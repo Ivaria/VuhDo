@@ -1,6 +1,6 @@
-## Interface: 50400
+## Interface: 60000
 ## Title: VuhDo ['vu:du:] - Options
-## Author: Iza@Gilneas
+## Author: Iza@Gilneas, humfras
 ## Version: 3.53
 ## Notes: VuhDo Options
 ## SavedVariables: VUHDO_OPTIONS_SETTINGS
