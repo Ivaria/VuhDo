@@ -1,4 +1,4 @@
-## Interface: 600
+## Interface: 60000
 ## Title: VuhDo ['vu:du:]
 ## Author: Iza@Gilneas, humfras
 ## Version: 3.6
