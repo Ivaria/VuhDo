@@ -1114,6 +1114,46 @@ function VUHDO_loadDefaultConfig()
 		142808
 		--Garrosh Hellscream
 	);
+	
+	-- 6.x - Warlords of Draenor
+	VUHDO_addCustomSpellIds(23,
+		-- [[ Draenor World Bosses ]]
+		-- Drov
+		-- Rukhmar
+		-- Tarlna
+		
+		-- [[ Highmaul ]]
+		-- Brackenspore
+		-- Kargath Bladefist
+		-- Koragh
+		162185, -- Expel Magic: Fire
+		-- Margok
+		-- Tectus
+		-- The Butcher
+		-- Twin Ogron
+		
+		--[[ Blackrock Foundry ]]
+		-- Blackhand
+		-- Darmac
+		154960, -- Pinned Down
+		155061, -- Rend and Tear
+		154981, -- Conflagration
+		155030, -- Seared Flesh
+		155236, -- Crush Armor
+		-- Gruul
+		-- Hansgar and Franzok
+		-- Kagraz
+		154932, -- Molten Torrent
+		163284, -- Rising Flames
+		154952, -- Fixate
+		154950, -- Overheated
+		155074  -- Charring Breath
+		-- Kromog
+		-- Oregorger
+		-- The Blast Furnace
+		-- The Iron Maidens
+		-- Thogar
+	);
 
 	for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
 		VUHDO_customDebuffsAddDefaultSettings(tName);
