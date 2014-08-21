@@ -35,7 +35,6 @@ Improvements:
 -- 	Added new Priest spell Clarity of Will as pumpable absorb
 --	Added new Hunter aspect Aspect of the Fox
 --	Added new Mage raid cooldown Amplify Magic
---  Added raid debuffs
 
 
 Changes:

@@ -1124,12 +1124,24 @@ function VUHDO_loadDefaultConfig()
 		
 		-- [[ Highmaul ]]
 		-- Brackenspore
+		163241, -- Rot
 		-- Kargath Bladefist
+		159250, -- Blade Dance
+		159947, -- Chain Hurl
 		-- Koragh
+		162186, -- Expel Magic: Arcane
 		162185, -- Expel Magic: Fire
 		-- Margok
+		156225, -- Arcane Wrath
+		158605, -- Mark Of Chaos
+		157801, -- Slow
+		157763, -- Fixate
 		-- Tectus
+		162346, -- Crystalline Barrage
+		162370, -- Crystalline Barrage Damage
+		162892, -- Petrification
 		-- The Butcher
+		156151, -- Tenderizer
 		-- Twin Ogron
 		
 		--[[ Blackrock Foundry ]]
@@ -1146,10 +1158,10 @@ function VUHDO_loadDefaultConfig()
 		154932, -- Molten Torrent
 		163284, -- Rising Flames
 		154952, -- Fixate
-		154950, -- Overheated
 		155074  -- Charring Breath
 		-- Kromog
 		-- Oregorger
+		156297  -- Acid Torrent
 		-- The Blast Furnace
 		-- The Iron Maidens
 		-- Thogar
