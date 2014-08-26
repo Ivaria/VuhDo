@@ -1158,10 +1158,10 @@ function VUHDO_loadDefaultConfig()
 		154932, -- Molten Torrent
 		163284, -- Rising Flames
 		154952, -- Fixate
-		155074  -- Charring Breath
+		155074,  -- Charring Breath
 		-- Kromog
 		-- Oregorger
-		156297  -- Acid Torrent
+		156297,  -- Acid Torrent
 		-- The Blast Furnace
 		-- The Iron Maidens
 		-- Thogar

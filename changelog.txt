@@ -2,7 +2,7 @@ Version 3.6.
 
 
 Bugfixes:
---  Removed deprecated spells and abilities
+--	Removed deprecated spells and abilities
 --	Removed Death Knight spell Unholy Frenzy
 --	Removed Druid spell Symbiosis
 --	Removed Hunter aspect Aspect of the Hawk
@@ -11,11 +11,11 @@ Bugfixes:
 --	Removed Monk spell Serpent's Zeal
 --	Changed Paladin spell Divine Light to Holy Light
 --	Removed Paladin spell Inquisition
--- 	Removed Priest spell Hymn of Hope
+--	Removed Priest spell Hymn of Hope
 --	Removed Priest spell Void Shift
 --	Removed Priest spell Inner Fire
 --	Removed Priest spell Inner Will
---  Changed Priest spell Greater Heal to Heal
+--	Changed Priest spell Greater Heal to Heal
 --	Removed Rogue poison Mind Numbing Poison
 --	Changed Rogue poison Paralytic Poison to Internal Bleeding
 --	Changed Shaman spell Greater Healing Wave to Healing Wave
@@ -31,8 +31,8 @@ Bugfixes:
 
 
 Improvements:
---  Added new spells and abilities
--- 	Added new Priest spell Clarity of Will as pumpable absorb
+--	Added new spells and abilities
+--	Added new Priest spell Clarity of Will as pumpable absorb
 --	Added new Hunter aspect Aspect of the Fox
 --	Added new Mage raid cooldown Amplify Magic
 
