@@ -1161,7 +1161,7 @@ function VUHDO_loadDefaultConfig()
 		155074,  -- Charring Breath
 		-- Kromog
 		-- Oregorger
-		156297,  -- Acid Torrent
+		156297  -- Acid Torrent
 		-- The Blast Furnace
 		-- The Iron Maidens
 		-- Thogar
