@@ -452,6 +452,32 @@ function VUHDO_isSpellKnown(aSpellName)
 end
 
 
+--
+function VUHDO_isTalentKnown(aTalentName, onlyActiveSpec)
+	if onlyActiveSpec then
+		for tier=1,7 do
+			for column=1,3 do
+				local id, name, texture, selected, available = GetTalentInfo(tier,column,GetActiveSpecGroup())
+				if name == aTalentName and selected then
+					return true
+				end
+			end
+		end
+	else
+		for group=1,2 do
+			for tier=1,7 do
+				for column=1,3 do
+					local id, name, texture, selected, available = GetTalentInfo(tier,column,group)
+					if name == aTalentName and selected then
+						return true
+					end
+				end
+			end
+		end
+	end
+	return false
+end
+
 
 --
 local tDeltaSecs;
@@ -622,7 +648,7 @@ end
 
 --
 local tActionLowerName;
-local tIsMacroKnown, tIsSpellKnown
+local tIsMacroKnown, tIsSpellKnown, tIsTalentKnown
 function VUHDO_isActionValid(anActionName, anIsCustom)
 
 	if (anActionName or "") == "" then
@@ -642,13 +668,14 @@ function VUHDO_isActionValid(anActionName, anIsCustom)
 
 	tIsMacroKnown = GetMacroIndexByName(anActionName) ~= 0;
 	tIsSpellKnown = VUHDO_isSpellKnown(anActionName);
+	tIsTalentKnown = VUHDO_isTalentKnown(anActionName, true);
 
-	if tIsSpellKnown and tIsMacroKnown then
+	if (tIsSpellKnown or tIsTalentKnown) and tIsMacroKnown then
 		VUHDO_Msg(format(VUHDO_I18N_AMBIGUOUS_MACRO, anActionName), 1, 0.3, 0.3);
 		return VUHDO_I18N_WARNING, 1, 0.3, 0.3, "WRN";
 	elseif tIsMacroKnown then
 		return VUHDO_I18N_MACRO, 0.8, 0.8, 1, "MCR";
-	elseif tIsSpellKnown then
+	elseif (tIsSpellKnown or tIsTalentKnown) then
 		return VUHDO_I18N_SPELL, 1, 0.8, 0.8, "SPL";
 	elseif IsUsableItem(anActionName) then
 		return VUHDO_I18N_ITEM, 1, 1, 0.8, "ITM";
