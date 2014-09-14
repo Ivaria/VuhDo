@@ -2,8 +2,9 @@ Version 3.6.
 
 
 Bugfixes:
---	Removed deprecated spells and abilities
+-- Removed deprecated spells and abilities
 --	Removed Death Knight spell Unholy Frenzy
+--	Removed Druid spell Nourish
 --	Removed Druid spell Symbiosis
 --	Removed Hunter aspect Aspect of the Hawk
 --	Changed Hunter aspect Aspect of the Iron Hawk to Iron Hawk
@@ -31,7 +32,7 @@ Bugfixes:
 
 
 Improvements:
---	Added new spells and abilities
+-- Added new spells and abilities
 --	Added new Priest spell Clarity of Will as pumpable absorb
 --	Added new Hunter aspect Aspect of the Fox
 --	Added new Mage raid cooldown Amplify Magic
@@ -40,7 +41,15 @@ Improvements:
 Changes:
 -- Updated TOC for 6.0
 -- TODO: Added custom debuffs for 6.0 raid content
-
+-- TODO: Added Priest spell Holy Nova support for AOE advisor
+-- TODO: Added Priest spell Holy Nova support for cluster indicator
+-- TODO: Updated combat log event processing for multistrike
+-- TODO: Added new instance difficulties
+-- TODO: Updated incoming heal estimation spell bases
+-- TODO: Updated overhealing estimation spell bases
+-- TODO: Updated AOE advisor spell bases
+-- TODO: Updated AOE advisor glyph item IDs
+-- TODO: Updated AOE advisor Glyph of Light of Dawn support
 
 Features:
 -- Minor update for Warlords of Draenor
