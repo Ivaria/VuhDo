@@ -475,7 +475,20 @@ function VUHDO_hotBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, a
 	VUHDO_updateHotIcons(aUnit, "BOUQUET_" .. (aBouquetName or ""), aTimer, aCounter, anIcon, aDuration, 0, aColor, aBuffName, aClipL, aClipR, aClipT, aClipB);
 end
 
+--
+local tTalentRampantGrowthSpellId;
+local tIsTalentSelected;
+function VUHDO_hasTalentRampantGrowth()
+	if "DRUID" ~= VUHDO_PLAYER_CLASS then
+		return false
+	end
 
+	tTalentRampantGrowthSpellId = 155834
+
+	_, _, _, tIsTalentSelected, _ = GetTalentInfoById(tTalentRampantGrowthSpellId)
+
+	return tIsTalentSelected
+end
 
 --
 local tOtherHotCnt;
@@ -541,17 +554,22 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				end
 			end
 
+			tIsCastByPlayer = tCaster == "player" or tCaster == VUHDO_PLAYER_RAID_ID;
+
 			if sIsPlayerKnowsSwiftmend and not sIsSwiftmend then
-				if VUHDO_SPELL_ID.REGROWTH == tBuffName or VUHDO_SPELL_ID.REJUVENATION == tBuffName then
+				if VUHDO_SPELL_ID.REGROWTH == tBuffName or VUHDO_SPELL_ID.REJUVENATION == tBuffName or VUHDO_SPELL_ID.GERMINATION == tBuffName then
 					tStart, tSmDuration, tEnabled = GetSpellCooldown(VUHDO_SPELL_ID.SWIFTMEND);
 					if tEnabled ~= 0 and (tStart == nil or tSmDuration == nil or tStart <= 0 or tSmDuration <= 1.6) then
-						sIsSwiftmend = true;
+						if not tIsCastByPlayer and VUHDO_hasTalentRampantGrowth() then
+							sIsSwiftmend = false;
+						else
+							sIsSwiftmend = true;
+						end
 					end
 				end
 			end
 
 			if (tExpiry or 0) == 0 then tExpiry = (tNow + 9999); end
-			tIsCastByPlayer = tCaster == "player" or tCaster == VUHDO_PLAYER_RAID_ID;
 			tHotFromBuff = sBuffs2Hots[tBuffName .. tBuffIcon] or sBuffs2Hots[tSpellId];
 
 			if tHotFromBuff == "" or VUHDO_IGNORE_HOT_IDS[tSpellId] then -- non hot buff

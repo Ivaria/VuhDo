@@ -246,6 +246,7 @@ function VUHDO_aoeUpdateSpellAverages()
 			tInfo["avg"] = floor((tInfo["base"] + tBonus * tSpellModi) + 0.5);
 		end
 		tInfo["thresh"] = VUHDO_CONFIG["AOE_ADVISOR"]["config"][tName]["thresh"];
+		--print("VUHDO_aoeUpdateSpellAverages(): name = " .. tName .. ", avg = floor((base + bonus * spellMod) + 0.5) | " .. tInfo["avg"] .. " = floor((" .. tInfo["base"] .. " + " .. tBonus .. " * " .. tSpellModi .. ") + 0.5)");
 	end
 end
 
@@ -263,12 +264,11 @@ local function VUHDO_isAoeSpellEnabled(aSpell)
 end
 
 
--- MOP:
--- Priester: Circle of Healing Ein Ziel mehr (42396)
--- Priester: ???Heilige Nova, neuer Zauber Heilung max. 5 um 4950 (42401)
--- Schamane: Kettenbildung Sprungreichweite +100% (41552)
--- Paladin: Light of Dawn, -2 Ziele 25% mehr Heilung (41109)
--- Druide: Wild Growth, + 1 Ziel (45602)
+-- AoE glyphs:
+--  Priest: Circle of Healing, +1 target (42396)
+--  Shaman: Chain Heal, +100% range (41552)
+--  Paladin: Light of Dawn, -2 targets +25% healing (41109)
+--  Druid: Wild Growth, +1 target (45602)
 
 --
 function VUHDO_aoeUpdateTalents()
@@ -441,7 +441,7 @@ end
 
 --
 local tUnitForAoe = { [0] = {}, [1] = {}, [2] = {}, [3] = {}, [4] = {}, [5] = {}, [6] = {}, [7] = {}, [8] = {} };
-local function VUHDO_abgleichVorherBesserInGruppen(anAoeName, aGroupNum, aUnit, anAoeHealed, ...)
+local function VUHDO_setBestUnitsForAoeInGroups(anAoeName, aGroupNum, aUnit, anAoeHealed, ...)
 	for tCnt = 1, select('#', ...) do
 		if (tUnitForAoe[select(tCnt, ...)][aUnit] or 0) >= anAoeHealed then
 			return;
@@ -479,10 +479,10 @@ function VUHDO_aoeUpdateAll()
 
 				tUnit = tUnitInfo["u"];
 				if tUnit then
-					if 0 == tIndex then -- Raidweit => Besser vorher in irgendeiner Gruppen oder Raid?
-						VUHDO_abgleichVorherBesserInGruppen(tName, tIndex, tUnit, tUnitInfo["h"], 0, 1, 2, 3, 4, 5, 6, 7, 8);
-					else -- je Gruppe => Besser vorher in eigener Gruppe oder Raid?
-						VUHDO_abgleichVorherBesserInGruppen(tName, tIndex, tUnit, tUnitInfo["h"], 0, tIndex);
+					if 0 == tIndex then -- raid wide => best units in all groups or the raid?
+						VUHDO_setBestUnitsForAoeInGroups(tName, tIndex, tUnit, tUnitInfo["h"], 0, 1, 2, 3, 4, 5, 6, 7, 8);
+					else -- per group => best units in this group or the raid?
+						VUHDO_setBestUnitsForAoeInGroups(tName, tIndex, tUnit, tUnitInfo["h"], 0, tIndex);
 					end
 				end
 

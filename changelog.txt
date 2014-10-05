@@ -36,23 +36,38 @@ Improvements:
 --	Added new Priest spell Clarity of Will as pumpable absorb
 --	Added new Hunter aspect Aspect of the Fox
 --	Added new Mage raid cooldown Amplify Magic
+--	Added new Druid spell Rejuvenation (Germination) as HoT icon
+--	Added new Druid spell Genesis as HoT icon
+-- Added custom debuffs for 6.0 raid content
 
 
 Changes:
 -- Updated TOC for 6.0
--- TODO: Added custom debuffs for 6.0 raid content
--- TODO: Added Priest spell Holy Nova support for AOE advisor
--- TODO: Added Priest spell Holy Nova support for cluster indicator
--- TODO: Updated combat log event processing for multistrike
--- TODO: Added new instance difficulties
--- TODO: Updated incoming heal estimation spell bases
--- TODO: Updated overhealing estimation spell bases
--- TODO: Updated AOE advisor spell bases
--- TODO: Updated AOE advisor glyph item IDs
--- TODO: Updated AOE advisor Glyph of Light of Dawn support
+-- Updated Swiftmendable check to include units with Rejuvenation (Germination)
+-- Updated Swiftmendable check to exclude others HoTs when Rampant Growth is selected
+-- Updated toolbox helper function for GetTalentInfo API changes
+
 
 Features:
 -- Minor update for Warlords of Draenor
+
+
+TODO:
+-- Added Priest spell Holy Nova support for AOE advisor
+-- Added Priest spell Holy Nova support for cluster indicator
+-- Updated combat log event processing for multistrike
+--   SWING_DAMAGE/SPELL_DAMAGE/SPELL_PERIODIC_DAMAGE has new params after crushing (isOffHand, multistrike)
+--   SPELL_HEAL/SPELL_PERIODIC_HEAL has new param after critical (multistrike)
+--   SPELL_MISSED/SPELL_PERIODIC_MISSED/RANGE_MISSED/SWING_MISSED has new param after isOffHand (multistrike)
+-- Added new instance difficulties
+-- Updated incoming/over heal estimation
+--   Not a bug in VuhDo - UnitGetIncomingHeals appears to return bogus values on beta
+-- Updated AOE advisor spell bases
+--   Healing spell base values have been removed (eg. H = Cx + B is now H = Cx)
+--   Need to empirically test coefficients shown on beta tooltips
+--   Use Hamlet's updated spreadsheet for WoD?
+-- Updated AOE advisor glyph item IDs
+-- Updated AOE advisor Glyph of Light of Dawn support
 
 
 --------------------------------------------------------------

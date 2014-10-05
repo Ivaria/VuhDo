@@ -60,6 +60,8 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.LIFEBLOOM] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.WILD_GROWTH] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.CENARION_WARD] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.GENESIS] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.GERMINATION] = { ["isHot"] = true },
 
 	-- Hunter
 	[VUHDO_SPELL_ID.MEND_PET] = { ["isHot"] = true },
@@ -90,6 +92,10 @@ function VUHDO_initFromSpellbook()
 
 	if "PRIEST" == VUHDO_PLAYER_CLASS then
 		VUHDO_PLAYER_HOTS[#VUHDO_PLAYER_HOTS + 1] = VUHDO_SPELL_ID.ECHO_OF_LIGHT;
+	end
+
+	if "DRUID" == VUHDO_PLAYER_CLASS then
+		VUHDO_PLAYER_HOTS[#VUHDO_PLAYER_HOTS + 1] = VUHDO_SPELL_ID.GERMINATION;
 	end
 
 	twipe(VUHDO_ACTIVE_HOTS);
