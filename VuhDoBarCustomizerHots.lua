@@ -480,14 +480,14 @@ local tTalentRampantGrowthSpellId;
 local tIsTalentSelected;
 function VUHDO_hasTalentRampantGrowth()
 	if "DRUID" ~= VUHDO_PLAYER_CLASS then
-		return false
+		return false;
 	end
 
-	tTalentRampantGrowthSpellId = 155834
+	tTalentRampantGrowthSpellId = 155834;
 
-	_, _, _, tIsTalentSelected, _ = GetTalentInfoById(tTalentRampantGrowthSpellId)
+	_, _, _, tIsTalentSelected, _ = GetTalentInfoById(tTalentRampantGrowthSpellId);
 
-	return tIsTalentSelected
+	return tIsTalentSelected;
 end
 
 --
