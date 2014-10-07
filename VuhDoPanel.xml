@@ -32,7 +32,7 @@
 		</Layers>
 	</Frame>
 
-	<Cooldown name="VuhDoHotCooldown" virtual="true">	</Cooldown>
+	<Cooldown name="VuhDoHotCooldown" inherits="CooldownFrameTemplate" virtual="true">	</Cooldown>
 
 	<Frame name="VuhDoHotIconTemplate" virtual="true">
 		<Layers>
