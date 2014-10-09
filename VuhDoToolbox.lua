@@ -429,7 +429,7 @@ end
 
 --
 function VUHDO_isInSameZone(aUnit)
-	return (VUHDO_RAID[aUnit] or sEmpty)["map"] == (VUHDO_RAID["player"] or sEmpty)["map"];
+	return (VUHDO_RAID[aUnit] or sEmpty)["zone"] == (VUHDO_RAID["player"] or sEmpty)["zone"];
 end
 local VUHDO_isInSameZone = VUHDO_isInSameZone;
 

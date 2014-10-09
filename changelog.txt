@@ -2,6 +2,9 @@ Version 3.6.
 
 
 Bugfixes:
+-- Fixed bug where isInSameZone check always returned true
+--	BuffWatch now correctly ignores other players outside the players zone
+--	Global scanner perf bump when 'same zone' limit selected
 -- Removed deprecated spells and abilities
 --	Removed Death Knight spell Unholy Frenzy
 --	Removed Druid spell Nourish
@@ -46,6 +49,7 @@ Changes:
 -- Updated Swiftmendable check to include units with Rejuvenation (Germination)
 -- Updated Swiftmendable check to exclude others HoTs when Rampant Growth is selected
 -- Updated toolbox helper function for GetTalentInfo API changes
+-- Updated 'Spells > Keys global' edit box to properly decorate text
 
 
 Features:
