@@ -106,17 +106,21 @@ function VUHDO_customDebuffUpdateEditBox(anEditBox)
 		VUHDO_setComboModel(tComboBox, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".SOUND", VUHDO_SOUNDS);
 		VUHDO_lnfComboBoxInitFromModel(tComboBox);
 
+		tColorSwatch = _G[tPanelName .. "ColorTexture"];
+
 		if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isColor) then
 			if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color == nil) then
-					VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color
-						= VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM]);
+				VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color
+					= VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM]);
 			end
+
+			VUHDO_lnfSetModel(tColorSwatch, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".color");
 		else
 			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color = nil;
+
+			VUHDO_lnfSetModel(tColorSwatch, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM);
 		end
 
-		tColorSwatch = _G[tPanelName .. "ColorTexture"];
-		VUHDO_lnfSetModel(tColorSwatch, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".color");
 		VUHDO_lnfInitColorSwatch(tColorSwatch, VUHDO_I18N_COLOR, VUHDO_I18N_COLOR);
 		VUHDO_lnfColorSwatchInitFromModel(tColorSwatch);
 
@@ -217,8 +221,6 @@ function VUHDO_saveCustomDebuffOnClick(aButton)
 
 	tPanelName = aButton:GetParent():GetName();
 
-	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue] = { };
-
 	tCheckButton = _G[tPanelName .. "IconCheckButton"];
 	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isIcon = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
 
@@ -247,9 +249,11 @@ function VUHDO_saveCustomDebuffOnClick(aButton)
 
 	tColorSwatch = _G[tPanelName .. "ColorTexture"];
 
-	if (VUHDO_COLOR_SWATCH_MODEL == nil) then
-		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color
-			= VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM]);
+	if (VUHDO_COLOR_SWATCH_MODEL == nil) then 
+		if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color == nil) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color
+				= VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM]);
+		end
 	else
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color
 			= VUHDO_deepCopyTable(VUHDO_COLOR_SWATCH_MODEL);

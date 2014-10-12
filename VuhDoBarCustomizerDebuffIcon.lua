@@ -74,7 +74,7 @@ local tButton;
 local tIsAnim;
 local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, anIsInit, aUnit)
 
-	tCuDeStoConfig = sCuDeStoredSettings[anIconInfo[3]] or sStaticConfig;
+	tCuDeStoConfig = sCuDeStoredSettings[anIconInfo[3]] or sCuDeStoredSettings[tostring(anIconInfo[7])] or sStaticConfig;
 	tIsAnim = tCuDeStoConfig["animate"] and VUHDO_MAY_DEBUFF_ANIM;
 	tTimeStamp = anIconInfo[2];
 	tAliveTime = anIsInit and 0 or aNow - tTimeStamp;
@@ -152,7 +152,7 @@ local tSlot;
 local tOldest;
 local tTimestamp;
 local tFrame, tIconInfo;
-function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff)
+function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId)
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
 		VUHDO_DEBUFF_ICONS[aUnit] = { };
 	end
@@ -169,7 +169,7 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 			end
 		end
 	end
-	tIconInfo = { anIcon, -1, aName, anExpiry, aStacks, aDuration };
+	tIconInfo = { anIcon, -1, aName, anExpiry, aStacks, aDuration, aSpellId };
 	VUHDO_DEBUFF_ICONS[aUnit][tSlot] = tIconInfo;
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do

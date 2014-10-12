@@ -818,3 +818,42 @@ function VUHDO_getCurrentKeyModifierString()
 		IsControlKeyDown() and "ctrl" or "",
 		IsShiftKeyDown() and "shift" or "");
 end
+
+-- Helper to serialize a table to a string for pretty printing
+-- Taken from Lua Users Wiki: http://lua-users.org/wiki/TableUtils
+function VUHDO_tableValueToString(v)
+  if "string" == type( v ) then
+    v = string.gsub( v, "\n", "\\n" )
+    if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
+      return "'" .. v .. "'"
+    end
+    return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
+  else
+    return "table" == type( v ) and VUHDO_tableToString( v ) or
+      tostring( v )
+  end
+end
+
+function VUHDO_tableKeyToString(k)
+  if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
+    return k
+  else
+    return "[" .. VUHDO_tableValueToString( k ) .. "]"
+  end
+end
+
+function VUHDO_tableToString(tbl)
+  local result, done = {}, {}
+  for k, v in ipairs( tbl ) do
+    table.insert( result, VUHDO_tableValueToString( v ) )
+    done[ k ] = true
+  end
+  for k, v in pairs( tbl ) do
+    if not done[ k ] then
+      table.insert( result,
+        VUHDO_tableKeyToString( k ) .. "=" .. VUHDO_tableValueToString( v ) )
+    end
+  end
+  return "{" .. table.concat( result, "," ) .. "}"
+end
+

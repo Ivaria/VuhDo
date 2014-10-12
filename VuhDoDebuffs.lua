@@ -189,15 +189,15 @@ end
 local tIconIndex = 0;
 local tIconArray;
 local tIconArrayDispenser = { };
-local function VUHDO_getOrCreateIconArray(anIcon, aExpiry, aStacks, aDuration, anIsBuff)
+local function VUHDO_getOrCreateIconArray(anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId)
 	tIconIndex = tIconIndex + 1;
 	if #tIconArrayDispenser < tIconIndex then
-		tIconArray = { anIcon, aExpiry, aStacks, aDuration, anIsBuff };
+		tIconArray = { anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId };
 		tIconArrayDispenser[tIconIndex] = tIconArray;
 	else
 		tIconArray = tIconArrayDispenser[tIconIndex];
-		tIconArray[1], tIconArray[2], tIconArray[3], tIconArray[4], tIconArray[5]
-			= anIcon, aExpiry, aStacks, aDuration, anIsBuff;
+		tIconArray[1], tIconArray[2], tIconArray[3], tIconArray[4], tIconArray[5], tIconArray[6] 
+			= anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId;
 	end
 
 	return tIconArray;
@@ -234,7 +234,7 @@ setmetatable(VUHDO_UNIT_DEBUFF_INFOS, {
 
 local sCurChosenType;
 local sCurChosenName;
-local sCurSoundName;
+local sCurChosenSpellId;
 local sCurIsStandard;
 local sCurIcons = { };
 
@@ -248,7 +248,7 @@ local function VUHDO_initDebuffInfos(aUnit)
 
 	sCurChosenType = VUHDO_DEBUFF_TYPE_NONE;
 	sCurChosenName = "";
-	sCurSoundName = nil;
+	sCurChosenSpellId = nil;
 	sCurIsStandard = false;
 	tIconIndex = 0;
 	twipe(sCurIcons);
@@ -271,6 +271,8 @@ local tIsRelevant;
 local tNow;
 local tUnitDebuffInfo;
 local tType;
+local tDebuffSettings;
+local tCurChosenStoredName;
 function VUHDO_determineDebuff(aUnit)
 	tInfo = (VUHDO_RAID or sEmpty)[aUnit];
 
@@ -290,16 +292,15 @@ function VUHDO_determineDebuff(aUnit)
 			if (tExpiry or 0) == 0 then tExpiry = (sCurIcons[tName] or sEmpty)[2] or tNow; end
 
 			-- Custom Debuff?
-			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId or -1)] or sEmpty;
+			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
 			if tDebuffConfig[1] then -- Farbe?
-				sCurChosenType, sCurChosenName, sCurSoundName = 6, tName, tName; -- VUHDO_DEBUFF_TYPE_CUSTOM
+				sCurChosenType, sCurChosenName, sCurChosenSpellId = 6, tName, tSpellId; -- VUHDO_DEBUFF_TYPE_CUSTOM
 			end
 
 			if sCurIcons[tName] then tStacks = tStacks + sCurIcons[tName][3]; end
 
 			if tDebuffConfig[2] then -- Icon?
-				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false);
-				sCurSoundName = tName;
+				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId);
 			end
 
 			tType = VUHDO_DEBUFF_TYPES[tTypeString];
@@ -322,7 +323,7 @@ function VUHDO_determineDebuff(aUnit)
 				if sIsUseDebuffIcon and (tIsBossDebuff or not sIsUseDebuffIconBossOnly)
 					and (sIsNotRemoveableOnlyIcons or tAbility ~= nil) then
 
-					sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false);
+					sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId);
 					sCurIsStandard = true;
 				end
 
@@ -338,29 +339,32 @@ function VUHDO_determineDebuff(aUnit)
 			tName, _, tIcon, tStacks, _, tDuration, tExpiry, _, _, _, tSpellId = UnitBuff(aUnit, tCnt);
 			if not tIcon then	break; end
 
-			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId or -1)] or sEmpty;
+			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
 
 			if tDebuffConfig[1] then -- Set color
-				sCurChosenType, sCurChosenName, sCurSoundName = 6, tName, tName; -- VUHDO_DEBUFF_TYPE_CUSTOM
+				sCurChosenType, sCurChosenName, sCurChosenSpellId = 6, tName, tSpellId; -- VUHDO_DEBUFF_TYPE_CUSTOM
 			end
 
 			if tDebuffConfig[2] then -- Set icon
-				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks or 0, tDuration, true);
-				sCurSoundName = tName;
+				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks or 0, tDuration, true, tSpellId);
 			end
 		end
 
 		-- Gained new custom debuff?
+		-- note we only play sounds for debuff customs with isIcon set to true
 		for tName, tDebuffInfo in pairs(sCurIcons) do
 
 			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] then
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3] };
-				VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5]);
+				VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6]);
 
-				if not VUHDO_IS_CONFIG and VUHDO_MAY_DEBUFF_ANIM and tSoundDebuff then
-					if sAllDebuffSettings[tSoundDebuff] then -- Spezieller custom debuff sound?
-						VUHDO_playDebuffSound(sAllDebuffSettings[tSoundDebuff]["SOUND"]);
-					elseif VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] then -- Allgemeiner custom debuff sound?
+				if not VUHDO_IS_CONFIG and VUHDO_MAY_DEBUFF_ANIM then
+					-- the key used to store the debuff settings is either the debuff name or spell ID
+					tDebuffSettings = sAllDebuffSettings[tName] or sAllDebuffSettings[tostring(tDebuffInfo[6])];
+
+					if tDebuffSettings then -- particular custom debuff sound?
+						VUHDO_playDebuffSound(tDebuffSettings["SOUND"]);
+					elseif VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] then -- default custom debuff sound?
 						VUHDO_playDebuffSound(VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"]);
 					end
 				end
@@ -403,7 +407,15 @@ function VUHDO_determineDebuff(aUnit)
 		sCurChosenType = VUHDO_DEBUFF_TYPE_MISSING_BUFF;
 	end
 
-	return sCurChosenType, sCurChosenName;
+	-- we need to return the actual key the debuff settings are stored under
+	-- this is either the debuff name or the debuff spell ID
+	if sAllDebuffSettings[sCurChosenName] then
+		tCurChosenStoredName = sCurChosenName;
+	elseif sAllDebuffSettings[tostring(sCurChosenSpellId)] then
+		tCurChosenStoredName = tostring(sCurChosenSpellId);
+	end
+
+	return sCurChosenType, tCurChosenStoredName;
 end
 
 local VUHDO_determineDebuff = VUHDO_determineDebuff;
