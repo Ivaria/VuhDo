@@ -453,13 +453,14 @@ end
 
 
 --
-function VUHDO_isTalentKnown(aTalentName, onlyActiveSpec)
+function VUHDO_getTalentSpellId(aTalentName, onlyActiveSpec)
 	if onlyActiveSpec then
 		for tier=1,7 do
 			for column=1,3 do
-				local id, name, texture, selected, available = GetTalentInfo(tier,column,GetActiveSpecGroup())
+				local id, name, _, selected, _ = GetTalentInfo(tier, column, GetActiveSpecGroup());
+
 				if name == aTalentName and selected then
-					return true
+					return id;
 				end
 			end
 		end
@@ -467,15 +468,22 @@ function VUHDO_isTalentKnown(aTalentName, onlyActiveSpec)
 		for group=1,2 do
 			for tier=1,7 do
 				for column=1,3 do
-					local id, name, texture, selected, available = GetTalentInfo(tier,column,group)
+					local id, name, _, selected, _ = GetTalentInfo(tier, column, group);
 					if name == aTalentName and selected then
-						return true
+						return id;
 					end
 				end
 			end
 		end
 	end
-	return false
+
+	return nil;
+end
+
+
+--
+function VUHDO_isTalentKnown(aTalentName, onlyActiveSpec)
+	return VUHDO_getTalentSpellId(aTalentName, onlyActiveSpec) and true or false;
 end
 
 

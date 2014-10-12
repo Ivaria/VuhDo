@@ -68,7 +68,7 @@ TODO:
 --   Appears to not be a bug in VuhDo
 --   UnitGetIncomingHeals API seems to return bogus values on beta/PTR?
 -- Updated AOE advisor spell bases
---   Healing spell base values have been removed (eg. H = Cx + B is now H = Cx)
+--   Healing spell base values have been removed (H = Cx + B is now H = Cx)
 --   Need to empirically test coefficients shown on beta tooltips
 --   Use Hamlet's updated spreadsheet for WoD?
 -- Updated AOE advisor glyph item IDs

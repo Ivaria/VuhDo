@@ -364,15 +364,20 @@ function VUHDO_initBuffsFromSpellBook()
 
 	local tSpellName, tSpellId, tIcon;
 
+	-- GetSpellBookItemInfo is bugged for Hunter Iron Hawk
 	if "HUNTER" == VUHDO_PLAYER_CLASS then
 		VUHDO_BUFFS[VUHDO_SPELL_ID.BUFF_IRON_HAWK] = {
 			["icon"] = select(3, GetSpellInfo(109260)),
 			["id"] = 109260,
 		};
+	end
 
-		tinsert(VUHDO_getPlayerClassBuffs()[VUHDO_I18N_BUFFC_ASPECT],
-			{ VUHDO_SPELL_ID.BUFF_IRON_HAWK, VUHDO_BUFF_TARGET_SELF }
-		);
+	-- GetSpellBookItemInfo is bugged for Shaman Water Shield
+	if "SHAMAN" == VUHDO_PLAYER_CLASS then
+		VUHDO_BUFFS[VUHDO_SPELL_ID.BUFF_WATER_SHIELD] = {
+			["icon"] = select(3, GetSpellInfo(52127)),
+			["id"] = 52127,
+		};
 	end
 
 	for _, tCateg in pairs(VUHDO_getPlayerClassBuffs()) do
