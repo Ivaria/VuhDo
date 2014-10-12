@@ -8,6 +8,7 @@ Bugfixes:
 -- Fixed bug where isInSameZone check always returned true
 --	BuffWatch now correctly ignores other players outside the players zone
 --	Global scanner perf bump when 'same zone' limit selected
+-- Fixed bug in the combat log parsing for incoming swing damage amount
 -- Removed deprecated spells and abilities
 --	Removed Death Knight spell Unholy Frenzy
 --	Removed Druid spell Nourish
@@ -63,10 +64,6 @@ Features:
 
 
 TODO:
--- Updated combat log event processing for multistrike
---   SWING_DAMAGE/SPELL_DAMAGE/SPELL_PERIODIC_DAMAGE has new params after crushing (isOffHand, multistrike)
---   SPELL_HEAL/SPELL_PERIODIC_HEAL has new param after critical (multistrike)
---   SPELL_MISSED/SPELL_PERIODIC_MISSED/RANGE_MISSED/SWING_MISSED has new param after isOffHand (multistrike)
 -- Updated incoming/over heal estimation
 --   Appears to not be a bug in VuhDo
 --   UnitGetIncomingHeals API seems to return bogus values on beta/PTR?
