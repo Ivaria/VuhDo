@@ -12,7 +12,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="250" y="-200" />
+							<AbsDimension x="250" y="-210" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -184,7 +184,7 @@
 
 			<Frame name="$parentAutoEnablePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="230" y="155" />
+					<AbsDimension x="230" y="190" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -313,7 +313,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parent25CheckButton" text="VUHDO_I18N_25" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parent20CheckButton" text="VUHDO_I18N_20" inherits="VuhDoCheckButtonTemplate">
 						<Size>
 							<AbsDimension x="65" y="32" />
 						</Size>
@@ -321,6 +321,33 @@
 							<Anchor point="TOPLEFT">
 								<Offset>
 									<AbsDimension x="80" y="-75" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K549);
+							</OnLoad>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_skinsInitAutoCheckButton(self, "20");
+							</OnShow>
+							<OnClick>
+								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_skinsAutoCheckButtonClicked(self, "20");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parent25CheckButton" text="VUHDO_I18N_25" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="65" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="150" y="-75" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -347,7 +374,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="150" y="-75" />
+									<AbsDimension x="10" y="-110" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -374,7 +401,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="25" y="-113" />
+									<AbsDimension x="25" y="-148" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -401,7 +428,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="115" y="-113" />
+									<AbsDimension x="115" y="-148" />
 								</Offset>
 							</Anchor>
 						</Anchors>

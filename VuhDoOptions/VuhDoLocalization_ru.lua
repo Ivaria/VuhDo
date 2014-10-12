@@ -711,6 +711,8 @@ VUHDO_I18N_TT.K545 = "Задать масштаб для этой иконки. 
 VUHDO_I18N_TT.K546 = "Отметьте, чтобы скрыть стандартный интерфейс управления рейдом.";
 VUHDO_I18N_TT.K547 = "Вычитать входящее исцеление только, если заклинание не мгновенного действия.";
 VUHDO_I18N_TT.K548 = "Отметьте, чтобы скрывать кнопки несуществующих юнитов (цель, фокус и члены рейда, покидающие группу во время боя).";
+VUHDO_I18N_TT.K549 = "If you check this button the currently selected arrangement will automatically enabled if you are in a raid of up to 20 players.";
+VUHDO_I18N_TT.K550 = "Select this to show a 20 players raid for testing."
 
 VUHDO_I18N_APPLY_TO_ALL = "Применить\nко всем";
 VUHDO_I18N_TEST = "Тест";
@@ -887,6 +889,7 @@ VUHDO_I18N_6 = " 6";
 VUHDO_I18N_7 = " 7";
 VUHDO_I18N_8 = " 8";
 VUHDO_I18N_10 = " 10";
+VUHDO_I18N_20 = " 20";
 VUHDO_I18N_25 = " 25";
 VUHDO_I18N_40 = " 40";
 VUHDO_I18N_NUM_TRIANGLES = "Кол-во треугольников";

@@ -38,13 +38,16 @@ Bugfixes:
 
 
 Improvements:
+-- Added new raid group size 20 man
+--   Tools > Profiles > Activate due to group size
+--   Move > Hold to Test 
+-- Added custom debuffs for 6.0 raid content
 -- Added new spells and abilities
 --	Added new Priest spell Clarity of Will as pumpable absorb
 --	Added new Hunter aspect Aspect of the Fox
 --	Added new Mage raid cooldown Amplify Magic
 --	Added new Druid spell Rejuvenation (Germination) as HoT icon
 --	Added new Druid spell Genesis as HoT icon
--- Added custom debuffs for 6.0 raid content
 
 
 Changes:
@@ -64,12 +67,9 @@ TODO:
 --   SWING_DAMAGE/SPELL_DAMAGE/SPELL_PERIODIC_DAMAGE has new params after crushing (isOffHand, multistrike)
 --   SPELL_HEAL/SPELL_PERIODIC_HEAL has new param after critical (multistrike)
 --   SPELL_MISSED/SPELL_PERIODIC_MISSED/RANGE_MISSED/SWING_MISSED has new param after isOffHand (multistrike)
--- Added new instance difficulties
---   Tools > Profiles > Activate due to group size
---   Move > Hold to Test 
 -- Updated incoming/over heal estimation
---   Appears to not bw a bug in VuhDo
---   UnitGetIncomingHeals API seems to return bogus values on beta/PTR
+--   Appears to not be a bug in VuhDo
+--   UnitGetIncomingHeals API seems to return bogus values on beta/PTR?
 -- Updated AOE advisor spell bases
 --   Healing spell base values have been removed (eg. H = Cx + B is now H = Cx)
 --   Need to empirically test coefficients shown on beta tooltips

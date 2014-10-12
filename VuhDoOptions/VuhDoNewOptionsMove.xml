@@ -152,7 +152,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentTwentyFiveRadioButton" text="VUHDO_I18N_25" inherits="VuhDoRadioButtonTemplate">
+					<CheckButton name="$parentTwentyRadioButton" text="VUHDO_I18N_20" inherits="VuhDoRadioButtonTemplate">
 						<Size>
 							<AbsDimension x="80" y="32" />
 						</Size>
@@ -160,6 +160,29 @@
 							<Anchor point="TOPLEFT">
 								<Offset>
 									<AbsDimension x="235" y="-39" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_lnfRadioButtonClicked(self);
+								VUHDO_newOptionsMoveSetTestData(20);
+							</OnClick>
+							<OnLoad>
+								VUHDO_lnfCheckButtonOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K550);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentTwentyFiveRadioButton" text="VUHDO_I18N_25" inherits="VuhDoRadioButtonTemplate">
+						<Size>
+							<AbsDimension x="80" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="320" y="-7" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -182,7 +205,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="320" y="-7" />
+									<AbsDimension x="320" y="-39" />
 								</Offset>
 							</Anchor>
 						</Anchors>
