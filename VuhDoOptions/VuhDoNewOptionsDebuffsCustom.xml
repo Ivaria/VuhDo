@@ -219,11 +219,6 @@
 							<OnLoad>
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K274);
 							</OnLoad>
-							<OnClick>
-								VUHDO_lnfCheckButtonUpdateModel(self);
-								VUHDO_lnfCheckButtonClicked(self);
-								VUHDO_custonDebuffisColorClicked();
-							</OnClick>
 						</Scripts>
 					</CheckButton>
 

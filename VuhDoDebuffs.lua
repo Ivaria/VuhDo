@@ -121,19 +121,30 @@ local tColor = { };
 local tEmpty = { };
 function _VUHDO_getDebuffColor(anInfo)
 
-	if anInfo["charmed"] then	return VUHDO_PANEL_SETUP["BAR_COLORS"]["CHARMED"]; end
+	if anInfo["charmed"] then
+		return VUHDO_PANEL_SETUP["BAR_COLORS"]["CHARMED"];
+	end
 
 	tDebuff = anInfo["debuff"];
-	if not anInfo["mibucateg"] and (tDebuff or 0) == 0 then return tEmpty; end-- VUHDO_DEBUFF_TYPE_NONE
+
+	if not anInfo["mibucateg"] and (tDebuff or 0) == 0 then -- VUHDO_DEBUFF_TYPE_NONE
+		return tEmpty;
+	end
 
 	if (tDebuff or 6) ~= 6 and VUHDO_DEBUFF_COLORS[tDebuff] then -- VUHDO_DEBUFF_TYPE_CUSTOM
 		return VUHDO_DEBUFF_COLORS[tDebuff];
 	end
 
 	tDebuffSettings = sAllDebuffSettings[anInfo["debuffName"]];
+
 	if tDebuff == 6 and tDebuffSettings ~= nil -- VUHDO_DEBUFF_TYPE_CUSTOM
-		and tDebuffSettings["isColor"] and tDebuffSettings["color"] ~= nil then
-		tSourceColor = tDebuffSettings["color"];
+		and tDebuffSettings["isColor"] then
+		if tDebuffSettings["color"] ~= nil then
+			tSourceColor = tDebuffSettings["color"];
+		else
+			tSourceColor = VUHDO_DEBUFF_COLORS[tDebuff];
+		end
+
 		twipe(tColor);
 
 		if VUHDO_DEBUFF_COLORS[6]["useBackground"] then
