@@ -242,9 +242,6 @@ function VUHDO_reloadBuffPanel()
 
 	if VUHDO_BUFF_SETTINGS["CONFIG"]["SHOW"] then
 		VuhDoBuffWatchMainFrame:Show();
-		if VUHDO_LibButtonFacade then
-			VUHDO_LibButtonFacade:Group("VuhDo", VUHDO_I18N_BUFF_WATCH):Skin(VUHDO_BUFF_SETTINGS["CONFIG"]["BUTTON_FACADE"]);
-		end
 	else
 		VuhDoBuffWatchMainFrame:Hide();
 	end

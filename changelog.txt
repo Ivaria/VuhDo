@@ -1,3 +1,20 @@
+Version 3.61.
+
+
+Bugfixes:
+-- Fixed Masque integration to no longer call deprecated API 'Skin'
+
+
+Improvements:
+
+
+Changes:
+
+
+Features:
+
+
+--------------------------------------------------------------
 Version 3.60.
 
 

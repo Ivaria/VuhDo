@@ -1032,10 +1032,6 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 	twipe(VUHDO_UNIT_BUTTONS);
 	twipe(VUHDO_UNIT_BUTTONS_PANEL);
 
-	if VUHDO_LibButtonFacade then
-		VUHDO_LibButtonFacade:Group("VuhDo", VUHDO_I18N_HOTS):Skin(VUHDO_PANEL_SETUP["HOTS"]["BUTTON_FACADE"]);
-	end
-
 	tBackdrop = nil;
 	tBackdropCluster = nil;
 	for tCnt  = 1, 10 do -- VUHDO_MAX_PANELS
