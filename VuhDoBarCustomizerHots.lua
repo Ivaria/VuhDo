@@ -485,7 +485,7 @@ function VUHDO_hasTalentRampantGrowth()
 
 	tTalentRampantGrowthSpellId = 155834;
 
-	_, _, _, tIsTalentSelected, _ = GetTalentInfoById(tTalentRampantGrowthSpellId);
+	_, _, _, tIsTalentSelected, _ = GetTalentInfoByID(tTalentRampantGrowthSpellId);
 
 	return tIsTalentSelected;
 end

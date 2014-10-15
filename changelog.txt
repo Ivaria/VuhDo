@@ -1,17 +1,16 @@
+Version 3.62.
+
+
+Bugfixes:
+-- Fixed invalid Blizzard Talent API call
+
+
+--------------------------------------------------------------
 Version 3.61.
 
 
 Bugfixes:
 -- Fixed Masque integration to no longer call deprecated API 'Skin'
-
-
-Improvements:
-
-
-Changes:
-
-
-Features:
 
 
 --------------------------------------------------------------
