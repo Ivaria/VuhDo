@@ -5,6 +5,7 @@ Bugfixes:
 -- Fixed Buff Watch support for the new type of derived spells
 --	Fixed watching of Shaman Lightning Shield and Water Shield
 --	Fixed watching of Paladin Seal of Truth
+-- Fixed bug where magic debuffs were not flagged as removable for Monks
 -- Removed deprecated Hunter spell Aspect of the Iron Hawk
 
 
