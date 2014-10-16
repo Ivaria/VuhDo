@@ -364,28 +364,19 @@ function VUHDO_initBuffsFromSpellBook()
 
 	local tSpellName, tSpellId, tIcon;
 
-	-- GetSpellBookItemInfo is bugged for Hunter Iron Hawk
-	if "HUNTER" == VUHDO_PLAYER_CLASS then
-		VUHDO_BUFFS[VUHDO_SPELL_ID.BUFF_IRON_HAWK] = {
-			["icon"] = select(3, GetSpellInfo(109260)),
-			["id"] = 109260,
-		};
-	end
-
-	-- GetSpellBookItemInfo is bugged for Shaman Water Shield
-	if "SHAMAN" == VUHDO_PLAYER_CLASS then
-		VUHDO_BUFFS[VUHDO_SPELL_ID.BUFF_WATER_SHIELD] = {
-			["icon"] = select(3, GetSpellInfo(52127)),
-			["id"] = 52127,
-		};
-	end
-
+	-- Patch 6.0.2 broke the spell book for a certain class of spells which 'transform' into other spells 
+	-- eg. Lightning Shield becomes Water Shield, Seal of Command becomes Seal of Truth
+	-- the workaround is to always check for existance in the spell book using the 'source' or 'parent' 
+	-- spell name then map the 'source' spell name to the correct 'derived' or 'child' spell info
+	-- eg. GetSpellBookItemInfo("Lightning Shield") will return a spell ID only for Lightning Shield, 
+	-- however when a Resto Shaman calls GetSpellInfo("Lightning Shield") it returns the correct 
+	-- information for the derived spell Water Shield
 	for _, tCateg in pairs(VUHDO_getPlayerClassBuffs()) do
 		for _, tCategSpells in pairs(tCateg) do
 			tSpellName = tCategSpells[1];
 			_, tSpellId = GetSpellBookItemInfo(tSpellName);
 			if tSpellId then
-				_, _, tIcon = GetSpellInfo(tSpellId);
+				tSpellName, _, tIcon, _, _, _, tSpellId = GetSpellInfo(tSpellName);
 				VUHDO_BUFFS[tSpellName] = {
 					["icon"] = tIcon,
 					["id"] = tSpellId

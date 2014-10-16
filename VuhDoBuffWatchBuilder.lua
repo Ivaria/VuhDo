@@ -69,10 +69,23 @@ end
 
 
 --
+local function VUHDO_getFirstBuffCategoryVariant(aCategorySpec)
+	local tFirstVariant = nil;
+
+	for _, tFirstVariant in pairs(VUHDO_getPlayerClassBuffs()[aCategorySpec]) do
+		if VUHDO_BUFFS[tFirstVariant[1]] ~= nil then
+			return tFirstVariant;
+		end
+	end
+
+	return nil;
+end
+
+
+--
 local function VUHDO_addBuffPanel(aCategorySpec)
 	local tCategName = aCategorySpec;
 	local tSettings = VUHDO_BUFF_SETTINGS[tCategName];
-	local tFirstVariant = VUHDO_getPlayerClassBuffs()[aCategorySpec][1];
 	local tBuffPanel, tSwatch;
 	local tIcon;
 	local tTargetType;
@@ -80,8 +93,12 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 	local tTexture;
 	local tLabelText;
 
+	local tFirstVariant = VUHDO_getFirstBuffCategoryVariant(aCategorySpec);
+
 	-- Happens on emergency login
-	if not VUHDO_BUFFS[tFirstVariant[1]] then	return nil; end
+	if not tFirstVariant or not VUHDO_BUFFS[tFirstVariant[1]] then
+		return nil;
+	end
 
 	tTargetType = tFirstVariant[2];
 	tLabelText = VUHDO_BUFF_SETTINGS[tCategName]["buff"] or tFirstVariant[1];

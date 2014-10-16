@@ -1,3 +1,14 @@
+Version 3.64.
+
+
+Bugfixes:
+-- Fixed Buff Watch support for the new type of derived spells
+--	Fixed watching of Shaman Lightning Shield and Water Shield
+--	Fixed watching of Paladin Seal of Truth
+-- Removed deprecated Hunter spell Aspect of the Iron Hawk
+
+
+--------------------------------------------------------------
 Version 3.63.
 
 
