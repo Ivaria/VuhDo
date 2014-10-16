@@ -142,7 +142,7 @@ function _VUHDO_getDebuffColor(anInfo)
 		if tDebuffSettings["color"] ~= nil then
 			tSourceColor = tDebuffSettings["color"];
 		else
-			tSourceColor = VUHDO_DEBUFF_COLORS[tDebuff];
+			tSourceColor = VUHDO_DEBUFF_COLORS[6];
 		end
 
 		twipe(tColor);
@@ -304,7 +304,7 @@ function VUHDO_determineDebuff(aUnit)
 
 			-- Custom Debuff?
 			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
-			if tDebuffConfig[1] then -- Farbe?
+			if tDebuffConfig[1] then -- Color?
 				sCurChosenType, sCurChosenName, sCurChosenSpellId = 6, tName, tSpellId; -- VUHDO_DEBUFF_TYPE_CUSTOM
 			end
 
@@ -418,11 +418,11 @@ function VUHDO_determineDebuff(aUnit)
 		sCurChosenType = VUHDO_DEBUFF_TYPE_MISSING_BUFF;
 	end
 
-	-- we need to return the actual key the debuff settings are stored under
-	-- this is either the debuff name or the debuff spell ID
-	if sAllDebuffSettings[sCurChosenName] then
+	-- we need to return the actual key that the debuff settings are stored under
+	-- this key is either the debuff name or the debuff spell ID
+	if sAllDebuffSettings[sCurChosenName] ~= nil then
 		tCurChosenStoredName = sCurChosenName;
-	elseif sAllDebuffSettings[tostring(sCurChosenSpellId)] then
+	elseif sAllDebuffSettings[tostring(sCurChosenSpellId)] ~= nil then
 		tCurChosenStoredName = tostring(sCurChosenSpellId);
 	end
 

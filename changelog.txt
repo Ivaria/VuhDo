@@ -1,3 +1,11 @@
+Version 3.63.
+
+
+Bugfixes:
+-- Fixed bug where magic debuffs were not flagged as removable for Paladins
+
+
+--------------------------------------------------------------
 Version 3.62.
 
 
