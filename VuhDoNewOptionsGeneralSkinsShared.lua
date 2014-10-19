@@ -1944,7 +1944,7 @@ end
 
 
 --
-local tAutoProfileIndices = { "1", "5", "10", "15", "25", "40" };
+local tAutoProfileIndices = { "1", "5", "10", "15", "20", "25", "30", "40" };
 local tKey;
 local function VUHDO_getBestProfileForSpecAndSize(aSpec, aSize)
 	for _, tIndex in ipairs(tAutoProfileIndices) do

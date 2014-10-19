@@ -367,7 +367,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parent40CheckButton" text="VUHDO_I18N_40" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parent30CheckButton" text="VUHDO_I18N_30" inherits="VuhDoCheckButtonTemplate">
 						<Size>
 							<AbsDimension x="65" y="32" />
 						</Size>
@@ -375,6 +375,33 @@
 							<Anchor point="TOPLEFT">
 								<Offset>
 									<AbsDimension x="10" y="-110" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K551);
+							</OnLoad>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_skinsInitAutoCheckButton(self, "30");
+							</OnShow>
+							<OnClick>
+								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_skinsAutoCheckButtonClicked(self, "30");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parent40CheckButton" text="VUHDO_I18N_40" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="65" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="80" y="-110" />
 								</Offset>
 							</Anchor>
 						</Anchors>

@@ -43,7 +43,7 @@
 			</Frame>
 			<Frame name="$parentTestPanelPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="410" y="75" />
+					<AbsDimension x="410" y="115" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -136,7 +136,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="235" y="-7" />
+									<AbsDimension x="150" y="-72" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -159,7 +159,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="235" y="-39" />
+									<AbsDimension x="235" y="-7" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -182,7 +182,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="320" y="-7" />
+									<AbsDimension x="235" y="-39" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -198,6 +198,29 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentThirtyRadioButton" text="VUHDO_I18N_30" inherits="VuhDoRadioButtonTemplate">
+						<Size>
+							<AbsDimension x="80" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="235" y="-72" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_lnfRadioButtonClicked(self);
+								VUHDO_newOptionsMoveSetTestData(30);
+							</OnClick>
+							<OnLoad>
+								VUHDO_lnfCheckButtonOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K552);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 					<CheckButton name="$parentFourtyRadioButton" text="VUHDO_I18N_40" inherits="VuhDoRadioButtonTemplate">
 						<Size>
 							<AbsDimension x="80" y="32" />
@@ -205,7 +228,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="320" y="-39" />
+									<AbsDimension x="320" y="-7" />
 								</Offset>
 							</Anchor>
 						</Anchors>

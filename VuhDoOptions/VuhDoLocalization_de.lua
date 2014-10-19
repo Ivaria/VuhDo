@@ -606,6 +606,8 @@ VUHDO_I18N_TT.K547 = "Eingehende Heilung nur berücksichtigen, wenn der Spruch Z
 VUHDO_I18N_TT.K548 = "Versteckt die Einheiten-Buttons für nicht-existente Raid-Mitglieder. (Ziel, Fokus und Raid-Mitglieder, die während des Kampfes den Raid verlassen)";
 VUHDO_I18N_TT.K549 = "Mit dieser Option wird das gewählte Arrangement bei BIS ZU 20 Spielern automatisch aktiviert.";
 VUHDO_I18N_TT.K550 = "Zeigt einen 20er Raid als Testeinstellung."
+VUHDO_I18N_TT.K551 = "Mit dieser Option wird das gewählte Arrangement bei BIS ZU 30 Spielern automatisch aktiviert.";
+VUHDO_I18N_TT.K552 = "Zeigt einen 30er Raid als Testeinstellung."
 
 VUHDO_I18N_APPLY_TO_ALL = "für alle";
 VUHDO_I18N_TEST = "Test"; -- nv
@@ -751,6 +753,7 @@ VUHDO_I18N_8 = " 8"; -- nv
 VUHDO_I18N_10 = " 10"; -- nv
 VUHDO_I18N_20 = " 20";
 VUHDO_I18N_25 = " 25"; -- nv
+VUHDO_I18N_30 = " 30";
 VUHDO_I18N_40 = " 40"; -- nv
 VUHDO_I18N_DEBUFF_DEFAULTS = "(De)Buff Defaults"; -- nv
 VUHDO_I18N_ITEXTUREI = "[Textur]"; -- nv

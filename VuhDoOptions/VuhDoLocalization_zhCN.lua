@@ -607,6 +607,8 @@ VUHDO_I18N_TT.K547 = "Substract incoming heals only if the spell is not instant.
 VUHDO_I18N_TT.K548 = "Check to entirely hide buttons for non-existant units. (Target, focus and raid members leaving during combat)";
 VUHDO_I18N_TT.K549 = "If you check this button the currently selected arrangement will automatically enabled if you are in a raid of up to 20 players.";
 VUHDO_I18N_TT.K550 = "Select this to show a 20 players raid for testing."
+VUHDO_I18N_TT.K551 = "If you check this button the currently selected arrangement will automatically enabled if you are in a raid of up to 30 players.";
+VUHDO_I18N_TT.K552 = "Select this to show a 30 players raid for testing."
 
 VUHDO_I18N_APPLY_TO_ALL = "全部应用";
 VUHDO_I18N_TEST = "测试";
@@ -750,6 +752,7 @@ VUHDO_I18N_8 = " 8";
 VUHDO_I18N_10 = " 10";
 VUHDO_I18N_20 = " 20";
 VUHDO_I18N_25 = " 25";
+VUHDO_I18N_30 = " 30";
 VUHDO_I18N_40 = " 40";
 VUHDO_I18N_DEBUFF_DEFAULTS = "增益/减益预设";
 VUHDO_I18N_ITEXTUREI = "[材质]";

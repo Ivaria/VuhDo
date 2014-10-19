@@ -1,3 +1,17 @@
+Version 3.65.
+
+
+Bugfixes:
+-- Fixed profile activation due to group size 20
+
+
+Improvements:
+-- Added new raid group size 30 man
+--   Tools > Profiles > Activate due to group size
+--   Move > Hold to Test 
+
+
+--------------------------------------------------------------
 Version 3.64.
 
 

@@ -615,6 +615,8 @@ VUHDO_I18N_TT.K547 = "Substract incoming heals only if the spell is not instant.
 VUHDO_I18N_TT.K548 = "Check to entirely hide buttons for non-existant units. (Target, focus and raid members leaving during combat)";
 VUHDO_I18N_TT.K549 = "Si vous cochez ce bouton, l'arrangement actuel sélectionné va automatiquement s'activer si vous êtes dans un raid maximum 20 joueurs.";
 VUHDO_I18N_TT.K550 = "Afficher un raid de 20 joueurs pour test."
+VUHDO_I18N_TT.K551 = "Si vous cochez ce bouton, l'arrangement actuel sélectionné va automatiquement s'activer si vous êtes dans un raid maximum 30 joueurs.";
+VUHDO_I18N_TT.K552 = "Afficher un raid de 30 joueurs pour test."
 
 VUHDO_I18N_APPLY_TO_ALL = "appliquez à tous";
 VUHDO_I18N_TEST = "Test";
@@ -762,6 +764,7 @@ VUHDO_I18N_7 = " 7";
 VUHDO_I18N_8 = " 8";
 VUHDO_I18N_10 = " 10";
 VUHDO_I18N_20 = " 20";
+VUHDO_I18N_30 = " 30";
 VUHDO_I18N_25 = " 25";
 VUHDO_I18N_40 = " 40";
 VUHDO_I18N_DEBUFF_DEFAULTS = "(De)Buff Par défaut";

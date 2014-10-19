@@ -2,7 +2,7 @@ VUHDO_CONFIG_TEST_USERS = -1;
 
 --
 function VUHDO_newOptionsMoveOnShow()
-	VuhDoNewOptionsTabbedFrame:SetHeight(110);
+	VuhDoNewOptionsTabbedFrame:SetHeight(155);
 	VUHDO_IS_PANEL_CONFIG = true;
 	VUHDO_CONFIG_SHOW_RAID = false;
 	VUHDO_initDynamicPanelModels();
