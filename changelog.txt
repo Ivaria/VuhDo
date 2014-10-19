@@ -3,6 +3,7 @@ Version 3.65.
 
 Bugfixes:
 -- Fixed profile activation due to group size 20
+-- Fixed the inability of players without assist to see ready checks
 
 
 Improvements:

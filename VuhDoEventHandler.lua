@@ -514,13 +514,13 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		if VUHDO_VARIABLES_LOADED then VUHDO_parseAddonMessage(anArg1, anArg2, anArg4); end
 
 	elseif "READY_CHECK" == anEvent then
-		if VUHDO_RAID and (VUHDO_getPlayerRank()) >= 1 then VUHDO_readyStartCheck(anArg1, anArg2); end
+		if VUHDO_RAID then VUHDO_readyStartCheck(anArg1, anArg2); end
 
 	elseif "READY_CHECK_CONFIRM" == anEvent then
-		if VUHDO_RAID and (VUHDO_getPlayerRank()) >= 1 then VUHDO_readyCheckConfirm(anArg1, anArg2); end
+		if VUHDO_RAID then VUHDO_readyCheckConfirm(anArg1, anArg2); end
 
 	elseif "READY_CHECK_FINISHED" == anEvent then
-		if VUHDO_RAID and (VUHDO_getPlayerRank()) >= 1 then VUHDO_readyCheckEnds(); end
+		if VUHDO_RAID then VUHDO_readyCheckEnds(); end
 
 	elseif "CVAR_UPDATE" == anEvent then
 		VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableSFX")) == 1;
