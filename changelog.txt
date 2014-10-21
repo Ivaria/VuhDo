@@ -1,6 +1,14 @@
 Version 3.65.
 
 
+Known issues:
+-- Settings are not saved when the character name includes a special character
+--   Mac OS X WoW client bug - http://us.battle.net/wow/en/forum/topic/14880818884
+-- Incoming heal estimation is not reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+-- AOE advisor not yet updated for Warlords of Draenor
+
+
 Bugfixes:
 -- Fixed profile activation due to group size 20
 -- Fixed the inability of players without assist to see ready checks
