@@ -775,6 +775,71 @@ end
 
 
 --
+local function VUHDO_warriorTankValidator(anInfo, _)
+	if (VUHDO_ID_MELEE_TANK == anInfo["role"]) then
+                if(VUHDO_ID_WARRIORS == anInfo["classId"]) then
+               		return true, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES", -1, -1, -1, nil, nil, GetTexCoordsForRole("TANK");
+                end
+	else
+		return false, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil;
+	end
+end
+
+
+
+--
+local function VUHDO_paladinTankValidator(anInfo, _)
+	if (VUHDO_ID_MELEE_TANK == anInfo["role"]) then
+                if(VUHDO_ID_PALADINS == anInfo["classId"]) then
+               		return true, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES", -1, -1, -1, nil, nil, GetTexCoordsForRole("TANK");
+                end
+	else
+		return false, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil;
+	end
+end
+
+
+
+--
+local function VUHDO_dkTankValidator(anInfo, _)
+	if (VUHDO_ID_MELEE_TANK == anInfo["role"]) then
+                if(VUHDO_ID_DEATH_KNIGHT == anInfo["classId"]) then
+               		return true, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES", -1, -1, -1, nil, nil, GetTexCoordsForRole("TANK");
+                end
+	else
+		return false, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil;
+	end
+end
+
+
+
+--
+local function VUHDO_monkTankValidator(anInfo, _)
+	if (VUHDO_ID_MELEE_TANK == anInfo["role"]) then
+                if(VUHDO_ID_MONKS == anInfo["classId"]) then
+               		return true, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES", -1, -1, -1, nil, nil, GetTexCoordsForRole("TANK");
+                end
+	else
+		return false, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil;
+	end
+end
+
+
+
+--
+local function VUHDO_druidTankValidator(anInfo, _)
+	if (VUHDO_ID_MELEE_TANK == anInfo["role"]) then
+                if(VUHDO_ID_DRUIDS == anInfo["classId"]) then
+               		return true, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES", -1, -1, -1, nil, nil, GetTexCoordsForRole("TANK");
+                end
+	else
+		return false, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil;
+	end
+end
+
+
+
+--
 local tIcon, tExpiry, tStacks, tDuration;
 local function VUHDO_customDebuffIconValidator(anInfo, _)
 	tIcon, tExpiry, tStacks, tDuration = VUHDO_getLatestCustomDebuff(anInfo["unit"]);
@@ -1367,6 +1432,36 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 	["ROLE_HEALER"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_ROLE_HEALER,
 		["validator"] = VUHDO_roleHealerValidator,
+		["interests"] = { },
+	},
+
+        ["WARRIOR_TANK"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_WARRIOR_TANK,
+		["validator"] = VUHDO_warriorTankValidator,
+		["interests"] = { },
+	},
+
+        ["PALADIN_TANK"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_PALADIN_TANK,
+		["validator"] = VUHDO_paladinTankValidator,
+		["interests"] = { },
+	},
+
+        ["DK_TANK"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_DK_TANK,
+		["validator"] = VUHDO_dkTankValidator,
+		["interests"] = { },
+	},
+
+        ["MONK_TANK"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_MONK_TANK,
+		["validator"] = VUHDO_monkTankValidator,
+		["interests"] = { },
+	},
+
+        ["DRUID_TANK"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_DRUID_TANK,
+		["validator"] = VUHDO_druidTankValidator,
 		["interests"] = { },
 	},
 

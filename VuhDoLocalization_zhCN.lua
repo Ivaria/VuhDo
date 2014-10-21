@@ -407,4 +407,9 @@ VUHDO_I18N_DEF_STATUS_OVERSHIELDED = "Statusbar: Overshielded";
 -- 3.65
 VUHDO_I18N_BOUQUET_OUTSIDE_ZONE = "Flag: Player Zone, outside";
 VUHDO_I18N_BOUQUET_INSIDE_ZONE = "Flag: Player Zone, inside";
+VUHDO_I18N_BOUQUET_WARRIOR_TANK = "Flag: Role Tank, Warrior";
+VUHDO_I18N_BOUQUET_PALADIN_TANK = "Flag: Role Tank, Paladin";
+VUHDO_I18N_BOUQUET_DK_TANK = "Flag: Role Tank, Death Knight";
+VUHDO_I18N_BOUQUET_MONK_TANK = "Flag: Role Tank, Monk";
+VUHDO_I18N_BOUQUET_DRUID_TANK = "Flag: Role Tank, Druid";
 
