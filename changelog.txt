@@ -14,6 +14,10 @@ Improvements:
 -- Added ability to select a default profile and key layout
 --   Defaults are applied when no existing settings are found
 --   Also a workaround for bugged settings on Mac OS X clients
+-- Added new bouquet validator to check if unit is in the player's zone
+--   Flag: Player Zone, Inside
+-- Added new bouquet validator to check if unit is NOT in the player's zone
+--   Flag: Player Zone, Outside
 
 
 --------------------------------------------------------------

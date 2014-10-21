@@ -409,3 +409,8 @@ VUHDO_I18N_DEF_STATUS_SHIELD = "Statusbar: Shield";
 VUHDO_I18N_TARGET = "Target";
 VUHDO_I18N_FOCUS = "Focus";
 VUHDO_I18N_DEF_STATUS_OVERSHIELDED = "Statusbar: Overshielded";
+
+-- 3.65
+VUHDO_I18N_BOUQUET_OUTSIDE_ZONE = "Flag: Player Zone, outside";
+VUHDO_I18N_BOUQUET_INSIDE_ZONE = "Flag: Player Zone, inside";
+

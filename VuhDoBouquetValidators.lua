@@ -169,6 +169,20 @@ end
 
 
 --
+local function VUHDO_outsideZoneValidator(anInfo, _)
+	return not VUHDO_isInSameZone(anInfo["unit"]), nil, -1, -1, -1;
+end
+
+
+
+--
+local function VUHDO_insideZoneValidator(anInfo, _)
+	return VUHDO_isInSameZone(anInfo["unit"]), nil, -1, -1, -1;
+end
+
+
+
+--
 local function VUHDO_outOfRangeValidator(anInfo, _)
 	return not anInfo["range"], nil, -1, -1, -1;
 end
@@ -965,6 +979,18 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_BOUQUET_AGGRO,
 		["validator"] = VUHDO_aggroValidator,
 		["interests"] = { VUHDO_UPDATE_AGGRO },
+	},
+
+	["OUTSIDE_ZONE"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_OUTSIDE_ZONE,
+		["validator"] = VUHDO_outsideZoneValidator,
+		["interests"] = { },
+	},
+
+	["INSIDE_ZONE"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_INSIDE_ZONE,
+		["validator"] = VUHDO_insideZoneValidator,
+		["interests"] = { },
 	},
 
 	["NO_RANGE"] = {
