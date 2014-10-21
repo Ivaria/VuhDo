@@ -2179,15 +2179,33 @@ function VUHDO_createNewProfileName(aName, aUnitName)
 		tIdx = tIdx + 1;
 		tPrefix = aUnitName .. "(" .. tIdx .. "): ";
 	end
+
 	return tNewName;
 end
 
 
 
-local VUHDO_TARGET_PROFILE_NAME = nil;
+--
+function VUHDO_createNewLayoutName(aName, aUnitName)
+	local tIdx = 1;
+	local tLayout = { };
+	local tPrefix = aUnitName .. ": ";
+
+	while tLayout do
+		tNewName = tPrefix .. aName;
+		tLayout = VUHDO_SPELL_LAYOUTS[tNewName];
+
+		tIdx = tIdx + 1;
+		tPrefix = aUnitName .. "(" .. tIdx .. "): ";
+	end
+
+	return tNewName;
+end
+
 
 
 --
+local VUHDO_TARGET_PROFILE_NAME = nil;
 local function VUHDO_askSaveProfileCallback(aButtonNum)
 	local _, tProfile = VUHDO_getProfileNamedCompressed(VUHDO_TARGET_PROFILE_NAME);
 	if tProfile and aButtonNum == 2 and tProfile["HARDLOCKED"] then
@@ -2198,6 +2216,15 @@ local function VUHDO_askSaveProfileCallback(aButtonNum)
 	if 1 == aButtonNum then -- Copy
 		VUHDO_TARGET_PROFILE_NAME = VUHDO_createNewProfileName(VUHDO_TARGET_PROFILE_NAME, VUHDO_PLAYER_NAME);
 		VUHDO_CONFIG["CURRENT_PROFILE"] = VUHDO_TARGET_PROFILE_NAME;
+
+		VUHDO_IS_DEFAULT_PROFILE = false;
+
+		if (VUHDO_CURR_LAYOUT ~= nil) then
+			VUHDO_CURR_LAYOUT = VUHDO_createNewLayoutName(VUHDO_CURR_LAYOUT, VUHDO_PLAYER_NAME);
+			VUHDO_SPEC_LAYOUTS["selected"] = VUHDO_CURR_LAYOUT;
+
+			VUHDO_IS_DEFAULT_LAYOUT = false;
+		end
 	elseif 2 == aButtonNum then -- Overwrite
 	elseif 3 == aButtonNum then-- Discard
 		return;
@@ -2213,8 +2240,21 @@ local function VUHDO_askSaveProfileCallback(aButtonNum)
 		VUHDO_PROFILES[tIndex]["HARDLOCKED"] = false;
 	end
 
+	if VUHDO_IS_DEFAULT_PROFILE then
+		VUHDO_DEFAULT_PROFILE = VUHDO_PROFILES[tIndex]["NAME"];
+	elseif VUHDO_DEFAULT_PROFILE == VUHDO_PROFILES[tIndex]["NAME"] then
+		VUHDO_DEFAULT_PROFILE = nil;
+	end
+
 	VUHDO_Msg(VUHDO_I18N_PROFILE_SAVED .. "\"" .. VUHDO_TARGET_PROFILE_NAME .. "\"");
 	VUHDO_updateProfileSelectCombo();
+
+	if ((VUHDO_CURR_LAYOUT or "") == "") then
+  		VUHDO_SPEC_LAYOUTS["selected"] = "";
+	elseif ((VUHDO_SPEC_LAYOUTS["selected"] or "") ~= "") then
+		VUHDO_CURR_LAYOUT = VUHDO_SPEC_LAYOUTS["selected"];
+		VUHDO_saveKeyLayoutCallback(VUHDO_YES);
+	end
 end
 
 

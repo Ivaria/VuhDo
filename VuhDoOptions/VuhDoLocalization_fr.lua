@@ -617,7 +617,11 @@ VUHDO_I18N_TT.K549 = "Si vous cochez ce bouton, l'arrangement actuel sélectionné
 VUHDO_I18N_TT.K550 = "Afficher un raid de 20 joueurs pour test."
 VUHDO_I18N_TT.K551 = "Si vous cochez ce bouton, l'arrangement actuel sélectionné va automatiquement s'activer si vous êtes dans un raid maximum 30 joueurs.";
 VUHDO_I18N_TT.K552 = "Afficher un raid de 30 joueurs pour test."
+VUHDO_I18N_TT.K553 = "Make the selected profile the default for all new characters on this account."
+VUHDO_I18N_TT.K554 = "Make the selected key layout the default for all new characters on this account."
 
+VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
+VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
 VUHDO_I18N_APPLY_TO_ALL = "appliquez à tous";
 VUHDO_I18N_TEST = "Test";
 VUHDO_I18N_ADD = "Ajouter";

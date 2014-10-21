@@ -80,13 +80,6 @@ function VUHDO_tabbedPanelOkayClicked(aButton)
 	VUHDO_initFromSpellbook();
 	VUHDO_registerAllBouquets(false);
 
-  if (VUHDO_CURR_LAYOUT == "") then
-  	VUHDO_SPEC_LAYOUTS["selected"] = "";
-	elseif ((VUHDO_SPEC_LAYOUTS["selected"] or "") ~= "") then
-		VUHDO_CURR_LAYOUT = VUHDO_SPEC_LAYOUTS["selected"];
-		VUHDO_saveKeyLayoutCallback(VUHDO_YES);
-	end
-
 	local _, tProfile = VUHDO_getProfileNamedCompressed(VUHDO_CONFIG["CURRENT_PROFILE"]);
 	if (VUHDO_CURRENT_PROFILE == "") then
 		VUHDO_CONFIG["CURRENT_PROFILE"] = "";

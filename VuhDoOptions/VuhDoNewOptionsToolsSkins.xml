@@ -30,7 +30,7 @@
 
 			<Frame name="$parentLoadSavePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="230" y="215" />
+					<AbsDimension x="235" y="255" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -163,6 +163,34 @@
 						</Scripts>
 					</EditBox>
 
+					<CheckButton name="$parentDefaultProfileCheckButton" text="VUHDO_I18N_DEFAULT_PROFILE" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="125" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-173" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K553);
+							</OnLoad>
+							<OnShow>
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_skinsInitDefaultProfileCheckButton(self);
+								VUHDO_lnfPatchFont(self, "Label");
+								VUHDO_lnfRadioButtonOnShow(self);
+							</OnShow>
+							<OnClick>
+								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_skinsDefaultProfileCheckButtonClicked(self);
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
 					<Button name="$parentProfileSaveButton" text="VUHDO_I18N_SAVE" inherits="VuhDoButtonTemplate">
 						<Size>
 							<AbsDimension x="100" y="32" />
@@ -170,7 +198,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="65" y="-173" />
+									<AbsDimension x="70" y="-213" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -485,7 +513,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="60" y="-270" />
+							<AbsDimension x="20" y="-285" />
 						</Offset>
 					</Anchor>
 				</Anchors>

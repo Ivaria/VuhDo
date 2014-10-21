@@ -751,6 +751,7 @@ function VUHDO_loadDefaultConfig()
 		VUHDO_CONFIG["VERSION"] = 4;
 	end
 
+	-- add relevant custom debuffs for raid bosses
 	-- 5.x - MoP
 	VUHDO_addCustomSpellIds(20,
 

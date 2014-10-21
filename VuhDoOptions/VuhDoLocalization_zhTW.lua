@@ -609,7 +609,11 @@ VUHDO_I18N_TT.K549 = "If you check this button the currently selected arrangemen
 VUHDO_I18N_TT.K550 = "Select this to show a 20 players raid for testing."
 VUHDO_I18N_TT.K551 = "If you check this button the currently selected arrangement will automatically enabled if you are in a raid of up to 30 players.";
 VUHDO_I18N_TT.K552 = "Select this to show a 30 players raid for testing."
+VUHDO_I18N_TT.K553 = "Make the selected profile the default for all new characters on this account."
+VUHDO_I18N_TT.K554 = "Make the selected key layout the default for all new characters on this account."
 
+VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
+VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
 VUHDO_I18N_APPLY_TO_ALL = "全部應用";
 VUHDO_I18N_TEST = "測試";
 VUHDO_I18N_ADD = "添加";

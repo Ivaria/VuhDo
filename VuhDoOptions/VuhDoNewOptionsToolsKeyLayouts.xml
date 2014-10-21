@@ -5,7 +5,7 @@
 		<Frames>
 			<Frame name="$parentStorePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="320" y="167" />
+					<AbsDimension x="320" y="177" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -40,7 +40,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="17" y="-115" />
+									<AbsDimension x="17" y="-137" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -119,6 +119,34 @@
 								self:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["1"]);
 								VUHDO_lnfCheckButtonClicked(self);
 							</OnShow>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentDefaultLayoutCheckButton" text="VUHDO_I18N_DEFAULT_LAYOUT" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="125" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-107" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K554);
+							</OnLoad>
+							<OnShow>
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_keyLayoutInitDefaultLayoutCheckButton(self);
+								VUHDO_lnfPatchFont(self, "Label");
+								VUHDO_lnfRadioButtonOnShow(self);
+							</OnShow>
+							<OnClick>
+								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_keyLayoutDefaultLayoutCheckButtonClicked(self);
+							</OnClick>
 						</Scripts>
 					</CheckButton>
 

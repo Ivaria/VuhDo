@@ -147,6 +147,9 @@ function VUHDO_vuhdoInitLocalOverrides()
 
 	sTrigger = VUHDO_CONFIG["EMERGENCY_TRIGGER"];
 	sCurrentMode = VUHDO_CONFIG["MODE"];
+
+	VUHDO_DEFAULT_PROFILE = _G["VUHDO_DEFAULT_PROFILE"];
+	VUHDO_DEFAULT_LAYOUT = _G["VUHDO_DEFAULT_LAYOUT"];
 end
 
 ----------------------------------------------------

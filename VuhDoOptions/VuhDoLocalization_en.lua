@@ -186,7 +186,7 @@ VUHDO_I18N_TT.K062 = "Overheal will lighten up the health bar if selected.";
 VUHDO_I18N_TT.K063 = "Check to also show incoming heal done by yourself. This is felt to be misleading by some players.";
 VUHDO_I18N_TT.K065 = "Select the refresh rate for checking if players are in range. Info: Low values may reduce system performance.";
 VUHDO_I18N_TT.K066 = "Check this to do check the range of a \"typical\" spell. Also select this if you dont have any beneficial spells.";
-VUHDO_I18N_TT.K067 = "Enter spell name whose range will be taken for range ckecking.";
+VUHDO_I18N_TT.K067 = "Enter spell name whose range will be taken for range checking.";
 VUHDO_I18N_TT.K068 = "Select this to have the spell range checked due to the range of the spell to the right.";
 VUHDO_I18N_TT.K070 = "Select a percentage of bar height for HoT icon size";
 VUHDO_I18N_TT.K071 = "Select to show HoT icon on the RIGHT side INSIDE of the health bar";
@@ -607,7 +607,11 @@ VUHDO_I18N_TT.K549 = "If you check this button the currently selected arrangemen
 VUHDO_I18N_TT.K550 = "Select this to show a 20 players raid for testing."
 VUHDO_I18N_TT.K551 = "If you check this button the currently selected arrangement will automatically enabled if you are in a raid of up to 30 players.";
 VUHDO_I18N_TT.K552 = "Select this to show a 30 players raid for testing."
+VUHDO_I18N_TT.K553 = "Make the selected profile the default for all new characters on this account."
+VUHDO_I18N_TT.K554 = "Make the selected key layout the default for all new characters on this account."
 
+VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
+VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
 VUHDO_I18N_APPLY_TO_ALL = "apply all";
 VUHDO_I18N_TEST = "Test";
 VUHDO_I18N_ADD = "Add";
@@ -1080,3 +1084,4 @@ VUHDO_I18N_HEALTH_COLOR = "Health\nColor";
 VUHDO_I18N_HIDE = "Hide";
 VUHDO_I18N_LEAVE_ALONE = "Leave alone";
 VUHDO_I18N_READY_CHECK = "Ready\nCheck";
+

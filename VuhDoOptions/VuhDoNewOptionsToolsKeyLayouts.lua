@@ -1,6 +1,7 @@
 local _;
 VUHDO_KEY_LAYOUT_COMBO_MODEL = { };
 VUHDO_CURR_LAYOUT = "";
+VUHDO_IS_DEFAULT_LAYOUT = false;
 
 
 
@@ -34,6 +35,8 @@ function VUHDO_keyLayoutComboChanged(aComboBox, aValue)
 	local tSpec2CheckButton =  _G[tParentName .. "Spec2CheckButton"];
 	tSpec2CheckButton:SetChecked(aValue == VUHDO_SPEC_LAYOUTS["2"]);
 	VUHDO_lnfCheckButtonClicked(tSpec2CheckButton);
+
+	VUHDO_updateDefaultLayoutCheckButton(aComboBox:GetParent():GetParent());
 end
 
 
@@ -55,6 +58,11 @@ function VUHDO_deleteKeyLayoutCallback(aDecision)
 		VUHDO_Msg(format(VUHDO_I18N_DELETED_KEY_LAYOUT, VUHDO_CURR_LAYOUT));
 		VUHDO_SPELL_LAYOUTS[VUHDO_CURR_LAYOUT] = nil;
 		if (VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["selected"]) then
+			if (VUHDO_CURR_LAYOUT == VUHDO_DEFAULT_LAYOUT) then
+				VUHDO_DEFAULT_LAYOUT = nil;
+				VUHDO_IS_DEFAULT_LAYOUT = false;
+			end
+
 			VUHDO_SPEC_LAYOUTS["selected"] = "";
 			VUHDO_CURR_LAYOUT = "";
 		else
@@ -125,7 +133,14 @@ function VUHDO_saveKeyLayoutCallback(aDecision)
 
 		VUHDO_SPEC_LAYOUTS["selected"] = VUHDO_CURR_LAYOUT;
 
+		if VUHDO_IS_DEFAULT_LAYOUT then
+			VUHDO_DEFAULT_LAYOUT = VUHDO_CURR_LAYOUT;
+		elseif VUHDO_DEFAULT_LAYOUT == VUHDO_CURR_LAYOUT then
+			VUHDO_DEFAULT_LAYOUT = nil;
+		end
+
 		VUHDO_Msg(format(VUHDO_I18N_KEY_LAYOUT_SAVED, VUHDO_CURR_LAYOUT));
+
 		VUHDO_initKeyLayoutComboModel();
 		VUHDO_lnfComboBoxInitFromModel(VuhDoNewOptionsToolsKeyLayoutsStorePanelLayoutCombo);
 	end
@@ -165,3 +180,45 @@ function VUHDO_shareCurrentKeyLayout(aUnitName, aKeyLayoutName)
 	local tQuestion = VUHDO_PLAYER_NAME .. " requests to transmit\nKey Layout " .. aKeyLayoutName .. " to you.\nProceed?"
 	VUHDO_startShare(aUnitName, { aKeyLayoutName, tLayout }, sCmdKeyLayoutDataChunk, sCmdKeyLayoutDataEnd, tQuestion);
 end
+
+
+
+--
+function VUHDO_keyLayoutDefaultLayoutCheckButtonClicked(aButton)
+	local tEditBox = _G[aButton:GetParent():GetName() .. "SaveAsEditBox"];
+
+	local tLayout = VUHDO_SPELL_LAYOUTS[VUHDO_CURR_LAYOUT];
+
+	if (tLayout ~= nil or (strtrim(tEditBox:GetText()) or "") ~= "") then
+		VUHDO_IS_DEFAULT_LAYOUT = VUHDO_forceBooleanValue(aButton:GetChecked());
+	else
+		VUHDO_Msg(VUHDO_I18N_SELECT_KEY_LAYOUT_FIRST, 1, 0.4, 0.4);
+	end
+end
+
+
+
+--
+function VUHDO_keyLayoutInitDefaultLayoutCheckButton(aButton)
+	local tLayout = VUHDO_SPELL_LAYOUTS[VUHDO_CURR_LAYOUT];
+
+	if (tLayout ~= nil and VUHDO_CURR_LAYOUT == VUHDO_DEFAULT_LAYOUT) then
+		VUHDO_IS_DEFAULT_LAYOUT = true;
+
+		aButton:SetChecked(true);
+	else
+		VUHDO_IS_DEFAULT_LAYOUT = false;
+
+		aButton:SetChecked(false);
+	end
+
+	VUHDO_lnfCheckButtonClicked(aButton);
+end
+
+
+
+--
+function VUHDO_updateDefaultLayoutCheckButton(aPanel)
+	VUHDO_keyLayoutInitDefaultLayoutCheckButton(_G[aPanel:GetName() .. "StorePanelDefaultLayoutCheckButton"]);
+end
+

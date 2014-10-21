@@ -4,12 +4,16 @@ Version 3.65.
 Bugfixes:
 -- Fixed profile activation due to group size 20
 -- Fixed the inability of players without assist to see ready checks
+-- Fixed VuhDo Options tooltip mispellings in EN and ES localizations
 
 
 Improvements:
 -- Added new raid group size 30 man
 --   Tools > Profiles > Activate due to group size
 --   Move > Hold to Test 
+-- Added ability to select a default profile and key layout
+--   Defaults are applied when no existing settings are found
+--   Also a workaround for bugged settings on Mac OS X clients
 
 
 --------------------------------------------------------------

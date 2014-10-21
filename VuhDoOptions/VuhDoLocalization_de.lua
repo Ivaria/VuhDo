@@ -608,7 +608,11 @@ VUHDO_I18N_TT.K549 = "Mit dieser Option wird das gewählte Arrangement bei BIS Z
 VUHDO_I18N_TT.K550 = "Zeigt einen 20er Raid als Testeinstellung."
 VUHDO_I18N_TT.K551 = "Mit dieser Option wird das gewählte Arrangement bei BIS ZU 30 Spielern automatisch aktiviert.";
 VUHDO_I18N_TT.K552 = "Zeigt einen 30er Raid als Testeinstellung."
+VUHDO_I18N_TT.K553 = "Make the selected profile the default for all new characters on this account."
+VUHDO_I18N_TT.K554 = "Make the selected key layout the default for all new characters on this account."
 
+VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
+VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
 VUHDO_I18N_APPLY_TO_ALL = "für alle";
 VUHDO_I18N_TEST = "Test"; -- nv
 VUHDO_I18N_ADD = "Hinzufügen";

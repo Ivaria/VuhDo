@@ -1,5 +1,6 @@
 local _;
 
+VUHDO_IS_DEFAULT_PROFILE = false;
 VUHDO_CURRENT_PROFILE = "";
 VUHDO_PROFILE_TABLE_MODEL = { };
 
@@ -118,6 +119,45 @@ end
 
 
 --
+function VUHDO_skinsDefaultProfileCheckButtonClicked(aButton)
+	local tIndex, _ = VUHDO_getProfileNamedCompressed(VUHDO_CURRENT_PROFILE);
+
+	if (tIndex ~= nil) then
+		VUHDO_IS_DEFAULT_PROFILE = VUHDO_forceBooleanValue(aButton:GetChecked());
+	else
+		VUHDO_Msg(VUHDO_I18N_ERROR_NO_PROFILE .. "\"" .. VUHDO_CURRENT_PROFILE .. "\" !", 1, 0.4, 0.4);
+	end
+end
+
+
+
+--
+function VUHDO_skinsInitDefaultProfileCheckButton(aButton)
+	local tIndex, _ = VUHDO_getProfileNamedCompressed(VUHDO_CURRENT_PROFILE);
+
+	if (tIndex ~= nil and VUHDO_CURRENT_PROFILE == VUHDO_DEFAULT_PROFILE) then
+		VUHDO_IS_DEFAULT_PROFILE = true;
+
+		aButton:SetChecked(true);
+	else
+		VUHDO_IS_DEFAULT_PROFILE = false;
+
+		aButton:SetChecked(false);
+	end
+
+	VUHDO_lnfCheckButtonClicked(aButton);
+end
+
+
+
+--
+function VUHDO_updateDefaultProfileCheckButton(aPanel)
+	VUHDO_skinsInitDefaultProfileCheckButton(_G[aPanel:GetName() .. "LoadSavePanelDefaultProfileCheckButton"]);
+end
+
+
+
+--
 local tButton;
 local function VUHDO_updateAllAutoProfiles(aPanel)
 	for tCnt = 1, 40 do
@@ -218,6 +258,7 @@ function VUHDO_profileComboValueChanged(aComboBox, aValue)
 	end
 
 	VUHDO_updateAllAutoProfiles(aComboBox:GetParent():GetParent());
+	VUHDO_updateDefaultProfileCheckButton(aComboBox:GetParent():GetParent());
 end
 
 
@@ -248,6 +289,11 @@ function VUHDO_deleteProfile(aName)
 		tremove(VUHDO_PROFILES, tIndex);
 		VUHDO_deleteAutoProfile(aName);
 		if (VUHDO_CURRENT_PROFILE == VUHDO_CONFIG["CURRENT_PROFILE"]) then
+			if (VUHDO_CURRENT_PROFILE == VUHDO_DEFAULT_PROFILE) then
+				VUHDO_DEFAULT_PROFILE = nil;
+				VUHDO_IS_DEFAULT_PROFILE = false;
+			end
+
 			VUHDO_CURRENT_PROFILE = "";
 			VUHDO_CONFIG["CURRENT_PROFILE"] = "";
 		else
