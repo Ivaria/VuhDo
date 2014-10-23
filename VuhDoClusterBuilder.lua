@@ -1,13 +1,12 @@
 local _;
 
 
+
 -- for saving once learnt yards in saved variables
-local VUHDO_STORED_ZONES = { };
 local VUHDO_CLUSTER_BLACKLIST = { };
 local VUHDO_RAID = {};
 
 local sqrt = sqrt;
-local GetPlayerMapPosition = GetPlayerMapPosition;
 local CheckInteractDistance = CheckInteractDistance;
 local GetMapInfo = GetMapInfo;
 local GetCurrentMapDungeonLevel = GetCurrentMapDungeonLevel;
@@ -24,14 +23,10 @@ local VUHDO_tableUniqueAdd;
 local VUHDO_COORD_DELTAS = { };
 setmetatable(VUHDO_COORD_DELTAS, VUHDO_META_NEW_ARRAY);
 
-local VUHDO_MAP_WIDTH = 0;
-local VUHDO_LAST_ZONE = nil;
-
-local VUHDO_MIN_TICK_UNIT = 0.000000000001;
-local VUHDO_MAX_TICK_UNIT = 1;
-local VUHDO_MAP_LIMIT_YARDS = 1000000;
 local VUHDO_MAX_SAMPLES = 50;
 local VUHDO_MAX_ITERATIONS = 120; -- For a 40 man raid there is a total of +800 iterations
+
+
 
 --
 local VUHDO_CLUSTER_BASE_RAID = { };
@@ -41,37 +36,6 @@ function VUHDO_clusterBuilderInitLocalOverrides()
 
 	VUHDO_setMapToCurrentZone = _G["VUHDO_setMapToCurrentZone"];
 	VUHDO_tableUniqueAdd = _G["VUHDO_tableUniqueAdd"];
-end
-
-
-
---
-local VUHDO_MAP_FIX_WIDTH = {
-	["AlteracValley"] = {
-		[1] = 4237.49987792969,
-	},
-
-	--[[["StormwindCity"] = {
-		[0] = 1737.4999589920044,
-	},]]
-};
-
-
-
--- Inspect, Trade, Duel, UnitInRange(, UnitIsVisible? => doesn't seem to be reliable)
-local VUHDO_INTERACT_MAX_DISTANCES = { VUHDO_MIN_TICK_UNIT, VUHDO_MIN_TICK_UNIT, VUHDO_MIN_TICK_UNIT, VUHDO_MIN_TICK_UNIT };
-local VUHDO_INTERACT_FAIL_MIN_DISTANCES = { VUHDO_MAX_TICK_UNIT, VUHDO_MAX_TICK_UNIT, VUHDO_MAX_TICK_UNIT, VUHDO_MAX_TICK_UNIT };
-local VUHDO_INTERACT_YARDS = { 28, 11.11, 9.9, 40 };
-
-
-
---
-local function VUHDO_clusterBuilderStoreZone(aZone)
-	if aZone then
-		VUHDO_STORED_ZONES[aZone] = { };
-		VUHDO_STORED_ZONES[aZone]["good"] = VUHDO_deepCopyTable(VUHDO_INTERACT_MAX_DISTANCES);
-		VUHDO_STORED_ZONES[aZone]["fail"] = VUHDO_deepCopyTable(VUHDO_INTERACT_FAIL_MIN_DISTANCES);
-	end
 end
 
 
@@ -87,69 +51,18 @@ end
 
 
 --
-local tDistance;
-local tEmptyUnit = { };
-local function VUHDO_calibrateMapScale(aUnit, aDeltaX, aDeltaY)
-	tDistance = sqrt((aDeltaX * aDeltaX)  + ((aDeltaY * 0.6666666666666) ^ 2));
-
-	for tCnt = 1, 3 do
-		-- Check only if new distance is within bandwidth (= better result than before)
-		if tDistance > VUHDO_INTERACT_MAX_DISTANCES[tCnt] and tDistance < VUHDO_INTERACT_FAIL_MIN_DISTANCES[tCnt] then
-			if CheckInteractDistance(aUnit, tCnt) then
-				VUHDO_INTERACT_MAX_DISTANCES[tCnt] = tDistance;
-			else
-				VUHDO_INTERACT_FAIL_MIN_DISTANCES[tCnt] = tDistance;
-			end
-			VUHDO_clusterBuilderStoreZone(VUHDO_LAST_ZONE);
-		end
-	end
-
-	if tDistance > VUHDO_INTERACT_MAX_DISTANCES[4] and tDistance < VUHDO_INTERACT_FAIL_MIN_DISTANCES[4] then
-		if (VUHDO_RAID[aUnit] or tEmptyUnit)["baseRange"] then
-			VUHDO_INTERACT_MAX_DISTANCES[4] = tDistance;
-		else
-			VUHDO_INTERACT_FAIL_MIN_DISTANCES[4] = tDistance;
-		end
-		VUHDO_clusterBuilderStoreZone(VUHDO_LAST_ZONE);
-	end
-end
-
-
-
---
-local tCurrWorldSize, tMinWorldSize, tUpperBoundary;
-local function VUHDO_getHeuristicMapWidth()
-	tMinWorldSize = VUHDO_MAP_LIMIT_YARDS;
-	tUpperBoundary = nil;
-	for tIndex, tNormFactor in pairs(VUHDO_INTERACT_YARDS) do
-		tCurrWorldSize = tNormFactor / VUHDO_INTERACT_MAX_DISTANCES[tIndex]; -- yards per full tick = world size in yards
-
-		if tCurrWorldSize < tMinWorldSize then -- Better test results are always smaller = closer to the limit of interact distance
-			tMinWorldSize = tCurrWorldSize;
-			if VUHDO_INTERACT_FAIL_MIN_DISTANCES[tIndex] < VUHDO_MAX_TICK_UNIT then
-				tUpperBoundary = tNormFactor / VUHDO_INTERACT_FAIL_MIN_DISTANCES[tIndex];
-			end
-		end
-	end
-
-	return tUpperBoundary and (tMinWorldSize + tUpperBoundary) * 0.5 or tMinWorldSize;
-end
-
-
-
---
 local tX1, tY1, tX2, tY2;
 local tIsValid;
 local function VUHDO_determineDistanceBetween(aUnit, anotherUnit)
 	tIsValid = true;
 
-	tX1, tY1 = GetPlayerMapPosition(aUnit);
+	tX1, tY1 = UnitPosition(aUnit);
 	if tX1 + tY1 <= 0 then
 		VUHDO_CLUSTER_BLACKLIST[aUnit] = true;
 		tIsValid = false;
 	end
 
-	tX2, tY2 = GetPlayerMapPosition(anotherUnit);
+	tX2, tY2 = UnitPosition(anotherUnit);
 	if tX2 + tY2 <= 0 then
 		VUHDO_CLUSTER_BLACKLIST[anotherUnit] = true;
 		tIsValid = false;
@@ -165,33 +78,10 @@ end
 
 
 --
-local function VUHDO_clusterBuilderNewZone(anOldZone, aNewZone)
-	VUHDO_clusterBuilderStoreZone(anOldZone);
-
-	if VUHDO_STORED_ZONES[aNewZone] then
-		VUHDO_INTERACT_MAX_DISTANCES = VUHDO_deepCopyTable(VUHDO_STORED_ZONES[aNewZone]["good"]);
-		VUHDO_INTERACT_FAIL_MIN_DISTANCES = VUHDO_deepCopyTable(VUHDO_STORED_ZONES[aNewZone]["fail"]);
-	else
-		VUHDO_INTERACT_MAX_DISTANCES[1] = VUHDO_MIN_TICK_UNIT;
-		VUHDO_INTERACT_MAX_DISTANCES[2] = VUHDO_MIN_TICK_UNIT;
-		VUHDO_INTERACT_MAX_DISTANCES[3] = VUHDO_MIN_TICK_UNIT;
-		VUHDO_INTERACT_MAX_DISTANCES[4] = VUHDO_MIN_TICK_UNIT;
-		VUHDO_INTERACT_FAIL_MIN_DISTANCES[1] = VUHDO_MAX_TICK_UNIT;
-		VUHDO_INTERACT_FAIL_MIN_DISTANCES[2] = VUHDO_MAX_TICK_UNIT;
-		VUHDO_INTERACT_FAIL_MIN_DISTANCES[3] = VUHDO_MAX_TICK_UNIT;
-		VUHDO_INTERACT_FAIL_MIN_DISTANCES[4] = VUHDO_MAX_TICK_UNIT;
-	end
-end
-
-
-
---
 local tUnit, tInfo;
 local tAnotherUnit, tAnotherInfo;
 local tX, tY, tDeltaX, tDeltaY;
 local tMaxX, tMaxY;
-local tMapFileName, tDungeonLevels, tCurrLevel;
-local tCurrentZone;
 local tNumRaid;
 local tIndex = 0;
 local tNumSamples, tNumIterations;
@@ -205,18 +95,9 @@ function VUHDO_updateAllClusters()
 		return;
 	end
 
-	tX, tY = GetPlayerMapPosition("player");
+	tX, tY = UnitPosition("player");
 	if (tX or 0) + (tY or 0) <= 0 then
 		VUHDO_setMapToCurrentZone();
-	end
-
-	tMapFileName = (GetMapInfo()) or "*";
-	tCurrLevel = GetCurrentMapDungeonLevel() or 0;
-	tCurrentZone = tMapFileName ..  tCurrLevel;
-
-	if VUHDO_LAST_ZONE ~= tCurrentZone then
-		VUHDO_clusterBuilderNewZone(VUHDO_LAST_ZONE, tCurrentZone);
-		VUHDO_LAST_ZONE = tCurrentZone;
 	end
 
 	tNumSamples, tNumIterations = 0, 0;
@@ -274,38 +155,6 @@ function VUHDO_updateAllClusters()
 
 		if tNumSamples > 50 or tNumIterations > 120 then break; end -- VUHDO_MAX_SAMPLES -- VUHDO_MAX_ITERATIONS
 	end
-
-	tMaxX = nil;
-
-	-- Try to determine well known dungeons
-	tDungeonLevels = VUHDO_MAP_FIX_WIDTH[tMapFileName];
-	if tDungeonLevels then
-		tMaxX = tDungeonLevels[tCurrLevel];
-		--VUHDO_Msg(GetCurrentMapDungeonLevel());
-	end
-
-	-- Otherwise get from heuristic database
-	if (tMaxX or 0) == 0 then
-		if VUHDO_COORD_DELTAS["player"] then
-			for tUnit, tDeltas in pairs(VUHDO_COORD_DELTAS["player"]) do
-				VUHDO_calibrateMapScale(tUnit, tDeltas[1], tDeltas[2]);
-			end
-		end
-
-		tMaxX = VUHDO_getHeuristicMapWidth();
-
-		-- Unreasonable?
-		if tMaxX < 1 or tMaxX >= VUHDO_MAP_LIMIT_YARDS then
-			VUHDO_MAP_WIDTH = 0;
-			return;
-		end
-	end
-
---	if (VUHDO_MAP_WIDTH ~= tMaxX) then
---		VUHDO_Msg("Map approx yards changed from " .. floor(VUHDO_MAP_WIDTH * 10) / 10 .. " to " .. floor(tMaxX * 10) / 10);
---	end
-
-	VUHDO_MAP_WIDTH = tMaxX;
 end
 
 
@@ -347,12 +196,12 @@ function VUHDO_getUnitsInRadialClusterWith(aUnit, aYardsPow, anArray, aCdSpell)
 	if tInfo and not VUHDO_CLUSTER_BLACKLIST[aUnit] then
 		anArray[1] = aUnit;-- Source is always part of the cluster
 	end
-	if VUHDO_MAP_WIDTH == 0 or not VUHDO_COORD_DELTAS[aUnit] then
+	if not VUHDO_COORD_DELTAS[aUnit] then
 		return anArray;
 	end
 
 	for tOtherUnit, tDeltas in pairs(VUHDO_COORD_DELTAS[aUnit]) do
-		tDistance = (((tDeltas[1] or 0) * VUHDO_MAP_WIDTH) ^ 2)  + (((tDeltas[2] or 0) * VUHDO_MAP_WIDTH / 1.5) ^ 2);
+		tDistance = ((tDeltas[1] or 0) ^ 2)  + ((tDeltas[2] or 0) ^ 2);
 		if tDistance <= aYardsPow and not VUHDO_CLUSTER_BLACKLIST[tOtherUnit] then
 			anArray[#anArray + 1] = tOtherUnit;
 		end
@@ -408,11 +257,13 @@ end
 --
 local tDeltas, tDistance;
 function VUHDO_getDistanceBetween(aUnit, anotherUnit)
-	if VUHDO_CLUSTER_BLACKLIST[aUnit] or VUHDO_CLUSTER_BLACKLIST[anotherUnit] then	return nil; end
+	if VUHDO_CLUSTER_BLACKLIST[aUnit] or VUHDO_CLUSTER_BLACKLIST[anotherUnit] then
+		return nil;
+	end
 
 	if VUHDO_COORD_DELTAS[aUnit] and VUHDO_COORD_DELTAS[aUnit][anotherUnit] then
 		tDeltas = VUHDO_COORD_DELTAS[aUnit][anotherUnit];
-		return sqrt((((tDeltas[1] or 0) * VUHDO_MAP_WIDTH) ^ 2)  + (((tDeltas[2] or 0) * VUHDO_MAP_WIDTH / 1.5) ^ 2));
+		return sqrt(((tDeltas[1] or 0) ^ 2)  + ((tDeltas[2] or 0) ^ 2));
 	end
 
 	return nil;
@@ -426,9 +277,9 @@ local function VUHDO_getRealPosition(aUnit)
 	if VUHDO_CLUSTER_BLACKLIST[aUnit] then return nil; end
 
 	if VUHDO_COORD_DELTAS[aUnit] then
-		tXCoord, tYCoord = GetPlayerMapPosition(aUnit);
+		tXCoord, tYCoord = UnitPosition(aUnit);
 		if tXCoord and tYCoord then
-			return tXCoord * VUHDO_MAP_WIDTH, tYCoord * VUHDO_MAP_WIDTH / 1.5;
+			return tXCoord, tYCoord;
 		end
 	end
 
@@ -566,3 +417,4 @@ function VUHDO_getUnitsInLinearCluster(aUnit, anArray, aRange, aMaxTargets, anIs
 		anArray[tCnt] = tDestCluster[tCnt];
 	end
 end
+
