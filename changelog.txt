@@ -14,6 +14,8 @@ Known issues:
 
 Bugfixes:
 -- Warlock spell Dark Intent no longer provides raid wide stamina buff
+-- Fixed pump aegis tooltip to correctly indicate a cap of 60% player max health
+-- Fixed Clarity of Will to cap based on 50% of the target's maximum health
 
 
 Improvements:
