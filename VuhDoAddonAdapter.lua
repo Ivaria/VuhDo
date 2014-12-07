@@ -2,8 +2,8 @@ local _;
 
 VUHDO_LibSharedMedia = LibStub("LibSharedMedia-3.0");
 VUHDO_LibDataBroker = LibStub("LibDataBroker-1.1", true);
+VUHDO_LibUTF8 = LibStub("UTF8");
 VUHDO_LibButtonFacade = nil;
-
 
 
 VUHDO_LibSharedMedia:Register("font", "Arial Black", "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf");
