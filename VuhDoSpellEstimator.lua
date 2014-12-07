@@ -29,8 +29,11 @@ local pairs = pairs;
 --
 VUHDO_SPELLS = {
 	-- Paladin
+	[VUHDO_SPELL_ID.BUFF_BEACON_OF_FAITH] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.BUFF_BEACON_OF_INSIGHT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_LIGHT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.SACRED_SHIELD] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.BUFF_STAY_OF_EXECUTION] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ETERNAL_FLAME] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ILLUMINATED_HEALING] = { ["isHot"] = true, },
 
@@ -42,7 +45,7 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.DIVINE_AEGIS] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.GRACE] = { ["isHot"] = true, ["nodefault"] = true },
-	[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = { ["isHot"] = true, ["nohelp"] = true, ["noselftarget"] = true	},
+	[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = { ["isHot"] = true, ["nohelp"] = true, ["noselftarget"] = true },
 	[VUHDO_SPELL_ID.ECHO_OF_LIGHT] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.SERENDIPITY] = { ["isHot"] = true, ["nodefault"] = true	},
 	[VUHDO_SPELL_ID.CLARITY_OF_WILL] = { ["isHot"] = true },

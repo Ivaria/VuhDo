@@ -498,7 +498,13 @@ VUHDO_DEFAULT_RAID_CDS_BOUQUET = {
 VUHDO_DEFAULT_PVP_FLAGS_BOUQUET = {
 	[VUHDO_I18N_DEF_PVP_FLAGS] = {
 	}
-}
+};
+
+
+VUHDO_DEFAULT_PALADIN_BEACON_BOUQUET = {
+	[VUHDO_I18N_BOUQUET_PALADIN_BEACON] = {
+	}
+};
 
 
 --
@@ -1204,6 +1210,13 @@ local tPvPFlags = {
 	127163, -- Power Orb
 }
 
+
+local tPaladinBeacons = {
+	156910, -- Beacon of Faith
+	53563, -- Beacon of Light
+}
+
+
 --
 function VUHDO_loadDefaultBouquets()
 	if not VUHDO_BOUQUETS then VUHDO_BOUQUETS = VUHDO_decompressOrCopy(VUHDO_DEFAULT_BOUQUETS); end
@@ -1281,6 +1294,12 @@ function VUHDO_loadDefaultBouquets()
 	end
 	tPvPFlags = nil;
 
+	if VUHDO_BOUQUETS["VERSION"] < 14 then
+		VUHDO_BOUQUETS["VERSION"] = 14;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_PALADIN_BEACON_BOUQUET);
+		VUHDO_AddSpellBouquetItem(VUHDO_I18N_BOUQUET_PALADIN_BEACON, unpack(tPaladinBeacons));
+	end
+	tPaladinBeacons = nil;
 
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();

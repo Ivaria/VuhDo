@@ -1185,7 +1185,6 @@ function VUHDO_loadDefaultConfig()
 		176121, -- Volatile Fire
 		175104, -- Melt Armor
 		-- The Iron Maidens
-		156626, -- Rapid Fire
 		164271, -- Penetrating Shot
 		156214, -- Convulsive Shadows
 		156007, -- Impale

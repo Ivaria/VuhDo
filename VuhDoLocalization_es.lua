@@ -420,4 +420,5 @@ VUHDO_I18N_BOUQUET_PALADIN_TANK = "Flag: Role Tank, Paladin";
 VUHDO_I18N_BOUQUET_DK_TANK = "Flag: Role Tank, Death Knight";
 VUHDO_I18N_BOUQUET_MONK_TANK = "Flag: Role Tank, Monk";
 VUHDO_I18N_BOUQUET_DRUID_TANK = "Flag: Role Tank, Druid";
+VUHDO_I18N_BOUQUET_PALADIN_BEACON = "Paladin Beacon";
 
