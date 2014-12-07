@@ -663,6 +663,28 @@ end
 
 
 --
+local function VUHDO_statusExcessAbsorbValidator(anInfo, _)
+	local healthmax = anInfo["healthmax"];
+
+	local excessAbsorb = (UnitGetTotalAbsorbs(anInfo["unit"]) or 0) + anInfo["health"] - healthmax;
+
+	if excessAbsorb < 0 then
+		return true, nil, 0, -1, healthmax;
+	end
+
+	return true, nil, excessAbsorb, -1, healthmax;
+end
+
+
+
+--
+local function VUHDO_statusTotalAbsorbValidator(anInfo, _)
+	return true, nil, UnitGetTotalAbsorbs(anInfo["unit"]) or 0, -1, anInfo["healthmax"];
+end
+
+
+
+--
 local function VUHDO_statusThreatValidator(anInfo, _)
 	return true, nil, anInfo["threatPerc"], -1, 100;
 end
@@ -1342,6 +1364,20 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_statusIncomingValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
 		["interests"] = { VUHDO_UPDATE_INC },
+	},
+
+	["STATUS_EXCESS_ABSORB"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_STATUS_EXCESS_ABSORB,
+		["validator"] = VUHDO_statusExcessAbsorbValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
+		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_SHIELD },
+	},
+
+	["STATUS_TOTAL_ABSORB"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_STATUS_TOTAL_ABSORB,
+		["validator"] = VUHDO_statusTotalAbsorbValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
+		["interests"] = { VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_SHIELD },
 	},
 
 	["STATUS_THREAT"] = {
