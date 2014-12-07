@@ -14,7 +14,7 @@ VUHDO_GCD_SPELLS = {
 	["WARLOCK"] = GetSpellInfo(686), -- Shadow Bolt
 	["SHAMAN"] = GetSpellInfo(8004), --  Healing Surge
 	["DRUID"] = VUHDO_SPELL_ID.REJUVENATION, -- Regrowth
-	["PRIEST"] = VUHDO_SPELL_ID.RENEW, -- mopok
+	["PRIEST"] = VUHDO_SPELL_ID.BUFF_POWER_WORD_FORTITUDE, -- Power Word: Fortitude
 	["DEATHKNIGHT"] = GetSpellInfo(48266), -- Blood Presence
 	["MONK"] = GetSpellInfo(100780) -- Jab
 };

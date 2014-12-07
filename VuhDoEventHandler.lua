@@ -1178,7 +1178,7 @@ function VUHDO_OnUpdate(_, aTimeDelta)
 		VUHDO_updateDirectionFrame();
 	end
 
-  -- Own frame flash routines to avoid taints
+	-- Own frame flash routines to avoid taints
 	VUHDO_UIFrameFlash_OnUpdate(aTimeDelta);
 
 

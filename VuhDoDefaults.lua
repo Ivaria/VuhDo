@@ -1139,6 +1139,9 @@ function VUHDO_loadDefaultConfig()
 		162185, -- Expel Magic: Fire
 		-- Margok
 		156225, -- Arcane Wrath
+		164004, -- Arcane Wrath: Displacement
+		164005, -- Arcane Wrath: Fortification
+		164006, -- Arcane Wrath: Replication
 		158605, -- Mark Of Chaos
 		157801, -- Slow
 		157763, -- Fixate
