@@ -15,9 +15,15 @@ Bugfixes:
 -- Fixed pump aegis tooltip to correctly indicate a cap of 60% player max health
 -- Fixed Clarity of Will to cap based on 50% of the target's maximum health
 -- Fixed bug when saving macros for player names with extended characters
+-- Removed Hunter Rapid Fire from custom debuff list
 
 
 Improvements:
+-- Added new default bouquet for Paladin Beacon of Light and Faith
+-- Added Paladin Beacon of Faith to Buff Watch
+-- Added Paladin Beacon of Faith as default HoT icon option
+-- Added Paladin Beacon of Insight as a default HoT icon option
+-- Added Paladin Stay of Execution as a default HoT icon option
 
 
 --------------------------------------------------------------
