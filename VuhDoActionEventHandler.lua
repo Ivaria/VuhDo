@@ -293,10 +293,13 @@ end
 local tModi;
 local tKey;
 function VuhDoActionPreClick(aButton, aMouseButton)
-	if VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"] then return; end
-
 	tModi = VUHDO_getCurrentKeyModifierString();
 	tKey = VUHDO_SPELL_ASSIGNMENTS[tModi .. SecureButton_GetButtonSuffix(aMouseButton)];
+
+	-- allow VuhDo menu command to be bound even when using Clique compat mode
+	if VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"] and tKey and strlower(tKey[3]) ~= "menu" then 
+		return;
+	end
 
 	if tKey and strlower(tKey[3]) == "menu" then
 		if not InCombatLockdown() then

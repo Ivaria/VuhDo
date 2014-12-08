@@ -29,6 +29,7 @@ Improvements:
 -- Added new bouquets for excess and total absorbtion percentages
 --   Status: Excess Absorption %
 --   Status: Total Absorption %
+-- The menu command can still be key bound when using Clique compat mode
 
 
 --------------------------------------------------------------
