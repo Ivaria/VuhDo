@@ -560,8 +560,11 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				if VUHDO_SPELL_ID.REGROWTH == tBuffName or VUHDO_SPELL_ID.REJUVENATION == tBuffName or VUHDO_SPELL_ID.GERMINATION == tBuffName then
 					tStart, tSmDuration, tEnabled = GetSpellCooldown(VUHDO_SPELL_ID.SWIFTMEND);
 					if tEnabled ~= 0 and (tStart == nil or tSmDuration == nil or tStart <= 0 or tSmDuration <= 1.6) then
-						if not tIsCastByPlayer and VUHDO_hasTalentRampantGrowth() then
-							sIsSwiftmend = false;
+						-- L100 talent makes a unit swiftmendable only with OWN hots
+						if VUHDO_hasTalentRampantGrowth() then
+							if tIsCastByPlayer then 
+								sIsSwiftmend = true;
+							end
 						else
 							sIsSwiftmend = true;
 						end
