@@ -196,8 +196,8 @@ local tNumRaid;
 local tIndex = 0;
 local tNumSamples, tNumIterations;
 local VuhDoDummyStub = {
-	["GetName"] = function() return ""; end
-	["IsForbidden"] = function() return ""; end
+	["GetName"] = function() return ""; end,
+	["IsForbidden"] = function() return ""; end,
 };
 
 function VUHDO_updateAllClusters()
