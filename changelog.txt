@@ -18,6 +18,7 @@ Bugfixes:
 -- Removed Hunter Rapid Fire from custom debuff list
 -- Added all of Mar'gok's variations of Arcane Wrath as default custom debuffs
 -- Fixed GCD bar display for Discipline and Shadow Priests
+-- Fixed cluster builder calling methods on forbidden frames (eg. in-game store)
 
 
 Improvements:
