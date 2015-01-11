@@ -30,7 +30,7 @@ local VUHDO_SHIELDS = {
 local VUHDO_PUMP_SHIELDS = {
 	[VUHDO_SPELL_ID.DIVINE_AEGIS] = 0.6,
 	[VUHDO_SPELL_ID.SPIRIT_SHELL] = 0.6,
-	[VUHDO_SPELL_ID.CLARITY_OF_WILL] = 0.5,
+	[VUHDO_SPELL_ID.CLARITY_OF_WILL] = 0.75,
 }
 
 
@@ -104,19 +104,11 @@ local function VUHDO_initShieldValue(aUnit, aShieldName, anAmount, aDuration)
 	VUHDO_SHIELD_LEFT[aUnit][aShieldName] = anAmount;
 
 	if sIsPumpAegis and VUHDO_PUMP_SHIELDS[aShieldName] then
-		local healthMax;
-
-		-- Clairty of Will shield size is based on health of the target not the player
-		if aShieldName == VUHDO_SPELL_ID.CLARITY_OF_WILL then
-			healthMax = VUHDO_RAID[aUnit]["healthmax"];
-		else
-			healthMax = VUHDO_RAID["player"]["healthmax"];
-		end
-
-		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = healthMax * VUHDO_PUMP_SHIELDS[aShieldName];
+		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = VUHDO_RAID["player"]["healthmax"] * VUHDO_PUMP_SHIELDS[aShieldName];
 	else
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 	end
+
 	VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] = GetTime() + aDuration;
 	--VUHDO_xMsg("Init shield " .. aShieldName .. " on " .. aUnit .. " for " .. anAmount .. " / " .. VUHDO_SHIELD_SIZE[aUnit][aShieldName], aDuration);
 end

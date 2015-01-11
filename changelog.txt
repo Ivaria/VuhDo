@@ -13,7 +13,7 @@ Known issues:
 Bugfixes:
 -- Warlock spell Dark Intent no longer provides raid wide stamina buff
 -- Fixed pump aegis tooltip to correctly indicate a cap of 60% player max health
--- Fixed Clarity of Will to cap based on 50% of the target's maximum health
+-- Fixed Clarity of Will to cap at 75% of the caster's maximum health
 -- Fixed bug when saving macros for player names with extended characters
 -- Removed Hunter Rapid Fire from custom debuff list
 -- Added all of Mar'gok's variations of Arcane Wrath as default custom debuffs
