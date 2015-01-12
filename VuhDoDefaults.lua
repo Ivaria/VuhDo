@@ -1116,7 +1116,7 @@ function VUHDO_loadDefaultConfig()
 		--Garrosh Hellscream
 	);
 	
-	-- 6.x - Warlords of Draenor
+	-- 6.0 - Warlords of Draenor - part 1
 	VUHDO_addCustomSpellIds(23,
 		-- [[ Draenor World Bosses ]]
 		-- Drov
@@ -1139,9 +1139,6 @@ function VUHDO_loadDefaultConfig()
 		162185, -- Expel Magic: Fire
 		-- Margok
 		156225, -- Arcane Wrath
-		164004, -- Arcane Wrath: Displacement
-		164005, -- Arcane Wrath: Fortification
-		164006, -- Arcane Wrath: Replication
 		158605, -- Mark Of Chaos
 		157801, -- Slow
 		157763, -- Fixate
@@ -1198,6 +1195,41 @@ function VUHDO_loadDefaultConfig()
 		155864, -- Pulse Grenade
 		159481, -- Delayed Siege Bomb
 		156494  -- Obliteration
+	);
+
+	-- 6.0 - Warlords of Draenor - part 2
+	VUHDO_addCustomSpellIds(24,
+		-- [[ Draenor World Bosses ]]
+		-- Drov
+		-- Rukhmar
+		-- Tarlna
+
+		-- [[ Highmaul ]]
+		-- Brackenspore
+		-- Kargath Bladefist
+		-- Koragh
+		-- Margok
+		164004, -- Arcane Wrath: Displacement
+		164005, -- Arcane Wrath: Fortification
+		164006, -- Arcane Wrath: Replication
+		164176, -- Mark of Chaos: Displacement
+		164178, -- Mark of CHaos: Fortification
+		164191  -- Mark of Chaos: Replication
+		-- Tectus
+		-- The Butcher
+		-- Twin Ogron
+	
+		--[[ Blackrock Foundry ]]
+		-- Blackhand
+		-- Darmac
+		-- Gruul
+		-- Hansgar and Franzok
+		-- Kagraz
+		-- Kromog
+		-- Oregorger
+		-- The Blast Furnace
+		-- The Iron Maidens
+		-- Thogar
 	);
 
 	for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do

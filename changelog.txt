@@ -19,7 +19,7 @@ Bugfixes:
 -- Fixed Clarity of Will to cap at 75% of the caster's maximum health
 -- Fixed bug when saving macros for player names with extended characters
 -- Removed Hunter Rapid Fire from custom debuff list
--- Added all of Mar'gok's variations of Arcane Wrath as default custom debuffs
+-- Added all Mar'gok's Arcane Wrath/Mark of Chaos variations to custom debuffs
 -- Fixed GCD bar display for Discipline and Shadow Priests
 -- Fixed cluster builder calling methods on forbidden frames (eg. in-game store)
 -- Fixed Swiftmendable bouquet validator when using L100 talent Rampant Growth
@@ -27,6 +27,7 @@ Bugfixes:
 
 Improvements:
 -- Added new default bouquet for Paladin Beacon of Light and Faith
+-- Added Hunter Lone Wolf to Buff Watch
 -- Added Paladin Beacon of Faith to Buff Watch
 -- Added Paladin Beacon of Faith as default HoT icon option
 -- Added Paladin Beacon of Insight as a default HoT icon option
