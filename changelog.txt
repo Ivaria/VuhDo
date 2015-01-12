@@ -2,6 +2,9 @@ Version 3.66.
 
 
 Known issues:
+-- Limited support for Garrison Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
 -- AOE advisor not yet updated for Warlords of Draenor
 --   Need new spell formulas and coefficients
 -- Incoming heal estimation reported is not even close to accurate
@@ -28,6 +31,7 @@ Improvements:
 -- Added Paladin Beacon of Faith as default HoT icon option
 -- Added Paladin Beacon of Insight as a default HoT icon option
 -- Added Paladin Stay of Execution as a default HoT icon option
+-- Added Rogue poison Instant Poison to Buff Watch Lethal Poisons
 -- Added new bouquets for excess and total absorbtion percentages
 --   Status: Excess Absorption %
 --   Status: Total Absorption %
