@@ -27,7 +27,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.#PNUM#.SCALING.maxColumnsWhenStructured");
-								VUHDO_lnfSliderOnLoad(self, VUHDO_I18N_MAX_COLUMNS, 1, 15);
+								VUHDO_lnfSliderOnLoad(self, VUHDO_I18N_MAX_COLUMNS, 1, 40);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K083);
 							</OnLoad>
 						</Scripts>
@@ -209,7 +209,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.#PNUM#.SCALING.maxRowsWhenLoose");
-								VUHDO_lnfSliderOnLoad(self, VUHDO_I18N_MAX_ROWS, 1, 25);
+								VUHDO_lnfSliderOnLoad(self, VUHDO_I18N_MAX_ROWS, 1, 40);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K087);
 							</OnLoad>
 						</Scripts>
