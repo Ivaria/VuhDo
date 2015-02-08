@@ -53,9 +53,9 @@ end
 
 --
 local function VUHDO_activateSpecc(aSpecNum)
-	VUHDO_activateSpellForSpec(aSpecNum);
 	local tProfile = VUHDO_getBestProfileAfterSpecChange();
 	if tProfile then VUHDO_loadProfile(tProfile); end
+	VUHDO_activateSpellForSpec(aSpecNum);
 	VUHDO_aoeUpdateTalents();
 end
 
