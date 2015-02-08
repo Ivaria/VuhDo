@@ -281,7 +281,7 @@
 
 			<Frame name="$parentCustomAddonsPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="126" y="112" />
+					<AbsDimension x="236" y="112" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -292,7 +292,7 @@
 				</Anchors>
 				<Frames>
 
-					<CheckButton name="$parentCliqueButton" text="VUHDO_I18N_CLIQUE" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentCliqueButton" text="VUHDO_I18N_CLIQUE_COMPAT_MODE" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -314,6 +314,22 @@
 								end
 								ReloadUI();
 							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentCliquePassThroughButton" text="VUHDO_I18N_CLIQUE_PASSTHROUGH" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="123" y="-31" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.IS_CLIQUE_PASSTHROUGH");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K555);
+							</OnLoad>
 						</Scripts>
 					</CheckButton>
 

@@ -608,6 +608,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["IS_SHOW_GCD"] = false,
 	["IS_SCAN_TALENTS"] = true,
 	["IS_CLIQUE_COMPAT_MODE"] = false,
+	["IS_CLIQUE_PASSTHROUGH"] = false,
 	["DIRECTION"] = {
 		["enable"] = true,
 		["isDistanceText"] = false,

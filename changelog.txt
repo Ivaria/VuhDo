@@ -37,6 +37,7 @@ Improvements:
 --   Status: Excess Absorption %
 --   Status: Total Absorption %
 -- The menu command can still be key bound when using Clique compat mode
+--   New option checkbox 'VuhDo Options > General > Misc > Clique Pass-Thru'
 -- Panels can now have up to a maximum of 40 columns and 40 rows
 
 
