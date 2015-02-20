@@ -33,7 +33,6 @@ Improvements:
 -- Added Paladin Beacon of Faith as default HoT icon option
 -- Added Paladin Beacon of Insight as a default HoT icon option
 -- Added Paladin Stay of Execution as a default HoT icon option
--- Added Rogue poison Instant Poison to Buff Watch Lethal Poisons
 -- Added new bouquets for excess and total absorbtion percentages
 --   Status: Excess Absorption %
 --   Status: Total Absorption %
