@@ -425,9 +425,15 @@ function VUHDO_setupSmartCast(aButton)
 	-- Buff?
 	if VUHDO_CONFIG["SMARTCAST_BUFF"] and tInfo["missbuff"] and not tInfo["dead"] then
 		tBuff = tInfo["mibuvariants"];
-		VUHDO_setupAllButtonsTo(aButton, tBuff[1]);
-		VUHDO_setupHealButtonAttributes("", "2", tBuff[1], aButton, false);
-		return true;
+
+		if VUHDO_isBuffOfTargetType(tBuff[1], VUHDO_BUFF_TARGET_HOSTILE) and not UnitIsEnemy("player", tUnit) then
+			return false;
+		else
+			VUHDO_setupAllButtonsTo(aButton, tBuff[1]);
+			VUHDO_setupHealButtonAttributes("", "2", tBuff[1], aButton, false);
+
+			return true;
+		end
 	end
 
 	return false;

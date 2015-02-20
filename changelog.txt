@@ -24,6 +24,7 @@ Bugfixes:
 -- Fixed cluster builder calling methods on forbidden frames (eg. in-game store)
 -- Fixed Swiftmendable bouquet validator when using L100 talent Rampant Growth
 -- Fixed the loading of HoTs when changing key layouts
+-- Buff Watch no longer attempts to smart cast hostile buffs on friendly targets
 
 
 Improvements:

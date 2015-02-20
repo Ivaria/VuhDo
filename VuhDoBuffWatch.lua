@@ -381,6 +381,8 @@ function VUHDO_initBuffsFromSpellBook()
 					["icon"] = tIcon,
 					["id"] = tSpellId
 				};
+
+				VUHDO_CLASS_BUFFS_BY_TARGET_TYPE[tCategSpells[2]][tSpellName] = true;
 			end
 		end
 	end
@@ -390,6 +392,15 @@ function VUHDO_initBuffsFromSpellBook()
 			VUHDO_CLASS_BUFFS[tClassName] = nil;
 		end
 	end
+
+end
+
+
+
+--
+function VUHDO_isBuffOfTargetType(aBuffName, aTargetType)
+
+	return VUHDO_CLASS_BUFFS_BY_TARGET_TYPE[aTargetType][aBuffName] and true or false;
 
 end
 
