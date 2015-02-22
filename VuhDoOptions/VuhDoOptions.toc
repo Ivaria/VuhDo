@@ -1,7 +1,7 @@
 ## Interface: 60000
 ## Title: VuhDo ['vu:du:] - Options
-## Author: Iza@Gilneas, humfras
-## Version: 3.66
+## Author: Iza@Gilneas, humfras, Ivaria@Zul'jin
+## Version: 3.67
 ## Notes: VuhDo Options
 ## SavedVariables: VUHDO_OPTIONS_SETTINGS
 ## SavedVariablesPerCharacter: VUHDO_GLOBAL_ICONS, VUHDO_GI_SCAN_IDX
