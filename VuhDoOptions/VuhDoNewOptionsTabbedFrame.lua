@@ -41,8 +41,14 @@ local function VUHDO_countTableDiffs(aTable, anotherTable)
 	anotherTable = VUHDO_decompressIfCompressed(anotherTable);
 
 	for tKey, tValue in pairs(aTable) do
-		if ("table" == type(tValue)) then
+		local tType = type(tValue);
+
+		if ("table" == tType) then
 			tCount = tCount + VUHDO_countTableDiffs(tValue, anotherTable[tKey]);
+		elseif ("number" == tType) then
+			if (format("%0.4f", aTable[tKey]) ~= format("%0.4f", anotherTable[tKey])) then
+				tCount = tCount + 1;
+			end
 		else
 			if (aTable[tKey] ~= anotherTable[tKey]) then
 				tCount = tCount + 1;
