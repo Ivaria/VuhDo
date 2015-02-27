@@ -98,7 +98,7 @@ local function VUHDO_getFireText(anAction)
 		if not sFireText then
 			sFireText = "";
 			if VUHDO_IS_SFX_ENABLED then
-				sFireText = sFireText .. "/console Sound_EnableSFX 0\n";
+				sFireText = sFireText .. "/console Sound_EnableErrorSpeech 0\n";
 			end
 
 			tModi = VUHDO_SPELL_CONFIG["IS_FIRE_OUT_FIGHT"] and " " or " [combat] ";
@@ -122,7 +122,7 @@ local function VUHDO_getFireText(anAction)
 
 			-- Ton wieder an
 			if VUHDO_IS_SFX_ENABLED then
-				sFireText = sFireText .. "/console Sound_EnableSFX 1\n";
+				sFireText = sFireText .. "/console Sound_EnableErrorSpeech 1\n";
 			end
 
 			sFireText = sFireText .. "/run UIErrorsFrame:Clear()\n";
@@ -439,7 +439,7 @@ function VUHDO_initKeyboardMacros()
 	local tKey1, tKey2;
 	local tBindPrefix = "VUHDO_KEY_ASSIGN_";
 
-	VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableSFX")) == 1;
+	VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
 
 	if not VUHDO_SPELLS_KEYBOARD then return; end
 
