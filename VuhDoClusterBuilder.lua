@@ -202,11 +202,17 @@ local VuhDoDummyStub = {
 
 function VUHDO_updateAllClusters()
 
-	-- check if our mouse focus frame is forbidden before calling any methods on it
-	local tIsFocusFrameForbidden = (GetMouseFocus() or VuhDoDummyStub):IsForbidden();
+	-- @UGLY Carbonite workaround
+	local tFocusFrame = GetMouseFocus() or VuhDoDummyStub;
 
-	if WorldMapFrame:IsShown()
-		or not (not tIsFocusFrameForbidden and (GetMouseFocus() or VuhDoDummyStub):GetName()) then -- @UGLY Carbonite workaround
+	-- check if our mouse focus frame is forbidden before calling any methods on it
+	if tFocusFrame:IsForbidden() then
+		return;
+	elseif not tFocusFrame:GetName() then
+		return;
+	end
+
+	if WorldMapFrame:IsShown() then
 		return;
 	end
 

@@ -16,6 +16,7 @@ Known issues:
 Bugfixes:
 -- Fixed floating point number comparison when closing/canceling VuhDo Options
 -- Fixed error speech sound playback during auto-trigger of trinkets and spells
+-- Really fixed Cluster Builder calling methods on forbidden frames
 
 
 Improvements:
