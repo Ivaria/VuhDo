@@ -483,9 +483,9 @@ function VUHDO_hasTalentRampantGrowth()
 		return false;
 	end
 
-	tTalentRampantGrowthSpellId = 155834;
+	tTalentRampantGrowthSpellId = 21655;
 
-	_, _, _, tIsTalentSelected, _ = GetTalentInfoByID(tTalentRampantGrowthSpellId);
+	_, _, _, tIsTalentSelected, _ = GetTalentInfoByID(tTalentRampantGrowthSpellId, GetActiveSpecGroup());
 
 	return tIsTalentSelected;
 end
