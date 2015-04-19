@@ -54,6 +54,7 @@ VUHDO_AOE_SPELLS = {
 		["degress"] = 1,
 		["rangePow"] = 30 * 30, -- MOPok
 		["isRadial"] = true,
+		["areTargetsRandom"] = true,
 		--["isSourcePlayer"] = false,
 		["isDestRaid"] = true,
 		["thresh"] = 15000,
@@ -75,6 +76,7 @@ VUHDO_AOE_SPELLS = {
 		["degress"] = 1,
 		["rangePow"] = 30 * 30,
 		["isRadial"] = true,
+		["areTargetsRandom"] = true,
 		--["isSourcePlayer"] = false,
 		--["isDestRaid"] = false,
 		["thresh"] = 20000,
@@ -97,6 +99,7 @@ VUHDO_AOE_SPELLS = {
 		["rangePow"] = 40 * 40,
 		["jumpRangePow"] = 11 * 11,
 		--["isRadial"] = false,
+		["areTargetsRandom"] = false,
 		--["isSourcePlayer"] = false,
 		["isDestRaid"] = true,
 		["thresh"] = 15000,
@@ -118,6 +121,7 @@ VUHDO_AOE_SPELLS = {
 		["degress"] = 1,
 		["rangePow"] = 30 * 30,
 		["isRadial"] = true,
+		["areTargetsRandom"] = true,
 		--["isSourcePlayer"] = false,
 		["isDestRaid"] = true,
 		["thresh"] = 15000,
@@ -139,6 +143,7 @@ VUHDO_AOE_SPELLS = {
 		["degress"] = 1,
 		["rangePow"] = 40 * 40,
 		["isRadial"] = true,
+		["areTargetsRandom"] = false,
 		["isSourcePlayer"] = true,
 		["isDestRaid"] = true,
 		["thresh"] = 15000,
@@ -160,6 +165,7 @@ VUHDO_AOE_SPELLS = {
 		["degress"] = 1,
 		["rangePow"] = 30 * 30,
 		["isRadial"] = true,
+		["areTargetsRandom"] = true,
 		["isSourcePlayer"] = true,
 		["isDestRaid"] = true,
 		["thresh"] = 8000,
@@ -181,6 +187,7 @@ VUHDO_AOE_SPELLS = {
 		["degress"] = 1,
 		["rangePow"] = 10 * 10,
 		["isRadial"] = true,
+		["areTargetsRandom"] = true,
 		--["isSourcePlayer"] = false,
 		["isDestRaid"] = true,
 		["thresh"] = 10000,
@@ -202,6 +209,7 @@ VUHDO_AOE_SPELLS = {
 		["degress"] = 1,
 		["rangePow"] = 4, -- not POW actually
 		--["isRadial"] = true,
+		["areTargetsRandom"] = false,
 		["isLinear"] = true,
 		["isSourcePlayer"] = true,
 		["isDestRaid"] = true,
@@ -313,33 +321,41 @@ end
 
 
 --
-local tTotal;
-local tDeficit;
-local tUnit;
-local tInfo;
-local function VUHDO_sumClusterHealing(aCluster, aMaxAmount, aDegression, aCastTime)
-	tTotal = 0;
+local function VUHDO_getAverageExpectedHeals(aCluster, aMaxHealAmount, aDegression, aCastTime, aMaxTargets, tTargetPlayer)
+	local tHealingTotal = 0;
+	local tNumPlayersHealed = 0;
 
+	-- Find the sum total healed
 	for tCnt = 1, #aCluster do
-		tUnit = aCluster[tCnt];
-		tInfo = VUHDO_RAID[tUnit];
-		tDeficit = tInfo["healthmax"] - tInfo["health"] - VUHDO_aoeGetIncHeals(tUnit, aCastTime);
+		local tUnit = aCluster[tCnt];
+		local tInfo = VUHDO_RAID[tUnit];
 
-		if tInfo["healthmax"] > 0 then
-			if tDeficit > aMaxAmount then
-				tTotal = tTotal + aMaxAmount + (1 - tInfo["health"] / tInfo["healthmax"]); -- To avoid hopping
-			elseif (tDeficit > 0) then
-				tTotal = tTotal + tDeficit;
-			end
+		if tInfo["healthmax"] > 0 and tInfo["health"] > 0 then
+			local tHPDeficit = tInfo["healthmax"] - tInfo["health"] - VUHDO_aoeGetIncHeals(tUnit, aCastTime);
+			local tHealingDonePotential = aMaxHealAmount + (1 - tInfo["health"] / tInfo["healthmax"]); -- Give slight priority to users with the least HP%
+			local tHealingDoneActual = math.min(tHPDeficit, tHealingDonePotential);
+			tHealingTotal = tHealingTotal + tHealingDoneActual;
+			tNumPlayersHealed = tNumPlayersHealed + 1;
 		end
-
-		aMaxAmount = aMaxAmount * aDegression;
 	end
-
-	return tTotal;
+	if tHealingTotal == 0 or tNumPlayersHealed == 0 then
+		return 0;
+	end
+	
+	-- Find out how much the aDegression multiplier has reduced our expected heals.
+	-- The heal-amount gets multiplied by aDegression on each jump.  So the average degression multiplier is
+	-- (1 + 1*aDegression + 1*aDegression^2 + ... + 1*aDegression^(tNumHealTargets-1))/tNumHealTargets
+	-- This is a geometric series, equal to the following:
+	local tNumHealTargets = math.min(aMaxTargets, tNumPlayersHealed)
+	local tDegressionAverage = 1;
+	if aDegression < 1 then
+		tDegressionAverage = (1-aDegression^tNumHealTargets)/((1-aDegression)*tNumHealTargets);
+	end
+	
+	--Find the average expected healed
+	local tAverageHealedPerPlayer = tHealingTotal / tNumPlayersHealed;
+	return tAverageHealedPerPlayer * tNumHealTargets * tDegressionAverage;
 end
-
-
 
 --
 local tBestUnit, tBestTotal;
@@ -361,6 +377,7 @@ local tTime;
 local tDegress;
 local tThresh;
 local tIsHealsPlayer;
+local tAreTargetsRandom;
 
 
 
@@ -372,19 +389,19 @@ local function VUHDO_getBestUnitForAoeGroup(anAoeInfo, aPlayerModi, aGroup)
 		tInfo = aGroup[tCnt];
 		if VUHDO_RAID[tInfo] then	tInfo = VUHDO_RAID[tInfo]; end
 
-		if tInfo["baseRange"] then
+		if tInfo["baseRange"] and tInfo["health"] > 0 then
 			if tIsLinear then
 				VUHDO_getUnitsInLinearCluster(tInfo["unit"], tCluster, tRangePow, tMaxTargets, tIsHealsPlayer, tCdSpell);
 			else
 				VUHDO_getCustomDestCluster(tInfo["unit"], tCluster,
 					tIsSourcePlayer, tIsRadial, tRangePow,
 					tMaxTargets, 101, tIsDestRaid, -- 101% = no health limit
-					tCdSpell,	tCone, tJumpRangePow
+					tCdSpell,	tCone, tJumpRangePow, tAreTargetsRandom
 				);
 			end
 
 			if #tCluster > 1 then
-				tCurrTotal = VUHDO_sumClusterHealing(tCluster, tSpellHeal, tDegress, tTime);
+				tCurrTotal = VUHDO_getAverageExpectedHeals(tCluster, tSpellHeal, tDegress, tTime, tMaxTargets, tInfo["unit"]);
 
 				if tCurrTotal > tBestTotal and tCurrTotal >= tThresh then
 					tBestTotal = tCurrTotal;
@@ -424,6 +441,7 @@ local function VUHDO_getBestUnitsForAoe(anAoeInfo, aPlayerModi)
 	tDegress = anAoeInfo["degress"];
 	tThresh = anAoeInfo["thresh"];
 	tIsHealsPlayer = anAoeInfo["isHealsPlayer"];
+	tAreTargetsRandom = anAoeInfo["areTargetsRandom"];
 	--tThresh = 1000;
 
 	if sIsPerGroup and not tIsDestRaid then

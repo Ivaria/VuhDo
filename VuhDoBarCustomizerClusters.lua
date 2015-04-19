@@ -42,6 +42,7 @@ local sClusterSlot;
 local sCdSpell;
 local sCone;
 local sJumpRangePow;
+local aAreTargetsRandom;
 function VUHDO_customClustersInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_ACTIVE_HOTS = _G["VUHDO_ACTIVE_HOTS"];
@@ -72,6 +73,7 @@ function VUHDO_customClustersInitLocalOverrides()
 	sCone = sClusterConfig["CONE_DEGREES"];
 	sCdSpell = sClusterConfig["COOLDOWN_SPELL"];
 	sJumpRangePow = sClusterConfig["RANGE_JUMP"] * sClusterConfig["RANGE_JUMP"];
+	sAreTargetsRandom = sClusterConfig["ARE_TARGETS_RANDOM"];
 	if (sCdSpell or "") == "" or not VUHDO_isSpellKnown(sCdSpell) then
 		sCdSpell = nil;
 	end
@@ -88,7 +90,10 @@ end
 local tDestCluster = { };
 local tInfo, tSrcInfo, tNumArray;
 local tSrcGroup;
-function VUHDO_getCustomDestCluster(aUnit, anArray, anIsSourcePlayer, anIsRadial, aRangePow, aNumMaxTargets, aHealthLimit, anIsRaid, aCdSpell, aCone, aJumpRangePow)
+function VUHDO_getCustomDestCluster(aUnit, anArray, anIsSourcePlayer, anIsRadial, aRangePow, aNumMaxTargets, aHealthLimit, anIsRaid, aCdSpell, aCone, aJumpRangePow, aAreTargetsRandom)
+	-- If targets are random, return ALL targets in range, so the caller can determine the average heals
+	if aAreTargetsRandom then aNumMaxTargets = 100; end
+
 	twipe(anArray);
 	if anIsSourcePlayer and aUnit ~= "player" then return 0; end
 
@@ -117,7 +122,7 @@ local VUHDO_getCustomDestCluster = VUHDO_getCustomDestCluster;
 
 --
 local function VUHDO_getDestCluster(aUnit, anArray)
-	return VUHDO_getCustomDestCluster(aUnit, anArray, sIsSourcePlayer, sIsRadial, sRangePow, sNumMaxJumps, sHealthLimit, sIsRaid, sCdSpell, sCone, sJumpRangePow);
+	return VUHDO_getCustomDestCluster(aUnit, anArray, sIsSourcePlayer, sIsRadial, sRangePow, sNumMaxJumps, sHealthLimit, sIsRaid, sCdSpell, sCone, sJumpRangePow, sAreTargetsRandom);
 end
 
 

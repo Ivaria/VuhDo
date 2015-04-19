@@ -18,6 +18,7 @@ Bugfixes:
 -- Fixed error speech sound playback during auto-trigger of trinkets and spells
 -- Fixed Cluster Builder calling methods on forbidden frames
 -- Fixed improper usage of API to check for Druid talent Rampant Growth
+-- Fixed AOE cluster advice for spells which target randomly (thanks BlueRajasmyk)
 
 
 Improvements:

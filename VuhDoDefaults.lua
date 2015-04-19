@@ -586,6 +586,7 @@ local VUHDO_DEFAULT_CONFIG = {
 		["CHAIN_MAX_JUMP"] = 3,
 		["COOLDOWN_SPELL"] = "",
 		["CONE_DEGREES"] = 360,
+        ["ARE_TARGETS_RANDOM"] = true,
 
 		["TEXT"] = {
 			["ANCHOR"] = "BOTTOMRIGHT",
