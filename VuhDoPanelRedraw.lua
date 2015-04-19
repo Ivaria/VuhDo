@@ -110,6 +110,10 @@ function VUHDO_isPanelVisible(aPanelNum)
 		return true;
 	end
 
+	if VUHDO_isModelInPanel(aPanelNum, 44) then -- VUHDO_ID_BOSSES
+		return true;
+	end
+
 	if VUHDO_CONFIG["HIDE_EMPTY_PANELS"] and not VUHDO_isConfigPanelShowing()
 		and #VUHDO_PANEL_UNITS[aPanelNum] == 0 then
 		return false;

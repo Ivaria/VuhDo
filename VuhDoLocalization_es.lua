@@ -420,7 +420,13 @@ VUHDO_I18N_BOUQUET_PALADIN_TANK = "Flag: Role Tank, Paladin";
 VUHDO_I18N_BOUQUET_DK_TANK = "Flag: Role Tank, Death Knight";
 VUHDO_I18N_BOUQUET_MONK_TANK = "Flag: Role Tank, Monk";
 VUHDO_I18N_BOUQUET_DRUID_TANK = "Flag: Role Tank, Druid";
+
+-- 3.66
 VUHDO_I18N_BOUQUET_PALADIN_BEACON = "Paladin Beacon";
 VUHDO_I18N_BOUQUET_STATUS_EXCESS_ABSORB = "Statusbar: Excess Absorption %";
 VUHDO_I18N_BOUQUET_STATUS_TOTAL_ABSORB = "Statusbar: Total Absorption %";
+
+-- 3.67
+VUHDO_I18N_NO_BOSS = "[no NPC]";
+VUHDO_I18N_BOSSES = "NPCs";
 

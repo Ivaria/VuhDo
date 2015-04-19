@@ -423,6 +423,13 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "UNIT_HEALTH" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_updateHealth(anArg1, 2); end -- VUHDO_UPDATE_HEALTH
 
+	-- TODO: is it ok to listen to both UNIT_HEALTH and UNIT_HEALTH_FREQUENT?
+	-- TODO: add options based on desired responsiveness and performance
+	elseif "UNIT_HEALTH_FREQUENT" == anEvent then
+ 		if (VUHDO_RAID or tEmptyRaid)[anArg1] or VUHDO_isBossUnit(anArg1) then
+ 			VUHDO_updateHealth(anArg1, 2);
+ 		end
+
 	elseif "UNIT_HEAL_PREDICTION" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
 			VUHDO_updateHealth(anArg1, 9); -- VUHDO_UPDATE_INC
@@ -499,7 +506,9 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "RAID_TARGET_UPDATE" == anEvent then
 		VUHDO_TIMERS["CUSTOMIZE"] = 0.1;
 
-	elseif "GROUP_ROSTER_UPDATE" == anEvent then
+ 	-- INSTANCE_ENCOUNTER_ENGAGE_UNIT fires when a boss unit is added to the UI
+ 	-- this is essentially the equivalent of GROUP_ROSTER_UPDATE for bosses/NPCs
+ 	elseif "GROUP_ROSTER_UPDATE" == anEvent or "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then	
 		--VUHDO_CURR_LAYOUT = VUHDO_SPEC_LAYOUTS["selected"];
 		--VUHDO_CURRENT_PROFILE = VUHDO_CONFIG["CURRENT_PROFILE"];
 
@@ -982,18 +991,14 @@ local function VUHDO_updateAllRange()
 
 		-- Check if unit is in range
 		if sIsRangeKnown then
-			tIsInRange
-				= tInfo["connected"]
-				 and (1 == IsSpellInRange(sRangeSpell, tUnit)
-							or ((tInfo["dead"] or tInfo["charmed"]) and tInfo["baseRange"])
-							or "player" == tUnit
-							or ((tUnit == "focus" or tUnit == "target")	and CheckInteractDistance(tUnit, 1)));
+			tIsInRange = tInfo["connected"] and 
+				(1 == IsSpellInRange(sRangeSpell, tUnit) or 
+					((tInfo["dead"] or tInfo["charmed"]) and tInfo["baseRange"]) or "player" == tUnit or 
+					(VUHDO_isSpecialUnit(tUnit) and CheckInteractDistance(tUnit, 1)));
 		else
-			tIsInRange
-				= tInfo["connected"]
-				 and (tInfo["baseRange"]
-							or ((tUnit == "focus" or tUnit == "target")
-								and CheckInteractDistance(tUnit, 1)));
+			tIsInRange = tInfo["connected"] and 
+				(tInfo["baseRange"] or 
+					(VUHDO_isSpecialUnit(tUnit) and CheckInteractDistance(tUnit, 1)));
 		end
 
 		if tInfo["range"] ~= tIsInRange then
@@ -1373,11 +1378,11 @@ end
 
 
 local VUHDO_ALL_EVENTS = {
-	"VARIABLES_LOADED",	"PLAYER_ENTERING_WORLD",
-	"UNIT_HEALTH", "UNIT_MAXHEALTH",
+	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD",
+	"UNIT_HEALTH", "UNIT_HEALTH_FREQUENT", "UNIT_MAXHEALTH",
 	"UNIT_AURA",
 	"UNIT_TARGET",
-	"GROUP_ROSTER_UPDATE",
+	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", 
 	"UNIT_PET",
 	"UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE", "UNIT_EXITING_VEHICLE",
 	"CHAT_MSG_ADDON",

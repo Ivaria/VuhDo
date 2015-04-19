@@ -22,6 +22,8 @@ Bugfixes:
 
 Improvements:
 -- Bumped TOCs for 6.1
+-- New special panel type 'NPCs' for boss encounter unit frames (thanks Dridzt)
+-- Listen to UNIT_HEALTH_FREQUENT events for more responsive health reporting
 
 
 --------------------------------------------------------------

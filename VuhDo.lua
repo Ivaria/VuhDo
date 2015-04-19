@@ -33,6 +33,14 @@ local VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_PANEL_UNITS = { };
 setmetatable(VUHDO_PANEL_UNITS, VUHDO_META_NEW_ARRAY);
 
+-- TODO: make local
+VUHDO_BOSS_UNIT = { };
+
+for i = 1, MAX_BOSS_FRAMES do
+	local bossUnitId = format("boss%d", i);
+
+	VUHDO_BOSS_UNIT[bossUnitId] = true;
+end
 
 VUHDO_PLAYER_CLASS = nil;
 VUHDO_PLAYER_NAME = nil;
@@ -163,7 +171,7 @@ local function VUHDO_updateAllRaidNames()
 	twipe(VUHDO_RAID_NAMES);
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if tUnit ~= "focus" and tUnit ~= "target" then
+		if not VUHDO_isSpecialUnit(tUnit) then
 			-- ensure not to overwrite a player name with a pet's identical name
 			if not VUHDO_RAID_NAMES[tInfo["name"]] or not tInfo["isPet"] then
 				VUHDO_RAID_NAMES[tInfo["name"]] = tUnit;
@@ -220,7 +228,7 @@ local function VUHDO_sortEmergencies()
 	twipe(VUHDO_RAID_SORTED);
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if "target" ~= tUnit and "focus" ~= tUnit
+		if not VUHDO_isSpecialUnit(tUnit) 
 			and VUHDO_getUnitHealthPercent(tInfo) < sTrigger and VUHDO_isValidEmergency(tInfo) then
 
 			VUHDO_RAID_SORTED[#VUHDO_RAID_SORTED + 1] = tUnit;
@@ -290,8 +298,7 @@ function VUHDO_setHealth(aUnit, aMode)
 	tOwner = VUHDO_PET_2_OWNER[aUnit];
 	tIsPet = tOwner ~= nil;
 
-	if strfind(aUnit, tUnitId, 1, true) or tIsPet
-			or aUnit == "player" or aUnit == "focus" or aUnit == "target" then
+	if strfind(aUnit, tUnitId, 1, true) or tIsPet or aUnit == "player" or VUHDO_isSpecialUnit(aUnit) then
 
 		tIsDead = UnitIsDeadOrGhost(aUnit) and not UnitIsFeignDeath(aUnit);
 		if tIsDead then
@@ -357,7 +364,7 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["mibucateg"] = nil;
 			tInfo["mibuvariants"] = nil;]]
 
-			if aUnit ~= "focus" and aUnit ~= "target" then
+			if not VUHDO_isSpecialUnit(aUnit) then
 				if not tIsPet and tInfo["fullName"] == tName and VUHDO_RAID_NAMES[tName] then
 					VUHDO_IS_SUSPICIOUS_ROSTER = true;
 				end
@@ -417,7 +424,7 @@ end
 local tOwner;
 local tIsPet;
 function VUHDO_updateHealth(aUnit, aMode)
-	tIsPet = VUHDO_RAID[aUnit]["isPet"];
+	tIsPet = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["isPet"];
 
 	if not tIsPet or VUHDO_INTERNAL_TOGGLES[26] then -- VUHDO_UPDATE_PETS  -- Enth„lt nur Pets als eigene Balken, vehicles werden ?ber owner dargestellt s.unten
 		VUHDO_setHealth(aUnit, aMode);
@@ -490,7 +497,7 @@ end
 --
 local function VUHDO_removeUnitFromRaidGroups(aUnit)
 	for tModelId, tAllUnits in pairs(VUHDO_GROUPS) do
-		if tModelId ~= 41 and tModelId ~= 42 and tModelId ~= 43 then  -- VUHDO_ID_MAINTANKS -- VUHDO_ID_PRIVATE_TANKS -- VUHDO_ID_MAIN_ASSISTS
+		if tModelId ~= 41 and tModelId ~= 42 and tModelId ~= 43 and tModelId ~= 44 then  -- VUHDO_ID_MAINTANKS -- VUHDO_ID_PRIVATE_TANKS -- VUHDO_ID_MAIN_ASSISTS -- VUHDO_ID_BOSSES
 			for tIndex, tUnit in pairs(tAllUnits) do
 				if tUnit == aUnit then tremove(tAllUnits, tIndex); end
 			end
@@ -509,6 +516,8 @@ local function VUHDO_removeSpecialFromAllRaidGroups()
 			VUHDO_removeUnitFromRaidGroups(tUnit); -- VUHDO_ID_PRIVATE_TANKS
 		elseif VUHDO_CONFIG["OMIT_MAIN_ASSIST"] and VUHDO_isModelConfigured(43) and VUHDO_isUnitInModelIterative(tUnit, 43) then -- VUHDO_ID_MAIN_ASSISTS
 			VUHDO_removeUnitFromRaidGroups(tUnit); -- VUHDO_ID_MAIN_ASSISTS
+		elseif VUHDO_isModelConfigured(44) and VUHDO_isUnitInModelIterative(tUnit, 44) then -- VUHDO_ID_BOSSES
+			VUHDO_removeUnitFromRaidGroups(tUnit); -- VUHDO_ID_BOSSES
 		end
 	end
 end
@@ -560,6 +569,15 @@ end
 
 
 --
+local function VUHDO_addUnitToBosses()
+	for bossUnitId, _ in pairs(VUHDO_BOSS_UNIT) do
+		VUHDO_tableUniqueAdd(VUHDO_GROUPS[44], bossUnitId); -- VUHDO_ID_BOSSES
+	end
+end
+
+
+
+--
 local tVehicleInfo = { ["isVehicle"] = true };
 local function VUHDO_addUnitToPets(aPetUnit)
 	if (VUHDO_RAID[VUHDO_RAID[aPetUnit]["ownerUnit"]] or tVehicleInfo)["isVehicle"] then return; end
@@ -601,7 +619,7 @@ local function VUHDO_updateGroupArrays(anWasMacroRestore)
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if not tInfo["isPet"] then
-			if "focus" ~= tUnit and "target" ~= tUnit then
+			if not VUHDO_isSpecialUnit(tUnit) then
 				VUHDO_addUnitToGroup(tUnit, tInfo["group"]);
 				VUHDO_addUnitToClass(tUnit, tInfo["classId"]);
 				VUHDO_addUnitToVehicles(tUnit);
@@ -618,10 +636,11 @@ local function VUHDO_updateGroupArrays(anWasMacroRestore)
 
 	VUHDO_addUnitToCtraMainTanks();
 	VUHDO_addUnitToPrivateTanks();
+	VUHDO_addUnitToBosses();
 
 	-- Need MTs for role estimation
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if "focus" ~= tUnit and "target" ~= tUnit and not tInfo["isPet"] then
+		if not VUHDO_isSpecialUnit(tUnit) and not tInfo["isPet"] then
 			VUHDO_addUnitToRole(tUnit);
 		end
 	end
@@ -764,6 +783,23 @@ function VUHDO_reloadRaidMembers()
 			VUHDO_setHealthSafe("target", 1); -- VUHDO_UPDATE_ALL
 		end
 
+		for bossUnitId, _ in pairs(VUHDO_BOSS_UNIT) do
+			if UnitExists(bossUnitId) then
+				VUHDO_setHealth(bossUnitId, 1); -- VUHDO_UPDATE_ALL
+			else
+				-- FIXME: find a more efficient way to trigger boss removal
+				VUHDO_removeHots(bossUnitId);
+				VUHDO_resetDebuffsFor(bossUnitId);
+				VUHDO_removeAllDebuffIcons(bossUnitId);
+				VUHDO_updateTargetBars(bossUnitId);
+				table.wipe(VUHDO_RAID[bossUnitId] or tEmptyInfo);
+				VUHDO_RAID[bossUnitId] = nil;
+
+				VUHDO_updateHealthBarsFor(bossUnitId, 1); -- VUHDO_UPDATE_ALL
+				VUHDO_initEventBouquetsFor(bossUnitId);
+			end
+		end
+
 		VUHDO_TIMERS["MIRROR_TO_MACRO"] = 8;
 	end
 
@@ -837,6 +873,33 @@ function VUHDO_refreshRaidMembers()
 	VUHDO_setHealthSafe("focus", 1); -- VUHDO_UPDATE_ALL
 	if VUHDO_INTERNAL_TOGGLES[27] then -- VUHDO_UPDATE_PLAYER_TARGET
 		VUHDO_setHealthSafe("target", 1); -- VUHDO_UPDATE_ALL
+	end
+
+	for bossUnitId, _ in pairs(VUHDO_BOSS_UNIT) do
+		if UnitExists(bossUnitId) then -- and UnitIsFriend("player", bossUnitId) then
+			tInfo = VUHDO_RAID[bossUnitId];
+
+			if not tInfo or VUHDO_RAID_GUIDS[UnitGUID(bossUnitId)] ~= bossUnitId then
+				VUHDO_setHealth(bossUnitId, 1); -- VUHDO_UPDATE_ALL
+			else
+				tInfo["group"] = VUHDO_getUnitGroup(bossUnitId, false);
+				tInfo["isVehicle"] = UnitHasVehicleUI(bossUnitId);
+
+				tInfo["afk"] = false;
+				tInfo["connected"] = true;
+			end
+		else
+			-- FIXME: find a more efficient way to trigger boss removal
+			VUHDO_removeHots(bossUnitId);
+			VUHDO_resetDebuffsFor(bossUnitId);
+			VUHDO_removeAllDebuffIcons(bossUnitId);
+			VUHDO_updateTargetBars(bossUnitId);
+			table.wipe(VUHDO_RAID[bossUnitId] or tEmptyInfo);
+			VUHDO_RAID[bossUnitId] = nil;
+
+			VUHDO_updateHealthBarsFor(bossUnitId, 1); -- VUHDO_UPDATE_ALL
+			VUHDO_initEventBouquetsFor(bossUnitId);
+		end
 	end
 
 	VUHDO_PLAYER_GROUP = VUHDO_getUnitGroup(VUHDO_PLAYER_RAID_ID, false);

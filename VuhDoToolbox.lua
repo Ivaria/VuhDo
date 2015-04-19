@@ -154,6 +154,7 @@ local VUHDO_RAID;
 local VUHDO_UNIT_BUTTONS;
 local VUHDO_CONFIG;
 local VUHDO_GROUPS_BUFFS;
+local VUHDO_BOSS_UNIT;
 local sRangeSpell;
 local sIsGuessRange = true;
 local sScanRange;
@@ -168,6 +169,7 @@ function VUHDO_toolboxInitLocalOverrides()
 	VUHDO_UNIT_BUTTONS = _G["VUHDO_UNIT_BUTTONS"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_GROUPS_BUFFS = _G["VUHDO_GROUPS_BUFFS"];
+	VUHDO_BOSS_UNIT = _G["VUHDO_BOSS_UNIT"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	sScanRange = tonumber(VUHDO_CONFIG["SCAN_RANGE"]);
 	sRangeSpell = VUHDO_CONFIG["RANGE_SPELL"];
@@ -252,7 +254,7 @@ end
 -- Extracts unit number from a Unit's name
 local tUnitNo;
 function VUHDO_getUnitNo(aUnit)
-	if "focus" == aUnit or "target" == aUnit then return 0; end
+	if not aUnit or VUHDO_isSpecialUnit(aUnit) then return 0; end
 	if "player" == aUnit then aUnit = VUHDO_PLAYER_RAID_ID or "player"; end
 	return tonumber(strsub(aUnit, -2, -1)) or tonumber(strsub(aUnit, -1)) or 1;
 end
@@ -262,7 +264,7 @@ local VUHDO_getUnitNo = VUHDO_getUnitNo;
 
 -- returns the units subgroup number, or 0 for pets/focus
 function VUHDO_getUnitGroup(aUnit, anIsPet)
-	if anIsPet or not aUnit or aUnit == "focus" or aUnit == "target" then return 0;
+	if anIsPet or not aUnit or VUHDO_isSpecialUnit(aUnit) then return 0;
 	elseif VUHDO_GROUP_TYPE_RAID == VUHDO_getCurrentGroupType() then
 		return select(3, GetRaidRosterInfo(VUHDO_getUnitNo(aUnit))) or 1;
 	else return 1; end
@@ -280,10 +282,21 @@ local VUHDO_isTargetInRange = VUHDO_isTargetInRange;
 
 -- returns wether or not a unit is in range
 function VUHDO_isInRange(aUnit)
-	if "player" == aUnit then return true;
-	elseif "focus" == aUnit or "target" == aUnit then return VUHDO_isTargetInRange(aUnit);
-	elseif (sIsGuessRange) then return UnitInRange(aUnit);
-	else return 1 == IsSpellInRange(sRangeSpell, aUnit); end
+	if "player" == aUnit then 
+		return true;
+	elseif VUHDO_isSpecialUnit(aUnit) then 
+		return VUHDO_isTargetInRange(aUnit);
+	elseif (sIsGuessRange) then 
+		return UnitInRange(aUnit);
+	else
+		local tIsSpellInRange = IsSpellInRange(sRangeSpell, aUnit);
+
+		if tIsSpellInRange ~= nil then
+			return (tIsSpellInRange == 1) and true or false;
+		else
+			return UnitInRange(aUnit);
+		end
+	end
 end
 
 
@@ -827,6 +840,8 @@ function VUHDO_getCurrentKeyModifierString()
 		IsShiftKeyDown() and "shift" or "");
 end
 
+
+
 -- Helper to serialize a table to a string for pretty printing
 -- Taken from Lua Users Wiki: http://lua-users.org/wiki/TableUtils
 function VUHDO_tableValueToString(v)
@@ -842,6 +857,8 @@ function VUHDO_tableValueToString(v)
   end
 end
 
+
+
 function VUHDO_tableKeyToString(k)
   if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
     return k
@@ -849,6 +866,8 @@ function VUHDO_tableKeyToString(k)
     return "[" .. VUHDO_tableValueToString( k ) .. "]"
   end
 end
+
+
 
 function VUHDO_tableToString(tbl)
   local result, done = {}, {}
@@ -863,5 +882,21 @@ function VUHDO_tableToString(tbl)
     end
   end
   return "{" .. table.concat( result, "," ) .. "}"
+end
+
+
+
+function VUHDO_isBossUnit(aUnit) 
+
+	return VUHDO_BOSS_UNIT and VUHDO_BOSS_UNIT[aUnit];
+
+end
+
+
+
+function VUHDO_isSpecialUnit(aUnit)
+
+	return aUnit == "focus" or aUnit == "target" or VUHDO_isBossUnit(aUnit);
+
 end
 

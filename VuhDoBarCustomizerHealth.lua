@@ -352,6 +352,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 		VUHDO_getBarText(tHealthBar):SetText(
 			   "focus" == tUnit and VUHDO_I18N_NO_FOCUS
 			or "target" == tUnit and VUHDO_I18N_NO_TARGET
+			or VUHDO_isBossUnit(tUnit) and VUHDO_I18N_NO_BOSS
 			or VUHDO_I18N_NOT_AVAILABLE);
 
 		VUHDO_getLifeText(tHealthBar):SetText("");
@@ -359,8 +360,8 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 	end
 
 	tPanelNum = VUHDO_BUTTON_CACHE[aButton];
-  tSetup = VUHDO_PANEL_SETUP[tPanelNum];
-  tLifeConfig = tSetup["LIFE_TEXT"];
+	tSetup = VUHDO_PANEL_SETUP[tPanelNum];
+	tLifeConfig = tSetup["LIFE_TEXT"];
 
 	tIsHideIrrel = tLifeConfig["hideIrrelevant"] and VUHDO_getUnitHealthPercent(tInfo) >= VUHDO_CONFIG["EMERGENCY_TRIGGER"];
 	tIsShowLife = tLifeConfig["show"] and not tIsHideIrrel;
@@ -677,9 +678,16 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 		tInfo = VUHDO_RAID[aUnit];
 		for _, tButton in pairs(tAllButtons) do
 			VUHDO_customizeText(tButton, 2, false); -- VUHDO_UPDATE_HEALTH
-			VUHDO_customizeDamageFlash(tButton, tInfo);
+			
+			if tInfo then 
+				VUHDO_customizeDamageFlash(tButton, tInfo);
+			end
 		end
-		tInfo["lifeLossPerc"] = nil;
+
+		if tInfo then
+			tInfo["lifeLossPerc"] = nil;
+		end
+
 		VUHDO_updateIncHeal(aUnit);
 
 	elseif 9 == anUpdateMode then -- VUHDO_UPDATE_INC
