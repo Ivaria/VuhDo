@@ -19,6 +19,7 @@ Bugfixes:
 -- Fixed Cluster Builder calling methods on forbidden frames
 -- Fixed improper usage of API to check for Druid talent Rampant Growth
 -- Fixed AOE cluster advice for spells which target randomly (thanks BlueRajasmyk)
+-- Fixed interacting with a frame after battle res when using Clique compat mode
 
 
 Improvements:
