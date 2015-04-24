@@ -1202,11 +1202,6 @@ function VUHDO_loadDefaultConfig()
 
 	-- 6.0 - Warlords of Draenor - part 2
 	VUHDO_addCustomSpellIds(24,
-		-- [[ Draenor World Bosses ]]
-		-- Drov
-		-- Rukhmar
-		-- Tarlna
-
 		-- [[ Highmaul ]]
 		-- Brackenspore
 		-- Kargath Bladefist
@@ -1221,17 +1216,25 @@ function VUHDO_loadDefaultConfig()
 		-- Tectus
 		-- The Butcher
 		-- Twin Ogron
-	
+	);
+
+	-- 6.1 - Warlords of Draenor
+	VUHDO_addCustomSpellIds(25,
 		--[[ Blackrock Foundry ]]
 		-- Blackhand
+		156743, -- Impaled
+		156047, -- Slagged
 		-- Darmac
 		-- Gruul
 		-- Hansgar and Franzok
 		-- Kagraz
+		155049, -- Singe
+		155277, -- Blazing Radiance
 		-- Kromog
 		-- Oregorger
 		-- The Blast Furnace
 		-- The Iron Maidens
+		156112  -- Convulsive Shadows
 		-- Thogar
 	);
 
