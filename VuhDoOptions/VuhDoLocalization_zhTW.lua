@@ -612,6 +612,7 @@ VUHDO_I18N_TT.K552 = "Select this to show a 30 players raid for testing.";
 VUHDO_I18N_TT.K553 = "Make the selected profile the default for all new characters on this account.";
 VUHDO_I18N_TT.K554 = "Make the selected key layout the default for all new characters on this account.";
 VUHDO_I18N_TT.K555 = "Check to allow the VuhDo menu command to be bound even when using Clique compatibility mode.";
+VUHDO_I18N_TT.K556 = "Check this to have an extra panel for boss encounter NPCs (eg. shards on Tectus, mushrooms on Brackenspore).";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";

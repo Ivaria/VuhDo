@@ -11,6 +11,7 @@ local function VUHDO_wizardInitMainPanelGrouped(aPanelNum)
 	tAktPanel["SCALING"].ommitEmptyWhenStructured = true;
 
 	tAktPanel["SCALING"].showTarget = false;
+	tAktPanel["SCALING"].showTot = false;
 
 	tAktPanel["SCALING"].barWidth = 75;
 	tAktPanel["SCALING"].barHeight = 25;
@@ -37,6 +38,7 @@ local function VUHDO_wizardInitMainPanelLoose(aPanelNum)
 	tAktPanel["SCALING"].ommitEmptyWhenStructured = true;
 
 	tAktPanel["SCALING"].showTarget = false;
+	tAktPanel["SCALING"].showTot = false;
 
 	tAktPanel["SCALING"].barWidth = 75;
 	tAktPanel["SCALING"].barHeight = 25;
@@ -95,7 +97,8 @@ function VUHDO_panelWizardInitVarsMainTanks(aPanelNum)
 	tAktPanel["SCALING"].maxRowsWhenLoose = 8;
 	tAktPanel["SCALING"].ommitEmptyWhenStructured = false;
 
-	tAktPanel["SCALING"].showTarget = true;
+	tAktPanel["SCALING"].showTarget = false;
+	tAktPanel["SCALING"].showTot = false;
 
 	tAktPanel["SCALING"].barWidth = 100;
 	tAktPanel["SCALING"].barHeight = 30;
@@ -122,7 +125,8 @@ function VUHDO_panelWizardInitVarsPlayerTargets(aPanelNum)
 	tAktPanel["SCALING"].maxRowsWhenLoose = 8;
 	tAktPanel["SCALING"].ommitEmptyWhenStructured = false;
 
-	tAktPanel["SCALING"].showTarget = true;
+	tAktPanel["SCALING"].showTarget = false;
+	tAktPanel["SCALING"].showTot = false;
 
 	tAktPanel["SCALING"].barWidth = 75;
 	tAktPanel["SCALING"].barHeight = 25;
@@ -137,16 +141,22 @@ end
 
 --
 function VUHDO_panelWizardInitVarsPets(aPanelNum)
-	VUHDO_wizardInitMainPanelLoose(aPanelNum);
+	VUHDO_wizardInitMainPanelGrouped(aPanelNum);
 end
 
 
 
 --
 function VUHDO_panelWizardInitVehicles(aPanelNum)
-	VUHDO_wizardInitMainPanelLoose(aPanelNum);
+	VUHDO_wizardInitMainPanelGrouped(aPanelNum);
 end
 
+
+
+--
+function VUHDO_panelWizardInitVarsBosses(aPanelNum)
+	VUHDO_wizardInitMainPanelGrouped(aPanelNum);
+end
 
 
 
@@ -189,6 +199,11 @@ VUHDO_WIZARD_ADDITIONAL_MODELS = {
 		["MODEL"] = { VUHDO_ID_VEHICLES },
 		["INIT_FUNC"] = VUHDO_panelWizardInitVehicles,
 	},
+	["BOSSES"] = { 
+		["MODEL"] = { VUHDO_ID_BOSSES },
+		["INIT_FUNC"] = VUHDO_panelWizardInitVarsBosses,
+
+	},
 };
 
 
@@ -205,7 +220,7 @@ VUHDO_WIZARD_IS_MTS = false;
 VUHDO_WIZARD_IS_PTS = false;
 VUHDO_WIZARD_IS_PETS = false;
 VUHDO_WIZARD_IS_VEHICLES = false;
-
+VUHDO_WIZARD_IS_BOSSES = false;
 
 
 
@@ -255,6 +270,13 @@ local function VUHDO_panelWizardApplyCallback(aDecision)
 		tNumPanels = tNumPanels + 1;
 		if (VUHDO_WIZARD_IS_VEHICLES) then
 			VUHDO_addPanel(VUHDO_WIZARD_ADDITIONAL_MODELS["VEHICLES"]);
+		else
+			VUHDO_PANEL_SETUP[tNumPanels]["MODEL"].groups = nil;
+		end
+
+		tNumPanels = tNumPanels + 1;
+		if (VUHDO_WIZARD_IS_BOSSES) then
+			VUHDO_addPanel(VUHDO_WIZARD_ADDITIONAL_MODELS["BOSSES"]);
 		else
 			VUHDO_PANEL_SETUP[tNumPanels]["MODEL"].groups = nil;
 		end

@@ -25,6 +25,7 @@ Bugfixes:
 Improvements:
 -- Bumped TOCs for 6.1
 -- New special panel type 'NPCs' for boss encounter unit frames (thanks Dridzt)
+-- Added panel type 'NPCs' to panel wizzard under 'Tools > Panel Wizard'
 -- Listen to UNIT_HEALTH_FREQUENT events for more responsive health reporting
 -- Added missing notable encounter debuffs for Blackrock Foundry
 

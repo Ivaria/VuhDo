@@ -23,7 +23,7 @@
 
 			<Frame name="$parentAdditionalPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="254" y="114" />
+					<AbsDimension x="254" y="145" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -94,6 +94,22 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_WIZARD_IS_MTS");
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K284);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentBossesCheckButton" text="VUHDO_I18N_BOSSES" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-107" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_WIZARD_IS_BOSSES");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K556);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
