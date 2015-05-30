@@ -573,7 +573,8 @@ local function VUHDO_updateHots(aUnit, anInfo)
 			end
 
 			if (tExpiry or 0) == 0 then tExpiry = (tNow + 9999); end
-			tHotFromBuff = sBuffs2Hots[tBuffName .. tBuffIcon] or sBuffs2Hots[tSpellId];
+--			tHotFromBuff = sBuffs2Hots[tBuffName .. tBuffIcon] or sBuffs2Hots[tSpellId];
+			tHotFromBuff = sBuffs2Hots[tSpellId];
 
 			if tHotFromBuff == "" or VUHDO_IGNORE_HOT_IDS[tSpellId] then -- non hot buff
 			elseif tHotFromBuff then -- Hot buff cached
@@ -582,7 +583,7 @@ local function VUHDO_updateHots(aUnit, anInfo)
 					VUHDO_snapshotHot(tHotFromBuff, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
 				end
 			else -- not yet scanned
-				sBuffs2Hots[tBuffName .. tBuffIcon] = "";
+--				sBuffs2Hots[tBuffName .. tBuffIcon] = "";
 				sBuffs2Hots[tSpellId] = "";
 				for tHotCmpName, _ in pairs(VUHDO_ACTIVE_HOTS) do
 					tDiffIcon = VUHDO_CAST_ICON_DIFF[tHotCmpName];
@@ -594,7 +595,7 @@ local function VUHDO_updateHots(aUnit, anInfo)
 						if tRest > 0 then
 							VUHDO_snapshotHot(tHotCmpName, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
 						end
-						sBuffs2Hots[tBuffName .. tBuffIcon] = tHotCmpName;
+--						sBuffs2Hots[tBuffName .. tBuffIcon] = tHotCmpName;
 						sBuffs2Hots[tSpellId] = tHotCmpName;
 						break;
 					end
