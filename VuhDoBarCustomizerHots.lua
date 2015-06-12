@@ -41,6 +41,10 @@ local VUHDO_CHARGE_COLORS = { "HOT_CHARGE_1", "HOT_CHARGE_2", "HOT_CHARGE_3", "H
 
 local VUHDO_HOT_CFGS = { "HOT1", "HOT2", "HOT3", "HOT4", "HOT5", "HOT6", "HOT7", "HOT8", "HOT9", "HOT10", };
 
+local VUHDO_CACHE_SPELL_ONLY_BY_ID = { 
+	[VUHDO_SPELL_ID.RIPTIDE] = true, 
+};
+
 -- BURST CACHE -------------------------------------------------
 
 
@@ -560,7 +564,7 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				if VUHDO_SPELL_ID.REGROWTH == tBuffName or VUHDO_SPELL_ID.REJUVENATION == tBuffName or VUHDO_SPELL_ID.GERMINATION == tBuffName then
 					tStart, tSmDuration, tEnabled = GetSpellCooldown(VUHDO_SPELL_ID.SWIFTMEND);
 					if tEnabled ~= 0 and (tStart == nil or tSmDuration == nil or tStart <= 0 or tSmDuration <= 1.6) then
-						-- L100 talent makes a unit swiftmendable only with OWN hots
+						-- Level 100 talent makes a unit swiftmendable only with OWN hots
 						if VUHDO_hasTalentRampantGrowth() then
 							if tIsCastByPlayer then 
 								sIsSwiftmend = true;
@@ -572,9 +576,15 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				end
 			end
 
-			if (tExpiry or 0) == 0 then tExpiry = (tNow + 9999); end
---			tHotFromBuff = sBuffs2Hots[tBuffName .. tBuffIcon] or sBuffs2Hots[tSpellId];
-			tHotFromBuff = sBuffs2Hots[tSpellId];
+			if (tExpiry or 0) == 0 then 
+				tExpiry = (tNow + 9999);
+			end
+
+			if not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] then
+				tHotFromBuff = sBuffs2Hots[tBuffName .. tBuffIcon] or sBuffs2Hots[tSpellId];
+			else
+				tHotFromBuff = sBuffs2Hots[tSpellId];
+			end
 
 			if tHotFromBuff == "" or VUHDO_IGNORE_HOT_IDS[tSpellId] then -- non hot buff
 			elseif tHotFromBuff then -- Hot buff cached
@@ -583,8 +593,12 @@ local function VUHDO_updateHots(aUnit, anInfo)
 					VUHDO_snapshotHot(tHotFromBuff, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
 				end
 			else -- not yet scanned
---				sBuffs2Hots[tBuffName .. tBuffIcon] = "";
+				if not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] then
+					sBuffs2Hots[tBuffName .. tBuffIcon] = "";
+				end
+
 				sBuffs2Hots[tSpellId] = "";
+
 				for tHotCmpName, _ in pairs(VUHDO_ACTIVE_HOTS) do
 					tDiffIcon = VUHDO_CAST_ICON_DIFF[tHotCmpName];
 
@@ -592,11 +606,17 @@ local function VUHDO_updateHots(aUnit, anInfo)
 						or (tDiffIcon == nil and tBuffName == tHotCmpName)
 						or tostring(tSpellId or -1) == tHotCmpName then
 						tRest = tExpiry - tNow;
+
 						if tRest > 0 then
 							VUHDO_snapshotHot(tHotCmpName, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
 						end
---						sBuffs2Hots[tBuffName .. tBuffIcon] = tHotCmpName;
+						
+						if not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] then
+							sBuffs2Hots[tBuffName .. tBuffIcon] = tHotCmpName;
+						end
+
 						sBuffs2Hots[tSpellId] = tHotCmpName;
+
 						break;
 					end
 				end

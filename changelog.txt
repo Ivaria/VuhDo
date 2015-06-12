@@ -20,7 +20,8 @@ Bugfixes:
 -- Fixed improper usage of API to check for Druid talent Rampant Growth
 -- Fixed AOE cluster advice for spells which target randomly (thanks BlueRajasmyk)
 -- Fixed interacting with a frame after battle res when using Clique compat mode
--- Fixed tracking of Shaman tier 18 bonus 'Riptide'
+-- Fixed tracking of tier 18 Shaman four piece bonus Riptide
+-- Fixed incorrect spell ID for Shaman spell Riptide
 
 
 Improvements:
