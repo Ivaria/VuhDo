@@ -365,8 +365,10 @@ function VUHDO_determineDebuff(aUnit)
 		-- note we only play sounds for debuff customs with isIcon set to true
 		for tName, tDebuffInfo in pairs(sCurIcons) do
 
-			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] then
-				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3] };
+			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] 
+				or (VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] and VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] ~= tDebuffInfo[6]) then
+				-- tExpiry, tStacks, tSpellId
+				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[6] };
 				VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6]);
 
 				if not VUHDO_IS_CONFIG and VUHDO_MAY_DEBUFF_ANIM then

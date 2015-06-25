@@ -1,7 +1,7 @@
-## Interface: 60100
+## Interface: 60200
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Zul'jin
-## Version: 3.67
+## Version: 3.68
 ## Notes: VuhDo Options
 ## SavedVariables: VUHDO_OPTIONS_SETTINGS
 ## SavedVariablesPerCharacter: VUHDO_GLOBAL_ICONS, VUHDO_GI_SCAN_IDX
