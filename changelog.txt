@@ -19,6 +19,7 @@ Bugfixes:
 
 Improvements:
 -- Bumped TOCs for 6.2
+-- Added default custom debuffs for patch 6.2 (HFC raid encounters + Kazzak)
 
 
 --------------------------------------------------------------

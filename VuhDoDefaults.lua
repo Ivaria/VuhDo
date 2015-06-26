@@ -1238,6 +1238,65 @@ function VUHDO_loadDefaultConfig()
 		-- Thogar
 	);
 
+	-- 6.2 - WoD - Hellfire Citadel
+	VUHDO_addCustomSpellIds(26,
+		--[[ Hellfire Citadel ]]
+		-- Hellfire Assault
+		156096, -- Marked for Death
+		-- Iron Reaver
+		182001, -- Unstable Orb
+		-- Kormrok
+		181306, -- Explosive Burst
+		181321, -- Fel Touch
+		-- Hellfire High Council
+		184450, -- Mark of the Necromancer Purple
+		185065, -- Mark of the Necromancer Yellow
+		185066, -- Mark of the Necromancer Red
+		184358, -- Fel Rage
+		-- Killrogg Deadeye
+		180372, -- Heart Seeker
+		182159, -- Fel Corruption
+		-- Gorefiend
+		179864, -- Shadow of Death
+		179978, -- Touch of Doom
+		179909, -- Shared Fate
+		-- Shadow-Lord Iskar
+		179202, -- Eye of Anzu
+		181956, -- Phantasmal Winds
+		182323, -- Phantasmal Wounds
+		182173, -- Fel Chakram
+		181753, -- Fel Bomb
+		179218, -- Phantasmal Obliteration
+		-- Socrethar the Eternal
+		182635, -- Reverberating Blow
+		-- Fel Lord Zakuun
+		181508, -- Seed of Destruction
+		179620, -- Fel Crystal
+		189030, -- Befouled Red
+		189031, -- Befouled Yellow
+		189032, -- Befouled Green
+		-- Xhul'horac
+		186490, -- Chains of Fel
+		186546, -- Black Hole
+		-- Tyrant Velhari
+		180166, -- Touch of Harm
+		180128, -- Edict of Condemnation
+		180526, -- Font of Corruption
+		-- Mannoroth
+		181099, -- Mark of Doom
+		181597, -- Mannoroth's Gaze
+		-- Archimonde
+		185590, -- Desecrate
+		183864, -- Shadow Blast
+		183828, -- Death Brand
+		184931, -- Shackled Torment
+
+		-- [[ Draenor World Bosses ]]
+		-- Supreme Lord Kazzak
+		187664, -- Fel Breath
+		187668  -- Mark of Kazzak
+	);
+
 	for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
 		VUHDO_customDebuffsAddDefaultSettings(tName);
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tName] = VUHDO_ensureSanity(
