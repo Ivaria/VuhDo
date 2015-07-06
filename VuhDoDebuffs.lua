@@ -27,9 +27,12 @@ local VUHDO_DEBUFF_TYPES = {
 
 
 VUHDO_DEBUFF_BLACKLIST = {
-	[GetSpellInfo(69127)] = true, -- MOP okay Chill of the Throne (ständiger debuff)
-	[GetSpellInfo(57724)] = true, -- MOP okay Sated
-	[GetSpellInfo(71328)] = true  -- MOP okay Dungeon Cooldown
+	[GetSpellInfo(69127)] = true, -- Chill of the Throne
+	[GetSpellInfo(57724)] = true, -- Sated (Bloodlust)
+	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
+	[GetSpellInfo(57723)] = true, -- Exhaustion (Heroism)
+	[GetSpellInfo(80354)] = true, -- Temporal Displacement
+	[GetSpellInfo(95223)] = true  -- Recently Mass Resurrected
 }
 
 
@@ -365,10 +368,10 @@ function VUHDO_determineDebuff(aUnit)
 		-- note we only play sounds for debuff customs with isIcon set to true
 		for tName, tDebuffInfo in pairs(sCurIcons) do
 
-			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] 
-				or (VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] and VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] ~= tDebuffInfo[6]) then
-				-- tExpiry, tStacks, tSpellId
-				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[6] };
+			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] then 
+				-- tExpiry, tStacks, tIcon
+				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1] };
+
 				VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6]);
 
 				if not VUHDO_IS_CONFIG and VUHDO_MAY_DEBUFF_ANIM then
@@ -385,10 +388,13 @@ function VUHDO_determineDebuff(aUnit)
 				VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
 			-- update number of stacks?
 			elseif VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1] ~= tDebuffInfo[2]
-				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2] ~= tDebuffInfo[3] then
+				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2] ~= tDebuffInfo[3] 
+				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] ~= tDebuffInfo[1] then 
 
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1] = tDebuffInfo[2];
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2] = tDebuffInfo[3];
+				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] = tDebuffInfo[1];
+
 				VUHDO_updateDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4]);
 				VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
 			end

@@ -435,6 +435,10 @@ end
 
 
 
+local VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID = {
+	["Mark of the Necromancer"] = true,
+};
+
 --
 local function VUHDO_addCustomSpellIds(aVersion, ...)
 	if ((VUHDO_CONFIG["CUSTOM_DEBUFF"].version or 0) < aVersion) then
@@ -444,9 +448,15 @@ local function VUHDO_addCustomSpellIds(aVersion, ...)
 
 		for tCnt = 1, select("#", ...) do
 			tArg = select(tCnt, ...);
+
 			if (type(tArg) == "number") then
-				tArg = select(1, GetSpellInfo(tArg));
+				local tName = select(1, GetSpellInfo(tArg));
+
+				if not VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID[tName] then
+					tArg = tName;
+				end
 			end
+
 			VUHDO_tableUniqueAdd(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"], tArg);
 		end
 	end

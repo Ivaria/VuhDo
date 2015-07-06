@@ -109,6 +109,8 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		VUHDO_getBarIconFrame(aButton, anIconIndex):SetAlpha(1);
 
 		if tIsAnim then VUHDO_setDebuffAnimation(1.2); end
+	elseif VUHDO_getBarIcon(aButton, anIconIndex):GetTexture() ~= anIconInfo[1] then
+		VUHDO_getBarIcon(aButton, anIconIndex):SetTexture(anIconInfo[1]);
 	end
 
 	if tIsAnim then
@@ -195,7 +197,7 @@ function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDurati
 		tIconInfo = VUHDO_DEBUFF_ICONS[aUnit][tCnt];
 
 		if tIconInfo and tIconInfo[3] == aName then
-			tIconInfo[4], tIconInfo[5], tIconInfo[6] = anExpiry, aStacks, aDuration;
+			tIconInfo[1], tIconInfo[4], tIconInfo[5], tIconInfo[6] = anIcon, anExpiry, aStacks, aDuration;
 		end
 	end
 end

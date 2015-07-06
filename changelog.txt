@@ -14,12 +14,13 @@ Known issues:
 
 
 Bugfixes:
--- Fixed tracking of debuffs with the same spell name but different IDs
+-- Fixed updating of debuff icon texture (eg. Mark of the Necromancer)
 
 
 Improvements:
 -- Bumped TOCs for 6.2
 -- Added default custom debuffs for patch 6.2 (HFC raid encounters + Kazzak)
+-- Added default common debuffs to the ignore list (eg. Exhaustion)
 
 
 --------------------------------------------------------------
