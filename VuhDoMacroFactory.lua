@@ -275,6 +275,12 @@ end
 
 
 
+--
+function VUHDO_buildExtraActionButtonMacroText(aTarget)
+	return "/tar [@vuhdo]\n/click ExtraActionButton1\n/targetlasttarget";
+end
+
+
 
 local VUHDO_PROHIBIT_HELP = {
 	[VUHDO_SPELL_ID.REBIRTH] = true,

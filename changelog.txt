@@ -21,6 +21,7 @@ Improvements:
 -- Bumped TOCs for 6.2
 -- Added default custom debuffs for patch 6.2 (HFC raid encounters + Kazzak)
 -- Added default common debuffs to the ignore list (eg. Exhaustion)
+-- Added new bindable command "ExtraActionButton" (useful to pass Eye of Anzu)
 
 
 --------------------------------------------------------------
