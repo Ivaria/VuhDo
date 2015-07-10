@@ -277,7 +277,7 @@ end
 
 --
 function VUHDO_buildExtraActionButtonMacroText(aTarget)
-	return "/tar [@vuhdo]\n/click ExtraActionButton1\n/targetlasttarget";
+	return "/tar [@" .. aTarget .. "]\n/click ExtraActionButton1\n/targetlasttarget";
 end
 
 
