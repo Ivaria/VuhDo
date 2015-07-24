@@ -46,7 +46,6 @@ local VUHDO_getCurrentBouquetColor;
 local VUHDO_getIncHealOnUnit;
 local VUHDO_getUnitDebuffSchoolInfos;
 local VUHDO_getCurrentBouquetStacks;
-local VUHDO_getCurrentPlayerFocus;
 local VUHDO_getAoeAdviceForUnit;
 local VUHDO_getCurrentBouquetTimer;
 local VUHDO_getRaidTargetIconTexture;
@@ -85,7 +84,6 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getIncHealOnUnit = _G["VUHDO_getIncHealOnUnit"];
 	VUHDO_getUnitDebuffSchoolInfos = _G["VUHDO_getUnitDebuffSchoolInfos"];
 	VUHDO_getCurrentBouquetStacks = _G["VUHDO_getCurrentBouquetStacks"];
-	VUHDO_getCurrentPlayerFocus = _G["VUHDO_getCurrentPlayerFocus"];
 	VUHDO_getIsCurrentBouquetActive = _G["VUHDO_getIsCurrentBouquetActive"];
 	VUHDO_getAoeAdviceForUnit = _G["VUHDO_getAoeAdviceForUnit"];
 	VUHDO_getCurrentBouquetTimer = _G["VUHDO_getCurrentBouquetTimer"];

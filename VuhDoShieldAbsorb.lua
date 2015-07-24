@@ -22,7 +22,8 @@ local VUHDO_SHIELDS = {
 	[108416] = 20, -- Sacrificial Pact (warlock talent)
 	[1463] = 8, -- Incanter's Ward (mage talent)
 	[114893] = 10, -- Stone Bulwark Totem (shaman talent)
-	[152118] = 15, -- VUDHO_SPELL_ID.CLARITY_OF_WILL -- ok
+	[152118] = 15, -- VUHDO_SPELL_ID.CLARITY_OF_WILL
+	[187805] = 15, -- VUHDO_SPELL_ID.BUFF_ETHERALUS
 }
 
 
@@ -36,16 +37,20 @@ local VUHDO_PUMP_SHIELDS = {
 
 
 local VUHDO_ABSORB_DEBUFFS = {
-	[109379] = function() return 200000, 5 * 60; end, -- Searing Plasma
-	[109362] = function() return 300000, 5 * 60; end,
-	[105479] = function() return 200000, 5 * 60; end,
-	[109364] = function() return 420000, 5 * 60; end,
-	[109363] = function() return 280000, 5 * 60; end,
+	[109379] = function(aUnit) return 200000, 5 * 60; end, -- Searing Plasma
+	[109362] = function(aUnit) return 300000, 5 * 60; end,
+	[105479] = function(aUnit) return 200000, 5 * 60; end,
+	[109364] = function(aUnit) return 420000, 5 * 60; end,
+	[109363] = function(aUnit) return 280000, 5 * 60; end,
 
-	[110598] = function() return 420000, 2 * 60; end, -- Consuming Shroud
-	[110214] = function() return 280000, 2 * 60; end,
+	[110598] = function(aUnit) return 420000, 2 * 60; end, -- Consuming Shroud
+	[110214] = function(aUnit) return 280000, 2 * 60; end,
 
-	--[79105] = function() return 280000, 60 * 60; end, -- @TESTING PW:F
+	-- Patch 6.2 - Hellfire Citadel
+	[189030] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
+	[180166] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM)), 10 * 60; end, -- Tyrant Velhari
+
+	--[79105] = function(aUnit) return 280000, 60 * 60; end, -- @TESTING PW:F
 };
 
 
@@ -273,9 +278,9 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 	elseif VUHDO_ABSORB_DEBUFFS[aSpellId] then
 
 		if "SPELL_AURA_REFRESH" == aMessage then
-			VUHDO_updateShieldValue(tUnit, aShieldName, VUHDO_ABSORB_DEBUFFS[aSpellId]());
+			VUHDO_updateShieldValue(tUnit, aShieldName, VUHDO_ABSORB_DEBUFFS[aSpellId](tUnit));
 		elseif "SPELL_AURA_APPLIED" == aMessage then
-			VUHDO_initShieldValue(tUnit, aShieldName, VUHDO_ABSORB_DEBUFFS[aSpellId]());
+			VUHDO_initShieldValue(tUnit, aShieldName, VUHDO_ABSORB_DEBUFFS[aSpellId](tUnit));
 			VUHDO_DEBUFF_SHIELDS[tUnit] = aShieldName;
 		elseif "SPELL_AURA_REMOVED" == aMessage
 			or "SPELL_AURA_BROKEN" == aMessage

@@ -565,6 +565,7 @@ local tInfo;
 function VUHDO_updateBouquetsForEvent(aUnit, anEventType)
 	tInfo = VUHDO_RAID[aUnit];
 
+	-- FIXME: if aUnit is nil they why iterate?
 	for tName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
 		if VUHDO_isBouquetInterestedInEvent(tName, anEventType) then
 			if tInfo then

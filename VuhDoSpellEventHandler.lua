@@ -106,7 +106,7 @@ function VUHDO_spellcastSent(aUnit, aSpellName, aSpellRank, aTargetName)
 	aTargetName = smatch(aTargetName, "^[^-]*");
 	tTargetUnit = VUHDO_RAID_NAMES[aTargetName];
 
-	if not tTargetUnit then return end;
+	if not tTargetUnit then return; end
 
 	-- Resurrection?
 	if aSpellName == sFirstRes or aSpellName == sSecondRes then

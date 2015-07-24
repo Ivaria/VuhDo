@@ -1,3 +1,34 @@
+Version 3.69.
+
+
+Known issues:
+-- Limited support for Garrison Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
+-- AOE advisor not yet updated for Warlords of Draenor
+--   Need new spell formulas and coefficients
+-- Incoming heal estimation reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+-- Holy Priest spells derived from Chakra stance behave oddly as of 6.0.2
+--   Stance specific spells must all use the spell name Holy Word: Chastise
+-- Monochrome text hint is currently disabled due to a Blizzard bug
+
+
+Bugfixes:
+-- Removed Shadow of Death from the default custom debuff list for HFC
+--   If you are upgrading from v3.68 please note Shadow of Death needs to 
+--   be manually deleted from the custom debuff list
+-- Fixed localization bug when adding default custom debuffs by spell ID
+
+
+Improvements:
+-- Added additional default custom debuffs for patch 6.2 (HFC raid encounters)
+-- Added healer legendary ring buff Etheralus as a HoT/absorb
+-- Added Fel Lord Zakuun Befouled debuff absorb tracking
+-- Added Tyrant Velhari Touch of Harm debuff absorb tracking
+
+
+--------------------------------------------------------------
 Version 3.68.
 
 

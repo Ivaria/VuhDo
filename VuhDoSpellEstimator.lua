@@ -77,6 +77,9 @@ VUHDO_SPELLS = {
 
 	-- Mage
 	[VUHDO_SPELL_ID.ICE_BARRIER] = { ["isHot"] = true },
+
+	-- 6.2 Healer Legendary Ring
+	[VUHDO_SPELL_ID.BUFF_ETHERALUS] = { ["isHot"] = true },
 };
 local VUHDO_SPELLS = VUHDO_SPELLS;
 

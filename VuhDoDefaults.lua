@@ -436,7 +436,7 @@ end
 
 
 local VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID = {
-	["Mark of the Necromancer"] = true,
+	[VUHDO_SPELL_ID.DEBUFF_MARK_OF_THE_NECROMANCER] = true,
 };
 
 --
@@ -1166,7 +1166,7 @@ function VUHDO_loadDefaultConfig()
 		158241, -- Blaze
 		163372, -- Arcane Volatility
 
-		--[[ Blackrock Foundry ]]
+		-- [[ Blackrock Foundry ]]
 		-- Blackhand
 		156096, -- Marked for Death
 		157000, -- Attach Slag Bombs
@@ -1230,7 +1230,7 @@ function VUHDO_loadDefaultConfig()
 
 	-- 6.1 - Warlords of Draenor
 	VUHDO_addCustomSpellIds(25,
-		--[[ Blackrock Foundry ]]
+		-- [[ Blackrock Foundry ]]
 		-- Blackhand
 		156743, -- Impaled
 		156047, -- Slagged
@@ -1250,7 +1250,7 @@ function VUHDO_loadDefaultConfig()
 
 	-- 6.2 - WoD - Hellfire Citadel
 	VUHDO_addCustomSpellIds(26,
-		--[[ Hellfire Citadel ]]
+		-- [[ Hellfire Citadel ]]
 		-- Hellfire Assault
 		156096, -- Marked for Death
 		-- Iron Reaver
@@ -1267,7 +1267,6 @@ function VUHDO_loadDefaultConfig()
 		180372, -- Heart Seeker
 		182159, -- Fel Corruption
 		-- Gorefiend
-		179864, -- Shadow of Death
 		179978, -- Touch of Doom
 		179909, -- Shared Fate
 		-- Shadow-Lord Iskar
@@ -1305,6 +1304,13 @@ function VUHDO_loadDefaultConfig()
 		-- Supreme Lord Kazzak
 		187664, -- Fel Breath
 		187668  -- Mark of Kazzak
+	);
+
+	-- 6.2 - WoD - Hellfire Citadel - part 2
+	VUHDO_addCustomSpellIds(27,
+		-- [[ Hellfire Citadel ]]
+		-- Socrethar the Eternal
+		184124  -- Gift of the Man'ari
 	);
 
 	for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
