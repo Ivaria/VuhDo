@@ -7,7 +7,7 @@ local VUHDO_TOT_GUIDS = { };
 -------------------------------------------------
 local UnitClass = UnitClass;
 local UnitPowerType = UnitPowerType;
-local UnitHealthMax = UnitHealthMax;
+--local UnitHealthMax = UnitHealthMax;
 local UnitHealth = UnitHealth;
 local UnitName = UnitName;
 local UnitMana = UnitMana;

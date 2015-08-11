@@ -19,6 +19,7 @@ Bugfixes:
 --   If you are upgrading from v3.68 please note Shadow of Death needs to 
 --   be manually deleted from the custom debuff list
 -- Fixed localization bug when adding default custom debuffs by spell ID
+-- Fixed muting of SFX and Error Speech when auto-firing spells/trinkets
 
 
 Improvements:

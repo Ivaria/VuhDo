@@ -1,4 +1,5 @@
 VUHDO_IS_SFX_ENABLED = true;
+VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = true;
 
 local VUHDO_RAID;
 local VUHDO_RAID_NAMES;
@@ -98,6 +99,10 @@ local function VUHDO_getFireText(anAction)
 		if not sFireText then
 			sFireText = "";
 			if VUHDO_IS_SFX_ENABLED then
+				sFireText = sFireText .. "/console Sound_EnableSFX 0\n";
+			end
+
+			if VUHDO_IS_SOUND_ERRORSPEECH_ENABLED then
 				sFireText = sFireText .. "/console Sound_EnableErrorSpeech 0\n";
 			end
 
@@ -121,8 +126,12 @@ local function VUHDO_getFireText(anAction)
 			sFireText = sFireText .. VUHDO_getInstantFireText(2);
 
 			-- Ton wieder an
-			if VUHDO_IS_SFX_ENABLED then
+			if VUHDO_IS_SOUND_ERRORSPEECH_ENABLED then
 				sFireText = sFireText .. "/console Sound_EnableErrorSpeech 1\n";
+			end
+
+			if VUHDO_IS_SFX_ENABLED then
+				sFireText = sFireText .. "/console Sound_EnableSFX 1\n";
 			end
 
 			sFireText = sFireText .. "/run UIErrorsFrame:Clear()\n";
@@ -445,7 +454,8 @@ function VUHDO_initKeyboardMacros()
 	local tKey1, tKey2;
 	local tBindPrefix = "VUHDO_KEY_ASSIGN_";
 
-	VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
+	VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableSFX")) == 1;
+	VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
 
 	if not VUHDO_SPELLS_KEYBOARD then return; end
 

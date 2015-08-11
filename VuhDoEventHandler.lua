@@ -584,7 +584,8 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		if VUHDO_RAID then VUHDO_readyCheckEnds(); end
 
 	elseif "CVAR_UPDATE" == anEvent then
-		VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
+		VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableSFX")) == 1;
+		VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
 		if VUHDO_VARIABLES_LOADED then VUHDO_reloadUI(false); end
 
 	elseif "INSPECT_READY" == anEvent then

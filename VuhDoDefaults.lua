@@ -437,6 +437,9 @@ end
 
 local VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID = {
 	[VUHDO_SPELL_ID.DEBUFF_MARK_OF_THE_NECROMANCER] = true,
+	[VUHDO_SPELL_ID.DEBUFF_MARK_OF_DOOM] = true, 
+	[VUHDO_SPELL_ID.DEBUFF_BEFOULED] = true,
+	[VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM] = true,
 };
 
 --
@@ -1259,9 +1262,6 @@ function VUHDO_loadDefaultConfig()
 		181306, -- Explosive Burst
 		181321, -- Fel Touch
 		-- Hellfire High Council
-		184450, -- Mark of the Necromancer Purple
-		185065, -- Mark of the Necromancer Yellow
-		185066, -- Mark of the Necromancer Red
 		184358, -- Fel Rage
 		-- Killrogg Deadeye
 		180372, -- Heart Seeker
@@ -1281,14 +1281,10 @@ function VUHDO_loadDefaultConfig()
 		-- Fel Lord Zakuun
 		181508, -- Seed of Destruction
 		179620, -- Fel Crystal
-		189030, -- Befouled Red
-		189031, -- Befouled Yellow
-		189032, -- Befouled Green
 		-- Xhul'horac
 		186490, -- Chains of Fel
 		186546, -- Black Hole
 		-- Tyrant Velhari
-		180166, -- Touch of Harm
 		180128, -- Edict of Condemnation
 		180526, -- Font of Corruption
 		-- Mannoroth
@@ -1309,8 +1305,19 @@ function VUHDO_loadDefaultConfig()
 	-- 6.2 - WoD - Hellfire Citadel - part 2
 	VUHDO_addCustomSpellIds(27,
 		-- [[ Hellfire Citadel ]]
+		-- Hellfire High Council
+		184450, -- Mark of the Necromancer Purple
+		185065, -- Mark of the Necromancer Yellow
+		185066, -- Mark of the Necromancer Red
 		-- Socrethar the Eternal
-		184124  -- Gift of the Man'ari
+		184124, -- Gift of the Man'ari
+		-- Fel Lord Zakuun
+		189030, -- Befouled Red
+		189031, -- Befouled Yellow
+		189032, -- Befouled Green
+		-- Tyrant Velhari
+		180164,  -- Touch of Harm
+		180166  -- Touch of Harm
 	);
 
 	for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do

@@ -111,8 +111,9 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		if tIsAnim then VUHDO_setDebuffAnimation(1.2); end
 	elseif VUHDO_getBarIcon(aButton, anIconIndex):GetTexture() ~= anIconInfo[1] then
 		VUHDO_getBarIcon(aButton, anIconIndex):SetTexture(anIconInfo[1]);
-
 		VUHDO_getBarIconFrame(aButton, anIconIndex):SetAlpha(1);
+
+		VUHDO_updateHealthBarsFor(aUnit, VUHDO_UPDATE_RANGE);
 	end
 
 	if tIsAnim then
