@@ -387,9 +387,7 @@ local tInfo;
 local tBuff;
 function VUHDO_setupSmartCast(aButton)
 	if InCombatLockdown() or UnitIsDeadOrGhost("player")
-		or (VUHDO_PLAYER_CLASS == "PRIEST" -- Engelchen?
-			and GetShapeshiftForm() ~= 0
-			and not select(3, UnitBuff("player", VUHDO_SPELL_ID.SHADOWFORM))) then
+		or (VUHDO_PLAYER_CLASS == "PRIEST" and GetShapeshiftForm() == 4) then -- Priest Spirit of Redemption?
 		return false;
 	end
 

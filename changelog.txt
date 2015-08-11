@@ -20,6 +20,7 @@ Bugfixes:
 --   be manually deleted from the custom debuff list
 -- Fixed localization bug when adding default custom debuffs by spell ID
 -- Fixed muting of SFX and Error Speech when auto-firing spells/trinkets
+-- Fixed smart cast for Holy Priest while in a Chakra stance
 
 
 Improvements:
