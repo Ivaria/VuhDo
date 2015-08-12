@@ -11,7 +11,6 @@ Known issues:
 --   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
 -- Holy Priest spells derived from Chakra stance behave oddly as of 6.0.2
 --   Stance specific spells must all use the spell name Holy Word: Chastise
--- Monochrome text hint is currently disabled due to a Blizzard bug
 
 
 Bugfixes:
@@ -21,6 +20,7 @@ Bugfixes:
 -- Fixed localization bug when adding default custom debuffs by spell ID
 -- Fixed muting of SFX and Error Speech when auto-firing spells/trinkets
 -- Fixed smart cast for Holy Priest while in a Chakra stance
+-- Re-enabled option for Monochrome font hint
 
 
 Improvements:
