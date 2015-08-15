@@ -455,7 +455,11 @@ local function VUHDO_addCustomSpellIds(aVersion, ...)
 			if (type(tArg) == "number") then
 				local tName = select(1, GetSpellInfo(tArg));
 
-				if not VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID[tName] then
+				if VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID[tName] then
+					-- make sure the spell ID is still added as a string
+					-- otherwise getKeyFromValue look-ups w/ spell ID string fail later
+					tArg = tostring(tArg);
+				else
 					tArg = tName;
 				end
 			end
@@ -1303,7 +1307,7 @@ function VUHDO_loadDefaultConfig()
 	);
 
 	-- 6.2 - WoD - Hellfire Citadel - part 2
-	VUHDO_addCustomSpellIds(28,
+	VUHDO_addCustomSpellIds(29,
 		-- [[ Hellfire Citadel ]]
 		-- Hellfire High Council
 		184449, -- Mark of the Necromancer Purple
@@ -1318,17 +1322,33 @@ function VUHDO_loadDefaultConfig()
 		189031, -- Befouled Yellow
 		189032, -- Befouled Green
 		-- Tyrant Velhari
-		180164,  -- Touch of Harm
+		180164, -- Touch of Harm
 		180166  -- Touch of Harm
 	);
 
-	for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
-		VUHDO_customDebuffsAddDefaultSettings(tName);
-		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tName] = VUHDO_ensureSanity(
-			"CUSTOM_DEBUFF.STORED_SETTINGS",
-			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tName],
-			VUHDO_DEFAULT_CU_DE_STORED_SETTINGS
-		);
+	local debuffRemovalList = {};
+
+	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
+		-- I introduced a bug which added some default custom debuffs by spell ID
+		-- where spell ID was a number and not a string, this causes all sorts of odd 
+		-- bugs in the custom debuff code particularly any getKeyFromValue table lookups
+		if (type(tName) == "number") then
+			-- if we encounter a custom debuff stored by an actual number flag this key for removal
+			debuffRemovalList[tIndex] = tIndex;
+		else
+			VUHDO_customDebuffsAddDefaultSettings(tName);
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tName] = VUHDO_ensureSanity(
+				"CUSTOM_DEBUFF.STORED_SETTINGS",
+				VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tName],
+				VUHDO_DEFAULT_CU_DE_STORED_SETTINGS
+			);
+		end
+	end
+
+	-- in Lua removal can't be done in place while perserving order properly
+	-- so do the removal in a second pass
+	for tIndex, _ in pairs(debuffRemovalList) do
+		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"][tIndex] = nil;
 	end
 
 	if (VUHDO_POWER_TYPE_COLORS == nil) then
