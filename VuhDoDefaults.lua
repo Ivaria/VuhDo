@@ -1307,7 +1307,7 @@ function VUHDO_loadDefaultConfig()
 	);
 
 	-- 6.2 - WoD - Hellfire Citadel - part 2
-	VUHDO_addCustomSpellIds(29,
+	VUHDO_addCustomSpellIds(30,
 		-- [[ Hellfire Citadel ]]
 		-- Hellfire High Council
 		184449, -- Mark of the Necromancer Purple
