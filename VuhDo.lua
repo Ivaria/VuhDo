@@ -84,7 +84,8 @@ local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local UnitIsFeignDeath = UnitIsFeignDeath;
 local UnitExists = UnitExists;
 local UnitHealth = UnitHealth;
---local UnitHealthMax = UnitHealthMax;
+-- Disable local alias so function can be overloaded by Velhari Health Fix addon
+--local UnitHealthMax = UnitHealthMax; 
 local string = string;
 local UnitIsAFK = UnitIsAFK;
 local UnitIsConnected = UnitIsConnected;

@@ -28,7 +28,8 @@ Improvements:
 -- Added healer legendary ring buff Etheralus as a HoT/absorb
 -- Added Fel Lord Zakuun Befouled debuff absorb tracking
 -- Added Tyrant Velhari Touch of Harm debuff absorb tracking
--- Added support for Velhari Health Fix addon
+-- Added support for VelhariRaidFrameAdjust and Velhari Health Fix addons
+--   Note only Velhari Health Fix versions greater than 1.0 will work
 
 
 --------------------------------------------------------------

@@ -7,6 +7,7 @@ local VUHDO_TOT_GUIDS = { };
 -------------------------------------------------
 local UnitClass = UnitClass;
 local UnitPowerType = UnitPowerType;
+-- Disable local alias so function can be overloaded by Velhari Health Fix addon
 --local UnitHealthMax = UnitHealthMax;
 local UnitHealth = UnitHealth;
 local UnitName = UnitName;
