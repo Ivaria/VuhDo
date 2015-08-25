@@ -1,3 +1,26 @@
+Version 3.70.
+
+
+Known issues:
+-- Limited support for Garrison Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
+-- AOE advisor not yet updated for Warlords of Draenor
+--   Need new spell formulas and coefficients
+-- Incoming heal estimation reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+-- Holy Priest spells derived from Chakra stance behave oddly as of 6.0.2
+--   Stance specific spells must all use the spell name Holy Word: Chastise
+
+
+Bugfixes:
+-- Disabled option for Monochrome font hint which crashes some WoW clients
+
+
+Improvements:
+
+
+--------------------------------------------------------------
 Version 3.69.
 
 

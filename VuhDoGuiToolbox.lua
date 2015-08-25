@@ -732,7 +732,7 @@ function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
 	aLabel:ClearAllPoints();
 	aLabel:SetPoint(aSetup["ANCHOR"], aParent:GetName(), aSetup["ANCHOR"], tFactor * aSetup["X_ADJUST"], -tFactor * aSetup["Y_ADJUST"]);
 	tOutline = aSetup["USE_OUTLINE"] and "OUTLINE|" or "";
-	tOutline = tOutline .. (aSetup["USE_MONO"] and "MONOCHROME" or ""); -- Bugs out in MoP beta
+--	tOutline = tOutline .. (aSetup["USE_MONO"] and "MONOCHROME" or ""); -- Bugs out in MoP beta
 
 	tColor = aSetup["COLOR"];
 	if tColor then
