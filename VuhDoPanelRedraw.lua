@@ -81,9 +81,9 @@ function VUHDO_initLocalVars(aPanelNum)
 	sLifeFontHeight = sPanelSetup["PANEL_COLOR"]["TEXT"]["textSizeLife"];
 
 	sOutlineText = sPanelSetup["PANEL_COLOR"]["TEXT"]["outline"] and "OUTLINE|" or "";
---	if (sPanelSetup["PANEL_COLOR"]["TEXT"]["USE_MONO"]) then -- Bugs out in MoP beta
---		sOutlineText = sOutlineText .. "MONOCHROME";
---	end
+	if (sPanelSetup["PANEL_COLOR"]["TEXT"]["USE_MONO"]) then -- Bugs out in MoP beta
+		sOutlineText = sOutlineText .. "OUTLINEMONOCHROME";
+	end
 	sShadowAlpha = sPanelSetup["PANEL_COLOR"]["TEXT"]["USE_SHADOW"] and 1 or 0;
 
 	sBarHeight = VUHDO_getHealthBarHeight(aPanelNum);
