@@ -6,6 +6,7 @@ VUHDO_BOUQUET_CUSTOM_TYPE_HEALTH = 5;
 VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER = 6;
 VUHDO_BOUQUET_CUSTOM_TYPE_SECONDS = 7;
 VUHDO_BOUQUET_CUSTOM_TYPE_STACKS = 8;
+VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG = 9;
 
 VUHDO_FORCE_RESET = false;
 
@@ -1002,6 +1003,41 @@ end
 
 
 --
+local function VUHDO_customFlagValidator(anInfo, aCustom)
+	if aCustom and aCustom["custom"] and aCustom["custom"][1] then
+		local loadedFunction, errorString = loadstring("local anInfo = _G[\"VUHDO_anInfo\"];" .. aCustom["custom"][1]);
+
+		if loadedFunction then
+			_G["VUHDO_anInfo"] = anInfo;
+			setfenv(loadedFunction, _G)
+			local _, ret, ret2, ret3, ret4, ret5 = xpcall(loadedFunction, 
+				function() 
+					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE, 1.0, 0.0, 0.0);
+					DEFAULT_CHAT_FRAME:AddMessage(debugstack(1, 2, 0), 1.0, 0.0, 0.0);
+					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
+					DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"][1], 1.0, 0.0, 0.0);
+
+					return false, nil, -1, -1, -1; 
+				end
+			);
+
+			if ret and ret == true then
+				return true, nil, -1, -1, -1;
+			end
+		else
+			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD, 1.0, 0.0, 0.0);
+			DEFAULT_CHAT_FRAME:AddMessage(errorString, 1.0, 0.0, 0.0);
+			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
+			DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"][1], 1.0, 0.0, 0.0);
+		end
+	end
+
+	return false, nil, -1, -1, -1;
+end
+
+
+
+--
 local tUnit;
 local function VUHDO_enemyStateValidator(anInfo, _)
 	tUnit = anInfo["unit"];
@@ -1593,5 +1629,13 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_alwaysTrueValidator,
 		["interests"] = { },
 	},
+
+	["CUSTOM_FLAG"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_CUSTOM_FLAG,
+		["validator"] = VUHDO_customFlagValidator, 
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG,
+		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE },
+	},
+
 };
 

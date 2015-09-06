@@ -430,3 +430,9 @@ VUHDO_I18N_BOUQUET_STATUS_TOTAL_ABSORB = "Statusbar: Total Absorption %";
 VUHDO_I18N_NO_BOSS = "[no NPC]";
 VUHDO_I18N_BOSSES = "NPCs";
 
+-- 3.71
+VUHDO_I18N_BOUQUET_CUSTOM_FLAG = "Custom Flag";
+VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD = "{VuhDo} Error: Your custom flag validator did not load:";
+VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE = "{VuhDo} Error: Your custom flag validator did not execute:";
+VUHDO_I18N_ERROR_INVALID_VALIDATOR = "{VuhDo} Error: Invalid validator:";
+

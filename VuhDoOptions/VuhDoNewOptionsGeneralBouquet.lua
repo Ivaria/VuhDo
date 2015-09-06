@@ -302,6 +302,7 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 
 	_G[tPanel:GetName() .. "BuffOrIndicatorFrameMineOthersFrame"]:Hide();
 	_G[tPanel:GetName() .. "BuffOrIndicatorFramePercentFrame"]:Hide();
+	_G[tPanel:GetName() .. "BuffOrIndicatorFrameCustomFlagEditBox"]:Hide();
 
 	tBuffName = VUHDO_lnfGetValueFrom(tModel .. ".name");
 
@@ -434,8 +435,13 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 				tSpecialName = VUHDO_BOUQUETS["STORED"][tBouquetName][tIndex]["name"];
 				VUHDO_lnfSliderOnLoad(tSlider, VUHDO_BOUQUET_BUFFS_SPECIAL[tSpecialName]["displayName"], 0, 50, "#");
 				tSubPanel:Show();
+			elseif (VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName]["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG) then
+				tSubPanel = _G[tInnerPanel:GetName() .. "CustomFlagEditBox"];
+				VUHDO_lnfSetModel(tSubPanel, tModel .. ".custom.##1");
+				tSubPanel:Show();
 			else
 				_G[tInnerPanel:GetName() .. "PercentFrame"]:Hide();
+				_G[tInnerPanel:GetName() .. "CustomFlagEditBox"]:Hide();
 			end
 
 			if (VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName]["no_color"]) then

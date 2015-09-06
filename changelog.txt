@@ -18,6 +18,12 @@ Bugfixes:
 
 
 Improvements:
+-- Added custom flag validator which accepts a user defined function.
+--   Bouquets can include any valid Lua function which returns true or false.
+--   The function can access the 'anInfo' variable which is a map containing 
+--   the relevant unit information.
+--   Example below returns true if the unit is named 'Ivaria': 
+--     return ("Ivaria" == anInfo["name"])
 
 
 --------------------------------------------------------------

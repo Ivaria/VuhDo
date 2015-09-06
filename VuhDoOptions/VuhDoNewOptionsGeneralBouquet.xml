@@ -818,6 +818,29 @@
 									</Frame>
 								</Frames>
 							</Frame>
+
+							<EditBox name="$parentCustomFlagEditBox" inherits="VuhDoEditBoxTemplate">
+								<Size>
+									<AbsDimension x="170" y="32" />
+								</Size>
+								<Anchors>
+									<Anchor point="BOTTOM">
+										<Offset>
+											<AbsDimension x="0" y="7" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										VUHDO_lnfSetModel(self, nil);
+										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K557);
+									</OnLoad>
+									<OnTextChanged>
+										VUHDO_lnfEditBoxUpdateModel(self);
+									</OnTextChanged>
+								</Scripts>
+							</EditBox>
+	
 						</Frames>
 					</Frame>
 
