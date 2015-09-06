@@ -15,6 +15,7 @@ Known issues:
 
 Bugfixes:
 -- Monochrome font outline should now work for all clients without crashing
+-- Fixed hiding of HoT icon countdown numbers when clock selected
 
 
 Improvements:

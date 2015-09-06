@@ -203,6 +203,7 @@ local function VUHDO_initHotIcon(anIndex)
 			tCd:SetAllPoints(tHotIcon);
 			tCd:SetReverse(true);
 			tCd:SetCooldown(GetTime(), 0);
+			tCd:SetHideCountdownNumbers(true);
 			tCd:SetAlpha(0);
 		end
 	end
