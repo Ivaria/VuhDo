@@ -70,7 +70,7 @@
 
 			<Frame name="$parentGeneralPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="158" y="245" />
+					<AbsDimension x="173" y="285" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -83,12 +83,12 @@
 
 					<Frame name="$parentRefreshSlider" inherits="VuhDoHSliderTemplate">
 						<Size>
-							<AbsDimension x="132" y="32" />
+							<AbsDimension x="147" y="32" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-202" />
+									<AbsDimension x="13" y="-242" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -101,6 +101,23 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
+
+					<CheckButton name="$parentHideOutOfCombatCheckButton" text="VUHDO_I18N_HIDE_OUT_OF_COMBAT" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="28" y="-192" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_BUFF_SETTINGS.CONFIG.HIDE_OUT_OF_COMBAT");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K558);
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_BUFF_SETTINGS.CONFIG.SHOW", false);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
 
 					<CheckButton name="$parentHideChargesCheckButton" text="VUHDO_I18N_HIDE_CHARGES" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>

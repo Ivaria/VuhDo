@@ -25,6 +25,8 @@ Improvements:
 --   the relevant unit information.
 --   Example below returns true if the unit is named 'Ivaria': 
 --     return ("Ivaria" == anInfo["name"])
+-- Added option to hide buff watch while out of combat
+--   Under 'VuhDo Options > Buffs > General'
 
 
 --------------------------------------------------------------

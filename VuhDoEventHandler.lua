@@ -361,7 +361,13 @@ local function VUHDO_init()
 
 	VUHDO_initPanelModels();
 	VUHDO_initFromSpellbook();
+
 	VUHDO_initBuffs();
+
+	if not InCombatLockdown() then
+		VUHDO_setIsOutOfCombat(true);
+	end
+
 	VUHDO_initDebuffs(); -- Too soon obviously => ReloadUI
 	VUHDO_clearUndefinedModelEntries();
 	VUHDO_registerAllBouquets(true);
@@ -470,6 +476,11 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 				VUHDO_updateThreat(tUnit);
 			end
 		end
+
+		VUHDO_setIsOutOfCombat(true);
+
+	elseif "PLAYER_REGEN_DISABLED" == anEvent then
+		VUHDO_setIsOutOfCombat(false);
 
 	elseif "UNIT_MAXHEALTH" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_updateHealth(anArg1, VUHDO_UPDATE_HEALTH_MAX); end
@@ -749,13 +760,13 @@ function VUHDO_slashCmd(aCommand)
 	elseif tCommandWord == "proff" then
 		SetCVar("scriptProfile", "0");
 		ReloadUI();
-	--[[elseif (strfind(tCommandWord, "chkvars")) then
+	elseif (strfind(tCommandWord, "chkvars")) then
 		table.wipe(VUHDO_DEBUG);
 		for tFName, tData in pairs(_G) do
 			if(strsub(tFName, 1, 1) == "t" or strsub(tFName, 1, 1) == "s") then
 				VUHDO_Msg("Emerging local variable " .. tFName);
 			end
-		end]]
+		end
 	elseif strfind(tCommandWord, "mm")
 		or strfind(tCommandWord, "map") then
 		VUHDO_CONFIG["SHOW_MINIMAP"] = VUHDO_forceBooleanValue(VUHDO_CONFIG["SHOW_MINIMAP"]);
@@ -1413,7 +1424,7 @@ local VUHDO_ALL_EVENTS = {
 	"UNIT_FACTION",
 	"INCOMING_RESURRECT_CHANGED",
 	"PET_BATTLE_CLOSE", "PET_BATTLE_OPENING_START",
-	"PLAYER_REGEN_ENABLED",
+	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED",
 	"UNIT_ABSORB_AMOUNT_CHANGED"
 };
 

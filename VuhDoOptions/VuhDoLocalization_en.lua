@@ -612,6 +612,7 @@ VUHDO_I18N_TT.K554 = "Make the selected key layout the default for all new chara
 VUHDO_I18N_TT.K555 = "Check to allow the VuhDo menu command to be bound even when using Clique compatibility mode.";
 VUHDO_I18N_TT.K556 = "Check this to have an extra panel for boss encounter NPCs (eg. shards on Tectus, mushrooms on Brackenspore).";
 VUHDO_I18N_TT.K557 = "Body of the custom flag function. Must return true or false. Example: return (\"YOURNAME\" == anInfo\[\"name\"\])";
+VUHDO_I18N_TT.K558 = "Hide buff watch while out of combat.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -621,7 +622,7 @@ VUHDO_I18N_ADD = "Add";
 VUHDO_I18N_SELECT = "Select";
 VUHDO_I18N_NEW_COLOR = "New Color";
 VUHDO_I18N_OLD_COLOR = "Old Color";
-VUHDO_I18N_HIDE_CHARGES = "hide charges";
+VUHDO_I18N_HIDE_CHARGES = "Hide\nCharges";
 VUHDO_I18N_POWERS = "Powers";
 VUHDO_I18N_HOT_COLORS = "HoT Colors";
 VUHDO_I18N_ICONS = "Icons";
@@ -1089,3 +1090,4 @@ VUHDO_I18N_HIDE = "Hide";
 VUHDO_I18N_LEAVE_ALONE = "Leave alone";
 VUHDO_I18N_READY_CHECK = "Ready\nCheck";
 
+VUHDO_I18N_HIDE_OUT_OF_COMBAT = "Show Only\nIn Combat";
