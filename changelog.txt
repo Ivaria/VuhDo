@@ -25,6 +25,73 @@ Improvements:
 --   the relevant unit information.
 --   Example below returns true if the unit is named 'Ivaria': 
 --     return ("Ivaria" == anInfo["name"])
+--   Unit information (anInfo table):
+--
+--     afk - boolean - true if unit is AFK
+--     aggro - boolean - true if unit has aggro
+--     charmed - boolean - true if unit is charmed
+--     class - string - the unit's class name
+--     classId - number - the unit's class ID
+--       20 - warrior
+--       21 - rogue
+--       22 - hunter
+--       23 - paladin
+--       24 - mage
+--       25 - warlock
+--       26 - shaman
+--       27 - druid
+--       28 - priest
+--       29 - death knight
+--       30 - monk
+--     className - string - the unit's class name prettified
+--     connected - boolean - true if unit is connected
+--     dead - boolean - true if unit is dead
+--     debuff - boolean - true if the unit has an active debuff
+--     debuffName - string - the most recent debuff on the unit
+--     fullName - string - the full name of the unit
+--     group - number - the group the unit is in
+--     health - number - the unit's current health
+--     healthmax - number - the unit's maximum health
+--     isAltPower - boolean - true if unit has an alt power active
+--     isPet - boolean - true if unit is a pet
+--     isVehicle - boolean - true if unit is in a vehicle
+--     name - string - the name of the unit
+--     ownerUnit - string - unit's owner if pet or vehicle
+--     petUnit - string - the unit's pet unit ID
+--     power - number - the unit's current power
+--     powermax - number - the unit's maximum power
+--     powertype - number - the type of power
+--       0 - mana
+--       1 - rage
+--       2 - focus
+--       3 - energy
+--       4 - happiness
+--       5 - runes
+--     raidIcon - number - the raid icon if unit is marked
+--       1 - yellow 4-point Star
+--       2 - orange circle
+--       3 - purple diamond
+--       4 - green triangle
+--       5 - white crescent moon
+--       6 - blue square
+--       7 - red "X" cross
+--       8 - white skull
+--     range - boolean - true if unit is in range
+--     role - number - the unit's combat role
+--       60 - melee tank
+--       61 - melee damage
+--       62 - ranged damage
+--       63 - ranged heal
+--     targetUnit - string - the unit's target
+--     threat - number - the unit's threat status
+--       0 - not tanking, lower threat than tank
+--       1 - not tanking, higher threat than tank
+--       2 - insecurely tanking, another unit has higher threat
+--       3 - securely tanking, highest threat
+--     threatPerc - number - the unit's threat percentage
+--     unit - string - the unit ID
+--     visible - boolean - true if the unit is visible
+--     
 -- Added option to hide buff watch while out of combat
 --   Under 'VuhDo Options > Buffs > General'
 -- Added Huffman compression for profile sharing and storage
