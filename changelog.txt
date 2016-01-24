@@ -27,6 +27,7 @@ Improvements:
 --     return ("Ivaria" == anInfo["name"])
 -- Added option to hide buff watch while out of combat
 --   Under 'VuhDo Options > Buffs > General'
+-- Added Huffman compression for profile sharing and storage
 
 
 --------------------------------------------------------------

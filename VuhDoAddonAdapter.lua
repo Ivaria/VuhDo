@@ -4,6 +4,8 @@ VUHDO_LibSharedMedia = LibStub("LibSharedMedia-3.0");
 VUHDO_LibDataBroker = LibStub("LibDataBroker-1.1", true);
 VUHDO_LibButtonFacade = nil;
 
+VUHDO_LibCompress = LibStub:GetLibrary("LibCompress");
+VUHDO_LibCompressEncode = VUHDO_LibCompress:GetAddonEncodeTable();
 
 VUHDO_LibSharedMedia:Register("font", "Arial Black", "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf");
 VUHDO_LibSharedMedia:Register("font", "Emblem",	"Interface\\AddOns\\VuhDo\\Fonts\\Emblem.ttf");

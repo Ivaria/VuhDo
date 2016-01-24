@@ -126,6 +126,33 @@ end
 
 
 --
+function VUHDO_getCommsData(aUnitName)
+
+	if (aUnitName ~= nil) then
+		VUHDO_xMsg("Dumping comms data for", aUnitName);
+		VUHDO_xMsg("sUserData", VUHDO_tableToString(sUserData[aUnitName]));
+		VUHDO_xMsg("sRequestsInProgress", VUHDO_tableToString(sRequestsInProgress[aUnitName]));
+		VUHDO_xMsg("sRepliesReceived", VUHDO_tableToString(sRepliesReceived[aUnitName]));
+		if (sBusyUnitName == aUnitName) then
+			VUHDO_xMsg("sBusyUnitName", sBusyUnitName);
+			VUHDO_xMsg("sNumChunks", sNumChunks);
+		end
+	else
+		VUHDO_xMsg("Dumping comms data");
+		VUHDO_xMsg("sUserData", (sUserData));
+		VUHDO_xMsg("sRequestsInProgress", VUHDO_tableToString(sRequestsInProgress));
+		VUHDO_xMsg("sRepliesReceived", VUHDO_tableToString(sRepliesReceived));
+		if (sBusyUnitName == aUnitName) then
+			VUHDO_xMsg("sBusyUnitName", sBusyUnitName);
+			VUHDO_xMsg("sNumChunks", sNumChunks);
+		end
+	end
+
+end
+
+
+
+--
 local function VUHDO_getFieldsFromReply(aUnitName, aReplyType)
 	local tUnitReplies = sRepliesReceived[aUnitName];
 
@@ -305,14 +332,22 @@ end
 
 --
 function VUHDO_compressForSending(aTable)
-	return VUHDO_compressTable(aTable);
+	local compressedString = VUHDO_compressAndPackTable(aTable);
+	local encodedString = VUHDO_LibCompressEncode:Encode(compressedString);
+
+	return encodedString;
+--	return VUHDO_compressAndPackTable(aTable);
 end
 
 
 
 --
 function VUHDO_decompressFromSending(aString)
-	return VUHDO_decompressIfCompressed(aString);
+	local decodedString = VUHDO_LibCompressEncode:Decode(aString);
+	local decompressedTable = VUHDO_decompressIfCompressed(decodedString);
+
+	return decompressedTable;
+--	return VUHDO_decompressIfCompressed(aString);
 end
 
 
