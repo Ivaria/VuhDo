@@ -16,9 +16,16 @@ Known issues:
 Bugfixes:
 -- Monochrome font outline should now work for all clients without crashing
 -- Fixed hiding of HoT icon countdown numbers when clock selected
+-- Fixed 'shield status' display for absorption spells tracked as HoT icons
 
 
 Improvements:
+-- Added ability to import/export profiles as strings for sharing purposes
+--   Under 'VuhDo Options > Tools > Profiles'
+--   Be warned that large profiles can momentarily freeze the WoW client
+--   Custom debuffs are NOT included in the exported profile
+-- Added ability to import/export bouquets as strings for sharing purposes
+--   Under 'VuhDo Options > General > Bouquets'
 -- Added custom flag validator which accepts a user defined function.
 --   Bouquets can include any valid Lua function which returns true or false.
 --   The function can access the 'anInfo' variable which is a map containing 

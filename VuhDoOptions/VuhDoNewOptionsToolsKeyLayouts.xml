@@ -5,7 +5,7 @@
 		<Frames>
 			<Frame name="$parentStorePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="320" y="177" />
+					<AbsDimension x="320" y="245" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -29,6 +29,42 @@
 						<Scripts>
 							<OnClick>
 								VUHDO_saveKeyLayoutOnClick(self);
+							</OnClick>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentExportButton" text="VUHDO_I18N_EXPORT" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="210" y="-165" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_exportKeyLayoutOnClick(self);
+							</OnClick>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentImportButton" text="VUHDO_I18N_IMPORT" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="210" y="-203" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_importKeyLayoutOnClick(self);
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -220,7 +256,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="270" y="-270" />
+							<AbsDimension x="30" y="-285" />
 						</Offset>
 					</Anchor>
 				</Anchors>

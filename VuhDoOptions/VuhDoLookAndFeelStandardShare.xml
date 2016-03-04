@@ -3,7 +3,7 @@
 
 	<Script file="VuhDoLookAndFeelStandardShare.lua" />
 
-	<Frame name="VuhDoLnfShareDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" hidden="true" parent="UIParent" movable="true" enableMouse="true" enableKeyboard="true" inherits="VuhDoFrameTemplate">
+	<Frame name="VuhDoLnfShareDialog" frameStrata="TOOLTIP" toplevel="true" hidden="true" parent="UIParent" movable="true" enableMouse="true" enableKeyboard="true" inherits="VuhDoFrameTemplate">
 		<Size>
 			<AbsDimension x="236" y="120" />
 		</Size>

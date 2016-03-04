@@ -16,6 +16,7 @@ externals:
 	Libs/LibDataBroker-1.1: git://git.wowace.com/wow/libdatabroker-1-1/mainline.git
 	Libs/UTF8: svn://svn.wowace.com/wow/utf8/mainline/trunk
 	Libs/LibCompress: svn://svn.wowace.com/wow/libcompress/mainline/trunk
+	Libs/LibBase64-1.0: git://git.wowace.com/wow/libbase64-1-0/mainline.git
 
 	VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
 	

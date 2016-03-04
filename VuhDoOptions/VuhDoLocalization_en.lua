@@ -896,7 +896,7 @@ VUHDO_I18N_GRADIENT = "Gradient";
 VUHDO_I18N_INDICATORS = "Indicators";
 VUHDO_I18N_COPIED_BOUQUET = "Copied bouquet ";
 VUHDO_I18N_BOUQUET_ALREADY_EXISTS = ": Bouquet already exists. Type new name first.";
-VUHDO_I18N_CREATED_NEW_BOUQUET = "Created new Bouquet: ";
+VUHDO_I18N_CREATED_NEW_BOUQUET = "Created new bouquet: ";
 VUHDO_I18N_DELETED_BOUQUET = "Deleted bouquet: ";
 VUHDO_I18N_BOUQUET_NOT_FOUND = ": No such bouquet found.";
 VUHDO_I18N_SELECT_STORE_BOUQUET_FIRST = "Select bouquet first";
@@ -1091,3 +1091,6 @@ VUHDO_I18N_LEAVE_ALONE = "Leave alone";
 VUHDO_I18N_READY_CHECK = "Ready\nCheck";
 
 VUHDO_I18N_HIDE_OUT_OF_COMBAT = "Show Only\nIn Combat";
+VUHDO_I18N_IMPORT = "Import";
+VUHDO_I18N_IMPORT_STRING_INVALID = "Import string was invalid.";
+VUHDO_I18N_REALLY_IMPORT = "Do you really want to import?\n\nYou should only import strings from known and\nreputable sources. Never import a string whose\nsource is not trusted.";

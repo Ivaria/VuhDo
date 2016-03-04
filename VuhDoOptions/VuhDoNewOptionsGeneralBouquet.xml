@@ -193,12 +193,12 @@
 
 					<Button name="$parentCopyButton" text="VUHDO_I18N_COPY" inherits="VuhDoButtonTemplate">
 						<Size>
-							<AbsDimension x="70" y="32" />
+							<AbsDimension x="70" y="20" />
 						</Size>
 						<Anchors>
-							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="-7" y="7" />
+									<AbsDimension x="-7" y="-47" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -211,12 +211,12 @@
 
 					<Button name="$parentNewButton" text="VUHDO_I18N_NEW" inherits="VuhDoButtonTemplate">
 						<Size>
-							<AbsDimension x="70" y="32" />
+							<AbsDimension x="70" y="20" />
 						</Size>
 						<Anchors>
-							<Anchor point="RIGHT" relativePoint="RIGHT">
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="-7" y="0" />
+									<AbsDimension x="-7" y="-27" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -229,7 +229,7 @@
 
 					<Button name="$parentDeleteButton" text="VUHDO_I18N_DELETE" inherits="VuhDoButtonTemplate">
 						<Size>
-							<AbsDimension x="70" y="32" />
+							<AbsDimension x="70" y="20" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
@@ -245,6 +245,41 @@
 						</Scripts>
 					</Button>
 
+					<Button name="$parentExportButton" text="VUHDO_I18N_EXPORT" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="70" y="20" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="-7" y="-67" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_bouquetExportButtonClicked(self);
+							</OnClick>
+						</Scripts>
+					</Button>
+					
+					<Button name="$parentImportButton" text="VUHDO_I18N_IMPORT" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="70" y="20" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="-7" y="-87" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_bouquetImportButtonClicked(self);
+							</OnClick>
+						</Scripts>
+					</Button>
 				</Frames>
 			</Frame>
 
@@ -1036,6 +1071,195 @@
 				</Scripts>
 			</Button>
 
+			<Frame name="$parentExportFrame" inherits="VuhDoFrameTemplate">
+				<Size>
+					<AbsDimension x="580" y="350"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="35" y="-25" />
+						</Offset>						
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Frame name="$parentRootPane" setallpoints="true" inherits="VuhDoPanelTemplate">
+						<Frames>
+
+							<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
+								<Layers>
+									<Layer>
+										<FontString name="$parentLabel" text="VUHDO_I18N_EXPORT" inherits="VuDoDefaultTitleFontTemplate">
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+
+							<ScrollFrame name="$parentStringScrollFrame" inherits="VuhDoScrollPanelTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="13" y="-30" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Size>
+									<AbsDimension x="550" y="250" />
+								</Size>
+								<ScrollChild>							
+									<EditBox name="$parentStringEditBox" multiLine="true" autoFocus="true" inherits="VuhDoEditBoxMultiLineTemplate">
+										<Size>
+											<AbsDimension x="540" y="200" />
+										</Size>
+										<Scripts>
+											<OnShow>
+												VUHDO_bouquetExportButtonShown(self);
+											</OnShow>
+										</Scripts>
+									</EditBox>
+								</ScrollChild>
+							</ScrollFrame>
+
+							<Button name="$parentOkayButton" inherits="VuhDoOkayButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMLEFT">
+										<Offset>
+											<AbsDimension x="13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+							<Button name="$parentCancelButton" inherits="VuhDoCancelButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMRIGHT">
+										<Offset>
+											<AbsDimension x="-13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+						</Frames>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetScript("OnKeyDown", function(anInstance, aKey)
+							if (aKey == "ESCAPE") then
+								self:Hide();
+							end
+						end);
+					</OnLoad>
+					<OnShow>
+						_G[self:GetName() .. "RootPane"]:Show();
+						_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText(VUHDO_I18N_EXPORT .. " " .. (VUHDO_BOUQUETS.SELECTED or ""));
+					</OnShow>
+				</Scripts>
+			</Frame>
+
+			<Frame name="$parentImportFrame" inherits="VuhDoFrameTemplate">
+				<Size>
+					<AbsDimension x="580" y="350"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="35" y="-25" />
+						</Offset>						
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Frame name="$parentRootPane" setallpoints="true" inherits="VuhDoPanelTemplate">
+						<Frames>
+
+							<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
+								<Layers>
+									<Layer>
+										<FontString name="$parentLabel" text="VUHDO_I18N_EXPORT" inherits="VuDoDefaultTitleFontTemplate">
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+
+							<ScrollFrame name="$parentStringScrollFrame" inherits="VuhDoScrollPanelTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="13" y="-30" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Size>
+									<AbsDimension x="550" y="250" />
+								</Size>
+								<ScrollChild>							
+									<EditBox name="$parentStringEditBox" multiLine="true" autoFocus="true" inherits="VuhDoEditBoxMultiLineTemplate">
+										<Size>
+											<AbsDimension x="540" y="200" />
+										</Size>
+									</EditBox>
+								</ScrollChild>
+							</ScrollFrame>
+
+							<Button name="$parentOkayButton" inherits="VuhDoOkayButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMLEFT">
+										<Offset>
+											<AbsDimension x="13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										VUHDO_importBouquetOkayClicked(self);
+									</OnClick>
+								</Scripts>
+							</Button>
+
+							<Button name="$parentCancelButton" inherits="VuhDoCancelButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMRIGHT">
+										<Offset>
+											<AbsDimension x="-13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+						</Frames>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetScript("OnKeyDown", function(anInstance, aKey)
+							if (aKey == "ESCAPE") then
+								self:Hide();
+							end
+						end);
+					</OnLoad>
+					<OnShow>
+						_G[self:GetName() .. "RootPane"]:Show();
+						_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText(VUHDO_I18N_IMPORT);
+					</OnShow>
+				</Scripts>
+			</Frame>
+
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -1043,11 +1267,16 @@
 			</OnLoad>
 			<OnShow>
 				VUHDO_bouquetsUpdateDefaultColors();
+				
 				_G[self:GetName() .. "BackButton"]:SetShown(VUHDO_MENU_RETURN_TARGET ~= nil or VUHDO_MENU_RETURN_TARGET_MAIN ~= nil);
+
+				_G[self:GetName() .. "ExportFrame"]:Hide();
+				_G[self:GetName() .. "ImportFrame"]:Hide();
 			</OnShow>
 			<OnHide>
 				VUHDO_trimAllBouquetItems();
 			</OnHide>
 		</Scripts>
 	</Frame>
+
 </Ui>

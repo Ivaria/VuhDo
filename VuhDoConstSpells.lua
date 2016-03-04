@@ -369,6 +369,6 @@ VUHDO_REPLACE_SPELL_NAME = {
 --
 VUHDO_NATIVE_ASSIGN_SPELLS = {
 	[VUHDO_SPELL_ID.SOULSTONE] = true, -- wirkt auf tote und lebendige
-	[VUHDO_SPELL_ID.SURGING_MIST] = true, -- wird instant bei soothing mist
-	[VUHDO_SPELL_ID.ENVELOPING_MIST] = true,
+--	[VUHDO_SPELL_ID.SURGING_MIST] = true, -- wird instant bei soothing mist
+--	[VUHDO_SPELL_ID.ENVELOPING_MIST] = true,
 };

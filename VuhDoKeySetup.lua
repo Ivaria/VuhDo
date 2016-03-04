@@ -147,20 +147,20 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
 				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-					VUHDO_buildRezMacroText(anAction, tUnit));
+				VUHDO_buildRezMacroText(anAction, tUnit));
 				return;
 			-- Cleansing charmed players is an offensive thing to do
 			elseif VUHDO_BUFF_REMOVAL_SPELLS[anAction] then
 
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
 				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-					VUHDO_buildPurgeMacroText(anAction, tUnit));
+				VUHDO_buildPurgeMacroText(anAction, tUnit));
 				return;
 			else
 				-- build a spell macro
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
 				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-					VUHDO_buildMacroText(anAction, false, tUnit));
+				VUHDO_buildMacroText(anAction, false, tUnit));
 			end
 		else
 			tMacroId = GetMacroIndexByName(anAction);
@@ -338,6 +338,11 @@ local tProhibitSmartCastOn = {
 	["menu"] = true,
 	["dropdown"] = true,
 	["tell"] = true,
+	["boss1"] = true,
+	["boss2"] = true,
+	["boss3"] = true,
+	["boss4"] = true,
+	["boss5"] = true,
 };
 -- Setup for smart cast
 local tKey;

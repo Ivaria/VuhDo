@@ -170,6 +170,18 @@ end
 
 
 --
+function VUHDO_exportKeyLayoutOnClick(aButton)
+end
+
+
+
+--
+function VUHDO_importKeyLayoutOnClick(aButton)
+end
+
+
+
+--
 function VUHDO_shareCurrentKeyLayout(aUnitName, aKeyLayoutName)
 	local tLayout = VUHDO_SPELL_LAYOUTS[aKeyLayoutName];
 	if not tLayout then

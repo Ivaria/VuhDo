@@ -2249,7 +2249,7 @@ local function VUHDO_askSaveProfileCallback(aButtonNum)
 		VUHDO_DEFAULT_PROFILE = nil;
 	end
 
-	VUHDO_Msg(VUHDO_I18N_PROFILE_SAVED .. "\"" .. VUHDO_TARGET_PROFILE_NAME .. "\"");
+	VUHDO_Msg(VUHDO_I18N_PROFILE_SAVED .. "\"" .. VUHDO_TARGET_PROFILE_NAME .. "\".");
 	VUHDO_updateProfileSelectCombo();
 
 	if ((VUHDO_CURR_LAYOUT or "") == "") then

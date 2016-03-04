@@ -1,5 +1,7 @@
 local _;
 
+VUHDO_PROFILE_SHARE_VERSION = 1;
+
 VUHDO_IS_DEFAULT_PROFILE = false;
 VUHDO_CURRENT_PROFILE = "";
 VUHDO_PROFILE_TABLE_MODEL = { };
@@ -385,10 +387,174 @@ end
 
 
 --
+local tProfileString;
+local tProfileTable;
+local function VUHDO_profileTableToString(aProfile)
+	if (aProfile ~= nil) then
+		tProfileTable = {
+			["profileVersion"] = VUHDO_PROFILE_SHARE_VERSION, 
+			["playerName"] = GetUnitName("player", true),
+			["profile"] = aProfile,
+		};
+
+		-- remove all custom debuffs from the profile
+		-- due to size these must be shared separately
+		if tProfileTable["profile"]["CONFIG"]["CUSTOM_DEBUFF"] and tProfileTable["profile"]["CONFIG"]["CUSTOM_DEBUFF"]["STORED"] then
+			tProfileTable["profile"]["CONFIG"]["CUSTOM_DEBUFF"]["STORED"] = { };
+		end
+
+		tProfileString = VUHDO_compressAndPackTable(tProfileTable);
+		tProfileString = VUHDO_LibBase64.Encode(tProfileString);
+
+		return tProfileString;
+	end
+end
+
+
+
+--
+local tDecodedProfileString;
+local tProfileTable;
+local function VUHDO_profileStringToTable(aProfileString)
+	tDecodedProfileString = VUHDO_LibBase64.Decode(aProfileString);
+	
+	tProfileTable = VUHDO_decompressIfCompressed(tDecodedProfileString);
+
+	return tProfileTable;
+end
+
+
+
+--
+function VUHDO_exportProfileClicked(aButton)
+	if ((VUHDO_CURRENT_PROFILE or "") == "") then
+		VUHDO_Msg(VUHDO_I18N_MUST_ENTER_SELECT_PROFILE);
+		return;
+	end
+
+	local _, tProfile = VUHDO_getProfileNamedCompressed(VUHDO_CURRENT_PROFILE);
+
+	if (tProfile == nil) then
+		VUHDO_Msg(VUHDO_I18N_ERROR_NO_PROFILE .. "\"" .. VUHDO_CURRENT_PROFILE .. "\" !", 1, 0.4, 0.4);
+		return;
+	end
+
+	if (tProfile["HARDLOCKED"]) then
+		VUHDO_Msg("You cannot share hardlocked profiles. Please make a copy before.", 1, 0.4, 0.4);
+		return;
+	end
+
+	_G[aButton:GetParent():GetParent():GetName() .. "ExportFrame"]:Show();
+end
+
+
+
+--
+function VUHDO_importProfileClicked(aButton)
+	_G[aButton:GetParent():GetParent():GetName() .. "ImportFrame"]:Show();
+end
+
+
+
+--
+local tEditText;
+function VUHDO_profileExportButtonShown(aEditBox)
+	if ((VUHDO_CURRENT_PROFILE or "") == "") then
+		VUHDO_Msg(VUHDO_I18N_MUST_ENTER_SELECT_PROFILE);
+		return;
+	end
+
+	local _, tProfile = VUHDO_getProfileNamed(VUHDO_CURRENT_PROFILE);
+
+	if (tProfile == nil) then
+		VUHDO_Msg(VUHDO_I18N_ERROR_NO_PROFILE .. "\"" .. VUHDO_CURRENT_PROFILE .. "\" !", 1, 0.4, 0.4);
+		return;
+	end
+
+	if (tProfile["HARDLOCKED"]) then
+		VUHDO_Msg("You cannot share hardlocked profiles. Please make a copy before.", 1, 0.4, 0.4);
+		return;
+	end
+
+	tEditText = VUHDO_profileTableToString(tProfile);
+
+	aEditBox:SetText(tEditText);
+	aEditBox:SetTextInsets(0, 10, 5, 5);
+
+	aEditBox:Show();
+end
+
+
+
+--
+local tImportString;
+local tImportTable;
+local tName;
+local tProfile;
+local tPos;
+function VUHDO_profileImport(aEditBoxName)
+	tImportString = _G[aEditBoxName]:GetText();
+	tImportTable = VUHDO_profileStringToTable(tImportString);
+
+	if (tImportTable == nil or tImportTable["profileVersion"] == nil or tonumber(tImportTable["profileVersion"]) == nil or 
+		tonumber(tImportTable["profileVersion"]) ~= VUHDO_PROFILE_SHARE_VERSION or tImportTable["playerName"] == nil or 
+		tImportTable["profile"] == nil or tImportTable["profile"]["NAME"] == nil) then
+		VUHDO_Msg(VUHDO_I18N_IMPORT_STRING_INVALID);
+
+		return;
+	end
+
+	tProfile = tImportTable["profile"];
+	tName = tProfile["NAME"];
+
+	if (VUHDO_getProfileNamedCompressed(tName) ~= nil) then
+		tPos = strfind(tName, ": ", 1, true);
+		
+		if (tPos ~= nil) then
+			tName = strsub(tName, tPos + 2);
+		end
+
+		tProfile["NAME"] = VUHDO_createNewProfileName(tName, tImportTable["playerName"]);
+	end
+
+	tinsert(VUHDO_PROFILES, tProfile);
+
+	VUHDO_Msg(VUHDO_I18N_PROFILE_SAVED .. "\"" .. tProfile["NAME"] .. "\".");
+end
+
+
+
+--
+function VUHDO_yesNoImportProfileCallback(aDecision)
+	if (VUHDO_YES == aDecision) then
+		local tEditBoxName = VuhDoYesNoFrame:GetAttribute("importStringEditBoxName"); 
+
+		VUHDO_profileImport(tEditBoxName);
+		VUHDO_updateProfileSelectCombo();
+
+		_G[tEditBoxName]:GetParent():GetParent():GetParent():Hide();
+	end
+end
+
+
+
+--
+function VUHDO_importProfileOkayClicked(aButton)
+	VuhDoYesNoFrameText:SetText(VUHDO_I18N_REALLY_IMPORT);
+	
+	VuhDoYesNoFrame:SetAttribute("callback", VUHDO_yesNoImportProfileCallback);
+	VuhDoYesNoFrame:SetAttribute("importStringEditBoxName", aButton:GetParent():GetName() .. "StringScrollFrameStringEditBox");
+
+	VuhDoYesNoFrame:Show();
+end
+
+
+
+--
 function VUHDO_shareCurrentProfile(aUnitName, aProfileName)
 	local _, tProfile = VUHDO_getProfileNamedCompressed(aProfileName);
 	if (tProfile == nil) then
-		VUHDO_Msg("There is no profile named \"" .. aProfileName .. "\"", 1, 0.4, 0.4);
+		VUHDO_Msg(VUHDO_I18N_ERROR_NO_PROFILE .. "\"" .. VUHDO_CURRENT_PROFILE .. "\" !", 1, 0.4, 0.4);
 		return;
 	end
 	if (tProfile["HARDLOCKED"]) then
@@ -398,3 +564,11 @@ function VUHDO_shareCurrentProfile(aUnitName, aProfileName)
 	local tQuestion = VUHDO_PLAYER_NAME .. " requests to transmit\nProfile " .. aProfileName .. " to you.\nThis will take about 60 secs. Proceed?"
 	VUHDO_startShare(aUnitName, tProfile, sCmdProfileDataChunk, sCmdProfileDataEnd, tQuestion);
 end
+
+
+
+
+
+
+
+

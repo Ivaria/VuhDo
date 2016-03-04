@@ -735,7 +735,6 @@ end
 
 --
 function VUHDO_decompressIfCompressed(aFile)
---	return "string" == type(aFile) and VUHDO_deserializeTable(aFile) or aFile;
 	return "string" == type(aFile) and VUHDO_deserializeTable(VUHDO_decompressStringHuffman(aFile)) or aFile;
 end
 
@@ -743,7 +742,6 @@ end
 
 --
 function VUHDO_decompressOrCopy(aFile)
---	return "string" == type(aFile) and VUHDO_deserializeTable(aFile) or VUHDO_deepCopyTable(aFile);
 	return "string" == type(aFile) and VUHDO_deserializeTable(VUHDO_decompressStringHuffman(aFile)) or VUHDO_deepCopyTable(aFile);
 end
 
@@ -758,7 +756,6 @@ end
 
 --
 function VUHDO_compressAndPackTable(aTable)
---	return type(aTable) == "table" and VUHDO_serializeTable(aTable) or aTable;
 	return type(aTable) == "table" and VUHDO_compressStringHuffman(VUHDO_serializeTable(aTable)) or aTable;
 end
 

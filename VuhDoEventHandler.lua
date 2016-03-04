@@ -790,10 +790,10 @@ function VUHDO_slashCmd(aCommand)
 
 		--[[local _, tProfile = VUHDO_getProfileNamedCompressed("Buh!");
 		tProfile = VUHDO_compressTable(tProfile);
-		local tCompressed = VUHDO_compressStringHuffman(VUHDO_compressTable(tProfile));
+		local tCompressed = VUHDO_compressStringHuffman(tProfile);
 		local tUnCompressed = VUHDO_decompressIfCompressed(VUHDO_decompressStringHuffman(tCompressed));
 
-		VUHDO_xMsg(#tProfile, #tCompressed);]]
+		VUHDO_xMsg(#tProfile, #tCompressed, #tUnCompressed);]]
 
 
 	elseif aCommand == "?" or strfind(tCommandWord, "help")	or aCommand == "" then

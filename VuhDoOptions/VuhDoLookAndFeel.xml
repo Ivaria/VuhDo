@@ -1821,6 +1821,56 @@
 	</Scripts>
 </EditBox>
 
+<EditBox name="VuhDoEditBoxMultiLineTemplate" multiLine="true" autoFocus="false" historyLines="0" justifyH="LEFT" virtual="true">
+	<Layers>
+		<Layer>
+			<FontString name="$parentHint" text="" inherits="VuDoDefaultFontTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-5" y="-9" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<FontHeight>
+					<AbsValue val="8" />
+				</FontHeight>
+				<Color r="0.8" g="0.8" b="1" />
+				<Shadow>
+					<Color r="0.8" g="0.8" b="1" a="0" />
+					<Offset>
+						<AbsDimension x="0" y="0" />
+					</Offset>
+				</Shadow>
+			</FontString>
+
+		</Layer>
+	</Layers>
+	<FontString font="Interface\AddOns\VuhDo\Fonts\ariblk.ttf">
+		<FontHeight>
+			<AbsValue val="11" />
+		</FontHeight>
+		<Color r="0.8" g="0.8" b="1" />
+		<Shadow>
+			<Color r="0.8" g="0.8" b="1" a="0" />
+			<Offset>
+				<AbsDimension x="0" y="0" />
+			</Offset>
+		</Shadow>
+	</FontString>
+	<Scripts>
+		<OnShow>VUHDO_lnfPatchFont(self, "Hint"); VUHDO_lnfPatchFont(self, ""); VUHDO_lnfEditBoxInitFromModel(self);</OnShow>
+		<OnTextChanged>VUHDO_lnfEditBoxUpdateModel(self)</OnTextChanged>
+		<OnEscapePressed>self:ClearFocus();</OnEscapePressed>
+		<OnEditFocusLost>self:HighlightText(0, 0);</OnEditFocusLost>
+		<OnEditFocusGained>self:HighlightText();</OnEditFocusGained>
+		<OnEnter>VUHDO_lnfShowTooltip(self)</OnEnter>
+		<OnLeave>VUHDO_lnfHideTooltip(self)</OnLeave>
+		<OnReceiveDrag>VUHDO_lnfEditboxReceivedDrag(self)</OnReceiveDrag>
+		<OnMouseDown>VUHDO_lnfEditboxReceivedDrag(self)</OnMouseDown>
+	</Scripts>
+</EditBox>
+
 <Button name="VuhDoEditComboBoxTemplate" enableMouse="false" virtual="true">
 	<Size>
 		<AbsDimension x="1" y="1" />

@@ -8,6 +8,7 @@
 	<Script file="Libs\LibSharedMedia-3.0\LibSharedMedia-3.0.lua" />
 	<Script file="Libs\UTF8\utf8.lua" />
 	<Script file="Libs\LibCompress\LibCompress.lua" />
+	<Script file="Libs\LibBase64-1.0\LibBase64-1.0.lua" />
 
 	<Script file="VuhDoLocalization_en.lua" />
 	<Script file="VuhDoLocalization_de.lua" />

@@ -336,7 +336,6 @@ function VUHDO_compressForSending(aTable)
 	local encodedString = VUHDO_LibCompressEncode:Encode(compressedString);
 
 	return encodedString;
---	return VUHDO_compressAndPackTable(aTable);
 end
 
 
@@ -347,7 +346,6 @@ function VUHDO_decompressFromSending(aString)
 	local decompressedTable = VUHDO_decompressIfCompressed(decodedString);
 
 	return decompressedTable;
---	return VUHDO_decompressIfCompressed(aString);
 end
 
 

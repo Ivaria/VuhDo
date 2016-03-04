@@ -84,6 +84,7 @@ local VUHDO_PLAYER_SHIELDS = { };
 --
 local pairs = pairs;
 local ceil = ceil;
+local floor = floor;
 local GetTime = GetTime;
 local select = select;
 local UnitAura = UnitAura;
@@ -187,8 +188,8 @@ function VUHDO_getShieldLeftCount(aUnit, aShield, aMode)
 		if aMode == 3 or aMode == 0
 		or (aMode == 1 and tSourceGuid == VUHDO_PLAYER_GUID)
 		or (aMode == 2 and tSourceGuid ~= VUHDO_PLAYER_GUID) then
-			tValue = ceil(4 * (VUHDO_SHIELD_LEFT[aUnit][aShield] or 0) / tInit);
-			return tValue > 4 and 4 or tValue;
+			tValue = floor(4 * (VUHDO_SHIELD_LEFT[aUnit][aShield] or 0) / tInit);
+			return tValue > 4 and 4 or (tValue < 1 and 1 or tValue);
 		end
 	end
 	return 0;

@@ -1002,6 +1002,66 @@ end
 
 
 
+-- WA2 sandbox for execution - warning best effort!
+-- no overrides for now
+local VUHDO_OVERRIDE_FUNCTIONS = { };
+
+local VUHDO_BLOCKED_FUNCTIONS = {
+	-- Lua functions that may allow breaking out of the environment
+	getfenv = true,
+	setfenv = true,
+	loadstring = true,
+	pcall = true,
+	-- blocked WoW API
+	SendMail = true,
+	SetTradeMoney = true,
+	AddTradeMoney = true,
+	PickupTradeMoney = true,
+	PickupPlayerMoney = true,
+	TradeFrame = true,
+	MailFrame = true,
+	EnumerateFrames = true,
+	RunScript = true,
+	AcceptTrade = true,
+	SetSendMailMoney = true,
+	EditMacro = true
+};
+
+
+
+--
+local function VUHDO_blockedFunction()
+	DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_BLOCKED, 1.0, 0.0, 0.0);
+end
+
+
+
+local env_getglobal;
+local exec_env = setmetatable({}, { __index =
+	function(t, k)
+		if k == "_G" then
+			return t
+		elseif k == "getglobal" then
+			return env_getglobal
+		elseif VUHDO_BLOCKED_FUNCTIONS[k] then
+			return VUHDO_blockedFunction
+		elseif VUHDO_OVERRIDE_FUNCTIONS[k] then
+			return VUHDO_OVERRIDE_FUNCTIONS[k]
+		else
+			return _G[k]
+		end
+	end
+});
+
+
+
+--
+function env_getglobal(k)
+	return exec_env[k];
+end
+
+
+
 --
 local function VUHDO_customFlagValidator(anInfo, aCustom)
 	if aCustom and aCustom["custom"] and aCustom["custom"][1] then
@@ -1009,7 +1069,7 @@ local function VUHDO_customFlagValidator(anInfo, aCustom)
 
 		if loadedFunction then
 			_G["VUHDO_anInfo"] = anInfo;
-			setfenv(loadedFunction, _G)
+			setfenv(loadedFunction, exec_env);
 			local _, ret, ret2, ret3, ret4, ret5 = xpcall(loadedFunction, 
 				function() 
 					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE, 1.0, 0.0, 0.0);

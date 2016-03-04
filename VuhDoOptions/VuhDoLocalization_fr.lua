@@ -1107,3 +1107,6 @@ VUHDO_I18N_HIDE = "Hide";
 VUHDO_I18N_LEAVE_ALONE = "Leave alone";
 
 VUHDO_I18N_HIDE_OUT_OF_COMBAT = "Show Only\nIn Combat";
+VUHDO_I18N_IMPORT = "Import";
+VUHDO_I18N_IMPORT_STRING_INVALID = "Import string was invalid.";
+VUHDO_I18N_REALLY_IMPORT = "Do you really want to import?\n\nYou should only import strings from known and\nreputable sources. Never import a string whose\nsource is not trusted.";

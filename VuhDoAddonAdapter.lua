@@ -7,6 +7,8 @@ VUHDO_LibButtonFacade = nil;
 VUHDO_LibCompress = LibStub:GetLibrary("LibCompress");
 VUHDO_LibCompressEncode = VUHDO_LibCompress:GetAddonEncodeTable();
 
+VUHDO_LibBase64 = LibStub:GetLibrary("LibBase64-1.0");
+
 VUHDO_LibSharedMedia:Register("font", "Arial Black", "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf");
 VUHDO_LibSharedMedia:Register("font", "Emblem",	"Interface\\AddOns\\VuhDo\\Fonts\\Emblem.ttf");
 VUHDO_LibSharedMedia:Register("font", "Vixar",	"Interface\\AddOns\\VuhDo\\Fonts\\vixar.ttf");

@@ -1,4 +1,7 @@
 local _;
+
+VUHDO_BOUQUET_SHARE_VERSION = 1;
+
 VUHDO_BOUQET_COMBO_MODEL = { };
 VUHDO_BOUQET_DETAILS_COMBO_MODEL = { };
 VUHDO_BOUQUET_ICON_COMBO_MODEL = { };
@@ -743,6 +746,173 @@ function VUHDO_bouquetNewButtonClicked(aPanel)
 		end
 	end
 
+end
+
+
+
+--
+local tBouquetString;
+local tBouquetTable;
+local function VUHDO_bouquetTableToString(aName)
+	if (VUHDO_BOUQUETS["STORED"][aName] ~= nil) then
+		tBouquetTable = {
+			["bouquetVersion"] = VUHDO_BOUQUET_SHARE_VERSION, 
+			["playerName"] = GetUnitName("player", true),
+			["bouquetName"] = aName,
+			["bouquet"] = VUHDO_BOUQUETS["STORED"][aName],
+		};
+
+		tBouquetString = VUHDO_compressAndPackTable(tBouquetTable);
+		tBouquetString = VUHDO_LibBase64.Encode(tBouquetString);
+
+		return tBouquetString;
+	end
+end
+
+
+
+--
+local tDecodedBouquetString;
+local tBouquetTable;
+local function VUHDO_bouquetStringToTable(aBouquetString)
+	tDecodedBouquetString = VUHDO_LibBase64.Decode(aBouquetString);
+	
+	tBouquetTable = VUHDO_decompressIfCompressed(tDecodedBouquetString);
+
+	return tBouquetTable;
+end
+
+
+
+--
+local tName;
+local tEditText;
+function VUHDO_bouquetExportButtonShown(aEditBox)
+	tName = VUHDO_getCurrentBouquetName();
+
+	if (tName ~= nil) then
+		if (VUHDO_BOUQUETS["STORED"][tName] ~= nil) then
+			tEditText = VUHDO_bouquetTableToString(tName);
+
+			aEditBox:SetText(tEditText);
+			aEditBox:SetTextInsets(0, 10, 5, 5);
+
+			aEditBox:Show();
+		else
+			VUHDO_Msg(tName .. VUHDO_I18N_BOUQUET_NOT_FOUND);
+		end
+	end
+end
+
+
+
+--
+function VUHDO_bouquetExportButtonClicked(aButton)
+	_G[aButton:GetParent():GetParent():GetName() .. "ExportFrame"]:Show();
+end
+
+
+
+--
+function VUHDO_bouquetImportButtonClicked(aButton)
+	_G[aButton:GetParent():GetParent():GetName() .. "ImportFrame"]:Show();
+end
+
+
+
+--
+local tIdx;
+local tBouquet;
+local tPrefix;
+local tNewName;
+function VUHDO_createNewBouquetName(aName, aUnitName)
+	tIdx = 1;
+	tBouquet = { };
+	tPrefix = aUnitName .. ": ";
+
+	while tBouquet do
+		tNewName = tPrefix .. aName;
+		tBouquet = VUHDO_BOUQUETS["STORED"][tNewName];
+
+		tIdx = tIdx + 1;
+		tPrefix = aUnitName .. "(" .. tIdx .. "): ";
+	end
+
+	return tNewName;
+end
+
+
+
+--
+local tPanelMain;
+local tImportString;
+local tImportTable;
+local tName;
+local tPos;
+function VUHDO_bouquetImport(aEditBoxName)
+	tPanelMain = _G[_G[aEditBoxName]:GetParent():GetParent():GetParent():GetParent():GetName() .. "MainPanel"];
+
+	tImportString = _G[aEditBoxName]:GetText();
+	tImportTable = VUHDO_bouquetStringToTable(tImportString);
+
+	if (tImportTable == nil or tImportTable["bouquetVersion"] == nil or tonumber(tImportTable["bouquetVersion"]) == nil or 
+		tonumber(tImportTable["bouquetVersion"]) ~= VUHDO_BOUQUET_SHARE_VERSION or tImportTable["playerName"] == nil or 
+		tImportTable["bouquetName"] == nil or tImportTable["bouquet"] == nil) then
+
+		VUHDO_Msg(VUHDO_I18N_IMPORT_STRING_INVALID);
+
+		return;
+	end
+
+	tName = tImportTable["bouquetName"];
+
+	if (VUHDO_BOUQUETS["STORED"][tName] ~= nil) then
+		tPos = strfind(tName, ": ", 1, true);
+		
+		if (tPos ~= nil) then
+			tName = strsub(tName, tPos + 2);
+		end
+
+		tName = VUHDO_createNewBouquetName(tName, tImportTable["playerName"]);
+	end
+
+	VUHDO_BOUQUETS["STORED"][tName] = tImportTable["bouquet"];
+	VUHDO_BOUQUETS["SELECTED"] = tName;
+
+	VUHDO_bouquetsComboValueChanged(tPanelMain, tName);
+	VUHDO_initBouquetComboModel();
+
+	tPanelMain:Hide();
+	tPanelMain:Show();
+
+	VUHDO_rebuildAllBouquetItems(nil, 0);
+
+	VUHDO_Msg(VUHDO_I18N_CREATED_NEW_BOUQUET .. tName);
+end
+
+
+
+--
+function VUHDO_yesNoImportBouquetCallback(aDecision)
+	if (VUHDO_YES == aDecision) then
+		local tEditBoxName = VuhDoYesNoFrame:GetAttribute("importStringEditBoxName"); 
+
+		VUHDO_bouquetImport(tEditBoxName);
+
+		_G[tEditBoxName]:GetParent():GetParent():GetParent():Hide();
+	end
+end
+
+
+
+--
+function VUHDO_importBouquetOkayClicked(aButton)
+	VuhDoYesNoFrameText:SetText(VUHDO_I18N_REALLY_IMPORT);
+	
+	VuhDoYesNoFrame:SetAttribute("callback", VUHDO_yesNoImportBouquetCallback);
+	VuhDoYesNoFrame:SetAttribute("importStringEditBoxName", aButton:GetParent():GetName() .. "StringScrollFrameStringEditBox");
+
+	VuhDoYesNoFrame:Show();
 end
 
 
