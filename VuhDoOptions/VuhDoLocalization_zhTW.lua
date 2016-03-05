@@ -613,7 +613,7 @@ VUHDO_I18N_TT.K553 = "Make the selected profile the default for all new characte
 VUHDO_I18N_TT.K554 = "Make the selected key layout the default for all new characters on this account.";
 VUHDO_I18N_TT.K555 = "Check to allow the VuhDo menu command to be bound even when using Clique compatibility mode.";
 VUHDO_I18N_TT.K556 = "Check this to have an extra panel for boss encounter NPCs (eg. shards on Tectus, mushrooms on Brackenspore).";
-VUHDO_I18N_TT.K557 = "Body of the custom flag function. Must return true or false. Example: return (\"YOURNAME\" == anInfo\[\"name\"\])";
+VUHDO_I18N_TT.K557 = "Body of the custom flag function. Must return true or false. Example: return (\"YOURNAME\" == VUHDO_unitInfo\[\"name\"\])";
 VUHDO_I18N_TT.K558 = "Hide buff watch while out of combat.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";

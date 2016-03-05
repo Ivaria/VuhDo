@@ -28,11 +28,11 @@ Improvements:
 --   Under 'VuhDo Options > General > Bouquets'
 -- Added custom flag validator which accepts a user defined function.
 --   Bouquets can include any valid Lua function which returns true or false.
---   The function can access the 'anInfo' variable which is a map containing 
---   the relevant unit information.
---   Example below returns true if the unit is named 'Ivaria': 
---     return ("Ivaria" == anInfo["name"])
---   Unit information (anInfo table):
+--   The function can access the 'VUHDO_unitInfo' variable which is a map 
+--   containing the relevant unit information.
+--   The example below returns true if the unit is named 'Ivaria': 
+--     return ("Ivaria" == VUHDO_unitInfo["name"])
+--   Unit information (VUHDO_unitInfo table):
 --
 --     afk - boolean - true if unit is AFK
 --     aggro - boolean - true if unit has aggro
