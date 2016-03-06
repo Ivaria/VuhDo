@@ -440,7 +440,7 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 				tSubPanel:Show();
 			elseif (VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName]["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG) then
 				tSubPanel = _G[tInnerPanel:GetName() .. "CustomFlagEditBox"];
-				VUHDO_lnfSetModel(tSubPanel, tModel .. ".custom.##1");
+				VUHDO_lnfSetModel(tSubPanel, tModel .. ".custom.function");
 				tSubPanel:Show();
 			else
 				_G[tInnerPanel:GetName() .. "PercentFrame"]:Hide();

@@ -754,6 +754,7 @@ VUHDO_SANE_BOUQUET_ITEM = {
 		[1] = 1,
 		["radio"] = 1,
 		["bright"] = 1.0,
+		["function"] = "return true;",
 	},
 };
 
