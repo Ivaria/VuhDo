@@ -1,4 +1,7 @@
 local _;
+
+VUHDO_KEY_LAYOUT_SHARE_VERSION = 1;
+
 VUHDO_KEY_LAYOUT_COMBO_MODEL = { };
 VUHDO_CURR_LAYOUT = "";
 VUHDO_IS_DEFAULT_LAYOUT = false;
@@ -116,6 +119,7 @@ end
 function VUHDO_saveKeyLayoutCallback(aDecision)
 	if (VUHDO_YES == aDecision) then
 		VUHDO_SPELL_LAYOUTS[VUHDO_CURR_LAYOUT] = {
+			["NAME"] = VUHDO_CURR_LAYOUT, 
 			["MOUSE"] = VUHDO_compressTable(VUHDO_SPELL_ASSIGNMENTS),
 			["HOSTILE_MOUSE"] = VUHDO_compressTable(VUHDO_HOSTILE_SPELL_ASSIGNMENTS),
 			["KEYS"] = VUHDO_compressTable(VUHDO_SPELLS_KEYBOARD),
@@ -170,13 +174,154 @@ end
 
 
 --
+local tKeyLayoutString;
+local tKeyLayoutTable;
+local function VUHDO_keyLayoutTableToString(aKeyLayout)
+	if (aKeyLayout ~= nil) then
+		tKeyLayoutTable = {
+			["keyLayoutVersion"] = VUHDO_KEY_LAYOUT_SHARE_VERSION, 
+			["playerName"] = GetUnitName("player", true),
+			["keyLayout"] = aKeyLayout,
+		};
+
+		tKeyLayoutString = VUHDO_compressAndPackTable(tKeyLayoutTable);
+		tKeyLayoutString = VUHDO_LibBase64.Encode(tKeyLayoutString);
+
+		return tKeyLayoutString;
+	end
+end
+
+
+
+--
+local tDecodedKeyLayoutString;
+local tKeyLayoutTable;
+local function VUHDO_keyLayoutStringToTable(aKeyLayoutString)
+	tDecodedKeyLayoutString = VUHDO_LibBase64.Decode(aKeyLayoutString);
+
+	tKeyLayoutTable = VUHDO_decompressIfCompressed(tDecodedKeyLayoutString);
+
+	return tKeyLayoutTable;
+end
+
+
+
+--
+local tEditBox;
+local tSelectedKeyLayout;
+local tKeyLayout;
 function VUHDO_exportKeyLayoutOnClick(aButton)
+	tEditBox = _G[aButton:GetParent():GetName() .. "SaveAsEditBox"];
+	tSelectedKeyLayout = strtrim(tEditBox:GetText());
+
+	if (#tSelectedKeyLayout == 0 or not VUHDO_SPELL_LAYOUTS[tSelectedKeyLayout]) then
+		VUHDO_Msg(VUHDO_I18N_SELECT_KEY_LAYOUT_FIRST, 1, 0.4, 0.4);
+		return;
+	end
+
+	_G[aButton:GetParent():GetParent():GetName() .. "ExportFrame"]:Show();
 end
 
 
 
 --
 function VUHDO_importKeyLayoutOnClick(aButton)
+	_G[aButton:GetParent():GetParent():GetName() .. "ImportFrame"]:Show();
+end
+
+
+
+--
+local tEditBox;
+local tSelectedKeyLayout;
+local tKeyLayout;
+function VUHDO_keyLayoutExportButtonShown(aEditBox)
+	tEditBox = _G[aEditBox:GetParent():GetParent():GetParent():GetParent():GetName() .. "StorePanelSaveAsEditBox"];
+	tSelectedKeyLayout = strtrim(tEditBox:GetText());
+
+	tKeyLayout = VUHDO_SPELL_LAYOUTS[tSelectedKeyLayout];
+
+	if (#tSelectedKeyLayout == 0 or not tKeyLayout) then
+		VUHDO_Msg(VUHDO_I18N_SELECT_KEY_LAYOUT_FIRST, 1, 0.4, 0.4);
+		return;
+	end
+
+	if ((tKeyLayout["NAME"] or "") == "") then
+		tKeyLayout["NAME"] = tSelectedKeyLayout;
+	end
+
+	tEditText = VUHDO_keyLayoutTableToString(tKeyLayout);
+
+	aEditBox:SetText(tEditText);
+	aEditBox:SetTextInsets(0, 10, 5, 5);
+
+	aEditBox:Show();
+end
+
+
+
+--
+local tImportString;
+local tImportTable;
+local tName;
+local tProfile;
+local tPos;
+function VUHDO_keyLayoutImport(aEditBoxName)
+	tImportString = _G[aEditBoxName]:GetText();
+	tImportTable = VUHDO_keyLayoutStringToTable(tImportString);
+
+	if (tImportTable == nil or tImportTable["keyLayoutVersion"] == nil or tonumber(tImportTable["keyLayoutVersion"]) == nil or 
+		tonumber(tImportTable["keyLayoutVersion"]) ~= VUHDO_KEY_LAYOUT_SHARE_VERSION or tImportTable["playerName"] == nil or 
+		tImportTable["keyLayout"] == nil or tImportTable["keyLayout"]["NAME"] == nil) then
+		VUHDO_Msg(VUHDO_I18N_IMPORT_STRING_INVALID);
+
+		return;
+	end
+
+	tKeyLayout = tImportTable["keyLayout"];
+	tName = tKeyLayout["NAME"];
+
+	if (VUHDO_SPELL_LAYOUTS[tName] ~= nil) then
+		tPos = strfind(tName, ": ", 1, true);
+		
+		if (tPos ~= nil) then
+			tName = strsub(tName, tPos + 2);
+		end
+
+		tKeyLayout["NAME"] = VUHDO_createNewLayoutName(tName, tImportTable["playerName"]);
+	end
+
+	VUHDO_SPELL_LAYOUTS[tKeyLayout["NAME"]] = tKeyLayout;
+
+	VUHDO_Msg(format(VUHDO_I18N_KEY_LAYOUT_SAVED, tKeyLayout["NAME"]));
+end
+
+
+
+--
+function VUHDO_yesNoImportKeyLayoutCallback(aDecision)
+	if (VUHDO_YES == aDecision) then
+		local tEditBoxName = VuhDoYesNoFrame:GetAttribute("importStringEditBoxName"); 
+
+		VUHDO_keyLayoutImport(tEditBoxName);
+
+		VUHDO_initKeyLayoutComboModel();
+		VUHDO_lnfComboBoxInitFromModel(VuhDoNewOptionsToolsKeyLayoutsStorePanelLayoutCombo);
+
+		_G[tEditBoxName]:GetParent():GetParent():GetParent():Hide();
+	end
+end
+
+
+
+--
+function VUHDO_importKeyLayoutOkayClicked(aButton)
+	VuhDoYesNoFrameText:SetText(VUHDO_I18N_REALLY_IMPORT);
+	
+	VuhDoYesNoFrame:SetAttribute("callback", VUHDO_yesNoImportKeyLayoutCallback);
+	VuhDoYesNoFrame:SetAttribute("importStringEditBoxName", aButton:GetParent():GetName() .. "StringScrollFrameStringEditBox");
+
+	VuhDoYesNoFrame:Show();
 end
 
 

@@ -21,12 +21,15 @@ Bugfixes:
 
 
 Improvements:
+-- Added ability to import/export bouquets as strings for sharing purposes
+--   Under 'VuhDo Options > General > Bouquets'
 -- Added ability to import/export profiles as strings for sharing purposes
 --   Under 'VuhDo Options > Tools > Profiles'
 --   Be warned that large profiles can momentarily freeze the WoW client
 --   Custom debuffs are NOT included in the exported profile
--- Added ability to import/export bouquets as strings for sharing purposes
---   Under 'VuhDo Options > General > Bouquets'
+-- Added ability to import/export key layouts as strings for sharing purposes
+--   Under 'VuhDo Options > Tools > Key Layouts'
+--   This includes mouse/key binds, hostile binds, HoTs and auto triggers
 -- Added custom flag validator which accepts a user defined function.
 --   Bouquets can include any valid Lua function which returns true or false.
 --   The function can access the 'VUHDO_unitInfo' variable which is a map 
