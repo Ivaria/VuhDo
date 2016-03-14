@@ -384,7 +384,7 @@
 					</OnLoad>
 					<OnShow>
 						_G[self:GetName() .. "RootPane"]:Show();
-						_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText(VUHDO_I18N_EXPORT .. " " .. (VUHDO_CURRENT_PROFILE or ""));
+						_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText(VUHDO_I18N_EXPORT .. " " .. strtrim(_G[self:GetParent():GetName() .. "StorePanelSaveAsEditBox"]:GetText()));
 					</OnShow>
 				</Scripts>
 			</Frame>
