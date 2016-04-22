@@ -1,3 +1,32 @@
+Version 3.72.
+
+
+Known issues:
+-- Limited support for Class Order Hall Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
+-- AOE advisor not yet updated for Legion
+--   Need new spell formulas and coefficients
+-- Incoming heal estimation reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+-- Holy Priest spells derived from Chakra stance behave oddly as of 6.0.2
+--   Stance specific spells must all use the spell name Holy Word: Chastise
+
+
+Bugfixes:
+-- Removed AOE spell side effects from glyphs which are now entirely cosmetic
+-- Removed 'Recently Mass Resurrected' from default ignored debuffs
+-- Priest 'Prayer of Healing' is now raid wide and has a target radius of 20 yards
+-- Druid 'Wild Growth' now hits up to 6 targets normally and 8 with 'Incarnation'
+-- Druid 'Tranquility' now hits up to all 40 targets in a raid
+-- Paladin 'Light of Dawn' now hits up to 5 targets in a frontal 180 degree cone
+-- Paladin 'Holy Radiance' has been removed from the game
+
+
+Improvements:
+
+
+--------------------------------------------------------------
 Version 3.71.
 
 

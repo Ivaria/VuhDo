@@ -782,18 +782,6 @@ end
 
 
 --
-function VUHDO_isGlyphed(aGlyphId)
-	local tGlyphId;
-	for tCnt = 1, GetNumGlyphs() do
-		if select(4, GetGlyphSocketInfo(tCnt)) == aGlyphId then return true; end
-	end
-
-	return false;
-end
-
-
-
---
 local tPlayerX, tPlayerY;
 local tUnitX, tUnitY;
 local tFacing;

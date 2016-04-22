@@ -74,11 +74,11 @@ VUHDO_AOE_SPELLS = {
 		["avg"] = 0,
 		["max_targets"] = 5,
 		["degress"] = 1,
-		["rangePow"] = 30 * 30,
+		["rangePow"] = 20 * 20,
 		["isRadial"] = true,
 		["areTargetsRandom"] = true,
 		--["isSourcePlayer"] = false,
-		--["isDestRaid"] = false,
+		["isDestRaid"] = false,
 		["thresh"] = 20000,
 		["cone"] = 360,
 		--["checkCd"] = false,
@@ -117,7 +117,7 @@ VUHDO_AOE_SPELLS = {
 		["icon"] = (GetSpellTexture(VUHDO_SPELL_ID_WG)),
 		["name"] = (GetSpellInfo(VUHDO_SPELL_ID_WG)),
 		["avg"] = 0,
-		["max_targets"] = 5,
+		["max_targets"] = 6,
 		["degress"] = 1,
 		["rangePow"] = 30 * 30,
 		["isRadial"] = true,
@@ -139,7 +139,7 @@ VUHDO_AOE_SPELLS = {
 		["icon"] = (GetSpellTexture(VUHDO_SPELL_ID_TQ)),
 		["name"] = (GetSpellInfo(VUHDO_SPELL_ID_TQ)),
 		["avg"] = 0,
-		["max_targets"] = 5,
+		["max_targets"] = 40,
 		["degress"] = 1,
 		["rangePow"] = 40 * 40,
 		["isRadial"] = true,
@@ -161,7 +161,7 @@ VUHDO_AOE_SPELLS = {
 		["icon"] = (GetSpellTexture(VUHDO_SPELL_ID_LOD)),
 		["name"] = (GetSpellInfo(VUHDO_SPELL_ID_LOD)),
 		["avg"] = 0,
-		["max_targets"] = 6, -- MOP
+		["max_targets"] = 5,
 		["degress"] = 1,
 		["rangePow"] = 30 * 30,
 		["isRadial"] = true,
@@ -172,28 +172,6 @@ VUHDO_AOE_SPELLS = {
 		["cone"] = 180,
 		--["checkCd"] = false,
 		["time"] = select(7, GetSpellInfo(VUHDO_SPELL_ID_LOD)) or 0,
-	},
-
-	-- Holy Radiance
-	["hr"] = {
-		--["present"] = false,
-		["id"] = VUHDO_SPELL_ID_HR,
-		["base"] = (5098 + 6230) * 0.3, --(ca. 0.25 + 0.5 target)
-		["divisor"] = 4859,
-		["icon"] = (GetSpellTexture(VUHDO_SPELL_ID_HR)),
-		["name"] = (GetSpellInfo(VUHDO_SPELL_ID_HR)),
-		["avg"] = 0,
-		["max_targets"] = 40,
-		["degress"] = 1,
-		["rangePow"] = 10 * 10,
-		["isRadial"] = true,
-		["areTargetsRandom"] = true,
-		--["isSourcePlayer"] = false,
-		["isDestRaid"] = true,
-		["thresh"] = 10000,
-		["cone"] = 360,
-		--["checkCd"] = false,
-		["time"] = select(7, GetSpellInfo(VUHDO_SPELL_ID_HR)) or 0,
 	},
 
 	-- Chi Burst
@@ -272,36 +250,11 @@ local function VUHDO_isAoeSpellEnabled(aSpell)
 end
 
 
--- AoE glyphs:
---  Priest: Circle of Healing, +1 target (42396)
---  Shaman: Chain Heal, +100% range (41552)
---  Paladin: Light of Dawn, -2 targets +25% healing (41109)
---  Druid: Wild Growth, +1 target (45602)
 
 --
 function VUHDO_aoeUpdateTalents()
 	for tName, tInfo in pairs(VUHDO_AOE_SPELLS) do
 		tInfo["present"] = VUHDO_isAoeSpellEnabled(tName);
-	end
-
-	if "PRIEST" == VUHDO_PLAYER_CLASS then
-		VUHDO_AOE_SPELLS["coh"]["max_targets"] = VUHDO_isGlyphed(42396) and 6 or 5; -- Glyph of CoH -- MOPok
-
-	elseif "SHAMAN" == VUHDO_PLAYER_CLASS then
-		VUHDO_AOE_SPELLS["ch"]["jumpRangePow"] = VUHDO_isGlyphed(41552) and 22 * 22 or 11 * 11; -- Kettenbildung -- MOPok
-
-	elseif "DRUID" == VUHDO_PLAYER_CLASS then
-		VUHDO_AOE_SPELLS["wg"]["max_targets"] = VUHDO_isGlyphed(45602) and 6 or 5; -- Glyph of WG -- MOPok
-
-	elseif "PALADIN" == VUHDO_PLAYER_CLASS then
-		local tSpell = VUHDO_AOE_SPELLS["lod"];
-		if VUHDO_isGlyphed(41109) then -- Glyph of LoD
-			tSpell["max_targets"] = 4;
-			tSpell["base"] = (4599 + 5082) * 0.75;
-		else
-			tSpell["max_targets"] = 6;
-			tSpell["base"] = (4599 + 5082) * 0.5;
-		end
 	end
 
 	VUHDO_aoeUpdateSpellAverages();
