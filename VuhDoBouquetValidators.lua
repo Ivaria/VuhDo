@@ -1082,7 +1082,7 @@ local function VUHDO_customFlagValidator(anInfo, aCustom)
 					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE, 1.0, 0.0, 0.0);
 					DEFAULT_CHAT_FRAME:AddMessage(debugstack(1, 2, 0), 1.0, 0.0, 0.0);
 					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
-					DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"][1], 1.0, 0.0, 0.0);
+					DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"]["function"], 1.0, 0.0, 0.0);
 
 					return false, nil, -1, -1, -1; 
 				end
@@ -1095,7 +1095,7 @@ local function VUHDO_customFlagValidator(anInfo, aCustom)
 			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD, 1.0, 0.0, 0.0);
 			DEFAULT_CHAT_FRAME:AddMessage(errorString, 1.0, 0.0, 0.0);
 			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
-			DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"][1], 1.0, 0.0, 0.0);
+			DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"]["function"], 1.0, 0.0, 0.0);
 		end
 	end
 
