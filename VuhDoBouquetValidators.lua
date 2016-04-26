@@ -1064,8 +1064,15 @@ end
 
 --
 local function VUHDO_customFlagValidator(anInfo, aCustom)
-	if aCustom and aCustom["custom"] and aCustom["custom"][1] then
-		local loadedFunction, errorString = loadstring("local VUHDO_unitInfo = _G[\"VUHDO_anInfo\"];" .. aCustom["custom"][1]);
+	if aCustom and aCustom["custom"] and aCustom["custom"]["function"] then
+		local customCodeString = "return true;";
+
+		-- compatibility with prior alphas where default code string was '1'
+		if aCustom["custom"]["function"] ~= "1" then
+			customCodeString = aCustom["custom"]["function"];
+		end
+
+		local loadedFunction, errorString = loadstring("local VUHDO_unitInfo = _G[\"VUHDO_anInfo\"]; " .. customCodeString);
 
 		if loadedFunction then
 			_G["VUHDO_anInfo"] = anInfo;
@@ -1075,7 +1082,7 @@ local function VUHDO_customFlagValidator(anInfo, aCustom)
 					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE, 1.0, 0.0, 0.0);
 					DEFAULT_CHAT_FRAME:AddMessage(debugstack(1, 2, 0), 1.0, 0.0, 0.0);
 					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
-					DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"][1], 1.0, 0.0, 0.0);
+					DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"]["function"], 1.0, 0.0, 0.0);
 
 					return false, nil, -1, -1, -1; 
 				end
@@ -1088,7 +1095,7 @@ local function VUHDO_customFlagValidator(anInfo, aCustom)
 			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD, 1.0, 0.0, 0.0);
 			DEFAULT_CHAT_FRAME:AddMessage(errorString, 1.0, 0.0, 0.0);
 			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
-			DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"][1], 1.0, 0.0, 0.0);
+			DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"]["function"], 1.0, 0.0, 0.0);
 		end
 	end
 
