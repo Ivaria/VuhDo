@@ -1065,7 +1065,16 @@ end
 --
 local function VUHDO_customFlagValidator(anInfo, aCustom)
 	if aCustom and aCustom["custom"] and aCustom["custom"][1] then
-		local loadedFunction, errorString = loadstring("local VUHDO_unitInfo = _G[\"VUHDO_anInfo\"];" .. aCustom["custom"][1]);
+		local customCodeString;
+
+		-- compatibility with prior alphas where default code string was '1'
+		if aCustom["custom"][1] == "1" then
+			customCodeString = "return true;";
+		else
+			customCodeString = aCustom["custom"][1];
+		end
+
+		local loadedFunction, errorString = loadstring("local VUHDO_unitInfo = _G[\"VUHDO_anInfo\"]; " .. customCodeString);
 
 		if loadedFunction then
 			_G["VUHDO_anInfo"] = anInfo;
