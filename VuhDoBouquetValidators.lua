@@ -1701,6 +1701,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_BOUQUET_CUSTOM_FLAG,
 		["validator"] = VUHDO_customFlagValidator, 
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG,
+		["updateCyclic"] = true,
 		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE },
 	},
 
