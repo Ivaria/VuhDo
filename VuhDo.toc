@@ -1,4 +1,4 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: VuhDo ['vu:du:]
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
 ## Version: 3.71
@@ -21,3 +21,4 @@ Libs\UTF8\utf8data.lua
 
 VuhDoPanel.xml
 VuhDoBuffWatch.xml
+
