@@ -992,7 +992,7 @@ local tUnit;
 local function VUHDO_tappedValidator(anInfo, _)
 	tUnit = anInfo["unit"];
 
-	if not UnitIsPlayer(tUnit) and UnitIsTapped(tUnit) and not UnitIsTappedByPlayer(tUnit) then
+	if not UnitIsPlayer(tUnit) and UnitIsTapDenied(tUnit) then
 		return true, nil, -1, -1, -1,
 			VUHDO_copyColor(sBarColors["TAPPED"]);
 	else
