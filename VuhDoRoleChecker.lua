@@ -305,8 +305,8 @@ function VUHDO_determineRole(aUnit)
 		end
 
 	elseif 28 == tClassId then -- VUHDO_ID_PRIESTS
-		_, _, tBuffExist = UnitBuff(aUnit, VUHDO_SPELL_ID.SHADOWFORM);
-		if (tBuffExist) then
+		tPowerType = UnitPowerType(aUnit);
+		if VUHDO_UNIT_POWER_INSANITY == tPowerType then
 			VUHDO_FIX_ROLES[tName] = 62; -- VUHDO_ID_RANGED_DAMAGE
 			return 62; -- VUHDO_ID_RANGED_DAMAGE
 		else
@@ -326,13 +326,10 @@ function VUHDO_determineRole(aUnit)
 	elseif 27 == tClassId then -- VUHDO_ID_DRUIDS
 		tPowerType = UnitPowerType(aUnit);
 		if VUHDO_UNIT_POWER_MANA == tPowerType then
-			_, _, tBuffExist = UnitBuff(aUnit, VUHDO_SPELL_ID.MOONKIN_FORM);
-			if tBuffExist then
-				VUHDO_FIX_ROLES[tName] = 62; -- VUHDO_ID_RANGED_DAMAGE
-				return 62; -- VUHDO_ID_RANGED_DAMAGE
-			else
-				return 63; -- VUHDO_ID_RANGED_HEAL
-			end
+			return 63; -- VUHDO_ID_RANGED_HEAL
+		elseif VUHDO_UNIT_POWER_LUNAR_POWER == tPowerType then
+			VUHDO_FIX_ROLES[tName] = 62; --	VUHDO_ID_RANGED_DAMAGE
+			return 62; -- VUHDO_ID_RANGED_DAMAGE
 		elseif VUHDO_UNIT_POWER_RAGE == tPowerType then
 			VUHDO_FIX_ROLES[tName] = 60; -- VUHDO_ID_MELEE_TANK
 			return 60; -- VUHDO_ID_MELEE_TANK
@@ -370,10 +367,11 @@ function VUHDO_determineRole(aUnit)
 		if tAgility > tIntellect then
 			return 61; -- VUHDO_ID_MELEE_DAMAGE
 		else
-			if VUHDO_DF_TOOL_ROLES[tName] == 61 then -- VUHDO_ID_MELEE_DAMAGE
+			tPowerType = UnitPowerType(aUnit);
+			if VUHDO_UNIT_POWER_MAELSTROM == tPowerType then -- VUHDO_ID_RANGED_DAMAGE
 				return 62; -- VUHDO_ID_RANGED_DAMAGE
 			else
-				return 63; -- Can't tell, assume its a healer -- VUHDO_ID_RANGED_HEAL
+				return 63; -- VUHDO_ID_RANGED_HEAL
 			end
 		end
 	end

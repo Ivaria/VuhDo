@@ -718,12 +718,15 @@ local VUHDO_DEFAULT_CU_DE_STORED_SETTINGS = {
 
 
 VUHDO_DEFAULT_POWER_TYPE_COLORS = {
-	[VUHDO_UNIT_POWER_MANA]      = VUHDO_makeFullColor(0,   0,   1,    1,   0,   0,   1,    1),
-	[VUHDO_UNIT_POWER_RAGE]      = VUHDO_makeFullColor(1,   0,   0,    1,   1,   0,   0,    1),
-	[VUHDO_UNIT_POWER_FOCUS]     = VUHDO_makeFullColor(1,   0.5, 0.25, 1,   1,   0.5, 0.25, 1),
-	[VUHDO_UNIT_POWER_ENERGY]    = VUHDO_makeFullColor(1,   1,   0,    1,   1,   1,   0,    1),
-	[VUHDO_UNIT_POWER_HAPPINESS] = VUHDO_makeFullColor(0,   1,   1,    1,   0,   1,   1,    1),
-	[VUHDO_UNIT_POWER_RUNES]     = VUHDO_makeFullColor(0.5, 0.5, 0.5,  1,   0.5, 0.5, 0.5,  1),
+	[VUHDO_UNIT_POWER_MANA]        = VUHDO_makeFullColor(0,     0,     1,    1,  0,     0,     1,    1),
+	[VUHDO_UNIT_POWER_RAGE]        = VUHDO_makeFullColor(1,     0,     0,    1,  1,     0,     0,    1),
+	[VUHDO_UNIT_POWER_FOCUS]       = VUHDO_makeFullColor(1,     0.5,   0.25, 1,  1,     0.5,   0.25, 1),
+	[VUHDO_UNIT_POWER_ENERGY]      = VUHDO_makeFullColor(1,     1,     0,    1,  1,     1,     0,    1),
+	[VUHDO_UNIT_POWER_HAPPINESS]   = VUHDO_makeFullColor(0,     1,     1,    1,  0,     1,     1,    1),
+	[VUHDO_UNIT_POWER_RUNES]       = VUHDO_makeFullColor(0.5,   0.5,   0.5,  1,  0.5,   0.5,   0.5,  1),
+	[VUHDO_UNIT_POWER_LUNAR_POWER] = VUHDO_makeFullColor(0.87,  0.95,  1,    1,  0.87,  0.95,  1,    1),
+	[VUHDO_UNIT_POWER_MAELSTROM]   = VUHDO_makeFullColor(0.09,  0.56,  1,    1,  0.09,  0.56,  1,    1),
+	[VUHDO_UNIT_POWER_INSANITY]    = VUHDO_makeFullColor(0.15,  0.97,  1,    1,  0.15,  0.97,  1,    1),
 };
 
 

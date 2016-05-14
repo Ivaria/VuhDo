@@ -28,6 +28,7 @@ Bugfixes:
 
 
 Improvements:
+-- Added new power types and power colors (Astral Power, Maelstrom, Insanity)
 
 
 --------------------------------------------------------------
