@@ -35,14 +35,11 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.SACRED_SHIELD] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_STAY_OF_EXECUTION] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ETERNAL_FLAME] = { ["isHot"] = true, },
-	[VUHDO_SPELL_ID.ILLUMINATED_HEALING] = { ["isHot"] = true, },
 
 	-- Priest
-	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.RENEW] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.POWERWORD_SHIELD] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.PRAYER_OF_MENDING] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.DIVINE_AEGIS] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.GRACE] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = { ["isHot"] = true, ["nohelp"] = true, ["noselftarget"] = true },

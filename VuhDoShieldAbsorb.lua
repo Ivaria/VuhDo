@@ -7,11 +7,8 @@ local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
 local VUHDO_SHIELDS = {
 	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD -- ok
 	[123258] = 15, -- Power Word: Shield (Improved)
-	[47753] = 15, -- VUHDO_SPELL_ID.DIVINE_AEGIS -- ok
-	[86273] = 15, -- VUHDO_SPELL_ID.ILLUMINATED_HEALING (buff) ok
 	[11426] = 60, -- VUHDO_SPELL_ID.ICE_BARRIER -- ok
 	[65148] = 15, -- VUHDO_SPELL_ID.SACRED_SHIELD (Buff) -- ok
-	[114908] = 15, -- VUHDO_SPELL_ID.SPIRIT_SHELL (Buff) -- ok
 	[116849] = 12, -- Life Cocoon
 	[115295] = 30, -- Guard (brewmaster monk's self buff, unglyphed)
 	--[118604] = 30, -- Guard (brewmaster monk's black ox statue (cast on group), unglyphed)
@@ -29,8 +26,6 @@ local VUHDO_SHIELDS = {
 
 --
 local VUHDO_PUMP_SHIELDS = {
-	[VUHDO_SPELL_ID.DIVINE_AEGIS] = 0.6,
-	[VUHDO_SPELL_ID.SPIRIT_SHELL] = 0.6,
 	[VUHDO_SPELL_ID.CLARITY_OF_WILL] = 0.75,
 }
 

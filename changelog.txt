@@ -17,10 +17,13 @@ Bugfixes:
 -- Removed AOE spell side effects from glyphs which are now entirely cosmetic
 -- Removed 'Recently Mass Resurrected' from default ignored debuffs
 -- Priest 'Prayer of Healing' is now raid wide and has a target radius of 20 yards
+-- Priest 'Divine Aegis' has been removed from the game
+-- Priest 'Spirit Shell' has been removed from the game
 -- Druid 'Wild Growth' now hits up to 6 targets normally and 8 with 'Incarnation'
 -- Druid 'Tranquility' now hits up to all 40 targets in a raid
 -- Paladin 'Light of Dawn' now hits up to 5 targets in a frontal 180 degree cone
 -- Paladin 'Holy Radiance' has been removed from the game
+-- Paladin 'Illuminated Healing' has been removed from the game
 -- Fixed 'Flag: Tapped' bouquet validator to use new UnitIsTapDenied() API
 
 
