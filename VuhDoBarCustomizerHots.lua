@@ -469,7 +469,6 @@ end
 local VUHDO_IGNORE_HOT_IDS = {
 	[67358] = true, -- "Rejuvenating" proc has same name in russian and spanish as rejuvenation
 	[126921] = true, -- "Weakened Soul" by Shao-Tien Soul-Render
-	[65148] = true, -- Second buff of Sacred Shield: New absorb buff every 6 (which actually lasts 30 sec.)
 }
 
 

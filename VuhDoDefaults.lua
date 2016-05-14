@@ -140,7 +140,6 @@ local VUHDO_CLASS_DEFAULT_SPELL_ASSIGNMENT = {
 		["2"] = {"", "2", VUHDO_SPELL_ID.PALA_CLEANSE},
 		["3"] = {"", "3", "menu"},
 		["4"] = {"", "4", VUHDO_SPELL_ID.LIGHT_OF_DAWN},
-		["5"] = {"", "5", VUHDO_SPELL_ID.SACRED_SHIELD},
 
 		["alt1"] = {"alt-", "1", "target"},
 

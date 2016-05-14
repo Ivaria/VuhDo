@@ -24,6 +24,9 @@ Bugfixes:
 -- Paladin 'Light of Dawn' now hits up to 5 targets in a frontal 180 degree cone
 -- Paladin 'Holy Radiance' has been removed from the game
 -- Paladin 'Illuminated Healing' has been removed from the game
+-- Paladin 'Sacred Shield' has been removed from the game
+-- Monk 'Guard' has been removed from the game
+-- Warrior 'Shield Barrier' has been removed from the game
 -- Fixed 'Flag: Tapped' bouquet validator to use new UnitIsTapDenied() API
 
 
