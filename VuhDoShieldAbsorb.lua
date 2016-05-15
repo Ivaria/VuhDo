@@ -27,13 +27,9 @@ local VUHDO_PUMP_SHIELDS = {
 
 local VUHDO_ABSORB_DEBUFFS = {
 	[109379] = function(aUnit) return 200000, 5 * 60; end, -- Searing Plasma
-	[109362] = function(aUnit) return 300000, 5 * 60; end,
 	[105479] = function(aUnit) return 200000, 5 * 60; end,
-	[109364] = function(aUnit) return 420000, 5 * 60; end,
-	[109363] = function(aUnit) return 280000, 5 * 60; end,
 
-	[110598] = function(aUnit) return 420000, 2 * 60; end, -- Consuming Shroud
-	[110214] = function(aUnit) return 280000, 2 * 60; end,
+	[110214] = function(aUnit) return 280000, 2 * 60; end, -- Consuming Shroud
 
 	-- Patch 6.2 - Hellfire Citadel
 	[189030] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
