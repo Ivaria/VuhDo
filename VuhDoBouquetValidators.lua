@@ -861,6 +861,19 @@ end
 
 
 --
+local function VUHDO_demonHunterTankValidator(anInfo, _)
+	if (VUHDO_ID_MELEE_TANK == anInfo["role"]) then
+                if(VUHDO_ID_DEMON_HUNTERS == anInfo["classId"]) then
+               		return true, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES", -1, -1, -1, nil, nil, GetTexCoordsForRole("TANK");
+                end
+	else
+		return false, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil;
+	end
+end
+
+
+
+--
 local tIcon, tExpiry, tStacks, tDuration;
 local function VUHDO_customDebuffIconValidator(anInfo, _)
 	tIcon, tExpiry, tStacks, tDuration = VUHDO_getLatestCustomDebuff(anInfo["unit"]);
@@ -1599,6 +1612,12 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
         ["DRUID_TANK"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_DRUID_TANK,
 		["validator"] = VUHDO_druidTankValidator,
+		["interests"] = { },
+	},
+
+        ["DEMON_HUNTER_TANK"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_DEMON_HUNTER_TANK,
+		["validator"] = VUHDO_demonHunterTankValidator,
 		["interests"] = { },
 	},
 

@@ -619,6 +619,9 @@ VUHDO_I18N_TT.K559 = "Click to select focus bar color.";
 VUHDO_I18N_TT.K560 = "Click to select astral power bar color.";
 VUHDO_I18N_TT.K561 = "Click to select maelstrom bar color.";
 VUHDO_I18N_TT.K562 = "Click to select insanity bar color.";
+VUHDO_I18N_TT.K563 = "Click to select fury bar color.";
+VUHDO_I18N_TT.K564 = "Select a color for Monks";
+VUHDO_I18N_TT.K565 = "Select a color for Demon Hunters";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1104,4 +1107,5 @@ VUHDO_I18N_REALLY_IMPORT = "Do you really want to import?\n\nYou should only imp
 VUHDO_I18N_LUNAR_POWER = "Astral Power";
 VUHDO_I18N_MAELSTROM = "Maelstrom";
 VUHDO_I18N_INSANITY = "Insanity";
+VUHDO_I18N_FURY = "Fury";
 

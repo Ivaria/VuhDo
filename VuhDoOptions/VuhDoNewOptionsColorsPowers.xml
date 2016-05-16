@@ -3,12 +3,12 @@
 		<Frames>
 			<Frame name="$parentPowerTypesPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="126" y="359" />
+					<AbsDimension x="126" y="395" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="146" y="-42" />
+							<AbsDimension x="146" y="-15" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -155,6 +155,23 @@
 								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##13");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_INSANITY, VUHDO_I18N_INSANITY);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K562);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentFuryTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-354" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##17");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_FURY, VUHDO_I18N_FURY);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K563);
 							</OnLoad>
 						</Scripts>
 					</Frame>
