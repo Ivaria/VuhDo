@@ -32,7 +32,7 @@ Bugfixes:
 
 
 Improvements:
--- Added new power types and power colors (Maelstrom, Insanity, etc.)
+-- Added new power types and power colors (Maelstrom, Insanity, Pain, etc.)
 -- Added auto loading of profiles and key layouts for all 4 specializations
 -- Added Demon Hunters to the demo groups for testing panels
 

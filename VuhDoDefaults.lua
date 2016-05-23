@@ -727,6 +727,7 @@ VUHDO_DEFAULT_POWER_TYPE_COLORS = {
 	[VUHDO_UNIT_POWER_MAELSTROM]   = VUHDO_makeFullColor(0.09,  0.56,  1,    1,  0.09,  0.56,  1,    1),
 	[VUHDO_UNIT_POWER_INSANITY]    = VUHDO_makeFullColor(0.15,  0.97,  1,    1,  0.15,  0.97,  1,    1),
 	[VUHDO_UNIT_POWER_FURY]        = VUHDO_makeFullColor(0.54,  0.09,  0.69, 1,  0.54,  0.09,  0.69, 1),
+	[VUHDO_UNIT_POWER_PAIN]        = VUHDO_makeFullColor(0.54,  0.09,  0.69, 1,  0.54,  0.09,  0.69, 1),
 };
 
 

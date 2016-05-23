@@ -3,7 +3,7 @@
 		<Frames>
 			<Frame name="$parentPowerTypesPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="126" y="395" />
+					<AbsDimension x="230" y="252" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -112,7 +112,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-240" />
+									<AbsDimension x="119" y="-50" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -129,7 +129,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-278" />
+									<AbsDimension x="119" y="-88" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -146,7 +146,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-316" />
+									<AbsDimension x="119" y="-126" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -163,7 +163,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-354" />
+									<AbsDimension x="119" y="-164" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -172,6 +172,23 @@
 								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##17");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_FURY, VUHDO_I18N_FURY);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K563);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentPainTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-202" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##18");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_PAIN, VUHDO_I18N_PAIN);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K566);
 							</OnLoad>
 						</Scripts>
 					</Frame>
