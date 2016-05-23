@@ -12,7 +12,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="270" y="-210" />
+							<AbsDimension x="20" y="-310" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -245,7 +245,7 @@
 
 			<Frame name="$parentAutoEnablePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="230" y="190" />
+					<AbsDimension x="230" y="230" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -532,6 +532,54 @@
 							<OnClick>
 								VUHDO_lnfCheckButtonClicked(self);
 								VUHDO_skinsAutoCheckButtonClicked(self, "SPEC_2");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentSpec3CheckButton" text="VUHDO_I18N_SPEC_3" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="85" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="25" y="-183" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_skinsInitAutoCheckButton(self, "SPEC_3");
+							</OnShow>
+							<OnClick>
+								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_skinsAutoCheckButtonClicked(self, "SPEC_3");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentSpec4CheckButton" text="VUHDO_I18N_SPEC_4" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="85" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="115" y="-183" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_skinsInitAutoCheckButton(self, "SPEC_4");
+							</OnShow>
+							<OnClick>
+								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_skinsAutoCheckButtonClicked(self, "SPEC_4");
 							</OnClick>
 						</Scripts>
 					</CheckButton>

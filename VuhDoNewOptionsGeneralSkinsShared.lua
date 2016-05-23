@@ -1983,7 +1983,7 @@ end
 --
 local tSpec;
 function VUHDO_getBestProfileAfterSpecChange()
-	tSpec = GetActiveSpecGroup(false);
+	tSpec = GetSpecialization();
 	return VUHDO_getBestProfileForSpecAndSize(tSpec, VUHDO_GROUP_SIZE)
 		or VUHDO_getBestProfileForSpec(tSpec)
 		or VUHDO_getBestProfileForSize(VUHDO_GROUP_SIZE);
@@ -1993,7 +1993,7 @@ end
 
 --
 function VUHDO_getBestProfileAfterSizeChange()
-	tSpec = GetActiveSpecGroup(false);
+	tSpec = GetSpecialization();
 	return VUHDO_getBestProfileForSpecAndSize(tSpec, VUHDO_GROUP_SIZE)
 		or VUHDO_getBestProfileForSize(VUHDO_GROUP_SIZE)
 		or VUHDO_getBestProfileForSpec(tSpec);

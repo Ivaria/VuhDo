@@ -14,7 +14,6 @@ local twipe = table.wipe;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
 local NotifyInspect = NotifyInspect;
-local GetActiveSpecGroup = GetActiveSpecGroup;
 local GetSpecializationInfo = GetSpecializationInfo;
 local ClearInspectPlayer = ClearInspectPlayer;
 local UnitBuff = UnitBuff;

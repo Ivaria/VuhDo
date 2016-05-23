@@ -39,6 +39,14 @@ function VUHDO_keyLayoutComboChanged(aComboBox, aValue)
 	tSpec2CheckButton:SetChecked(aValue == VUHDO_SPEC_LAYOUTS["2"]);
 	VUHDO_lnfCheckButtonClicked(tSpec2CheckButton);
 
+	local tSpec2CheckButton =  _G[tParentName .. "Spec3CheckButton"];
+	tSpec2CheckButton:SetChecked(aValue == VUHDO_SPEC_LAYOUTS["3"]);
+	VUHDO_lnfCheckButtonClicked(tSpec2CheckButton);
+
+	local tSpec2CheckButton =  _G[tParentName .. "Spec4CheckButton"];
+	tSpec2CheckButton:SetChecked(aValue == VUHDO_SPEC_LAYOUTS["4"]);
+	VUHDO_lnfCheckButtonClicked(tSpec2CheckButton);
+
 	VUHDO_updateDefaultLayoutCheckButton(aComboBox:GetParent():GetParent());
 end
 

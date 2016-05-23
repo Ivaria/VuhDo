@@ -21,6 +21,7 @@ Bugfixes:
 -- Priest 'Spirit Shell' has been removed from the game
 -- Druid 'Wild Growth' now hits up to 6 targets normally and 8 with 'Incarnation'
 -- Druid 'Tranquility' now hits up to all 40 targets in a raid
+-- Druid 'Rampant Growth' has been removed from the game
 -- Paladin 'Light of Dawn' now hits up to 5 targets in a frontal 180 degree cone
 -- Paladin 'Holy Radiance' has been removed from the game
 -- Paladin 'Illuminated Healing' has been removed from the game
@@ -31,7 +32,9 @@ Bugfixes:
 
 
 Improvements:
--- Added new power types and power colors (Astral Power, Maelstrom, Insanity)
+-- Added new power types and power colors (Maelstrom, Insanity, etc.)
+-- Added auto loading of profiles and key layouts for all 4 specializations
+-- Added Demon Hunters to the demo groups for testing panels
 
 
 --------------------------------------------------------------
