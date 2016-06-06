@@ -1465,5 +1465,5 @@ function VUHDO_OnLoad(anInstance)
 
 	anInstance:SetScript("OnEvent", VUHDO_OnEvent);
 	anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
-	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v".. VUHDO_VERSION .. ". by Iza(ak)@Gilneas, dedicated to Vuh (use /vd)");
+	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v".. VUHDO_VERSION .. " (use /vd). originally authored by Iza(ak)@EU-Gilneas in dedication to Vuh.  Currently maintained by Ivaria@US-Hyjal in honor of Marshy.");
 end
