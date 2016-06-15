@@ -32,7 +32,7 @@ VUHDO_DEBUFF_BLACKLIST = {
 	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
 	[GetSpellInfo(57723)] = true, -- Exhaustion (Heroism)
 	[GetSpellInfo(80354)] = true  -- Temporal Displacement
-}
+};
 
 
 

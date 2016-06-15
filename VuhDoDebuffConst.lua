@@ -194,7 +194,6 @@ VUHDO_INIT_IGNORE_DEBUFFS_NO_HARM = {
 	[(GetSpellInfo(53753))] = true, -- Nightmare Slumber
 	[(GetSpellInfo(78993))] = true, -- Concentration
 	[(GetSpellInfo(105701))] = true, -- Potion of Focus
-
 	[(GetSpellInfo(57724))] = true, -- Sated
 	[(GetSpellInfo(57723))] = true, -- Exhaustion
 	[(GetSpellInfo(80354))] = true, -- Temporal Displacement
