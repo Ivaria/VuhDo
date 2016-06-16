@@ -376,7 +376,7 @@
 									<AbsDimension x="550" y="250" />
 								</Size>
 								<ScrollChild>							
-									<EditBox name="$parentStringEditBox" multiLine="true" autoFocus="true" inherits="VuhDoEditBoxMultiLineTemplate">
+									<EditBox name="$parentStringEditBox" inherits="VuhDoEditBoxMultiLineTemplate">
 										<Size>
 											<AbsDimension x="540" y="200" />
 										</Size>
@@ -473,7 +473,7 @@
 									<AbsDimension x="550" y="250" />
 								</Size>
 								<ScrollChild>							
-									<EditBox name="$parentStringEditBox" multiLine="true" autoFocus="true" inherits="VuhDoEditBoxMultiLineTemplate">
+									<EditBox name="$parentStringEditBox" inherits="VuhDoEditBoxMultiLineTemplate">
 										<Size>
 											<AbsDimension x="540" y="200" />
 										</Size>
