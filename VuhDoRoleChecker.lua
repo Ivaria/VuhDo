@@ -14,7 +14,6 @@ local twipe = table.wipe;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
 local NotifyInspect = NotifyInspect;
-local GetActiveSpecGroup = GetActiveSpecGroup;
 local GetSpecializationInfo = GetSpecializationInfo;
 local ClearInspectPlayer = ClearInspectPlayer;
 local UnitBuff = UnitBuff;
@@ -177,7 +176,8 @@ function VUHDO_inspectLockRole()
 			or VUHDO_ID_ROGUES == tClassId
 			or VUHDO_ID_PALADINS == tClassId
 			or VUHDO_ID_MONKS == tClassId
-			or VUHDO_ID_DEATH_KNIGHT == tClassId then
+			or VUHDO_ID_DEATH_KNIGHT == tClassId 
+			or VUHDO_ID_DEMON_HUNTERS == tClassId then
 
 			VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_ID_MELEE_DAMAGE;
 
@@ -230,7 +230,8 @@ local function VUHDO_determineDfToolRole(anInfo)
 		if anInfo["classId"] == VUHDO_ID_WARRIORS
 		or anInfo["classId"] == VUHDO_ID_PALADINS
 		or anInfo["classId"] == VUHDO_ID_DEATH_KNIGHT
-		or anInfo["classId"] == VUHDO_ID_MONKS then
+		or anInfo["classId"] == VUHDO_ID_MONKS 
+		or anInfo["classId"] == VUHDO_ID_DEMON_HUNTERS then
 			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_MELEE_DAMAGE;
 			tReturnRole = VUHDO_ID_MELEE_DAMAGE;
 		elseif anInfo["classId"] == VUHDO_ID_PRIESTS then
@@ -305,8 +306,8 @@ function VUHDO_determineRole(aUnit)
 		end
 
 	elseif 28 == tClassId then -- VUHDO_ID_PRIESTS
-		_, _, tBuffExist = UnitBuff(aUnit, VUHDO_SPELL_ID.SHADOWFORM);
-		if (tBuffExist) then
+		tPowerType = UnitPowerType(aUnit);
+		if VUHDO_UNIT_POWER_INSANITY == tPowerType then
 			VUHDO_FIX_ROLES[tName] = 62; -- VUHDO_ID_RANGED_DAMAGE
 			return 62; -- VUHDO_ID_RANGED_DAMAGE
 		else
@@ -315,7 +316,12 @@ function VUHDO_determineRole(aUnit)
 
 	elseif 20 == tClassId then -- VUHDO_ID_WARRIORS
 		_, tDefense = UnitDefense(aUnit);
-		tDefense = tDefense / UnitLevel(aUnit);
+		tLevel = UnitLevel(aUnit) or 0;
+		if tLevel <= 0 then
+			return nil;
+		end
+
+		tDefense = tDefense / tLevel;
 
 		if (tDefense > 2 or VUHDO_isUnitInModel(aUnit, VUHDO_ID_MAINTANKS)) then
 			return 60; -- VUHDO_ID_MELEE_TANK
@@ -326,13 +332,10 @@ function VUHDO_determineRole(aUnit)
 	elseif 27 == tClassId then -- VUHDO_ID_DRUIDS
 		tPowerType = UnitPowerType(aUnit);
 		if VUHDO_UNIT_POWER_MANA == tPowerType then
-			_, _, tBuffExist = UnitBuff(aUnit, VUHDO_SPELL_ID.MOONKIN_FORM);
-			if tBuffExist then
-				VUHDO_FIX_ROLES[tName] = 62; -- VUHDO_ID_RANGED_DAMAGE
-				return 62; -- VUHDO_ID_RANGED_DAMAGE
-			else
-				return 63; -- VUHDO_ID_RANGED_HEAL
-			end
+			return 63; -- VUHDO_ID_RANGED_HEAL
+		elseif VUHDO_UNIT_POWER_LUNAR_POWER == tPowerType then
+			VUHDO_FIX_ROLES[tName] = 62; --	VUHDO_ID_RANGED_DAMAGE
+			return 62; -- VUHDO_ID_RANGED_DAMAGE
 		elseif VUHDO_UNIT_POWER_RAGE == tPowerType then
 			VUHDO_FIX_ROLES[tName] = 60; -- VUHDO_ID_MELEE_TANK
 			return 60; -- VUHDO_ID_MELEE_TANK
@@ -370,12 +373,30 @@ function VUHDO_determineRole(aUnit)
 		if tAgility > tIntellect then
 			return 61; -- VUHDO_ID_MELEE_DAMAGE
 		else
-			if VUHDO_DF_TOOL_ROLES[tName] == 61 then -- VUHDO_ID_MELEE_DAMAGE
+			tPowerType = UnitPowerType(aUnit);
+			if VUHDO_UNIT_POWER_MAELSTROM == tPowerType then -- VUHDO_ID_RANGED_DAMAGE
 				return 62; -- VUHDO_ID_RANGED_DAMAGE
 			else
-				return 63; -- Can't tell, assume its a healer -- VUHDO_ID_RANGED_HEAL
+				return 63; -- VUHDO_ID_RANGED_HEAL
 			end
 		end
+
+	-- TODO: monk is missing for some reason?
+	elseif 31 == tClassId then -- VUHDO_ID_DEMON_HUNTERS
+		_, tDefense = UnitDefense(aUnit);
+		tLevel = UnitLevel(aUnit) or 0;
+		if tLevel <= 0 then
+			return nil;
+		end
+
+		tDefense = tDefense / tLevel;
+
+		if (tDefense > 2 or VUHDO_isUnitInModel(aUnit, VUHDO_ID_MAINTANKS)) then
+			return 60; -- VUHDO_ID_MELEE_TANK
+		else
+			return 61; -- VUHDO_ID_MELEE_DAMAGE
+		end
+
 	end
 
 	return nil;

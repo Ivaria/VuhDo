@@ -469,7 +469,6 @@ end
 local VUHDO_IGNORE_HOT_IDS = {
 	[67358] = true, -- "Rejuvenating" proc has same name in russian and spanish as rejuvenation
 	[126921] = true, -- "Weakened Soul" by Shao-Tien Soul-Render
-	[65148] = true, -- Second buff of Sacred Shield: New absorb buff every 6 (which actually lasts 30 sec.)
 }
 
 
@@ -479,20 +478,7 @@ function VUHDO_hotBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, a
 	VUHDO_updateHotIcons(aUnit, "BOUQUET_" .. (aBouquetName or ""), aTimer, aCounter, anIcon, aDuration, 0, aColor, aBuffName, aClipL, aClipR, aClipT, aClipB);
 end
 
---
-local tTalentRampantGrowthSpellId;
-local tIsTalentSelected;
-function VUHDO_hasTalentRampantGrowth()
-	if "DRUID" ~= VUHDO_PLAYER_CLASS then
-		return false;
-	end
 
-	tTalentRampantGrowthSpellId = 21655;
-
-	_, _, _, tIsTalentSelected, _ = GetTalentInfoByID(tTalentRampantGrowthSpellId, GetActiveSpecGroup());
-
-	return tIsTalentSelected;
-end
 
 --
 local tOtherHotCnt;
@@ -564,14 +550,7 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				if VUHDO_SPELL_ID.REGROWTH == tBuffName or VUHDO_SPELL_ID.REJUVENATION == tBuffName or VUHDO_SPELL_ID.GERMINATION == tBuffName then
 					tStart, tSmDuration, tEnabled = GetSpellCooldown(VUHDO_SPELL_ID.SWIFTMEND);
 					if tEnabled ~= 0 and (tStart == nil or tSmDuration == nil or tStart <= 0 or tSmDuration <= 1.6) then
-						-- Level 100 talent makes a unit swiftmendable only with OWN hots
-						if VUHDO_hasTalentRampantGrowth() then
-							if tIsCastByPlayer then 
-								sIsSwiftmend = true;
-							end
-						else
-							sIsSwiftmend = true;
-						end
+						sIsSwiftmend = true;
 					end
 				end
 			end

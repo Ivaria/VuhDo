@@ -77,7 +77,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="17" y="-137" />
+									<AbsDimension x="17" y="-177" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -159,6 +159,54 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentSpec3CheckButton" text="VUHDO_I18N_SPEC_3" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="80" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-107" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_keyLayoutSpecOnClick(self, "3");
+								VUHDO_lnfCheckButtonClicked(self);
+							</OnClick>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Label");
+								self:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["3"]);
+								VUHDO_lnfCheckButtonClicked(self);
+							</OnShow>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentSpec4CheckButton" text="VUHDO_I18N_SPEC_4" inherits="VuhDoCheckButtonTemplate">
+						<Size>
+							<AbsDimension x="80" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="105" y="-107" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_keyLayoutSpecOnClick(self, "4");
+								VUHDO_lnfCheckButtonClicked(self);
+							</OnClick>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Label");
+								self:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["4"]);
+								VUHDO_lnfCheckButtonClicked(self);
+							</OnShow>
+						</Scripts>
+					</CheckButton>
+
 					<CheckButton name="$parentDefaultLayoutCheckButton" text="VUHDO_I18N_DEFAULT_LAYOUT" inherits="VuhDoCheckButtonTemplate">
 						<Size>
 							<AbsDimension x="125" y="32" />
@@ -166,7 +214,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-107" />
+									<AbsDimension x="13" y="-145" />
 								</Offset>
 							</Anchor>
 						</Anchors>

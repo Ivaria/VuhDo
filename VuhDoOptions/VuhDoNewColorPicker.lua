@@ -32,7 +32,7 @@ function VUHDO_setPickerColor(aPanel)
 	local tR, tG, TB, tO = VUHDO_backOrTextColor(VUHDO_COLOR, sIsTextEdit);
 
 	aPanel:SetColorRGB(tR, tG, TB);
-	VuhDoColorPickerColorSwatchOld:SetTexture(tR, tG, TB);
+	VuhDoColorPickerColorSwatchOld:SetColorTexture(tR, tG, TB);
 	_G[aPanel:GetName() .. "OpacitySliderFrame"]:SetShown(tO ~= nil and not strfind(VUHDO_PROHIBIT, "O"));
 	_G[aPanel:GetName() .. "OpacitySliderFrameSlider"]:SetValue(floor(tO * 100));
 end
@@ -216,7 +216,7 @@ end
 
 --
 function VUHDO_colorPickerColorSelectCallback(anInstance, aR, aG, aB)
-	VuhDoColorPickerColorSwatchNew:SetTexture(aR, aG, aB);
+	VuhDoColorPickerColorSwatchNew:SetColorTexture(aR, aG, aB);
 	VUHDO_colorPickerOnColorSelect(aR, aG, aB);
 	VUHDO_colorPickerSetColorCode();
 	VUHDO_setColorCodeTextColor();

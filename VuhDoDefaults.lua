@@ -140,7 +140,6 @@ local VUHDO_CLASS_DEFAULT_SPELL_ASSIGNMENT = {
 		["2"] = {"", "2", VUHDO_SPELL_ID.PALA_CLEANSE},
 		["3"] = {"", "3", "menu"},
 		["4"] = {"", "4", VUHDO_SPELL_ID.LIGHT_OF_DAWN},
-		["5"] = {"", "5", VUHDO_SPELL_ID.SACRED_SHIELD},
 
 		["alt1"] = {"alt-", "1", "target"},
 
@@ -718,12 +717,17 @@ local VUHDO_DEFAULT_CU_DE_STORED_SETTINGS = {
 
 
 VUHDO_DEFAULT_POWER_TYPE_COLORS = {
-	[VUHDO_UNIT_POWER_MANA]      = VUHDO_makeFullColor(0,   0,   1,    1,   0,   0,   1,    1),
-	[VUHDO_UNIT_POWER_RAGE]      = VUHDO_makeFullColor(1,   0,   0,    1,   1,   0,   0,    1),
-	[VUHDO_UNIT_POWER_FOCUS]     = VUHDO_makeFullColor(1,   0.5, 0.25, 1,   1,   0.5, 0.25, 1),
-	[VUHDO_UNIT_POWER_ENERGY]    = VUHDO_makeFullColor(1,   1,   0,    1,   1,   1,   0,    1),
-	[VUHDO_UNIT_POWER_HAPPINESS] = VUHDO_makeFullColor(0,   1,   1,    1,   0,   1,   1,    1),
-	[VUHDO_UNIT_POWER_RUNES]     = VUHDO_makeFullColor(0.5, 0.5, 0.5,  1,   0.5, 0.5, 0.5,  1),
+	[VUHDO_UNIT_POWER_MANA]        = VUHDO_makeFullColor(0,     0,     1,    1,  0,     0,     1,    1),
+	[VUHDO_UNIT_POWER_RAGE]        = VUHDO_makeFullColor(1,     0,     0,    1,  1,     0,     0,    1),
+	[VUHDO_UNIT_POWER_FOCUS]       = VUHDO_makeFullColor(1,     0.5,   0.25, 1,  1,     0.5,   0.25, 1),
+	[VUHDO_UNIT_POWER_ENERGY]      = VUHDO_makeFullColor(1,     1,     0,    1,  1,     1,     0,    1),
+	[VUHDO_UNIT_POWER_HAPPINESS]   = VUHDO_makeFullColor(0,     1,     1,    1,  0,     1,     1,    1),
+	[VUHDO_UNIT_POWER_RUNES]       = VUHDO_makeFullColor(0.5,   0.5,   0.5,  1,  0.5,   0.5,   0.5,  1),
+	[VUHDO_UNIT_POWER_LUNAR_POWER] = VUHDO_makeFullColor(0.87,  0.95,  1,    1,  0.87,  0.95,  1,    1),
+	[VUHDO_UNIT_POWER_MAELSTROM]   = VUHDO_makeFullColor(0.09,  0.56,  1,    1,  0.09,  0.56,  1,    1),
+	[VUHDO_UNIT_POWER_INSANITY]    = VUHDO_makeFullColor(0.15,  0.97,  1,    1,  0.15,  0.97,  1,    1),
+	[VUHDO_UNIT_POWER_FURY]        = VUHDO_makeFullColor(0.54,  0.09,  0.69, 1,  0.54,  0.09,  0.69, 1),
+	[VUHDO_UNIT_POWER_PAIN]        = VUHDO_makeFullColor(0.54,  0.09,  0.69, 1,  0.54,  0.09,  0.69, 1),
 };
 
 
@@ -1872,18 +1876,19 @@ local VUHDO_DEFAULT_BUFF_CONFIG = {
 
 
 VUHDO_DEFAULT_USER_CLASS_COLORS = {
-	[VUHDO_ID_DRUIDS]       = VUHDO_makeFullColor(1,    0.49, 0.04, 1,   1,    0.6,  0.04, 1),
-	[VUHDO_ID_HUNTERS]      = VUHDO_makeFullColor(0.67, 0.83, 0.45, 1,   0.77, 0.93, 0.55, 1),
-	[VUHDO_ID_MAGES]        = VUHDO_makeFullColor(0.41, 0.8,  0.94, 1,   0.51, 0.9,  1,    1),
-	[VUHDO_ID_PALADINS]     = VUHDO_makeFullColor(0.96, 0.55, 0.73, 1,   1,    0.65, 0.83, 1),
-	[VUHDO_ID_PRIESTS]      = VUHDO_makeFullColor(0.9,  0.9,  0.9,  1,   1,    1,    1,    1),
-	[VUHDO_ID_ROGUES]       = VUHDO_makeFullColor(1,    0.96, 0.41, 1,   1,    1,    0.51, 1),
-	[VUHDO_ID_SHAMANS]      = VUHDO_makeFullColor(0.14, 0.35, 1,    1,   0.24, 0.45, 1,    1),
-	[VUHDO_ID_WARLOCKS]     = VUHDO_makeFullColor(0.58, 0.51, 0.79, 1,   0.68, 0.61, 0.89, 1),
-	[VUHDO_ID_WARRIORS]     = VUHDO_makeFullColor(0.78, 0.61, 0.43, 1,   0.88, 0.71, 0.53, 1),
-	[VUHDO_ID_DEATH_KNIGHT] = VUHDO_makeFullColor(0.77, 0.12, 0.23, 1,   0.87, 0.22, 0.33, 1),
-	[VUHDO_ID_MONKS]        = VUHDO_makeFullColor(0,    1,    0.59, 1,   0,    1,    0.69, 1),
-	[VUHDO_ID_PETS]         = VUHDO_makeFullColor(0.4,  0.6,  0.4,  1,   0.5,  0.9,  0.5,  1),
+	[VUHDO_ID_DRUIDS]        = VUHDO_makeFullColor(1,    0.49, 0.04, 1,   1,    0.6,  0.04, 1),
+	[VUHDO_ID_HUNTERS]       = VUHDO_makeFullColor(0.67, 0.83, 0.45, 1,   0.77, 0.93, 0.55, 1),
+	[VUHDO_ID_MAGES]         = VUHDO_makeFullColor(0.41, 0.8,  0.94, 1,   0.51, 0.9,  1,    1),
+	[VUHDO_ID_PALADINS]      = VUHDO_makeFullColor(0.96, 0.55, 0.73, 1,   1,    0.65, 0.83, 1),
+	[VUHDO_ID_PRIESTS]       = VUHDO_makeFullColor(0.9,  0.9,  0.9,  1,   1,    1,    1,    1),
+	[VUHDO_ID_ROGUES]        = VUHDO_makeFullColor(1,    0.96, 0.41, 1,   1,    1,    0.51, 1),
+	[VUHDO_ID_SHAMANS]       = VUHDO_makeFullColor(0.14, 0.35, 1,    1,   0.24, 0.45, 1,    1),
+	[VUHDO_ID_WARLOCKS]      = VUHDO_makeFullColor(0.58, 0.51, 0.79, 1,   0.68, 0.61, 0.89, 1),
+	[VUHDO_ID_WARRIORS]      = VUHDO_makeFullColor(0.78, 0.61, 0.43, 1,   0.88, 0.71, 0.53, 1),
+	[VUHDO_ID_DEATH_KNIGHT]  = VUHDO_makeFullColor(0.77, 0.12, 0.23, 1,   0.87, 0.22, 0.33, 1),
+	[VUHDO_ID_MONKS]         = VUHDO_makeFullColor(0,    1,    0.59, 1,   0,    1,    0.69, 1),
+	[VUHDO_ID_DEMON_HUNTERS] = VUHDO_makeFullColor(0.54, 0.09, 0.69, 1,   0.64, 0.19, 0.79, 1),
+	[VUHDO_ID_PETS]          = VUHDO_makeFullColor(0.4,  0.6,  0.4,  1,   0.5,  0.9,  0.5,  1),
 	["petClassColor"] = false,
 }
 

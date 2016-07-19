@@ -52,7 +52,7 @@ end
 
 
 --
-local function VUHDO_activateSpecc(aSpecNum)
+function VUHDO_activateSpecc(aSpecNum)
 	local tProfile = VUHDO_getBestProfileAfterSpecChange();
 	if tProfile then VUHDO_loadProfile(tProfile); end
 	VUHDO_activateSpellForSpec(aSpecNum);
@@ -63,8 +63,7 @@ end
 
 --
 local VUHDO_TALENT_CHANGE_SPELLS = {
-	[VUHDO_SPELL_ID.ACTIVATE_FIRST_TALENT] = true,
-	[VUHDO_SPELL_ID.ACTIVATE_SECOND_TALENT] = true,
+	[VUHDO_SPELL_ID.ACTIVATING_SPECIALIZATION] = true,
 	[VUHDO_SPELL_ID.BUFF_FROST_PRESENCE] = true,
 	[VUHDO_SPELL_ID.BUFF_BLOOD_PRESENCE] = true,
 	[VUHDO_SPELL_ID.BUFF_UNHOLY_PRESENCE] = true,
@@ -86,9 +85,6 @@ function VUHDO_spellcastSucceeded(aUnit, aSpellName)
 		VUHDO_updateAllHoTs();
 		VUHDO_updateAllCyclicBouquets(true);
 	end
-
-	if VUHDO_SPELL_ID.ACTIVATE_FIRST_TALENT == aSpellName then VUHDO_activateSpecc("1");
-	elseif (VUHDO_SPELL_ID.ACTIVATE_SECOND_TALENT == aSpellName) then VUHDO_activateSpecc("2"); end
 
 	VUHDO_aoeUpdateAll();
 end

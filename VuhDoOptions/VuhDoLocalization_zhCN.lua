@@ -615,6 +615,14 @@ VUHDO_I18N_TT.K555 = "Check to allow the VuhDo menu command to be bound even whe
 VUHDO_I18N_TT.K556 = "Check this to have an extra panel for boss encounter NPCs (eg. shards on Tectus, mushrooms on Brackenspore).";
 VUHDO_I18N_TT.K557 = "Body of the custom flag function. Must return true or false. Example: return (\"YOURNAME\" == VUHDO_unitInfo\[\"name\"\])";
 VUHDO_I18N_TT.K558 = "Hide buff watch while out of combat.";
+VUHDO_I18N_TT.K559 = "Click to select focus bar color.";
+VUHDO_I18N_TT.K560 = "Click to select astral power bar color.";
+VUHDO_I18N_TT.K561 = "Click to select maelstrom bar color.";
+VUHDO_I18N_TT.K562 = "Click to select insanity bar color.";
+VUHDO_I18N_TT.K563 = "Click to select fury bar color.";
+VUHDO_I18N_TT.K564 = "Select a color for Monks";
+VUHDO_I18N_TT.K565 = "Select a color for Demon Hunters";
+VUHDO_I18N_TT.K566 = "Click to select pain bar color.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1096,3 +1104,12 @@ VUHDO_I18N_HIDE_OUT_OF_COMBAT = "Show Only\nIn Combat";
 VUHDO_I18N_IMPORT = "Import";
 VUHDO_I18N_IMPORT_STRING_INVALID = "Import string was invalid.";
 VUHDO_I18N_REALLY_IMPORT = "Do you really want to import?\n\nYou should only import strings from known and\nreputable sources. Never import a string whose\nsource is not trusted.";
+
+VUHDO_I18N_LUNAR_POWER = "Astral Power";
+VUHDO_I18N_MAELSTROM = "Maelstrom";
+VUHDO_I18N_INSANITY = "Insanity";
+VUHDO_I18N_FURY = "Fury";
+VUHDO_I18N_PAIN = "Pain";
+VUHDO_I18N_SPEC_3 = "Spec 3";
+VUHDO_I18N_SPEC_4 = "Spec 4";
+

@@ -6,17 +6,19 @@ VUHDO_SPELL_TYPE_HOT = 1;  -- Spell type heal over time
 
 
 VUHDO_GCD_SPELLS = {
+	-- TODO: many of these GCD spell IDs are now deprecated, replace them
 	["WARRIOR"] = GetSpellInfo(78), -- Heroic Strike
 	["ROGUE"] = GetSpellInfo(1752), -- Sinister Strike
 	["HUNTER"] = GetSpellInfo(1494), -- Track beasts
-	["PALADIN"] = VUHDO_SPELL_ID.FLASH_OF_LIGHT,
+	["PALADIN"] = VUHDO_SPELL_ID.FLASH_OF_LIGHT, -- Flash of Light
 	["MAGE"] = GetSpellInfo(133), -- Fire Ball
 	["WARLOCK"] = GetSpellInfo(686), -- Shadow Bolt
 	["SHAMAN"] = GetSpellInfo(8004), --  Healing Surge
-	["DRUID"] = VUHDO_SPELL_ID.REJUVENATION, -- Regrowth
+	["DRUID"] = VUHDO_SPELL_ID.REJUVENATION, -- Rejuvenation
 	["PRIEST"] = VUHDO_SPELL_ID.BUFF_POWER_WORD_FORTITUDE, -- Power Word: Fortitude
 	["DEATHKNIGHT"] = GetSpellInfo(48266), -- Blood Presence
-	["MONK"] = GetSpellInfo(100780) -- Jab
+	["MONK"] = GetSpellInfo(100780), -- Jab
+	["DEMONHUNTER"] = GetSpellInfo(162243), -- Demon's Bite
 };
 
 
@@ -32,17 +34,13 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_FAITH] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_INSIGHT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_LIGHT] = { ["isHot"] = true, },
-	[VUHDO_SPELL_ID.SACRED_SHIELD] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_STAY_OF_EXECUTION] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ETERNAL_FLAME] = { ["isHot"] = true, },
-	[VUHDO_SPELL_ID.ILLUMINATED_HEALING] = { ["isHot"] = true, },
 
 	-- Priest
-	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.RENEW] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.POWERWORD_SHIELD] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.PRAYER_OF_MENDING] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.DIVINE_AEGIS] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.GRACE] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = { ["isHot"] = true, ["nohelp"] = true, ["noselftarget"] = true },

@@ -861,6 +861,19 @@ end
 
 
 --
+local function VUHDO_demonHunterTankValidator(anInfo, _)
+	if (VUHDO_ID_MELEE_TANK == anInfo["role"]) then
+                if(VUHDO_ID_DEMON_HUNTERS == anInfo["classId"]) then
+               		return true, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES", -1, -1, -1, nil, nil, GetTexCoordsForRole("TANK");
+                end
+	else
+		return false, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil;
+	end
+end
+
+
+
+--
 local tIcon, tExpiry, tStacks, tDuration;
 local function VUHDO_customDebuffIconValidator(anInfo, _)
 	tIcon, tExpiry, tStacks, tDuration = VUHDO_getLatestCustomDebuff(anInfo["unit"]);
@@ -992,7 +1005,7 @@ local tUnit;
 local function VUHDO_tappedValidator(anInfo, _)
 	tUnit = anInfo["unit"];
 
-	if not UnitIsPlayer(tUnit) and UnitIsTapped(tUnit) and not UnitIsTappedByPlayer(tUnit) then
+	if not UnitIsPlayer(tUnit) and UnitIsTapDenied(tUnit) then
 		return true, nil, -1, -1, -1,
 			VUHDO_copyColor(sBarColors["TAPPED"]);
 	else
@@ -1602,6 +1615,12 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["interests"] = { },
 	},
 
+        ["DEMON_HUNTER_TANK"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_DEMON_HUNTER_TANK,
+		["validator"] = VUHDO_demonHunterTankValidator,
+		["interests"] = { },
+	},
+
 	["DIRECTION"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_DIRECTION_ARROW,
 		["validator"] = VUHDO_directionArrowValidator,
@@ -1702,7 +1721,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_customFlagValidator, 
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG,
 		["updateCyclic"] = true,
-		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE },
+		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE }, --ignoring some for now (eg. VUHDO_UPDATE_MANA, VUHDO_UPDATE_DC, etc.)
 	},
 
 };

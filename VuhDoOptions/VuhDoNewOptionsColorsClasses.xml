@@ -6,7 +6,7 @@
 		<Frames>
 			<Frame name="$parentClassColorsPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="230" y="314" />
+					<AbsDimension x="230" y="342" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -20,7 +20,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="119" y="-273" />
+									<AbsDimension x="119" y="-301" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -223,7 +223,24 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_USER_CLASS_COLORS.##30");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_MONKS, VUHDO_I18N_MONKS);
-								VUHDO_lnfSetTooltip(self, nil);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K564);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentDemonHuntersTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-230" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_USER_CLASS_COLORS.##31");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_DEMON_HUNTERS, VUHDO_I18N_DEMON_HUNTERS);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K565);
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -232,7 +249,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="119" y="-230" />
+									<AbsDimension x="13" y="-268" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -252,7 +269,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-273" />
+									<AbsDimension x="13" y="-301" />
 								</Offset>
 							</Anchor>
 						</Anchors>

@@ -466,26 +466,13 @@ end
 
 
 --
-function VUHDO_getTalentSpellId(aTalentName, onlyActiveSpec)
-	if onlyActiveSpec then
-		for tier=1,7 do
-			for column=1,3 do
-				local id, name, _, selected, _ = GetTalentInfo(tier, column, GetActiveSpecGroup());
-
-				if name == aTalentName and selected then
-					return id;
-				end
-			end
-		end
-	else
-		for group=1,2 do
-			for tier=1,7 do
-				for column=1,3 do
-					local id, name, _, selected, _ = GetTalentInfo(tier, column, group);
-					if name == aTalentName and selected then
-						return id;
-					end
-				end
+function VUHDO_getTalentSpellId(aTalentName)
+	for tier=1,7 do
+		for column=1,3 do
+			local id, name, _, selected, _ = GetTalentInfo(tier, column, GetActiveSpecGroup());
+	
+			if name == aTalentName and selected then
+				return id;
 			end
 		end
 	end
@@ -495,8 +482,8 @@ end
 
 
 --
-function VUHDO_isTalentKnown(aTalentName, onlyActiveSpec)
-	return VUHDO_getTalentSpellId(aTalentName, onlyActiveSpec) and true or false;
+function VUHDO_isTalentKnown(aTalentName)
+	return VUHDO_getTalentSpellId(aTalentName) and true or false;
 end
 
 
@@ -690,7 +677,7 @@ function VUHDO_isActionValid(anActionName, anIsCustom)
 
 	tIsMacroKnown = GetMacroIndexByName(anActionName) ~= 0;
 	tIsSpellKnown = VUHDO_isSpellKnown(anActionName);
-	tIsTalentKnown = VUHDO_isTalentKnown(anActionName, true);
+	tIsTalentKnown = VUHDO_isTalentKnown(anActionName);
 
 	if (tIsSpellKnown or tIsTalentKnown) and tIsMacroKnown then
 		VUHDO_Msg(format(VUHDO_I18N_AMBIGUOUS_MACRO, anActionName), 1, 0.3, 0.3);
@@ -777,18 +764,6 @@ function VUHDO_decompressAllBouquets()
 	for tName, _ in pairs(VUHDO_BOUQUETS["STORED"]) do
 		VUHDO_BOUQUETS["STORED"][tName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][tName]);
 	end
-end
-
-
-
---
-function VUHDO_isGlyphed(aGlyphId)
-	local tGlyphId;
-	for tCnt = 1, GetNumGlyphs() do
-		if select(4, GetGlyphSocketInfo(tCnt)) == aGlyphId then return true; end
-	end
-
-	return false;
 end
 
 

@@ -7,17 +7,8 @@ local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
 local VUHDO_SHIELDS = {
 	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD -- ok
 	[123258] = 15, -- Power Word: Shield (Improved)
-	[47753] = 15, -- VUHDO_SPELL_ID.DIVINE_AEGIS -- ok
-	[86273] = 15, -- VUHDO_SPELL_ID.ILLUMINATED_HEALING (buff) ok
 	[11426] = 60, -- VUHDO_SPELL_ID.ICE_BARRIER -- ok
-	[65148] = 15, -- VUHDO_SPELL_ID.SACRED_SHIELD (Buff) -- ok
-	[114908] = 15, -- VUHDO_SPELL_ID.SPIRIT_SHELL (Buff) -- ok
 	[116849] = 12, -- Life Cocoon
-	[115295] = 30, -- Guard (brewmaster monk's self buff, unglyphed)
-	--[118604] = 30, -- Guard (brewmaster monk's black ox statue (cast on group), unglyphed)
-	--[123402] = 30, -- Guard (brewmaster monk's self buff, with Glyph of Guard) - Magic damage ONLY
-	--[136070] = 30, -- Guard (brewmaster monk's black ox statue (cast on group), with Glyph of Guard) - Magic damage ONLY
-	[112048] = 6, -- Shield Barrier (Prot warrior)
 	--[77535] = 10, -- Blood Shield (Blood DK) - Physical damage ONLY
 	[108416] = 20, -- Sacrificial Pact (warlock talent)
 	[1463] = 8, -- Incanter's Ward (mage talent)
@@ -29,8 +20,6 @@ local VUHDO_SHIELDS = {
 
 --
 local VUHDO_PUMP_SHIELDS = {
-	[VUHDO_SPELL_ID.DIVINE_AEGIS] = 0.6,
-	[VUHDO_SPELL_ID.SPIRIT_SHELL] = 0.6,
 	[VUHDO_SPELL_ID.CLARITY_OF_WILL] = 0.75,
 }
 
@@ -38,13 +27,9 @@ local VUHDO_PUMP_SHIELDS = {
 
 local VUHDO_ABSORB_DEBUFFS = {
 	[109379] = function(aUnit) return 200000, 5 * 60; end, -- Searing Plasma
-	[109362] = function(aUnit) return 300000, 5 * 60; end,
 	[105479] = function(aUnit) return 200000, 5 * 60; end,
-	[109364] = function(aUnit) return 420000, 5 * 60; end,
-	[109363] = function(aUnit) return 280000, 5 * 60; end,
 
-	[110598] = function(aUnit) return 420000, 2 * 60; end, -- Consuming Shroud
-	[110214] = function(aUnit) return 280000, 2 * 60; end,
+	[110214] = function(aUnit) return 280000, 2 * 60; end, -- Consuming Shroud
 
 	-- Patch 6.2 - Hellfire Citadel
 	[189030] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun

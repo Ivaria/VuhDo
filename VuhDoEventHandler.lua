@@ -645,6 +645,12 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 
 	elseif "PET_BATTLE_CLOSE" == anEvent then
 		VUHDO_setPetBattle(false);
+
+	elseif "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
+		if VUHDO_VARIABLES_LOADED then 
+			VUHDO_activateSpecc(tostring(GetSpecialization()) or "1");
+		end
+
 	else
 		VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 	end
@@ -1425,7 +1431,8 @@ local VUHDO_ALL_EVENTS = {
 	"INCOMING_RESURRECT_CHANGED",
 	"PET_BATTLE_CLOSE", "PET_BATTLE_OPENING_START",
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED",
-	"UNIT_ABSORB_AMOUNT_CHANGED"
+	"UNIT_ABSORB_AMOUNT_CHANGED",
+	"ACTIVE_TALENT_GROUP_CHANGED"
 };
 
 
@@ -1458,5 +1465,5 @@ function VUHDO_OnLoad(anInstance)
 
 	anInstance:SetScript("OnEvent", VUHDO_OnEvent);
 	anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
-	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v".. VUHDO_VERSION .. ". by Iza(ak)@Gilneas, dedicated to Vuh (use /vd)");
+	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v" .. VUHDO_VERSION .. " (use /vd). Currently maintained by Ivaria@US-Hyjal in honor of Marshy. Originally authored by Iza(ak)@EU-Gilneas in dedication to Vuh.");
 end

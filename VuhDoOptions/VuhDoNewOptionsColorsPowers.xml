@@ -3,12 +3,12 @@
 		<Frames>
 			<Frame name="$parentPowerTypesPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="126" y="249" />
+					<AbsDimension x="230" y="252" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="146" y="-72" />
+							<AbsDimension x="146" y="-15" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -102,12 +102,97 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##2");
-								VUHDO_lnfInitColorSwatch(self, "Energy", "Energy");
-								VUHDO_lnfSetTooltip(self, nil);
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_FOCUS, VUHDO_I18N_FOCUS);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K559);
 							</OnLoad>
 						</Scripts>
 					</Frame>
 
+					<Frame name="$parentLunarPowerTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-50" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##8");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_LUNAR_POWER, VUHDO_I18N_LUNAR_POWER);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K560);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentMaelstromTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-88" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##11");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_MAELSTROM, VUHDO_I18N_MAELSTROM);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K561);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentInsanityTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-126" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##13");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_INSANITY, VUHDO_I18N_INSANITY);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K562);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentFuryTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-164" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##17");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_FURY, VUHDO_I18N_FURY);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K563);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentPainTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-202" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_POWER_TYPE_COLORS.##18");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_PAIN, VUHDO_I18N_PAIN);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K566);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					
 				</Frames>
 			</Frame>
 		</Frames>
