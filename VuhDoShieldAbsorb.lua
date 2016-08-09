@@ -289,6 +289,9 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		VUHDO_SHIELD_EXPIRY[tUnit] = nil;
 		VUHDO_DEBUFF_SHIELDS[tUnit] = nil;
 		VUHDO_SHIELD_LAST_SOURCE_GUID[tUnit] = nil;
+	elseif VUHDO_ACTIVE_HOTS[aShieldName] and "SPELL_AURA_APPLIED" == aMessage then
+		VUHDO_updateAllHoTs();
+		VUHDO_updateAllCyclicBouquets(true);
 	end
 
 	VUHDO_updateBouquetsForEvent(tUnit, 36); -- VUHDO_UPDATE_SHIELD

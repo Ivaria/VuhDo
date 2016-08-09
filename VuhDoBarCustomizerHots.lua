@@ -539,11 +539,12 @@ local function VUHDO_updateHots(aUnit, anInfo)
 
 			if tDebuffOffset then -- Achtung kein elseif
 				tBuffName, _, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnitDebuff(aUnit, tCnt - tDebuffOffset);
+
 				if not tBuffIcon then
 					break;
 				end
 			end
-
+			
 			tIsCastByPlayer = tCaster == "player" or tCaster == VUHDO_PLAYER_RAID_ID;
 
 			if sIsPlayerKnowsSwiftmend and not sIsSwiftmend then
