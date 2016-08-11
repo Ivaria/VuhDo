@@ -17,6 +17,7 @@ Known issues:
 
 
 Bugfixes:
+-- Resolve tracking ambiguity by caching Druid 'Cenarion Ward' by spell ID
 
 
 Improvements:
