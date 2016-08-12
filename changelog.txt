@@ -18,6 +18,8 @@ Known issues:
 
 Bugfixes:
 -- Resolve tracking ambiguity by caching Druid 'Cenarion Ward' by spell ID
+-- Import and export frames now properly auto-focus when opened
+-- Druid 'Spring Blossoms' now properly auto populates in the HoT dropdown
 
 
 Improvements:
