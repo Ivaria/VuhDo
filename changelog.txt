@@ -15,6 +15,7 @@ Known issues:
 
 Bugfixes:
 -- Priest 'Purge the Wicked' can be directly assigned as a spell bind again
+-- Fixed HoT clock start time rounding error
 
 
 Improvements:
