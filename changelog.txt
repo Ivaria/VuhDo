@@ -20,6 +20,7 @@ Bugfixes:
 
 Improvements:
 -- Added Priest 'Clarity of Will' as a default HoT icon option
+-- Custom flag bouquet validator now listens for VUHDO_UPDATE_NUM_CLUSTER
 
 
 --------------------------------------------------------------
