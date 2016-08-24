@@ -7,10 +7,9 @@ Known issues:
 --   Bodyguards have no unit ID so for now are only partially supported
 -- AOE advisor not yet updated for Legion
 --   Need new spell formulas and coefficients
+--   No support yet for new AOEs like 'Power Word: Radiance'
 -- Incoming heal estimation reported is not even close to accurate
 --   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
--- Holy Priest spells derived from Chakra stance behave oddly as of 6.0.2
---   Stance specific spells must all use the spell name Holy Word: Chastise
 
 
 Bugfixes:
@@ -21,6 +20,9 @@ Bugfixes:
 Improvements:
 -- Added Priest 'Clarity of Will' as a default HoT icon option
 -- Custom flag bouquet validator now listens for VUHDO_UPDATE_NUM_CLUSTER
+-- Only explicitly refresh a whitelist of auras (eg. 'Atonement')
+--   and listen for all SPELL_AURA_ events not just APPLIED so the updates 
+--   and consistently immediate
 
 
 --------------------------------------------------------------
