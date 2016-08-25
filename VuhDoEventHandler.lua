@@ -646,8 +646,8 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "PET_BATTLE_CLOSE" == anEvent then
 		VUHDO_setPetBattle(false);
 
-	elseif "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
-		if VUHDO_VARIABLES_LOADED then 
+	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent then
+		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then 
 			VUHDO_activateSpecc(tostring(GetSpecialization()) or "1");
 		end
 
@@ -1432,7 +1432,7 @@ local VUHDO_ALL_EVENTS = {
 	"PET_BATTLE_CLOSE", "PET_BATTLE_OPENING_START",
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED",
 	"UNIT_ABSORB_AMOUNT_CHANGED",
-	"ACTIVE_TALENT_GROUP_CHANGED"
+	"PLAYER_SPECIALIZATION_CHANGED",
 };
 
 

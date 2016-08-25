@@ -15,14 +15,16 @@ Known issues:
 Bugfixes:
 -- Priest 'Purge the Wicked' can be directly assigned as a spell bind again
 -- Fixed HoT clock start time rounding error
+-- Fixed error on level up where VuhDo would try to handle specialization 
+--   changes while still in combat lockdown
 
 
 Improvements:
 -- Added Priest 'Clarity of Will' as a default HoT icon option
 -- Custom flag bouquet validator now listens for VUHDO_UPDATE_NUM_CLUSTER
--- Only explicitly refresh a whitelist of auras (eg. 'Atonement')
---   and listen for all SPELL_AURA_ events not just APPLIED so the updates 
---   and consistently immediate
+-- Only explicitly refresh an auras if it is whitelisted (eg. 'Atonement')
+--   and listen for all SPELL_AURA events not just APPLIED so the updates 
+--   are consistently immediate
 
 
 --------------------------------------------------------------
