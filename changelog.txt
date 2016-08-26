@@ -1,3 +1,23 @@
+Version 3.76
+
+
+Known issues:
+-- Limited support for Class Order Hall Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
+-- AOE advisor not yet updated for Legion
+--   Need new spell formulas and coefficients
+--   No support yet for new AOEs like 'Power Word: Radiance'
+-- Incoming heal estimation reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+
+
+Bugfixes:
+-- Activate profile/key layout when only the player changes specialization
+-- Fix nil reference in bar customizer for clusters after spec change
+
+
+--------------------------------------------------------------
 Version 3.75
 
 
