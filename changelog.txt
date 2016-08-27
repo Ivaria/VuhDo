@@ -12,6 +12,11 @@ Known issues:
 --   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
 
 
+Bugfixes:
+-- Fixed role detection for Survival Hunters
+-- Fixed role detection for Monks
+
+
 Improvements:
 -- Text provider '+<#n>k' now abbreviates millions as '+<#n>M'
 -- Hitpoints text now abbreviates millions as '<n>M'
