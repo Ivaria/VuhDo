@@ -21,6 +21,7 @@ Improvements:
 -- Text provider '+<#n>k' now abbreviates millions as '+<#n>M'
 -- Hitpoints text now abbreviates millions as '<n>M'
 -- Tooltip text now abbreviates millions as '<n>M'
+-- Added default custom debuffs for Emerald Nightmare raid encounters
 
 
 --------------------------------------------------------------
