@@ -15,6 +15,9 @@ Known issues:
 Bugfixes:
 -- Fixed role detection for Survival Hunters
 -- Fixed role detection for Monks
+-- Mage 'Remove Curse' is no longer a valid dispel
+-- Updated all class dispel abilities
+-- Updated all default spell bindings for healer dispels
 
 
 Improvements:

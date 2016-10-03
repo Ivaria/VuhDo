@@ -167,8 +167,8 @@ local VUHDO_CLASS_DEFAULT_SPELL_ASSIGNMENT = {
 		["shift2"] = {"shift-", "2", VUHDO_SPELL_ID.CHAIN_HEAL},
 		["shift3"] = {"shift-", "3", "menu" },
 
-		["altctrl1"] = {"alt-ctrl-", "1", VUHDO_SPELL_ID.PURGE},
-		["altctrl2"] = {"alt-ctrl-", "2", VUHDO_SPELL_ID.PURGE},
+		["altctrl1"] = {"alt-ctrl-", "1", VUHDO_SPELL_ID.PURIFY_SPIRIT},
+		["altctrl2"] = {"alt-ctrl-", "2", VUHDO_SPELL_ID.PURIFY_SPIRIT},
 	},
 
 	["PRIEST"] = {
@@ -190,7 +190,7 @@ local VUHDO_CLASS_DEFAULT_SPELL_ASSIGNMENT = {
 		["ctrl4"] = {"ctrl-", "4", VUHDO_SPELL_ID.PRAYER_OF_MENDING},
 		["ctrl5"] = {"ctrl-", "5", VUHDO_SPELL_ID.PRAYER_OF_MENDING},
 
-		["shift2"] = {"shift-", "2", VUHDO_SPELL_ID.DISPEL_MAGIC},
+		["shift2"] = {"shift-", "2", VUHDO_SPELL_ID.PURIFY},
 		["shift3"] = {"shift-", "3", "menu"},
 	},
 
@@ -210,7 +210,7 @@ local VUHDO_CLASS_DEFAULT_SPELL_ASSIGNMENT = {
 		["ctrl4"] = {"ctrl-", "4", VUHDO_SPELL_ID.TRANQUILITY},
 		["ctrl5"] = {"ctrl-", "5", VUHDO_SPELL_ID.TRANQUILITY},
 
-		["shift2"] = {"shift-", "2", VUHDO_SPELL_ID.REMOVE_CURSE},
+		["shift2"] = {"shift-", "2", VUHDO_SPELL_ID.NATURES_CURE},
 	},
 
 	["MONK"] = {
