@@ -1339,6 +1339,7 @@ function VUHDO_loadDefaultConfig()
 		203096, -- Rot
 		204463, -- Volatile Rot
 		203646, -- Burst of Corruption
+		221028, -- Unstable Decay
 		-- Il'gynoth, Heart of Corruption
 		212886, -- Nightmare Corruption
 		215845, -- Dispersed Spores
