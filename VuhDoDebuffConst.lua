@@ -37,10 +37,10 @@ VUHDO_INIT_DEBUFF_ABILITIES = {
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { "*" },
 	},
 	["DEATHKNIGHT"] = { },
-	["MONK"] = {
-		[VUHDO_DEBUFF_TYPE_POISON] = { VUHDO_SPELL_ID.ALT_DETOX, VUHDO_SPELL_ID.DETOX },
-		[VUHDO_DEBUFF_TYPE_DISEASE] = { VUHDO_SPELL_ID.ALT_DETOX, VUHDO_SPELL_ID.DETOX },
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.DETOX },
+	["MONK"] = { -- Monk has two dispel spells with the same name ("Detox") and needs to be referenced by ID
+		[VUHDO_DEBUFF_TYPE_POISON] = { 218164, 115450 },
+		[VUHDO_DEBUFF_TYPE_DISEASE] = { 218164, 115450 },
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 115450 }, -- Now Mistweaver "Detox" only
 	},
 	["DEMONHUNTER"] = { },
 };
