@@ -39,11 +39,14 @@ local VUHDO_ABSORB_DEBUFFS = {
 	[110214] = function(aUnit) return 280000, 2 * 60; end, -- Consuming Shroud
 
 	-- Patch 6.2 - Hellfire Citadel
-	[189030] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
-	[189031] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
-	[189032] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
-	[180164] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM)), 10 * 60; end, -- Tyrant Velhari
-	[180166] = function(aUnit) return select(15, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM)), 10 * 60; end, -- Tyrant Velhari
+	[189030] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
+	[189031] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
+	[189032] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_BEFOULED)), 10 * 60; end, -- Fel Lord Zakuun
+	[180164] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM)), 10 * 60; end, -- Tyrant Velhari
+	[180166] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM)), 10 * 60; end, -- Tyrant Velhari
+
+	-- Patch 7.0 - Legion
+	[221772] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_OVERFLOWING)), 10 * 60; end, -- Mythic+ affix
 
 	--[79105] = function(aUnit) return 280000, 60 * 60; end, -- @TESTING PW:F
 };

@@ -6,19 +6,66 @@ VUHDO_SPELL_TYPE_HOT = 1;  -- Spell type heal over time
 
 
 VUHDO_GCD_SPELLS = {
-	-- TODO: many of these GCD spell IDs are now deprecated, replace them
-	["WARRIOR"] = GetSpellInfo(78), -- Heroic Strike
-	["ROGUE"] = GetSpellInfo(1752), -- Sinister Strike
-	["HUNTER"] = GetSpellInfo(1494), -- Track beasts
-	["PALADIN"] = VUHDO_SPELL_ID.FLASH_OF_LIGHT, -- Flash of Light
-	["MAGE"] = GetSpellInfo(133), -- Fire Ball
-	["WARLOCK"] = GetSpellInfo(686), -- Shadow Bolt
-	["SHAMAN"] = GetSpellInfo(8004), --  Healing Surge
-	["DRUID"] = VUHDO_SPELL_ID.REJUVENATION, -- Rejuvenation
-	["PRIEST"] = VUHDO_SPELL_ID.BUFF_POWER_WORD_FORTITUDE, -- Power Word: Fortitude
-	["DEATHKNIGHT"] = GetSpellInfo(48266), -- Blood Presence
-	["MONK"] = GetSpellInfo(100780), -- Jab
-	["DEMONHUNTER"] = GetSpellInfo(162243), -- Demon's Bite
+	["WARRIOR"] = {
+		[1] = GetSpellInfo(78), -- Heroic Strike
+		[2] = GetSpellInfo(78), -- Heroic Strike
+		[3] = GetSpellInfo(78), -- Heroic Strike
+	},
+	["ROGUE"] = {
+		[1] = GetSpellInfo(1752), -- Sinister Strike
+		[2] = GetSpellInfo(1752), -- Sinister Strike
+		[3] = GetSpellInfo(1752), -- Sinister Strike
+	},
+	["HUNTER"] = {
+		[1] = GetSpellInfo(1494), -- Track beasts
+		[2] = GetSpellInfo(1494), -- Track beasts
+		[3] = GetSpellInfo(1494), -- Track beasts
+	},
+	["PALADIN"] = {
+		[1] = VUHDO_SPELL_ID.FLASH_OF_LIGHT, -- Flash of Light
+		[2] = VUHDO_SPELL_ID.FLASH_OF_LIGHT, -- Flash of Light
+		[3] = VUHDO_SPELL_ID.FLASH_OF_LIGHT, -- Flash of Light
+	},
+	["MAGE"] = {
+		[1] = GetSpellInfo(133), -- Fire Ball
+		[2] = GetSpellInfo(133), -- Fire Ball
+		[3] = GetSpellInfo(133), -- Fire Ball
+	},
+	["WARLOCK"] = {
+		[1] = GetSpellInfo(686), -- Shadow Bolt
+		[2] = GetSpellInfo(686), -- Shadow Bolt
+		[3] = GetSpellInfo(686), -- Shadow Bolt
+	},
+	["SHAMAN"] = {
+		[1] = GetSpellInfo(8004), --  Healing Surge
+		[2] = GetSpellInfo(8004), --  Healing Surge
+		[3] = GetSpellInfo(8004), --  Healing Surge
+	},
+	["DRUID"] = {
+		[1] = VUHDO_SPELL_ID.REJUVENATION, -- Rejuvenation
+		[2] = VUHDO_SPELL_ID.REJUVENATION, -- Rejuvenation
+		[3] = VUHDO_SPELL_ID.REJUVENATION, -- Rejuvenation
+		[4] = VUHDO_SPELL_ID.REJUVENATION, -- Rejuvenation
+	},
+	["PRIEST"] = {
+		[1] = VUHDO_SPELL_ID.DISPEL_MAGIC, -- Dispel Magic
+		[2] = VUHDO_SPELL_ID.DISPEL_MAGIC, -- Dispel Magic
+		[3] = VUHDO_SPELL_ID.DISPEL_MAGIC, -- Dispel Magic
+	},
+	["DEATHKNIGHT"] = {
+		[1] = GetSpellInfo(48266), -- Blood Presence
+		[2] = GetSpellInfo(48266), -- Blood Presence
+		[3] = GetSpellInfo(48266), -- Blood Presence
+	},
+	["MONK"] = {
+		[1] = GetSpellInfo(100780), -- Jab
+		[2] = GetSpellInfo(100780), -- Jab
+		[3] = GetSpellInfo(100780), -- Jab
+	},
+	["DEMONHUNTER"] = {
+		[1] = GetSpellInfo(162243), -- Demon's Bite
+		[2] = GetSpellInfo(162243), -- Demon's Bite
+	},
 };
 
 
