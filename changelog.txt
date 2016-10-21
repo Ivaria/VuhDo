@@ -29,6 +29,7 @@ Improvements:
 -- Tooltip text now abbreviates millions as '<n>M'
 -- Added default custom debuffs for Emerald Nightmare raid encounters
 -- Added debuff absorption tracking for Mythic+ affix 'Overflow'
+-- Added bouquet validator 'Counter: Mythic+ Overflow Absorb #k'
 
 
 --------------------------------------------------------------

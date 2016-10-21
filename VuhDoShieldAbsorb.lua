@@ -46,7 +46,7 @@ local VUHDO_ABSORB_DEBUFFS = {
 	[180166] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM)), 10 * 60; end, -- Tyrant Velhari
 
 	-- Patch 7.0 - Legion
-	[221772] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_OVERFLOWING)), 10 * 60; end, -- Mythic+ affix
+	[221772] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_OVERFLOW)), 10 * 60; end, -- Mythic+ affix
 
 	--[79105] = function(aUnit) return 280000, 60 * 60; end, -- @TESTING PW:F
 };
