@@ -302,6 +302,10 @@ VUHDO_SPELL_ID.BUFF_LEGACY_OF_THE_WHITE_TIGER = VUHDO_getSpellInfo(116781);
 -- 6.2 Healer Legendary Ring
 VUHDO_SPELL_ID.BUFF_ETHERALUS = VUHDO_getSpellInfo(187805);
 
+-- "Global Cooldown" spell
+VUHDO_SPELL_ID.GLOBAL_COOLDOWN = 61304;
+
+
 ----------
 -- Debuffs
 ----------

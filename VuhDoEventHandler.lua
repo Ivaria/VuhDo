@@ -1182,16 +1182,13 @@ function VUHDO_OnUpdate(_, aTimeDelta)
 
 	-- Update GCD-Bar
 	if VUHDO_GCD_UPDATE then
-		local tGcdSpell = VUHDO_GCD_SPELLS[VUHDO_PLAYER_CLASS][GetSpecialization() or 1];
+		tGcdStart, tGcdDuration = GetSpellCooldown(VUHDO_SPELL_ID.GLOBAL_COOLDOWN);
 
-		if tGcdSpell then
-			tGcdStart, tGcdDuration = GetSpellCooldown(tGcdSpell);
-			if (tGcdDuration or 0) == 0 then
-				VuhDoGcdStatusBar:SetValue(0);
-				VUHDO_GCD_UPDATE = false;
-			else
-				VuhDoGcdStatusBar:SetValue((tGcdDuration - (GetTime() - tGcdStart)) / tGcdDuration);
-			end
+		if (tGcdDuration or 0) == 0 then
+			VuhDoGcdStatusBar:SetValue(0);
+			VUHDO_GCD_UPDATE = false;
+		else
+			VuhDoGcdStatusBar:SetValue((tGcdDuration - (GetTime() - tGcdStart)) / tGcdDuration);
 		end
 	end
 
