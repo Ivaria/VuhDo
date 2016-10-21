@@ -20,6 +20,7 @@ Bugfixes:
 -- Updated all default spell bindings for healer dispels
 -- Fixed display of GCD bar
 -- Fixed absorption tracking for 'Befouled' and 'Touch of Harm'
+-- Fixed shield absorption amount tracking of Hot icons
 
 
 Improvements:
@@ -27,7 +28,7 @@ Improvements:
 -- Bar health text now abbreviates million as '<n>M'
 -- Tooltip text now abbreviates millions as '<n>M'
 -- Added default custom debuffs for Emerald Nightmare raid encounters
--- Added absorption tracking for Mythic+ affix debuff 'Overflowing'
+-- Added debuff absorption tracking for Mythic+ affix 'Overflow'
 
 
 --------------------------------------------------------------

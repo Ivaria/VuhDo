@@ -198,7 +198,7 @@ local tSpellName;
 local function VUHDO_updateShields(aUnit)
 	for tSpellId, _ in pairs(VUHDO_SHIELDS) do
 		tSpellName = select(1, GetSpellInfo(tSpellId));
-		tRemain = select(15, UnitAura(aUnit, tSpellName));
+		tRemain = select(17, UnitAura(aUnit, tSpellName));
 
 		--VUHDO_xMsg(UnitAura(aUnit, tSpellName));
 		if tRemain and "number" == type(tRemain) then
