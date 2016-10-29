@@ -16,6 +16,9 @@ Known issues:
 Bugfixes:
 -- Fixed handling of empty values in health related combat log events
 -- Disabled retrieval of unit facing and map position inside instances
+-- Fixed font dropshadow offset which Blizzard broke in 7.1
+--   Shadow offset is not scaling properly with resolution
+--   Hardcoded the offset to be optimal for 1920x1080 for now
 
 
 --------------------------------------------------------------

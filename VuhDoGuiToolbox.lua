@@ -746,7 +746,11 @@ function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
 	end
 
 	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline);
-	aLabel:SetShadowOffset(1, -1);
+	
+	-- patch 7.1 introduced a bug with shadow offset scaling by resolution
+	-- hardcode the offset to -3 for now which should be the equiv of -1 @ 1920x1080
+	aLabel:SetShadowOffset(1, -3);
+
 	aLabel:SetText("");
 end
 
