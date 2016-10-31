@@ -1350,14 +1350,10 @@ function VUHDO_loadDefaultConfig()
 		197980, -- Nightmarish Cacophony
 		205611, -- Miasma
 		-- Dragons of Nightmare
-		203102, -- Mark of Ysondre
 		207681, -- Nightmare Bloom
 		204731, -- Wasting Dread
-		203125, -- Mark of Emeriss
 		203787, -- Volatile Infection
-		203086, -- Mark of Lethon
 		204044, -- Shadow Burst
-		203121, -- Mark of Taerar
 		204078, -- Bellowing Roar
 		214543, -- Collapsing Nightmare
 		-- Cenarius

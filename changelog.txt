@@ -22,7 +22,11 @@ Bugfixes:
 -- Fixed ability to bind Priest 'Shadow Mend' to a mouse/key directly
 -- Default custom debuffs will now always be added by spell ID
 --   This resolves numerous issues with ambiguous debuff names
+--   Please consider a complete reset of your custom debuff settings 
+--   This can be done under 'VuhDo Options > Tools > Reset > Buffs/HoTs' 
 -- Removed default custom debuff spell IDs that were no longer valid
+-- Fixed mapping of ambiguous Monk "Detox" debuff abilities by spec
+-- Removed some default custom debuffs for Emerald Nightmare encounters
 
 
 --------------------------------------------------------------
