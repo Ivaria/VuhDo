@@ -20,6 +20,9 @@ Bugfixes:
 --   Shadow offset is not scaling properly with resolution
 --   Hardcoded the offset to be optimal for 1920x1080 for now
 -- Fixed ability to bind Priest 'Shadow Mend' to a mouse/key directly
+-- Default custom debuffs will now always be added by spell ID
+--   This resolves numerous issues with ambiguous debuff names
+-- Removed default custom debuff spell IDs that were no longer valid
 
 
 --------------------------------------------------------------

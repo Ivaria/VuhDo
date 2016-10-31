@@ -436,14 +436,6 @@ end
 
 
 
-local VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID = {
-	[VUHDO_SPELL_ID.DEBUFF_MARK_OF_THE_NECROMANCER] = true,
-	[VUHDO_SPELL_ID.DEBUFF_MARK_OF_DOOM] = true, 
-	[VUHDO_SPELL_ID.DEBUFF_BEFOULED] = true,
-	[VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM] = true,
-	[VUHDO_SPELL_ID.DEBUFF_MOMENTUM] = true,
-};
-
 --
 local function VUHDO_addCustomSpellIds(aVersion, ...)
 	if ((VUHDO_CONFIG["CUSTOM_DEBUFF"].version or 0) < aVersion) then
@@ -455,15 +447,9 @@ local function VUHDO_addCustomSpellIds(aVersion, ...)
 			tArg = select(tCnt, ...);
 
 			if (type(tArg) == "number") then
-				local tName = select(1, GetSpellInfo(tArg));
-
-				if VUHDO_CUSTOM_DEBUFF_ADD_ONLY_BY_ID[tName] then
-					-- make sure the spell ID is still added as a string
-					-- otherwise getKeyFromValue look-ups w/ spell ID string fail later
-					tArg = tostring(tArg);
-				else
-					tArg = tName;
-				end
+				-- make sure the spell ID is still added as a string
+				-- otherwise getKeyFromValue look-ups w/ spell ID string fail later
+				tArg = tostring(tArg);
 			end
 
 			VUHDO_tableUniqueAdd(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"], tArg);
@@ -1044,7 +1030,6 @@ function VUHDO_loadDefaultConfig()
 		135695,
 		136295,
 		135000,
-		394514,
 		136543,
 		134821,
 		136326,
@@ -1220,8 +1205,7 @@ function VUHDO_loadDefaultConfig()
 		-- Thogar
 		155921, -- Enkindle
 		155864, -- Pulse Grenade
-		159481, -- Delayed Siege Bomb
-		156494  -- Obliteration
+		159481  -- Delayed Siege Bomb
 	);
 
 	-- 6.0 - Warlords of Draenor - part 2
