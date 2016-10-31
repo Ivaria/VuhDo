@@ -19,6 +19,7 @@ Bugfixes:
 -- Fixed font dropshadow offset which Blizzard broke in 7.1
 --   Shadow offset is not scaling properly with resolution
 --   Hardcoded the offset to be optimal for 1920x1080 for now
+-- Fixed ability to bind Priest 'Shadow Mend' to a mouse/key directly
 
 
 --------------------------------------------------------------
