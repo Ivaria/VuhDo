@@ -378,6 +378,8 @@ function VUHDO_loadSpellArray()
 			["selected"] = "",
 			["1"] = "";
 			["2"] = "";
+			["3"] = "";
+			["4"] = "";
 		}
 	end
 
