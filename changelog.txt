@@ -27,6 +27,9 @@ Bugfixes:
 -- Removed default custom debuff spell IDs that were no longer valid
 -- Fixed mapping of ambiguous Monk "Detox" debuff abilities by spec
 -- Removed some default custom debuffs for Emerald Nightmare encounters
+--   If there are too many debuffs for your taste then reset:
+--     'VuhDo Options > Tools > Reset > Buffs/HoTs > Custom Debuffs'
+--   Beware you will loose all previous custom debuff settings!
 
 
 --------------------------------------------------------------
