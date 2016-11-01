@@ -1357,25 +1357,18 @@ function VUHDO_loadDefaultConfig()
 		204078, -- Bellowing Roar
 		214543, -- Collapsing Nightmare
 		-- Cenarius
-		212681, -- Cleansed Ground
 		210279, -- Creeping Nightmares
 		210315, -- Nightmare Brambles
-		226821, -- Desiccating Stomp
 		211507, -- Nightmare Javelin
 		211471, -- Scorned Touch
-		216516, -- Ancient Dream
-		211989, -- Unbound Touch
-		211990, -- Unbound Essence
 		-- Xavius
 		206005, -- Dream Simulacrum
 		206109, -- Awakening to the Nightmare
 		208431, -- Descent into Madness
 		207409, -- Madness
 		206651, -- Darkening Soul
-		211802, -- Nightmare Blades
 		205771, -- Tormenting Fixation
 		209158, -- Blackening Soul
-		205612, -- Blackened
 		210451, -- Bonds of Terror
 		208385, -- Tainted Discharge
 		211634  -- The Infinite Dark
