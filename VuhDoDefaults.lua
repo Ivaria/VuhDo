@@ -1372,7 +1372,7 @@ function VUHDO_loadDefaultConfig()
 		--205771, -- Tormenting Fixation
 		209158, -- Blackening Soul
 		205612, -- Blackened
-		210451, -- Bonds of Terror
+		210451  -- Bonds of Terror
 		--208385, -- Tainted Discharge
 		--211634  -- The Infinite Dark
 	);
