@@ -1321,57 +1321,60 @@ function VUHDO_loadDefaultConfig()
 	VUHDO_addCustomSpellIds(31, 
 		-- [[ Emerald Nightmare ]]
 		-- Nythendra
-		204504, -- Infested
-		203045, -- Infested Ground
+		--204504, -- Infested
+		--203045, -- Infested Ground
 		203096, -- Rot
-		204463, -- Volatile Rot
+		--204463, -- Volatile Rot
 		203646, -- Burst of Corruption
-		221028, -- Unstable Decay
+		--221028, -- Unstable Decay
 		-- Il'gynoth, Heart of Corruption
-		212886, -- Nightmare Corruption
-		215845, -- Dispersed Spores
-		210099, -- Fixate
+		--212886, -- Nightmare Corruption
+		--215845, -- Dispersed Spores
+		--210099, -- Fixate
 		209469, -- Touch of Corruption 
-		209471, -- Nightmare Explosion
+		--209471, -- Nightmare Explosion
 		208697, -- Mind Flay
 		208929, -- Spew Corruption
 		215128, -- Cursed Blood
 		-- Erethe Renferal
 		215307, -- Web of Pain
-		215460, -- Necrotic Venom
-		213124, -- Venomous Pool
-		210850, -- Twisting Shadows
+		--215460, -- Necrotic Venom
+		--213124, -- Venomous Pool
+		--210850, -- Twisting Shadows
 		218519, -- Wind Burn
 		210228, -- Dripping Fangs
 		-- Ursoc
 		204859, -- Rend Flesh
 		198006, -- Focused Gaze
-		198108, -- Momentum
-		197980, -- Nightmarish Cacophony
+		--198108, -- Momentum
+		--197980, -- Nightmarish Cacophony
 		205611, -- Miasma
 		-- Dragons of Nightmare
 		207681, -- Nightmare Bloom
-		204731, -- Wasting Dread
+		--204731, -- Wasting Dread
 		203787, -- Volatile Infection
 		204044, -- Shadow Burst
-		204078, -- Bellowing Roar
-		214543, -- Collapsing Nightmare
+		--204078, -- Bellowing Roar
+		--214543, -- Collapsing Nightmare
 		-- Cenarius
-		210279, -- Creeping Nightmares
+		--210279, -- Creeping Nightmares
 		210315, -- Nightmare Brambles
 		211507, -- Nightmare Javelin
 		211471, -- Scorned Touch
+		216516, -- Ancient Dream
 		-- Xavius
 		206005, -- Dream Simulacrum
-		206109, -- Awakening to the Nightmare
+		--206109, -- Awakening to the Nightmare
 		208431, -- Descent into Madness
-		207409, -- Madness
+		--207409, -- Madness
 		206651, -- Darkening Soul
-		205771, -- Tormenting Fixation
+		211802, -- Nightmare Blades
+		--205771, -- Tormenting Fixation
 		209158, -- Blackening Soul
+		205612, -- Blackened
 		210451, -- Bonds of Terror
-		208385, -- Tainted Discharge
-		211634  -- The Infinite Dark
+		--208385, -- Tainted Discharge
+		--211634  -- The Infinite Dark
 	);
 
 	local debuffRemovalList = {};
