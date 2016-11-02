@@ -524,9 +524,11 @@ end
 
 
 --
+local tResurrectionSpells;
 function VUHDO_getResurrectionSpells()
-	return (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[1],
-		(VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[2];
+	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[GetSpecialization() or 0];
+
+	return unpack(tResurrectionSpells);
 end
 
 

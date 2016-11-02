@@ -32,6 +32,10 @@ Bugfixes:
 --   Beware you will loose all previous custom debuff settings!
 
 
+Improvements:
+-- Out of combat smart cast resurrection now prefers 'mass' spells
+
+
 --------------------------------------------------------------
 Version 3.77
 

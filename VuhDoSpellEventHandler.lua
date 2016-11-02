@@ -14,7 +14,7 @@ local VUHDO_CONFIG = { };
 
 local sIsShowGcd;
 local sUniqueSpells = { };
-local sFirstRes, sSecondRes;
+local sFirstRes, sSecondRes, sThirdRes;
 local sEmpty = { };
 
 
@@ -35,7 +35,7 @@ function VUHDO_spellEventHandlerInitLocalOverrides()
 		sUniqueSpells[tSpellName] = tUniqueCategs[tSpellName];
 	end
 
-	sFirstRes, sSecondRes = VUHDO_getResurrectionSpells();
+	sFirstRes, sSecondRes, sThirdRes = VUHDO_getResurrectionSpells();
 end
 
 
@@ -109,7 +109,7 @@ function VUHDO_spellcastSent(aUnit, aSpellName, aSpellRank, aTargetName)
 	if not tTargetUnit then return; end
 
 	-- Resurrection?
-	if aSpellName == sFirstRes or aSpellName == sSecondRes then
+	if aSpellName == sFirstRes or aSpellName == sSecondRes or aSpellName == sThirdRes then
 
 		if VUHDO_CONFIG["RES_IS_SHOW_TEXT"] then
 
