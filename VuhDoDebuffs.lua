@@ -312,7 +312,6 @@ function VUHDO_determineDebuff(aUnit)
 
 			if sCurIcons[tName] then tStacks = tStacks + sCurIcons[tName][3]; end
 
---			VUHDO_xMsg("Found a debuff", tName, "custom debuff show icon?", tDebuffConfig[2] or "false");
 			if tDebuffConfig[2] then -- Icon?
 				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId);
 			end
@@ -330,7 +329,6 @@ function VUHDO_determineDebuff(aUnit)
 				end
 			end
 
---			VUHDO_xMsg("Found a debuff", tName, "tType", tType or "nil", "tAbility", tAbility or "nil", "tIsRelevant", tIsRelevant or "false", "sIsUseDebuffIcon", sIsUseDebuffIcon or "false", "tIsBossDebuff", tIsBossDebuff or "false", "sIsUseDebuffIconBossOnly", sIsUseDebuffIconBossOnly or "false", "sIsNotRemovableOnlyIcons", sIsNotRemovableOnlyIcons or "false", "sCurChosenType", sCurChosenType or 0);
 			if sCurChosenType ~= 6 -- VUHDO_DEBUFF_TYPE_CUSTOM
 				and not VUHDO_DEBUFF_BLACKLIST[tName]
 				and tIsRelevant then
