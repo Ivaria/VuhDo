@@ -123,9 +123,7 @@ function VUHDO_lnfStandardFontUpdateDemoText()
 		tLabel:SetShadowColor(0, 0, 0, tShadowAlpha);
 	end
 
-	-- patch 7.1 introduced a bug with shadow offset scaling by resolution
-	-- hardcode the offset to -3 for now which should be the equiv of -1 @ 1920x1080
-	tLabel:SetShadowOffset(1, -3);
+	tLabel:SetShadowOffset(1, -1);
 
 	if (sTable["COLOR"] ~= nil) then
 		tLabel:SetTextColor(VUHDO_textColor(sTable["COLOR"]));
