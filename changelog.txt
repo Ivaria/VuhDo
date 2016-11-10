@@ -16,6 +16,7 @@ Known issues:
 Bugfixes:
 -- Fixed an issue where Shaman 'Healing Stream Totem' would not cast
 -- Fixed resurrection spell cast announcement
+-- Fixed Paladin non-healer smart cast resurrection
 -- Blizzard fixed the font drop shadow offset on their end finally
 
 
