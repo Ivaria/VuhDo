@@ -15,7 +15,15 @@ Known issues:
 
 Bugfixes:
 -- Fixed an issue where Shaman 'Healing Stream Totem' would not cast
+-- Fixed resurrection spell cast announcement
 -- Blizzard fixed the font drop shadow offset on their end finally
+
+
+Improvements:
+-- Added default custom debuffs for Trial of Valor raid encounters
+-- Added debuff absorption tracking for ToV 'Shadow Lick'
+-- Added debuff absorption tracking for ToV 'Corrupted Axion'
+-- Added seperate cast announcement for 'mass' resurrection spells
 
 
 --------------------------------------------------------------

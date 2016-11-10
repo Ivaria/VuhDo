@@ -526,6 +526,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["AUTO_PROFILES"] = {	},
 
 	["RES_ANNOUNCE_TEXT"] = VUHDO_I18N_DEFAULT_RES_ANNOUNCE,
+	["RES_ANNOUNCE_MASS_TEXT"] = VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS,
 	["RES_IS_SHOW_TEXT"] = false,
 
 	["CUSTOM_DEBUFF"] = {
@@ -1375,6 +1376,22 @@ function VUHDO_loadDefaultConfig()
 		210451  -- Bonds of Terror
 		--208385, -- Tainted Discharge
 		--211634  -- The Infinite Dark
+	);
+
+	-- 7.1 - Legion - Trial of Valor
+	VUHDO_addCustomSpellIds(32,
+		-- [[ Trial of Valor ]]
+		-- Odyn
+		227959, -- Storm of Justice
+		228915, -- Stormforged Spear
+		228030, -- Expel Light
+		-- Guarm
+		228228, -- Flame Lick
+		228250, -- Shadow Lick
+		-- Helya
+		232450, -- Corrupted Axion
+		193367, -- Fetid Rot
+		228519 -- Anchor Slam
 	);
 
 	local debuffRemovalList = {};
