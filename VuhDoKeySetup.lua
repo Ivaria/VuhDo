@@ -329,6 +329,10 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		aButton:SetAttribute("_onleave", "self:ClearBindings();");
 		aButton:SetAttribute("_onshow", "self:ClearBindings();");
 		aButton:SetAttribute("_onhide", "self:ClearBindings();");
+		aButton:SetAttribute(
+			"_onmousedown", 
+			"if not self:IsUnderMouse(false) then self:ClearBindings(); end"
+		);
 	end
 end
 local VUHDO_setupAllHealButtonAttributes = VUHDO_setupAllHealButtonAttributes;
