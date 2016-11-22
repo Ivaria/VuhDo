@@ -1394,6 +1394,20 @@ function VUHDO_loadDefaultConfig()
 		228519 -- Anchor Slam
 	);
 
+	-- 7.1 - Legion - Trial of Valor (part 2)
+	VUHDO_addCustomSpellIds(33,
+		-- [[ Trial of Valor ]]
+		-- Odyn
+		228918, -- Stormforged Spear
+		228914, -- Stormforged Spear
+		228932, -- Stormforged Spear
+		227811, -- Raging Tempest
+		-- Guarm
+		228253, -- Shadow Lick
+		-- Helya
+		232488  -- Dark Hatred
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do

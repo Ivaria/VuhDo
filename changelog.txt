@@ -17,9 +17,11 @@ Bugfixes:
 -- Workaround for Blizzard bug in secure button onenter/onleave
 --   Should improve sticking keybindings when off VuhDo frames
 --   See: https://wow.curseforge.com/projects/vuhdo/issues/442
+-- Fixed ToV Guarm 'Shadow Lick' debuff absorption tracking
 
 
 Improvements:
+-- Added additional default custom debuffs for ToV raid encounters
 
 
 --------------------------------------------------------------
