@@ -23,6 +23,7 @@ Bugfixes:
 Improvements:
 -- Added additional default custom debuffs for ToV raid encounters
 -- Map Monk 'Ancient Mistweaver Arts' to 'Soothing Mist(Honor Talent)'
+-- Added spell 'Essence Font' to Mistweaver Monk default HoTs
 
 
 --------------------------------------------------------------
