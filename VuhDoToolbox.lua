@@ -679,6 +679,7 @@ function VUHDO_isActionValid(anActionName, anIsCustom)
 	 or VUHDO_SPELL_KEY_TELL == tActionLowerName
 	 or VUHDO_SPELL_KEY_TARGET == tActionLowerName 
 	 or VUHDO_SPELL_KEY_EXTRAACTIONBUTTON == tActionLowerName 
+	 or VUHDO_SPELL_KEY_MOUSELOOK == tActionLowerName 
 	 or VUHDO_SPELL_KEY_DROPDOWN == tActionLowerName then
 		return VUHDO_I18N_COMMAND, 0.8, 1, 0.8, "CMD";
 	end

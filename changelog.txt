@@ -19,6 +19,7 @@ Bugfixes:
 
 
 Improvements:
+-- Added new bindable command 'MouseLook' (move the camera with mouse)
 
 
 --------------------------------------------------------------
