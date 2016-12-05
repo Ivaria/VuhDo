@@ -20,7 +20,6 @@ local VUHDO_SHIELDS = {
 
 --
 local VUHDO_PUMP_SHIELDS = {
-	[VUHDO_SPELL_ID.CLARITY_OF_WILL] = 0.75,
 }
 
 
@@ -113,6 +112,9 @@ local function VUHDO_initShieldValue(aUnit, aShieldName, anAmount, aDuration)
 
 	if sIsPumpAegis and VUHDO_PUMP_SHIELDS[aShieldName] then
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = VUHDO_RAID["player"]["healthmax"] * VUHDO_PUMP_SHIELDS[aShieldName];
+	elseif aShieldName == VUHDO_SPELL_ID.CLARITY_OF_WILL then
+		-- as of patch 7.0 Priest CoW is capped at twice the initial cast amount
+		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount * 2;
 	else
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 	end
