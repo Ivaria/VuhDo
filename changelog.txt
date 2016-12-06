@@ -20,6 +20,8 @@ Bugfixes:
 
 Improvements:
 -- Added new bindable command 'MouseLook' (move the camera with mouse)
+-- Added default bouquet 'Overflow Mythic+ Affix'
+--   Assign this bouquet to a HoT Icon slot to track the absorb
 
 
 --------------------------------------------------------------
