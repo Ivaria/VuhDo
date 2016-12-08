@@ -525,11 +525,20 @@ end
 
 --
 local tResurrectionSpells;
+local tKnownResurrectionSpells;
 function VUHDO_getResurrectionSpells()
 	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[GetSpecialization() or 0];
 
 	if tResurrectionSpells then
-		return unpack(tResurrectionSpells);
+		tKnownResurrectionSpells = { };
+
+		for _, tResurrectionSpell in ipairs(tResurrectionSpells) do
+			if VUHDO_isSpellKnown(tResurrectionSpell) then
+				tinsert(tKnownResurrectionSpells, tResurrectionSpell);
+			end
+		end
+
+		return tKnownResurrectionSpells;
 	else
 		return nil;
 	end

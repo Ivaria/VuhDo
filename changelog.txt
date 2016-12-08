@@ -16,6 +16,7 @@ Known issues:
 Bugfixes:
 -- Fixed Priest 'Clarity of Will' maximum shield absorption amount
 -- Updated spell ID for Shaman 'Earth Shield' (now an Honor Talent)
+-- Fixed smart casting of unknown resurrection spells
 
 
 Improvements:
