@@ -538,7 +538,7 @@ function VUHDO_getResurrectionSpells()
 			end
 		end
 
-		return tKnownResurrectionSpells;
+		return unpack(tKnownResurrectionSpells);
 	else
 		return nil;
 	end
