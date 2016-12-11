@@ -718,7 +718,7 @@ function VUHDO_slashCmd(aCommand)
 
 	elseif tCommandWord == "load" and tParsedTexts[2] then
 		local tTokens = VUHDO_splitString(tParsedTexts[2] .. (tParsedTexts[3] or ""), ",");
-		if #tTokens >= 2 and not VUHDO_strempty(tTokens[2]) > 0 then
+		if #tTokens >= 2 and not VUHDO_strempty(tTokens[2]) then
 			local tName = strtrim(tTokens[2]);
 			if (VUHDO_SPELL_LAYOUTS[tName] ~= nil) then
 				VUHDO_activateLayout(tName);
@@ -762,9 +762,9 @@ function VUHDO_slashCmd(aCommand)
 		VUHDO_ctraBroadCastMaintanks();
 		VUHDO_Msg(VUHDO_I18N_MTS_BROADCASTED);
 
-	--[[elseif (tCommandWord == "pron") then
+	elseif (tCommandWord == "pron") then
 		SetCVar("scriptProfile", "1");
-		ReloadUI();]]
+		ReloadUI();
 	elseif tCommandWord == "proff" then
 		SetCVar("scriptProfile", "0");
 		ReloadUI();
@@ -806,7 +806,10 @@ function VUHDO_slashCmd(aCommand)
 
 	elseif aCommand == "?" or strfind(tCommandWord, "help")	or aCommand == "" then
 		local tLines = VUHDO_splitString(VUHDO_I18N_COMMAND_LIST, "§");
-		for _, tCurLine in ipairs(tLines) do VUHDO_MsgC(tCurLine); end
+
+		for _, tCurLine in ipairs(tLines) do 
+			VUHDO_MsgC(tCurLine);
+		end
 	else
 		VUHDO_Msg(VUHDO_I18N_BAD_COMMAND, 1, 0.4, 0.4);
 	end
