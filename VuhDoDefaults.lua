@@ -110,10 +110,8 @@ end
 
 
 local VUHDO_DEFAULT_MODELS = {
-	{ VUHDO_ID_GROUP_1, VUHDO_ID_GROUP_2, VUHDO_ID_GROUP_3, VUHDO_ID_GROUP_4, VUHDO_ID_GROUP_5, VUHDO_ID_GROUP_6, VUHDO_ID_GROUP_7, VUHDO_ID_GROUP_8 },
-	{ VUHDO_ID_PETS },
-	{ VUHDO_ID_PRIVATE_TANKS, VUHDO_ID_MAINTANKS }, 
-	{ VUHDO_ID_BOSSES },
+	{ VUHDO_ID_GROUP_1, VUHDO_ID_GROUP_2, VUHDO_ID_GROUP_3, VUHDO_ID_GROUP_4, VUHDO_ID_GROUP_5, VUHDO_ID_GROUP_6, VUHDO_ID_GROUP_7, VUHDO_ID_GROUP_8, VUHDO_ID_PETS },
+	{ VUHDO_ID_PRIVATE_TANKS, VUHDO_ID_BOSSES }, 
 };
 
 
@@ -1455,8 +1453,8 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 	},
 
 	["HOTS"] = {
-		["radioValue"] = 20,
-		["iconRadioValue"] = 2,
+		["radioValue"] = 13,
+		["iconRadioValue"] = 1,
 		["stacksRadioValue"] = 2,
 
 		["TIMER_TEXT"] = {
@@ -1471,7 +1469,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		},
 
 		["COUNTER_TEXT"] = {
-			["ANCHOR"] = "TOPLEFT",
+			["ANCHOR"] = "TOP",
 			["X_ADJUST"] = -25,
 			["Y_ADJUST"] = 0,
 			["SCALE"] = 66,
@@ -1685,14 +1683,14 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 --
 local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 	["HOTS"] = {
-		["size"] = 76,
+		["size"] = 40,
 	},
 	["MODEL"] = {
 		["ordering"] = VUHDO_ORDERING_STRICT,
 		["sort"] = VUHDO_SORT_RAID_UNITID,
 		["isReverse"] = false,
 	},
-
+--[[
 	["POSITION"] = {
 		["x"] = 100,
 		["y"] = 668,
@@ -1703,6 +1701,7 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["height"] = 200,
 		["scale"] = 1,
 	};
+]]--
 
 	["SCALING"] = {
 		["columnSpacing"] = 5,
@@ -1711,8 +1710,8 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["borderGapX"] = 5,
 		["borderGapY"] = 5,
 
-		["barWidth"] = 75,
-		["barHeight"] = 28,
+		["barWidth"] = 80,
+		["barHeight"] = 40,
 
 		["showHeaders"] = true,
 		["headerHeight"] = 12,
@@ -1723,8 +1722,8 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["sideLeftWidth"] = 6,
 		["sideRightWidth"] = 6,
 
-		["maxColumnsWhenStructured"] = 8,
-		["maxRowsWhenLoose"] = 6,
+		["maxColumnsWhenStructured"] = 10,
+		["maxRowsWhenLoose"] = 5,
 		["ommitEmptyWhenStructured"] = true,
 		["isPlayerOnTop"] = true,
 
@@ -1763,7 +1762,7 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["showClass"] = false,
 		["showTags"] = true,
 		["showPetOwners"] = true,
-		["position"] = "BOTTOMRIGHT+BOTTOMRIGHT",
+		["position"] = "CENTER+CENTER",
 		["xAdjust"] = 0.000001,
 		["yAdjust"] = 0.000001,
 	},
@@ -1862,7 +1861,6 @@ function VUHDO_loadDefaultPanelSetup()
 			tAktPanel["MODEL"]["groups"] = VUHDO_DEFAULT_MODELS[tPanelNum];
 
 			if VUHDO_DEFAULT_MODELS[tPanelNum] and VUHDO_ID_PRIVATE_TANKS == VUHDO_DEFAULT_MODELS[tPanelNum][1] then
-				tAktPanel["SCALING"]["showTarget"] = true;
 				tAktPanel["SCALING"]["ommitEmptyWhenStructured"] = false;
 			end
 
@@ -1881,10 +1879,32 @@ function VUHDO_loadDefaultPanelSetup()
 	end
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
-		if not VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] then
+		if not VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] and tPanelNum == 1 then
 			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = {
-				["x"] = 100 + 30 * tPanelNum,
-				["y"] = 668 - 30 * tPanelNum,
+				["x"] = 130,
+				["y"] = 650,
+				["relativePoint"] = "BOTTOMLEFT",
+				["orientation"] = "TOPLEFT",
+				["growth"] = "TOPLEFT",
+				["width"] = 200,
+				["height"] = 200,
+				["scale"] = 1,
+			};
+		elseif not VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] and tPanelNum == 2 then
+			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = {
+				["x"] = 130,
+				["y"] = 885,
+				["relativePoint"] = "BOTTOMLEFT",
+				["orientation"] = "TOPLEFT",
+				["growth"] = "TOPLEFT",
+				["width"] = 200,
+				["height"] = 200,
+				["scale"] = 1,
+			};
+		elseif not VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] then
+			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = {
+				["x"] = 130 + 75 * tPanelNum,
+				["y"] = 650 - 75 * tPanelNum,
 				["relativePoint"] = "BOTTOMLEFT",
 				["orientation"] = "TOPLEFT",
 				["growth"] = "TOPLEFT",
@@ -1917,8 +1937,8 @@ local VUHDO_DEFAULT_BUFF_CONFIG = {
 	["HIDE_CHARGES"] = false,
 	["REFRESH_SECS"] = 1,
 	["POSITION"] = {
-		["x"] = 100,
-		["y"] = -100,
+		["x"] = 130,
+		["y"] = -130,
 		["point"] = "TOPLEFT",
 		["relativePoint"] = "TOPLEFT",
 	},
