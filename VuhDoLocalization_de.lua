@@ -440,3 +440,7 @@ VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "Casting mass resurrection!";
 -- 3.81
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "Overflow Mythic+ Affix";
 
+-- 3.82
+VUHDO_I18N_SPELL_TRACE = "Icon: Spell Trace";
+VUHDO_I18N_DEF_SPELL_TRACE = "Spell Trace";
+

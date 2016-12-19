@@ -251,6 +251,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_directionsInitLocalOverrides();
 	VUHDO_dcShieldInitLocalOverrides();
 	VUHDO_shieldAbsorbInitLocalOverrides();
+	VUHDO_spellTraceInitLocalOverrides();
 	VUHDO_playerTargetEventHandlerInitLocalOverrides();
 end
 
@@ -412,10 +413,21 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
 			-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
 			VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15);
+
 			if VUHDO_INTERNAL_TOGGLES[36] then -- VUHDO_UPDATE_SHIELD
 				-- for SPELL events with _AURA suffixes the amount healed is the 16th arg
 				-- for SPELL_HEAL/SPELL_PERIODIC_HEAL the amount absorbed is the 17th arg
 				VUHDO_parseCombatLogShieldAbsorb(anArg2, anArg4, anArg8, anArg13, anArg16, anArg12, anArg17);
+			end
+
+			if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
+				VUHDO_parseCombatLogSpellTrace(
+					anArg2,  -- message/event
+					anArg4,  -- source GUID
+					anArg8,  -- dest GUID
+					anArg13, -- spell name
+					anArg12  -- spell ID
+				);
 			end
 		end
 
@@ -907,7 +919,6 @@ function VUHDO_updateGlobalToggles()
 
 	VUHDO_UnRegisterEvent(VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"],
 		"UNIT_HEAL_PREDICTION");
-	VUHDO_UnRegisterEvent(VUHDO_CONFIG["PARSE_COMBAT_LOG"], "COMBAT_LOG_EVENT_UNFILTERED");
 
 	VUHDO_UnRegisterEvent(not VUHDO_CONFIG["IS_READY_CHECK_DISABLED"],
 		"READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED");
@@ -918,6 +929,12 @@ function VUHDO_updateGlobalToggles()
 			or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SHIELD);
 
 	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD], "UNIT_ABSORB_AMOUNT_CHANGED");
+
+	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE] = VUHDO_CONFIG["SHOW_SPELL_TRACE"] 
+		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SPELL_TRACE);
+
+	VUHDO_UnRegisterEvent(VUHDO_CONFIG["PARSE_COMBAT_LOG"] or VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE], 
+		"COMBAT_LOG_EVENT_UNFILTERED");
 end
 
 
@@ -1268,8 +1285,13 @@ function VUHDO_OnUpdate(_, aTimeDelta)
 	if VUHDO_checkResetTimer("UPDATE_HOTS", sHotToggleUpdateSecs) then
 		if tHotDebuffToggle == 1 then
 			VUHDO_updateAllHoTs();
+			
 			if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
 				VUHDO_updateClusterHighlights();
+			end
+
+			if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
+				VUHDO_updateSpellTrace(aTimeDelta);
 			end
 		elseif tHotDebuffToggle == 2 then
 			VUHDO_updateAllCyclicBouquets(false);

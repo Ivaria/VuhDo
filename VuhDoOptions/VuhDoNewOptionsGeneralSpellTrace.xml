@@ -1,0 +1,50 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<Script file="VuhDoNewOptionsGeneralSpellTrace.lua" />
+
+	<Frame name="VuhDoNewOptionsGeneralSpellTraceTemplate" virtual="true">
+		<Frames>
+
+			<Frame name="$parentMainPanel" inherits="VuhDoPanelTemplate">
+				<Size>
+					<AbsDimension x="270" y="115" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="20" y="-13" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<CheckButton name="$parentShowSpellTraceCheckButton" text="VUHDO_I18N_SPELL_TRACE" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-13" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.SHOW_SPELL_TRACE");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K568);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+				</Frames>
+			</Frame>
+
+		</Frames>
+		<Scripts>
+			<OnLoad>
+			</OnLoad>
+			<OnShow>
+			</OnShow>
+			<OnHide>
+			</OnHide>
+		</Scripts>
+	</Frame>
+
+</Ui>

@@ -1128,3 +1128,6 @@ VUHDO_I18N_SPEC_3 = "Spec 3";
 VUHDO_I18N_SPEC_4 = "Spec 4";
 
 VUHDO_I18N_ANNOUNCE_MASS_RES = "'Mass' Resurrection\nAnnouncement";
+
+VUHDO_I18N_SPELL_TRACE = "Spell Trace";
+
