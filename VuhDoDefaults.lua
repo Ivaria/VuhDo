@@ -458,6 +458,49 @@ end
 
 
 --
+local function VUHDO_spellTraceAddDefaultSettings(aSpellName)
+
+	if (VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"] == nil) then
+		VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"] = { };
+	end
+
+	if (VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][aSpellName] == nil) then
+		VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][aSpellName] = {
+			["isMine"] = VUHDO_CONFIG["SPELL_TRACE"]["isMine"],
+			["isOthers"] = VUHDO_CONFIG["SPELL_TRACE"]["isOthers"],
+		}
+	end
+
+end
+
+
+
+--
+local function VUHDO_addSpellTraceSpellIds(aVersion, ...)
+
+	if ((VUHDO_CONFIG["SPELL_TRACE"].version or 0) < aVersion) then
+		VUHDO_CONFIG["SPELL_TRACE"].version = aVersion;
+
+		local tArg;
+
+		for tCnt = 1, select("#", ...) do
+			tArg = select(tCnt, ...);
+
+			if (type(tArg) == "number") then
+				-- make sure the spell ID is still added as a string
+				-- otherwise getKeyFromValue look-ups w/ spell ID string fail later
+				tArg = tostring(tArg);
+			end
+
+			VUHDO_tableUniqueAdd(VUHDO_CONFIG["SPELL_TRACE"]["STORED"], tArg);
+		end
+	end
+
+end
+
+
+
+--
 local VUHDO_DEFAULT_CONFIG = {
 	["VERSION"] = 4,
 
@@ -566,6 +609,13 @@ local VUHDO_DEFAULT_CONFIG = {
 			["USE_OUTLINE"] = false,
 			["USE_MONO"] = false,
 		},
+	},
+
+	["SPELL_TRACE"] = {
+		["isMine"] = true,
+		["isOthers"] = false,
+		["SELECTED"] = "",
+		["STORED"] = { },
 	},
 
 	["THREAT"] = {
@@ -702,6 +752,13 @@ local VUHDO_DEFAULT_CU_DE_STORED_SETTINGS = {
 --		["useBackground"] = true,
 --		["useOpacity"] = true,
 --	},
+};
+
+
+
+local VUHDO_DEFAULT_SPELL_TRACE_STORED_SETTINGS = {
+	["isMine"] = true,
+	["isOthers"] = false,
 };
 
 
@@ -1431,6 +1488,28 @@ function VUHDO_loadDefaultConfig()
 	-- so do the removal in a second pass
 	for tIndex, _ in pairs(debuffRemovalList) do
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"][tIndex] = nil;
+	end
+
+	-- add default spells to track with spell trace
+	VUHDO_addSpellTraceSpellIds(1, 
+		-- Shaman
+		1064,   -- Chain Heal
+		-- Priest
+		200128, -- Trail of Light
+		34861,  -- Holy Word: Sanctify
+		596,    -- Prayer of Healing
+		132157, -- Holy Nova
+		194509  -- Power Word: Radiance
+	);
+
+	for tIndex, tName in pairs(VUHDO_CONFIG["SPELL_TRACE"]["STORED"]) do
+		VUHDO_spellTraceAddDefaultSettings(tName);
+
+		VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][tName] = VUHDO_ensureSanity(
+			"SPELL_TRACE.STORED_SETTINGS",
+			VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][tName],
+			VUHDO_DEFAULT_SPELL_TRACE_STORED_SETTINGS
+		);
 	end
 
 	if (VUHDO_POWER_TYPE_COLORS == nil) then

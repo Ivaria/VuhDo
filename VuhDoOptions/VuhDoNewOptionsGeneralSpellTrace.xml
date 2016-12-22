@@ -7,7 +7,7 @@
 
 			<Frame name="$parentMainPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="270" y="115" />
+					<AbsDimension x="125" y="63" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -17,7 +17,8 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<CheckButton name="$parentShowSpellTraceCheckButton" text="VUHDO_I18N_SPELL_TRACE" inherits="VuhDoCheckButtonTemplate">
+					
+					<CheckButton name="$parentShowSpellTraceCheckButton" text="VUHDO_I18N_ENABLE" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -36,15 +37,184 @@
 				</Frames>
 			</Frame>
 
+			<Frame name="$parentStorePanel" inherits="VuhDoPanelTemplate">
+				<Size>
+					<AbsDimension x="235" y="213" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="280" y="-13" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Frames>
+
+					<Frame name="$parentListLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="120" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="43" y="-65" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_SPELL_TRACE_LIST" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Button name="$parentSelectComboBox" inherits="VuhDoScrollComboBoxTemplate">
+						<Size>
+							<AbsDimension x="180" y="1" />
+						</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="43" y="-95" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+						<Scripts>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Text");
+								VUHDO_setupSpellTraceComboModel(self);
+							</OnShow>
+							<OnLoad>
+								self:SetAttribute("custom_function", VUHDO_notifySpellTraceSelect);
+							</OnLoad>
+						</Scripts>
+					</Button>
+
+					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_STORE_DELETE" inherits="VuDoDefaultTitleFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Frame name="$parentEditLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="120" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="18" y="-28" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_SPELL_TRACE_EDIT_BOX" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<EditBox name="$parentEditBox" inherits="VuhDoEditBoxTemplate">
+						<Size>
+							<AbsDimension x="205" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="18" y="-36" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Hint"); VUHDO_lnfPatchFont(self, "");
+								if (VUHDO_CONFIG.SPELL_TRACE.SELECTED ~= nil) then
+									self:SetText(VUHDO_CONFIG.SPELL_TRACE.SELECTED);
+								end
+							</OnShow>
+							<OnTextChanged>
+								if (self:GetText() ~= "") then
+									VUHDO_spellTraceUpdateEditBox(self);
+								end
+							</OnTextChanged>
+						</Scripts>
+					</EditBox>
+
+					<CheckButton name="$parentMineCheckButton" text="VUHDO_I18N_MINE" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-138" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K523);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentOthersCheckButton" text="VUHDO_I18N_OTHERS" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-138" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K528);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<Button name="$parentSaveButton" text="VUHDO_I18N_SAVE" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-173" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_saveSpellTraceOnClick(self);
+							</OnClick>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentDeleteButton" text="VUHDO_I18N_DELETE" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-173" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								VUHDO_deleteSpellTraceOnClick(self);
+							</OnClick>
+						</Scripts>
+					</Button>
+
+				</Frames>
+			</Frame>
+
 		</Frames>
-		<Scripts>
-			<OnLoad>
-			</OnLoad>
-			<OnShow>
-			</OnShow>
-			<OnHide>
-			</OnHide>
-		</Scripts>
 	</Frame>
 
 </Ui>

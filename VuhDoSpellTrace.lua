@@ -1,32 +1,5 @@
 local pairs = pairs;
 
-local VUHDO_TRACE_SPELLS = {
-	[1064] = { -- Chain Heal
-		["mine"] = true,
-		["others"] = false,
-	},
-	[200128] = { -- Trail of Light
-		["mine"] = true,
-		["others"] = false,
-	},
-	[34861] = { -- Holy Word: Sanctify
-		["mine"] = true,
-		["others"] = false,
-	},
-	[596] = { -- Prayer of Healing
-		["mine"] = true,
-		["others"] = false,
-	},
-	[194509] = { -- Power Word: Radiance
-		["mine"] = true,
-		["others"] = false,
-	},
-	[132157] = { -- Holy Nova
-		["mine"] = true,
-		["others"] = false,
-	},
-};
-
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
 	-- [<unit GUID>] = {
 	--	["latest"] = <latest trace spell ID>,
@@ -46,12 +19,14 @@ local VUHDO_PLAYER_GUID = -1;
 local VUHDO_RAID_GUIDS = { };
 local VUHDO_INTERNAL_TOGGLES = { };
 local sShowSpellTrace = nil;
+local sSpellTraceStoredSettings = nil;
 function VUHDO_spellTraceInitLocalOverrides()
 
 	VUHDO_PLAYER_GUID = UnitGUID("player");
 	VUHDO_RAID_GUIDS = _G["VUHDO_RAID_GUIDS"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	sShowSpellTrace = VUHDO_CONFIG["SHOW_SPELL_TRACE"];
+	sSpellTraceStoredSettings = VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"];
 
 end
 
@@ -61,9 +36,9 @@ end
 function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellId)
 
 	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
-		aMessage ~= "SPELL_HEAL" or not VUHDO_TRACE_SPELLS[aSpellId] or 
-		(aSrcGuid ~= VUHDO_PLAYER_GUID and not VUHDO_TRACE_SPELLS[aSpellId]["others"]) or 
-		(aSrcGuid == VUHDO_PLAYER_GUID and not VUHDO_TRACE_SPELLS[aSpellId]["mine"]) or 
+		aMessage ~= "SPELL_HEAL" or not sSpellTraceStoredSettings[aSpellId] or 
+		(aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[aSpellId]["isOthers"]) or 
+		(aSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[aSpellId]["isMine"]) or 
 		not VUHDO_RAID_GUIDS[aDstGuid] then
 		return;
 	end
