@@ -35,16 +35,19 @@ end
 --
 function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellId)
 
+	-- ensure table keys are always strings
+	local tSpellId = tostring(aSpellId);
+
 	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
-		aMessage ~= "SPELL_HEAL" or not sSpellTraceStoredSettings[aSpellId] or 
-		(aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[aSpellId]["isOthers"]) or 
-		(aSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[aSpellId]["isMine"]) or 
+		aMessage ~= "SPELL_HEAL" or not sSpellTraceStoredSettings[tSpellId] or 
+		(aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
+		(aSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) or 
 		not VUHDO_RAID_GUIDS[aDstGuid] then
 		return;
 	end
 
 	if not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid] or not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"] or 
-		not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][aSpellId] then
+		not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] then
 		local tName, _, tIcon = GetSpellInfo(aSpellId);
 
 		if not tName then
@@ -57,13 +60,13 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 			};
 		end
 
-		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][aSpellId] = {
+		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] = {
 			["icon"] = tIcon,
 		};
 	end
 
-	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][aSpellId]["duration"] = 0.1;
-	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = aSpellId;
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId]["duration"] = 0.1;
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = tSpellId;
 
 	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[aDstGuid], VUHDO_UPDATE_SPELL_TRACE);
 
