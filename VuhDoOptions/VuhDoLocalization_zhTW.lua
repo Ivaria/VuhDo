@@ -1119,4 +1119,6 @@ VUHDO_I18N_ANNOUNCE_MASS_RES = "'Mass' Resurrection\nAnnouncement";
 VUHDO_I18N_SPELL_TRACE = "Spell Trace";
 VUHDO_I18N_SPELL_TRACE_EDIT_BOX = "Enter spell name or ID to trace";
 VUHDO_I18N_SPELL_TRACE_LIST = "Spell Trace List";
+VUHDO_I18N_DURATION = "Duration";
+VUHDO_I18N_SEC = "sec";
 

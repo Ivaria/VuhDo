@@ -1291,7 +1291,7 @@ function VUHDO_OnUpdate(_, aTimeDelta)
 			end
 
 			if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
-				VUHDO_updateSpellTrace(aTimeDelta);
+				VUHDO_updateSpellTrace();
 			end
 		elseif tHotDebuffToggle == 2 then
 			VUHDO_updateAllCyclicBouquets(false);
@@ -1311,8 +1311,11 @@ function VUHDO_OnUpdate(_, aTimeDelta)
 			end
 		end
 
-		if tHotDebuffToggle > 2 then tHotDebuffToggle = 1;
-		else tHotDebuffToggle = tHotDebuffToggle + 1; end
+		if tHotDebuffToggle > 2 then 
+			tHotDebuffToggle = 1;
+		else 
+			tHotDebuffToggle = tHotDebuffToggle + 1;
+		end
 	end
 
 	-- track dragged panel coords
@@ -1389,6 +1392,7 @@ function VUHDO_OnUpdate(_, aTimeDelta)
 			end
 		end
 	end
+
 	-- automatic profiles, shield cleanup, hide generic blizz party
 	if VUHDO_checkResetTimer("CHECK_PROFILES", 3.1) then
 		if not InCombatLockdown() then
@@ -1416,8 +1420,11 @@ function VUHDO_OnUpdate(_, aTimeDelta)
 
 	-- Refresh d/c shield macros?
 	if VUHDO_checkTimer("MIRROR_TO_MACRO") then
-		if InCombatLockdown() then VUHDO_TIMERS["MIRROR_TO_MACRO"] = 2;
-		else VUHDO_mirrorToMacro(); end
+		if InCombatLockdown() then 
+			VUHDO_TIMERS["MIRROR_TO_MACRO"] = 2;
+		else 
+			VUHDO_mirrorToMacro();
+		end
 	end
 end
 

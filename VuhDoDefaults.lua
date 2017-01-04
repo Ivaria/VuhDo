@@ -468,6 +468,7 @@ local function VUHDO_spellTraceAddDefaultSettings(aSpellName)
 		VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][aSpellName] = {
 			["isMine"] = VUHDO_CONFIG["SPELL_TRACE"]["isMine"],
 			["isOthers"] = VUHDO_CONFIG["SPELL_TRACE"]["isOthers"],
+			["duration"] = VUHDO_CONFIG["SPELL_TRACE"]["duration"],
 		}
 	end
 
@@ -614,6 +615,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["SPELL_TRACE"] = {
 		["isMine"] = true,
 		["isOthers"] = false,
+		["duration"] = 2,
 		["SELECTED"] = "",
 		["STORED"] = { },
 	},
@@ -759,6 +761,7 @@ local VUHDO_DEFAULT_CU_DE_STORED_SETTINGS = {
 local VUHDO_DEFAULT_SPELL_TRACE_STORED_SETTINGS = {
 	["isMine"] = true,
 	["isOthers"] = false,
+	["duration"] = 2,
 };
 
 
@@ -1495,10 +1498,8 @@ function VUHDO_loadDefaultConfig()
 		-- Shaman
 		1064,   -- Chain Heal
 		-- Priest
-		200128, -- Trail of Light
 		34861,  -- Holy Word: Sanctify
 		596,    -- Prayer of Healing
-		132157, -- Holy Nova
 		194509  -- Power Word: Radiance
 	);
 

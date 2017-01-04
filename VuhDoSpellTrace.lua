@@ -1,4 +1,6 @@
 local pairs = pairs;
+local tostring = tostring;
+local tonumber = tonumber;
 
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
 	-- [<unit GUID>] = {
@@ -20,6 +22,7 @@ local VUHDO_RAID_GUIDS = { };
 local VUHDO_INTERNAL_TOGGLES = { };
 local sShowSpellTrace = nil;
 local sSpellTraceStoredSettings = nil;
+local sSpellTraceDefaultDuration = nil;
 function VUHDO_spellTraceInitLocalOverrides()
 
 	VUHDO_PLAYER_GUID = UnitGUID("player");
@@ -27,6 +30,7 @@ function VUHDO_spellTraceInitLocalOverrides()
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	sShowSpellTrace = VUHDO_CONFIG["SHOW_SPELL_TRACE"];
 	sSpellTraceStoredSettings = VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"];
+	sSpellTraceDefaultDuration = VUHDO_CONFIG["SPELL_TRACE"]["duration"];
 
 end
 
@@ -39,10 +43,21 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 	local tSpellId = tostring(aSpellId);
 
 	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
-		aMessage ~= "SPELL_HEAL" or not sSpellTraceStoredSettings[tSpellId] or 
-		(aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
-		(aSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) or 
-		not VUHDO_RAID_GUIDS[aDstGuid] then
+		aMessage ~= "SPELL_HEAL" or not VUHDO_RAID_GUIDS[aDstGuid] then
+		return;
+	end
+
+	-- spells can be traced by name or spell ID
+	if not sSpellTraceStoredSettings[tSpellId] then
+		tSpellId = aSpellName;
+
+		if not sSpellTraceStoredSettings[tSpellId] then
+			return;
+		end
+	end
+	
+	if (aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
+		(aSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) then
 		return;
 	end
 
@@ -65,7 +80,8 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 		};
 	end
 
-	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId]["duration"] = 0.1;
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId]["startTime"] = GetTime();
+
 	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = tSpellId;
 
 	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[aDstGuid], VUHDO_UPDATE_SPELL_TRACE);
@@ -75,17 +91,20 @@ end
 
 
 --
-function VUHDO_updateSpellTrace(aTimeDelta)
+function VUHDO_updateSpellTrace()
 
 	for tUnitGuid, tActiveTrace in pairs(VUHDO_ACTIVE_TRACE_SPELLS) do
 		local i = 0;
 		local tActiveTraceSpells = tActiveTrace["spells"];
+		local tCurrentTime = GetTime();
 
 		for tSpellId, tActiveTraceSpell in pairs(tActiveTraceSpells) do
 			if tActiveTraceSpell then
-				local tDuration = tActiveTraceSpell["duration"] - aTimeDelta;
-	
-				if tDuration <= 0 then
+				local tDuration = tonumber(sSpellTraceStoredSettings[tSpellId]["duration"] or sSpellTraceDefaultDuration) or sSpellTraceDefaultDuration;
+
+				local tRemaining = tDuration - (tCurrentTime - tActiveTraceSpell["startTime"]);
+
+				if tRemaining <= 0 then
 					VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tSpellId] = nil;
 
 					if tActiveTrace["latest"] == tSpellId then
@@ -97,15 +116,13 @@ function VUHDO_updateSpellTrace(aTimeDelta)
 					if tUnit then
 						VUHDO_updateBouquetsForEvent(tUnit, VUHDO_UPDATE_SPELL_TRACE);
 					end
-				else
-					VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tSpellId]["duration"] = tDuration;
 				end
 
 				i = i + 1;
 			end
 		end
 
-		if not i then
+		if i == 0 then
 			VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid] = nil;
 		end
 	end
@@ -132,6 +149,15 @@ function VUHDO_getSpellTraceForUnit(aUnit)
 	if tLatestTraceSpellId then
 		return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tLatestTraceSpellId];
 	end
+
+end
+
+
+
+--
+function VUHDO_getActiveSpellTraceSpells()
+
+	return VUHDO_ACTIVE_TRACE_SPELLS;
 
 end
 

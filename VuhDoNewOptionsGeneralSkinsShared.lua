@@ -91,6 +91,7 @@ local VUHDO_DEFAULT_PROFILES = {
 			["SPELL_TRACE"] = {
 				["isMine"] = true,
 				["isOthers"] = false,
+				["duration"] = 2,
 				["selected"] = "",
 			},
 			["SHOW_TEXT_OVERHEAL"] = true,
@@ -740,6 +741,7 @@ local VUHDO_DEFAULT_PROFILES = {
 			["SPELL_TRACE"] = {
 				["isMine"] = true,
 				["isOthers"] = false,
+				["duration"] = 2,
 				["selected"] = "",
 			},
 		},

@@ -3,6 +3,7 @@ local _;
 local VUHDO_COMBO_MODEL = nil;
 local VUHDO_MINE_MODEL = nil;
 local VUHDO_OTHERS_MODEL = nil;
+local VUHDO_DURATION_MODEL = nil;
 
 local VUHDO_SPELL_TRACE_SORTABLE = { };
 
@@ -74,6 +75,7 @@ local tIndex;
 local tPanelName;
 local tCheckButton;
 local tComboBox;
+local tSlider;
 function VUHDO_spellTraceUpdateEditBox(anEditBox)
 
 	tValue = anEditBox:GetText();
@@ -93,6 +95,14 @@ function VUHDO_spellTraceUpdateEditBox(anEditBox)
 		VUHDO_lnfSetModel(tCheckButton, 
 		    "VUHDO_CONFIG.SPELL_TRACE.STORED_SETTINGS." .. tValue .. ".isOthers");
 		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tSlider = _G[tPanelName .. "DurationSlider"];
+		VUHDO_lnfSetModel(tSlider,
+		    "VUHDO_CONFIG.SPELL_TRACE.STORED_SETTINGS." .. tValue .. ".duration");
+		VUHDO_lnfSliderOnLoad(tSlider, VUHDO_I18N_DURATION, 0, 30, " " .. VUHDO_I18N_SEC);
+
+		anEditBox:GetParent():Hide();
+		anEditBox:GetParent():Show();
 	else
 		anEditBox:SetTextColor(0.8, 0.8, 1, 1);
 
@@ -100,6 +110,7 @@ function VUHDO_spellTraceUpdateEditBox(anEditBox)
 
 		VUHDO_MINE_MODEL = VUHDO_CONFIG.SPELL_TRACE.isMine;
 		VUHDO_OTHERS_MODEL = VUHDO_CONFIG.SPELL_TRACE.isOthers;
+		VUHDO_DURATION_MODEL = VUHDO_CONFIG.SPELL_TRACE.duration;
 	
 		tCheckButton = _G[tPanelName .. "MineCheckButton"];
 		VUHDO_lnfSetModel(tCheckButton, "VUHDO_MINE_MODEL");
@@ -108,6 +119,13 @@ function VUHDO_spellTraceUpdateEditBox(anEditBox)
 		tCheckButton = _G[tPanelName .. "OthersCheckButton"];
 		VUHDO_lnfSetModel(tCheckButton, "VUHDO_OTHERS_MODEL");
 		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tSlider = _G[tPanelName .. "DurationSlider"];
+		VUHDO_lnfSetModel(tSlider, "VUHDO_DURATION_MODEL");
+		VUHDO_lnfSliderOnLoad(tSlider, VUHDO_I18N_DURATION, 0, 30, " " .. VUHDO_I18N_SEC);
+
+		anEditBox:GetParent():Hide();
+		anEditBox:GetParent():Show();
 	end
 
 end
@@ -120,6 +138,7 @@ local tValue;
 local tIndex;
 local tCheckButton;
 local tPanelName;
+local tSlider;
 function VUHDO_saveSpellTraceOnClick(aButton)
 
 	tEditBox = _G[aButton:GetParent():GetName() .. "EditBox"];
@@ -143,6 +162,9 @@ function VUHDO_saveSpellTraceOnClick(aButton)
 
 	tCheckButton = _G[tPanelName .. "OthersCheckButton"];
 	VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][tValue].isOthers = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
+
+	tSlider = _G[tPanelName .. "DurationSliderSlider"];
+	VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"][tValue].duration = tSlider:GetValue() or VUHDO_CONFIG["SPELL_TRACE"].duration;
 
 	VUHDO_CONFIG["SPELL_TRACE"]["SELECTED"] = tValue;
 	VUHDO_initSpellTraceComboModel();
