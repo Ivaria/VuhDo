@@ -20,8 +20,9 @@ Improvements:
 -- Added ability to track different spell casts on units
 --   See settings under 'VuhDo Options > General > Spell Trace'
 --   Useful for tracking which units are hit by AOE healing spells
--- Added new bouquet validator 'Icon: Spell Trace' 
--- Added new default bouquet 'Spell Trace'
+-- Added bouquet validator 'Icon: Spell Trace' 
+-- Added default bouquet 'Spell Trace'
+-- Added panel sort method 'Tank => MDPS => RDPS => Healer'
 
 
 --------------------------------------------------------------
