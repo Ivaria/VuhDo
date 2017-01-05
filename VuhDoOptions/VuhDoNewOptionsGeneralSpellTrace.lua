@@ -83,13 +83,13 @@ function VUHDO_spellTraceUpdateEditBox(anEditBox)
 	if (tIndex ~= nil) then
 		tModel = "VUHDO_CONFIG.SPELL_TRACE.STORED_SETTINGS." .. tValue;
 	else
-		tModel = "VUHDO_SPELL_TRACE_TEMP_MODEL";
-
 		VUHDO_SPELL_TRACE_TEMP_MODEL = {
-			["isMine"] = VUHDO_CONFIG.SPELL_TRACE.isMine,
-			["isOthers"] = VUHDO_CONFIG.SPELL_TRACE.isOthers,
-			["duration"] = VUHDO_CONFIG.SPELL_TRACE.duration,
+			["isMine"] = VUHDO_CONFIG["SPELL_TRACE"]["isMine"],
+			["isOthers"] = VUHDO_CONFIG["SPELL_TRACE"]["isOthers"],
+			["duration"] = VUHDO_CONFIG["SPELL_TRACE"]["duration"],
 		};
+
+		tModel = "VUHDO_SPELL_TRACE_TEMP_MODEL";
 	end
 
 	anEditBox:SetTextColor(1, 1, 1, 1);
