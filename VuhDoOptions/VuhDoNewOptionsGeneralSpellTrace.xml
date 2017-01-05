@@ -145,7 +145,7 @@
 						</Scripts>
 					</EditBox>
 
-					<Frame name="$parentDurationSlider" inherits="VuhDoHSliderTemplate">
+					<Frame name="$parentDurationFrame" hidden="true">
 						<Size>
 							<AbsDimension x="211" y="18" />
 						</Size>
@@ -156,11 +156,27 @@
 								</Offset>
 							</Anchor>
 						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K523);
-							</OnLoad>
-						</Scripts>
+						<Frames>
+
+							<Frame name="$parentSlider" inherits="VuhDoHSliderTemplate">
+								<Size>
+									<AbsDimension x="211" y="18" />
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="0" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K523);
+									</OnLoad>
+								</Scripts>
+							</Frame>
+
+						</Frames>
 					</Frame>
 
 					<CheckButton name="$parentMineCheckButton" text="VUHDO_I18N_MINE" inherits="VuhDoCheckButtonTemplate">
