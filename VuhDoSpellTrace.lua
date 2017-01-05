@@ -8,7 +8,7 @@ local VUHDO_ACTIVE_TRACE_SPELLS = {
 	--	["spells"] = {
 	--		[<spell ID>] = {
 	--			["icon"] = <spell icon>,
-	--			["duration"] = <duration of trace>,
+	--			["startTime"] = <epoch time event received>,
 	--		},
 	--	},
 	-- },
