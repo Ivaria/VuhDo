@@ -1252,6 +1252,8 @@ local tPvPFlags = {
 
 local tPaladinBeacons = {
 	156910, -- Beacon of Faith
+	197446, -- Beacon of the Lightbringer
+	200025, -- Beacon of Virtue
 	53563, -- Beacon of Light
 }
 
