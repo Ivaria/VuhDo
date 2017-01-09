@@ -77,7 +77,7 @@ end
 
 
 --
-function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellIdi, anAmount)
+function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellId, anAmount)
 
 	-- ensure table keys are always strings
 	local tSpellId = tostring(aSpellId);
@@ -88,7 +88,7 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 
 	-- special tracking for Holy Priest "Trail of Light"
 	if sShowTrailOfLight and sIsPlayerKnowsTrailOfLight and 
-		aSpellName == VUHDO_SPELL_ID.FLASH_HEAL then
+		aSrcGuid == VUHDO_PLAYER_GUID and aSpellName == VUHDO_SPELL_ID.FLASH_HEAL then
 		tinsert(
 			VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT, 
 			{
@@ -118,7 +118,9 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 				);
 			end
 
-			if tPreviousPlayerTrailOfLight and VUHDO_RAID_GUIDS[tPreviousPlayerTrailOfLight] then
+			if tPreviousPlayerTrailOfLight and 
+				tPreviousPlayerTrailOfLight ~= sCurrentPlayerTrailOfLight and 
+				VUHDO_RAID_GUIDS[tPreviousPlayerTrailOfLight] then
 				VUHDO_updateBouquetsForEvent(
 					VUHDO_RAID_GUIDS[tPreviousPlayerTrailOfLight],
 					VUHDO_UPDATE_SPELL_TRACE
