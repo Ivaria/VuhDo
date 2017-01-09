@@ -1135,4 +1135,5 @@ VUHDO_I18N_SPELL_TRACE_EDIT_BOX = "Enter spell name or ID to trace";
 VUHDO_I18N_SPELL_TRACE_LIST = "Spell Trace List";
 VUHDO_I18N_DURATION = "Duration";
 VUHDO_I18N_SEC = "sec";
+VUHDO_I18N_TRAIL_OF_LIGHT = "Trail of\nLight";
 

@@ -616,6 +616,7 @@ local VUHDO_DEFAULT_CONFIG = {
 		["isMine"] = true,
 		["isOthers"] = false,
 		["duration"] = 2,
+		["showTrailOfLight"] = false,
 		["SELECTED"] = "",
 		["STORED"] = { },
 	},

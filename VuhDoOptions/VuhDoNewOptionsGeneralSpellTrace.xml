@@ -7,7 +7,7 @@
 
 			<Frame name="$parentMainPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="125" y="63" />
+					<AbsDimension x="125" y="92" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -30,6 +30,23 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.SHOW_SPELL_TRACE");
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K568);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentShowTrailOfLightCheckButton" text="VUHDO_I18N_TRAIL_OF_LIGHT" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-47" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.SPELL_TRACE.showTrailOfLight");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K568);
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_CONFIG.SHOW_SPELL_TRACE", false);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

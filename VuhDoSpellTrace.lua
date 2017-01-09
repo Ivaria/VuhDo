@@ -1,6 +1,8 @@
 local pairs = pairs;
 local tostring = tostring;
 local tonumber = tonumber;
+local tinsert = table.insert;
+local twipe = table.wipe;
 
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
 	-- [<unit GUID>] = {
@@ -14,6 +16,12 @@ local VUHDO_ACTIVE_TRACE_SPELLS = {
 	-- },
 };
 
+local VUHDO_TRAIL_OF_LIGHT_SPELL_ID = 200128;
+local VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT = { };
+local sIsPlayerKnowsTrailOfLight = false;
+local sCurrentPlayerTrailOfLight = nil;
+local sTrailOfLightIcon = nil;
+
 
 
 --
@@ -21,6 +29,7 @@ local VUHDO_PLAYER_GUID = -1;
 local VUHDO_RAID_GUIDS = { };
 local VUHDO_INTERNAL_TOGGLES = { };
 local sShowSpellTrace = nil;
+local sShowTrailOfLight = nil;
 local sSpellTraceStoredSettings = nil;
 local sSpellTraceDefaultDuration = nil;
 function VUHDO_spellTraceInitLocalOverrides()
@@ -31,20 +40,94 @@ function VUHDO_spellTraceInitLocalOverrides()
 	sShowSpellTrace = VUHDO_CONFIG["SHOW_SPELL_TRACE"];
 	sSpellTraceStoredSettings = VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"];
 	sSpellTraceDefaultDuration = VUHDO_CONFIG["SPELL_TRACE"]["duration"];
+	sShowTrailOfLight = VUHDO_CONFIG["SPELL_TRACE"]["showTrailOfLight"];
+
+	VUHDO_setKnowsTrailOfLight(VUHDO_isTalentKnown(VUHDO_SPELL_ID.TRAIL_OF_LIGHT));
 
 end
 
 
 
 --
-function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellId)
+function VUHDO_setKnowsTrailOfLight(aKnowsTrailOfLight)
+
+	sIsPlayerKnowsTrailOfLight = aKnowsTrailOfLight;
+
+	if aKnowsTrailOfLight then
+		_, _, sTrailOfLightIcon = GetSpellInfo(VUHDO_TRAIL_OF_LIGHT_SPELL_ID);
+	else
+		twipe(VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT);
+
+		local tPreviousPlayerTrailOfLight = sCurrentPlayerTrailOfLight;
+		sCurrentPlayerTrailOfLight = nil;
+
+		if tPreviousPlayerTrailOfLight and VUHDO_RAID_GUIDS[tPreviousPlayerTrailOfLight] then
+			VUHDO_updateBouquetsForEvent(
+				VUHDO_RAID_GUIDS[tPreviousPlayerTrailOfLight],
+				VUHDO_UPDATE_SPELL_TRACE
+			);
+		end
+
+		VUHDO_updateBouquetsForEvent("target", VUHDO_UPDATE_SPELL_TRACE);
+		VUHDO_updateBouquetsForEvent("focus", VUHDO_UPDATE_SPELL_TRACE);
+	end
+
+end
+
+
+
+--
+function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellIdi, anAmount)
 
 	-- ensure table keys are always strings
 	local tSpellId = tostring(aSpellId);
 
-	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
-		aMessage ~= "SPELL_HEAL" or not VUHDO_RAID_GUIDS[aDstGuid] then
+	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or aMessage ~= "SPELL_HEAL" then
 		return;
+	end
+
+	-- special tracking for Holy Priest "Trail of Light"
+	if sShowTrailOfLight and sIsPlayerKnowsTrailOfLight and 
+		aSpellName == VUHDO_SPELL_ID.FLASH_HEAL then
+		tinsert(
+			VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT, 
+			{
+				anAmount,
+				aDstGuid
+			}
+		);
+
+		local FlashHeal1 = VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1];
+		local FlashHeal2 = VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[2];
+
+		if FlashHeal1 and FlashHeal2 then
+			local tPreviousPlayerTrailOfLight = sCurrentPlayerTrailOfLight;
+
+			if FlashHeal1[1] < FlashHeal2[1] then
+				sCurrentPlayerTrailOfLight = FlashHeal1[2];
+			else
+				sCurrentPlayerTrailOfLight = FlashHeal2[2];
+			end
+
+			twipe(VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT);
+
+			if VUHDO_RAID_GUIDS[sCurrentPlayerTrailOfLight] then
+				VUHDO_updateBouquetsForEvent(
+					VUHDO_RAID_GUIDS[sCurrentPlayerTrailOfLight], 
+					VUHDO_UPDATE_SPELL_TRACE
+				);
+			end
+
+			if tPreviousPlayerTrailOfLight and VUHDO_RAID_GUIDS[tPreviousPlayerTrailOfLight] then
+				VUHDO_updateBouquetsForEvent(
+					VUHDO_RAID_GUIDS[tPreviousPlayerTrailOfLight],
+					VUHDO_UPDATE_SPELL_TRACE
+				);
+			end
+
+			VUHDO_updateBouquetsForEvent("target", VUHDO_UPDATE_SPELL_TRACE);
+			VUHDO_updateBouquetsForEvent("focus", VUHDO_UPDATE_SPELL_TRACE);
+		end
 	end
 
 	-- spells can be traced by name or spell ID
@@ -55,8 +138,9 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 			return;
 		end
 	end
-	
-	if (aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
+
+	if not VUHDO_RAID_GUIDS[aDstGuid] or 
+		(aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
 		(aSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) then
 		return;
 	end
@@ -158,6 +242,36 @@ end
 function VUHDO_getActiveSpellTraceSpells()
 
 	return VUHDO_ACTIVE_TRACE_SPELLS;
+
+end
+
+
+
+--
+function VUHDO_getSpellTraceTrailOfLight()
+
+	return VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT;
+
+end
+
+
+
+--
+function VUHDO_getSpellTraceTrailOfLightForUnit(aUnit)
+
+	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
+		not sShowTrailOfLight or not sIsPlayerKnowsTrailOfLight or 
+		not aUnit then
+		return;
+	end
+
+	local tUnitGuid = UnitGUID(aUnit);
+
+	if not tUnitGuid or tUnitGuid ~= sCurrentPlayerTrailOfLight then
+		return;
+	end
+
+	return { ["icon"] = sTrailOfLightIcon, };
 
 end
 

@@ -426,7 +426,8 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 					anArg4,  -- source GUID
 					anArg8,  -- dest GUID
 					anArg13, -- spell name
-					anArg12  -- spell ID
+					anArg12, -- spell ID
+					anArg16  -- amount
 				);
 			end
 		end

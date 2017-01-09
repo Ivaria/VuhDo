@@ -48,6 +48,7 @@ local VUHDO_getIncHealOnUnit;
 local VUHDO_getUnitDebuffSchoolInfos;
 local VUHDO_getCurrentBouquetStacks;
 local VUHDO_getSpellTraceForUnit;
+local VUHDO_getSpellTraceTrailOfLightForUnit;
 local VUHDO_getAoeAdviceForUnit;
 local VUHDO_getCurrentBouquetTimer;
 local VUHDO_getRaidTargetIconTexture;
@@ -88,6 +89,7 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getCurrentBouquetStacks = _G["VUHDO_getCurrentBouquetStacks"];
 	VUHDO_getIsCurrentBouquetActive = _G["VUHDO_getIsCurrentBouquetActive"];
 	VUHDO_getSpellTraceForUnit = _G["VUHDO_getSpellTraceForUnit"];
+	VUHDO_getSpellTraceTrailOfLightForUnit = _G["VUHDO_getSpellTraceTrailOfLightForUnit"];
 	VUHDO_getAoeAdviceForUnit = _G["VUHDO_getAoeAdviceForUnit"];
 	VUHDO_getCurrentBouquetTimer = _G["VUHDO_getCurrentBouquetTimer"];
 	VUHDO_getRaidTargetIconTexture = _G["VUHDO_getRaidTargetIconTexture"];
@@ -152,6 +154,20 @@ end
 local tInfo;
 local function VUHDO_spellTraceValidator(anInfo, _)
 	tInfo = VUHDO_getSpellTraceForUnit(anInfo["unit"]);
+
+	if tInfo then
+		return true, tInfo["icon"], -1, -1, -1;
+	else
+		return false, nil, -1, -1, -1;
+	end
+end
+
+
+
+--
+local tInfo;
+local function VUHDO_trailOfLightValidator(anInfo, _)
+	tInfo = VUHDO_getSpellTraceTrailOfLightForUnit(anInfo["unit"]);
 
 	if tInfo then
 		return true, tInfo["icon"], -1, -1, -1;
@@ -1680,6 +1696,12 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 	["SPELL_TRACE"] = {
 		["displayName"] = VUHDO_I18N_SPELL_TRACE,
 		["validator"] = VUHDO_spellTraceValidator,
+		["interests"] = { VUHDO_UPDATE_SPELL_TRACE },
+	},
+
+	["TRAIL_OF_LIGHT"] = {
+		["displayName"] = VUHDO_I18N_TRAIL_OF_LIGHT,
+		["validator"] = VUHDO_trailOfLightValidator,
 		["interests"] = { VUHDO_UPDATE_SPELL_TRACE },
 	},
 

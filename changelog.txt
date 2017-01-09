@@ -22,6 +22,10 @@ Improvements:
 --   Useful for tracking which units are hit by AOE healing spells
 -- Added bouquet validator 'Icon: Spell Trace' 
 -- Added default bouquet 'Spell Trace'
+-- Added ability to track Holy Priest "Trail of Light"
+--   Enable under 'VuhDo Options > General > Spell Trace'
+-- Added bouquet validator 'Icon: Trail of Light'
+-- Added default bouquet 'Trail of Light'
 -- Added panel sort method 'Tank => MDPS => RDPS => Healer'
 
 
