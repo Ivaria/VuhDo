@@ -45,7 +45,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.SPELL_TRACE.showTrailOfLight");
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K568);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K569);
 								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_CONFIG.SHOW_SPELL_TRACE", false);
 							</OnLoad>
 						</Scripts>
@@ -188,7 +188,7 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K523);
+										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K570);
 									</OnLoad>
 								</Scripts>
 							</Frame>
@@ -206,7 +206,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K523);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K571);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -221,7 +221,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K528);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K572);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
