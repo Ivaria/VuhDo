@@ -1469,6 +1469,45 @@ function VUHDO_loadDefaultConfig()
 		232488  -- Dark Hatred
 	);
 
+	-- 7.1.5 - Legion - Nighthold
+	VUHDO_addCustomSpellIds(34,
+		-- [[ Nighthold ]]
+		-- Skorpyron
+		204766, -- Energy Surge
+		211659, -- Arcane Tether
+		-- Chronomatic Anomaly
+		206607, -- Chronometric Particles
+		206609, -- Time Release
+		206615, -- Time Bomb
+		-- Trilliax
+		-- Spellblade Aluriel
+		212587, -- Mark of Frost
+		-- Tichondrius
+		206480, -- Carrion Plague
+		212795, -- Brand of Argus
+		208230, -- Feast of Blood
+		216024, -- Volatile Wound
+		216040, -- Burning Soul
+		-- Krosus
+		-- High Botanist Tel'arn
+		218502, -- Recursive Strikes
+		219049, -- Toxic Spores
+		218424, -- Parasitic Fetter
+		-- Star Augur Etraeus
+		206585, -- Absolute Zero
+		206388, -- Felburst
+		205649, -- Fel Ejection
+		206965, -- Voidburst
+		207143, -- Void Ejection
+		-- Grand Magistrix Elisande
+		-- Gul'dan
+		212568, -- Drain
+		206883, -- Soul Vortex
+		206222, -- Bonds of Fel
+		206221, -- Empowered Bonds of Fel
+		208802  -- Soul Corrosion
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
