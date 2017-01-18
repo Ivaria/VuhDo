@@ -82,7 +82,8 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 	-- ensure table keys are always strings
 	local tSpellId = tostring(aSpellId);
 
-	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or aMessage ~= "SPELL_HEAL" then
+	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
+		(aMessage ~= "SPELL_HEAL" and aMessage ~= "SPELL_PERIODIC_HEAL") then
 		return;
 	end
 
