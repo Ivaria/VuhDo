@@ -18,6 +18,8 @@ Bugfixes:
 
 
 Improvements:
+-- Added bouquet validator 'Statusbar: Mana % (Healer Only)'
+-- Added default bouquet 'Manabars: Mana (Healer Only)'
 
 
 --------------------------------------------------------------

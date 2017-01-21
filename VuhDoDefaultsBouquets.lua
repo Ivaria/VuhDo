@@ -615,6 +615,31 @@ VUHDO_DEFAULT_ROLE_COLOR_BOUQUET = {
 
 
 --
+VUHDO_DEFAULT_BAR_MANA_HEALER_ONLY = {
+	[VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY] = {
+		{
+			["name"] = "NO_RANGE",
+			["mine"] = true, ["icon"] = 2,
+			["color"] = {
+				["R"] = 0, ["G"] = 0, ["B"] = 0, ["O"] = 0.25,
+				["TR"] = 0, ["TG"] = 0, ["TB"] = 0, ["TO"] = 0.25,
+				["useText"] = false, ["useBackground"] = false, ["useOpacity"] = true,
+				["isManuallySet"] = true,
+			},
+			["custom"] = { [1] = 1, ["radio"] = 2, ["bright"] = 1.0 },
+		},
+		{
+			["name"] = "STATUS_MANA_HEALER_ONLY",
+			["mine"] = true, ["icon"] = 2,
+			["color"] = VUHDO_makeFullColorForBouquet(0, 0, 1, 1,   0, 0, 1, 1),
+			["custom"] = { [1] = 1, ["radio"] = 1, ["bright"] = 1.0	},
+		},
+	},
+}
+
+
+
+--
 VUHDO_DEFAULT_INDICATOR_CONFIG = {
 	["BOUQUETS"] = {
 		["AGGRO_BAR"] = "",
@@ -1359,6 +1384,12 @@ function VUHDO_loadDefaultBouquets()
 		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_TRAIL_OF_LIGHT_BOUQUET);
 	end
 	VUHDO_DEFAULT_TRAIL_OF_LIGHT_BOUQUET = nil;
+
+	if VUHDO_BOUQUETS["VERSION"] < 18 then
+		VUHDO_BOUQUETS["VERSION"] = 18;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_BAR_MANA_HEALER_ONLY);
+	end
+	VUHDO_DEFAULT_BAR_MANA_HEALER_ONLY = nil;
 
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();

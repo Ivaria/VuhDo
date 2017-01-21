@@ -520,3 +520,7 @@ VUHDO_I18N_DEF_SPELL_TRACE = "Spell Trace";
 VUHDO_I18N_TRAIL_OF_LIGHT = "Icon: Trail of Light";
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "Trail of Light";
 
+-- 3.83
+VUHDO_I18N_BOUQUET_STATUS_MANA_HEALER_ONLY = "Statusbar: Mana % (Healer Only)";
+VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY = "Manabars: Mana (Healer Only)";
+
