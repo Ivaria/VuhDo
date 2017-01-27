@@ -15,11 +15,13 @@ Known issues:
 
 Bugfixes:
 -- Fixed spell trace tracking for periodic heals (eg. 'Healing Rain')
+-- Fixed debuff absorption tracking for Nighthold 'Time Release'
 
 
 Improvements:
 -- Added bouquet validator 'Statusbar: Mana % (Healer Only)'
 -- Added default bouquet 'Manabars: Mana (Healer Only)'
+-- Added more default custom debuffs for Nighthold raid encounters
 
 
 --------------------------------------------------------------

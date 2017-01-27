@@ -1508,6 +1508,17 @@ function VUHDO_loadDefaultConfig()
 		208802  -- Soul Corrosion
 	);
 
+	-- 7.1.5 - Legion - Nighthold (part 2)
+	VUHDO_addCustomSpellIds(35,
+		-- [[ Nighthold ]]
+		-- Chronomatic Anomaly
+		219964, -- Time Release Green
+		219965, -- Time Release Yellow
+		219966  -- Time Release Red
+		-- Trilliax
+		-- Grand Magistrix Elisande
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
