@@ -18,6 +18,7 @@ local VUHDO_ACTIVE_TRACE_SPELLS = {
 
 local VUHDO_TRAIL_OF_LIGHT_SPELL_ID = 200128;
 local VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT = { };
+
 local sIsPlayerKnowsTrailOfLight = false;
 local sCurrentPlayerTrailOfLight = nil;
 local sTrailOfLightIcon = nil;
@@ -37,6 +38,7 @@ function VUHDO_spellTraceInitLocalOverrides()
 	VUHDO_PLAYER_GUID = UnitGUID("player");
 	VUHDO_RAID_GUIDS = _G["VUHDO_RAID_GUIDS"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
+
 	sShowSpellTrace = VUHDO_CONFIG["SHOW_SPELL_TRACE"];
 	sSpellTraceStoredSettings = VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"];
 	sSpellTraceDefaultDuration = VUHDO_CONFIG["SPELL_TRACE"]["duration"];
