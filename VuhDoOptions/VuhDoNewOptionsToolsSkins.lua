@@ -199,11 +199,10 @@ end
 
 
 --
+local tPrefixes = { "SPEC_1", "SPEC_2", "SPEC_3", "SPEC_4" };
 local tExistIndex;
-local tIsSpec1;
-local tIsSpec2;
-local tPrefix;
 local tIsGroupFound;
+local tIsSpecSelected;
 function VUHDO_skinsSaveAutoProfileButtonEnablement(aPanel, aProfileName)
 
 	tExistIndex, _ = VUHDO_getProfileNamedCompressed(aProfileName);
@@ -211,65 +210,78 @@ function VUHDO_skinsSaveAutoProfileButtonEnablement(aPanel, aProfileName)
 		return;
 	end
 
-	tIsSpec1 = _G[aPanel:GetName() .. "AutoEnablePanelSpec1CheckButton"]:GetChecked();
-	tIsSpec2 = _G[aPanel:GetName() .. "AutoEnablePanelSpec2CheckButton"]:GetChecked();
-	tIsSpec3 = _G[aPanel:GetName() .. "AutoEnablePanelSpec3CheckButton"]:GetChecked();
-	tIsSpec4 = _G[aPanel:GetName() .. "AutoEnablePanelSpec4CheckButton"]:GetChecked();
+	local tSelectedPrefixes = {};
 
-	if (tIsSpec1 and not tIsSpec2 and not tIsSpec3 and not tIsSpec4) then
-		tPrefix = "SPEC_1_";
-		VUHDO_clearProfileFromPrefix(aProfileName, "", "SPEC_2_", "SPEC_3_", "SPEC_4_");
-	elseif (tIsSpec2 and not tIsSpec1 and not tIsSpec3 and not tIsSpec4) then
-		tPrefix = "SPEC_2_";
-		VUHDO_clearProfileFromPrefix(aProfileName, "", "SPEC_1_", "SPEC_3_", "SPEC_4_");
-	elseif (tIsSpec3 and not tIsSpec1 and not tIsSpec2 and not tIsSpec4) then
-		tPrefix = "SPEC_3_";
-		VUHDO_clearProfileFromPrefix(aProfileName, "", "SPEC_1_", "SPEC_2_", "SPEC_4_");
-	elseif (tIsSpec4 and not tIsSpec1 and not tIsSpec2 and not tIsSpec3) then
-		tPrefix = "SPEC_4_";
-		VUHDO_clearProfileFromPrefix(aProfileName, "", "SPEC_1_", "SPEC_2_", "SPEC_3_");
-	else
-		tPrefix = "";
-		VUHDO_clearProfileFromPrefix(aProfileName, "SPEC_1_", "SPEC_2_", "SPEC_3_", "SPEC_4_");
+	for tCnt = 1, 4 do
+		tIsSpecSelected = _G[aPanel:GetName() .. "AutoEnablePanelSpec" .. tCnt .. "CheckButton"]:GetChecked();
+
+		tSelectedPrefixes["SPEC_" .. tCnt] = tIsSpecSelected and true or false;
 	end
 
 	tIsGroupFound = false;
-	for tCnt = 1, 40 do
-		tButton = _G[aPanel:GetName() .. "AutoEnablePanel" .. tCnt .. "CheckButton"];
-		if (tButton ~= nil) then
-			if (tButton:GetChecked()) then
-				VUHDO_CONFIG["AUTO_PROFILES"][tPrefix .. tCnt] = aProfileName;
-				tIsGroupFound = true;
-			elseif (VUHDO_CONFIG["AUTO_PROFILES"][tPrefix .. tCnt] == aProfileName) then
-				VUHDO_CONFIG["AUTO_PROFILES"][tPrefix .. tCnt] = nil;
+	tIsSpecSelected = false;
+
+	for tPrefix, tIsSelected in pairs(tSelectedPrefixes) do
+		if (tIsSelected) then
+			for tCnt = 1, 40 do
+				tButton = _G[aPanel:GetName() .. "AutoEnablePanel" .. tCnt .. "CheckButton"];
+
+				if (tButton ~= nil) then
+					if (tButton:GetChecked()) then
+						VUHDO_CONFIG["AUTO_PROFILES"][tPrefix .. "_" .. tCnt] = aProfileName;
+
+						tIsGroupFound = true;
+					elseif (VUHDO_CONFIG["AUTO_PROFILES"][tPrefix .. "_" .. tCnt] == aProfileName) then
+						VUHDO_CONFIG["AUTO_PROFILES"][tPrefix .. "_" .. tCnt] = nil;
+					end
+				end
+			end
+
+			tIsSpecSelected = true;
+		else
+			VUHDO_clearProfileFromPrefix(aProfileName, tPrefix .. "_");
+		end
+	end
+
+	if (tIsSpecSelected) then
+		for tCnt = 1, 40 do
+			tCnt = tostring(tCnt);
+
+			if (VUHDO_CONFIG["AUTO_PROFILES"][tCnt] == aProfileName) then
+				VUHDO_CONFIG["AUTO_PROFILES"][tCnt] = nil;
+			end
+		end
+	else
+		for tCnt = 1, 40 do
+			tCnt = tostring(tCnt);
+
+			tButton = _G[aPanel:GetName() .. "AutoEnablePanel" .. tCnt .. "CheckButton"];
+
+			if (tButton ~= nil) then
+				if (tButton:GetChecked()) then
+					VUHDO_CONFIG["AUTO_PROFILES"][tCnt] = aProfileName;
+
+					tIsGroupFound = true;
+				elseif (VUHDO_CONFIG["AUTO_PROFILES"][tCnt] == aProfileName) then
+					VUHDO_CONFIG["AUTO_PROFILES"][tCnt] = nil;
+				end
 			end
 		end
 	end
 
 	if (tIsGroupFound) then
-		if (tIsSpec1 and not tIsSpec2 and not tIsSpec3 and not tIsSpec4) then
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_1");
-		elseif (tIsSpec2 and not tIsSpec1 and not tIsSpec3 and not tIsSpec4) then
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_2");
-		elseif (tIsSpec3 and not tIsSpec1 and not tIsSpec2 and not tIsSpec4) then
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_3");
-		elseif (tIsSpec4 and not tIsSpec1 and not tIsSpec2 and not tIsSpec3) then
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_4");
+		for tPrefix, tIsSelected in pairs(tSelectedPrefixes) do
+			if (tIsSelected) then
+				VUHDO_clearProfileIfInSlot(aProfileName, tPrefix);
+			end
 		end
 	else
-		if (tIsSpec1 and not tIsSpec2 and not tIsSpec3 and not tIsSpec4) then
-			VUHDO_CONFIG["AUTO_PROFILES"]["SPEC_1"] = aProfileName;
-		elseif (tIsSpec2 and not tIsSpec1 and not tIsSpec3 and not tIsSpec4) then
-			VUHDO_CONFIG["AUTO_PROFILES"]["SPEC_2"] = aProfileName;
-		elseif (tIsSpec3 and not tIsSpec1 and not tIsSpec2 and not tIsSpec4) then
-			VUHDO_CONFIG["AUTO_PROFILES"]["SPEC_3"] = aProfileName;
-		elseif (tIsSpec4 and not tIsSpec1 and not tIsSpec2 and not tIsSpec3) then
-			VUHDO_CONFIG["AUTO_PROFILES"]["SPEC_4"] = aProfileName;
-		else
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_1");
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_2");
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_3");
-			VUHDO_clearProfileIfInSlot(aProfileName, "SPEC_4");
+		for tPrefix, tIsSelected in pairs(tSelectedPrefixes) do
+			if (tIsSelected) then
+				VUHDO_CONFIG["AUTO_PROFILES"][tPrefix] = aProfileName;
+			else
+				VUHDO_clearProfileIfInSlot(aProfileName, tPrefix);
+			end
 		end
 	end
 
