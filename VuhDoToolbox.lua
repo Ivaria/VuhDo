@@ -155,7 +155,7 @@ local VUHDO_RAID;
 local VUHDO_UNIT_BUTTONS;
 local VUHDO_CONFIG;
 local VUHDO_GROUPS_BUFFS;
-local VUHDO_BOSS_UNIT;
+local VUHDO_BOSS_UNITS;
 local sRangeSpell;
 local sIsGuessRange = true;
 local sScanRange;
@@ -170,7 +170,7 @@ function VUHDO_toolboxInitLocalOverrides()
 	VUHDO_UNIT_BUTTONS = _G["VUHDO_UNIT_BUTTONS"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_GROUPS_BUFFS = _G["VUHDO_GROUPS_BUFFS"];
-	VUHDO_BOSS_UNIT = _G["VUHDO_BOSS_UNIT"];
+	VUHDO_BOSS_UNITS = _G["VUHDO_BOSS_UNITS"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	sScanRange = tonumber(VUHDO_CONFIG["SCAN_RANGE"]);
 	sRangeSpell = VUHDO_CONFIG["RANGE_SPELL"];
@@ -897,7 +897,7 @@ end
 
 function VUHDO_isBossUnit(aUnit) 
 
-	return VUHDO_BOSS_UNIT and VUHDO_BOSS_UNIT[aUnit];
+	return VUHDO_BOSS_UNITS and VUHDO_BOSS_UNITS[aUnit];
 
 end
 
