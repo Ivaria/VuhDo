@@ -415,7 +415,7 @@ function VUHDO_determineRole(aUnit)
 		if VUHDO_UNIT_POWER_MANA == tPowerType then
 			return 63; -- VUHDO_ID_RANGED_HEAL
 		elseif VUHDO_UNIT_POWER_ENERGY == tPowerType then
-			if UnitPowerMax(aUnit, SPELL_POWER_CHI) > 4 then -- WW Monks have 5 Chi (6 w/ Ascension)
+			if UnitPowerMax(aUnit, VUHDO_UNIT_POWER_CHI) > 4 then -- WW Monks have 5 Chi (6 w/ Ascension)
 				return 61; -- VUHDO_ID_MELEE_DAMAGE
 			else
 				return 60; -- VUHDO_ID_MELEE_TANK

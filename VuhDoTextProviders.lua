@@ -15,7 +15,7 @@ end
 --
 local function VUHDO_chiCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], SPELL_POWER_CHI), UnitPowerMax(anInfo["unit"], SPELL_POWER_CHI)
+		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_CHI), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_CHI)
 	else
 		return 0, 0;
 	end
@@ -26,7 +26,7 @@ end
 --
 local function VUHDO_holyPowerCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], 9), UnitPowerMax(anInfo["unit"], 9);
+		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER);
 	else
 		return 0, 0;
 	end

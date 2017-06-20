@@ -481,9 +481,9 @@ end
 --
 local function VUHDO_chiEqualsValidator(anInfo, someCustom)
 	if anInfo["connected"] and not anInfo["dead"] then
-		tPower = UnitPower(anInfo["unit"], SPELL_POWER_CHI);
+		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_CHI);
 		if tPower == someCustom["custom"][1] then
-			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], SPELL_POWER_CHI);
+			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_CHI);
 		else
 			return false, nil, -1, -1, -1;
 		end
