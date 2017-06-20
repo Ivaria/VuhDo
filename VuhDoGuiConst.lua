@@ -1,5 +1,5 @@
 
-VUHDO_STANDARD_ICON = "interface\\characterframe\\temporaryportrait-female-draenei";
+VUHDO_STANDARD_ICON = "interface\\characterframe\\temporaryportrait-female-bloodelf";
 
 
 
