@@ -1519,6 +1519,68 @@ function VUHDO_loadDefaultConfig()
 		-- Grand Magistrix Elisande
 	);
 
+	-- 7.2.5 - Legion - Tomb of Sargeras
+	VUHDO_addCustomSpellIds(36,
+		-- [[ Tomb of Sargeras ]]
+		-- Gorgoth
+		231363, -- Burning Armor
+		230345, -- Crashing Comet
+		233062, -- Infernal Burning
+		-- Demonic Inquistion
+		-- Atrigan
+		-- Belac
+		-- Harjatan
+		231998, -- Jagged Abrasion
+		-- Mistress Sassz'ine
+		230201, -- Burden of Pain
+		230143, -- Hydra Shot
+		230139, -- Hydra Shot
+		230920, -- Consuming Hunger
+		230384, -- Consuming Hunger
+		234661, -- Consuming Hunger
+		230276, -- Jaws from the Deep
+		-- Sisters of the Moon
+		-- Huntress Kasparian
+		236550, -- Discorporate
+		237561, -- Twilight Glaive
+		-- Priestess Lunaspyre
+		236519, -- Moon Burn
+		239264, -- Lunar Fire
+		-- Captain Yathae Moonstrike
+		233263, -- Embrace of the Eclipse
+		236596, -- Rapid Shot
+		-- The Desolate Host
+		236459, -- Soulbind
+		241566, -- Crush Mind
+		235933, -- Spear of Anguish
+		238442, -- Spear of Anguish
+		235924, -- Spear of Anguish
+		235621, -- Spirit Realm
+		235732, -- Spiritual Barrier
+		236772, -- Shattering Scream
+		236515, -- Shattering Scream
+		236011, -- Tormented Cries
+		288018, -- Tormented Cries
+		235989, -- Tormented Cries
+		236135, -- Wither
+		-- Maiden of Vigilence
+		235213, -- Light Infusion
+		235240, -- Fel Infusion
+		235117, -- Unstable Soul
+		235125, -- Unstable Soul
+		-- Fallen Avatar
+		236494, -- Desolate
+		239739, -- Dark Mark
+		240970, -- Shadowy Blades
+		236604, -- Shadowy Blades
+		236571, -- Shadowy Blades
+		242017, -- Black Winds
+		240728, -- Tainted Essence
+		-- Kil'jaeden
+		234310, -- Armageddon Rain
+		243624  -- Lingering Wail
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
