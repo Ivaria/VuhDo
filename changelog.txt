@@ -19,6 +19,7 @@ Bugfixes:
 
 Improvements:
 -- Added default custom debuffs for Tomb of Sargeras raid encounters
+-- Added debuff absorption tracking for ToS 'Embrace of the Eclipse'
 
 
 --------------------------------------------------------------

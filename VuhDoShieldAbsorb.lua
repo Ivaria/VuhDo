@@ -57,6 +57,9 @@ local VUHDO_ABSORB_DEBUFFS = {
 	[219965] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 10 * 60; end, -- Chronomatic Anomaly Time Release Yellow
 	[219966] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 10 * 60; end, -- Chronomatic Anomaly Time Release Red
 
+	-- Patch 7.2.5 - Legion - Tomb of Sargeras
+	[233263] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_EMBRACE_OF_THE_ECLIPSE)), 10 * 60; end, -- Sisters Embrace of the Eclipse
+
 	--[79105] = function(aUnit) return 280000, 60 * 60; end, -- @TESTING PW:F
 };
 
