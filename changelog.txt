@@ -11,7 +11,10 @@ Known issues:
 --   This was an intentional breaking change by Blizzard
 --   This breaks AOE Advice, Clusters and out-of-range direction arrow
 --   At this time there is no way to fix or renable these features
-
+-- Patch 7.2.5 Tomb of Sargeras Desolate Host encounter workaround
+--   Under 'VuhDo Options > General > Scanners' set:
+--     Range => '40 yards'
+--     Global Scanner => 'Infinite'
 
 Bugfixes:
 -- Use new power type enumeration in place of deprecated constants
