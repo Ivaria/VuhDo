@@ -1548,16 +1548,12 @@ function VUHDO_loadDefaultConfig()
 		233263, -- Embrace of the Eclipse
 		236596, -- Rapid Shot
 		-- The Desolate Host
-		241566, -- Crush Mind
-		236340, -- Crush Mind
 		236515, -- Shattering Scream
 		236459, -- Soulbind
 		235621, -- Spirit Realm
 		236011, -- Tormented Cries
-		235933, -- Spear of Anguish
 		238442, -- Spear of Anguish
 		235924, -- Spear of Anguish
-		236135, -- Wither
 		236131, -- Wither
 		236138, -- Wither
 		-- Maiden of Vigilence
@@ -1565,9 +1561,6 @@ function VUHDO_loadDefaultConfig()
 		-- Fallen Avatar
 		239739, -- Dark Mark
 		236494, -- Desolate
-		240970, -- Shadowy Blades
-		236604, -- Shadowy Blades
-		236571, -- Shadowy Blades
 		242017, -- Black Winds
 		240728, -- Tainted Essence
 		-- Kil'jaeden
