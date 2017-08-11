@@ -15,6 +15,10 @@ Known issues:
 --   Under 'VuhDo Options > General > Scanners' set:
 --     Range => '40 yards'
 --     Global Scanner => 'Infinite'
+-- Tracking of 'debuff absorbs' like 'Embrace of the Eclipse' requires 
+--   Under 'VuhDo Options > Panels > HoT Icons > Shields' set:
+--      Shield Status => checked
+
 
 Bugfixes:
 -- Use new power type enumeration in place of deprecated constants
