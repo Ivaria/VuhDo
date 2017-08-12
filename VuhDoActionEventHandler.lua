@@ -311,7 +311,7 @@ function VuhDoActionPreClick(aButton, aMouseButton)
 		ToggleDropDownMenu(1, nil, VuhDoPlayerTargetDropDown, aButton:GetName(), 0, -5);
 
 	elseif tKey and strlower(tKey[3]) == "tell" then
-		ChatFrame_SendTell(VUHDO_RAID[aButton:GetAttribute("unit")]["name"]);
+		ChatFrame_SendTell(VUHDO_RAID[aButton:GetAttribute("unit")]["fullName"]);
 
 	else
 		if VUHDO_SPELL_CONFIG["smartCastModi"] == "all"
