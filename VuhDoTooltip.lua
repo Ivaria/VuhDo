@@ -150,7 +150,9 @@ local function VUHDO_initTooltip()
 			VuhDoTooltip:SetPoint(tConfig["point"], "UIParent", tConfig["relativePoint"], tConfig["x"], tConfig["y"]);
 		elseif VUHDO_TOOLTIP_POS_STANDARD == tPos then
 			if (not VUHDO_CONFIG["STANDARD_TOOLTIP"]) then
-				GameTooltip:Hide();
+				if not GameTooltip:IsForbidden() then	
+					GameTooltip:Hide();
+				end
 			end
 
 			VuhDoTooltip:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -CONTAINER_OFFSET_X - 13, CONTAINER_OFFSET_Y);
@@ -352,9 +354,11 @@ function VUHDO_showTooltip(aButton)
 	end
 
 	if VUHDO_CONFIG["STANDARD_TOOLTIP"] then
-		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
-		GameTooltip:SetUnit(aButton:GetAttribute("unit"));
-		GameTooltip:Show();
+		if not GameTooltip:IsForbidden() then	
+			GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
+			GameTooltip:SetUnit(aButton:GetAttribute("unit"));
+			GameTooltip:Show();
+		end
 	else
 		VUHDO_TT_UNIT = aButton:GetAttribute("unit");
 		VUHDO_TT_PANEL_NUM = tPanelNum;
@@ -382,8 +386,13 @@ end
 --
 function VUHDO_hideTooltip()
 	if not VUHDO_IS_PANEL_CONFIG then
-		if VUHDO_CONFIG["STANDARD_TOOLTIP"] then GameTooltip:Hide();
-		else VuhDoTooltip:Hide();	end
+		if VUHDO_CONFIG["STANDARD_TOOLTIP"] then 
+			if not GameTooltip:IsForbidden() then
+				GameTooltip:Hide();
+			end
+		else 
+			VuhDoTooltip:Hide();
+		end
 	end
 end
 

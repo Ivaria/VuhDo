@@ -115,9 +115,11 @@ function VUHDO_initFuBar()
 		VuhDo.name = "VuhDo";
 		tLibFuBarPlugin:OnEmbedInitialize(VuhDo, VuhDo);
 		function VuhDo:OnUpdateFuBarTooltip()
-			GameTooltip:AddLine("VuhDo");
-			GameTooltip:AddLine(VUHDO_I18N_BROKER_TOOLTIP_1);
-			GameTooltip:AddLine(VUHDO_I18N_BROKER_TOOLTIP_2);
+			if not GameTooltip:IsForbidden() then
+				GameTooltip:AddLine("VuhDo");
+				GameTooltip:AddLine(VUHDO_I18N_BROKER_TOOLTIP_1);
+				GameTooltip:AddLine(VUHDO_I18N_BROKER_TOOLTIP_2);
+			end
 		end
 		VuhDo:Show();
 		function VuhDo:OnFuBarClick(aButton)

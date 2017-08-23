@@ -76,15 +76,19 @@ VuhDoMinimap = {
 
 
 	["OnEnter"] = function(self)
-		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
-		GameTooltip:AddLine("VuhDo");
-		GameTooltip:AddLine(VUHDO_I18N_MM_TOOLTIP, 0.8, 0.8, 0.8, 1);
-		GameTooltip:Show();
+		if not GameTooltip:IsForbidden() then
+			GameTooltip_SetDefaultAnchor(GameTooltip, UIParent);
+			GameTooltip:AddLine("VuhDo");
+			GameTooltip:AddLine(VUHDO_I18N_MM_TOOLTIP, 0.8, 0.8, 0.8, 1);
+			GameTooltip:Show();
+		end
 	end,
 
 
 	["OnLeave"] = function(self)
-		GameTooltip:Hide()
+		if not GameTooltip:IsForbidden() then
+			GameTooltip:Hide()
+		end
 	end,
 
 

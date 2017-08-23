@@ -22,6 +22,8 @@ Known issues:
 
 Bugfixes:
 -- Use full player name including realm for tell command
+-- Check if GameTooltip is flagged forbidden before any interaction
+--   Should fix taints related to Blizzard lock down in 7.2.5
 
 
 Improvements:
