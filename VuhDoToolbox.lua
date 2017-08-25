@@ -471,9 +471,10 @@ end
 function VUHDO_getTalentSpellId(aTalentName)
 	for tier=1,7 do
 		for column=1,3 do
-			local id, name, _, selected, _ = GetTalentInfo(tier, column, GetActiveSpecGroup());
+			-- as of Legion "active spec group" is always 1
+			local id, name, _, selected, _ = GetTalentInfo(tier, column, 1);
 	
-			if name == aTalentName and selected then
+			if selected and name == aTalentName then
 				return id;
 			end
 		end
