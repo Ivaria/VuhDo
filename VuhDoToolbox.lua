@@ -462,6 +462,7 @@ end
 --
 function VUHDO_isSpellKnown(aSpellName)
 	return (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
+		or (type(aSpellName) == "number" and IsPlayerSpell(aSpellName))
 		or GetSpellBookItemInfo(aSpellName) ~= nil
 		or VUHDO_NAME_TO_SPELL[aSpellName] ~= nil and GetSpellBookItemInfo(VUHDO_NAME_TO_SPELL[aSpellName]);
 end
@@ -472,10 +473,11 @@ function VUHDO_getTalentSpellId(aTalentName)
 	for tier=1,7 do
 		for column=1,3 do
 			-- as of Legion "active spec group" is always 1
-			local id, name, _, selected, _ = GetTalentInfo(tier, column, 1);
+			local _, name, _, selected, _, spellId, _, _, _, _, _ = GetTalentInfo(tier, column, 1);
 	
-			if selected and name == aTalentName then
-				return id;
+			if selected and (name == aTalentName 
+				or (type(aTalentName) == "number" and spellId == aTalentName)) then
+				return spellId;
 			end
 		end
 	end
@@ -674,7 +676,9 @@ end
 
 --
 local tActionLowerName;
-local tIsMacroKnown, tIsSpellKnown, tIsTalentKnown
+local tIsMacroKnown;
+local tIsSpellKnown; 
+local tIsTalentKnown;
 function VUHDO_isActionValid(anActionName, anIsCustom)
 
 	if (anActionName or "") == "" then
@@ -696,7 +700,10 @@ function VUHDO_isActionValid(anActionName, anIsCustom)
 
 	tIsMacroKnown = GetMacroIndexByName(anActionName) ~= 0;
 	tIsSpellKnown = VUHDO_isSpellKnown(anActionName);
-	tIsTalentKnown = VUHDO_isTalentKnown(anActionName);
+
+	if not tIsSpellKnown then
+		tIsTalentKnown = VUHDO_isTalentKnown(anActionName);
+	end
 
 	if (tIsSpellKnown or tIsTalentKnown) and tIsMacroKnown then
 		VUHDO_Msg(format(VUHDO_I18N_AMBIGUOUS_MACRO, anActionName), 1, 0.3, 0.3);
