@@ -26,7 +26,7 @@ Bugfixes:
 --   Should fix taints related to Blizzard lock down in 7.2.5
 -- Optimize common action validation on panel refresh
 --   Should fix some "script ran too long" errors w/ talent spells
-
+-- Migrate to the 7.3 PlaySound API
 
 Improvements:
 
