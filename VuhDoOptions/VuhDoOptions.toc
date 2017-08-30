@@ -1,4 +1,4 @@
-## Interface: 70200
+## Interface: 70300
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
 ## Version: 3.87
