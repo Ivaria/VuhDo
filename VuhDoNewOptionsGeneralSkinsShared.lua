@@ -2533,8 +2533,8 @@ function VUHDO_loadProfileNoInit(aName)
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"] = VUHDO_deepCopyTable(tProfile["CONFIG"]["CUSTOM_DEBUFF"]["STORED"]);
 	end
 
-	if tProfile["CONFIG"]["SPELL_TRACE"] and tProfile["CONFIG"]["SPELL_TRACE"]["STORED"] and VUHDO_CONFIG["SPELL_TRACE"] then
-		VUHDO_CONFIG["SPELL_TRACE"]["STORED"] = VUHDO_deepCopyTable(tProfile["CONFIG"]["SPELL_TRACE"]["STORED"]);
+	if tProfile["CONFIG"]["SPELL_TRACE"] and VUHDO_CONFIG["SPELL_TRACE"] then
+		VUHDO_CONFIG["SPELL_TRACE"] = VUHDO_deepCopyTable(tProfile["CONFIG"]["SPELL_TRACE"]);
 	end
 
 	VUHDO_fixDominantProfileSettings(tProfile);
@@ -2558,8 +2558,13 @@ function VUHDO_loadProfile(aName)
 	VUHDO_resetTooltip();
 	VUHDO_initBlizzFrames();
 	VUHDO_bouqetsChanged();
+
 	if (VUHDO_initCustomDebuffComboModel ~= nil) then
 		VUHDO_initCustomDebuffComboModel();
+	end
+
+	if (VUHDO_initSpellTraceComboModel ~= nil) then
+		VUHDO_initSpellTraceComboModel();
 	end
 
 	collectgarbage('collect');
