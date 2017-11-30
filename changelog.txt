@@ -11,11 +11,16 @@ Known issues:
 --   This was an intentional breaking change by Blizzard
 --   This breaks AOE Advice, Clusters and out-of-range direction arrow
 --   At this time there is no way to fix or renable these features
+-- Blizzard has changed the way vehicles work for Antoran High Command
+--   For now I've just disabled the proper vehicle support
+--   Targeting a player in vehicle will still targe the vehicle unit
+--   However, mouseover/click-to-heal should work properly
+--   Healing actual vehicles (e.g. Ulduar) is now broken though
 
 
 Bugfixes:
 -- Fixed saving/loading of per profile Spell Trace settings
-
+-- Workaround for Antoran High Command vehicles, see known issues
 
 Improvements:
 

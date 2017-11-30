@@ -43,13 +43,15 @@ local tPowerType;
 function VUHDO_updateManaBars(aUnit, aChange)
 	tInfo = VUHDO_RAID[aUnit];
 
-	if (tInfo["isVehicle"]) then
-		aUnit = tInfo["petUnit"];
-		if not aUnit then return; end
-
-		tInfo = VUHDO_RAID[aUnit];
-		if not tInfo then return; end
-	end
+	-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
+	-- For now just disable vehicle support (note: this breaks encounters like Malygos)
+	--if (tInfo["isVehicle"]) then
+	--	aUnit = tInfo["petUnit"];
+	--	if not aUnit then return; end
+	--
+	--	tInfo = VUHDO_RAID[aUnit];
+	--	if not tInfo then return; end
+	--end
 
 	if not VUHDO_isConfigDemoUsers() then
 		if 1 == aChange then

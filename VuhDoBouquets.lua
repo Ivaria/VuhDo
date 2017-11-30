@@ -218,7 +218,10 @@ local tEmptyInfo = { };
 
 local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 
-	tUnit = (VUHDO_RAID[aUnit] or tEmptyInfo)["isVehicle"] and VUHDO_RAID[aUnit]["petUnit"] or aUnit;
+	-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
+	-- For now just disable vehicle support (note: this breaks encounters like Malygos)
+	--tUnit = (VUHDO_RAID[aUnit] or tEmptyInfo)["isVehicle"] and VUHDO_RAID[aUnit]["petUnit"] or aUnit;
+	tUnit = aUnit;
 	tInfo = anInfo or VUHDO_RAID[tUnit];
 
 	if not tInfo then

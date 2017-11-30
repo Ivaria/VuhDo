@@ -307,9 +307,11 @@ function VUHDO_getDisplayUnit(aButton)
 			return VUHDO_CUSTOM_INFO["fixResolveId"], VUHDO_RAID[VUHDO_CUSTOM_INFO["fixResolveId"]];
 		end
 	else
-		if VUHDO_RAID[tUnit] and VUHDO_RAID[tUnit]["isVehicle"] then
-			tUnit = VUHDO_RAID[tUnit]["petUnit"];
-		end
+		-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
+		-- For now just disable vehicle support (note: this breaks encounters like Malygos)
+		--if VUHDO_RAID[tUnit] and VUHDO_RAID[tUnit]["isVehicle"] then
+		--	tUnit = VUHDO_RAID[tUnit]["petUnit"];
+		--end
 		return tUnit, VUHDO_RAID[tUnit];
 	end
 end
@@ -382,7 +384,8 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 	  tOwnerInfo = VUHDO_RAID[tInfo["ownerUnit"]];
 	  tIndex = tInfo["name"] .. (tInfo["ownerUnit"] or "") .. tPanelNum;
-		if not VUHDO_NAME_TEXTS[tIndex] then
+
+	  if not VUHDO_NAME_TEXTS[tIndex] then
 
 	  	if tSetup["ID_TEXT"]["showName"] then
 	  		tTextString = (tSetup["ID_TEXT"]["showClass"] and not tInfo["isPet"])
@@ -411,9 +414,15 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
   	-- Add title flags
   	if tSetup["ID_TEXT"]["showTags"] and not anIsTarget then
 
-  		if "focus" == tUnit then tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_FOC, tTextString);
-  		elseif "target" == tUnit then tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_TAR, tTextString);
- 			elseif tOwnerInfo and tOwnerInfo["isVehicle"] then tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_VEHICLE, tTextString); end
+  		if "focus" == tUnit then 
+			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_FOC, tTextString);
+  		elseif "target" == tUnit then 
+			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_TAR, tTextString);
+		-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
+		-- For now just disable vehicle support (note: this breaks encounters like Malygos)
+ 		--elseif tOwnerInfo and tOwnerInfo["isVehicle"] then 
+		--	tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_VEHICLE, tTextString);
+		end
   	end
 	end
 

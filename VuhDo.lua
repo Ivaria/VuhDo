@@ -441,8 +441,12 @@ function VUHDO_updateHealth(aUnit, aMode)
 		tOwner = VUHDO_RAID[aUnit]["ownerUnit"];
 		-- tOwner may not be present when leaving a vehicle
 		if VUHDO_RAID[tOwner] and VUHDO_RAID[tOwner]["isVehicle"] then
-			VUHDO_setHealth(tOwner, aMode);
-			VUHDO_updateHealthBarsFor(tOwner, aMode);
+			-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
+			-- For now just disable vehicle support (note: this breaks encounters like Malygos)
+			--VUHDO_setHealth(tOwner, aMode);
+			--VUHDO_updateHealthBarsFor(tOwner, aMode);
+			VUHDO_setHealth(aUnit, aMode);
+			VUHDO_updateHealthBarsFor(aUnit, aMode);
 		end
 	end
 

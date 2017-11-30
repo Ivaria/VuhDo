@@ -386,6 +386,8 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		else
 			tVehicleCond = "";
 		end
+		-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
+		-- For now just disable vehicle support (note: this breaks encounters like Malygos)
 		tText = tText .. tCastText .. "[" .. tModiSpell .. "nounithasvehicleui,@vuhdo]" .. tVehicleCond .. " " .. anAction .. "\n";
 		tText = tText .. tSpellPost;
 		if aPet then
