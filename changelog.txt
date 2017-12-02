@@ -1,3 +1,31 @@
+Version 3.89
+
+
+Known issues:
+-- Limited support for Class Order Hall Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
+-- Incoming heal estimation reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+-- Patch 7.1 disabled retrieval of unit facing and position in instances
+--   This was an intentional breaking change by Blizzard
+--   This breaks AOE Advice, Clusters and out-of-range direction arrow
+--   At this time there is no way to fix or renable these features
+-- Blizzard has changed the way vehicles work for Antoran High Command
+--   For now I've just disabled the proper vehicle support
+--   Targeting a player in vehicle will still targe the vehicle unit
+--   However, mouseover/click-to-heal should work properly
+--   Healing actual vehicles (e.g. Ulduar) is now broken though
+
+
+Bugfixes:
+
+
+Improvements:
+-- Added default custom debuffs for Antorus raid encounters
+
+
+--------------------------------------------------------------
 Version 3.88
 
 
@@ -21,6 +49,7 @@ Known issues:
 Bugfixes:
 -- Fixed saving/loading of per profile Spell Trace settings
 -- Workaround for Antoran High Command vehicles, see known issues
+
 
 Improvements:
 
