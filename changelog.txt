@@ -19,6 +19,7 @@ Known issues:
 
 
 Bugfixes:
+-- Shaman spell 'Purify Spirit' no longer remapped to 'Cleanse Spirit'
 
 
 Improvements:
