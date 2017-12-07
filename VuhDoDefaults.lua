@@ -828,556 +828,556 @@ function VUHDO_loadDefaultConfig()
 
 	-- add relevant custom debuffs for raid bosses
 	-- 5.x - MoP
-	VUHDO_addCustomSpellIds(20,
+--	VUHDO_addCustomSpellIds(20,
+--
+--		--[[ Heart of Fear ]]
+--
+--		--Imperial Vizier Zor'lok
+--		122760, --Exhale
+--		123812, --Pheromones of Zeal
+--		122740, --Convert
+--		122706, --Noise Cancelling
+--		--Blade Lord Ta'yak
+--		122949, --Unseen Strike
+--		123474, --Overwhelming Assault
+--		124783, --Storm Unleashed
+--		123180, --Wind Step
+--		--Garalon
+--		122835, --Pheromones
+--		123081, --Pungency
+--		122774, --Crush (knocked down)
+--		123423, --Weak Points
+--		--123120, --Pheromone Trail
+--		--Wind Lord Mel'jarak
+--		121881, --Amber Prison
+--		122055, --Residue
+--		122064, --Corrosive Resin
+--		--Amber-Shaper Un'sok
+--		121949, --Parasitic Growth
+--		122784, --Reshape Life
+--		122064, --Corrosive Resin
+--		--122504, --Burning Amber
+--		--Grand Empress Shek'zeer
+--		125390, --Fixate
+--		123707, --Eyes of the Empress
+--		123788, --Cry of Terror
+--		124097, --Sticky Resin
+--		125824, --Trapped!
+--		124777, --Poison Bomb
+--		124821, --Poison-Drenched Armor
+--		124827, --Poison Fumes
+--		124849, --Consuming Terror
+--		124863, --Visions of Demise
+--		123845, --Heart of Fear
+--		123184, --Dissonance Field
+--		125283, --Sha Corruption
+--		--Trash
+--		123417, --Dismantled Armor
+--		123422, --Arterial Bleeding
+--		123434, --Gouge Throat
+--		123436, --Riposte
+--		123497, --Gale Force Winds
+--		123180, --Wind Step
+--		123420, --Stunning Strike
+--		125081, --Slam
+--		125490, --Burning Sting
+--		126901, --Mortal Rend
+--		126912, --Grievous Whirl
+--
+--		--[[ Mogushan Vaults ]]
+--
+--		-- Trash
+--		118562, --Petrified
+--		116596, --Smoke Bomb
+--		116970, --Sundering Bite
+--		121087, --Curse of Vitality
+--		120670, --Pyroblast
+--		116606, --Troll Rush
+--		--The Stone Guard
+--		130395, --Jasper Chains
+--		130774, --Amethyst Pool
+--		116038, --Jasper Petrification
+--		115861, --Cobalt Petrification
+--		116060, --Amethyst Petrification
+--		116281, --Cobalt Mine Blast
+--		125206, --Rend Flesh
+--		116008, --Jade Petrification
+--		--Feng The Accursed
+--		131788, --Lightning Lash
+--		116040, --Epicenter
+--		116942, --Flaming Spear
+--		116784, --Wildfire Spark
+--		102464, --Arcane Shock
+--		116417, --Arcane Resonance
+--		116364, --Arcane Velocity
+--		116374, --Lightning Charge
+--		131792, --Shadowburn
+--		--Gara'jal the Spiritbinder
+--		122151, --Voodoo doll
+--		117723, --Frail Soul
+--		116260, --Crossed Over
+--		116278, --Soul Sever
+--		--The Spirit Kings
+--		117708, --Maddening Shout
+--		118303, --Fixate
+--		118048, --Pillaged
+--		118135, --Pinned Down
+--		118047, --Pillage: Target
+--		118163, --Robbed Blind
+--		--Elegon
+--		117878, --Overcharged
+-- 		117949, --Closed circuit
+--		117945, --Arcing Energy
+--		132222, --Destabilizing Energies
+--		--Will of the Emperor
+--		116835, --Devastating Arc
+--		132425, --Stomp
+--		116525, --Focused Assault
+--		116778, --Focused Defense
+--		117485, --Impeding Thrust
+--		116550, --Energizing Smash
+--		116829, --Focused Energy
+--
+--		--[[ Sha of Anger ]]
+--
+--		119626, --Aggressive Behavior
+--		119488, --Unleashed Wrath
+--		119610, --Bitter Thoughts
+--
+--		--[[ Terrace of Endless Spring ]]
+--
+--		--Protector Kaolan
+--		117519, --Touch of Sha
+--		111850, --Lightning Prison: Targeted
+--		117436, --Lightning Prison: Stunned
+--		118191, --Corrupted Essence
+--		117986, --Defiled Ground: Stacks
+--		117235, --Purified
+--		117283, --Cleansing Waters
+--		117353, --Overwhelming Corruption
+--
+--		--Tsulong
+--		122768, --Dread Shadows
+--		122777, --Nightmares
+--		122752, --Shadow Breath
+--		122789, --Sunbeam
+--		123012, --Terrorize
+--		123036, --Fright
+--		122858, --Bathed in Light
+--
+--		--Lei Shi
+--		123121, --Spray
+--		123705, --Scary Fog
+--
+--		--Sha of Fear
+--		119414, --Breath of Fear
+--		129147, --Onimous Cackle
+--		119983, --Dread Spray
+--		120669, --Naked and Afraid
+--		75683, --Waterspout
+--		120629, --Huddle in Terror
+--		120394, --Eternal Darkness
+--		129189, --Sha Globe
+--		119086, --Penetrating Bolt
+--		119775  --Reaching Attack
+--
+--	);
 
-		--[[ Heart of Fear ]]
 
-		--Imperial Vizier Zor'lok
-		122760, --Exhale
-		123812, --Pheromones of Zeal
-		122740, --Convert
-		122706, --Noise Cancelling
-		--Blade Lord Ta'yak
-		122949, --Unseen Strike
-		123474, --Overwhelming Assault
-		124783, --Storm Unleashed
-		123180, --Wind Step
-		--Garalon
-		122835, --Pheromones
-		123081, --Pungency
-		122774, --Crush (knocked down)
-		123423, --Weak Points
-		--123120, --Pheromone Trail
-		--Wind Lord Mel'jarak
-		121881, --Amber Prison
-		122055, --Residue
-		122064, --Corrosive Resin
-		--Amber-Shaper Un'sok
-		121949, --Parasitic Growth
-		122784, --Reshape Life
-		122064, --Corrosive Resin
-		--122504, --Burning Amber
-		--Grand Empress Shek'zeer
-		125390, --Fixate
-		123707, --Eyes of the Empress
-		123788, --Cry of Terror
-		124097, --Sticky Resin
-		125824, --Trapped!
-		124777, --Poison Bomb
-		124821, --Poison-Drenched Armor
-		124827, --Poison Fumes
-		124849, --Consuming Terror
-		124863, --Visions of Demise
-		123845, --Heart of Fear
-		123184, --Dissonance Field
-		125283, --Sha Corruption
-		--Trash
-		123417, --Dismantled Armor
-		123422, --Arterial Bleeding
-		123434, --Gouge Throat
-		123436, --Riposte
-		123497, --Gale Force Winds
-		123180, --Wind Step
-		123420, --Stunning Strike
-		125081, --Slam
-		125490, --Burning Sting
-		126901, --Mortal Rend
-		126912, --Grievous Whirl
-
-		--[[ Mogushan Vaults ]]
-
-		-- Trash
-		118562, --Petrified
-		116596, --Smoke Bomb
-		116970, --Sundering Bite
-		121087, --Curse of Vitality
-		120670, --Pyroblast
-		116606, --Troll Rush
-		--The Stone Guard
-		130395, --Jasper Chains
-		130774, --Amethyst Pool
-		116038, --Jasper Petrification
-		115861, --Cobalt Petrification
-		116060, --Amethyst Petrification
-		116281, --Cobalt Mine Blast
-		125206, --Rend Flesh
-		116008, --Jade Petrification
-		--Feng The Accursed
-		131788, --Lightning Lash
-		116040, --Epicenter
-		116942, --Flaming Spear
-		116784, --Wildfire Spark
-		102464, --Arcane Shock
-		116417, --Arcane Resonance
-		116364, --Arcane Velocity
-		116374, --Lightning Charge
-		131792, --Shadowburn
-		--Gara'jal the Spiritbinder
-		122151, --Voodoo doll
-		117723, --Frail Soul
-		116260, --Crossed Over
-		116278, --Soul Sever
-		--The Spirit Kings
-		117708, --Maddening Shout
-		118303, --Fixate
-		118048, --Pillaged
-		118135, --Pinned Down
-		118047, --Pillage: Target
-		118163, --Robbed Blind
-		--Elegon
-		117878, --Overcharged
-		117949, --Closed circuit
-		117945, --Arcing Energy
-		132222, --Destabilizing Energies
-		--Will of the Emperor
-		116835, --Devastating Arc
-		132425, --Stomp
-		116525, --Focused Assault
-		116778, --Focused Defense
-		117485, --Impeding Thrust
-		116550, --Energizing Smash
-		116829, --Focused Energy
-
-		--[[ Sha of Anger ]]
-
-		119626, --Aggressive Behavior
-		119488, --Unleashed Wrath
-		119610, --Bitter Thoughts
-
-		--[[ Terrace of Endless Spring ]]
-
-		--Protector Kaolan
-		117519, --Touch of Sha
-		111850, --Lightning Prison: Targeted
-		117436, --Lightning Prison: Stunned
-		118191, --Corrupted Essence
-		117986, --Defiled Ground: Stacks
-		117235, --Purified
-		117283, --Cleansing Waters
-		117353, --Overwhelming Corruption
-
-		--Tsulong
-		122768, --Dread Shadows
-		122777, --Nightmares
-		122752, --Shadow Breath
-		122789, --Sunbeam
-		123012, --Terrorize
-		123036, --Fright
-		122858, --Bathed in Light
-
-		--Lei Shi
-		123121, --Spray
-		123705, --Scary Fog
-
-		--Sha of Fear
-		119414, --Breath of Fear
-		129147, --Onimous Cackle
-		119983, --Dread Spray
-		120669, --Naked and Afraid
-		75683, --Waterspout
-		120629, --Huddle in Terror
-		120394, --Eternal Darkness
-		129189, --Sha Globe
-		119086, --Penetrating Bolt
-		119775  --Reaching Attack
-
-	);
-
-
-	VUHDO_addCustomSpellIds(21,
-		-- Jin'rokh
-		138006,
-		137399,
-		138732,
-		138349,
-		137371,
-		-- Horridon
-		136769,
-		136767,
-		136708,
-		136723,
-		136587,
-		136710,
-		136670,
-		136573,
-		136512,
-		136719,
-		136654,
-		140946,
-		-- Council of Elders
-		136922,
-		137084,
-		137641,
-		136878,
-		136857,
-		137650,
-		137359,
-		137972,
-		136860,
-		--Tortos
-		134030,
-		134920,
-		136751,
-		136753,
-		137633,
-		--Megaera
-		139822,
-		134396,
-		137731,
-		136892,
-		139909,
-		137746,
-		139843,
-		139840,
-		140179,
-		--Ji-Kun
-		138309,
-		138319,
-		140571,
-		134372,
-		--Durumu the Forgotten
-		133768,
-		133767,
-		136932,
-		134122,
-		134123,
-		134124,
-		133795,
-		133597,
-		133732,
-		133677,
-		133738,
-		133737,
-		133675,
-		134626,
-		--Primordius
-		140546,
-		136180,
-		136181,
-		136182,
-		136183,
-		136184,
-		136185,
-		136186,
-		136187,
-		136050,
-		--Dark Animus
-		138569,
-		138659,
-		138609,
-		138691,
-		136962,
-		138480,
-		--Iron Qon
-		134647,
-		136193,
-		135147,
-		134691,
-		135145,
-		136520,
-		137669,
-		137668,
-		137654,
-		136577,
-		136192,
-		--Twin Consorts
-		137440,
-		137417,
-		138306,
-		137408,
-		137360,
-		137375,
-		136722,
-		--Lei Shen
-		135695,
-		136295,
-		135000,
-		136543,
-		134821,
-		136326,
-		137176,
-		136853,
-		135153,
-		136914,
-		135001
-		--Ra-den
-	);
+--	VUHDO_addCustomSpellIds(21,
+--		-- Jin'rokh
+--		138006,
+--		137399,
+--		138732,
+--		138349,
+--		137371,
+--		-- Horridon
+--		136769,
+--		136767,
+--		136708,
+--		136723,
+--		136587,
+--		136710,
+--		136670,
+--		136573,
+--		136512,
+--		136719,
+--		136654,
+--		140946,
+--		-- Council of Elders
+--		136922,
+--		137084,
+--		137641,
+--		136878,
+--		136857,
+--		137650,
+--		137359,
+--		137972,
+--		136860,
+--		--Tortos
+--		134030,
+--		134920,
+--		136751,
+--		136753,
+--    		137633,
+--		--Megaera
+--		139822,
+--		134396,
+--		137731,
+--		136892,
+--		139909,
+--		137746,
+--		139843,
+--		139840,
+--		140179,
+--		--Ji-Kun
+--		138309,
+--		138319,
+--		140571,
+--		134372,
+--		--Durumu the Forgotten
+--		133768,
+--		133767,
+--		136932,
+--		134122,
+--		134123,
+--		134124,
+--		133795,
+--		133597,
+--		133732,
+--		133677,
+--		133738,
+--		133737,
+--		133675,
+--		134626,
+--		--Primordius
+--		140546,
+--		136180,
+--		136181,
+--		136182,
+--		136183,
+--		136184,
+--		136185,
+--		136186,
+--		136187,
+--		136050,
+--		--Dark Animus
+--		138569,
+--		138659,
+--		138609,
+--		138691,
+--		136962,
+--		138480,
+--		--Iron Qon
+--		134647,
+--		136193,
+--		135147,
+--		134691,
+--		135145,
+--		136520,
+--		137669,
+--		137668,
+--		137654,
+--		136577,
+--		136192,
+--		--Twin Consorts
+--		137440,
+--		137417,
+--		138306,
+--		137408,
+--		137360,
+--		137375,
+--		136722,
+--		--Lei Shen
+--		135695,
+--		136295,
+--		135000,
+--		136543,
+--		134821,
+--		136326,
+--		137176,
+--		136853,
+--		135153,
+--		136914,
+--		135001
+--		--Ra-den
+--	);
 
 	-- Siege of Orgrimmar
-	VUHDO_addCustomSpellIds(22,
-		--Trash
-		143828,
-		146452,
-		--Immerseus
-		143436,
-		143298,
-		--The Fallen Protectors
-		143962,
-		144397,
-		143009,
-		143198,
-		1776,
-		144365,
-		144176,
-		147383,
-		143424,
-		--Sha of Pride
-		144358,
-		144574,
-		--Galakras
-		147200,
-		146763,
-		147705,
-		147029,
-		--Iron Juggernaut
-		144459,
-		144467,
-		144498,
-		146325,
-		--Kor'kron Dark Shaman
-		17153,
-		144215,
-		144089,
-		143993,
-		144331,
-		144328,
-		144089,
-		--General Nazgrim
-		143494,
-		143638,
-		143480,
-		143882,
-		--Malkorok
-		142990,
-		142862,
-		142861,
-		143919,
-		--Spoils of Pandaria
-		145993,
-		144853,
-		142524,
-		146217,
-		145712,
-		--Thok the Bloodthirsty
-		143766,
-		143428,
-		143445,
-		143780,
-		143773,
-		143800,
-		143767,
-		143783,
-		--Siegecrafter Blackfuse
-		143385,
-		145444,
-		143856,
-		144466,
-		--Paragons of the Klaxxi
-		142931,
-		34940,
-		142315,
-		142929,
-		142668,
-		143974,
-		143735,
-		143275,
-		143278,
-		143339,
-		142948,
-		143702,
-		143358,
-		142808
-		--Garrosh Hellscream
-	);
+--	VUHDO_addCustomSpellIds(22,
+--		--Trash
+--		143828,
+--		146452,
+--		--Immerseus
+--		143436,
+--		143298,
+--		--The Fallen Protectors
+--		143962,
+--		144397,
+--		143009,
+--		143198,
+--		1776,
+--		144365,
+--		144176,
+--		147383,
+--		143424,
+--		--Sha of Pride
+--		144358,
+--		144574,
+--		--Galakras
+--		147200,
+--		146763,
+--		147705,
+--		147029,
+--		--Iron Juggernaut
+--		144459,
+--		144467,
+--		144498,
+--		146325,
+--		--Kor'kron Dark Shaman
+--		17153,
+--		144215,
+--		144089,
+--		143993,
+--		144331,
+--		144328,
+--		144089,
+--		--General Nazgrim
+--		143494,
+--		143638,
+--		143480,
+--		143882,
+--		--Malkorok
+--		142990,
+--		142862,
+--		142861,
+--		143919,
+--		--Spoils of Pandaria
+--		145993,
+--		144853,
+--		142524,
+--		146217,
+--		145712,
+--		--Thok the Bloodthirsty
+--		143766,
+--		143428,
+--		143445,
+--		143780,
+--		143773,
+--		143800,
+--		143767,
+--		143783,
+--		--Siegecrafter Blackfuse
+--		143385,
+--		145444,
+--		143856,
+--		144466,
+--		--Paragons of the Klaxxi
+--		142931,
+--		34940,
+--		142315,
+--		142929,
+--		142668,
+--		143974,
+--		143735,
+--		143275,
+--		143278,
+--		143339,
+--		142948,
+--		143702,
+--		143358,
+--		142808
+--		--Garrosh Hellscream
+--	);
 	
 	-- 6.0 - Warlords of Draenor - part 1
-	VUHDO_addCustomSpellIds(23,
-		-- [[ Draenor World Bosses ]]
-		-- Drov
-		175915, -- Acid Breath
-		-- Rukhmar
-		167615, -- Pierce Armor
-		167650, -- Loose Quills
-		-- Tarlna
-		176004, -- Savage Vines
-
-		-- [[ Highmaul ]]
-		-- Brackenspore
-		163241, -- Rot
-		-- Kargath Bladefist
-		159250, -- Blade Dance
-		159947, -- Chain Hurl
-		162497, -- On The Hunt
-		-- Koragh
-		162186, -- Expel Magic: Arcane
-		162185, -- Expel Magic: Fire
-		-- Margok
-		156225, -- Arcane Wrath
-		158605, -- Mark Of Chaos
-		157801, -- Slow
-		157763, -- Fixate
-		-- Tectus
-		162346, -- Crystalline Barrage
-		162370, -- Crystalline Barrage Damage
-		162892, -- Petrification
-		-- The Butcher
-		156151, -- Tenderizer
-		-- Twin Ogron
-		167200, -- Arcane Wound
-		158241, -- Blaze
-		163372, -- Arcane Volatility
-
-		-- [[ Blackrock Foundry ]]
-		-- Blackhand
-		156096, -- Marked for Death
-		157000, -- Attach Slag Bombs
-		-- Darmac
-		154960, -- Pinned Down
-		155061, -- Rend and Tear
-		154981, -- Conflagration
-		155030, -- Seared Flesh
-		155236, -- Crush Armor
-		-- Gruul
-		155078, -- Overwhelming Blows
-		155326, -- Petrifying Slam
-		155506, -- Petrified
-		-- Hansgar and Franzok
-		157139, -- Shattered Vertebrae
-		-- Kagraz
-		154932, -- Molten Torrent
-		163284, -- Rising Flames
-		154952, -- Fixate
-		155074, -- Charring Breath
-		-- Kromog
-		156766, -- Warped Armor
-		-- Oregorger
-		156297, -- Acid Torrent
-		-- The Blast Furnace
-		158345, -- Shields Down
-		155196, -- Fixate
-		155192, -- Bomb
-		176121, -- Volatile Fire
-		175104, -- Melt Armor
-		-- The Iron Maidens
-		164271, -- Penetrating Shot
-		156214, -- Convulsive Shadows
-		156007, -- Impale
-		158315, -- Dark Hunt
-		157950, -- Heart Seeker
-		-- Thogar
-		155921, -- Enkindle
-		155864, -- Pulse Grenade
-		159481  -- Delayed Siege Bomb
-	);
+--	VUHDO_addCustomSpellIds(23,
+--		-- [[ Draenor World Bosses ]]
+--		-- Drov
+--		175915, -- Acid Breath
+--		-- Rukhmar
+--		167615, -- Pierce Armor
+--		167650, -- Loose Quills
+--		-- Tarlna
+--		176004, -- Savage Vines
+--
+--		-- [[ Highmaul ]]
+--		-- Brackenspore
+--		163241, -- Rot
+--		-- Kargath Bladefist
+--		159250, -- Blade Dance
+--		159947, -- Chain Hurl
+--		162497, -- On The Hunt
+--		-- Koragh
+--		162186, -- Expel Magic: Arcane
+--		162185, -- Expel Magic: Fire
+--		-- Margok
+--		156225, -- Arcane Wrath
+--		158605, -- Mark Of Chaos
+--		157801, -- Slow
+--		157763, -- Fixate
+--		-- Tectus
+--		162346, -- Crystalline Barrage
+--		162370, -- Crystalline Barrage Damage
+--		162892, -- Petrification
+--		-- The Butcher
+--		156151, -- Tenderizer
+--		-- Twin Ogron
+--		167200, -- Arcane Wound
+--		158241, -- Blaze
+--		163372, -- Arcane Volatility
+--
+--		-- [[ Blackrock Foundry ]]
+--		-- Blackhand
+--		156096, -- Marked for Death
+--		157000, -- Attach Slag Bombs
+--		-- Darmac
+--		154960, -- Pinned Down
+--		155061, -- Rend and Tear
+--		154981, -- Conflagration
+--		155030, -- Seared Flesh
+--		155236, -- Crush Armor
+--		-- Gruul
+--		155078, -- Overwhelming Blows
+--		155326, -- Petrifying Slam
+--		155506, -- Petrified
+--		-- Hansgar and Franzok
+--		157139, -- Shattered Vertebrae
+--		-- Kagraz
+--		154932, -- Molten Torrent
+--		163284, -- Rising Flames
+--		154952, -- Fixate
+--		155074, -- Charring Breath
+--		-- Kromog
+--		156766, -- Warped Armor
+--		-- Oregorger
+--		156297, -- Acid Torrent
+--		-- The Blast Furnace
+--		158345, -- Shields Down
+--		155196, -- Fixate
+--		155192, -- Bomb
+--		176121, -- Volatile Fire
+--		175104, -- Melt Armor
+--		-- The Iron Maidens
+--		164271, -- Penetrating Shot
+--		156214, -- Convulsive Shadows
+--		156007, -- Impale
+--		158315, -- Dark Hunt
+--		157950, -- Heart Seeker
+--		-- Thogar
+--		155921, -- Enkindle
+--		155864, -- Pulse Grenade
+--		159481  -- Delayed Siege Bomb
+--	);
 
 	-- 6.0 - Warlords of Draenor - part 2
-	VUHDO_addCustomSpellIds(24,
-		-- [[ Highmaul ]]
-		-- Brackenspore
-		-- Kargath Bladefist
-		-- Koragh
-		-- Margok
-		164004, -- Arcane Wrath: Displacement
-		164005, -- Arcane Wrath: Fortification
-		164006, -- Arcane Wrath: Replication
-		164176, -- Mark of Chaos: Displacement
-		164178, -- Mark of CHaos: Fortification
-		164191  -- Mark of Chaos: Replication
-		-- Tectus
-		-- The Butcher
-		-- Twin Ogron
-	);
+--	VUHDO_addCustomSpellIds(24,
+--		-- [[ Highmaul ]]
+--		-- Brackenspore
+--		-- Kargath Bladefist
+--		-- Koragh
+--		-- Margok
+--		164004, -- Arcane Wrath: Displacement
+--		164005, -- Arcane Wrath: Fortification
+--		164006, -- Arcane Wrath: Replication
+--		164176, -- Mark of Chaos: Displacement
+--		164178, -- Mark of CHaos: Fortification
+--		164191  -- Mark of Chaos: Replication
+--		-- Tectus
+--		-- The Butcher
+--		-- Twin Ogron
+--	);
 
 	-- 6.1 - Warlords of Draenor
-	VUHDO_addCustomSpellIds(25,
-		-- [[ Blackrock Foundry ]]
-		-- Blackhand
-		156743, -- Impaled
-		156047, -- Slagged
-		-- Darmac
-		-- Gruul
-		-- Hansgar and Franzok
-		-- Kagraz
-		155049, -- Singe
-		155277, -- Blazing Radiance
-		-- Kromog
-		-- Oregorger
-		-- The Blast Furnace
-		-- The Iron Maidens
-		156112  -- Convulsive Shadows
-		-- Thogar
-	);
+--	VUHDO_addCustomSpellIds(25,
+--		-- [[ Blackrock Foundry ]]
+--		-- Blackhand
+--		156743, -- Impaled
+--		156047, -- Slagged
+--		-- Darmac
+--		-- Gruul
+--		-- Hansgar and Franzok
+--		-- Kagraz
+--		155049, -- Singe
+--		155277, -- Blazing Radiance
+--		-- Kromog
+--		-- Oregorger
+--		-- The Blast Furnace
+--		-- The Iron Maidens
+--		156112  -- Convulsive Shadows
+--		-- Thogar
+--	);
 
 	-- 6.2 - WoD - Hellfire Citadel
-	VUHDO_addCustomSpellIds(26,
-		-- [[ Hellfire Citadel ]]
-		-- Hellfire Assault
-		156096, -- Marked for Death
-		-- Iron Reaver
-		182001, -- Unstable Orb
-		-- Kormrok
-		181306, -- Explosive Burst
-		181321, -- Fel Touch
-		-- Hellfire High Council
-		184358, -- Fel Rage
-		-- Killrogg Deadeye
-		180372, -- Heart Seeker
-		182159, -- Fel Corruption
-		-- Gorefiend
-		179978, -- Touch of Doom
-		179909, -- Shared Fate
-		-- Shadow-Lord Iskar
-		179202, -- Eye of Anzu
-		181956, -- Phantasmal Winds
-		182323, -- Phantasmal Wounds
-		182173, -- Fel Chakram
-		181753, -- Fel Bomb
-		179218, -- Phantasmal Obliteration
-		-- Socrethar the Eternal
-		182635, -- Reverberating Blow
-		-- Fel Lord Zakuun
-		181508, -- Seed of Destruction
-		179620, -- Fel Crystal
-		-- Xhul'horac
-		186490, -- Chains of Fel
-		186546, -- Black Hole
-		-- Tyrant Velhari
-		180128, -- Edict of Condemnation
-		180526, -- Font of Corruption
-		-- Mannoroth
-		181099, -- Mark of Doom
-		181597, -- Mannoroth's Gaze
-		-- Archimonde
-		185590, -- Desecrate
-		183864, -- Shadow Blast
-		183828, -- Death Brand
-		184931, -- Shackled Torment
-
-		-- [[ Draenor World Bosses ]]
-		-- Supreme Lord Kazzak
-		187664, -- Fel Breath
-		187668  -- Mark of Kazzak
-	);
+--	VUHDO_addCustomSpellIds(26,
+--		-- [[ Hellfire Citadel ]]
+--		-- Hellfire Assault
+--		156096, -- Marked for Death
+--		-- Iron Reaver
+--		182001, -- Unstable Orb
+--		-- Kormrok
+--		181306, -- Explosive Burst
+--		181321, -- Fel Touch
+--		-- Hellfire High Council
+--		184358, -- Fel Rage
+--		-- Killrogg Deadeye
+--		180372, -- Heart Seeker
+--		182159, -- Fel Corruption
+--		-- Gorefiend
+--		179978, -- Touch of Doom
+--		179909, -- Shared Fate
+--		-- Shadow-Lord Iskar
+--		179202, -- Eye of Anzu
+--		181956, -- Phantasmal Winds
+--		182323, -- Phantasmal Wounds
+--		182173, -- Fel Chakram
+--		181753, -- Fel Bomb
+--		179218, -- Phantasmal Obliteration
+--		-- Socrethar the Eternal
+--		182635, -- Reverberating Blow
+--		-- Fel Lord Zakuun
+--		181508, -- Seed of Destruction
+--		179620, -- Fel Crystal
+--		-- Xhul'horac
+--		186490, -- Chains of Fel
+--		186546, -- Black Hole
+--		-- Tyrant Velhari
+--		180128, -- Edict of Condemnation
+--		180526, -- Font of Corruption
+--		-- Mannoroth
+--		181099, -- Mark of Doom
+--		181597, -- Mannoroth's Gaze
+--		-- Archimonde
+--		185590, -- Desecrate
+--		183864, -- Shadow Blast
+--		183828, -- Death Brand
+--		184931, -- Shackled Torment
+--
+--		-- [[ Draenor World Bosses ]]
+--		-- Supreme Lord Kazzak
+--		187664, -- Fel Breath
+--		187668  -- Mark of Kazzak
+--	);
 
 	-- 6.2 - WoD - Hellfire Citadel - part 2
-	VUHDO_addCustomSpellIds(30,
-		-- [[ Hellfire Citadel ]]
-		-- Hellfire High Council
-		184449, -- Mark of the Necromancer Purple
-		184450, -- Mark of the Necromancer Purple
-		184676, -- Mark of the Necromancer Purple
-		185065, -- Mark of the Necromancer Yellow
-		185066, -- Mark of the Necromancer Red
-		-- Socrethar the Eternal
-		184124, -- Gift of the Man'ari
-		-- Fel Lord Zakuun
-		189030, -- Befouled Red
-		189031, -- Befouled Yellow
-		189032, -- Befouled Green
-		-- Tyrant Velhari
-		180164, -- Touch of Harm
-		180166  -- Touch of Harm
-	);
+--	VUHDO_addCustomSpellIds(30,
+--		-- [[ Hellfire Citadel ]]
+--		-- Hellfire High Council
+--		184449, -- Mark of the Necromancer Purple
+--		184450, -- Mark of the Necromancer Purple
+--		184676, -- Mark of the Necromancer Purple
+--		185065, -- Mark of the Necromancer Yellow
+--		185066, -- Mark of the Necromancer Red
+--		-- Socrethar the Eternal
+--		184124, -- Gift of the Man'ari
+--		-- Fel Lord Zakuun
+--		189030, -- Befouled Red
+--		189031, -- Befouled Yellow
+--		189032, -- Befouled Green
+--		-- Tyrant Velhari
+--		180164, -- Touch of Harm
+--		180166  -- Touch of Harm
+--	);
 
 	-- 7.0 - Legion
 	VUHDO_addCustomSpellIds(31, 

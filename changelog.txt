@@ -20,10 +20,13 @@ Known issues:
 
 Bugfixes:
 -- Shaman spell 'Purify Spirit' no longer remapped to 'Cleanse Spirit'
+-- Fixed debuff duration for several debuff absorption spells
 
 
 Improvements:
 -- Added default custom debuffs for Antorus raid encounters
+-- Added debuff absorption tracking for Antorus 'Chilled Blood'
+-- Removed MoP and WoD default custom debuffs
 
 
 --------------------------------------------------------------

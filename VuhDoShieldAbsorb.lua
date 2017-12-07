@@ -45,20 +45,23 @@ local VUHDO_ABSORB_DEBUFFS = {
 	[180166] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TOUCH_OF_HARM)), 10 * 60; end, -- Tyrant Velhari
 
 	-- Patch 7.0 - Legion
-	[221772] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_OVERFLOW)), 10 * 60; end, -- Mythic+ affix
+	[221772] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_OVERFLOW)), 1 * 60; end, -- Mythic+ affix
 
 	-- Patch 7.1 - Legion - Trial of Valor
 	[228253] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_SHADOW_LICK)), 10 * 60; end, -- Shadow Lick
-	[232450] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_CORRUPTED_AXION)), 10 * 60; end, -- Corrupted Axion
+	[232450] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_CORRUPTED_AXION)), 30; end, -- Corrupted Axion
 
 	-- Patch 7.1.5 - Legion - Nighthold
-	[206609] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 10 * 60; end, -- Chronomatic Anomaly Time Release
-	[219964] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 10 * 60; end, -- Chronomatic Anomaly Time Release Geen
-	[219965] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 10 * 60; end, -- Chronomatic Anomaly Time Release Yellow
-	[219966] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 10 * 60; end, -- Chronomatic Anomaly Time Release Red
+	[206609] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 30; end, -- Chronomatic Anomaly Time Release
+	[219964] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 30; end, -- Chronomatic Anomaly Time Release Geen
+	[219965] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 30; end, -- Chronomatic Anomaly Time Release Yellow
+	[219966] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_TIME_RELEASE)), 30; end, -- Chronomatic Anomaly Time Release Red
 
 	-- Patch 7.2.5 - Legion - Tomb of Sargeras
-	[233263] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_EMBRACE_OF_THE_ECLIPSE)), 10 * 60; end, -- Sisters Embrace of the Eclipse
+	[233263] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_EMBRACE_OF_THE_ECLIPSE)), 12; end, -- Sisters Embrace of the Eclipse
+
+	-- Patch 7.3 - Legion - Antorus, The Burning Throne
+	[245586] = function(aUnit) return select(17, UnitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_CHILLED_BLOOD)), 10; end, -- Coven Chilled Blood
 
 	--[79105] = function(aUnit) return 280000, 60 * 60; end, -- @TESTING PW:F
 };
