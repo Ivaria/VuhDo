@@ -129,8 +129,8 @@
 							</OnClick>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Label");
-								self:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["2"]);
-								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_keyLayoutInitSpecCheckButton(self, "2");
 							</OnShow>
 						</Scripts>
 					</CheckButton>
@@ -153,8 +153,8 @@
 							</OnClick>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Label");
-								self:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["1"]);
-								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_keyLayoutInitSpecCheckButton(self, "1");
 							</OnShow>
 						</Scripts>
 					</CheckButton>
@@ -177,8 +177,8 @@
 							</OnClick>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Label");
-								self:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["3"]);
-								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_keyLayoutInitSpecCheckButton(self, "3");
 							</OnShow>
 						</Scripts>
 					</CheckButton>
@@ -201,8 +201,8 @@
 							</OnClick>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Label");
-								self:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS["4"]);
-								VUHDO_lnfCheckButtonClicked(self);
+								VUHDO_lnfCheckButtonInitFromModel(self);
+								VUHDO_keyLayoutInitSpecCheckButton(self, "4");
 							</OnShow>
 						</Scripts>
 					</CheckButton>

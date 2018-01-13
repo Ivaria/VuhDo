@@ -498,7 +498,7 @@
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K475);
 							</OnLoad>
 							<OnShow>
-								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfPatchFont(self, "Label");
 								VUHDO_lnfCheckButtonInitFromModel(self);
 								VUHDO_skinsInitAutoCheckButton(self, "SPEC_1");
 							</OnShow>
@@ -525,7 +525,7 @@
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K476);
 							</OnLoad>
 							<OnShow>
-								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfPatchFont(self, "Label");
 								VUHDO_lnfCheckButtonInitFromModel(self);
 								VUHDO_skinsInitAutoCheckButton(self, "SPEC_2");
 							</OnShow>
@@ -549,7 +549,7 @@
 						</Anchors>
 						<Scripts>
 							<OnShow>
-								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfPatchFont(self, "Label");
 								VUHDO_lnfCheckButtonInitFromModel(self);
 								VUHDO_skinsInitAutoCheckButton(self, "SPEC_3");
 							</OnShow>
@@ -573,7 +573,7 @@
 						</Anchors>
 						<Scripts>
 							<OnShow>
-								VUHDO_lnfPatchFont(self, "Label"); VUHDO_lnfRadioButtonOnShow(self);
+								VUHDO_lnfPatchFont(self, "Label");
 								VUHDO_lnfCheckButtonInitFromModel(self);
 								VUHDO_skinsInitAutoCheckButton(self, "SPEC_4");
 							</OnShow>

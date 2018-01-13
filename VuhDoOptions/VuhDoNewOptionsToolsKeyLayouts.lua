@@ -64,6 +64,37 @@ end
 
 
 --
+function VUHDO_keyLayoutInitSpecCheckButton(aCheckButton, aSpecId)
+								
+	aCheckButton:SetChecked(VUHDO_CURR_LAYOUT == VUHDO_SPEC_LAYOUTS[aSpecId]);
+	VUHDO_lnfCheckButtonClicked(aCheckButton);
+
+	local tIndexName;
+	local tSpecId = tonumber(aSpecId) or 0;
+
+	if (tSpecId == 1) then
+		tIndexName = VUHDO_I18N_SPEC_1;
+	elseif (tSpecId == 2) then
+		tIndexName = VUHDO_I18N_SPEC_2;
+	elseif (tSpecId == 3) then
+		tIndexName = VUHDO_I18N_SPEC_3;
+	elseif (tSpecId == 4) then
+		tIndexName = VUHDO_I18N_SPEC_4;
+	end
+
+	if tIndexName then
+		local _, tSpecName = GetSpecializationInfo(tSpecId);
+
+		if tSpecName then
+			_G[aCheckButton:GetName() .. "Label"]:SetText(tIndexName .. "\n(" .. string.sub(tSpecName,1,4) .. ")");
+		end
+	end
+
+end
+
+
+
+--
 function VUHDO_deleteKeyLayoutCallback(aDecision)
 	if (VUHDO_YES == aDecision) then
 		VUHDO_Msg(format(VUHDO_I18N_DELETED_KEY_LAYOUT, VUHDO_CURR_LAYOUT));

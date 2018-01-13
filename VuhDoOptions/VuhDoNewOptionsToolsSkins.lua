@@ -103,6 +103,31 @@ end
 function VUHDO_skinsInitAutoCheckButton(aButton, anIndex)
 	aButton:SetChecked(VUHDO_isAutoProfileButtonEnabled(anIndex));
 	VUHDO_lnfCheckButtonClicked(aButton);
+
+	local tIndexStart, tIndexEnd = strfind(anIndex, "SPEC", 1, true);
+
+	if ((tIndexStart == 1) and tIndexEnd) then
+		local tIndexName;
+		local tSpecId = tonumber(string.sub(anIndex, tIndexEnd + 2, tIndexEnd + 2));
+
+		if (tSpecId == 1) then
+			tIndexName = VUHDO_I18N_SPEC_1;
+		elseif (tSpecId == 2) then
+			tIndexName = VUHDO_I18N_SPEC_2;
+		elseif (tSpecId == 3) then
+			tIndexName = VUHDO_I18N_SPEC_3;
+		elseif (tSpecId == 4) then
+			tIndexName = VUHDO_I18N_SPEC_4;
+		end
+
+		if tIndexName then
+			local _, tSpecName = GetSpecializationInfo(tSpecId);
+
+			if tSpecName then
+				_G[aButton:GetName() .. "Label"]:SetText(tIndexName .. "\n(" .. string.sub(tSpecName,1,4) .. ")");
+			end
+		end
+	end
 end
 
 
