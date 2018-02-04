@@ -307,11 +307,9 @@ function VUHDO_getDisplayUnit(aButton)
 			return VUHDO_CUSTOM_INFO["fixResolveId"], VUHDO_RAID[VUHDO_CUSTOM_INFO["fixResolveId"]];
 		end
 	else
-		-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-		-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-		--if VUHDO_RAID[tUnit] and VUHDO_RAID[tUnit]["isVehicle"] then
-		--	tUnit = VUHDO_RAID[tUnit]["petUnit"];
-		--end
+		if VUHDO_RAID[tUnit] and VUHDO_RAID[tUnit]["isVehicle"] then
+			tUnit = VUHDO_RAID[tUnit]["petUnit"];
+		end
 		return tUnit, VUHDO_RAID[tUnit];
 	end
 end
@@ -418,10 +416,8 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_FOC, tTextString);
   		elseif "target" == tUnit then 
 			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_TAR, tTextString);
-		-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-		-- For now just disable vehicle support (note: this breaks encounters like Malygos)
- 		--elseif tOwnerInfo and tOwnerInfo["isVehicle"] then 
-		--	tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_VEHICLE, tTextString);
+ 		elseif tOwnerInfo and tOwnerInfo["isVehicle"] then 
+			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_VEHICLE, tTextString);
 		end
   	end
 	end

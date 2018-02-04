@@ -501,13 +501,11 @@ local tSpellId, tDebuffOffset;
 local tNow;
 local tFilter;
 local function VUHDO_updateHots(aUnit, anInfo)
-	-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-	-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-	--if anInfo["isVehicle"] then
-	--	VUHDO_removeHots(aUnit);
-	--	aUnit = anInfo["petUnit"];
-	--	if not aUnit then return; end-- bei z.B. focus/target
-	--end
+	if anInfo["isVehicle"] then
+		VUHDO_removeHots(aUnit);
+		aUnit = anInfo["petUnit"];
+		if not aUnit then return; end-- bei z.B. focus/target
+	end
 
 	if not VUHDO_MY_HOTS[aUnit] then VUHDO_MY_HOTS[aUnit] = { }; end
 	if not VUHDO_OTHER_HOTS[aUnit] then VUHDO_OTHER_HOTS[aUnit] = { }; end

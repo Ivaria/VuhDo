@@ -552,12 +552,9 @@ end
 --
 local tInfo;
 function VUHDO_resolveVehicleUnit(aUnit)
-	-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-	-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-	--tInfo = VUHDO_RAID[aUnit] or sEmpty;
-	--return tInfo["isPet"] and (VUHDO_RAID[tInfo["ownerUnit"]] or sEmpty)["isVehicle"]
-	--	and tInfo["ownerUnit"] or aUnit;
-	return aUnit;
+	tInfo = VUHDO_RAID[aUnit] or sEmpty;
+	return tInfo["isPet"] and (VUHDO_RAID[tInfo["ownerUnit"]] or sEmpty)["isVehicle"]
+		and tInfo["ownerUnit"] or aUnit;
 end
 
 

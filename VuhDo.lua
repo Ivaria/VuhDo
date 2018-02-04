@@ -90,6 +90,9 @@ local string = string;
 local UnitIsAFK = UnitIsAFK;
 local UnitIsConnected = UnitIsConnected;
 local UnitIsCharmed = UnitIsCharmed;
+local UnitInRaid = UnitInRaid;
+local UnitHasVehicleUI = UnitHasVehicleUI;
+local UnitTargetsVehicleInRaidUI = UnitTargetsVehicleInRaidUI;
 local UnitCanAttack = UnitCanAttack;
 local GetNumGroupMembers = GetNumGroupMembers;
 local UnitName = UnitName;
@@ -441,12 +444,8 @@ function VUHDO_updateHealth(aUnit, aMode)
 		tOwner = VUHDO_RAID[aUnit]["ownerUnit"];
 		-- tOwner may not be present when leaving a vehicle
 		if VUHDO_RAID[tOwner] and VUHDO_RAID[tOwner]["isVehicle"] then
-			-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-			-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-			--VUHDO_setHealth(tOwner, aMode);
-			--VUHDO_updateHealthBarsFor(tOwner, aMode);
-			VUHDO_setHealth(aUnit, aMode);
-			VUHDO_updateHealthBarsFor(aUnit, aMode);
+			VUHDO_setHealth(tOwner, aMode);
+			VUHDO_updateHealthBarsFor(tOwner, aMode);
 		end
 	end
 
@@ -857,10 +856,20 @@ function VUHDO_refreshRaidMembers()
 		if UnitExists(tPlayer) and tPlayer ~= VUHDO_PLAYER_RAID_ID then
 			tInfo = VUHDO_RAID[tPlayer];
 			if not tInfo or VUHDO_RAID_GUIDS[UnitGUID(tPlayer)] ~= tPlayer then
+				--VUHDO_xMsg("VUHDO_refreshRaidMembers", "VUHDO_setHealth", tPlayer or "no player", tInfo and "in raid" or "not in raid", VUHDO_RAID_GUIDS[UnitGUID(tPlayer)] or "no raid guid");
 				VUHDO_setHealth(tPlayer, 1); -- VUHDO_UPDATE_ALL
 			else
 				tInfo["group"] = VUHDO_getUnitGroup(tPlayer, false);
+
 				tInfo["isVehicle"] = UnitHasVehicleUI(tPlayer);
+				if ( tInfo["isVehicle"] ) then
+					local tRaidId = UnitInRaid(tPlayer);
+					
+					if ( tRaidId and not UnitTargetsVehicleInRaidUI(tPlayer) ) then
+						tInfo["isVehicle"] = false;
+					end
+				end
+
 				tInfo["afk"], tInfo["connected"], tIsDcChange = VUHDO_updateAfkDc(tPlayer);
 
 				if tIsDcChange then

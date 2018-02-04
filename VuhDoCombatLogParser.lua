@@ -84,13 +84,11 @@ function VUHDO_clParserSetCurrentFocus()
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if UnitIsUnit("focus", tUnit) and tUnit ~= "focus" and tUnit ~= "target" then
-			-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-			-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-			--if tInfo["isPet"] and (VUHDO_RAID[tInfo["ownerUnit"]] or {})["isVehicle"] then
-			--	sCurrentFocus = tInfo["ownerUnit"];
-			--else
+			if tInfo["isPet"] and (VUHDO_RAID[tInfo["ownerUnit"]] or {})["isVehicle"] then
+				sCurrentFocus = tInfo["ownerUnit"];
+			else
 				sCurrentFocus = tUnit;
-			--end
+			end
 			break;
 		end
 	end

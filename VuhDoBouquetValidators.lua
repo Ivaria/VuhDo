@@ -348,26 +348,22 @@ end
 
 --
 local function VUHDO_playerTargetValidator(anInfo, _)
-	-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-	-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-	--if anInfo["isPet"] and (VUHDO_RAID[anInfo["ownerUnit"]] or tEmptyInfo)["isVehicle"] then
-	--	return anInfo["ownerUnit"] == VUHDO_getCurrentPlayerTarget(), nil, -1, -1, -1;
-	--else
+	if anInfo["isPet"] and (VUHDO_RAID[anInfo["ownerUnit"]] or tEmptyInfo)["isVehicle"] then
+		return anInfo["ownerUnit"] == VUHDO_getCurrentPlayerTarget(), nil, -1, -1, -1;
+	else
 		return anInfo["unit"] == VUHDO_getCurrentPlayerTarget(), nil, -1, -1, -1;
-	--end
+	end
 end
 
 
 
 --
 local function VUHDO_playerFocusValidator(anInfo, _)
-	-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-	-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-	--if anInfo["isPet"] and (VUHDO_RAID[anInfo["ownerUnit"]] or tEmptyInfo)["isVehicle"] then
-	--	return anInfo["ownerUnit"] == VUHDO_getCurrentPlayerFocus(), nil, -1, -1, -1;
-	--else
+	if anInfo["isPet"] and (VUHDO_RAID[anInfo["ownerUnit"]] or tEmptyInfo)["isVehicle"] then
+		return anInfo["ownerUnit"] == VUHDO_getCurrentPlayerFocus(), nil, -1, -1, -1;
+	else
 		return anInfo["unit"] == VUHDO_getCurrentPlayerFocus(), nil, -1, -1, -1;
-	--end
+	end
 end
 
 
@@ -375,13 +371,11 @@ end
 
 --
 local function VUHDO_mouseOverTargetValidator(anInfo, _)
-	-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
-	-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-	--if anInfo["isPet"] and (VUHDO_RAID[anInfo["ownerUnit"]] or tEmptyInfo)["isVehicle"] then
-	--	return anInfo["ownerUnit"] == VUHDO_getCurrentMouseOver(), nil, -1, -1, -1;
-	--else
+	if anInfo["isPet"] and (VUHDO_RAID[anInfo["ownerUnit"]] or tEmptyInfo)["isVehicle"] then
+		return anInfo["ownerUnit"] == VUHDO_getCurrentMouseOver(), nil, -1, -1, -1;
+	else
 		return anInfo["unit"] == VUHDO_getCurrentMouseOver(), nil, -1, -1, -1;
-	--end
+	end
 end
 
 
