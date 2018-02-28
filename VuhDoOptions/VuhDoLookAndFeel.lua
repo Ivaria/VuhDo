@@ -454,7 +454,7 @@ function VUHDO_lnfUpdateVar(aModel, aValue, aPanelNum)
 
 			elseif tPanelNum then
 				if (strfind(aModel, "TOOLTIP", 1, true) ~= nil) then
-					VUHDO_demoTooltip(aPanelNum);
+					VUHDO_demoTooltip(tPanelNum);
 				else
 					VUHDO_initDynamicPanelModels();
 					VUHDO_timeRedrawPanel(tPanelNum, 0.3);
