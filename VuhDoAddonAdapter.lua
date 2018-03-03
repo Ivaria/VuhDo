@@ -98,6 +98,8 @@ function VUHDO_initFuBar()
 		-- Minimap icon provided by LibDBIcon
 		if VUHDO_LibDBIcon then
 			VUHDO_LibDBIcon:Register("VuhDo", minimapObject);
+
+			VUHDO_initMinimap();
 		end
 	end
 
