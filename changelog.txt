@@ -18,6 +18,7 @@ Bugfixes:
 
 
 Improvements:
+-- Migrate minimap icon to LibDBIcon (fixes SexyMap compat)
 
 
 --------------------------------------------------------------

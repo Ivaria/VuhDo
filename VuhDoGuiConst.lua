@@ -53,14 +53,6 @@ VUHDO_HEADER_TEXTS = {
 
 
 
--- For initializing the minimap
-VUHDO_MM_LAYOUT = {
-	drag = "CIRCLE",
-	position = 0,
-};
-
-
-
 --
 VUHDO_CUSTOM_ICONS = {
 	{ VUHDO_I18N_CUSTOM_ICON_NONE, nil }, -- 1

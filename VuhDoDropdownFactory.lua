@@ -1,5 +1,4 @@
 local _;
-VUHDO_MM_SETTINGS = { };
 local VUHDO_MENU_UNIT = nil;
 
 
@@ -393,19 +392,4 @@ function VUHDO_minimapItemSelected(_, anId)
 	end
 
 	VUHDO_slashCmd(tCmd);
-end
-
-
-
---
-function VUHDO_initMinimap()
-	VuhDoMinimap:Create(VUHDO_MM_SETTINGS, VUHDO_MM_LAYOUT);
-	VUHDO_initShowMinimap();
-end
-
-
-
---
-function VUHDO_initShowMinimap()
-	VuhDoMinimapButton:SetShown(VUHDO_CONFIG["SHOW_MINIMAP"]);
 end
