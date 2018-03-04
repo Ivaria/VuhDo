@@ -949,7 +949,6 @@ function VUHDO_loadVariables()
 	VUHDO_loadSpellArray();
 	VUHDO_loadDefaultPanelSetup();
 	VUHDO_initBuffSettings();
-	VUHDO_initMinimap();
 	VUHDO_loadDefaultBouquets();
 	VUHDO_initClassColors();
 	VUHDO_initTextProviderConfig();
