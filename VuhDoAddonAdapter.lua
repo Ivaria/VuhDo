@@ -113,6 +113,7 @@ function VUHDO_initFuBar()
 
 	if not VUHDO_LibDataBroker or not VUHDO_LibDBIcon then
 		VuhDoMinimap:Create(VUHDO_MM_SETTINGS, VUHDO_MM_LAYOUT);
+		VuhDoMinimapButton:SetShown(VUHDO_CONFIG["SHOW_MINIMAP"]);
 	end
 
 	-- Native FuBar
@@ -236,7 +237,7 @@ end
 --
 function VUHDO_initShowMinimap()
 
-	if not VUHDO_LibDataBroker or not VUHDO_LibDBIcon then
+	if VuhDoMinimapButton and (not VUHDO_LibDataBroker or not VUHDO_LibDBIcon) then
 		VuhDoMinimapButton:SetShown(VUHDO_CONFIG["SHOW_MINIMAP"]);
 	else
 		if VUHDO_CONFIG["SHOW_MINIMAP"] then
