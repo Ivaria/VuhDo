@@ -1,5 +1,13 @@
 local _;
 
+-- For initializing the minimap
+VUHDO_MM_SETTINGS = { };
+
+VUHDO_MM_LAYOUT = {
+	drag = "CIRCLE",
+	position = 0,
+};
+
 VUHDO_LibSharedMedia = LibStub("LibSharedMedia-3.0");
 VUHDO_LibDataBroker = LibStub("LibDataBroker-1.1", true);
 VUHDO_LibDBIcon = LibStub("LibDBIcon-1.0");
@@ -101,6 +109,10 @@ function VUHDO_initFuBar()
 
 			VUHDO_initMinimap();
 		end
+	end
+
+	if not VUHDO_LibDataBroker or not VUHDO_LibDBIcon then
+		VuhDoMinimap:Create(VUHDO_MM_SETTINGS, VUHDO_MM_LAYOUT);
 	end
 
 	-- Native FuBar
@@ -224,10 +236,14 @@ end
 --
 function VUHDO_initShowMinimap()
 
-	if VUHDO_CONFIG["SHOW_MINIMAP"] then
-		VUHDO_LibDBIcon:Show("VuhDo");
+	if not VUHDO_LibDataBroker or not VUHDO_LibDBIcon then
+		VuhDoMinimapButton:SetShown(VUHDO_CONFIG["SHOW_MINIMAP"]);
 	else
-		VUHDO_LibDBIcon:Hide("VuhDo");
+		if VUHDO_CONFIG["SHOW_MINIMAP"] then
+			VUHDO_LibDBIcon:Show("VuhDo");
+		else
+			VUHDO_LibDBIcon:Hide("VuhDo");
+		end
 	end
 
 end
