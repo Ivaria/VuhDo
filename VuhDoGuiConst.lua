@@ -1,5 +1,5 @@
 
-VUHDO_STANDARD_ICON = "interface\\characterframe\\temporaryportrait-female-bloodelf";
+VUHDO_STANDARD_ICON = "Interface\\AddOns\\VuhDo\\Images\\TemporaryPortrait-Female-BloodElf-VuhDo";
 
 
 
