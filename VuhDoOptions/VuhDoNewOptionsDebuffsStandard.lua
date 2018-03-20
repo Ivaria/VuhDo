@@ -5,10 +5,17 @@ VUHDO_SELECTED_DEBUFF_IGNORE = "";
 
 
 --
+local tSpellNameById;
 function VUHDO_initDebuffIgnoreComboModel()
 	table.wipe(VUHDO_DEBUFF_IGNORE_COMBO_MODEL);
-	for tName, _ in pairs(VUHDO_DEBUFF_BLACKLIST) do
-		tinsert(VUHDO_DEBUFF_IGNORE_COMBO_MODEL, { tName, tName });
+	for tName, _ in pairs(VUHDO_DEBUFF_BLACKLIST) do 
+		tSpellNameById = VUHDO_resolveSpellId(tName);
+
+		if (tSpellNameById ~= tName) then
+			tinsert(VUHDO_DEBUFF_IGNORE_COMBO_MODEL, { tName, "[" .. tName .. "] " .. tSpellNameById });
+		else
+			tinsert(VUHDO_DEBUFF_IGNORE_COMBO_MODEL, { tName, tName });
+		end
 	end
 end
 
@@ -31,8 +38,19 @@ end
 --
 function VUHDO_deleteDebuffIgnoreClicked(aButton)
 	local tText = _G[aButton:GetParent():GetName() .. "IgnoreComboBoxEditBox"]:GetText();
+
 	if (tText ~= nil) then
-		VUHDO_DEBUFF_BLACKLIST[strtrim(tText)] = nil;
+		if (VUHDO_DEBUFF_BLACKLIST[strtrim(tText)]) then
+			VUHDO_DEBUFF_BLACKLIST[strtrim(tText)] = nil;
+		else
+			local tSpellId = string.match(tText, "([^\]\[]+)");
+
+			if (tSpellId ~= nil and VUHDO_DEBUFF_BLACKLIST[tSpellId]) then
+				VUHDO_DEBUFF_BLACKLIST[tSpellId] = nil;
+			end
+		end
+
+
 		VUHDO_initDebuffIgnoreComboModel();
 		_G[aButton:GetParent():GetName() .. "IgnoreComboBox"]:Hide();
 		_G[aButton:GetParent():GetName() .. "IgnoreComboBox"]:Show();

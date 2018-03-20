@@ -19,6 +19,7 @@ Bugfixes:
 
 Improvements:
 -- Migrate minimap icon to LibDBIcon (fixes SexyMap compat)
+-- Standard debuffs can now be ignored/blacklisted by spell ID
 
 
 --------------------------------------------------------------

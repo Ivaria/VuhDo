@@ -330,7 +330,8 @@ function VUHDO_determineDebuff(aUnit)
 			end
 
 			if sCurChosenType ~= 6 -- VUHDO_DEBUFF_TYPE_CUSTOM
-				and not VUHDO_DEBUFF_BLACKLIST[tName]
+				and not VUHDO_DEBUFF_BLACKLIST[tName] 
+				and not VUHDO_DEBUFF_BLACKLIST[tostring(tSpellId)] 
 				and tIsRelevant then
 
 				if sIsUseDebuffIcon and (tIsBossDebuff or not sIsUseDebuffIconBossOnly)
