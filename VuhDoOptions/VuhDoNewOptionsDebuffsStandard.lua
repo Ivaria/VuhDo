@@ -1,4 +1,6 @@
 local _;
+
+VUHDO_DEBUFF_BLACKLIST_SORTABLE = { };
 VUHDO_DEBUFF_IGNORE_COMBO_MODEL = { };
 VUHDO_SELECTED_DEBUFF_IGNORE = "";
 
@@ -7,8 +9,20 @@ VUHDO_SELECTED_DEBUFF_IGNORE = "";
 --
 local tSpellNameById;
 function VUHDO_initDebuffIgnoreComboModel()
+
+	table.wipe(VUHDO_DEBUFF_BLACKLIST_SORTABLE);
+	for tName, _ in pairs(VUHDO_DEBUFF_BLACKLIST) do
+		tinsert(VUHDO_DEBUFF_BLACKLIST_SORTABLE, tName);
+	end
+	
+	table.sort(VUHDO_DEBUFF_BLACKLIST_SORTABLE,
+	    function(aDebuff, anotherDebuff)
+		    return VUHDO_resolveSpellId(aDebuff) < VUHDO_resolveSpellId(anotherDebuff);
+	    end
+	);
+
 	table.wipe(VUHDO_DEBUFF_IGNORE_COMBO_MODEL);
-	for tName, _ in pairs(VUHDO_DEBUFF_BLACKLIST) do 
+	for _, tName in pairs(VUHDO_DEBUFF_BLACKLIST_SORTABLE) do 
 		tSpellNameById = VUHDO_resolveSpellId(tName);
 
 		if (tSpellNameById ~= tName) then
