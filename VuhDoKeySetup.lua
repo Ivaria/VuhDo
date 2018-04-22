@@ -22,7 +22,6 @@ local GetMacroInfo = GetMacroInfo;
 local GetSpellBookItemTexture = GetSpellBookItemTexture;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local gsub = gsub;
-local UnitBuff = UnitBuff;
 local GetCursorInfo = GetCursorInfo;
 local GetShapeshiftForm = GetShapeshiftForm;
 local InCombatLockdown = InCombatLockdown;

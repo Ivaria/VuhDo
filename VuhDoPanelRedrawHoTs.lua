@@ -196,6 +196,7 @@ local function VUHDO_initHotIcon(anIndex)
 		tChargeIcon:SetWidth(tHotIcon:GetWidth() + 4);
 		tChargeIcon:SetHeight(tHotIcon:GetHeight() + 4);
 		tChargeIcon:SetVertexColor(tHotColor["R"] * 2, tHotColor["G"] * 2, tHotColor["B"] * 2);
+		tChargeIcon:ClearAllPoints();
 		tChargeIcon:SetPoint("TOPLEFT", tHotIcon:GetName(), "TOPLEFT", -2, 2);
 
 		if tHotColor["isClock"] then

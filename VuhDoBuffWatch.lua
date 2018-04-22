@@ -497,7 +497,7 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 			tInRange = (IsSpellInRange(aBuffInfo[1], tUnit) == 1) or tInfo["baseRange"];
 			tIsAvailable = tInfo["connected"] and not tInfo["dead"];
 
-			_, _, tTexture, tCount, _, tStart, tRest, _, _ = UnitBuff(tUnit, aBuffInfo[1]);
+			_, tTexture, tCount, _, tStart, tRest, _, _ = UnitBuff(tUnit, aBuffInfo[1]);
 
 			if not tTexture then
 				for tCnt = 3, 10 do
@@ -505,7 +505,7 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 					if not tBuffGroup then break; end
 
 					for _, tSameGroupBuff in pairs(tBuffGroup) do
-						_, _, tTexture, tCount, _, tStart, tRest, _, _ = UnitBuff(tUnit, tSameGroupBuff);
+						_, tTexture, tCount, _, tStart, tRest, _, _ = UnitBuff(tUnit, tSameGroupBuff);
 						if tTexture then break; end
 					end
 

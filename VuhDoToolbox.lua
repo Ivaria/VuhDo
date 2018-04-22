@@ -404,7 +404,8 @@ function VUHDO_getUnitZoneName(aUnit)
 	tInfo = VUHDO_RAID[aUnit];
 	if not tInfo then return; end
 
-	if "player" == aUnit or tInfo["visible"] then tZone = GetRealZoneText();
+	if "player" == aUnit or tInfo["visible"] then 
+		tZone = GetRealZoneText();
 	elseif VUHDO_GROUP_TYPE_RAID == VUHDO_getCurrentGroupType() then
 		tIndex = (VUHDO_RAID[aUnit] or sEmpty)["number"] or 1;
 		_, _, _, _, _, _, tZone = GetRaidRosterInfo(tIndex);
@@ -416,7 +417,7 @@ function VUHDO_getUnitZoneName(aUnit)
 		if tZone == "PvP" then tZone = VuhDoScanTooltipTextLeft4:GetText(); end
 	end
 
-	tMap = GetMapInfo();
+	tMap = C_Map.GetMapInfo(C_Map.GetBestMapForUnit(aUnit) or C_Map.GetCurrentMapID());
 	return tZone or tMap or VUHDO_I18N_UNKNOWN, tMap;
 end
 
@@ -930,3 +931,21 @@ function VUHDO_round(number, digits)
 	end
 
 end
+
+
+function VUHDO_unitAura(aUnit, aSpell)
+
+	for tCnt = 1, 40 do
+		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt);
+
+		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
+			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3;
+		end
+	end
+
+	return nil;
+
+end
+
+
+
