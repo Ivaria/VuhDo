@@ -74,8 +74,17 @@ local VUHDO_TALENT_CHANGE_SPELLS = {
 
 
 --
-function VUHDO_spellcastSucceeded(aUnit, aSpellName)
-	if VUHDO_TALENT_CHANGE_SPELLS[aSpellName] then
+local tSpellName;
+function VUHDO_spellcastSucceeded(aUnit, aSpellId)
+	if aSpellId then
+		tSpellName = GetSpellInfo(aSpellId);
+	end
+
+	if not tSpellName then 
+		return;
+	end
+
+	if VUHDO_TALENT_CHANGE_SPELLS[tSpellName] then
 		VUHDO_resetTalentScan(aUnit);
 		VUHDO_initDebuffs(); -- Talentabhängige Debuff-Fähigkeiten neu initialisieren.
 		VUHDO_timeReloadUI(1);
@@ -83,12 +92,12 @@ function VUHDO_spellcastSucceeded(aUnit, aSpellName)
 
 	if "player" ~= aUnit and VUHDO_PLAYER_RAID_ID ~= aUnit then return; end
 
-	if VUHDO_ACTIVE_HOTS[aSpellName] then
+	if VUHDO_ACTIVE_HOTS[tSpellName] then
 		VUHDO_updateAllHoTs();
 		VUHDO_updateAllCyclicBouquets(true);
 	end
 
-	if aSpellName == VUHDO_SPELL_ID.ACTIVATING_SPECIALIZATION then
+	if tSpellName == VUHDO_SPELL_ID.ACTIVATING_SPECIALIZATION then
 		VUHDO_activateSpecc(tostring(GetSpecialization()) or "1");
 	end
 
@@ -100,13 +109,22 @@ end
 --
 local tTargetUnit;
 local tCateg;
-function VUHDO_spellcastSent(aUnit, aSpellName, aSpellRank, aTargetName)
+local tSpellName;
+function VUHDO_spellcastSent(aUnit, aSpellId, aTargetName)
 	if "player" ~= aUnit then return; end
 
 	if sIsShowGcd then VUHDO_initGcd(); end
 
+	if aSpellId then
+		tSpellName = GetSpellInfo(aSpellId);
+	end
+
+	if not tSpellName then
+		return;
+	end
+
 	-- Resurrection?
-	if aSpellName == sFirstRes or aSpellName == sSecondRes or aSpellName == sThirdRes then
+	if tSpellName == sFirstRes or tSpellName == sSecondRes or tSpellName == sThirdRes then
 		if aTargetName and not VUHDO_strempty(aTargetName) then 
 			aTargetName = smatch(aTargetName, "^[^-]*");
 
@@ -134,7 +152,7 @@ function VUHDO_spellcastSent(aUnit, aSpellName, aSpellRank, aTargetName)
 
 	if not tTargetUnit then return; end
 
-	tCateg = sUniqueSpells[aSpellName];
+	tCateg = sUniqueSpells[tSpellName];
 	if tCateg and not InCombatLockdown()
 		and (VUHDO_BUFF_SETTINGS or sEmpty)[tCateg] and aTargetName ~= VUHDO_BUFF_SETTINGS[tCateg]["name"] then
 

@@ -14,14 +14,16 @@ Known issues:
 
 
 Bugfixes:
+-- UNIT_SPELLCAST_* events no longer pass spell name or rank
+-- UNIT_POWER event is now named UNIT_POWER_UPDATE
+-- UnitAura/UnitBuff/UnitDebuff no longer accept spell name or ID
+-- UnitAura/UnitBuff/UnitDebuff no longer return spell rank
 
 
 Improvements:
 -- Misc fixes/changes needed for Battle for Azeroth 8.x
 -- BfA Alpha known issues:
 --   Buffs are back and BuffWatch is broken for now
---   Aura lookup by name is no more - some lingering cases
---   Spell ranks are no more - few lingering cases
 
 
 --------------------------------------------------------------
