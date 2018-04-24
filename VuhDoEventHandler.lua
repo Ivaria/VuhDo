@@ -485,6 +485,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_spellcastSucceeded(anArg1, anArg3); end
 
 	elseif "UNIT_SPELLCAST_SENT" == anEvent then
+		-- TODO: Blizz confirmed bug in payload no longer included target (arg4?)
 		if VUHDO_VARIABLES_LOADED then VUHDO_spellcastSent(anArg1, anArg2, anArg3); end
 
 	elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then

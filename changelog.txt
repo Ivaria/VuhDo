@@ -7,10 +7,6 @@ Known issues:
 --   Bodyguards have no unit ID so for now are only partially supported
 -- Incoming heal estimation reported is not even close to accurate
 --   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
--- Patch 7.1 disabled retrieval of unit facing and position in instances
---   This was an intentional breaking change by Blizzard
---   This breaks AOE Advice, Clusters and out-of-range direction arrow
---   At this time there is no way to fix or renable these features
 
 
 Bugfixes:
@@ -18,6 +14,7 @@ Bugfixes:
 -- UNIT_POWER event is now named UNIT_POWER_UPDATE
 -- UnitAura/UnitBuff/UnitDebuff no longer accept spell name or ID
 -- UnitAura/UnitBuff/UnitDebuff no longer return spell rank
+-- Fixed BuffWatch tracking of auras
 
 
 Improvements:

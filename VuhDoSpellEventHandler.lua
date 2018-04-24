@@ -110,10 +110,14 @@ end
 local tTargetUnit;
 local tCateg;
 local tSpellName;
-function VUHDO_spellcastSent(aUnit, aSpellId, aTargetName)
-	if "player" ~= aUnit then return; end
+function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
+	if "player" ~= aUnit then 
+		return;
+	end
 
-	if sIsShowGcd then VUHDO_initGcd(); end
+	if sIsShowGcd then 
+		VUHDO_initGcd(); 
+	end
 
 	if aSpellId then
 		tSpellName = GetSpellInfo(aSpellId);
