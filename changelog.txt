@@ -14,13 +14,42 @@ Bugfixes:
 -- UNIT_POWER event is now named UNIT_POWER_UPDATE
 -- UnitAura/UnitBuff/UnitDebuff no longer accept spell name or ID
 -- UnitAura/UnitBuff/UnitDebuff no longer return spell rank
+-- Fixed cluster builder/AOE advice to use the new C_Map API
 -- Fixed BuffWatch tracking of auras
+-- Removed deprecated Death Knight aura 'Horn of Winter' from BuffWatch
+-- Removed deprecated Death Knight presences from BuffWatch
+-- Removed deprecated Warlock pet aura 'Dark Intent' from BuffWatch
+-- Removed deprecated Priest aura 'Fear Ward' from BuffWatch
+-- Removed deprecated Priest chakras from BuffWatch
+-- Removed deprecated Druid aura 'Leader of the Park' from BuffWatch
+-- Removed deprecated Druid aura 'Mark of the Wild' from BuffWatch
+-- Removed deprecated Monk 'Legacy of ...' auras from BuffWatch
+-- Removed deprecated Paladin aura 'Blessing of Might' from BuffWatch
+-- Removed deprecated Shaman aura 'Grace of Air' from BuffWatch
+-- Removed deprecated Shaman aura 'Water Shield' from BuffWatch
+-- Removed passive Shaman aura 'Ancestral Swiftness' from BuffWatch
+-- Removed Shaman totem type buff-overwriting groups from BuffWatch
+-- Removed deprecated Shaman totem 'Searing' from BuffWatch
+-- Removed deprecated Shaman totem 'Stone Bulwark' from BuffWatch
+-- Removed deprecated Hunter pet aura 'Spirit Beast' from BuffWatch
+-- Removed depreacted Hunter pet aura 'Roar of Courage' from BuffWatch
+-- Removed deprecated Hunter pet aura 'Still Water' from BuffWatch
+-- Removed default Priest HoT for deprecated aura 'Grace'
+-- Removed deprecated Paladin aura 'Righteous Fury' from BuffWatch
+-- Removed deprecated Paladin aura 'Seal of Righteousness' from BuffWatch
+-- Removed deprecated Paladin aura 'Seal of Justice' from BuffWatch
+-- Removed deprecated Paladin aura 'Seal of Insight' from BuffWatch
+-- Removed deprecated Paladin aura 'Seal of Truth' from BuffWatch
+-- Removed deprecated Paladin aura 'Seal of Command' from BuffWatch
+-- Removed deprecated Paladin spell 'Beacon of Insight'
+-- Added Paladin aura 'Greater Blessing of Kings' to BuffWatch
+-- Added Paladin aura 'Greater Blessing of Wisdom' to BuffWatch
+-- Removed deprecated Warrior spell 'Vigilance' from BuffWatch
+-- Fixed preservation of BuffWatch settings for spec specific buffs
 
 
 Improvements:
 -- Misc fixes/changes needed for Battle for Azeroth 8.x
--- BfA Alpha known issues:
---   Buffs are back and BuffWatch is broken for now
 
 
 --------------------------------------------------------------

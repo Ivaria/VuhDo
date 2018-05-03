@@ -154,7 +154,7 @@ local function VUHDO_setupStaticBuffPanel(aCategoryName, aBuffPanel, anIsPresent
 	tBuffSettings = VUHDO_BUFF_SETTINGS[aCategoryName];
 
 	local tEnableCheckButton = _G[aBuffPanel:GetName() .. "EnableCheckButton"];
-	tEnableCheckButton:SetChecked(tBuffSettings["enabled"] and anIsPresent);
+	tEnableCheckButton:SetChecked(tBuffSettings["enabled"]);
 	tEnableCheckButton:SetShown(anIsPresent);
 	VUHDO_lnfCheckButtonClicked(tEnableCheckButton);
 

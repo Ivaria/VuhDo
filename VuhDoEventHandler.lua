@@ -583,6 +583,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		end
 
 	elseif "LEARNED_SPELL_IN_TAB" == anEvent then
+		-- FIXME: this event does not fire when spell is learned via talent change
 		if VUHDO_VARIABLES_LOADED then
 			VUHDO_initFromSpellbook();
 			VUHDO_registerAllBouquets(false);

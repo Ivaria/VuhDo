@@ -15,7 +15,6 @@ local pairs = pairs;
 VUHDO_SPELLS = {
 	-- Paladin
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_FAITH] = { ["isHot"] = true, },
-	[VUHDO_SPELL_ID.BUFF_BEACON_OF_INSIGHT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_LIGHT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_STAY_OF_EXECUTION] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ETERNAL_FLAME] = { ["isHot"] = true, },
@@ -25,7 +24,6 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.POWERWORD_SHIELD] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.PRAYER_OF_MENDING] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = { ["isHot"] = true, ["nodefault"] = true },
-	[VUHDO_SPELL_ID.GRACE] = { ["isHot"] = true, ["nodefault"] = true },
 	[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = { ["isHot"] = true, ["nohelp"] = true, ["noselftarget"] = true },
 	[VUHDO_SPELL_ID.ECHO_OF_LIGHT] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.SERENDIPITY] = { ["isHot"] = true, ["nodefault"] = true	},
@@ -36,7 +34,6 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.RIPTIDE] = { ["isHot"] = true	},
 	[VUHDO_SPELL_ID.GIFT_OF_THE_NAARU] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.BUFF_EARTH_SHIELD] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.BUFF_WATER_SHIELD] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.TIDAL_WAVES] = { ["isHot"] = true, ["nodefault"] = true },
 
 	-- Druid
@@ -103,6 +100,7 @@ function VUHDO_initFromSpellbook()
 				if #tHotSlots == 10 then break; end
 			end
 		end
+		
 		tHotSlots[10] = "BOUQUET_" .. VUHDO_I18N_DEF_AOE_ADVICE;
 	end
 

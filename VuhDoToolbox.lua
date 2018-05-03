@@ -26,7 +26,6 @@ local UnitAlternatePowerInfo = UnitAlternatePowerInfo;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local GetPlayerFacing = GetPlayerFacing;
-local GetPlayerMapPosition = GetPlayerMapPosition;
 local GetSpellBookItemInfo = GetSpellBookItemInfo;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
@@ -809,14 +808,14 @@ function VUHDO_getUnitDirection(aUnit)
 		return nil;
 	end
 
-	tPlayerX, tPlayerY = GetPlayerMapPosition("player");
+	tPlayerX, tPlayerY = VUHDO_getUnitMapPosition("player");
 	if (tPlayerX or 0) + (tPlayerY or 0) <= 0 then
 		VUHDO_setMapToCurrentZone();
-		tPlayerX, tPlayerY = GetPlayerMapPosition("player");
+		tPlayerX, tPlayerY = VUHDO_getUnitMapPosition("player");
 		if (tPlayerX or 0) + (tPlayerY or 0) <= 0 then return nil; end
 	end
 
-	tUnitX, tUnitY = GetPlayerMapPosition(aUnit);
+	tUnitX, tUnitY = VUHDO_getUnitMapPosition(aUnit);
 	if (tUnitX or 0) + (tUnitY or 0) <= 0 then return nil; end
 
 	tFacing = GetPlayerFacing();
