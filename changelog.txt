@@ -45,6 +45,11 @@ Bugfixes:
 -- Added Paladin aura 'Greater Blessing of Kings' to BuffWatch
 -- Added Paladin aura 'Greater Blessing of Wisdom' to BuffWatch
 -- Removed deprecated Warrior spell 'Vigilance' from BuffWatch
+-- Removed deprecated Mage spell 'Frost Armor' from BuffWatch
+-- Removed deprecated Mage spell 'Molten Armor' from BuffWatch
+-- Removed deprecated Mage spell 'Mage Armor' from BuffWatch
+-- Removed deprecated Mage spell 'Incanter's Ward' from BuffWatch
+-- Removed deprecated Mage spell 'Invocation' from BuffWatch
 -- Fixed preservation of BuffWatch settings for spec specific buffs
 
 
