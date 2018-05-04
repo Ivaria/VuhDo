@@ -35,6 +35,15 @@ Bugfixes:
 -- Removed deprecated Hunter pet aura 'Spirit Beast' from BuffWatch
 -- Removed depreacted Hunter pet aura 'Roar of Courage' from BuffWatch
 -- Removed deprecated Hunter pet aura 'Still Water' from BuffWatch
+-- Removed deprecated Hunter aura 'Trueshot Aura' from BuffWatch
+-- Removed deprecated Hunter aura 'Aspect of the Pack' from BuffWatch
+-- Removed deprecated Hunter aura 'Aspect of the Fox' from BuffWatch
+-- Removed deprecated Hunter aura 'Lone Wolf Cat' from BuffWatch
+-- Removed deprecated Hunter aura 'Lone Wolf Bear' from BuffWatch
+-- Removed deprecated Hunter aura 'Lone Wolf Raptor' from BuffWatch
+-- Removed deprecated Hunter aura 'Lone Wolf Hyena' from BuffWatch
+-- Removed deprecated Hunter aura 'Lone Wolf Serpent' from BuffWatch
+-- Removed deprecated Hunter aura 'Lone Wolf Primates' from BuffWatch
 -- Removed default Priest HoT for deprecated aura 'Grace'
 -- Removed deprecated Paladin aura 'Righteous Fury' from BuffWatch
 -- Removed deprecated Paladin aura 'Seal of Righteousness' from BuffWatch
@@ -43,8 +52,6 @@ Bugfixes:
 -- Removed deprecated Paladin aura 'Seal of Truth' from BuffWatch
 -- Removed deprecated Paladin aura 'Seal of Command' from BuffWatch
 -- Removed deprecated Paladin spell 'Beacon of Insight'
--- Added Paladin aura 'Greater Blessing of Kings' to BuffWatch
--- Added Paladin aura 'Greater Blessing of Wisdom' to BuffWatch
 -- Removed deprecated Warrior spell 'Vigilance' from BuffWatch
 -- Removed deprecated Mage spell 'Frost Armor' from BuffWatch
 -- Removed deprecated Mage spell 'Molten Armor' from BuffWatch
@@ -56,6 +63,12 @@ Bugfixes:
 
 Improvements:
 -- Misc fixes/changes needed for Battle for Azeroth 8.x
+-- Added Hunter aura 'Aspect of the Chameleon' to BuffWatch
+-- Added Hunter aura 'Aspect of the Eagle' to BuffWatch
+-- Added Hunter aura 'Aspect of the Turtle' to BuffWatch
+-- Added Hunter aura 'Aspect of the Wild' to BuffWatch
+-- Added Paladin aura 'Greater Blessing of Kings' to BuffWatch
+-- Added Paladin aura 'Greater Blessing of Wisdom' to BuffWatch
 
 
 --------------------------------------------------------------
