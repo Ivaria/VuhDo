@@ -17,6 +17,7 @@ Bugfixes:
 -- Fixed cluster builder/AOE advice to use the new C_Map API
 -- Fixed BuffWatch tracking of auras
 -- Removed deprecated Death Knight aura 'Horn of Winter' from BuffWatch
+-- Removed deprecated Death Knight aura 'Bone Shield' from BuffWatch
 -- Removed deprecated Death Knight presences from BuffWatch
 -- Removed deprecated Warlock pet aura 'Dark Intent' from BuffWatch
 -- Removed deprecated Priest aura 'Fear Ward' from BuffWatch
