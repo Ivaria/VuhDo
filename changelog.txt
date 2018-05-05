@@ -58,6 +58,10 @@ Bugfixes:
 -- Removed deprecated Mage spell 'Mage Armor' from BuffWatch
 -- Removed deprecated Mage spell 'Incanter's Ward' from BuffWatch
 -- Removed deprecated Mage spell 'Invocation' from BuffWatch
+-- Removed deprecated Rogue poison 'Instant Poison' from BuffWatch
+-- Removed deprecated Monk stance 'Fierce Tiger' from BuffWatch
+-- Removed deprecated Monk stance 'Sturdy Ox' from BuffWatch
+-- Removed deprecated Monk stance 'Wise Serpent' from BuffWatch
 -- Fixed preservation of BuffWatch settings for spec specific buffs
 
 
@@ -67,6 +71,7 @@ Improvements:
 -- Added Hunter aura 'Aspect of the Eagle' to BuffWatch
 -- Added Hunter aura 'Aspect of the Turtle' to BuffWatch
 -- Added Hunter aura 'Aspect of the Wild' to BuffWatch
+-- Added Hunter ability 'Misdirection' to BuffWatch
 -- Added Paladin aura 'Greater Blessing of Kings' to BuffWatch
 -- Added Paladin aura 'Greater Blessing of Wisdom' to BuffWatch
 
