@@ -8,7 +8,6 @@ local VUHDO_RAID = {};
 
 local sqrt = sqrt;
 local CheckInteractDistance = CheckInteractDistance;
-local GetCurrentMapDungeonLevel = GetCurrentMapDungeonLevel;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local pairs = pairs;
@@ -306,7 +305,6 @@ function VUHDO_updateAllClusters()
 	tDungeonLevels = VUHDO_MAP_FIX_WIDTH[tMapFileName];
 	if tDungeonLevels then
 		tMaxX = tDungeonLevels[tCurrLevel];
-		--VUHDO_Msg(GetCurrentMapDungeonLevel());
 	end
 
 	-- Otherwise get from heuristic database

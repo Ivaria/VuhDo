@@ -19,7 +19,6 @@ local IsInInstance = IsInInstance;
 local IsSpellInRange = IsSpellInRange;
 local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
-local GetMapInfo = GetMapInfo;
 local GetSpellInfo = GetSpellInfo;
 local SetMapToCurrentZone = SetMapToCurrentZone;
 local UnitAlternatePowerInfo = UnitAlternatePowerInfo;
