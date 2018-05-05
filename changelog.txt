@@ -74,6 +74,7 @@ Improvements:
 -- Added Hunter ability 'Misdirection' to BuffWatch
 -- Added Paladin aura 'Greater Blessing of Kings' to BuffWatch
 -- Added Paladin aura 'Greater Blessing of Wisdom' to BuffWatch
+-- Added default custom debuffs for Uldir raid encounters
 
 
 --------------------------------------------------------------
