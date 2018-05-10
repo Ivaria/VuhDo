@@ -63,6 +63,7 @@ Bugfixes:
 -- Removed deprecated Monk stance 'Sturdy Ox' from BuffWatch
 -- Removed deprecated Monk stance 'Wise Serpent' from BuffWatch
 -- Fixed preservation of BuffWatch settings for spec specific buffs
+-- Fixed lack of explicit refresh on event UPDATE_ACTIVE_BATTLEFIELD
 
 
 Improvements:

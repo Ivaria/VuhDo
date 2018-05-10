@@ -415,7 +415,8 @@ function VUHDO_getUnitZoneName(aUnit)
 		if tZone == "PvP" then tZone = VuhDoScanTooltipTextLeft4:GetText(); end
 	end
 
-	tMap = C_Map.GetMapInfo(C_Map.GetBestMapForUnit(aUnit) or C_Map.GetCurrentMapID());
+	-- 8.0.1 build 26567 added some (artbirary?) restrictions on which unit IDs can be queried
+	tMap = C_Map.GetMapInfo(C_Map.GetBestMapForUnit(aUnit) or C_Map.GetBestMapForUnit("player") or C_Map.GetCurrentMapID());
 	return tZone or tMap or VUHDO_I18N_UNKNOWN, tMap;
 end
 

@@ -601,7 +601,8 @@ function VUHDO_getUnitMapPosition(aUnit)
 		return;
 	end
 
-	tUiMapId = C_Map.GetBestMapForUnit(aUnit) or C_Map.GetCurrentMapID();
+	-- 8.0.1 build 26567 added some (artbirary?) restrictions on which unit IDs can be queried
+	tUiMapId = C_Map.GetBestMapForUnit(aUnit) or C_Map.GetBestMapForUnit("player") or C_Map.GetCurrentMapID();
 
 	if not tUiMapId then
 		return;
