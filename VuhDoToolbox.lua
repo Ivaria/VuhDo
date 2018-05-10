@@ -640,9 +640,15 @@ end
 
 -- Throttle resetting to current map to avoid conflicts with other addons
 local tNextTime = 0;
+local tMap;
 function VUHDO_setMapToCurrentZone()
 	if tNextTime < GetTime() then
-		SetMapToCurrentZone();
+		tMap = C_Map.GetBestMapForUnit("player");
+		
+		if tMap and WorldMapFrame ~= nil then
+			WorldMapFrame:SetMapID(tMap);
+		end
+
 		tNextTime = GetTime() + 2;
 	end
 end

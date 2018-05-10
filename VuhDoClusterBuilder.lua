@@ -202,12 +202,20 @@ local tCurrentZone;
 local tNumRaid;
 local tIndex = 0;
 local tNumSamples, tNumIterations;
+local tIsInInstance;
 local VuhDoDummyStub = {
 	["GetName"] = function() return ""; end,
 	["IsForbidden"] = function() return false; end,
 };
 
 function VUHDO_updateAllClusters()
+
+	-- as of patch 7.1 APIs related to unit position/distance do not function inside instances
+	tIsInInstance, _ = IsInInstance();
+
+	if tIsInInstance then
+		return;
+	end
 
 	-- @UGLY Carbonite workaround
 	local tFocusFrame = GetMouseFocus() or VuhDoDummyStub;
@@ -223,6 +231,7 @@ function VUHDO_updateAllClusters()
 		return;
 	end
 
+	-- TODO: is this needed anymore given 8.0.1 map changes?
 	tX, tY = VUHDO_getUnitMapPosition("player");
 	if (tX or 0) + (tY or 0) <= 0 then
 		VUHDO_setMapToCurrentZone();
