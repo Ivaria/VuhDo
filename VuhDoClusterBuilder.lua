@@ -197,7 +197,7 @@ local tUnit, tInfo;
 local tAnotherUnit, tAnotherInfo;
 local tX, tY, tDeltaX, tDeltaY;
 local tMaxX, tMaxY;
-local tMap, tMapFileName, tDungeonLevels, tCurrLevel;
+local tMapId, tMap, tMapFileName, tDungeonLevels, tCurrLevel;
 local tCurrentZone;
 local tNumRaid;
 local tIndex = 0;
@@ -232,17 +232,23 @@ function VUHDO_updateAllClusters()
 	end
 
 	-- TODO: is this needed anymore given 8.0.1 map changes?
-	tX, tY = VUHDO_getUnitMapPosition("player");
+	--[[tX, tY = VUHDO_getUnitMapPosition("player");
 	if (tX or 0) + (tY or 0) <= 0 then
+		-- FIXME: calling WorldMapFrame:SetMapID produces strange results as of build 26567
 		VUHDO_setMapToCurrentZone();
-	end
+	end]]
 
-	-- In 8.x Blizzard introduced new C_Map APIs
+	-- In 8.0.1 Blizzard introduced new C_Map APIs
 	-- each map level has a unique map ID now
 	-- tMapFileName will now represent simply the map name
 	-- tCurrLevel will now represent the unique map ID
 	-- tDungeonLevels will still group all map IDs under the same map name (e.g. old map levels)
-	tMap = C_Map.GetMapInfo(C_Map.GetBestMapForUnit("player") or C_Map.GetCurrentMapID());
+	tMapId = C_Map.GetBestMapForUnit("player");
+
+	if tMapId then
+		tMap = C_Map.GetMapInfo(tMapId);
+	end
+
 	tMapFileName = tMap and tMap["name"] or "*";
 	tCurrLevel = tMap and tMap["mapID"] or 0;
 	tCurrentZone = tMapFileName .. tCurrLevel;
@@ -603,21 +609,21 @@ end
 
 --
 local tVector2d;
-local tUiMapId;
+local tMapId;
 function VUHDO_getUnitMapPosition(aUnit)
 
 	if not aUnit then
 		return;
 	end
 
-	-- 8.0.1 build 26567 added some (artbirary?) restrictions on which unit IDs can be queried
-	tUiMapId = C_Map.GetBestMapForUnit(aUnit) or C_Map.GetBestMapForUnit("player") or C_Map.GetCurrentMapID();
+	-- 8.0.1 build 26567 added restrictions (must be in player's party) on which unit IDs can be queried
+	tMapId = C_Map.GetBestMapForUnit(aUnit) or C_Map.GetBestMapForUnit("player");
 
-	if not tUiMapId then
+	if not tMapId then
 		return;
 	end
 
-	tVector2d = C_Map.GetPlayerMapPosition(tUiMapId, aUnit);
+	tVector2d = C_Map.GetPlayerMapPosition(tMapId, aUnit);
 
 	if tVector2d then
 		return tVector2d:GetXY();

@@ -397,7 +397,7 @@ end
 
 
 --
-local tZone, tIndex, tMap, tInfo;
+local tZone, tIndex, tMap, tMapId, tInfo;
 function VUHDO_getUnitZoneName(aUnit)
 	tInfo = VUHDO_RAID[aUnit];
 	if not tInfo then return; end
@@ -412,12 +412,20 @@ function VUHDO_getUnitZoneName(aUnit)
 		VuhDoScanTooltip:ClearLines();
 		VuhDoScanTooltip:SetUnit(aUnit)
 		tZone = VuhDoScanTooltipTextLeft3:GetText();
-		if tZone == "PvP" then tZone = VuhDoScanTooltipTextLeft4:GetText(); end
+	
+		if tZone == "PvP" then 
+			tZone = VuhDoScanTooltipTextLeft4:GetText();
+		end
 	end
 
-	-- 8.0.1 build 26567 added some (artbirary?) restrictions on which unit IDs can be queried
-	tMap = C_Map.GetMapInfo(C_Map.GetBestMapForUnit(aUnit) or C_Map.GetBestMapForUnit("player") or C_Map.GetCurrentMapID());
-	return tZone or tMap or VUHDO_I18N_UNKNOWN, tMap;
+	-- 8.0.1 build 26567 added restrictions (must be in player's party) on which unit IDs can be queried
+	tMapId = C_Map.GetBestMapForUnit(aUnit);
+	
+	if tMapId then
+		tMap = C_Map.GetMapInfo(tMapId);
+	end
+
+	return tZone or (tMap and tMap["name"]) or VUHDO_I18N_UNKNOWN, tMap and tMap["name"] or nil;
 end
 
 
