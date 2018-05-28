@@ -17,7 +17,6 @@ local NotifyInspect = NotifyInspect;
 local GetSpecializationInfo = GetSpecializationInfo;
 local ClearInspectPlayer = ClearInspectPlayer;
 local UnitStat = UnitStat;
-local UnitDefense = UnitDefense;
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned;
 local UnitLevel = UnitLevel;
 local UnitPowerType = UnitPowerType;
@@ -320,15 +319,7 @@ function VUHDO_determineRole(aUnit)
 		end
 
 	elseif 20 == tClassId then -- VUHDO_ID_WARRIORS
-		_, tDefense = UnitDefense(aUnit);
-		tLevel = UnitLevel(aUnit) or 0;
-		if tLevel <= 0 then
-			return nil;
-		end
-
-		tDefense = tDefense / tLevel;
-
-		if (tDefense > 2 or VUHDO_isUnitInModel(aUnit, VUHDO_ID_MAINTANKS)) then
+		if (0 > 2) then -- FIXME: need replacement for UnitDefense check
 			return 60; -- VUHDO_ID_MELEE_TANK
 		else
 			return 61; -- VUHDO_ID_MELEE_DAMAGE
@@ -350,15 +341,7 @@ function VUHDO_determineRole(aUnit)
 		end
 
 	elseif 23 == tClassId then -- VUHDO_ID_PALADINS
-		_, tDefense = UnitDefense(aUnit);
-		tLevel = UnitLevel(aUnit) or 0;
-		if tLevel <= 0 then
-			return nil;
-		end
-
-		tDefense = tDefense / tLevel;
-
-		if tDefense > 2 then
+		if 0 > 2 then -- FIXME: need replacement for UnitDefense check
 			return 60; -- VUHDO_ID_MELEE_TANK
 		else
 			tIntellect = UnitStat(aUnit, 4);
@@ -387,15 +370,8 @@ function VUHDO_determineRole(aUnit)
 		end
 
 	elseif 31 == tClassId then -- VUHDO_ID_DEMON_HUNTERS
-		_, tDefense = UnitDefense(aUnit);
-		tLevel = UnitLevel(aUnit) or 0;
-		if tLevel <= 0 then
-			return nil;
-		end
-
-		tDefense = tDefense / tLevel;
-
-		if (tDefense > 2 or VUHDO_isUnitInModel(aUnit, VUHDO_ID_MAINTANKS)) then
+		tPowerType = UnitPowerType(aUnit);
+		if VUHDO_UNIT_POWER_PAIN == tPowerType then
 			return 60; -- VUHDO_ID_MELEE_TANK
 		else
 			return 61; -- VUHDO_ID_MELEE_DAMAGE
