@@ -10,6 +10,7 @@ Known issues:
 
 
 Bugfixes:
+-- Boss unit frames now apply hostile spell binds like a target unit frame
 -- UNIT_SPELLCAST_* events no longer pass spell name or rank
 -- UNIT_POWER event is now named UNIT_POWER_UPDATE
 -- UnitAura/UnitBuff/UnitDebuff no longer accept spell name or ID
