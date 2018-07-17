@@ -19,9 +19,7 @@ local VUHDO_LAST_COLORS = { };
 
 --
 VUHDO_BUFFS = { };
-local VUHDO_BUFFS = VUHDO_BUFFS;
 VUHDO_BUFF_SETTINGS = { };
---local VUHDO_BUFF_SETTINGS = VUHDO_BUFF_SETTINGS;
 
 local VUHDO_CLICKED_BUFF = nil;
 local VUHDO_CLICKED_TARGET = nil;
@@ -45,7 +43,6 @@ local VUHDO_isInBattleground;
 local VUHDO_brightenTextColor;
 local VUHDO_isConfigDemoUsers;
 
-local UnitBuff = UnitBuff;
 local GetTotemInfo = GetTotemInfo;
 local table = table;
 local strsub = strsub;
@@ -362,7 +359,7 @@ end
 --
 function VUHDO_initBuffsFromSpellBook()
 
-	local tSpellName, tSpellId, tIcon;
+	local tParentSpellName, tChildSpellName, tSpellId, tIcon;
 
 	-- Patch 6.0.2 broke the spell book for a certain class of spells which 'transform' into other spells 
 	-- eg. Lightning Shield becomes Water Shield, Seal of Command becomes Seal of Truth
@@ -371,18 +368,26 @@ function VUHDO_initBuffsFromSpellBook()
 	-- eg. GetSpellBookItemInfo("Lightning Shield") will return a spell ID only for Lightning Shield, 
 	-- however when a Resto Shaman calls GetSpellInfo("Lightning Shield") it returns the correct 
 	-- information for the derived spell Water Shield
+	VUHDO_BUFFS = { };
 	for _, tCateg in pairs(VUHDO_getPlayerClassBuffs()) do
 		for _, tCategSpells in pairs(tCateg) do
-			tSpellName = tCategSpells[1];
-			_, tSpellId = GetSpellBookItemInfo(tSpellName);
+			tParentSpellName = tCategSpells[1];
+			_, tSpellId = GetSpellBookItemInfo(tParentSpellName);
 			if tSpellId then
-				tSpellName, _, tIcon, _, _, _, tSpellId = GetSpellInfo(tSpellName);
-				VUHDO_BUFFS[tSpellName] = {
+				tChildSpellName, _, tIcon, _, _, _, tSpellId = GetSpellInfo(tParentSpellName);
+				VUHDO_BUFFS[tChildSpellName] = {
 					["icon"] = tIcon,
 					["id"] = tSpellId
 				};
 
-				VUHDO_CLASS_BUFFS_BY_TARGET_TYPE[tCategSpells[2]][tSpellName] = true;
+				if tChildSpellName ~= tParentSpellName then
+					VUHDO_BUFFS[tParentSpellName] = {
+						["icon"] = tIcon,
+						["id"] = tSpellId
+					};
+				end
+
+				VUHDO_CLASS_BUFFS_BY_TARGET_TYPE[tCategSpells[2]][tParentSpellName] = true;
 			end
 		end
 	end
@@ -497,7 +502,7 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 			tInRange = (IsSpellInRange(aBuffInfo[1], tUnit) == 1) or tInfo["baseRange"];
 			tIsAvailable = tInfo["connected"] and not tInfo["dead"];
 
-			_, _, tTexture, tCount, _, tStart, tRest, _, _ = UnitBuff(tUnit, aBuffInfo[1]);
+			_, tTexture, tCount, _, tStart, tRest, _, _ = VUHDO_unitAura(tUnit, aBuffInfo[1]);
 
 			if not tTexture then
 				for tCnt = 3, 10 do
@@ -505,7 +510,7 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 					if not tBuffGroup then break; end
 
 					for _, tSameGroupBuff in pairs(tBuffGroup) do
-						_, _, tTexture, tCount, _, tStart, tRest, _, _ = UnitBuff(tUnit, tSameGroupBuff);
+						_, tTexture, tCount, _, tStart, tRest, _, _ = VUHDO_unitAura(tUnit, tSameGroupBuff);
 						if tTexture then break; end
 					end
 

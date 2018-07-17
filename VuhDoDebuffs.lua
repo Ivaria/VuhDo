@@ -202,15 +202,15 @@ end
 local tIconIndex = 0;
 local tIconArray;
 local tIconArrayDispenser = { };
-local function VUHDO_getOrCreateIconArray(anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId)
+local function VUHDO_getOrCreateIconArray(anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId, aCnt)
 	tIconIndex = tIconIndex + 1;
 	if #tIconArrayDispenser < tIconIndex then
-		tIconArray = { anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId };
+		tIconArray = { anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId, aCnt };
 		tIconArrayDispenser[tIconIndex] = tIconArray;
 	else
 		tIconArray = tIconArrayDispenser[tIconIndex];
-		tIconArray[1], tIconArray[2], tIconArray[3], tIconArray[4], tIconArray[5], tIconArray[6] 
-			= anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId;
+		tIconArray[1], tIconArray[2], tIconArray[3], tIconArray[4], tIconArray[5], tIconArray[6], tIconArray[7] 
+			= anIcon, aExpiry, aStacks, aDuration, anIsBuff, aSpellId, aCnt;
 	end
 
 	return tIconArray;
@@ -298,7 +298,7 @@ function VUHDO_determineDebuff(aUnit)
 		tNow = GetTime();
 
 		for tCnt = 1, huge do
-			tName, _, tIcon, tStacks, tTypeString, tDuration, tExpiry, _, _, _, tSpellId, _, tIsBossDebuff = UnitDebuff(aUnit, tCnt, false);
+			tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, _, _, _, tSpellId, _, tIsBossDebuff = UnitDebuff(aUnit, tCnt, false);
 			if not tIcon then break;	end
 
 			tStacks = tStacks or 0;
@@ -313,7 +313,7 @@ function VUHDO_determineDebuff(aUnit)
 			if sCurIcons[tName] then tStacks = tStacks + sCurIcons[tName][3]; end
 
 			if tDebuffConfig[2] then -- Icon?
-				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId);
+				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId, tCnt);
 			end
 
 			tType = VUHDO_DEBUFF_TYPES[tTypeString];
@@ -337,7 +337,7 @@ function VUHDO_determineDebuff(aUnit)
 				if sIsUseDebuffIcon and (tIsBossDebuff or not sIsUseDebuffIconBossOnly)
 					and (sIsNotRemovableOnlyIcons or tAbility ~= nil) then
 
-					sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId);
+					sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId, tCnt);
 					sCurIsStandard = true;
 				end
 
@@ -350,7 +350,7 @@ function VUHDO_determineDebuff(aUnit)
 		end
 
 		for tCnt = 1, huge do
-			tName, _, tIcon, tStacks, _, tDuration, tExpiry, _, _, _, tSpellId = UnitBuff(aUnit, tCnt);
+			tName, tIcon, tStacks, _, tDuration, tExpiry, _, _, _, tSpellId = UnitBuff(aUnit, tCnt);
 			if not tIcon then	break; end
 
 			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
@@ -360,7 +360,7 @@ function VUHDO_determineDebuff(aUnit)
 			end
 
 			if tDebuffConfig[2] then -- Set icon
-				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks or 0, tDuration, true, tSpellId);
+				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks or 0, tDuration, true, tSpellId, tCnt);
 			end
 		end
 
@@ -372,7 +372,7 @@ function VUHDO_determineDebuff(aUnit)
 				-- tExpiry, tStacks, tIcon
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1] };
 
-				VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6]);
+				VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7]);
 
 				if not VUHDO_IS_CONFIG and VUHDO_MAY_DEBUFF_ANIM then
 					-- the key used to store the debuff settings is either the debuff name or spell ID

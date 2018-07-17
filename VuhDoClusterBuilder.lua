@@ -7,10 +7,7 @@ local VUHDO_CLUSTER_BLACKLIST = { };
 local VUHDO_RAID = {};
 
 local sqrt = sqrt;
-local GetPlayerMapPosition = GetPlayerMapPosition;
 local CheckInteractDistance = CheckInteractDistance;
-local GetMapInfo = GetMapInfo;
-local GetCurrentMapDungeonLevel = GetCurrentMapDungeonLevel;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local pairs = pairs;
@@ -152,14 +149,14 @@ local function VUHDO_determineDistanceBetween(aUnit, anotherUnit)
 	tIsValid = true;
 
 	-- as of patch 7.1 GetPlayerMapPosition() returns zero/nil inside certain zones
-	tX1, tY1 = GetPlayerMapPosition(aUnit);
+	tX1, tY1 = VUHDO_getUnitMapPosition(aUnit);
 	if not tX1 or (tX1 + tY1 <= 0) then
 		VUHDO_CLUSTER_BLACKLIST[aUnit] = true;
 		tIsValid = false;
 	end
 
 	-- as of patch 7.1 GetPlayerMapPosition() returns zero/nil inside certain zones
-	tX2, tY2 = GetPlayerMapPosition(anotherUnit);
+	tX2, tY2 = VUHDO_getUnitMapPosition(anotherUnit);
 	if not tX2 or (tX2 + tY2 <= 0) then
 		VUHDO_CLUSTER_BLACKLIST[anotherUnit] = true;
 		tIsValid = false;
@@ -200,17 +197,25 @@ local tUnit, tInfo;
 local tAnotherUnit, tAnotherInfo;
 local tX, tY, tDeltaX, tDeltaY;
 local tMaxX, tMaxY;
-local tMapFileName, tDungeonLevels, tCurrLevel;
+local tMapId, tMap, tMapFileName, tDungeonLevels, tCurrLevel;
 local tCurrentZone;
 local tNumRaid;
 local tIndex = 0;
 local tNumSamples, tNumIterations;
+local tIsInInstance;
 local VuhDoDummyStub = {
 	["GetName"] = function() return ""; end,
 	["IsForbidden"] = function() return false; end,
 };
 
 function VUHDO_updateAllClusters()
+
+	-- as of patch 7.1 APIs related to unit position/distance do not function inside instances
+	tIsInInstance, _ = IsInInstance();
+
+	if tIsInInstance then
+		return;
+	end
 
 	-- @UGLY Carbonite workaround
 	local tFocusFrame = GetMouseFocus() or VuhDoDummyStub;
@@ -226,14 +231,27 @@ function VUHDO_updateAllClusters()
 		return;
 	end
 
-	tX, tY = GetPlayerMapPosition("player");
+	-- TODO: is this needed anymore given 8.0.1 map changes?
+	--[[tX, tY = VUHDO_getUnitMapPosition("player");
 	if (tX or 0) + (tY or 0) <= 0 then
+		-- FIXME: calling WorldMapFrame:SetMapID produces strange results as of build 26567
 		VUHDO_setMapToCurrentZone();
+	end]]
+
+	-- In 8.0.1 Blizzard introduced new C_Map APIs
+	-- each map level has a unique map ID now
+	-- tMapFileName will now represent simply the map name
+	-- tCurrLevel will now represent the unique map ID
+	-- tDungeonLevels will still group all map IDs under the same map name (e.g. old map levels)
+	tMapId = C_Map.GetBestMapForUnit("player");
+
+	if tMapId then
+		tMap = C_Map.GetMapInfo(tMapId);
 	end
 
-	tMapFileName = (GetMapInfo()) or "*";
-	tCurrLevel = GetCurrentMapDungeonLevel() or 0;
-	tCurrentZone = tMapFileName ..  tCurrLevel;
+	tMapFileName = tMap and tMap["name"] or "*";
+	tCurrLevel = tMap and tMap["mapID"] or 0;
+	tCurrentZone = tMapFileName .. tCurrLevel;
 
 	if VUHDO_LAST_ZONE ~= tCurrentZone then
 		VUHDO_clusterBuilderNewZone(VUHDO_LAST_ZONE, tCurrentZone);
@@ -302,7 +320,6 @@ function VUHDO_updateAllClusters()
 	tDungeonLevels = VUHDO_MAP_FIX_WIDTH[tMapFileName];
 	if tDungeonLevels then
 		tMaxX = tDungeonLevels[tCurrLevel];
-		--VUHDO_Msg(GetCurrentMapDungeonLevel());
 	end
 
 	-- Otherwise get from heuristic database
@@ -447,7 +464,7 @@ local function VUHDO_getRealPosition(aUnit)
 	if VUHDO_CLUSTER_BLACKLIST[aUnit] then return nil; end
 
 	if VUHDO_COORD_DELTAS[aUnit] then
-		tXCoord, tYCoord = GetPlayerMapPosition(aUnit);
+		tXCoord, tYCoord = VUHDO_getUnitMapPosition(aUnit);
 		if tXCoord and tYCoord then
 			return tXCoord * VUHDO_MAP_WIDTH, tYCoord * VUHDO_MAP_WIDTH / 1.5;
 		end
@@ -587,3 +604,32 @@ function VUHDO_getUnitsInLinearCluster(aUnit, anArray, aRange, aMaxTargets, anIs
 		anArray[tCnt] = tDestCluster[tCnt];
 	end
 end
+
+
+
+--
+local tVector2d;
+local tMapId;
+function VUHDO_getUnitMapPosition(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	-- 8.0.1 build 26567 added restrictions (must be in player's party) on which unit IDs can be queried
+	tMapId = C_Map.GetBestMapForUnit(aUnit) or C_Map.GetBestMapForUnit("player");
+
+	if not tMapId then
+		return;
+	end
+
+	tVector2d = C_Map.GetPlayerMapPosition(tMapId, aUnit);
+
+	if tVector2d then
+		return tVector2d:GetXY();
+	else
+		return nil, nil;
+	end
+
+end
+

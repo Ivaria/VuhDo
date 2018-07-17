@@ -19,14 +19,12 @@ local IsInInstance = IsInInstance;
 local IsSpellInRange = IsSpellInRange;
 local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
-local GetMapInfo = GetMapInfo;
 local GetSpellInfo = GetSpellInfo;
 local SetMapToCurrentZone = SetMapToCurrentZone;
 local UnitAlternatePowerInfo = UnitAlternatePowerInfo;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local GetPlayerFacing = GetPlayerFacing;
-local GetPlayerMapPosition = GetPlayerMapPosition;
 local GetSpellBookItemInfo = GetSpellBookItemInfo;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
@@ -399,12 +397,13 @@ end
 
 
 --
-local tZone, tIndex, tMap, tInfo;
+local tZone, tIndex, tMap, tMapId, tInfo;
 function VUHDO_getUnitZoneName(aUnit)
 	tInfo = VUHDO_RAID[aUnit];
 	if not tInfo then return; end
 
-	if "player" == aUnit or tInfo["visible"] then tZone = GetRealZoneText();
+	if "player" == aUnit or tInfo["visible"] then 
+		tZone = GetRealZoneText();
 	elseif VUHDO_GROUP_TYPE_RAID == VUHDO_getCurrentGroupType() then
 		tIndex = (VUHDO_RAID[aUnit] or sEmpty)["number"] or 1;
 		_, _, _, _, _, _, tZone = GetRaidRosterInfo(tIndex);
@@ -413,11 +412,20 @@ function VUHDO_getUnitZoneName(aUnit)
 		VuhDoScanTooltip:ClearLines();
 		VuhDoScanTooltip:SetUnit(aUnit)
 		tZone = VuhDoScanTooltipTextLeft3:GetText();
-		if tZone == "PvP" then tZone = VuhDoScanTooltipTextLeft4:GetText(); end
+	
+		if tZone == "PvP" then 
+			tZone = VuhDoScanTooltipTextLeft4:GetText();
+		end
 	end
 
-	tMap = GetMapInfo();
-	return tZone or tMap or VUHDO_I18N_UNKNOWN, tMap;
+	-- 8.0.1 build 26567 added restrictions (must be in player's party) on which unit IDs can be queried
+	tMapId = C_Map.GetBestMapForUnit(aUnit);
+	
+	if tMapId then
+		tMap = C_Map.GetMapInfo(tMapId);
+	end
+
+	return tZone or (tMap and tMap["name"]) or VUHDO_I18N_UNKNOWN, tMap and tMap["name"] or nil;
 end
 
 
@@ -640,9 +648,15 @@ end
 
 -- Throttle resetting to current map to avoid conflicts with other addons
 local tNextTime = 0;
+local tMap;
 function VUHDO_setMapToCurrentZone()
 	if tNextTime < GetTime() then
-		SetMapToCurrentZone();
+		tMap = C_Map.GetBestMapForUnit("player");
+		
+		if tMap and WorldMapFrame ~= nil then
+			WorldMapFrame:SetMapID(tMap);
+		end
+
 		tNextTime = GetTime() + 2;
 	end
 end
@@ -808,14 +822,14 @@ function VUHDO_getUnitDirection(aUnit)
 		return nil;
 	end
 
-	tPlayerX, tPlayerY = GetPlayerMapPosition("player");
+	tPlayerX, tPlayerY = VUHDO_getUnitMapPosition("player");
 	if (tPlayerX or 0) + (tPlayerY or 0) <= 0 then
 		VUHDO_setMapToCurrentZone();
-		tPlayerX, tPlayerY = GetPlayerMapPosition("player");
+		tPlayerX, tPlayerY = VUHDO_getUnitMapPosition("player");
 		if (tPlayerX or 0) + (tPlayerY or 0) <= 0 then return nil; end
 	end
 
-	tUnitX, tUnitY = GetPlayerMapPosition(aUnit);
+	tUnitX, tUnitY = VUHDO_getUnitMapPosition(aUnit);
 	if (tUnitX or 0) + (tUnitY or 0) <= 0 then return nil; end
 
 	tFacing = GetPlayerFacing();
@@ -930,3 +944,21 @@ function VUHDO_round(number, digits)
 	end
 
 end
+
+
+function VUHDO_unitAura(aUnit, aSpell)
+
+	for tCnt = 1, 40 do
+		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt);
+
+		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
+			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3;
+		end
+	end
+
+	return nil;
+
+end
+
+
+

@@ -440,7 +440,6 @@ local function VUHDO_addCustomSpellIds(aVersion, ...)
 		VUHDO_CONFIG["CUSTOM_DEBUFF"].version = aVersion;
 
 		local tArg;
-
 		for tCnt = 1, select("#", ...) do
 			tArg = select(tCnt, ...);
 
@@ -1380,340 +1379,372 @@ function VUHDO_loadDefaultConfig()
 --	);
 
 	-- 7.0 - Legion
-	VUHDO_addCustomSpellIds(31, 
-		-- [[ Emerald Nightmare ]]
-		-- Nythendra
-		--204504, -- Infested
-		--203045, -- Infested Ground
-		203096, -- Rot
-		--204463, -- Volatile Rot
-		203646, -- Burst of Corruption
-		--221028, -- Unstable Decay
-		-- Il'gynoth, Heart of Corruption
-		--212886, -- Nightmare Corruption
-		--215845, -- Dispersed Spores
-		--210099, -- Fixate
-		209469, -- Touch of Corruption 
-		--209471, -- Nightmare Explosion
-		208697, -- Mind Flay
-		208929, -- Spew Corruption
-		215128, -- Cursed Blood
-		-- Erethe Renferal
-		215307, -- Web of Pain
-		--215460, -- Necrotic Venom
-		--213124, -- Venomous Pool
-		--210850, -- Twisting Shadows
-		218519, -- Wind Burn
-		210228, -- Dripping Fangs
-		-- Ursoc
-		204859, -- Rend Flesh
-		198006, -- Focused Gaze
-		--198108, -- Momentum
-		--197980, -- Nightmarish Cacophony
-		205611, -- Miasma
-		-- Dragons of Nightmare
-		207681, -- Nightmare Bloom
-		--204731, -- Wasting Dread
-		203787, -- Volatile Infection
-		204044, -- Shadow Burst
-		--204078, -- Bellowing Roar
-		--214543, -- Collapsing Nightmare
-		-- Cenarius
-		--210279, -- Creeping Nightmares
-		210315, -- Nightmare Brambles
-		211507, -- Nightmare Javelin
-		211471, -- Scorned Touch
-		216516, -- Ancient Dream
-		-- Xavius
-		206005, -- Dream Simulacrum
-		--206109, -- Awakening to the Nightmare
-		208431, -- Descent into Madness
-		--207409, -- Madness
-		206651, -- Darkening Soul
-		211802, -- Nightmare Blades
-		--205771, -- Tormenting Fixation
-		209158, -- Blackening Soul
-		205612, -- Blackened
-		210451  -- Bonds of Terror
-		--208385, -- Tainted Discharge
-		--211634  -- The Infinite Dark
-	);
+--	VUHDO_addCustomSpellIds(31, 
+--		-- [[ Emerald Nightmare ]]
+--		-- Nythendra
+--		--204504, -- Infested
+--		--203045, -- Infested Ground
+--		203096, -- Rot
+--		--204463, -- Volatile Rot
+--		203646, -- Burst of Corruption
+--		--221028, -- Unstable Decay
+--		-- Il'gynoth, Heart of Corruption
+--		--212886, -- Nightmare Corruption
+--		--215845, -- Dispersed Spores
+--		--210099, -- Fixate
+--		209469, -- Touch of Corruption 
+--		--209471, -- Nightmare Explosion
+--		208697, -- Mind Flay
+--		208929, -- Spew Corruption
+--		215128, -- Cursed Blood
+--		-- Erethe Renferal
+--		215307, -- Web of Pain
+--		--215460, -- Necrotic Venom
+--		--213124, -- Venomous Pool
+--		--210850, -- Twisting Shadows
+--		218519, -- Wind Burn
+--		210228, -- Dripping Fangs
+--		-- Ursoc
+--		204859, -- Rend Flesh
+--		198006, -- Focused Gaze
+--		--198108, -- Momentum
+--		--197980, -- Nightmarish Cacophony
+--		205611, -- Miasma
+--		-- Dragons of Nightmare
+--		207681, -- Nightmare Bloom
+--		--204731, -- Wasting Dread
+--		203787, -- Volatile Infection
+--		204044, -- Shadow Burst
+--		--204078, -- Bellowing Roar
+--		--214543, -- Collapsing Nightmare
+--		-- Cenarius
+--		--210279, -- Creeping Nightmares
+--		210315, -- Nightmare Brambles
+--		211507, -- Nightmare Javelin
+--		211471, -- Scorned Touch
+--		216516, -- Ancient Dream
+--		-- Xavius
+--		206005, -- Dream Simulacrum
+--		--206109, -- Awakening to the Nightmare
+--		208431, -- Descent into Madness
+--		--207409, -- Madness
+--		206651, -- Darkening Soul
+--		211802, -- Nightmare Blades
+--		--205771, -- Tormenting Fixation
+--		209158, -- Blackening Soul
+--		205612, -- Blackened
+--		210451  -- Bonds of Terror
+--		--208385, -- Tainted Discharge
+--		--211634  -- The Infinite Dark
+--	);
 
 	-- 7.1 - Legion - Trial of Valor
-	VUHDO_addCustomSpellIds(32,
-		-- [[ Trial of Valor ]]
-		-- Odyn
-		227959, -- Storm of Justice
-		228915, -- Stormforged Spear
-		228030, -- Expel Light
-		-- Guarm
-		228228, -- Flame Lick
-		228250, -- Shadow Lick
-		-- Helya
-		232450, -- Corrupted Axion
-		193367, -- Fetid Rot
-		228519 -- Anchor Slam
-	);
+--	VUHDO_addCustomSpellIds(32,
+--		-- [[ Trial of Valor ]]
+--		-- Odyn
+--		227959, -- Storm of Justice
+--		228915, -- Stormforged Spear
+--		228030, -- Expel Light
+--		-- Guarm
+--		228228, -- Flame Lick
+--		228250, -- Shadow Lick
+--		-- Helya
+--		232450, -- Corrupted Axion
+--		193367, -- Fetid Rot
+--		228519 -- Anchor Slam
+--	);
 
 	-- 7.1 - Legion - Trial of Valor (part 2)
-	VUHDO_addCustomSpellIds(33,
-		-- [[ Trial of Valor ]]
-		-- Odyn
-		228918, -- Stormforged Spear
-		228914, -- Stormforged Spear
-		228932, -- Stormforged Spear
-		227811, -- Raging Tempest
-		-- Guarm
-		228253, -- Shadow Lick
-		-- Helya
-		232488  -- Dark Hatred
-	);
+--	VUHDO_addCustomSpellIds(33,
+--		-- [[ Trial of Valor ]]
+--		-- Odyn
+--		228918, -- Stormforged Spear
+--		228914, -- Stormforged Spear
+--		228932, -- Stormforged Spear
+--		227811, -- Raging Tempest
+--		-- Guarm
+--		228253, -- Shadow Lick
+--		-- Helya
+--		232488  -- Dark Hatred
+--	);
 
 	-- 7.1.5 - Legion - Nighthold
-	VUHDO_addCustomSpellIds(34,
-		-- [[ Nighthold ]]
-		-- Skorpyron
-		204766, -- Energy Surge
-		211659, -- Arcane Tether
-		-- Chronomatic Anomaly
-		206607, -- Chronometric Particles
-		206609, -- Time Release
-		206615, -- Time Bomb
-		-- Trilliax
-		-- Spellblade Aluriel
-		212587, -- Mark of Frost
-		-- Tichondrius
-		206480, -- Carrion Plague
-		212795, -- Brand of Argus
-		208230, -- Feast of Blood
-		216024, -- Volatile Wound
-		216040, -- Burning Soul
-		-- Krosus
-		-- High Botanist Tel'arn
-		218502, -- Recursive Strikes
-		219049, -- Toxic Spores
-		218424, -- Parasitic Fetter
-		-- Star Augur Etraeus
-		206585, -- Absolute Zero
-		206388, -- Felburst
-		205649, -- Fel Ejection
-		206965, -- Voidburst
-		207143, -- Void Ejection
-		-- Grand Magistrix Elisande
-		-- Gul'dan
-		212568, -- Drain
-		206883, -- Soul Vortex
-		206222, -- Bonds of Fel
-		206221, -- Empowered Bonds of Fel
-		208802  -- Soul Corrosion
-	);
+--	VUHDO_addCustomSpellIds(34,
+--		-- [[ Nighthold ]]
+--		-- Skorpyron
+--		204766, -- Energy Surge
+--		211659, -- Arcane Tether
+--		-- Chronomatic Anomaly
+--		206607, -- Chronometric Particles
+--		206609, -- Time Release
+--		206615, -- Time Bomb
+--		-- Trilliax
+--		-- Spellblade Aluriel
+--		212587, -- Mark of Frost
+--		-- Tichondrius
+--		206480, -- Carrion Plague
+--		212795, -- Brand of Argus
+--		208230, -- Feast of Blood
+--		216024, -- Volatile Wound
+--		216040, -- Burning Soul
+--		-- Krosus
+--		-- High Botanist Tel'arn
+--		218502, -- Recursive Strikes
+--		219049, -- Toxic Spores
+--		218424, -- Parasitic Fetter
+--		-- Star Augur Etraeus
+--		206585, -- Absolute Zero
+--		206388, -- Felburst
+--		205649, -- Fel Ejection
+--		206965, -- Voidburst
+--		207143, -- Void Ejection
+--		-- Grand Magistrix Elisande
+--		-- Gul'dan
+--		212568, -- Drain
+--		206883, -- Soul Vortex
+--		206222, -- Bonds of Fel
+--		206221, -- Empowered Bonds of Fel
+--		208802  -- Soul Corrosion
+--	);
 
 	-- 7.1.5 - Legion - Nighthold (part 2)
-	VUHDO_addCustomSpellIds(35,
-		-- [[ Nighthold ]]
-		-- Chronomatic Anomaly
-		219964, -- Time Release Green
-		219965, -- Time Release Yellow
-		219966  -- Time Release Red
-		-- Trilliax
-		-- Grand Magistrix Elisande
-	);
+--	VUHDO_addCustomSpellIds(35,
+--		-- [[ Nighthold ]]
+--		-- Chronomatic Anomaly
+--		219964, -- Time Release Green
+--		219965, -- Time Release Yellow
+--		219966  -- Time Release Red
+--		-- Trilliax
+--		-- Grand Magistrix Elisande
+--	);
 
 	-- 7.2.5 - Legion - Tomb of Sargeras
-	VUHDO_addCustomSpellIds(36,
-		-- [[ Tomb of Sargeras ]]
-		-- Goroth
-		231363, -- Burning Armor
-		230345, -- Crashing Comet
-		233062, -- Infernal Burning
-		-- Demonic Inquistion
-		-- Atrigan
-		-- Belac
-		-- Harjatan
-		231998, -- Jagged Abrasion
-		-- Mistress Sassz'ine
-		230201, -- Burden of Pain
-		230920, -- Consuming Hunger
-		230139, -- Hydra Shot
-		232754, -- Hydra Acid
-		230276, -- Jaws from the Deep
-		-- Sisters of the Moon
-		-- Huntress Kasparian
-		236550, -- Discorporate
-		237561, -- Twilight Glaive
-		-- Priestess Lunaspyre
-		239264, -- Lunar Fire
-		236519, -- Moon Burn
-		-- Captain Yathae Moonstrike
-		233263, -- Embrace of the Eclipse
-		236596, -- Rapid Shot
-		-- The Desolate Host
-		236515, -- Shattering Scream
-		236459, -- Soulbind
-		235621, -- Spirit Realm
-		236011, -- Tormented Cries
-		238442, -- Spear of Anguish
-		235924, -- Spear of Anguish
-		236131, -- Wither
-		236138, -- Wither
-		-- Maiden of Vigilence
-		235117, -- Unstable Soul
-		-- Fallen Avatar
-		239739, -- Dark Mark
-		236494, -- Desolate
-		242017, -- Black Winds
-		240728, -- Tainted Essence
-		-- Kil'jaeden
-		234310, -- Armageddon Rain
-		245509, -- Felclaws    
-		243624  -- Lingering Wail
-	);
+--	VUHDO_addCustomSpellIds(36,
+--		-- [[ Tomb of Sargeras ]]
+--		-- Goroth
+--		231363, -- Burning Armor
+--		230345, -- Crashing Comet
+--		233062, -- Infernal Burning
+--		-- Demonic Inquistion
+--		-- Atrigan
+--		-- Belac
+--		-- Harjatan
+--		231998, -- Jagged Abrasion
+--		-- Mistress Sassz'ine
+--		230201, -- Burden of Pain
+--		230920, -- Consuming Hunger
+--		230139, -- Hydra Shot
+--		232754, -- Hydra Acid
+--		230276, -- Jaws from the Deep
+--		-- Sisters of the Moon
+--		-- Huntress Kasparian
+--		236550, -- Discorporate
+--		237561, -- Twilight Glaive
+--		-- Priestess Lunaspyre
+--		239264, -- Lunar Fire
+--		236519, -- Moon Burn
+--		-- Captain Yathae Moonstrike
+--		233263, -- Embrace of the Eclipse
+--		236596, -- Rapid Shot
+--		-- The Desolate Host
+--		236515, -- Shattering Scream
+--		236459, -- Soulbind
+--		235621, -- Spirit Realm
+--		236011, -- Tormented Cries
+--		238442, -- Spear of Anguish
+--		235924, -- Spear of Anguish
+--		236131, -- Wither
+--		236138, -- Wither
+--		-- Maiden of Vigilence
+--		235117, -- Unstable Soul
+--		-- Fallen Avatar
+--		239739, -- Dark Mark
+--		236494, -- Desolate
+--		242017, -- Black Winds
+--		240728, -- Tainted Essence
+--		-- Kil'jaeden
+--		234310, -- Armageddon Rain
+--		245509, -- Felclaws    
+--		243624  -- Lingering Wail
+--	);
 
 	-- 7.3.0 - Legion - Antorus, The Burning Throne
-	VUHDO_addCustomSpellIds(37, 
-		-- [[ Antorus, The Burning Throne ]]
-		-- Garothi
-		246220, -- Fel Bombardment (tank)
-	        244410, -- Decimation
-		246920, -- Haywire Decimation (M)
---	        246848, -- Luring Destruction (M)
-		-- Felhounds of Sargeras
---		251445, -- Smouldering
-		244091, -- Singed
-		244768, -- Desolate Gaze
-		248815, -- Enflamed
---		245098, -- Decay
-		245024, -- Consumed
-		244071, -- Weight of Darkness
-		248819, -- Siphoned
-		244086, -- Molten Touch
-		254747, -- Burning Maw
---		244055, -- Shadowtouched (M)
---		244054, -- Flametouched (M)
---		245022, -- Burning Remnant (M)
-		244517, -- Lingering Flames (M)
-		-- Antoran High Command
---		244892, -- Exploit Weakness
-		257974, -- Chaos Pulse
---		244910, -- Felshield
-		245121, -- Entropic Blast
-		253037, -- Demonic Charge
-		244172, -- Psychic Assault
---		244388, -- Psychic Scarring
-		244729, -- Shock Grenade
-		244748, -- Shocked (M)
-		-- Portal Keeper Hasabel
---		244016, -- Reality Tear
---		245118, -- Cloying Shadows
---		245075, -- Hungering Gloom
---		245099, -- Mind Fog
-		244613, -- Everburning Flames
-		245050, -- Delusions
-		245040, -- Corrupt
-		244849, -- Caustic Slime (M)
---		245075, -- Hungering Gloom (M)
---		244915, -- Poison Essence
---		244915, -- Leech Essence
-		244949, -- Felsilk Wrap
-		246208, -- Acidic Web
---		244709, -- Fiery Detonation
-		-- Eonar, the Lifebinder
-		248332, -- Rain of Fel
---		248861, -- Spear of Doom
-		248795, -- Fel Wake
---		250691, -- Burning Embers (M)
---		250140, -- Foul Steps (M)
-		249016, -- Feedback: Targeted (M)
-		249017, -- Feedback: Arcane Singularity (M)
-		249014, -- Feedback: Foul Steps (M)
-		249015, -- Feedback: Burning Embers (M)
-		-- Imonar the Soulhunter
---		247367, -- Shock Lance
-		247687, -- Sever
---		250255, -- Empowered Shock Lance
-		250006, -- Empowered Pulse
---		255029, -- Asleep
-		247552, -- Sleep Canister
---		247565, -- Slumber Gas
---		247716, -- Charged Blasts
-		250224, -- Shocked
-		247949, -- Shrapnel Blast
-		247641, -- Stasis Trap
---		250191, -- Conflagration
---		254181, -- Seared Skin
---		248255, -- Infernal Rockets
-		-- Kin’garoth
---		254919, -- Forging Strike
-		249535, -- Demolished (M)
-		246706, -- Demolish
-		246687, -- Decimation
---		246840, -- Ruiner	
-		-- Varimathras
-		244094, -- Necrotic Embrace
-		243961, -- Misery
-		244042, -- Marked Prey
-		244005, -- Dark Fissure
---		243980, -- Torment of Fel
---		243968, -- Torment of Flames
---		243977, -- Torment of Frost
---		243974, -- Torment of Shadows
-		248732, -- Echoes of Doom (M)		
-		-- Coven of Shivarra
---		253203, -- Shivan Pact
---		244899, -- Fiery Strike
---		245518, -- Flashfreeze
-		253520, -- Fulminating Pulse
---		253752, -- Sense of Dread
---		245627, -- Whirling Saber
---		253697, -- Orb of Frost
---		252861, -- Storm of Darkness
-		246763, -- Fury of Golganneth
-		245586, -- Chilled Blood (healing absorb)
---		245921, -- Spectral Army
---		245671, -- Flames of Khaz'goroth
---		250757, -- Cosmic Glare (M)
-		-- Aggramar
---		244291, -- Foe Breaker
---		245990, -- Taeschalach’s Reach
-		245994, -- Scorching Blaze
---		246014, -- Searing Tempest
---		244736, -- Wake of Flame
---		244912, -- Blazing Eruption
---		245916, -- Molten Remnants
-		254452, -- Ravenous Blaze (M)
---		247079, -- Empowered Flame Rend
---		255062, -- Empowered Searing Tempest
---		255060, -- Empowered Foe Breaker
---		255528, -- Searing Binding
-		-- Argus the Unmaker
---		248499, -- Sweeping Scythe
---		258039, -- Deadly Scythe 
-		248396, -- Soulblight
---		253901, -- Strength of Sea
---		253903, -- Strength of Sky
---		258647, -- Gift of the Sea
---		258646, -- Gift of the Sky
---		255199, -- Avatar of Aggramar
-		250669, -- Soulburst
---		255200, -- Aggramar’s Boon
---		257299, -- Ember of Rage
---		252729, -- Cosmic Ray
---		252634, -- Cosmic Smash
---		257215, -- Titanforged
---		248167, -- Death Fog
---		256899, -- Soul Detonation
---		251815, -- Edge of Obliteration
---		257299, -- Ember of Rage
---		258373, -- Grasp (M)
---		257961, -- Chains of Sargeras (M)
---		257966, -- Sentence of Sargeras (M)
---		258026, -- Punishment (M)
---		258000, -- Shattered Bonds (M)
---		257930, -- Crushing (M)
---		257931, -- Sargeras Fear (M)
---		257869, -- Unleashed (M)
---		257911, -- Sargeras Rage (M)
-		251570  -- Soulbomb
+--	VUHDO_addCustomSpellIds(37, 
+--		-- [[ Antorus, The Burning Throne ]]
+--		-- Garothi
+--		246220, -- Fel Bombardment (tank)
+--	        244410, -- Decimation
+--		246920, -- Haywire Decimation (M)
+----	        246848, -- Luring Destruction (M)
+--		-- Felhounds of Sargeras
+----		251445, -- Smouldering
+--		244091, -- Singed
+--		244768, -- Desolate Gaze
+--		248815, -- Enflamed
+----		245098, -- Decay
+--		245024, -- Consumed
+--		244071, -- Weight of Darkness
+--		248819, -- Siphoned
+--		244086, -- Molten Touch
+--		254747, -- Burning Maw
+----		244055, -- Shadowtouched (M)
+----		244054, -- Flametouched (M)
+----		245022, -- Burning Remnant (M)
+--		244517, -- Lingering Flames (M)
+--		-- Antoran High Command
+----		244892, -- Exploit Weakness
+--		257974, -- Chaos Pulse
+----		244910, -- Felshield
+--		245121, -- Entropic Blast
+--		253037, -- Demonic Charge
+--		244172, -- Psychic Assault
+----		244388, -- Psychic Scarring
+--		244729, -- Shock Grenade
+--		244748, -- Shocked (M)
+--		-- Portal Keeper Hasabel
+----		244016, -- Reality Tear
+----		245118, -- Cloying Shadows
+----		245075, -- Hungering Gloom
+----		245099, -- Mind Fog
+--		244613, -- Everburning Flames
+--		245050, -- Delusions
+--		245040, -- Corrupt
+--		244849, -- Caustic Slime (M)
+----		245075, -- Hungering Gloom (M)
+----		244915, -- Poison Essence
+----		244915, -- Leech Essence
+--		244949, -- Felsilk Wrap
+--		246208, -- Acidic Web
+----		244709, -- Fiery Detonation
+--		-- Eonar, the Lifebinder
+--		248332, -- Rain of Fel
+----		248861, -- Spear of Doom
+--		248795, -- Fel Wake
+----		250691, -- Burning Embers (M)
+----		250140, -- Foul Steps (M)
+--		249016, -- Feedback: Targeted (M)
+--		249017, -- Feedback: Arcane Singularity (M)
+--		249014, -- Feedback: Foul Steps (M)
+--		249015, -- Feedback: Burning Embers (M)
+--		-- Imonar the Soulhunter
+----		247367, -- Shock Lance
+--		247687, -- Sever
+----		250255, -- Empowered Shock Lance
+--		250006, -- Empowered Pulse
+----		255029, -- Asleep
+--		247552, -- Sleep Canister
+----		247565, -- Slumber Gas
+----		247716, -- Charged Blasts
+--		250224, -- Shocked
+--		247949, -- Shrapnel Blast
+--		247641, -- Stasis Trap
+----		250191, -- Conflagration
+----		254181, -- Seared Skin
+----		248255, -- Infernal Rockets
+--		-- Kin’garoth
+----		254919, -- Forging Strike
+--		249535, -- Demolished (M)
+--		246706, -- Demolish
+--		246687, -- Decimation
+----		246840, -- Ruiner	
+--		-- Varimathras
+--		244094, -- Necrotic Embrace
+--		243961, -- Misery
+--		244042, -- Marked Prey
+--		244005, -- Dark Fissure
+----		243980, -- Torment of Fel
+----		243968, -- Torment of Flames
+----		243977, -- Torment of Frost
+----		243974, -- Torment of Shadows
+--		248732, -- Echoes of Doom (M)		
+--		-- Coven of Shivarra
+----		253203, -- Shivan Pact
+----		244899, -- Fiery Strike
+----		245518, -- Flashfreeze
+--		253520, -- Fulminating Pulse
+----		253752, -- Sense of Dread
+----		245627, -- Whirling Saber
+----		253697, -- Orb of Frost
+----		252861, -- Storm of Darkness
+--		246763, -- Fury of Golganneth
+--		245586, -- Chilled Blood (healing absorb)
+----		245921, -- Spectral Army
+----		245671, -- Flames of Khaz'goroth
+----		250757, -- Cosmic Glare (M)
+--		-- Aggramar
+----		244291, -- Foe Breaker
+----		245990, -- Taeschalach’s Reach
+--		245994, -- Scorching Blaze
+----		246014, -- Searing Tempest
+----		244736, -- Wake of Flame
+----		244912, -- Blazing Eruption
+----		245916, -- Molten Remnants
+--		254452, -- Ravenous Blaze (M)
+----		247079, -- Empowered Flame Rend
+----		255062, -- Empowered Searing Tempest
+----		255060, -- Empowered Foe Breaker
+----		255528, -- Searing Binding
+--		-- Argus the Unmaker
+----		248499, -- Sweeping Scythe
+----		258039, -- Deadly Scythe 
+--		248396, -- Soulblight
+----		253901, -- Strength of Sea
+----		253903, -- Strength of Sky
+----		258647, -- Gift of the Sea
+----		258646, -- Gift of the Sky
+----		255199, -- Avatar of Aggramar
+--		250669, -- Soulburst
+----		255200, -- Aggramar’s Boon
+----		257299, -- Ember of Rage
+----		252729, -- Cosmic Ray
+----		252634, -- Cosmic Smash
+----		257215, -- Titanforged
+----		248167, -- Death Fog
+----		256899, -- Soul Detonation
+----		251815, -- Edge of Obliteration
+----		257299, -- Ember of Rage
+----		258373, -- Grasp (M)
+----		257961, -- Chains of Sargeras (M)
+----		257966, -- Sentence of Sargeras (M)
+----		258026, -- Punishment (M)
+----		258000, -- Shattered Bonds (M)
+----		257930, -- Crushing (M)
+----		257931, -- Sargeras Fear (M)
+----		257869, -- Unleashed (M)
+----		257911, -- Sargeras Rage (M)
+--		251570  -- Soulbomb
+--	);
+
+	-- 8.0.1 - Battle for Azeroth - Uldir
+	VUHDO_addCustomSpellIds(38, 
+		-- [[ Uldir ]]
+		-- Taloc
+		271222, -- Plasma Discharge 
+		-- Mother
+		267821, -- Defense Grid
+		-- Devourer
+		262313, -- Malodorous Miasma
+		262314, -- Deadly Disease
+		-- Zek'voz
+		264219, -- Fixate
+		265360, -- Roiling Deceit
+		265662, -- Corruptors Pact
+		-- Vectis
+		265129, -- Omega Vector
+		265178, -- Mutagenic Pathogen
+		265212, -- Gestate
+		-- Zul
+		273365, -- Dark Revelation
+		269936, -- Fixate
+		274358, -- Rupturing Blood
+		274271, -- Deathwish
+		-- Mythrax
+		272336, -- Annihilation
+		272536, -- Imminent Ruin
+		-- G'huun
+		263334, -- Putrid Blood
+		263372  -- Power Matrix
+
 	);
 
 	local debuffRemovalList = {};

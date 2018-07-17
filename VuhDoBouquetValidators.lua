@@ -1180,7 +1180,7 @@ end
 --
 local tShieldLeft;
 local function VUHDO_overflowCountValidator(anInfo, _)
-	tShieldLeft = select(17, UnitDebuff(anInfo["unit"], VUHDO_SPELL_ID.DEBUFF_OVERFLOW)) or 0;
+	tShieldLeft = select(16, VUHDO_unitAura(anInfo["unit"], VUHDO_SPELL_ID.DEBUFF_OVERFLOW)) or 0;
 	return tShieldLeft >= 1000, nil, -1, floor(tShieldLeft * 0.001 + 0.5), -1;
 end
 

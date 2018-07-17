@@ -1,5 +1,4 @@
 --
-local UnitBuff = UnitBuff;
 local UnitPower = UnitPower;
 local UnitGetIncomingHeals = UnitGetIncomingHeals;
 local pairs = pairs;
@@ -205,9 +204,7 @@ local VUHDO_AOE_SPELLS = VUHDO_AOE_SPELLS;
 --
 local tAltPower;
 local function VUHDO_getPlayerHealingMod()
-	if "PRIEST" == VUHDO_PLAYER_CLASS then
-		return 1 + (0.15 * (UnitBuff("player", VUHDO_SPELL_ID.CHAKRA_SANCTUARY) and 1 or 0));
-	elseif "PALADIN" == VUHDO_PLAYER_CLASS then
+	if "PALADIN" == VUHDO_PLAYER_CLASS then
 		tAltPower = UnitPower("player", 9);
 		if (tAltPower or 6) ~= 6 then
 			return 1 / (6 - tAltPower);

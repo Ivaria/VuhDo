@@ -531,7 +531,7 @@ local function VUHDO_updateHots(aUnit, anInfo)
 		for tCnt = 1, huge do
 
 			if not tDebuffOffset then
-				tBuffName, _, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnitBuff(aUnit, tCnt);
+				tBuffName, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnitBuff(aUnit, tCnt);
 
 				if not tBuffIcon then
 					tDebuffOffset = tCnt - 1;
@@ -539,7 +539,7 @@ local function VUHDO_updateHots(aUnit, anInfo)
 			end
 
 			if tDebuffOffset then -- Achtung kein elseif
-				tBuffName, _, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnitDebuff(aUnit, tCnt - tDebuffOffset);
+				tBuffName, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnitDebuff(aUnit, tCnt - tDebuffOffset);
 
 				if not tBuffIcon then
 					break;

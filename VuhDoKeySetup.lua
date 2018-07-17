@@ -22,7 +22,6 @@ local GetMacroInfo = GetMacroInfo;
 local GetSpellBookItemTexture = GetSpellBookItemTexture;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local gsub = gsub;
-local UnitBuff = UnitBuff;
 local GetCursorInfo = GetCursorInfo;
 local GetShapeshiftForm = GetShapeshiftForm;
 local InCombatLockdown = InCombatLockdown;
@@ -204,7 +203,7 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 
 	tUnit = aButton["raidid"];
 
-	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= anAction) then
+	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= anAction) or VUHDO_isBossUnit(tUnit) then
 		if not anIndex then
 			tSpellInfo = VUHDO_HOSTILE_SPELL_ASSIGNMENTS[VUHDO_KEYS_MODIFIER[aModiKey] .. aButtonId];
 			tHostSpell = tSpellInfo ~= nil and tSpellInfo[3] or "";

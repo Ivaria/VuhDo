@@ -409,6 +409,9 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	--VUHDO_Msg(anEvent);
 	if "COMBAT_LOG_EVENT_UNFILTERED" == anEvent then
 		if VUHDO_VARIABLES_LOADED then
+			-- As of 8.x COMBAT_LOG_EVENT_UNFILTERED is now just an event with no arguments
+			anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17 = CombatLogGetCurrentEventInfo();
+
 			-- SWING_DAMAGE - the amount of damage is the 12th arg
 			-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
 			-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
@@ -459,7 +462,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, 9); -- VUHDO_UPDATE_ALT_POWER
 		end
 
-	elseif "UNIT_POWER" == anEvent or "UNIT_POWER_FREQUENT" == anEvent then
+	elseif "UNIT_POWER_UPDATE" == anEvent or "UNIT_POWER_FREQUENT" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 			if "CHI" == anArg2 then
 				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 35); end -- VUHDO_UPDATE_CHI
@@ -479,10 +482,10 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		end
 
 	elseif "UNIT_SPELLCAST_SUCCEEDED" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_spellcastSucceeded(anArg1, anArg2); end
+		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_spellcastSucceeded(anArg1, anArg3); end
 
 	elseif "UNIT_SPELLCAST_SENT" == anEvent then
-		if VUHDO_VARIABLES_LOADED then VUHDO_spellcastSent(anArg1, anArg2, anArg3, anArg4); end
+		if VUHDO_VARIABLES_LOADED then VUHDO_spellcastSent(anArg1, anArg2, anArg4); end
 
 	elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then
 		if VUHDO_VARIABLES_LOADED then VUHDO_updateThreat(anArg1); end
@@ -539,7 +542,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 
  	-- INSTANCE_ENCOUNTER_ENGAGE_UNIT fires when a boss unit is added to the UI
  	-- this is essentially the equivalent of GROUP_ROSTER_UPDATE for bosses/NPCs
- 	elseif "GROUP_ROSTER_UPDATE" == anEvent or "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then	
+ 	elseif "GROUP_ROSTER_UPDATE" == anEvent or "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent or "UPDATE_ACTIVE_BATTLEFIELD" == anEvent then	
 		--VUHDO_CURR_LAYOUT = VUHDO_SPEC_LAYOUTS["selected"];
 		--VUHDO_CURRENT_PROFILE = VUHDO_CONFIG["CURRENT_PROFILE"];
 
@@ -579,6 +582,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		end
 
 	elseif "LEARNED_SPELL_IN_TAB" == anEvent then
+		-- FIXME: this event does not fire when spell is learned via talent change
 		if VUHDO_VARIABLES_LOADED then
 			VUHDO_initFromSpellbook();
 			VUHDO_registerAllBouquets(false);
@@ -892,7 +896,7 @@ function VUHDO_updateGlobalToggles()
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_ALT_POWER)
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_OWN_HOLY_POWER)
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_CHI),
-		"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER", "UNIT_POWER_FREQUENT"
+		"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "UNIT_POWER_FREQUENT"
 	);
 
 	if VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_UNIT_TARGET) then
@@ -1435,7 +1439,7 @@ local VUHDO_ALL_EVENTS = {
 	"UNIT_HEALTH", "UNIT_HEALTH_FREQUENT", "UNIT_MAXHEALTH",
 	"UNIT_AURA",
 	"UNIT_TARGET",
-	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", 
+	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",  
 	"UNIT_PET",
 	"UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE", "UNIT_EXITING_VEHICLE",
 	"CHAT_MSG_ADDON",
@@ -1443,7 +1447,7 @@ local VUHDO_ALL_EVENTS = {
 	"LEARNED_SPELL_IN_TAB",
 	"PLAYER_FLAGS_CHANGED",
 	"PLAYER_LOGOUT",
-	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER",
+	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE",
 	"UNIT_SPELLCAST_SENT", "UNIT_SPELLCAST_SUCCEEDED",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
 	"COMBAT_LOG_EVENT_UNFILTERED",

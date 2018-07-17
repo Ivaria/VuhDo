@@ -435,8 +435,8 @@
 												<AbsDimension x="10" y="20" />
 											</Size>
 											<Anchors>
-												<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT" />
-												<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT" />
+												<Anchor point="LEFT" relativePoint="RIGHT" />
+												<Anchor point="RIGHT" relativePoint="LEFT" />
 											</Anchors>
 											<TexCoords left="0" right="1" top="0" bottom="1" />
 										</Texture>

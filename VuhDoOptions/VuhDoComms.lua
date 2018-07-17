@@ -179,7 +179,7 @@ end
 
 --
 local function VUHDO_sendDirectMessage(aUnitName, aMessage)
-	SendAddonMessage(VUHDO_COMMS_PREFIX, aMessage, "WHISPER", aUnitName);
+	C_ChatInfo.SendAddonMessage(VUHDO_COMMS_PREFIX, aMessage, "WHISPER", aUnitName);
 end
 
 

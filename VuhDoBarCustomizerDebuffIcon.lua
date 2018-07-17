@@ -157,7 +157,7 @@ local tSlot;
 local tOldest;
 local tTimestamp;
 local tFrame, tIconInfo;
-function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId)
+function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, aCnt)
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
 		VUHDO_DEBUFF_ICONS[aUnit] = { };
 	end
@@ -180,7 +180,7 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		VUHDO_animateDebuffIcon(tButton, tIconInfo, GetTime(), tSlot + 39, true, aUnit);
 		tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
-		tFrame["debuffInfo"], tFrame["isBuff"] = aName, anIsBuff;
+		tFrame["debuffInfo"], tFrame["isBuff"], tFrame["debuffCnt"] = aName, anIsBuff, aCnt;
 	end
 	tIconInfo[2] = GetTime();
 
