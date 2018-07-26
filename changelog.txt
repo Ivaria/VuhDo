@@ -7,7 +7,7 @@ Known issues:
 --   Bodyguards have no unit ID so for now are only partially supported
 -- Incoming heal estimation reported is not even close to accurate
 --   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
--- BfA stat squish cleanup stil a work in progress
+-- BfA stat squish cleanup still a work in progress
 --   AOE Advice spell equations need complete overhaul
 --   Some text providers need changes to better display small numbers
 
