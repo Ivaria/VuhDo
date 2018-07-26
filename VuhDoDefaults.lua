@@ -1569,151 +1569,151 @@ function VUHDO_loadDefaultConfig()
 --	);
 
 	-- 7.3.0 - Legion - Antorus, The Burning Throne
---	VUHDO_addCustomSpellIds(37, 
---		-- [[ Antorus, The Burning Throne ]]
---		-- Garothi
---		246220, -- Fel Bombardment (tank)
---	        244410, -- Decimation
---		246920, -- Haywire Decimation (M)
-----	        246848, -- Luring Destruction (M)
---		-- Felhounds of Sargeras
-----		251445, -- Smouldering
---		244091, -- Singed
---		244768, -- Desolate Gaze
---		248815, -- Enflamed
-----		245098, -- Decay
---		245024, -- Consumed
---		244071, -- Weight of Darkness
---		248819, -- Siphoned
---		244086, -- Molten Touch
---		254747, -- Burning Maw
-----		244055, -- Shadowtouched (M)
-----		244054, -- Flametouched (M)
-----		245022, -- Burning Remnant (M)
---		244517, -- Lingering Flames (M)
---		-- Antoran High Command
-----		244892, -- Exploit Weakness
---		257974, -- Chaos Pulse
-----		244910, -- Felshield
---		245121, -- Entropic Blast
---		253037, -- Demonic Charge
---		244172, -- Psychic Assault
-----		244388, -- Psychic Scarring
---		244729, -- Shock Grenade
---		244748, -- Shocked (M)
---		-- Portal Keeper Hasabel
-----		244016, -- Reality Tear
-----		245118, -- Cloying Shadows
-----		245075, -- Hungering Gloom
-----		245099, -- Mind Fog
---		244613, -- Everburning Flames
---		245050, -- Delusions
---		245040, -- Corrupt
---		244849, -- Caustic Slime (M)
-----		245075, -- Hungering Gloom (M)
-----		244915, -- Poison Essence
-----		244915, -- Leech Essence
---		244949, -- Felsilk Wrap
---		246208, -- Acidic Web
-----		244709, -- Fiery Detonation
---		-- Eonar, the Lifebinder
---		248332, -- Rain of Fel
-----		248861, -- Spear of Doom
---		248795, -- Fel Wake
-----		250691, -- Burning Embers (M)
-----		250140, -- Foul Steps (M)
---		249016, -- Feedback: Targeted (M)
---		249017, -- Feedback: Arcane Singularity (M)
---		249014, -- Feedback: Foul Steps (M)
---		249015, -- Feedback: Burning Embers (M)
---		-- Imonar the Soulhunter
-----		247367, -- Shock Lance
---		247687, -- Sever
-----		250255, -- Empowered Shock Lance
---		250006, -- Empowered Pulse
-----		255029, -- Asleep
---		247552, -- Sleep Canister
-----		247565, -- Slumber Gas
-----		247716, -- Charged Blasts
---		250224, -- Shocked
---		247949, -- Shrapnel Blast
---		247641, -- Stasis Trap
-----		250191, -- Conflagration
-----		254181, -- Seared Skin
-----		248255, -- Infernal Rockets
---		-- Kin’garoth
-----		254919, -- Forging Strike
---		249535, -- Demolished (M)
---		246706, -- Demolish
---		246687, -- Decimation
-----		246840, -- Ruiner	
---		-- Varimathras
---		244094, -- Necrotic Embrace
---		243961, -- Misery
---		244042, -- Marked Prey
---		244005, -- Dark Fissure
-----		243980, -- Torment of Fel
-----		243968, -- Torment of Flames
-----		243977, -- Torment of Frost
-----		243974, -- Torment of Shadows
---		248732, -- Echoes of Doom (M)		
---		-- Coven of Shivarra
-----		253203, -- Shivan Pact
-----		244899, -- Fiery Strike
-----		245518, -- Flashfreeze
---		253520, -- Fulminating Pulse
-----		253752, -- Sense of Dread
-----		245627, -- Whirling Saber
-----		253697, -- Orb of Frost
-----		252861, -- Storm of Darkness
---		246763, -- Fury of Golganneth
---		245586, -- Chilled Blood (healing absorb)
-----		245921, -- Spectral Army
-----		245671, -- Flames of Khaz'goroth
-----		250757, -- Cosmic Glare (M)
---		-- Aggramar
-----		244291, -- Foe Breaker
-----		245990, -- Taeschalach’s Reach
---		245994, -- Scorching Blaze
-----		246014, -- Searing Tempest
-----		244736, -- Wake of Flame
-----		244912, -- Blazing Eruption
-----		245916, -- Molten Remnants
---		254452, -- Ravenous Blaze (M)
-----		247079, -- Empowered Flame Rend
-----		255062, -- Empowered Searing Tempest
-----		255060, -- Empowered Foe Breaker
-----		255528, -- Searing Binding
---		-- Argus the Unmaker
-----		248499, -- Sweeping Scythe
-----		258039, -- Deadly Scythe 
---		248396, -- Soulblight
-----		253901, -- Strength of Sea
-----		253903, -- Strength of Sky
-----		258647, -- Gift of the Sea
-----		258646, -- Gift of the Sky
-----		255199, -- Avatar of Aggramar
---		250669, -- Soulburst
-----		255200, -- Aggramar’s Boon
-----		257299, -- Ember of Rage
-----		252729, -- Cosmic Ray
-----		252634, -- Cosmic Smash
-----		257215, -- Titanforged
-----		248167, -- Death Fog
-----		256899, -- Soul Detonation
-----		251815, -- Edge of Obliteration
-----		257299, -- Ember of Rage
-----		258373, -- Grasp (M)
-----		257961, -- Chains of Sargeras (M)
-----		257966, -- Sentence of Sargeras (M)
-----		258026, -- Punishment (M)
-----		258000, -- Shattered Bonds (M)
-----		257930, -- Crushing (M)
-----		257931, -- Sargeras Fear (M)
-----		257869, -- Unleashed (M)
-----		257911, -- Sargeras Rage (M)
---		251570  -- Soulbomb
---	);
+	VUHDO_addCustomSpellIds(37, 
+		-- [[ Antorus, The Burning Throne ]]
+		-- Garothi
+		246220, -- Fel Bombardment (tank)
+	        244410, -- Decimation
+		246920, -- Haywire Decimation (M)
+	        246848, -- Luring Destruction (M)
+		-- Felhounds of Sargeras
+--		251445, -- Smouldering
+		244091, -- Singed
+		244768, -- Desolate Gaze
+		248815, -- Enflamed
+--		245098, -- Decay
+		245024, -- Consumed
+		244071, -- Weight of Darkness
+		248819, -- Siphoned
+		244086, -- Molten Touch
+		254747, -- Burning Maw
+--		244055, -- Shadowtouched (M)
+--		244054, -- Flametouched (M)
+--		245022, -- Burning Remnant (M)
+		244517, -- Lingering Flames (M)
+		-- Antoran High Command
+--		244892, -- Exploit Weakness
+		257974, -- Chaos Pulse
+--		244910, -- Felshield
+		245121, -- Entropic Blast
+		253037, -- Demonic Charge
+		244172, -- Psychic Assault
+--		244388, -- Psychic Scarring
+		244729, -- Shock Grenade
+		244748, -- Shocked (M)
+		-- Portal Keeper Hasabel
+--		244016, -- Reality Tear
+--		245118, -- Cloying Shadows
+--		245075, -- Hungering Gloom
+--		245099, -- Mind Fog
+		244613, -- Everburning Flames
+		245050, -- Delusions
+		245040, -- Corrupt
+		244849, -- Caustic Slime (M)
+--		245075, -- Hungering Gloom (M)
+--		244915, -- Poison Essence
+--		244915, -- Leech Essence
+		244949, -- Felsilk Wrap
+		246208, -- Acidic Web
+--		244709, -- Fiery Detonation
+		-- Eonar, the Lifebinder
+		248332, -- Rain of Fel
+--		248861, -- Spear of Doom
+		248795, -- Fel Wake
+--		250691, -- Burning Embers (M)
+--		250140, -- Foul Steps (M)
+		249016, -- Feedback: Targeted (M)
+		249017, -- Feedback: Arcane Singularity (M)
+		249014, -- Feedback: Foul Steps (M)
+		249015, -- Feedback: Burning Embers (M)
+		-- Imonar the Soulhunter
+--		247367, -- Shock Lance
+		247687, -- Sever
+--		250255, -- Empowered Shock Lance
+		250006, -- Empowered Pulse
+--		255029, -- Asleep
+		247552, -- Sleep Canister
+--		247565, -- Slumber Gas
+--		247716, -- Charged Blasts
+		250224, -- Shocked
+		247949, -- Shrapnel Blast
+		247641, -- Stasis Trap
+--		250191, -- Conflagration
+--		254181, -- Seared Skin
+--		248255, -- Infernal Rockets
+		-- Kin’garoth
+--		254919, -- Forging Strike
+		249535, -- Demolished (M)
+		246706, -- Demolish
+		246687, -- Decimation
+--		246840, -- Ruiner	
+		-- Varimathras
+		244094, -- Necrotic Embrace
+		243961, -- Misery
+		244042, -- Marked Prey
+		244005, -- Dark Fissure
+--		243980, -- Torment of Fel
+--		243968, -- Torment of Flames
+--		243977, -- Torment of Frost
+--		243974, -- Torment of Shadows
+		248732, -- Echoes of Doom (M)		
+		-- Coven of Shivarra
+--		253203, -- Shivan Pact
+--		244899, -- Fiery Strike
+--		245518, -- Flashfreeze
+		253520, -- Fulminating Pulse
+--		253752, -- Sense of Dread
+--		245627, -- Whirling Saber
+--		253697, -- Orb of Frost
+--		252861, -- Storm of Darkness
+		246763, -- Fury of Golganneth
+		245586, -- Chilled Blood (healing absorb)
+--		245921, -- Spectral Army
+--		245671, -- Flames of Khaz'goroth
+--		250757, -- Cosmic Glare (M)
+		-- Aggramar
+--		244291, -- Foe Breaker
+--		245990, -- Taeschalach’s Reach
+		245994, -- Scorching Blaze
+--		246014, -- Searing Tempest
+--		244736, -- Wake of Flame
+--		244912, -- Blazing Eruption
+--		245916, -- Molten Remnants
+		254452, -- Ravenous Blaze (M)
+--		247079, -- Empowered Flame Rend
+--		255062, -- Empowered Searing Tempest
+--		255060, -- Empowered Foe Breaker
+--		255528, -- Searing Binding
+		-- Argus the Unmaker
+--		248499, -- Sweeping Scythe
+--		258039, -- Deadly Scythe 
+		248396, -- Soulblight
+--		253901, -- Strength of Sea
+--		253903, -- Strength of Sky
+--		258647, -- Gift of the Sea
+--		258646, -- Gift of the Sky
+--		255199, -- Avatar of Aggramar
+		250669, -- Soulburst
+--		255200, -- Aggramar’s Boon
+--		257299, -- Ember of Rage
+--		252729, -- Cosmic Ray
+--		252634, -- Cosmic Smash
+--		257215, -- Titanforged
+--		248167, -- Death Fog
+--		256899, -- Soul Detonation
+--		251815, -- Edge of Obliteration
+--		257299, -- Ember of Rage
+--		258373, -- Grasp (M)
+--		257961, -- Chains of Sargeras (M)
+--		257966, -- Sentence of Sargeras (M)
+--		258026, -- Punishment (M)
+--		258000, -- Shattered Bonds (M)
+--		257930, -- Crushing (M)
+--		257931, -- Sargeras Fear (M)
+--		257869, -- Unleashed (M)
+--		257911, -- Sargeras Rage (M)
+		251570  -- Soulbomb
+	);
 
 	-- 8.0.1 - Battle for Azeroth - Uldir
 	VUHDO_addCustomSpellIds(38, 

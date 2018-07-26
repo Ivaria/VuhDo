@@ -144,7 +144,7 @@ end
 
 --
 function VUHDO_keyLayoutApplyOnClick(aButton)
-	if (VUHDO_CURR_LAYOUT ~= nil and VUHDO_CURR_LAYOUT ~= "") then
+	if (VUHDO_CURR_LAYOUT ~= nil and VUHDO_CURR_LAYOUT ~= "" and VUHDO_SPELL_LAYOUTS[VUHDO_CURR_LAYOUT] ~= nil) then
 		VuhDoYesNoFrameText:SetText(VUHDO_I18N_OVERWRITE_CURR_KEY_LAYOUT_QUESTION);
 		VuhDoYesNoFrame:SetAttribute("callback", VUHDO_applyKeyLayoutCallback);
 		VuhDoYesNoFrame:Show();

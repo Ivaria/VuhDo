@@ -1,3 +1,26 @@
+Version 3.94
+
+
+Known issues:
+-- Limited support for Class Order Hall Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
+-- Incoming heal estimation reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+-- BfA stat squish cleanup stil a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+
+
+Bugfixes:
+-- Fixed error applying key layouts which have not yet been created
+-- Once again include default custom debuffs for Antorus raid encounters
+
+
+Improvements:
+
+
+--------------------------------------------------------------
 Version 3.93
 
 
