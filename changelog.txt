@@ -1,3 +1,25 @@
+Version 3.96
+
+
+Known issues:
+-- Limited support for Class Order Hall Bodyguards
+--   Bodyguards can be used in panels when set to target or focus
+--   Bodyguards have no unit ID so for now are only partially supported
+-- Incoming heal estimation reported is not even close to accurate
+--   Bug in Blizzard API UnitGetIncomingHeals() - returns bogus values
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+
+
+Bugfixes:
+
+
+Improvements:
+-- Added default custom debuffs for 8.0 World Boss encounters
+
+
+--------------------------------------------------------------
 Version 3.95
 
 
