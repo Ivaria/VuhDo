@@ -222,6 +222,7 @@ function VUHDO_removeDebuffIcon(aUnit, aName)
 				if tFrame then
 					tFrame:SetAlpha(0);
 					tFrame["debuffInfo"] = nil;
+					tFrame["debuffCnt"] = nil;
 				end
 			end
 
@@ -246,6 +247,7 @@ function VUHDO_removeAllDebuffIcons(aUnit)
 			if tFrame then
 				tFrame:SetAlpha(0);
 				tFrame["debuffInfo"] = nil;
+				tFrame["debuffCnt"] = nil;
 			end
 		end
 	end

@@ -103,6 +103,8 @@ function VUHDO_tabbedPanelOkayClicked(aButton)
 
 	VUHDO_MAY_DEBUFF_ANIM = true;
 	VuhDoNewOptionsTabbedFrame:Hide();
+
+	VUHDO_timeReloadUI(3);
 end
 
 

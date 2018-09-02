@@ -16,6 +16,7 @@ Known issues:
 
 
 Bugfixes:
+-- Fixed display of custom debuffs after closing VuhDo Options
 
 
 Improvements:
