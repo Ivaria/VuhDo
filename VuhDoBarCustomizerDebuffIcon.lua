@@ -191,7 +191,7 @@ end
 
 --
 local tIconInfo;
-function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration)
+function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, aCnt)
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
 		VUHDO_DEBUFF_ICONS[aUnit] = { };
 	end
@@ -200,7 +200,12 @@ function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDurati
 		tIconInfo = VUHDO_DEBUFF_ICONS[aUnit][tCnt];
 
 		if tIconInfo and tIconInfo[3] == aName then
-			tIconInfo[1], tIconInfo[4], tIconInfo[5], tIconInfo[6] = anIcon, anExpiry, aStacks, aDuration;
+			tIconInfo[1], tIconInfo[3], tIconInfo[4], tIconInfo[5], tIconInfo[6], tIconInfo[7] = anIcon, aName, anExpiry, aStacks, aDuration, aSpellId;
+
+			for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+				tFrame = VUHDO_getBarIconFrame(tButton, tCnt + 39);
+				tFrame["debuffInfo"], tFrame["isBuff"], tFrame["debuffCnt"] = aName, anIsBuff, aCnt;
+			end
 		end
 	end
 end

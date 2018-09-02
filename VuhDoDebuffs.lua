@@ -389,13 +389,16 @@ function VUHDO_determineDebuff(aUnit)
 			-- update number of stacks?
 			elseif VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1] ~= tDebuffInfo[2]
 				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2] ~= tDebuffInfo[3] 
-				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] ~= tDebuffInfo[1] then 
+				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] ~= tDebuffInfo[1]
+				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][4] ~= tDebuffInfo[7] then 
 
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1] = tDebuffInfo[2];
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2] = tDebuffInfo[3];
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] = tDebuffInfo[1];
+				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][4] = tDebuffInfo[7];
 
-				VUHDO_updateDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4]);
+				VUHDO_updateDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7]);
+
 				VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
 			end
 		end

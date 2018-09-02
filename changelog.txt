@@ -17,6 +17,7 @@ Known issues:
 
 Bugfixes:
 -- Fixed display of custom debuffs after closing VuhDo Options
+-- Fixed display of debuff tooltips after zone change
 
 
 Improvements:
