@@ -18,6 +18,7 @@ Known issues:
 Bugfixes:
 -- Fixed display of custom debuffs after closing VuhDo Options
 -- Fixed display of debuff tooltips after zone change
+-- Fixed incoming heal and shield bar height when there is no mana bar
 
 
 Improvements:
