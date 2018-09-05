@@ -460,12 +460,6 @@ local function VUHDO_profileTableToString(aProfile)
 			["profile"] = aProfile,
 		};
 
-		-- remove all custom debuffs from the profile
-		-- due to size these must be shared separately
-		if tProfileTable["profile"]["CONFIG"]["CUSTOM_DEBUFF"] and tProfileTable["profile"]["CONFIG"]["CUSTOM_DEBUFF"]["STORED"] then
-			tProfileTable["profile"]["CONFIG"]["CUSTOM_DEBUFF"]["STORED"] = { };
-		end
-
 		tProfileString = VUHDO_compressAndPackTable(tProfileTable);
 		tProfileString = VUHDO_LibBase64.Encode(tProfileString);
 
