@@ -20,6 +20,7 @@ Bugfixes:
 -- Fixed display of debuff tooltips after zone change
 -- Fixed incoming heal and shield bar height when there is no mana bar
 -- Fixed export of custom debuffs in profile string
+-- Fixed range detection for out of phase units
 
 
 Improvements:

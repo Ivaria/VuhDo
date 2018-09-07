@@ -1033,16 +1033,21 @@ local function VUHDO_updateAllRange()
 			VUHDO_updateHealthBarsFor(tUnit, 4); -- VUHDO_UPDATE_DEBUFF
 		end
 
-		-- Check if unit is in range
-		if sIsRangeKnown then
-			tIsInRange = tInfo["connected"] and 
-				(1 == IsSpellInRange(sRangeSpell, tUnit) or 
-					((tInfo["dead"] or tInfo["charmed"]) and tInfo["baseRange"]) or "player" == tUnit or 
-					(VUHDO_isSpecialUnit(tUnit) and CheckInteractDistance(tUnit, 1)));
+		-- Check if unit is phased
+		if UnitIsWarModePhased(tUnit) or not UnitInPhase(tUnit) then
+			tIsInRange = false;
 		else
-			tIsInRange = tInfo["connected"] and 
-				(tInfo["baseRange"] or 
-					(VUHDO_isSpecialUnit(tUnit) and CheckInteractDistance(tUnit, 1)));
+			-- Check if unit is in range
+			if sIsRangeKnown then
+				tIsInRange = tInfo["connected"] and 
+					(1 == IsSpellInRange(sRangeSpell, tUnit) or 
+						((tInfo["dead"] or tInfo["charmed"]) and tInfo["baseRange"]) or "player" == tUnit or 
+						(VUHDO_isSpecialUnit(tUnit) and CheckInteractDistance(tUnit, 1)));
+			else
+				tIsInRange = tInfo["connected"] and 
+					(tInfo["baseRange"] or 
+						(VUHDO_isSpecialUnit(tUnit) and CheckInteractDistance(tUnit, 1)));
+			end
 		end
 
 		if tInfo["range"] ~= tIsInRange then

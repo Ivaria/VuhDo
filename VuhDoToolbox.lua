@@ -279,12 +279,14 @@ local VUHDO_isTargetInRange = VUHDO_isTargetInRange;
 
 
 
--- returns wether or not a unit is in range
+-- returns whether or not a unit is in range
 function VUHDO_isInRange(aUnit)
 	if "player" == aUnit then 
 		return true;
 	elseif VUHDO_isSpecialUnit(aUnit) then 
 		return VUHDO_isTargetInRange(aUnit);
+	elseif UnitIsWarModePhased(aUnit) or not UnitInPhase(aUnit) then
+		return false;
 	elseif (sIsGuessRange) then 
 		return UnitInRange(aUnit);
 	else
