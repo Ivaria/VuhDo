@@ -25,6 +25,7 @@ Bugfixes:
 
 Improvements:
 -- Added default custom debuffs for 8.0 World Boss encounters
+-- Added Mage spell 'Remove Curse' to list of 'Curse' debuff types
 
 
 --------------------------------------------------------------
