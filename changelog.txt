@@ -1,3 +1,25 @@
+Version 3.97
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+-- Bug in French language clients for Priest 'Shadow Mend' spell
+--   Work around for now is to create and bind a custom macro:
+--     /cast [@vuhdo] Soins rapides
+
+
+Bugfixes:
+-- Fixed vertical health bar display for units w/o a power bar
+
+
+Improvements:
+
+
+--------------------------------------------------------------
 Version 3.96
 
 

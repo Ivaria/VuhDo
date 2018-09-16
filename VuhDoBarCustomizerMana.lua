@@ -117,8 +117,10 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 			tRegularHeight = tButton["regularHeight"];
 			if tRegularHeight then
 				VUHDO_getHealthBar(tButton, 1):SetHeight(tRegularHeight - tManaBarHeight);
-				VUHDO_getHealthBar(tButton, 6):SetHeight(tRegularHeight - tManaBarHeight);
-				VUHDO_getHealthBar(tButton, 19):SetHeight(tRegularHeight - tManaBarHeight);
+				if (tQuota > 0) then
+					VUHDO_getHealthBar(tButton, 6):SetHeight(tRegularHeight - tManaBarHeight);
+					VUHDO_getHealthBar(tButton, 19):SetHeight(tRegularHeight - tManaBarHeight);
+				end
 			end
 		end
 	end
