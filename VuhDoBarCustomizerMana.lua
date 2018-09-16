@@ -20,6 +20,7 @@ local VUHDO_updateBouquetsForEvent;
 local VUHDO_indicatorTextCallback;
 
 local sIsInverted;
+local sIsHealthBarVertical;
 function VUHDO_customManaInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
@@ -32,6 +33,7 @@ function VUHDO_customManaInitLocalOverrides()
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_indicatorTextCallback = _G["VUHDO_indicatorTextCallback"];
 	sIsInverted = VUHDO_INDICATOR_CONFIG["CUSTOM"]["MANA_BAR"]["invertGrowth"];
+	sIsHealthBarVertical = VUHDO_INDICATOR_CONFIG["CUSTOM"]["HEALTH_BAR"]["vertical"];
 end
 
 ----------------------------------------------------
@@ -117,7 +119,8 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 			tRegularHeight = tButton["regularHeight"];
 			if tRegularHeight then
 				VUHDO_getHealthBar(tButton, 1):SetHeight(tRegularHeight - tManaBarHeight);
-				if anIsActive then
+
+				if not sIsHealthBarVertical then
 					VUHDO_getHealthBar(tButton, 6):SetHeight(tRegularHeight - tManaBarHeight);
 					VUHDO_getHealthBar(tButton, 19):SetHeight(tRegularHeight - tManaBarHeight);
 				end
