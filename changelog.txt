@@ -14,6 +14,7 @@ Known issues:
 
 Bugfixes:
 -- Fixed vertical health bar display for units w/o a power bar
+-- Fixed mana bar display after specialization activation
 
 
 Improvements:
