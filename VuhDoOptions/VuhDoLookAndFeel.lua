@@ -1120,12 +1120,16 @@ end
 --
 function VUHDO_lnfEditboxReceivedDrag(anEditBox)
 	local tName = nil;
-	local tType, tId, tId2 = GetCursorInfo();
+	local tType, tId, tId2, tId3 = GetCursorInfo();
 
 	if "item" == tType then
 		tName = GetItemInfo(tId) ;
 	elseif "spell" == tType then
 		tName = GetSpellBookItemName(tId, tId2);
+
+		if not tName then
+			tName = GetSpellInfo(tId3);
+		end
 	elseif "macro" == tType then
 		tName = GetMacroInfo(tId);
 	end
