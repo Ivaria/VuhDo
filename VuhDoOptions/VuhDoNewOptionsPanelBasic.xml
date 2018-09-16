@@ -447,6 +447,7 @@
 										{ 6, "Tank => Healer => DD" },
 										{ 7, "Healer => Tank => DD" },
 										{ 8, "Tank => MDPS => RDPS => Healer" },
+										{ 9, "Tank => Healer => MDPS => RDPS" },
 									}
 								);
 								VUHDO_lnfSetTooltip(self, nil);
