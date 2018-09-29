@@ -14,6 +14,7 @@ Bugfixes:
 -- Fixed mana bar display after specialization activation
 -- Fixed apostrophe issue for Priest 'Shadow Mend' in French language
 -- Fixed assignment of remapped spells when dragging from spell book
+-- Fixed Holy Priest 'Trail of Light' tracker
 
 
 Improvements:

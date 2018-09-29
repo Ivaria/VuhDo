@@ -92,27 +92,27 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 	-- special tracking for Holy Priest "Trail of Light"
 	if sShowTrailOfLight and sIsPlayerKnowsTrailOfLight and 
 		aSrcGuid == VUHDO_PLAYER_GUID and aSpellName == VUHDO_SPELL_ID.FLASH_HEAL then
-		tinsert(
-			VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT, 
-			{
-				anAmount,
-				aDstGuid
-			}
-		);
+		if not VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1] or 
+			(VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1] and VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1][2] ~= aDstGuid) then
+			tinsert(
+				VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT, 
+				{
+					anAmount,
+					aDstGuid
+				}
+			);
+		end
 
-		local FlashHeal1 = VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1];
-		local FlashHeal2 = VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[2];
+		local flashHeal1 = VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1];
+		local flashHeal2 = VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[2];
 
-		if FlashHeal1 and FlashHeal2 then
+		if flashHeal1 and flashHeal2 then
 			local tPreviousPlayerTrailOfLight = sCurrentPlayerTrailOfLight;
 
-			if FlashHeal1[1] < FlashHeal2[1] then
-				sCurrentPlayerTrailOfLight = FlashHeal1[2];
-			else
-				sCurrentPlayerTrailOfLight = FlashHeal2[2];
-			end
+			sCurrentPlayerTrailOfLight = flashHeal1[2];
 
-			twipe(VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT);
+			tremove(VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT, 2);
+			VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1] = flashHeal2;
 
 			if VUHDO_RAID_GUIDS[sCurrentPlayerTrailOfLight] then
 				VUHDO_updateBouquetsForEvent(
