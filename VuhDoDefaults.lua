@@ -1768,6 +1768,14 @@ function VUHDO_loadDefaultConfig()
 		-- Dunegorger Kraulok
 	);
 		
+	-- 8.0.1 - Battle for Azeroth - Debuff Absorbs
+	VUHDO_addCustomSpellIds(40,
+		-- [[ The Underrot ]]
+		-- Diseased Lasher
+		278961, -- Decaying Mind
+		-- [[ Uldir - Vectis ]]
+		265206  -- Immunosuppression
+	);
 
 	local debuffRemovalList = {};
 
