@@ -16,6 +16,7 @@ Improvements:
 -- Added Vectis Immunosuppression debuff absorb tracking
 -- Added Diseased Lasher Decaying Mind debuff absorb tracking
 -- Added Priest Luminous Barrier absorb tracking
+-- Added more default custom debuffs for Uldir raid encounters
 
 
 --------------------------------------------------------------
