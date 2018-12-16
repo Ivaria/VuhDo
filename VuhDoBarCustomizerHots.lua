@@ -223,7 +223,12 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 	end
 
 	if anIcon and (sIsHotShowIcon or aColor) then
-		tIcon:SetTexture(anIcon);
+		if VUHDO_ATLAS_TEXTURES[anIcon] then
+			tIcon:SetAtlas(anIcon);
+
+		else
+			tIcon:SetTexture(anIcon);
+		end
 	end
 
 	tIcon:SetTexCoord(aClipL or sClipL, aClipR or sClipR, aClipT or sClipT, aClipB or sClipB);
@@ -645,9 +650,16 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if anIsActive and aColor then
 			tIcon = VUHDO_getBarRoleIcon(tButton, 51);
-			tIcon:SetTexture(anIcon);
+
+			if VUHDO_ATLAS_TEXTURES[anIcon] then
+				tIcon:SetAtlas(anIcon);
+			else
+				tIcon:SetTexture(anIcon);
+			end
+
 			tIcon:SetVertexColor(VUHDO_backColor(aColor));
 			tIcon:SetTexCoord(aClipL or 0, aClipR or 1, aClipT or 0, aClipB or 1);
+
 			tIcon:Show();
 		else
 			VUHDO_getBarRoleIcon(tButton, 51):Hide();

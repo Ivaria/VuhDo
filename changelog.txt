@@ -17,6 +17,10 @@ Improvements:
 -- Added Diseased Lasher Decaying Mind debuff absorb tracking
 -- Added Priest Luminous Barrier absorb tracking
 -- Added more default custom debuffs for Uldir raid encounters
+-- Added new bouquet validator 'Has Summon'
+-- Added new default bouquet 'Summon Status Icon'
+-- Added new default bouquet 'Role & Summon Status Icon'
+--   Now assigned to the 'Special Dot' indicator by default
 
 
 --------------------------------------------------------------

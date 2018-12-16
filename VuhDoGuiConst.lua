@@ -70,3 +70,13 @@ VUHDO_CUSTOM_ICONS = {
 	{ VUHDO_I18N_CUSTOM_ICON_FOUR_THIRDS, "Interface\\AddOns\\VuhDo\\Images\\third_four" }, -- 13
 	{ VUHDO_I18N_CUSTOM_ICON_FIVE_THIRDS, "Interface\\AddOns\\VuhDo\\Images\\third_five" }, -- 14
 };
+
+
+
+--
+VUHDO_ATLAS_TEXTURES = {
+	["Raid-Icon-SummonPending"] = true,
+	["Raid-Icon-SummonAccepted"] = true,
+	["Raid-Icon-SummonDeclined"] = true,
+};
+

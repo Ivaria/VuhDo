@@ -638,6 +638,39 @@ VUHDO_DEFAULT_BAR_MANA_HEALER_ONLY = {
 }
 
 
+--
+VUHDO_DEFAULT_ICON_HAS_SUMMON = {
+	[VUHDO_I18N_DEF_BOUQUET_HAS_SUMMON] = {
+		{
+			["name"] = "HAS_SUMMON_ICON",
+			["mine"] = true, ["icon"] = 1,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 1, 1,   1, 1, 1, 1),
+			["custom"] = { [1] = 3, ["radio"] = 2, ["bright"] = 1 },
+		},
+	},
+}
+
+
+
+--
+VUHDO_DEFAULT_ICON_ROLE_AND_SUMMON = {
+	[VUHDO_I18N_DEF_BOUQUET_ROLE_AND_SUMMON] = {
+		{
+			["name"] = "HAS_SUMMON_ICON",
+			["mine"] = true, ["icon"] = 1,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 1, 1,   1, 1, 1, 1),
+			["custom"] = { [1] = 3, ["radio"] = 2, ["bright"] = 1 },
+		},
+		{
+			["name"] = "ROLE_ICON",
+			["mine"] = true, ["icon"] = 1,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 1, 1,   1, 1, 1, 1),
+			["custom"] = { [1] = 3, ["radio"] = 2, ["bright"] = 1 },
+		},
+	},
+}
+
+
 
 --
 VUHDO_DEFAULT_INDICATOR_CONFIG = {
@@ -1391,6 +1424,18 @@ function VUHDO_loadDefaultBouquets()
 	end
 	VUHDO_DEFAULT_BAR_MANA_HEALER_ONLY = nil;
 
+	if VUHDO_BOUQUETS["VERSION"] < 19 then
+		VUHDO_BOUQUETS["VERSION"] = 19;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_ICON_HAS_SUMMON);
+	end
+	VUHDO_DEFAULT_ICON_HAS_SUMMON = nil;
+
+	if VUHDO_BOUQUETS["VERSION"] < 20 then
+		VUHDO_BOUQUETS["VERSION"] = 20;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_ICON_ROLE_AND_SUMMON);
+	end
+	VUHDO_DEFAULT_ICON_ROLE_AND_SUMMON = nil;
+
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();
 
@@ -1398,7 +1443,7 @@ function VUHDO_loadDefaultBouquets()
 		VUHDO_INDICATOR_CONFIG = VUHDO_decompressOrCopy(VUHDO_DEFAULT_INDICATOR_CONFIG);
 
 		VUHDO_INDICATOR_CONFIG["BOUQUETS"]["SWIFTMEND_INDICATOR"]
-			= "DRUID" == VUHDO_PLAYER_CLASS and VUHDO_I18N_DEF_BOUQUET_SWIFTMENDABLE or VUHDO_I18N_DEF_ROLE_ICON;
+			= "DRUID" == VUHDO_PLAYER_CLASS and VUHDO_I18N_DEF_BOUQUET_SWIFTMENDABLE or VUHDO_I18N_DEF_BOUQUET_ROLE_AND_SUMMON;
 	end
 
 	if not VUHDO_INDICATOR_CONFIG["CUSTOM"]["HOT_BARS"] then
