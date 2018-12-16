@@ -21,6 +21,7 @@ Improvements:
 -- Added new default bouquet 'Summon Status Icon'
 -- Added new default bouquet 'Role & Summon Status Icon'
 --   Now assigned to the 'Special Dot' indicator by default
+-- Bump TOC interface version for 8.1
 
 
 --------------------------------------------------------------
