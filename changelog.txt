@@ -10,6 +10,7 @@ Known issues:
 
 
 Bugfixes:
+-- Fixed debuff absorb tracking
 
 
 Improvements:

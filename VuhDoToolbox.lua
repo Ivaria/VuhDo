@@ -948,10 +948,15 @@ function VUHDO_round(number, digits)
 end
 
 
-function VUHDO_unitAura(aUnit, aSpell)
+
+function VUHDO_unitAura(aUnit, aSpell, aFilter)
+
+	if (aFilter == nil) then
+		aFilter = "HELPFUL";
+	end
 
 	for tCnt = 1, 40 do
-		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt);
+		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
 
 		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
 			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3;
@@ -963,4 +968,18 @@ function VUHDO_unitAura(aUnit, aSpell)
 end
 
 
+
+function VUHDO_unitBuff(aUnit, aSpell)
+
+	return VUHDO_unitAura(aUnit, aSpell, "HELPFUL");
+
+end
+
+
+
+function VUHDO_unitDebuff(aUnit, aSpell)
+
+	return VUHDO_unitAura(aUnit, aSpell, "HARMFUL");
+
+end
 

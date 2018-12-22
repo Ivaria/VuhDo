@@ -300,7 +300,7 @@ function VUHDO_determineRole(aUnit)
 	end
 
 	if 29 == tClassId then -- VUHDO_ID_DEATH_KNIGHT
-		tBuffExist = VUHDO_unitAura(aUnit, VUHDO_SPELL_ID.BUFF_BLOOD_PRESENCE);
+		tBuffExist = VUHDO_unitBuff(aUnit, VUHDO_SPELL_ID.BUFF_BLOOD_PRESENCE);
 		if tBuffExist then
 			--VUHDO_FIX_ROLES[tName] = 60; -- VUHDO_ID_MELEE_TANK
 			return 60; -- VUHDO_ID_MELEE_TANK
