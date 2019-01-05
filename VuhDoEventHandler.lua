@@ -675,6 +675,11 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_SUMMON); 
 		end
 		
+	elseif "UNIT_PHASE" == anEvent then
+		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then 
+			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_PHASE); 
+		end
+		
 	else
 		VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 	end
@@ -1482,6 +1487,7 @@ local VUHDO_ALL_EVENTS = {
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED",
 	"UNIT_ABSORB_AMOUNT_CHANGED",
 	"INCOMING_SUMMON_CHANGED",
+	"UNIT_PHASE",
 };
 
 

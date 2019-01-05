@@ -228,6 +228,30 @@ end
 
 
 --
+local function VUHDO_isPhasedValidator(anInfo, _)
+	if UnitIsWarModePhased(anInfo["unit"]) or not UnitInPhase(anInfo["unit"]) then
+		return true, "Interface\\TargetingFrame\\UI-PhasingIcon", 
+			-1, -1, -1, nil, nil, 0.15625, 0.84375, 0.15625, 0.84375;
+	else
+		return false, nil, -1, -1, -1;
+	end
+end
+
+
+
+--
+local function VUHDO_isWarModePhasedValidator(anInfo, _)
+	if UnitIsWarModePhased(anInfo["unit"]) then
+		return true, "Interface\\TargetingFrame\\UI-PhasingIcon", 
+			-1, -1, -1, nil, nil, 0.15625, 0.84375, 0.15625, 0.84375;
+	else
+		return false, nil, -1, -1, -1;
+	end
+end
+
+
+
+--
 local tDistance;
 local function VUHDO_inYardsRangeValidator(anInfo, someCustom)
 	tDistance = VUHDO_getDistanceBetween("player", anInfo["unit"]);
@@ -1274,6 +1298,18 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_BOUQUET_IN_RANGE,
 		["validator"] = VUHDO_inRangeValidator,
 		["interests"] = { VUHDO_UPDATE_RANGE },
+	},
+
+	["IS_PHASED_ICON"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_IS_PHASED,
+		["validator"] = VUHDO_isPhasedValidator,
+		["interests"] = { VUHDO_UPDATE_RANGE, VUHDO_UPDATE_PHASE },
+	},
+
+	["IS_WAR_MODE_PHASED_ICON"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_IS_WAR_MODE_PHASED,
+		["validator"] = VUHDO_isWarModePhasedValidator,
+		["interests"] = { VUHDO_UPDATE_RANGE, VUHDO_UPDATE_PHASE },
 	},
 
 	["YARDS_RANGE"] = {

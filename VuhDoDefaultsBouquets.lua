@@ -673,6 +673,20 @@ VUHDO_DEFAULT_ICON_ROLE_AND_SUMMON = {
 
 
 --
+VUHDO_DEFAULT_ICON_IS_PHASED = {
+	[VUHDO_I18N_DEF_BOUQUET_IS_PHASED] = {
+		{
+			["name"] = "IS_PHASED_ICON",
+			["mine"] = true, ["icon"] = 1,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 1, 1,   1, 1, 1, 1),
+			["custom"] = { [1] = 3, ["radio"] = 2, ["bright"] = 1 },
+		},
+	},
+}
+
+
+
+--
 VUHDO_DEFAULT_INDICATOR_CONFIG = {
 	["BOUQUETS"] = {
 		["AGGRO_BAR"] = "",
@@ -1435,6 +1449,12 @@ function VUHDO_loadDefaultBouquets()
 		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_ICON_ROLE_AND_SUMMON);
 	end
 	VUHDO_DEFAULT_ICON_ROLE_AND_SUMMON = nil;
+
+	if VUHDO_BOUQUETS["VERSION"] < 21 then
+		VUHDO_BOUQUETS["VERSION"] = 21;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_ICON_IS_PHASED);
+	end
+	VUHDO_DEFAULT_ICON_IS_PHASED = nil;
 
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();
