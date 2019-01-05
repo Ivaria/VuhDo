@@ -2433,7 +2433,7 @@ local VUHDO_PROFILE_MODEL = {
 local tOriginatorClass = nil;
 local tOriginatorToon = nil;
 local function VUHDO_smartLoadFromProfile(aDestArray, aSourceArray, aProfileModel, aDerivedRule)
-	if not aSourceArray then
+	if not aSourceArray or not aDestArray then
 		return aDestArray;
 	end
 

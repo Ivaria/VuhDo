@@ -374,10 +374,10 @@ function VUHDO_loadSpellArray()
 	if (VUHDO_SPEC_LAYOUTS == nil) then
 		VUHDO_SPEC_LAYOUTS = {
 			["selected"] = "",
-			["1"] = "";
-			["2"] = "";
-			["3"] = "";
-			["4"] = "";
+			["1"] = "",
+			["2"] = "",
+			["3"] = "",
+			["4"] = ""
 		}
 	end
 
