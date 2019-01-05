@@ -16,6 +16,11 @@ Improvements:
 -- Added new bouquet validator 'Icon: Is Phased'
 -- Added new bouquet validator 'Icon: Is War Mode Phased'
 -- Added new default bouquet 'Is Phased Icon'
+-- Added spell caster source options to custom debuffs
+--  See 'VuhDo Options > Debuffs > Custom > Store / Delete > Mine'
+--  See 'VuhDo Options > Debuffs > Custom > Store / Delete > Others'
+--  Both checkboxes are selected by default
+--  These defaults are inherited by existing custom debuffs
 
 
 --------------------------------------------------------------

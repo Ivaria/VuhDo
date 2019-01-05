@@ -278,7 +278,7 @@ local tSound;
 local tRemaining;
 local tAbility;
 local tSchool;
-local tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, tSpellId, tIsBossDebuff;
+local tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, tUnitCaster, tSpellId, tIsBossDebuff;
 local tDebuffConfig;
 local tIsRelevant;
 local tNow;
@@ -298,21 +298,24 @@ function VUHDO_determineDebuff(aUnit)
 		tNow = GetTime();
 
 		for tCnt = 1, huge do
-			tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, _, _, _, tSpellId, _, tIsBossDebuff = UnitDebuff(aUnit, tCnt, false);
-			if not tIcon then break;	end
+			tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, tUnitCaster, _, _, tSpellId, _, tIsBossDebuff = UnitDebuff(aUnit, tCnt, false);
+			if not tIcon then 
+				break;
+			end
 
 			tStacks = tStacks or 0;
 			if (tExpiry or 0) == 0 then tExpiry = (sCurIcons[tName] or sEmpty)[2] or tNow; end
 
 			-- Custom Debuff?
 			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
-			if tDebuffConfig[1] then -- Color?
+
+			if tDebuffConfig[1] and ((tDebuffConfig[3] and tUnitCaster == "player") or (tDebuffConfig[4] and tUnitCaster ~= "player")) then -- Color?
 				sCurChosenType, sCurChosenName, sCurChosenSpellId = 6, tName, tSpellId; -- VUHDO_DEBUFF_TYPE_CUSTOM
 			end
 
 			if sCurIcons[tName] then tStacks = tStacks + sCurIcons[tName][3]; end
 
-			if tDebuffConfig[2] then -- Icon?
+			if tDebuffConfig[2] and ((tDebuffConfig[3] and tUnitCaster == "player") or (tDebuffConfig[4] and tUnitCaster ~= "player")) then -- Icon?
 				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId, tCnt);
 			end
 
@@ -486,6 +489,18 @@ function VUHDO_initDebuffs()
 
 		VUHDO_CUSTOM_DEBUFF_CONFIG[tDebuffName][1] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isColor"];
 		VUHDO_CUSTOM_DEBUFF_CONFIG[tDebuffName][2] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isIcon"];
+
+		if VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isMine"] == nil then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isMine"] = true;
+		end
+
+		VUHDO_CUSTOM_DEBUFF_CONFIG[tDebuffName][3] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isMine"];
+
+		if VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isOthers"] == nil then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isOthers"] = true;
+		end
+
+		VUHDO_CUSTOM_DEBUFF_CONFIG[tDebuffName][4] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tDebuffName]["isOthers"];
 	end
 
 	for tDebuffName, _ in pairs(VUHDO_CUSTOM_DEBUFF_CONFIG) do

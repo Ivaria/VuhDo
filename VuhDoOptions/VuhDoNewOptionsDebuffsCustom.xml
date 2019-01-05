@@ -181,7 +181,7 @@
 
 			<Frame name="$parentStorePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="235" y="358" />
+					<AbsDimension x="235" y="410" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -211,7 +211,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-180" />
+									<AbsDimension x="13" y="-214" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -226,7 +226,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-180" />
+									<AbsDimension x="125" y="-214" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -281,59 +281,6 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
-
-					<Frame name="$parentSoundLabel" inherits="VuhDoLabelFrameTemplate">
-						<Size>
-							<AbsDimension x="120" y="18" />
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="43" y="-220" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer>
-								<FontString name="$parentLabel" text="VUHDO_I18N_SOUND" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
-
-					<Button name="$parentSoundCombo" inherits="VuhDoComboBoxTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="43" y="-233" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								self:SetAttribute("custom_function", VUHDO_notifySoundSelect);
-							</OnLoad>
-						</Scripts>
-					</Button>
-
-					<Frame name="$parentListLabel" inherits="VuhDoLabelFrameTemplate">
-						<Size>
-							<AbsDimension x="120" y="18" />
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="43" y="-65" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer>
-								<FontString name="$parentLabel" text="VUHDO_I18N_DEBUFF_LIST" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
 
 					<Button name="$parentSelectComboBox" inherits="VuhDoScrollComboBoxTemplate">
 						<Size>
@@ -411,11 +358,30 @@
 						</Scripts>
 					</EditBox>
 
+					<Frame name="$parentListLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="120" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="43" y="-65" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_DEBUFF_LIST" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
 					<CheckButton name="$parentAliveTimeCheckButton" text="VUHDO_I18N_ALIVE_TIME" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-275" />
+									<AbsDimension x="13" y="-180" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -430,7 +396,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-275" />
+									<AbsDimension x="125" y="-180" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -441,6 +407,76 @@
 						</Scripts>
 					</CheckButton>
 
+					<Frame name="$parentSelectLabel" inherits="VuhDoLabelFrameTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-248" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_SOURCE_SPELL" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<CheckButton name="$parentMineCheckButton" text="VUHDO_I18N_MINE" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-268" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+
+					<CheckButton name="$parentOthersCheckButton" text="VUHDO_I18N_OTHERS" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-268" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</CheckButton>
+
+					<Frame name="$parentSoundLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="120" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="43" y="-323" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_SOUND" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Button name="$parentSoundCombo" inherits="VuhDoComboBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="43" y="-338" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								self:SetAttribute("custom_function", VUHDO_notifySoundSelect);
+							</OnLoad>
+						</Scripts>
+					</Button>
+
 					<Button name="$parentSaveButton" text="VUHDO_I18N_SAVE" inherits="VuhDoButtonTemplate">
 						<Size>
 							<AbsDimension x="100" y="32" />
@@ -448,7 +484,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-313" />
+									<AbsDimension x="13" y="-368" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -466,7 +502,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-313" />
+									<AbsDimension x="125" y="-368" />
 								</Offset>
 							</Anchor>
 						</Anchors>

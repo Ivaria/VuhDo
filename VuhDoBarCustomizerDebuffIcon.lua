@@ -54,7 +54,9 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		["timer"] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["timer"],
 		["isStacks"] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isStacks"],
 		["isAliveTime"] = false,
-		["isFullDuration"] = false
+		["isFullDuration"] = false,
+		["isMine"] = true,
+		["isOthers"] = true
 	};
 
 end

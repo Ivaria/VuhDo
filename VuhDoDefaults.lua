@@ -421,6 +421,8 @@ local function VUHDO_customDebuffsAddDefaultSettings(aBuffName)
 			["animate"] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["animate"],
 			["timer"] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["timer"],
 			["isStacks"] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isStacks"],
+			["isMine"] = true,
+			["isOthers"] = true,
 		}
 	end
 
@@ -740,6 +742,8 @@ local VUHDO_DEFAULT_CU_DE_STORED_SETTINGS = {
 	["isStacks"] = true,
 	["isAliveTime"] = false,
 	["isFullDuration"] = false,
+	["isMine"] = true,
+	["isOthers"] = true,
 
 --	["color"] = {
 --		["R"] = 0.6,

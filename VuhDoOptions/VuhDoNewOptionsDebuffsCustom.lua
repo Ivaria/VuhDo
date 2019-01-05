@@ -60,6 +60,8 @@ VUHDO_TIMER_MODEL = nil;
 VUHDO_STACKS_MODEL = nil;
 VUHDO_ALIVE_TIME_MODEL = nil;
 VUHDO_FULL_DURATION_MODEL = nil;
+VUHDO_MINE_MODEL = nil;
+VUHDO_OTHERS_MODEL = nil;
 VUHDO_COLOR_SWATCH_MODEL = nil;
 VUHDO_SOUND_MODEL = nil;
 
@@ -127,6 +129,22 @@ function VUHDO_customDebuffUpdateEditBox(anEditBox)
 		tCheckButton = _G[tPanelName .. "FullDurationCheckButton"];
 		VUHDO_lnfSetModel(tCheckButton, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".isFullDuration");
 		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+		
+		if VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue]["isMine"] == nil then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue]["isMine"] = true;
+		end
+
+		tCheckButton = _G[tPanelName .. "MineCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".isMine");	
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		if VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue]["isOthers"] == nil then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue]["isOthers"] = true;
+		end
+
+		tCheckButton = _G[tPanelName .. "OthersCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".isOthers");
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
 	else
 		anEditBox:SetTextColor(0.8, 0.8, 1, 1);
 
@@ -139,6 +157,8 @@ function VUHDO_customDebuffUpdateEditBox(anEditBox)
 		VUHDO_STACKS_MODEL = VUHDO_CONFIG.CUSTOM_DEBUFF.isStacks;
 		VUHDO_ALIVE_TIME_MODEL = false;
 		VUHDO_FULL_DURATION_MODEL = false;
+		VUHDO_MINE_MODEL = true;
+		VUHDO_OTHERS_MODEL = true;
 		VUHDO_COLOR_SWATCH_MODEL = VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM]);
 		VUHDO_SOUND_MODEL = VUHDO_CONFIG.CUSTOM_DEBUFF.SOUND;
 
@@ -177,6 +197,14 @@ function VUHDO_customDebuffUpdateEditBox(anEditBox)
 
 		tCheckButton = _G[tPanelName .. "FullDurationCheckButton"];
 		VUHDO_lnfSetModel(tCheckButton, "VUHDO_FULL_DURATION_MODEL");
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tCheckButton = _G[tPanelName .. "MineCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_MINE_MODEL");
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tCheckButton = _G[tPanelName .. "OthersCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_OTHERS_MODEL");
 		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
 	end
 end
@@ -240,6 +268,12 @@ function VUHDO_saveCustomDebuffOnClick(aButton)
 
 	tCheckButton = _G[tPanelName .. "FullDurationCheckButton"];
 	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isFullDuration = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
+
+	tCheckButton = _G[tPanelName .. "MineCheckButton"];
+	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isMine = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
+
+	tCheckButton = _G[tPanelName .. "OthersCheckButton"];
+	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isOthers = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
 
 	tComboBox = _G[tPanelName .. "SoundCombo"];
 	tSoundName = _G[tComboBox:GetName() .. "Text"]:GetText();
