@@ -22,6 +22,7 @@ Improvements:
 --  See 'VuhDo Options > Debuffs > Custom > Store / Delete > Others'
 --  Both checkboxes are selected by default
 --  These defaults are inherited by existing custom debuffs
+-- Added auto-activate of profile due to a group size of '3'
 
 
 --------------------------------------------------------------
