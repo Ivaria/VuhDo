@@ -630,6 +630,8 @@ VUHDO_I18N_TT.K570 = "The duration that the spell trace icon should be shown.";
 VUHDO_I18N_TT.K571 = "Trigger the spell trace when the spell is cast by yourself.";
 VUHDO_I18N_TT.K572 = "Trigger the spell trace when the spell is cast by others.";
 VUHDO_I18N_TT.K573 = "If you check this button the currently selected arrangement will automatically enabled if you are in a group of up to 3 players.";
+VUHDO_I18N_TT.K574 = "Select this to show a 3 man party raid for testing."
+VUHDO_I18N_TT.K575 = "Select this to show a 15 man party raid for testing."
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";

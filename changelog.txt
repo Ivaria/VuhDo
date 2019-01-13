@@ -23,6 +23,7 @@ Improvements:
 --  Both checkboxes are selected by default
 --  These defaults are inherited by existing custom debuffs
 -- Added auto-activate of profile due to a group size of '3'
+-- Added '3' and '15' man group sizes for 'Hold to Test' demo mode
 
 
 --------------------------------------------------------------
