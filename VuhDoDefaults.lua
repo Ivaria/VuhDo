@@ -1807,6 +1807,49 @@ function VUHDO_loadDefaultConfig()
 		272506  -- Explosive Corruption
 	);
 
+	-- 8.1 - Battle for Azeroth - Battle of Dazar'alor
+	VUHDO_addCustomSpellIds(42,
+		-- [[ Battle of Dazar'alor ]]
+		-- Champion of the Light
+		-- Grong (Horde & Alliance)
+		285875, -- Rending Bite
+		282215, -- Megatomic Seeker Missile
+		282471, -- Voodoo Blast
+		285659, -- Apetagonizer Core
+		286434, -- Necrotic Core
+		-- Jadefire Masters
+		285632, -- Stalking
+		286988, -- Searing Embers
+		-- Treasure Guardian Opulence
+		287072, -- Liquid Gold
+		283507, -- Volatile Charge
+		284519, -- Pulse Quickening Toxin
+		-- Conclave of the Chosen
+		282444, -- Lacerating Claws
+		286811, -- Akunda's Wrath
+		282209, -- Mark of Prey
+		-- King Rastakhan
+		285213, -- Caress of Death
+		288449, -- Death's Door
+		284662, -- Seal of Purification
+		285349, -- Plague of Fire
+		284781, -- Grevious Axe
+		-- High Tinker Mekkatorque
+		286480, -- Anti-Tampering Shock
+		282182, -- Buster Cannon
+		287757, -- Gigavolt Charge
+		283411, -- Gigavolt Blast
+		-- Stormwall Blockade
+		284405, -- Tempting Song
+		285000, -- Kelp Wrapping
+		285350, -- Storm's Wail
+		-- Lady Jaina Proudmoore
+		287365, -- Searing Pitch
+		288218, -- Broadside
+		289220, -- Heart of Frost
+		288038  -- Marked Target
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
