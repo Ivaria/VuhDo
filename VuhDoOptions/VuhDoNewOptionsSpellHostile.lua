@@ -45,40 +45,9 @@ end
 
 
 --
-local tActionLowerName;
-local function VUHDO_isHostileActionValid(anActionName)
-
-	if (anActionName == nil or "" == anActionName) then
-		return true;
-	end
-
-	tActionLowerName = strlower(anActionName);
-
-	if (VUHDO_SPELL_KEY_ASSIST == tActionLowerName
-	 or VUHDO_SPELL_KEY_FOCUS == tActionLowerName
-	 or VUHDO_SPELL_KEY_TARGET == tActionLowerName 
-	 or VUHDO_SPELL_KEY_EXTRAACTIONBUTTON == tActionLowerName 
-	 or VUHDO_SPELL_KEY_MOUSELOOK == tActionLowerName) then
-		return "Command", 0.8, 1, 0.8;
-	end
-
-	if (GetMacroIndexByName(anActionName) ~= 0) then
-		return "Macro", 0.8, 0.8, 1;
-	end
-
-	if (VUHDO_isSpellKnown(anActionName)) then
-		return "Spell", 1, 0.8, 0.8;
-	end
-
-	return nil;
-end
-
-
-
---
 local tText, tLabel, tR, tG, tB;
 function VUHDO_newOptionsSpellEditBoxCheckHostileSpell(anEditBox)
-	tText, tR, tG, tB = VUHDO_isHostileActionValid(anEditBox:GetText());
+	tText, tR, tG, tB = VUHDO_isActionValid(anEditBox:GetText(), false, true);
 	tLabel = _G[anEditBox:GetName() .. "Hint"];
 	if (tText ~= nil) then
 		anEditBox:SetTextColor(1, 1, 1, 1);
