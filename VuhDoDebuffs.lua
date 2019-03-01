@@ -298,7 +298,7 @@ function VUHDO_determineDebuff(aUnit)
 		tNow = GetTime();
 
 		for tCnt = 1, huge do
-			tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, tUnitCaster, _, _, tSpellId, _, tIsBossDebuff = UnitDebuff(aUnit, tCnt, false);
+			tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, tUnitCaster, _, _, tSpellId, _, tIsBossDebuff = UnitDebuff(aUnit, tCnt);
 			if not tIcon then 
 				break;
 			end
@@ -353,16 +353,16 @@ function VUHDO_determineDebuff(aUnit)
 		end
 
 		for tCnt = 1, huge do
-			tName, tIcon, tStacks, _, tDuration, tExpiry, _, _, _, tSpellId = UnitBuff(aUnit, tCnt);
+			tName, tIcon, tStacks, _, tDuration, tExpiry, tUnitCaster, _, _, tSpellId = UnitBuff(aUnit, tCnt);
 			if not tIcon then	break; end
 
 			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
 
-			if tDebuffConfig[1] then -- Set color
+			if tDebuffConfig[1] and ((tDebuffConfig[3] and tUnitCaster == "player") or (tDebuffConfig[4] and tUnitCaster ~= "player")) then -- Color?
 				sCurChosenType, sCurChosenName, sCurChosenSpellId = 6, tName, tSpellId; -- VUHDO_DEBUFF_TYPE_CUSTOM
 			end
 
-			if tDebuffConfig[2] then -- Set icon
+			if tDebuffConfig[2] and ((tDebuffConfig[3] and tUnitCaster == "player") or (tDebuffConfig[4] and tUnitCaster ~= "player")) then -- Icon?
 				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks or 0, tDuration, true, tSpellId, tCnt);
 			end
 		end

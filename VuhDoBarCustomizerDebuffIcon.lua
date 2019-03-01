@@ -280,3 +280,12 @@ function VUHDO_getLatestCustomDebuff(aUnit)
 
 	return tDebuffInfo[1], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6];
 end
+
+
+--
+function VUHDO_getDebuffIcons()
+
+	return VUHDO_DEBUFF_ICONS;
+
+end
+

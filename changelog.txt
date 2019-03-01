@@ -11,6 +11,7 @@ Known issues:
 
 Bugfixes:
 -- Fixed hostile spells options UI recognition of talents and items
+-- Fixed custom debuff spell source filter when aura is a buff
 
 
 Improvements:
