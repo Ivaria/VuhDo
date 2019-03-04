@@ -373,7 +373,7 @@ function VUHDO_determineDebuff(aUnit)
 
 			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] then 
 				-- tExpiry, tStacks, tIcon
-				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1] };
+				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7] };
 
 				VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7]);
 
@@ -555,4 +555,12 @@ function VUHDO_resetDebuffsFor(aUnit)
 	twipe(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]);
 end
 
+
+
+--
+function VUHDO_getUnitCustomDebuffs()
+	
+	return VUHDO_UNIT_CUSTOM_DEBUFFS;
+
+end
 

@@ -12,6 +12,8 @@ Known issues:
 Bugfixes:
 -- Fixed hostile spells options UI recognition of talents and items
 -- Fixed custom debuff spell source filter when aura is a buff
+-- Fixed unnecessary shield value updates for irrelevant spells
+-- Fixed shield overwrite detection when new shield amount is smaller
 
 
 Improvements:

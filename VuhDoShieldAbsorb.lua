@@ -155,12 +155,11 @@ local function VUHDO_updateShieldValue(aUnit, aShieldName, anAmount, aDuration)
 		return;
 	end
 
-	if aDuration and VUHDO_SHIELD_LEFT[aUnit][aShieldName] <= anAmount then
+	if aDuration then
 		VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] = GetTime() + aDuration;
+		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 		--VUHDO_xMsg("Shield overwritten");
-	end
-
-	if VUHDO_SHIELD_SIZE[aUnit][aShieldName] < anAmount then
+	elseif VUHDO_SHIELD_SIZE[aUnit][aShieldName] < anAmount then
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 	end
 
@@ -311,7 +310,7 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 			VUHDO_removeShield(tUnit, aShieldName);
 			VUHDO_DEBUFF_SHIELDS[tUnit] = nil;
 		end
-	elseif "SPELL_HEAL" == aMessage or "SPELL_PERIODIC_HEAL" == aMessage
+	elseif ("SPELL_HEAL" == aMessage or "SPELL_PERIODIC_HEAL" == aMessage)
 		and VUHDO_DEBUFF_SHIELDS[tUnit]
 		and (tonumber(anAbsorbAmount) or 0) > 0 then
 		tShieldName = VUHDO_DEBUFF_SHIELDS[tUnit];
