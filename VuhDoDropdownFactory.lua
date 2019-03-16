@@ -280,23 +280,53 @@ function VUHDO_miniMapDropDown_Initialize(aFrame, aLevel)
 
 	if aLevel > 1 then
 		if "S" == UIDROPDOWNMENU_MENU_VALUE then
-			for _, tSetup in ipairs(VUHDO_PROFILES) do
+			local tSortedProfileNames = { };
+
+			for tProfileIndex, tProfile in ipairs(VUHDO_PROFILES) do
+				tinsert(tSortedProfileNames, { tProfileIndex, tProfile["NAME"] });
+			end
+			
+			table.sort(tSortedProfileNames, 
+				function(anInfo, anotherInfo)
+					return anInfo[2] < anotherInfo[2];
+				end
+			);
+
+			for _, tSortedProfile in ipairs(tSortedProfileNames) do
+				local tSetup = VUHDO_PROFILES[tSortedProfile[1]];
+
 				tInfo = UIDropDownMenu_CreateInfo();
 				tInfo["text"] = tSetup["NAME"];
 				tInfo["arg1"] = tSetup["NAME"];
 				tInfo["func"] = function(_, aName) VUHDO_loadProfile(aName) end;
 				tInfo["checked"] = tSetup["NAME"] == VUHDO_CONFIG["CURRENT_PROFILE"];
 				tInfo["level"] = 2;
+
 				UIDropDownMenu_AddButton(tInfo, 2);
 			end
 		elseif "K" == UIDROPDOWNMENU_MENU_VALUE then
-			for tName, _ in pairs(VUHDO_SPELL_LAYOUTS) do
+			local tSortedKeyLayoutNames = { };
+
+			for tKeyLayoutName, _ in pairs(VUHDO_SPELL_LAYOUTS) do
+				tinsert(tSortedKeyLayoutNames, { tKeyLayoutName, tKeyLayoutName });
+			end
+			
+			table.sort(tSortedKeyLayoutNames, 
+				function(anInfo, anotherInfo)
+					return anInfo[1] < anotherInfo[1];
+				end
+			);
+
+			for _, tSortedKeyLayout in ipairs(tSortedKeyLayoutNames) do
+				local tName = tSortedKeyLayout[1];
+
 				tInfo = UIDropDownMenu_CreateInfo();
 				tInfo["text"] = tName;
 				tInfo["arg1"] = tName;
 				tInfo["func"] = function(_, aName) VUHDO_activateLayout(aName) end;
 				tInfo["checked"] = tName == VUHDO_SPEC_LAYOUTS["selected"];
 				tInfo["level"] = 2;
+
 				UIDropDownMenu_AddButton(tInfo, 2);
 			end
 		end
