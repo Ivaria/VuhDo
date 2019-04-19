@@ -19,6 +19,8 @@ local sShowPanels;
 local sIsHideEmptyAndClickThrough;
 local sEmpty = { };
 
+local tEmptyColor = { };
+
 local VUHDO_LibSharedMedia;
 local VUHDO_getActionPanelOrStub;
 local VUHDO_getPanelButtons;
@@ -345,7 +347,7 @@ local VUHDO_BLIZZ_EVENTS = {
 	"UNIT_FACTION",
 	"UNIT_FLAGS",
 	"UNIT_HEAL_PREDICTION",
-	"UNIT_HEALTH",
+--	"UNIT_HEALTH",
 	"UNIT_HEALTH_FREQUENT",
 	"UNIT_LEVEL",
 	"UNIT_MAXHEALTH",
@@ -378,7 +380,7 @@ local VUHDO_FIX_EVENTS = {
 	"UNIT_AURA",
 	"UNIT_COMBAT",
 	"UNIT_HEAL_PREDICTION",
-	"UNIT_HEALTH",
+--	"UNIT_HEALTH",
 	"UNIT_HEALTH_FREQUENT",
 	"UNIT_MAXHEALTH",
 	"UNIT_MAXPOWER",
@@ -785,6 +787,27 @@ function VUHDO_textColor(aColor)
 end
 
 
+
+--
+local tCopy = { };
+function VUHDO_copyColor(aColor)
+	if not aColor then return tEmptyColor; end
+	tCopy["R"], tCopy["G"], tCopy["B"], tCopy["O"] = aColor["R"], aColor["G"], aColor["B"], aColor["O"];
+	tCopy["TR"], tCopy["TG"], tCopy["TB"], tCopy["TO"] = aColor["TR"], aColor["TG"], aColor["TB"], aColor["TO"];
+	tCopy["useBackground"], tCopy["useText"], tCopy["useOpacity"] = aColor["useBackground"], aColor["useText"], aColor["useOpacity"];
+	return tCopy;
+end
+
+
+
+--
+local tSummand;
+function VUHDO_brightenColor(aColor, aFactor)
+	if not aColor then return; end
+	tSummand = aFactor - 1;
+	aColor["R"], aColor["G"], aColor["B"] = (aColor["R"] or 0) + tSummand, (aColor["G"] or 0) + tSummand, (aColor["B"] or 0) + tSummand;
+	return aColor;
+end
 
 
 

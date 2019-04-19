@@ -35,6 +35,28 @@ end
 
 
 --
+local function VUHDO_comboPointsCalculator(anInfo)
+	if anInfo["connected"] and not anInfo["dead"] then
+		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS);
+	else
+		return 0, 0;
+	end
+end
+
+
+
+--
+local function VUHDO_soulShardsCalculator(anInfo)
+	if anInfo["connected"] and not anInfo["dead"] then
+		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS);
+	else
+		return 0, 0;
+	end
+end
+
+
+
+--
 local tAmountInc;
 local function VUHDO_overhealCalculator(anInfo)
 	tAmountInc = VUHDO_getIncHealOnUnit(anInfo["unit"]);
@@ -192,6 +214,18 @@ VUHDO_TEXT_PROVIDERS = {
 		["calculator"] = VUHDO_holyPowerCalculator,
 		["validator"] = VUHDO_absoluteValidator,
 		["interests"] = { VUHDO_UPDATE_OWN_HOLY_POWER, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+	["COMBO_POINTS_N"] = {
+		["displayName"] = "Combo Points: <#n>",
+		["calculator"] = VUHDO_comboPointsCalculator,
+		["validator"] = VUHDO_absoluteValidator,
+		["interests"] = { VUHDO_UPDATE_COMBO_POINTS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+	["SOUL_SHARDS_N"] = {
+		["displayName"] = "Soul Shards: <#n>",
+		["calculator"] = VUHDO_soulShardsCalculator,
+		["validator"] = VUHDO_absoluteValidator,
+		["interests"] = { VUHDO_UPDATE_SOUL_SHARDS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
 	},
 	["MANA_PERCENT"] = {
 		["displayName"] = "Mana: <#n>%",

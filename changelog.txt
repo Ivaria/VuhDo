@@ -14,6 +14,14 @@ Bugfixes:
 
 Improvements:
 -- Minimap icon profile and key layout dropdown menus are now sorted
+-- Added new bouquet validator 'Flag: Own Combo Points =='
+-- Added new default bouquet 'Player Combo Points'
+-- Added new text provider 'Combo Points: <#n>'
+-- Added new bouquet validator 'Flag: Own Soul Shards =='
+-- Added new default bouquet 'Player Soul Shards'
+-- Added new text provider 'Soul Shards: <#n>'
+-- Listen to UNIT_HEALTH_FREQUENT events exclusively
+--   Work around a Blizzard bug that triplicates health events
 
 
 --------------------------------------------------------------

@@ -176,6 +176,7 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 			end
 		end
 	end
+
 	tIconInfo = { anIcon, -1, aName, anExpiry, aStacks, aDuration, aSpellId };
 	VUHDO_DEBUFF_ICONS[aUnit][tSlot] = tIconInfo;
 

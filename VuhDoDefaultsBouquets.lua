@@ -444,6 +444,80 @@ VUHDO_DEFAULT_CHI_BOUQUET = {
 
 
 
+VUHDO_DEFAULT_COMBO_POINTS_BOUQUET = {
+	[VUHDO_I18N_DEF_PLAYER_COMBO_POINTS] = {
+		{
+			["name"] = "OWN_COMBO_POINTS_EQUALS",
+			["mine"] = true, ["icon"] = 14,
+			["color"] = VUHDO_makeFullColorForBouquet(0.6, 1, 0.6, 1,   0.6, 1, 0.6, 1),
+			["custom"] = { [1] = 5, ["radio"] = 1, ["bright"] = 1 },
+		},
+		{
+			["name"] = "OWN_COMBO_POINTS_EQUALS",
+			["mine"] = true, ["icon"] = 13,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 0.4, 1,   1, 1, 0.4, 1),
+			["custom"] = { [1] = 4, ["radio"] = 1, ["bright"] = 1 },
+		},
+		{
+			["name"] = "OWN_COMBO_POINTS_EQUALS",
+			["mine"] = true, ["icon"] = 12,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 0.4, 1,   1, 1, 0.4, 1),
+			["custom"] = { [1] = 3, ["radio"] = 1, ["bright"] = 1 },
+		},
+		{
+			["name"] = "OWN_COMBO_POINTS_EQUALS",
+			["mine"] = true, ["icon"] = 11,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 0.75, 0.4, 1,   1, 0.75, 0.4, 1),
+			["custom"] = { [1] = 2, ["radio"] = 1, ["bright"] = 1	},
+		},
+		{
+			["name"] = "OWN_COMBO_POINTS_EQUALS",
+			["mine"] = true, ["icon"] = 10,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 0.4, 0.4, 1,   1, 0.4, 0.4, 1),
+			["custom"] = { [1] = 1, ["radio"] = 1, ["bright"] = 1	},
+		},
+	},
+};
+
+
+
+VUHDO_DEFAULT_SOUL_SHARDS_BOUQUET = {
+	[VUHDO_I18N_DEF_PLAYER_SOUL_SHARDS] = {
+		{
+			["name"] = "OWN_SOUL_SHARDS_EQUALS",
+			["mine"] = true, ["icon"] = 14,
+			["color"] = VUHDO_makeFullColorForBouquet(0.6, 1, 0.6, 1,   0.6, 1, 0.6, 1),
+			["custom"] = { [1] = 5, ["radio"] = 1, ["bright"] = 1 },
+		},
+		{
+			["name"] = "OWN_SOUL_SHARDS_EQUALS",
+			["mine"] = true, ["icon"] = 13,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 0.4, 1,   1, 1, 0.4, 1),
+			["custom"] = { [1] = 4, ["radio"] = 1, ["bright"] = 1 },
+		},
+		{
+			["name"] = "OWN_SOUL_SHARDS_EQUALS",
+			["mine"] = true, ["icon"] = 12,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 0.4, 1,   1, 1, 0.4, 1),
+			["custom"] = { [1] = 3, ["radio"] = 1, ["bright"] = 1 },
+		},
+		{
+			["name"] = "OWN_SOUL_SHARDS_EQUALS",
+			["mine"] = true, ["icon"] = 11,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 0.75, 0.4, 1,   1, 0.75, 0.4, 1),
+			["custom"] = { [1] = 2, ["radio"] = 1, ["bright"] = 1	},
+		},
+		{
+			["name"] = "OWN_SOUL_SHARDS_EQUALS",
+			["mine"] = true, ["icon"] = 10,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 0.4, 0.4, 1,   1, 0.4, 0.4, 1),
+			["custom"] = { [1] = 1, ["radio"] = 1, ["bright"] = 1	},
+		},
+	},
+};
+
+
+
 VUHDO_DEFAULT_ROLE_ICON_BOUQUET = {
 	[VUHDO_I18N_DEF_ROLE_ICON] = {
 		{
@@ -1455,6 +1529,14 @@ function VUHDO_loadDefaultBouquets()
 		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_ICON_IS_PHASED);
 	end
 	VUHDO_DEFAULT_ICON_IS_PHASED = nil;
+
+	if VUHDO_BOUQUETS["VERSION"] < 22 then
+		VUHDO_BOUQUETS["VERSION"] = 22;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_COMBO_POINTS_BOUQUET);
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_SOUL_SHARDS_BOUQUET);
+	end
+	VUHDO_DEFAULT_COMBO_POINTS_BOUQUET = nil;
+	VUHDO_DEFAULT_SOUL_SHARDS_BOUQUET = nil;
 
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();

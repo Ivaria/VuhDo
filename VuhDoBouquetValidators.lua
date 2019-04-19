@@ -106,13 +106,9 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	sIsDistance = VUHDO_CONFIG["DIRECTION"]["isDistanceText"];
 end
 
+
+
 local tEmptyInfo = { };
-local tEmptyColor = { };
-
-----------------------------------------------------------
-
-
-
 local VUHDO_CHARGE_COLORS = {
 	"HOT_CHARGE_1",
 	"HOT_CHARGE_2",
@@ -122,27 +118,7 @@ local VUHDO_CHARGE_COLORS = {
 
 
 
---
-local tCopy = { };
-local function VUHDO_copyColor(aColor)
-	if not aColor then return tEmptyColor; end
-	tCopy["R"], tCopy["G"], tCopy["B"], tCopy["O"] = aColor["R"], aColor["G"], aColor["B"], aColor["O"];
-	tCopy["TR"], tCopy["TG"], tCopy["TB"], tCopy["TO"] = aColor["TR"], aColor["TG"], aColor["TB"], aColor["TO"];
-	tCopy["useBackground"], tCopy["useText"], tCopy["useOpacity"] = aColor["useBackground"], aColor["useText"], aColor["useOpacity"];
-	return tCopy;
-end
-
-
-
---
-local tSummand;
-local function VUHDO_brightenColor(aColor, aFactor)
-	if not aColor then return; end
-	tSummand = aFactor - 1;
-	aColor["R"], aColor["G"], aColor["B"] = (aColor["R"] or 0) + tSummand, (aColor["G"] or 0) + tSummand, (aColor["B"] or 0) + tSummand;
-	return aColor;
-end
-
+----------------------------------------------------------
 
 
 
@@ -508,6 +484,38 @@ local function VUHDO_chiEqualsValidator(anInfo, someCustom)
 		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_CHI);
 		if tPower == someCustom["custom"][1] then
 			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_CHI);
+		else
+			return false, nil, -1, -1, -1;
+		end
+	else
+		return false, nil, tPower, -1, -1;
+	end
+end
+
+
+
+--
+local function VUHDO_comboPointsEqualsValidator(anInfo, someCustom)
+	if anInfo["connected"] and not anInfo["dead"] then
+		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS);
+		if tPower == someCustom["custom"][1] then
+			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS);
+		else
+			return false, nil, -1, -1, -1;
+		end
+	else
+		return false, nil, tPower, -1, -1;
+	end
+end
+
+
+
+--
+local function VUHDO_soulShardsEqualsValidator(anInfo, someCustom)
+	if anInfo["connected"] and not anInfo["dead"] then
+		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS);
+		if tPower == someCustom["custom"][1] then
+			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS);
 		else
 			return false, nil, -1, -1, -1;
 		end
@@ -1479,6 +1487,20 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_chiEqualsValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER,
 		["interests"] = { VUHDO_UPDATE_CHI, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+
+	["OWN_COMBO_POINTS_EQUALS"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_OWN_COMBO_POINTS_EQUALS,
+		["validator"] = VUHDO_comboPointsEqualsValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER,
+		["interests"] = { VUHDO_UPDATE_COMBO_POINTS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+
+	["OWN_SOUL_SHARDS_EQUALS"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_OWN_SOUL_SHARDS_EQUALS,
+		["validator"] = VUHDO_soulShardsEqualsValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER,
+		["interests"] = { VUHDO_UPDATE_SOUL_SHARDS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
 	},
 
 	["DURATION_ABOVE"] = {

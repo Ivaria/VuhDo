@@ -442,11 +442,11 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
 		end
 
-	elseif "UNIT_HEALTH" == anEvent then
+--	elseif "UNIT_HEALTH" == anEvent then
 		-- as of patch 7.1 we are seeing empty units on health related events
-		if anArg1 and (VUHDO_RAID or tEmptyRaid)[anArg1] then 
-			VUHDO_updateHealth(anArg1, 2); -- VUHDO_UPDATE_HEALTH
-		end
+--		if anArg1 and (VUHDO_RAID or tEmptyRaid)[anArg1] then 
+--			VUHDO_updateHealth(anArg1, 2); -- VUHDO_UPDATE_HEALTH
+--		end
 
 	-- TODO: is it ok to listen to both UNIT_HEALTH and UNIT_HEALTH_FREQUENT?
 	-- TODO: add options based on desired responsiveness and performance
@@ -468,6 +468,10 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 35); end -- VUHDO_UPDATE_CHI
 			elseif "HOLY_POWER" == anArg2 then
 				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 31); end -- VUHDO_UPDATE_OWN_HOLY_POWER
+			elseif "COMBO_POINTS" == anArg2 then
+				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 40); end -- VUHDO_UPDATE_OWN_COMBO_POINTS
+			elseif "SOUL_SHARDS" == anArg2 then
+				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 41); end -- VUHDO_UPDATE_OWN_SOUL_SHARDS
 			elseif "ALTERNATE" == anArg2 then
 				VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
 			else
@@ -905,7 +909,9 @@ function VUHDO_updateGlobalToggles()
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_OTHER_POWERS)
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_ALT_POWER)
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_OWN_HOLY_POWER)
-	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_CHI),
+	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_CHI)
+		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_COMBO_POINTS) 
+		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SOUL_SHARDS),
 		"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "UNIT_POWER_FREQUENT"
 	);
 
@@ -1451,7 +1457,7 @@ end
 
 local VUHDO_ALL_EVENTS = {
 	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD",
-	"UNIT_HEALTH", "UNIT_HEALTH_FREQUENT", "UNIT_MAXHEALTH",
+	"UNIT_HEALTH_FREQUENT", "UNIT_MAXHEALTH", -- "UNIT_HEALTH",
 	"UNIT_AURA",
 	"UNIT_TARGET",
 	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",  
