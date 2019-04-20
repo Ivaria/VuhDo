@@ -10,6 +10,8 @@ Known issues:
 
 
 Bugfixes:
+-- Listen to UNIT_HEALTH_FREQUENT events exclusively
+--   Work around a Blizzard bug that triplicates health events
 
 
 Improvements:
@@ -20,8 +22,6 @@ Improvements:
 -- Added new bouquet validator 'Flag: Own Soul Shards =='
 -- Added new default bouquet 'Player Soul Shards'
 -- Added new text provider 'Soul Shards: <#n>'
--- Listen to UNIT_HEALTH_FREQUENT events exclusively
---   Work around a Blizzard bug that triplicates health events
 
 
 --------------------------------------------------------------
