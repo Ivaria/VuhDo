@@ -527,6 +527,38 @@ end
 
 
 --
+local function VUHDO_runesEqualsValidator(anInfo, someCustom)
+	if anInfo["connected"] and not anInfo["dead"] then
+		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
+		if tPower == someCustom["custom"][1] then
+			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
+		else
+			return false, nil, -1, -1, -1;
+		end
+	else
+		return false, nil, tPower, -1, -1;
+	end
+end
+
+
+
+--
+local function VUHDO_arcaneChargesEqualsValidator(anInfo, someCustom)
+	if anInfo["connected"] and not anInfo["dead"] then
+		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES);
+		if tPower == someCustom["custom"][1] then
+			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES);
+		else
+			return false, nil, -1, -1, -1;
+		end
+	else
+		return false, nil, tPower, -1, -1;
+	end
+end
+
+
+
+--
 local function VUHDO_durationAboveValidator(anInfo, someCustom)
 	if VUHDO_getIsCurrentBouquetActive() then
 		return VUHDO_getCurrentBouquetTimer() > someCustom["custom"][1], nil, -1, -1, -1;
@@ -1501,6 +1533,20 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_soulShardsEqualsValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER,
 		["interests"] = { VUHDO_UPDATE_SOUL_SHARDS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+
+	["OWN_RUNES_EQUALS"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_OWN_RUNES_EQUALS,
+		["validator"] = VUHDO_runesEqualsValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER,
+		["interests"] = { VUHDO_UPDATE_RUNES, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+
+	["OWN_ARCANE_CHARGES_EQUALS"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_OWN_ARCANE_CHARGES_EQUALS,
+		["validator"] = VUHDO_arcaneChargesEqualsValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER,
+		["interests"] = { VUHDO_UPDATE_ARCANE_CHARGES, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
 	},
 
 	["DURATION_ABOVE"] = {

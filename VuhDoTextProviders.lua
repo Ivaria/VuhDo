@@ -57,6 +57,28 @@ end
 
 
 --
+local function VUHDO_runesCalculator(anInfo)
+	if anInfo["connected"] and not anInfo["dead"] then
+		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_RUNES), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
+	else
+		return 0, 0;
+	end
+end
+
+
+
+--
+local function VUHDO_arcaneChargesCalculator(anInfo)
+	if anInfo["connected"] and not anInfo["dead"] then
+		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES);
+	else
+		return 0, 0;
+	end
+end
+
+
+
+--
 local tAmountInc;
 local function VUHDO_overhealCalculator(anInfo)
 	tAmountInc = VUHDO_getIncHealOnUnit(anInfo["unit"]);
@@ -226,6 +248,18 @@ VUHDO_TEXT_PROVIDERS = {
 		["calculator"] = VUHDO_soulShardsCalculator,
 		["validator"] = VUHDO_absoluteValidator,
 		["interests"] = { VUHDO_UPDATE_SOUL_SHARDS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+	["RUNES_N"] = {
+		["displayName"] = "Runes: <#n>",
+		["calculator"] = VUHDO_runesCalculator,
+		["validator"] = VUHDO_absoluteValidator,
+		["interests"] = { VUHDO_UPDATE_RUNES, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
+	},
+	["ARCANE_CHARGES_N"] = {
+		["displayName"] = "Arcane Charges: <#n>",
+		["calculator"] = VUHDO_arcaneChargesCalculator,
+		["validator"] = VUHDO_absoluteValidator,
+		["interests"] = { VUHDO_UPDATE_ARCANE_CHARGES, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
 	},
 	["MANA_PERCENT"] = {
 		["displayName"] = "Mana: <#n>%",

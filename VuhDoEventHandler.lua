@@ -469,9 +469,13 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			elseif "HOLY_POWER" == anArg2 then
 				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 31); end -- VUHDO_UPDATE_OWN_HOLY_POWER
 			elseif "COMBO_POINTS" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 40); end -- VUHDO_UPDATE_OWN_COMBO_POINTS
+				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 40); end -- VUHDO_UPDATE_COMBO_POINTS
 			elseif "SOUL_SHARDS" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 41); end -- VUHDO_UPDATE_OWN_SOUL_SHARDS
+				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 41); end -- VUHDO_UPDATE_SOUL_SHARDS
+			elseif "RUNES" == anArg2 then
+				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 42); end -- VUHDO_UPDATE_RUNES
+			elseif "ARCANE_CHARGES" == anArg2 then
+				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 43); end -- VUHDO_UPDATE_ARCANE_CHARGES
 			elseif "ALTERNATE" == anArg2 then
 				VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
 			else
@@ -911,7 +915,9 @@ function VUHDO_updateGlobalToggles()
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_OWN_HOLY_POWER)
 	 	or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_CHI)
 		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_COMBO_POINTS) 
-		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SOUL_SHARDS),
+		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SOUL_SHARDS) 
+		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_RUNES) 
+		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_ARCANE_CHARGES),
 		"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "UNIT_POWER_FREQUENT"
 	);
 

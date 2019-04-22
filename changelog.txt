@@ -22,6 +22,12 @@ Improvements:
 -- Added new bouquet validator 'Flag: Own Soul Shards =='
 -- Added new default bouquet 'Player Soul Shards'
 -- Added new text provider 'Soul Shards: <#n>'
+-- Added new bouquet validator 'Flag: Own Runes =='
+-- Added new default bouquet 'Player Runes'
+-- Added new text provider 'Runes: <#n>'
+-- Added new bouquet validator 'Flag: Own Arcane Charges =='
+-- Added new default bouquet 'Player Arcane Charges'
+-- Added new text provider 'Arcane Charges: <#n>'
 
 
 --------------------------------------------------------------

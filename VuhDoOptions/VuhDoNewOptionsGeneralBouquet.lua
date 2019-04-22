@@ -422,7 +422,7 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 				tSlider = _G[tSubPanel:GetName() .. "Slider"];
 				VUHDO_lnfSetModel(tSlider, tModel .. ".custom.##1");
 				tSpecialName = VUHDO_BOUQUETS["STORED"][tBouquetName][tIndex]["name"];
-				VUHDO_lnfSliderOnLoad(tSlider, VUHDO_BOUQUET_BUFFS_SPECIAL[tSpecialName]["displayName"], 0, 5, "");
+				VUHDO_lnfSliderOnLoad(tSlider, VUHDO_BOUQUET_BUFFS_SPECIAL[tSpecialName]["displayName"], 0, 6, "");
 				tSubPanel:Show();
 			elseif (VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName]["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_SECONDS) then
 				tSubPanel = _G[tInnerPanel:GetName() .. "PercentFrame"];
