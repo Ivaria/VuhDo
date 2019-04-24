@@ -12,6 +12,8 @@ Known issues:
 Bugfixes:
 -- Listen to UNIT_HEALTH_FREQUENT events exclusively
 --   Work around a Blizzard bug that triplicates health events
+-- Fixed Spell Trace for Holy Priest talent 'Trail of Light' 
+--   As of 8.1.0 this talent is now triggered by 'Heal'
 
 
 Improvements:

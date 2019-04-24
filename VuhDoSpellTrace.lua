@@ -91,7 +91,8 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 
 	-- special tracking for Holy Priest "Trail of Light"
 	if sShowTrailOfLight and sIsPlayerKnowsTrailOfLight and 
-		aSrcGuid == VUHDO_PLAYER_GUID and aSpellName == VUHDO_SPELL_ID.FLASH_HEAL then
+		aSrcGuid == VUHDO_PLAYER_GUID and 
+		(aSpellName == VUHDO_SPELL_ID.FLASH_HEAL or aSpellName == VUHDO_SPELL_ID.HEAL) then
 		if not VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1] or 
 			(VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1] and VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT[1][2] ~= aDstGuid) then
 			tinsert(
