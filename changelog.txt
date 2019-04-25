@@ -30,6 +30,7 @@ Improvements:
 -- Added new bouquet validator 'Flag: Own Arcane Charges =='
 -- Added new default bouquet 'Player Arcane Charges'
 -- Added new text provider 'Arcane Charges: <#n>'
+-- Added default custom debuffs for Crucible of Storms raid
 
 
 --------------------------------------------------------------

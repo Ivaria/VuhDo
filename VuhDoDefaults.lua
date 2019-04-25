@@ -1850,6 +1850,31 @@ function VUHDO_loadDefaultConfig()
 		288038  -- Marked Target
 	);
 
+	-- 8.1.5 - Battle for Azeroth - Crucible of Storms
+	VUHDO_addCustomSpellIds(43, 
+		-- [[ Crucible of Storms ]]
+		-- Restless Cabal
+		293300, -- Storm Essence
+		282540, -- Agent of Demise
+		282432, -- Crushing Doubt
+		287762, -- Crushing Doubt
+		131097, -- Crushing Doubt
+		131098, -- Crushing Doubt
+		282437, -- Crushing Doubt
+		282386, -- Aphotic Blast
+		283524, -- Aphotic Blast
+		293488, -- Oceanic Essence
+		-- Uu'nat
+		285345, -- Maddening Eyes of N'zoth
+		285652, -- Insatiable Torment
+		295609, -- Insatiable Torment
+		286770, -- Embrace of the Void
+		284733, -- Embrace of the Void
+		283053, -- Embrace of the Void
+		282738, -- Embrace of the Void
+		285367  -- Piercing Gaze of N'zoth
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
