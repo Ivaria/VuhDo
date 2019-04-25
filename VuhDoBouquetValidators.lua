@@ -527,9 +527,19 @@ end
 
 
 --
+local tIsRuneReady;
 local function VUHDO_runesEqualsValidator(anInfo, someCustom)
-	if anInfo["connected"] and not anInfo["dead"] then
-		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
+	if anInfo["unit"] ~= "player" then
+		return false, nil, -1, -1, -1;
+	elseif anInfo["connected"] and not anInfo["dead"] then
+		tPower = 0;
+
+		for i = 1, 6 do
+			_, _, tIsRuneReady = GetRuneCooldown(i);
+
+			tPower = tPower + (tIsRuneReady and 1 or 0);
+		end
+
 		if tPower == someCustom["custom"][1] then
 			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
 		else

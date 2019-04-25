@@ -57,9 +57,19 @@ end
 
 
 --
+local tReadyRuneCount;
+local tIsRuneReady;
 local function VUHDO_runesCalculator(anInfo)
-	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_RUNES), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
+	if anInfo["connected"] and not anInfo["dead"] and anInfo["unit"] == "player" then
+		tReadyRuneCount = 0;
+
+		for i = 1, 6 do
+			_, _, tIsRuneReady = GetRuneCooldown(i);
+
+			tReadyRuneCount = tReadyRuneCount + (tIsRuneReady and 1 or 0);
+		end
+
+		return tReadyRuneCount, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
 	else
 		return 0, 0;
 	end

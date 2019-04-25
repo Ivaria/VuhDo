@@ -688,6 +688,9 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_PHASE); 
 		end
 		
+	elseif "RUNE_POWER_UPDATE" == anEvent then
+		VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
+
 	else
 		VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 	end
@@ -1474,7 +1477,7 @@ local VUHDO_ALL_EVENTS = {
 	"LEARNED_SPELL_IN_TAB",
 	"PLAYER_FLAGS_CHANGED",
 	"PLAYER_LOGOUT",
-	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE",
+	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE", 
 	"UNIT_SPELLCAST_SENT", "UNIT_SPELLCAST_SUCCEEDED",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
 	"COMBAT_LOG_EVENT_UNFILTERED",
