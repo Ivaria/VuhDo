@@ -117,7 +117,6 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 				sDropdown = TargetFrameDropDown;
 			--[[elseif (UnitIsUnit(tUnit, "focus")) then
 				sDropdown = FocusFrameDropDown;]] -- Problem, wenn Fokus löschen
-
 			elseif UnitIsUnit(tUnit, "pet") then
 				sDropdown = PetFrameDropDown;
 			else
@@ -199,11 +198,13 @@ end
 local tUnit;
 local tHostSpell;
 local tSpellInfo;
+local tActionLow;
 local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex)
 
 	tUnit = aButton["raidid"];
+	tActionLow = strlower(anAction);
 
-	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= anAction) or VUHDO_isBossUnit(tUnit) then
+	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= tActionLow) or VUHDO_isBossUnit(tUnit) then
 		if not anIndex then
 			tSpellInfo = VUHDO_HOSTILE_SPELL_ASSIGNMENTS[VUHDO_KEYS_MODIFIER[aModiKey] .. aButtonId];
 			tHostSpell = tSpellInfo ~= nil and tSpellInfo[3] or "";
@@ -211,16 +212,16 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 			tHostSpell = VUHDO_SPELLS_KEYBOARD["HOSTILE_WHEEL"][anIndex][3];
 		end
 		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		if (tHostSpell or "") ~= "" or (anAction or "") ~= "" then
+		if (tHostSpell or "") ~= "" or (tActionLow or "") ~= "" then
 			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildTargetButtonMacroText(tUnit, anAction, tHostSpell));
+				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell));
 		else
 			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, nil);
 		end
 		return;
 	end
 
-	if (anAction or "") == "" then
+	if (tActionLow or "") == "" then
 		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, nil);
 		return;
 	else
