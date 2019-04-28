@@ -614,3 +614,7 @@ VUHDO_OWNER_2_PET = {
 	["raid39"] = "raidpet39",
 	["raid40"] = "raidpet40",
 };
+
+VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY = "_CuDe_Frame";
+VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY = "_CuDe_Icon";
+

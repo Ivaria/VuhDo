@@ -713,6 +713,15 @@ end
 
 
 --
+local function VUHDO_printAbout()
+
+	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v" .. VUHDO_VERSION .. " (use /vd). Currently maintained by Ivaria@US-Hyjal in honor of Marshy.");
+
+end
+
+
+
+--
 function VUHDO_slashCmd(aCommand)
 	local tParsedTexts = VUHDO_textParse(aCommand);
 	local tCommandWord = strlower(tParsedTexts[1]);
@@ -841,6 +850,9 @@ function VUHDO_slashCmd(aCommand)
 
 		VUHDO_xMsg(#tProfile, #tCompressed, #tUnCompressed);]]
 
+
+	elseif tCommandWord == "ab" or tCommandWord == "about" then
+		VUHDO_printAbout();
 
 	elseif aCommand == "?" or strfind(tCommandWord, "help")	or aCommand == "" then
 		local tLines = VUHDO_splitString(VUHDO_I18N_COMMAND_LIST, "§");
@@ -1535,5 +1547,6 @@ function VUHDO_OnLoad(anInstance)
 
 	anInstance:SetScript("OnEvent", VUHDO_OnEvent);
 	anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
-	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v" .. VUHDO_VERSION .. " (use /vd). Currently maintained by Ivaria@US-Hyjal in honor of Marshy.");
+
+	VUHDO_printAbout();
 end

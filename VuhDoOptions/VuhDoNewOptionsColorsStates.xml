@@ -8,7 +8,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="30" y="-300" />
+							<AbsDimension x="290" y="-200" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -196,7 +196,7 @@
 
 			<Frame name="$parentDebuffsPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="232" y="249" />
+					<AbsDimension x="232" y="330" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -465,6 +465,40 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF6");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_CUSTOM, VUHDO_I18N_CUSTOM);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K261);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentBarGlowTexture" inherits="VuhDoContextColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-240" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF_BAR_GLOW");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_BAR_GLOW_COLOR, VUHDO_I18N_BAR_GLOW_COLOR);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K261);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentIconGlowTexture" inherits="VuhDoContextColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-278" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF_ICON_GLOW");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_ICON_GLOW_COLOR, VUHDO_I18N_ICON_GLOW_COLOR);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K261);
 							</OnLoad>
 						</Scripts>

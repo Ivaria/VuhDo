@@ -56,7 +56,9 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		["isAliveTime"] = false,
 		["isFullDuration"] = false,
 		["isMine"] = true,
-		["isOthers"] = true
+		["isOthers"] = true,
+		["isBarGlow"] = false,
+		["isIconGlow"] = false,
 	};
 
 end
@@ -74,10 +76,14 @@ local tShieldPerc;
 local tName;
 local tButton;
 local tIsAnim;
+local tIsBarGlow;
+local tIsIconGlow;
 local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, anIsInit, aUnit)
 
 	tCuDeStoConfig = sCuDeStoredSettings[anIconInfo[3]] or sCuDeStoredSettings[tostring(anIconInfo[7])] or sStaticConfig;
 	tIsAnim = tCuDeStoConfig["animate"] and VUHDO_MAY_DEBUFF_ANIM;
+	tIsBarGlow = tCuDeStoConfig["isBarGlow"];
+	tIsIconGlow = tCuDeStoConfig["isIconGlow"];
 	tTimeStamp = anIconInfo[2];
 	tAliveTime = anIsInit and 0 or aNow - tTimeStamp;
 	tName = anIconInfo[3];
@@ -111,6 +117,56 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		VUHDO_getBarIconFrame(aButton, anIconIndex):SetAlpha(1);
 
 		if tIsAnim then VUHDO_setDebuffAnimation(1.2); end
+	
+		if tIsBarGlow then
+			VUHDO_LibCustomGlow.PixelGlow_Start(
+				aButton, 
+				tCuDeStoConfig["barGlowColor"] and { 
+					tCuDeStoConfig["barGlowColor"]["R"], 
+					tCuDeStoConfig["barGlowColor"]["G"], 
+					tCuDeStoConfig["barGlowColor"]["B"], 
+					tCuDeStoConfig["barGlowColor"]["O"] 
+				} or { 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["R"], 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["R"], 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["B"], 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["O"] 
+				}, 
+				14,                             -- number of particles
+				0.3,                            -- frequency
+				8,                              -- length
+				2,                              -- thickness
+				0,                              -- x offset
+				0,                              -- y offset
+				false,                          -- border
+				VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY
+			);
+		end
+
+		if tIsIconGlow then
+			VUHDO_LibCustomGlow.PixelGlow_Start(
+				VUHDO_getBarIconFrame(aButton, anIconIndex), 
+				tCuDeStoConfig["iconGlowColor"] and { 
+					tCuDeStoConfig["iconGlowColor"]["R"], 
+					tCuDeStoConfig["iconGlowColor"]["G"], 
+					tCuDeStoConfig["iconGlowColor"]["B"], 
+					tCuDeStoConfig["iconGlowColor"]["O"] 
+				} or { 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["R"], 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["R"], 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["B"], 
+					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["O"] 
+				}, 
+				8,                                           -- number of particles
+				0.3,                                         -- frequency
+				6,                                           -- length
+				2,                                           -- thickness
+				0,                                           -- x offset
+				0,                                           -- y offset
+				false,                                       -- border
+				VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY
+			);
+		end
 	elseif VUHDO_getBarIcon(aButton, anIconIndex):GetTexture() ~= anIconInfo[1] then
 		VUHDO_getBarIcon(aButton, anIconIndex):SetTexture(anIconInfo[1]);
 		VUHDO_getBarIconFrame(aButton, anIconIndex):SetAlpha(1);
@@ -182,6 +238,7 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		VUHDO_animateDebuffIcon(tButton, tIconInfo, GetTime(), tSlot + 39, true, aUnit);
+
 		tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
 		tFrame["debuffInfo"], tFrame["isBuff"], tFrame["debuffCnt"] = aName, anIsBuff, aCnt;
 	end
@@ -237,10 +294,16 @@ function VUHDO_removeDebuffIcon(aUnit, aName)
 		if (VUHDO_DEBUFF_ICONS[aUnit][tCnt2] or sEmpty)[3] == aName then
 			VUHDO_DEBUFF_ICONS[aUnit][tCnt2][2] = 1; -- ~= -1, lock icon to not be processed by onupdate
 			for _, tButton2 in pairs(tAllButtons2) do
+				VUHDO_LibCustomGlow.PixelGlow_Stop(tButton2, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
+
 				tFrame = VUHDO_getBarIconFrame(tButton2, tCnt2 + 39);
 				if tFrame then
+					VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+
 					tFrame:SetAlpha(0);
+
 					tFrame["debuffInfo"] = nil;
+					tFrame["isBuff"] = nil;
 					tFrame["debuffCnt"] = nil;
 				end
 			end

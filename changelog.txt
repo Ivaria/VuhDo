@@ -18,6 +18,8 @@ Bugfixes:
 
 
 Improvements:
+-- Added new custom debuff display options 'Bar Glow' and 'Icon Glow'
+--  Default color settings under 'VuhDo Options > Colors > States'
 -- Minimap icon profile and key layout dropdown menus are now sorted
 -- Added new bouquet validator 'Flag: Own Combo Points =='
 -- Added new default bouquet 'Player Combo Points'
@@ -32,6 +34,7 @@ Improvements:
 -- Added new default bouquet 'Player Arcane Charges'
 -- Added new text provider 'Arcane Charges: <#n>'
 -- Added default custom debuffs for Crucible of Storms raid
+-- Added new slash command "/vd about"
 
 
 --------------------------------------------------------------

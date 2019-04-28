@@ -63,6 +63,10 @@ VUHDO_FULL_DURATION_MODEL = nil;
 VUHDO_MINE_MODEL = nil;
 VUHDO_OTHERS_MODEL = nil;
 VUHDO_COLOR_SWATCH_MODEL = nil;
+VUHDO_BAR_GLOW_MODEL = nil;
+VUHDO_BAR_GLOW_SWATCH_MODEL = nil;
+VUHDO_ICON_GLOW_MODEL = nil;
+VUHDO_ICON_GLOW_SWATCH_MODEL = nil;
 VUHDO_SOUND_MODEL = nil;
 
 
@@ -145,6 +149,43 @@ function VUHDO_customDebuffUpdateEditBox(anEditBox)
 		tCheckButton = _G[tPanelName .. "OthersCheckButton"];
 		VUHDO_lnfSetModel(tCheckButton, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".isOthers");
 		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tCheckButton = _G[tPanelName .. "BarGlowCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".isBarGlow");
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		if (not VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isBarGlow) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].barGlowColor = nil;
+		end
+
+		if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].barGlowColor == nil) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].barGlowColor
+				= VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]);
+		end
+
+		tColorSwatch = _G[tPanelName .. "BarGlowTexture"];
+		VUHDO_lnfSetModel(tColorSwatch, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".barGlowColor");
+		VUHDO_lnfInitColorSwatch(tColorSwatch, VUHDO_I18N_COLOR, VUHDO_I18N_COLOR);
+		VUHDO_lnfColorSwatchInitFromModel(tColorSwatch);
+		
+		tCheckButton = _G[tPanelName .. "IconGlowCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".isIconGlow");
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		if (not VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isIconGlow) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].iconGlowColor = nil;
+		end
+
+		if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].iconGlowColor == nil) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].iconGlowColor
+				= VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]);
+		end
+
+		tColorSwatch = _G[tPanelName .. "IconGlowTexture"];
+		VUHDO_lnfSetModel(tColorSwatch, "VUHDO_CONFIG.CUSTOM_DEBUFF.STORED_SETTINGS." .. tValue .. ".iconGlowColor");
+		VUHDO_lnfInitColorSwatch(tColorSwatch, VUHDO_I18N_COLOR, VUHDO_I18N_COLOR);
+		VUHDO_lnfColorSwatchInitFromModel(tColorSwatch);
+
 	else
 		anEditBox:SetTextColor(0.8, 0.8, 1, 1);
 
@@ -159,7 +200,11 @@ function VUHDO_customDebuffUpdateEditBox(anEditBox)
 		VUHDO_FULL_DURATION_MODEL = false;
 		VUHDO_MINE_MODEL = true;
 		VUHDO_OTHERS_MODEL = true;
+		VUHDO_BAR_GLOW_MODEL = VUHDO_CONFIG.CUSTOM_DEBUFF.isBarGlow;
+		VUHDO_ICON_GLOW_MODEL = VUHDO_CONFIG.CUSTOM_DEBUFF.isIconGlow;
 		VUHDO_COLOR_SWATCH_MODEL = VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM]);
+		VUHDO_BAR_GLOW_SWATCH_MODEL = VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]);
+		VUHDO_ICON_GLOW_SWATCH_MODEL = VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]);
 		VUHDO_SOUND_MODEL = VUHDO_CONFIG.CUSTOM_DEBUFF.SOUND;
 
 		tCheckButton = _G[tPanelName .. "IconCheckButton"];
@@ -206,6 +251,25 @@ function VUHDO_customDebuffUpdateEditBox(anEditBox)
 		tCheckButton = _G[tPanelName .. "OthersCheckButton"];
 		VUHDO_lnfSetModel(tCheckButton, "VUHDO_OTHERS_MODEL");
 		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tCheckButton = _G[tPanelName .. "BarGlowCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_BAR_GLOW_MODEL");
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tColorSwatch = _G[tPanelName .. "BarGlowTexture"];
+		VUHDO_lnfSetModel(tColorSwatch, "VUHDO_BAR_GLOW_SWATCH_MODEL");
+		VUHDO_lnfInitColorSwatch(tColorSwatch, VUHDO_I18N_COLOR, VUHDO_I18N_COLOR);
+		VUHDO_lnfColorSwatchInitFromModel(tColorSwatch);
+
+		tCheckButton = _G[tPanelName .. "IconGlowCheckButton"];
+		VUHDO_lnfSetModel(tCheckButton, "VUHDO_ICON_GLOW_MODEL");
+		VUHDO_lnfCheckButtonInitFromModel(tCheckButton);
+
+		tColorSwatch = _G[tPanelName .. "IconGlowTexture"];
+		VUHDO_lnfSetModel(tColorSwatch, "VUHDO_ICON_GLOW_SWATCH_MODEL");
+		VUHDO_lnfInitColorSwatch(tColorSwatch, VUHDO_I18N_COLOR, VUHDO_I18N_COLOR);
+		VUHDO_lnfColorSwatchInitFromModel(tColorSwatch);
+
 	end
 end
 
@@ -275,6 +339,12 @@ function VUHDO_saveCustomDebuffOnClick(aButton)
 	tCheckButton = _G[tPanelName .. "OthersCheckButton"];
 	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isOthers = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
 
+	tCheckButton = _G[tPanelName .. "BarGlowCheckButton"];
+	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isBarGlow = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
+
+	tCheckButton = _G[tPanelName .. "IconGlowCheckButton"];
+	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isIconGlow = VUHDO_forceBooleanValue(tCheckButton:GetChecked());
+
 	tComboBox = _G[tPanelName .. "SoundCombo"];
 	tSoundName = _G[tComboBox:GetName() .. "Text"]:GetText();
 	VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].SOUND = VUHDO_LibSharedMedia:Fetch("sound", tSoundName);
@@ -289,6 +359,28 @@ function VUHDO_saveCustomDebuffOnClick(aButton)
 		end
 	else
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].color = nil;
+	end
+
+	if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isBarGlow) then
+		if (VUHDO_BAR_GLOW_SWATCH_MODEL ~= nil) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].barGlowColor
+				= VUHDO_deepCopyTable(VUHDO_BAR_GLOW_SWATCH_MODEL);
+
+			VUHDO_BAR_GLOW_SWATCH_MODEL = nil;
+		end
+	else
+		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].barGlowColor = nil;
+	end
+
+	if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].isIconGlow) then
+		if (VUHDO_ICON_GLOW_SWATCH_MODEL ~= nil) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].iconGlowColor
+				= VUHDO_deepCopyTable(VUHDO_ICON_GLOW_SWATCH_MODEL);
+
+			VUHDO_ICON_GLOW_SWATCH_MODEL = nil;
+		end
+	else
+		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue].iconGlowColor = nil;
 	end
 
 	VUHDO_CONFIG["CUSTOM_DEBUFF"]["SELECTED"] = tValue;

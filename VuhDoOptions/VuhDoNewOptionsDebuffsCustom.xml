@@ -181,107 +181,16 @@
 
 			<Frame name="$parentStorePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="235" y="410" />
+					<AbsDimension x="235" y="430" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="280" y="-20" />
+							<AbsDimension x="280" y="-10" />
 						</Offset>
 					</Anchor>
 				</Anchors>
 				<Frames>
-
-					<CheckButton name="$parentIconCheckButton" text="VUHDO_I18N_ICON" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="13" y="-112" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K273);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<CheckButton name="$parentColorCheckButton" text="VUHDO_I18N_BAR_COLOR" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="13" y="-214" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K274);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<Frame name="$parentColorTexture" inherits="VuhDoColorSwatchTexture">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="125" y="-214" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K413);
-							</OnLoad>
-						</Scripts>
-					</Frame>
-
-					<CheckButton name="$parentAnimateCheckButton" text="VUHDO_I18N_ANIMATION" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="13" y="-146" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K275);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<CheckButton name="$parentTimerCheckButton" text="VUHDO_I18N_TIMER" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="125" y="-146" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K276);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<CheckButton name="$parentStacksCheckButton" text="VUHDO_I18N_APPLIANCES" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="125" y="-112" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K350);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
 					<Button name="$parentSelectComboBox" inherits="VuhDoScrollComboBoxTemplate">
 						<Size>
 							<AbsDimension x="180" y="1" />
@@ -289,7 +198,7 @@
 								<Anchors>
 									<Anchor point="TOPLEFT">
 										<Offset>
-											<AbsDimension x="43" y="-95" />
+											<AbsDimension x="43" y="-86" />
 										</Offset>
 									</Anchor>
 								</Anchors>
@@ -320,7 +229,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="18" y="-28" />
+									<AbsDimension x="18" y="-22" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -339,7 +248,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="18" y="-36" />
+									<AbsDimension x="18" y="-30" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -365,7 +274,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="43" y="-65" />
+									<AbsDimension x="43" y="-56" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -376,12 +285,72 @@
 							</Layer>
 						</Layers>
 					</Frame>
+					
+					<CheckButton name="$parentIconCheckButton" text="VUHDO_I18N_ICON" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-100" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K273);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentStacksCheckButton" text="VUHDO_I18N_APPLIANCES" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-100" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K350);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentAnimateCheckButton" text="VUHDO_I18N_ANIMATION" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-134" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K275);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentTimerCheckButton" text="VUHDO_I18N_TIMER" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-134" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K276);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
 
 					<CheckButton name="$parentAliveTimeCheckButton" text="VUHDO_I18N_ALIVE_TIME" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-180" />
+									<AbsDimension x="13" y="-168" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -396,7 +365,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-180" />
+									<AbsDimension x="125" y="-168" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -407,11 +376,100 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentColorCheckButton" text="VUHDO_I18N_BAR_COLOR" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-202" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K274);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<Frame name="$parentColorTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-202" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K413);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					<CheckButton name="$parentBarGlowCheckButton" text="VUHDO_I18N_BAR_GLOW_COLOR" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-236" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K274);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<Frame name="$parentBarGlowTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-236" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K413);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<CheckButton name="$parentIconGlowCheckButton" text="VUHDO_I18N_ICON_GLOW_COLOR" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-270" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K274);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<Frame name="$parentIconGlowTexture" inherits="VuhDoColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-270" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K413);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
 					<Frame name="$parentSelectLabel" inherits="VuhDoLabelFrameTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-248" />
+									<AbsDimension x="13" y="-301" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -427,7 +485,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-268" />
+									<AbsDimension x="13" y="-316" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -437,7 +495,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-268" />
+									<AbsDimension x="125" y="-316" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -450,7 +508,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="43" y="-323" />
+									<AbsDimension x="43" y="-347" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -466,7 +524,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="43" y="-338" />
+									<AbsDimension x="43" y="-362" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -484,7 +542,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-368" />
+									<AbsDimension x="13" y="-392" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -502,7 +560,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-368" />
+									<AbsDimension x="125" y="-392" />
 								</Offset>
 							</Anchor>
 						</Anchors>
