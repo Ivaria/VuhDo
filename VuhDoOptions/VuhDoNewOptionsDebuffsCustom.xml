@@ -415,7 +415,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K274);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K577);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -430,7 +430,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K413);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K579);
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -445,7 +445,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K274);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K576);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -460,7 +460,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K413);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K578);
 							</OnLoad>
 						</Scripts>
 					</Frame>

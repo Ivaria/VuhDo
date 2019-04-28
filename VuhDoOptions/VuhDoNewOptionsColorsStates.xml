@@ -482,7 +482,7 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF_BAR_GLOW");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_BAR_GLOW_COLOR, VUHDO_I18N_BAR_GLOW_COLOR);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K261);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K579);
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -499,7 +499,7 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF_ICON_GLOW");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_ICON_GLOW_COLOR, VUHDO_I18N_ICON_GLOW_COLOR);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K261);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K578);
 							</OnLoad>
 						</Scripts>
 					</Frame>
