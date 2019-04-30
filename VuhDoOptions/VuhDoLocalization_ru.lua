@@ -1315,4 +1315,5 @@ VUHDO_I18N_TRAIL_OF_LIGHT = "Trail of\nLight";
 
 VUHDO_I18N_BAR_GLOW_COLOR = "Bar Glow";
 VUHDO_I18N_ICON_GLOW_COLOR = "Icon Glow";
+VUHDO_I18N_DEBUFF_BLACKLIST_ADDED = "Added \"[%s] %s\" to the debuff backlist.";
 

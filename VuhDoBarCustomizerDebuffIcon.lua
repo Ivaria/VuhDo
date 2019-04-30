@@ -240,7 +240,7 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 		VUHDO_animateDebuffIcon(tButton, tIconInfo, GetTime(), tSlot + 39, true, aUnit);
 
 		tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
-		tFrame["debuffInfo"], tFrame["isBuff"], tFrame["debuffCnt"] = aName, anIsBuff, aCnt;
+		tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffCnt"] = aName, aSpellId, anIsBuff, aCnt;
 	end
 	tIconInfo[2] = GetTime();
 
@@ -270,7 +270,7 @@ function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDurati
 
 			for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 				tFrame = VUHDO_getBarIconFrame(tButton, tCnt + 39);
-				tFrame["debuffInfo"], tFrame["isBuff"], tFrame["debuffCnt"] = aName, anIsBuff, aCnt;
+				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffCnt"] = aName, aSpellId, anIsBuff, aCnt;
 			end
 		end
 	end
@@ -303,6 +303,7 @@ function VUHDO_removeDebuffIcon(aUnit, aName)
 					tFrame:SetAlpha(0);
 
 					tFrame["debuffInfo"] = nil;
+					tFrame["debuffSpellId"] = nil;
 					tFrame["isBuff"] = nil;
 					tFrame["debuffCnt"] = nil;
 				end
@@ -324,11 +325,18 @@ function VUHDO_removeAllDebuffIcons(aUnit)
 	if not tAllButtons3 then return; end
 
 	for _, tButton3 in pairs(tAllButtons3) do
+		VUHDO_LibCustomGlow.PixelGlow_Stop(tButton3, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
+
 		for tCnt3 = 40, 39 + sMaxIcons do
 			tFrame = VUHDO_getBarIconFrame(tButton3, tCnt3);
 			if tFrame then
+				VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+
 				tFrame:SetAlpha(0);
+				
 				tFrame["debuffInfo"] = nil;
+				tFrame["debuffSpellId"] = nil;
+				tFrame["isBuff"] = nil;
 				tFrame["debuffCnt"] = nil;
 			end
 		end

@@ -36,6 +36,7 @@ Improvements:
 -- Added new text provider 'Arcane Charges: <#n>'
 -- Added default custom debuffs for Crucible of Storms raid
 -- Added new slash command "/vd about"
+-- CTRL+SHIFT+RIGHTBUTTON now adds debuff icons to the blacklist
 
 
 --------------------------------------------------------------
