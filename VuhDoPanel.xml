@@ -86,7 +86,27 @@
 			<OnLoad>
 				self.addLevel = 9;
 				self:SetScript("PreClick", VuhDoActionPreClick);
-				self:SetScript("PostClick", VuhDoActionPostClick);
+				self:SetScript("PostClick", function(self, aButton) 
+					if aButton == "RightButton" and 
+						IsShiftKeyDown() and IsControlKeyDown() and IsAltKeyDown() then
+						local debuffName = self["debuffInfo"];
+				
+						if debuffName then
+							local debuffSpellId = strtrim(self["debuffSpellId"]);
+
+							if not VUHDO_DEBUFF_BLACKLIST[debuffSpellId] then
+								VUHDO_DEBUFF_BLACKLIST[debuffSpellId] = true;
+
+								VUHDO_updateAllDebuffIcons(false);
+								VUHDO_initDebuffIgnoreComboModel();
+
+								VUHDO_Msg(format(VUHDO_I18N_DEBUFF_BLACKLIST_ADDED, debuffSpellId, debuffName), 1, 0.4, 0.4);
+							end
+						end
+					end
+				
+					VuhDoActionPostClick(self);
+				end)
 			</OnLoad>
 		</Scripts>
 	</Button>

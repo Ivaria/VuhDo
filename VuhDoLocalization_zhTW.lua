@@ -472,4 +472,5 @@ VUHDO_I18N_DEF_PLAYER_RUNES = "Player Runes";
 VUHDO_I18N_BOUQUET_OWN_RUNES_EQUALS = "Flag: Own Runes ==";
 VUHDO_I18N_DEF_PLAYER_ARCANE_CHARGES = "Player Arcane Charges";
 VUHDO_I18N_BOUQUET_OWN_ARCANE_CHARGES_EQUALS = "Flag: Own Arcane Charges ==";
+VUHDO_I18N_DEBUFF_BLACKLIST_ADDED = "Added \"[%s] %s\" to the debuff backlist.";
 
