@@ -101,21 +101,6 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "BC"];
 		VUHDO_BAR_ICON_CHARGES[aButton][anIconNumber] = _G[tFrameName .. "BA"];
 		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "BN"];
-
-		local tBarIconFrame = VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber];
-		tBarIconFrame:RegisterForClicks('RightButtonUp');
-		tBarIconFrame:SetScript('OnClick', function(self)
-			if IsShiftKeyDown() and IsControlKeyDown() then 
-				local debuffName = self["debuffInfo"];
-				local debuffSpellId = strtrim(self["debuffSpellId"]);
-
-				if debuffName then
-					VUHDO_DEBUFF_BLACKLIST[debuffSpellId] = true;
-
-					VUHDO_Msg(format(VUHDO_I18N_DEBUFF_BLACKLIST_ADDED, debuffSpellId, debuffName), 1, 0.4, 0.4);
-				end
-			end
-		end)
 	end
 
 	return VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber];
