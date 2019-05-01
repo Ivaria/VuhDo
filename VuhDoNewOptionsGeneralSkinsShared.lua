@@ -87,6 +87,7 @@ local VUHDO_DEFAULT_PROFILES = {
 				["isName"] = false,
 				["xAdjust"] = -2,
 				["max_num"] = 3,
+				["blacklistModi"] = "ALT-CTRL-SHIFT",
 			},
 			["SPELL_TRACE"] = {
 				["isMine"] = true,

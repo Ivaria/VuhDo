@@ -36,7 +36,9 @@ Improvements:
 -- Added new text provider 'Arcane Charges: <#n>'
 -- Added default custom debuffs for Crucible of Storms raid
 -- Added new slash command "/vd about"
--- CTRL+SHIFT+ALT+RIGHTBUTTON now adds debuff icons to the blacklist
+-- MODIFIER+RIGHTBUTTON now adds debuff icons to the blacklist
+--   Default key modifier is set to 'CTRL+SHIFT+ALT'
+--   Set under 'VuhDo Options > Debuffs > Standard > Icons'
 
 
 --------------------------------------------------------------

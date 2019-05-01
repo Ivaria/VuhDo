@@ -112,12 +112,12 @@
 
 			<Frame name="$parentIconsPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="236" y="208" />
+					<AbsDimension x="236" y="248" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="280" y="-65" />
+							<AbsDimension x="280" y="-25" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -206,7 +206,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="33" y="-138" />
+									<AbsDimension x="33" y="-140" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -219,6 +219,58 @@
 						</Scripts>
 					</Button>
 
+					<Frame name="$parentModifierLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="149" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-190" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_BLACKLIST_KEY_MODIFIES" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Button name="$parentModifierComboBox" inherits="VuhDoComboBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="40" y="-208" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								if not VUHDO_CONFIG.CUSTOM_DEBUFF.blacklistModi then
+									VUHDO_CONFIG.CUSTOM_DEBUFF.blacklistModi = "ALT-CTRL-SHIFT";
+								end
+
+								VUHDO_setComboModel(self, "VUHDO_CONFIG.CUSTOM_DEBUFF.blacklistModi",
+									{
+										{ "OFF", "-- " .. VUHDO_I18N_OFF .. " --" },
+										{ "ALT-CTRL-SHIFT", VUHDO_I18N_ALT .. VUHDO_I18N_PLUS_CTRL_SHIFT },
+										{ "ALT-SHIFT", VUHDO_I18N_ALT .. VUHDO_I18N_PLUS_SHIFT },
+										{ "ALT-CTRL", VUHDO_I18N_ALT .. VUHDO_I18N_PLUS_CTRL },
+										{ "CTRL-SHIFT", VUHDO_I18N_CTRL .. VUHDO_I18N_PLUS_SHIFT },
+										{ "SHIFT", VUHDO_I18N_SHIFT },
+										{ "CTRL", VUHDO_I18N_CTRL },
+										{ "ALT", VUHDO_I18N_ALT },
+									}
+								);
+
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K580);
+							</OnLoad>
+						</Scripts>
+
+					</Button>
+
 					<Button name="$parentSaveButton" text="VUHDO_I18N_SAVE" inherits="VuhDoButtonTemplate">
 						<Size>
 							<AbsDimension x="100" y="32" />
@@ -226,7 +278,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-168" />
+									<AbsDimension x="13" y="-155" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -245,7 +297,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-168" />
+									<AbsDimension x="125" y="-155" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -268,7 +320,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="100" y="-280" />
+							<AbsDimension x="25" y="-280" />
 						</Offset>
 					</Anchor>
 				</Anchors>

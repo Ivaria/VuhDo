@@ -598,6 +598,7 @@ local VUHDO_DEFAULT_CONFIG = {
 		["isColor"] = false,
 		["isStacks"] = false,
 		["isName"] = false,
+		["blacklistModi"] = "ALT-CTRL-SHIFT",
 		["selected"] = "",
 		["point"] = "TOPRIGHT",
 		["xAdjust"] = -2,

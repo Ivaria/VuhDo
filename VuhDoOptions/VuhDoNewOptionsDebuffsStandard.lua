@@ -70,3 +70,30 @@ function VUHDO_deleteDebuffIgnoreClicked(aButton)
 		_G[aButton:GetParent():GetName() .. "IgnoreComboBox"]:Show();
 	end
 end
+
+
+
+--
+function VUHDO_addDebuffToBlacklist(aCuDeIconFrame)
+
+	if not aCuDeIconFrame then
+		return;
+	end
+
+	local debuffName = aCuDeIconFrame["debuffInfo"];
+				
+	if debuffName then
+		local debuffSpellId = strtrim(aCuDeIconFrame["debuffSpellId"]);
+
+		if not VUHDO_DEBUFF_BLACKLIST[debuffSpellId] then
+			VUHDO_DEBUFF_BLACKLIST[debuffSpellId] = true;
+	
+			VUHDO_updateAllDebuffIcons(false);
+			VUHDO_initDebuffIgnoreComboModel();
+	
+			VUHDO_Msg(format(VUHDO_I18N_DEBUFF_BLACKLIST_ADDED, debuffSpellId, debuffName), 1, 0.4, 0.4);
+		end
+	end
+
+end
+

@@ -635,6 +635,7 @@ VUHDO_I18N_TT.K576 = "Click to display a glow on the icon while active.";
 VUHDO_I18N_TT.K577 = "Click to display a glow on the bar while active."; 
 VUHDO_I18N_TT.K578 = "Select a color for the icon glow.";
 VUHDO_I18N_TT.K579 = "Select a color for the bar glow.";
+VUHDO_I18N_TT.K580 = "Select a modifier key to use with the right mouse button to blacklist debuff icons."
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1135,4 +1136,5 @@ VUHDO_I18N_TRAIL_OF_LIGHT = "Trail of\nLight";
 
 VUHDO_I18N_BAR_GLOW_COLOR = "Bar Glow";
 VUHDO_I18N_ICON_GLOW_COLOR = "Icon Glow";
+VUHDO_I18N_BLACKLIST_KEY_MODIFIES = "Ignore List Modifier Key";
 
