@@ -266,6 +266,8 @@
 								);
 
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K580);
+
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_PANEL_SETUP.BAR_COLORS.useDebuffIcon", false);
 							</OnLoad>
 						</Scripts>
 
