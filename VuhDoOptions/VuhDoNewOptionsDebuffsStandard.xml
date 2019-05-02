@@ -248,7 +248,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								if not VUHDO_CONFIG.CUSTOM_DEBUFF.blacklistModi then
+								if VUHDO_CONFIG and VUHDO_CONFIG.CUSTOM_DEBUFF and 
+									not VUHDO_CONFIG.CUSTOM_DEBUFF.blacklistModi then
 									VUHDO_CONFIG.CUSTOM_DEBUFF.blacklistModi = "ALT-CTRL-SHIFT";
 								end
 
