@@ -1894,6 +1894,14 @@ function VUHDO_loadDefaultConfig()
 		285367  -- Piercing Gaze of N'zoth
 	);
 
+	--- 8.1.5 - Battle for Azeroth - Crucible of Storms part 2
+	VUHDO_addCustomSpellIds(44,
+		-- [[ Crucible of Storms ]]
+		-- Uu'nat
+		284722, -- Umbral Shell
+		286771  -- Umbral Shell
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do

@@ -70,6 +70,10 @@ local VUHDO_ABSORB_DEBUFFS = {
 	-- Patch 8.0 - Battle for Azeroth - The Underrot
 	[278961] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_DECAYING_MIND)), 30; end, -- Diseased Lasher Decaying Mind
 
+	-- Patch 8.1.5 - Battle for Azeroth - Crucible of Storms
+	[284722] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_UMBRAL_SHELL)), 10 * 60; end, -- Uu'nat Umbral Shell
+	[286771] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_UMBRAL_SHELL)), 10 * 60; end, -- Uu'nat Umbral Shell
+
 	--[79105] = function(aUnit) return 280000, 60 * 60; end, -- @TESTING PW:F
 };
 
