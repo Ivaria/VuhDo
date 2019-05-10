@@ -290,9 +290,8 @@ end
 
 
 -- Liefert sicheren Fontnamen. Falls in LSM nicht (mehr) vorhanden oder
--- in asiatischem Land den Standard-Font zurückliefern. Genauso wenn als Argument nil geliefert wurde
 function VUHDO_getFont(aFont)
-	if (aFont or "") ~= "" and sIsNotInChina then
+	if (aFont or "") ~= "" then
 		for _, tFontInfo in pairs(VUHDO_FONTS) do
 			if aFont == tFontInfo[1] then return aFont; end
 		end

@@ -10,6 +10,7 @@ Known issues:
 
 
 Bugfixes:
+-- Re-enable LibSharedMedia fonts for zhCN, zhTW, and koKR locales
 
 
 Improvements:
