@@ -43,7 +43,7 @@ end
 
 
 --
-local function VUHDO_activateSpellForSpec(aSpecId)
+function VUHDO_activateSpellForSpec(aSpecId)
 	local tName = VUHDO_SPEC_LAYOUTS[aSpecId];
 	if not VUHDO_strempty(tName) then
 		if VUHDO_SPELL_LAYOUTS[tName] then VUHDO_activateLayout(tName);
@@ -64,44 +64,24 @@ end
 
 
 --
-local VUHDO_TALENT_CHANGE_SPELLS = {
-	[VUHDO_SPELL_ID.ACTIVATING_SPECIALIZATION] = true,
-}
-
-
-
---
 local tSpellName;
 function VUHDO_spellcastSucceeded(aUnit, aSpellId)
+
+	if "player" ~= aUnit and VUHDO_PLAYER_RAID_ID ~= aUnit then 
+		return;
+	end
+
 	if aSpellId then
 		tSpellName = GetSpellInfo(aSpellId);
 	end
 
-	if not tSpellName then 
-		return;
-	end
-
-	if VUHDO_TALENT_CHANGE_SPELLS[tSpellName] then
-		VUHDO_resetTalentScan(aUnit);
-		VUHDO_initDebuffs(); -- Talentabhängige Debuff-Fähigkeiten neu initialisieren.
-		VUHDO_timeReloadUI(1);
-	end
-
-	if "player" ~= aUnit and VUHDO_PLAYER_RAID_ID ~= aUnit then return; end
-
-	if VUHDO_ACTIVE_HOTS[tSpellName] then
+	if tSpellName and VUHDO_ACTIVE_HOTS[tSpellName] then
 		VUHDO_updateAllHoTs();
 		VUHDO_updateAllCyclicBouquets(true);
 	end
 
-	if tSpellName == VUHDO_SPELL_ID.ACTIVATING_SPECIALIZATION then
-		VUHDO_activateSpecc(tostring(GetSpecialization()) or "1");
-		VUHDO_resetTalentScan(aUnit);
-		VUHDO_initDebuffs(); -- Talentabhängige Debuff-Fähigkeiten neu initialisieren.
-		VUHDO_timeReloadUI(1);
-	end
-
 	VUHDO_aoeUpdateAll();
+
 end
 
 

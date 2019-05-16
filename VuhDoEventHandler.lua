@@ -691,6 +691,24 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "RUNE_POWER_UPDATE" == anEvent then
 		VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
 
+	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent then
+		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
+			if "player" == anArg1 then
+				local tSpecNum = tostring(GetSpecialization()) or "1";
+
+				-- event sometimes fires multiple times so we must de-dupe
+				if VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNum] then
+					VUHDO_activateSpecc(tSpecNum);
+				end
+			end
+
+			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
+				VUHDO_resetTalentScan(anArg1);
+				VUHDO_initDebuffs(); -- Talentabhängige Debuff-Fähigkeiten neu initialisieren.
+				VUHDO_timeReloadUI(1);
+			end
+		end
+
 	else
 		VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 	end
@@ -1515,6 +1533,7 @@ local VUHDO_ALL_EVENTS = {
 	"UNIT_ABSORB_AMOUNT_CHANGED",
 	"INCOMING_SUMMON_CHANGED",
 	"UNIT_PHASE",
+	"PLAYER_SPECIALIZATION_CHANGED",
 };
 
 

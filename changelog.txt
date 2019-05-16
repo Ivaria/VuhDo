@@ -11,6 +11,7 @@ Known issues:
 
 Bugfixes:
 -- Re-enable LibSharedMedia fonts for zhCN, zhTW, and koKR locales
+-- Fixed loading of profile/key layout on automatic spec change 
 
 
 Improvements:
