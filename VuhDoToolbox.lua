@@ -993,3 +993,95 @@ function VUHDO_unitDebuff(aUnit, aSpell)
 
 end
 
+
+
+---------------------------------
+-- CLASSIC COMPATABILITY LAYER --
+---------------------------------
+function GetSpecialization()
+
+	return 1;
+
+end
+
+
+
+function GetSpecializationInfo()
+
+	return 1, "Unknown", _, _, _, "NONE";
+
+end
+
+
+
+function GetSpellBookItemInfo()
+
+	return nil, nil;
+
+end
+
+
+
+function UnitGetIncomingHeals()
+
+	return 0;
+
+end
+
+
+
+function UnitGetTotalAbsorbs()
+
+	return 0;
+
+end
+
+
+
+function UnitThreatSituation()
+
+	return 0;
+
+end
+
+
+
+function UnitIsWarModePhased()
+
+	return false;
+
+end
+
+
+
+function UnitHasVehicleUI()
+
+	return false;
+
+end
+
+
+
+function UnitGroupRolesAssigned()
+
+	return "NONE";
+
+end
+
+
+
+function UnitAlternatePowerInfo()
+
+	return false;
+
+end
+
+
+
+C_IncomingSummon = { };
+function C_IncomingSummon.HasIncomingSummon()
+
+	return false;
+
+end
+

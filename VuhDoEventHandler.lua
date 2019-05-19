@@ -456,12 +456,12 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
  			VUHDO_updateHealth(anArg1, 2);
  		end
 
-	elseif "UNIT_HEAL_PREDICTION" == anEvent then
+--[[	elseif "UNIT_HEAL_PREDICTION" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
 			VUHDO_updateHealth(anArg1, 9); -- VUHDO_UPDATE_INC
 			VUHDO_updateBouquetsForEvent(anArg1, 9); -- VUHDO_UPDATE_ALT_POWER
 		end
-
+]]
 	elseif "UNIT_POWER_UPDATE" == anEvent or "UNIT_POWER_FREQUENT" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 			if "CHI" == anArg2 then
@@ -483,21 +483,21 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			end
 		end
 
-	elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
+--[[	elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
 			VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 			VUHDO_updateShieldBar(anArg1);
 		end
-
+]]
 	elseif "UNIT_SPELLCAST_SUCCEEDED" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_spellcastSucceeded(anArg1, anArg3); end
 
 	elseif "UNIT_SPELLCAST_SENT" == anEvent then
 		if VUHDO_VARIABLES_LOADED then VUHDO_spellcastSent(anArg1, anArg2, anArg4); end
 
-	elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then
+--[[	elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then
 		if VUHDO_VARIABLES_LOADED then VUHDO_updateThreat(anArg1); end
-
+]]
 	elseif "PLAYER_REGEN_ENABLED" == anEvent then
 		if VUHDO_VARIABLES_LOADED then
 			for tUnit, _ in pairs(VUHDO_RAID) do
@@ -541,10 +541,10 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			else VUHDO_normalRaidReload(); end
 		end
 
-	elseif "UNIT_ENTERED_VEHICLE" == anEvent or "UNIT_EXITED_VEHICLE" == anEvent or "UNIT_EXITING_VEHICLE" == anEvent then
+--[[	elseif "UNIT_ENTERED_VEHICLE" == anEvent or "UNIT_EXITED_VEHICLE" == anEvent or "UNIT_EXITING_VEHICLE" == anEvent then
 		VUHDO_REMOVE_HOTS = false;
 		VUHDO_normalRaidReload();
-
+]]
 	elseif "RAID_TARGET_UPDATE" == anEvent then
 		VUHDO_TIMERS["CUSTOMIZE"] = 0.1;
 
@@ -559,7 +559,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			if VUHDO_TIMERS["RELOAD_ROSTER"] < 0.4 then VUHDO_TIMERS["RELOAD_ROSTER"] = 0.6; end
 		end
 
-	elseif "PLAYER_FOCUS_CHANGED" == anEvent then
+--[[	elseif "PLAYER_FOCUS_CHANGED" == anEvent then
 		VUHDO_removeAllDebuffIcons("focus");
 		VUHDO_quickRaidReload();
 		VUHDO_clParserSetCurrentFocus();
@@ -568,7 +568,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_determineIncHeal("focus");
 			VUHDO_updateHealth("focus", 9); -- VUHDO_UPDATE_INC
 		end
-
+]]
 	elseif "PARTY_MEMBER_ENABLE" == anEvent or "PARTY_MEMBER_DISABLE" == anEvent then
 		VUHDO_TIMERS["CUSTOMIZE"] = 0.2;
 
@@ -655,7 +655,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "PLAYER_EQUIPMENT_CHANGED" == anEvent then
 		VUHDO_aoeUpdateSpellAverages();
 
-	elseif "LFG_PROPOSAL_SHOW" == anEvent then
+--[[	elseif "LFG_PROPOSAL_SHOW" == anEvent then
 		VUHDO_buildSafeParty();
 
 	elseif "LFG_PROPOSAL_FAILED" == anEvent then
@@ -663,6 +663,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 
 	elseif "LFG_PROPOSAL_SUCCEEDED" == anEvent then
 		VUHDO_lateRaidReload();
+]]
 	--elseif("UPDATE_MACROS" == anEvent) then
 		--VUHDO_timeReloadUI(0.1); -- @WARNING Lädt wg. shield macro alle 8 sec.
 
@@ -672,23 +673,23 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "INCOMING_RESURRECT_CHANGED" == anEvent then
 		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_RESURRECTION); end
 
-	elseif "PET_BATTLE_OPENING_START" == anEvent then
+--[[	elseif "PET_BATTLE_OPENING_START" == anEvent then
 		VUHDO_setPetBattle(true);
 
 	elseif "PET_BATTLE_CLOSE" == anEvent then
 		VUHDO_setPetBattle(false);
-
-	elseif "INCOMING_SUMMON_CHANGED" == anEvent then
+]]
+--[[	elseif "INCOMING_SUMMON_CHANGED" == anEvent then
 		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then 
 			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_SUMMON); 
 		end
-		
+]]		
 	elseif "UNIT_PHASE" == anEvent then
 		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then 
 			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_PHASE); 
 		end
 		
-	elseif "RUNE_POWER_UPDATE" == anEvent then
+--[[	elseif "RUNE_POWER_UPDATE" == anEvent then
 		VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
 
 	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent then
@@ -708,7 +709,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 				VUHDO_timeReloadUI(1);
 			end
 		end
-
+]]
 	else
 		VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 	end
@@ -911,11 +912,11 @@ function VUHDO_updateGlobalToggles()
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_THREAT_LEVEL] = VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_THREAT_LEVEL);
 
-	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_THREAT_LEVEL]
+--[[	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_THREAT_LEVEL]
 		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_AGGRO),
 		"UNIT_THREAT_SITUATION_UPDATE"
 	);
-
+]]
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_THREAT_PERC] = VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_THREAT_PERC);
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AGGRO] = VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_AGGRO);
 
@@ -977,9 +978,9 @@ function VUHDO_updateGlobalToggles()
 		= (VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_TARGET"])
 		or VUHDO_isModelConfigured(VUHDO_ID_TARGET);
 
-	VUHDO_UnRegisterEvent(VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"],
+--[[	VUHDO_UnRegisterEvent(VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"],
 		"UNIT_HEAL_PREDICTION");
-
+]]
 	VUHDO_UnRegisterEvent(not VUHDO_CONFIG["IS_READY_CHECK_DISABLED"],
 		"READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED");
 
@@ -988,7 +989,7 @@ function VUHDO_updateGlobalToggles()
 			or VUHDO_CONFIG["SHOW_SHIELD_BAR"]
 			or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SHIELD);
 
-	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD], "UNIT_ABSORB_AMOUNT_CHANGED");
+--	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD], "UNIT_ABSORB_AMOUNT_CHANGED");
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE] = VUHDO_CONFIG["SHOW_SPELL_TRACE"] 
 		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SPELL_TRACE);
@@ -1501,19 +1502,19 @@ local VUHDO_ALL_EVENTS = {
 	"UNIT_TARGET",
 	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",  
 	"UNIT_PET",
-	"UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE", "UNIT_EXITING_VEHICLE",
+--	"UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE", "UNIT_EXITING_VEHICLE",
 	"CHAT_MSG_ADDON",
 	"RAID_TARGET_UPDATE",
 	"LEARNED_SPELL_IN_TAB",
 	"PLAYER_FLAGS_CHANGED",
 	"PLAYER_LOGOUT",
-	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE", 
+	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", -- "RUNE_POWER_UPDATE", 
 	"UNIT_SPELLCAST_SENT", "UNIT_SPELLCAST_SUCCEEDED",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
 	"COMBAT_LOG_EVENT_UNFILTERED",
-	"UNIT_THREAT_SITUATION_UPDATE",
+--	"UNIT_THREAT_SITUATION_UPDATE",
 	"UPDATE_BINDINGS",
-	"PLAYER_TARGET_CHANGED", "PLAYER_FOCUS_CHANGED",
+	"PLAYER_TARGET_CHANGED", -- "PLAYER_FOCUS_CHANGED",
 	"PLAYER_EQUIPMENT_CHANGED",
 	"READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED",
 	"ROLE_CHANGED_INFORM",
@@ -1521,19 +1522,19 @@ local VUHDO_ALL_EVENTS = {
 	"INSPECT_READY",
 	"MODIFIER_STATE_CHANGED",
 	"UNIT_CONNECTION",
-	"UNIT_HEAL_PREDICTION",
+--	"UNIT_HEAL_PREDICTION",
 	"UNIT_POWER_BAR_SHOW","UNIT_POWER_BAR_HIDE",
 	"UNIT_NAME_UPDATE",
-	"LFG_PROPOSAL_SHOW", "LFG_PROPOSAL_FAILED", "LFG_PROPOSAL_SUCCEEDED",
+--	"LFG_PROPOSAL_SHOW", "LFG_PROPOSAL_FAILED", "LFG_PROPOSAL_SUCCEEDED",
 	--"UPDATE_MACROS",
 	"UNIT_FACTION",
 	"INCOMING_RESURRECT_CHANGED",
-	"PET_BATTLE_CLOSE", "PET_BATTLE_OPENING_START",
+--	"PET_BATTLE_CLOSE", "PET_BATTLE_OPENING_START",
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED",
-	"UNIT_ABSORB_AMOUNT_CHANGED",
-	"INCOMING_SUMMON_CHANGED",
+--	"UNIT_ABSORB_AMOUNT_CHANGED",
+--	"INCOMING_SUMMON_CHANGED",
 	"UNIT_PHASE",
-	"PLAYER_SPECIALIZATION_CHANGED",
+--	"PLAYER_SPECIALIZATION_CHANGED",
 };
 
 

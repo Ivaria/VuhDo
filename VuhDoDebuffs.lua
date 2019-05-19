@@ -27,11 +27,11 @@ local VUHDO_DEBUFF_TYPES = {
 
 
 VUHDO_DEBUFF_BLACKLIST = {
-	[GetSpellInfo(69127)] = true, -- Chill of the Throne
-	[GetSpellInfo(57724)] = true, -- Sated (Bloodlust)
-	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
-	[GetSpellInfo(57723)] = true, -- Exhaustion (Heroism)
-	[GetSpellInfo(80354)] = true  -- Temporal Displacement
+--	[GetSpellInfo(69127)] = true, -- Chill of the Throne
+--	[GetSpellInfo(57724)] = true, -- Sated (Bloodlust)
+--	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
+--	[GetSpellInfo(57723)] = true, -- Exhaustion (Heroism)
+--	[GetSpellInfo(80354)] = true  -- Temporal Displacement
 };
 
 
