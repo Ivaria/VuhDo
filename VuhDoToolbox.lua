@@ -996,7 +996,7 @@ end
 
 
 ---------------------------------
--- CLASSIC COMPATABILITY LAYER --
+-- CLASSIC COMPATIBILITY LAYER --
 ---------------------------------
 function GetSpecialization()
 
@@ -1009,6 +1009,22 @@ end
 function GetSpecializationInfo()
 
 	return 1, "Unknown", _, _, _, "NONE";
+
+end
+
+
+
+function GetInspectSpecialization()
+
+	return 0;
+
+end
+
+
+
+function GetSpecializationRoleByID()
+
+	return "NONE";
 
 end
 
