@@ -847,7 +847,7 @@ function VUHDO_loadDefaultConfig()
 		VUHDO_CONFIG["IS_SHARE"] = true;
 		VUHDO_CONFIG["VERSION"] = 4;
 	end
-
+--[=====[ 
 	-- add relevant custom debuffs for raid bosses
 	-- 5.x - MoP
 --	VUHDO_addCustomSpellIds(20,
@@ -1901,6 +1901,14 @@ function VUHDO_loadDefaultConfig()
 		284722, -- Umbral Shell
 		286771  -- Umbral Shell
 	);
+--]=====]
+
+	-- 1.13.2 - Classic
+	VUHDO_addCustomSpellIds(45, 
+		-- [[ MolTon Core ]]
+		-- Baron Geddon
+		20475   -- Living Bomb
+	 );
 
 	local debuffRemovalList = {};
 
