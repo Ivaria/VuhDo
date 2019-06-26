@@ -465,9 +465,9 @@ end
 local tPower;
 local function VUHDO_holyPowersEqualsValidator(anInfo, someCustom)
 	if anInfo["connected"] and not anInfo["dead"] then
-		tPower = UnitPower(anInfo["unit"], 9);
+		tPower = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER);
 		if tPower == someCustom["custom"][1] then
-			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], 9);
+			return true, nil, tPower, -1, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER);
 		else
 			return false, nil, -1, -1, -1;
 		end

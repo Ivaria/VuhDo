@@ -13,6 +13,7 @@ Bugfixes:
 -- Re-enable LibSharedMedia fonts for zhCN, zhTW, and koKR locales
 -- Fixed loading of profile/key layout on automatic spec change
 -- Fixed referencing external sound files (8.2 restriction)
+-- Unit power text providers only display when non-zero
 
 
 Improvements:
