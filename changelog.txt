@@ -1,3 +1,22 @@
+Version 3.103
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+
+
+Bugfixes:
+-- Better handling of tooltips missing zone information
+
+
+Improvements:
+
+
+--------------------------------------------------------------
 Version 3.102
 
 

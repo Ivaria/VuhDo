@@ -412,10 +412,13 @@ function VUHDO_getUnitZoneName(aUnit)
 	else
 		VuhDoScanTooltip:SetOwner(VuhDo, "ANCHOR_NONE");
 		VuhDoScanTooltip:ClearLines();
-		VuhDoScanTooltip:SetUnit(aUnit)
-		tZone = VuhDoScanTooltipTextLeft3:GetText();
+		VuhDoScanTooltip:SetUnit(aUnit);
+
+		if VuhDoScanTooltip:NumLines() > 2 then
+			tZone = VuhDoScanTooltipTextLeft3:GetText();
+		end
 	
-		if tZone == "PvP" then 
+		if tZone and tZone == "PvP" and VuhDoScanTooltip:NumLines() > 3 then 
 			tZone = VuhDoScanTooltipTextLeft4:GetText();
 		end
 	end
