@@ -17,14 +17,14 @@ VUHDO_IS_CONFIG = false;
 
 --
 function VUHDO_tabbedFrameOnMouseDown(aPanel)
-	aPanel:StartMoving();
+	--aPanel:StartMoving();
 end
 
 
 
 --
 function VUHDO_tabbedFrameOnMouseUp(aPanel)
-	aPanel:StopMovingOrSizing();
+	--aPanel:StopMovingOrSizing();
 end
 
 
