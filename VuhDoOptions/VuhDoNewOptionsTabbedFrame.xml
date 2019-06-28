@@ -251,6 +251,11 @@
 			<OnMouseDown>VUHDO_tabbedFrameOnMouseDown(self)</OnMouseDown>
 			<OnMouseUp>VUHDO_tabbedFrameOnMouseUp(self)</OnMouseUp>
 			<OnShow>
+				-- 8.2 introduced a bug that renders VuhDo Options useless when the main frame is moved
+				-- force the frame position to center top of the screen for now
+				self:ClearAllPoints();
+				self:SetPoint("TOP", "UIParent", "TOP", 0, -15);
+					
 				self:SetScale(VUHDO_OPTIONS_SETTINGS.scale);
 				VuhDoNewOptionsScaleSlider:Show();
 				VuhDoNewOptionsPanelBarsTexturePanelTextureSliderSlider:SetMinMaxValues(1, #VUHDO_STATUS_BARS);
