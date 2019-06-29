@@ -1902,6 +1902,53 @@ function VUHDO_loadDefaultConfig()
 		286771  -- Umbral Shell
 	);
 
+	--- 8.2.0 - Battle for Azeroth - Rise of Azshara
+	VUHDO_addCustomSpellIds(45,
+		-- [[ Eternal Palace ]]
+		-- Abyssal Commander
+--		294715, -- Toxic Brand
+--		294711, -- Frost Mark
+		295421, -- Overflowing Venom
+		295348, -- Overflowing Chill
+		300882, -- Inversion Sickness
+		300957, -- Inversion Sickness
+		-- Blackwater Behemoth
+		292127, -- Darkest Depths
+--		292133, -- Bioluminescence
+		292307, -- Gaze from Below
+		292167, -- Toxic Spine
+		301494, -- Piercing Barb
+		298595, -- Glowing Stinger
+		-- Radiance of Aszhara
+		296737, -- Arcane Bomb
+		296746, -- Arcane Bomb
+		-- Lady Ashvane
+		296693, -- Waterlogged
+		297333, -- Briny Bubble
+		-- Orgozoa
+		298306, -- Incubation Fluid
+		295779, -- Aqua Lance
+		-- The Queen's Court
+		297586, -- Suffering
+		299914, -- Frenetic Charge
+		296851, -- Fanatical Verdict
+		300545, -- Mighty Rupture
+		-- Za'qul
+		292971, -- Hysteria
+		292963, -- Dread
+		293509, -- Manifest Nightmares
+		298192, -- Dark Beyond
+		-- Queen Azshara
+--		298569, -- Drained Soul
+--		301078, -- Charged Spear 
+--		299094, -- Beckon
+		303828, -- Crushing Depths
+		303825, -- Crushing Depths
+		303657, -- Arcane Burst
+		300492, -- Static Shock
+		297907  -- Cursed Heart
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do

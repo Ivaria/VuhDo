@@ -20,6 +20,7 @@ Bugfixes:
 
 
 Improvements:
+-- Added default custom debuffs for Eternal Palace raid encounters
 
 
 --------------------------------------------------------------
