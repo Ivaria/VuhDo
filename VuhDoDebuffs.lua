@@ -187,13 +187,22 @@ end
 
 --
 local tNextSoundTime = 0;
-local function VUHDO_playDebuffSound(aSound)
+local function VUHDO_playDebuffSound(aSound, aDebuffName)
 	if (aSound or "") == "" or GetTime() < tNextSoundTime then
 		return;
 	end
 
-	PlaySoundFile(aSound);
-	tNextSoundTime = GetTime() + 2;
+	local tSuccess = VUHDO_playSoundFile(aSound);
+
+	if tSuccess then
+		tNextSoundTime = GetTime() + 2;
+	else
+		if aDebuffName then
+			VUHDO_Msg(format(VUHDO_I18N_PLAY_SOUND_FILE_CUSTOM_DEBUFF_ERR, aSound, aDebuffName));
+		else
+			VUHDO_Msg(format(VUHDO_I18N_PLAY_SOUND_FILE_DEBUFF_ERR, aSound));
+		end
+	end
 end
 
 
@@ -382,9 +391,9 @@ function VUHDO_determineDebuff(aUnit)
 					tDebuffSettings = sAllDebuffSettings[tName] or sAllDebuffSettings[tostring(tDebuffInfo[6])];
 
 					if tDebuffSettings then -- particular custom debuff sound?
-						VUHDO_playDebuffSound(tDebuffSettings["SOUND"]);
+						VUHDO_playDebuffSound(tDebuffSettings["SOUND"], tName);
 					elseif VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] then -- default custom debuff sound?
-						VUHDO_playDebuffSound(VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"]);
+						VUHDO_playDebuffSound(VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"], tName);
 					end
 				end
 
