@@ -242,7 +242,11 @@ local function VUHDO_isAoeSpellEnabled(aSpell)
 	elseif not VUHDO_CONFIG["AOE_ADVISOR"]["knownOnly"] then
 		return true;
 	else
-		return VUHDO_isSpellKnown(VUHDO_AOE_SPELLS[aSpell]["name"]);
+		if VUHDO_AOE_SPELLS[aSpell]["name"] then
+			return VUHDO_isSpellKnown(VUHDO_AOE_SPELLS[aSpell]["name"]);
+		else
+			return false;
+		end
 	end
 end
 
