@@ -1030,14 +1030,6 @@ end
 
 
 
-function GetSpellBookItemInfo()
-
-	return nil, nil;
-
-end
-
-
-
 function UnitGetIncomingHeals()
 
 	return 0;
