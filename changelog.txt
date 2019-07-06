@@ -1,3 +1,26 @@
+Version 3.106
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+-- In 8.2.0 Blizzard removed the ability to play sounds by file path
+--   If you have LibSharedMedia installed make sure it is up to date
+--   You may need to reselect your sound options in VuhDo for debuffs
+-- VuhDo Options frame cannot be moved due to a bug introduced in 8.2
+
+
+Bugfixes:
+-- Safer sound playback for profiles created w/ old versions of LSM
+
+
+Improvements:
+
+
+--------------------------------------------------------------
 Version 3.105
 
 

@@ -1000,26 +1000,31 @@ end
 
 function VUHDO_playSoundFile(aSound)
 
-	if (aSound and aSound == "Interface\\Quiet.ogg") then
+	if (aSound and (aSound == "Interface\\Quiet.ogg" or aSound == "Interface\\Quiet.mp3")) then
 		-- sweep and reset any sound settings referencing the old 'none' LSM default	
 		for _, tDebuffInfo in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"]) do
-			if (tDebuffInfo["SOUND"] and tDebuffInfo["SOUND"] == "Interface\\Quiet.ogg") then
+			if (tDebuffInfo["SOUND"] and 
+				(tDebuffInfo["SOUND"] == "Interface\\Quiet.ogg" or 
+					tDebuffInfo["SOUND"] == "Interface\\Quiet.mp3")) then
 				tDebuffInfo["SOUND"] = nil;
 			end
 		end
 
 		-- reset custom debuff default sound if set to old 'none' LSM default
 		if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] and 
-			VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] == "Interface\\Quiet.ogg") then
+			(VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] == "Interface\\Quiet.ogg" or 
+				VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] == "Interface\\Quiet.mp3")) then
 			VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] = nil;
 		end
 
 		-- reset standard debuff sound if set to old 'none' LSM default
-		if (VUHDO_CONFIG["SOUND_DEBUFF"] and VUHDO_CONFIG["SOUND_DEBUFF"] == "Interface\\Quiet.ogg") then
+		if (VUHDO_CONFIG["SOUND_DEBUFF"] and 
+		      (VUHDO_CONFIG["SOUND_DEBUFF"] == "Interface\\Quiet.ogg" or 
+				VUHDO_CONFIG["SOUND_DEBUFF"] == "Interface\\Quiet.mp3")) then
 			VUHDO_CONFIG["SOUND_DEBUFF"] = nil;
 		end
 
-		-- return success because we've played nothing as requested (ie. Quiet.ogg)
+		-- return success because we've played nothing as requested (eg. Quiet.ogg)
 		return true;
 	end
 
