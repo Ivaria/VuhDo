@@ -224,23 +224,7 @@ function VUHDO_initOptionsSettings()
 	end
 
 	-- workaround the bug introduced in 8.2 that causes issues moving frame
-	-- essentially create an proxy frame and then move the main frame on drag stop
 	-- TODO: fix the root cause so we can go back to actually moving the frame
-	local overlay = CreateFrame("Frame", "VuhDoDragOverlay", UIParent);
-	overlay:ClearAllPoints();
-	overlay:SetPoint(VuhDoNewOptionsTabbedFrame:GetPoint());
-	overlay:SetSize(VuhDoNewOptionsTabbedFrame:GetSize());
-	overlay:SetScale(VuhDoNewOptionsTabbedFrame:GetScale());
-	
-	hooksecurefunc(VuhDoNewOptionsTabbedFrame, "SetScale", function(self, aScale) 
-		overlay:SetScale(aScale);
-	end);
-	
-	overlay:Hide();
-	
-	local ntex = overlay:CreateTexture();
-	ntex:SetColorTexture(1, 1, 1, 0.5);
-	ntex:SetAllPoints();
 	
 	local xs, ys;
 	local p, rf, rp, x, y;
@@ -253,9 +237,7 @@ function VUHDO_initOptionsSettings()
 		xs, ys = GetCursorPosition();
 		p, rf, rp, x, y = aFrame:GetPoint();
 		
-		overlay:Show();
-		
-		overlay:SetScript("OnUpdate", function(self, aTimeDelta)
+		aFrame:SetScript("OnUpdate", function(self, aTimeDelta)
 			if not xs then 
 				return;
 			end
@@ -268,8 +250,6 @@ function VUHDO_initOptionsSettings()
 			self:SetPoint(p, rf, rp, x + mx, y + my);
 		end);
 		
-		aFrame:SetAlpha(0);
-		VuhDoNewOptionsScaleSlider:SetAlpha(0);
 		aFrame:StartMoving();
 	end);
 	
@@ -278,17 +258,14 @@ function VUHDO_initOptionsSettings()
 
 		aFrame:StopMovingOrSizing();
 		
-		overlay:Hide();
-		
 		local uiScale = UIParent:GetEffectiveScale();
 		local mx, my = (xe - xs) / uiScale, (ye - ys) / uiScale;
 
 		aFrame:ClearAllPoints();
 		aFrame:SetPoint(p, rf, rp, x + mx, y + my);
+		
+		aFrame:SetScript("OnUpdate", VUHDO_optionsOnUpdate)
 
-		overlay:Hide();
-		aFrame:SetAlpha(1);
-		VuhDoNewOptionsScaleSlider:SetAlpha(1);
 	end);
 
 end
