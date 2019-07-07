@@ -223,50 +223,70 @@ function VUHDO_initOptionsSettings()
 		};
 	end
 	
-	local f = VuhDoNewOptionsTabbedFrame
-	local s = VuhDoNewOptionsScaleSlider
+	local overlay = CreateFrame("Frame", "VuhDoDragOverlay", UIParent);
+	overlay:ClearAllPoints();
+	overlay:SetPoint(VuhDoNewOptionsTabbedFrame:GetPoint());
+	overlay:SetSize(VuhDoNewOptionsTabbedFrame:GetSize());
+	overlay:SetScale(VuhDoNewOptionsTabbedFrame:GetScale());
 	
-	local overlay = CreateFrame("Frame","VuhDoDragOverlay",UIParent)
-	overlay:ClearAllPoints()
-	overlay:SetPoint(f:GetPoint())
-	overlay:SetSize(f:GetSize())
-	overlay:SetScale(f:GetScale())
-	hooksecurefunc(f,"SetScale", function(self,v) overlay:SetScale(v) end)
-	overlay:Hide()
-	local ntex = overlay:CreateTexture()
-	ntex:SetColorTexture(1,1,1,0.5)
-	ntex:SetAllPoints()	
+	hooksecurefunc(VuhDoNewOptionsTabbedFrame, "SetScale", function(self, aScale) 
+		overlay:SetScale(aScale);
+	end);
 	
-	local xs,ys
-	local p,rf,rp,x,y
-	f:SetMovable(true)
-	f:EnableMouse(true)
-	f:RegisterForDrag("LeftButton")
-	f:SetScript("OnDragStart", function(f)
-		xs,ys = GetCursorPosition()
-		p,rf,rp,x,y = f:GetPoint()
-		overlay:Show()
-		overlay:SetScript("OnUpdate", function(self,elapsed)
-			if not xs then return end
-			local cx,cy = GetCursorPosition()
-			local uiScale = UIParent:GetEffectiveScale()
-			local mx, my = (cx-xs)/uiScale, (cy-ys)/uiScale
-			self:ClearAllPoints()
-			self:SetPoint(p,rf,rp,x+mx,y+my)
-		end)
-		f:SetAlpha(0) VuhDoNewOptionsScaleSlider:SetAlpha(0) 
-		f:StartMoving()
-	end)
-	f:SetScript("OnDragStop", function(f)
-		local xe,ye = GetCursorPosition()
-		f:StopMovingOrSizing()
-		overlay:Hide()
-		local uiScale = UIParent:GetEffectiveScale()
-		local mx, my = (xe-xs)/uiScale, (ye-ys)/uiScale
-	--	print("Movement:", xe-xs,mx, ye-ys,my)
-		f:ClearAllPoints()
-		f:SetPoint(p,rf,rp,x+mx,y+my)
-		overlay:Hide() f:SetAlpha(1) VuhDoNewOptionsScaleSlider:SetAlpha(1)
-	end)
+	overlay:Hide();
 	
+	local ntex = overlay:CreateTexture();
+	ntex:SetColorTexture(1, 1, 1, 0.5);
+	ntex:SetAllPoints();
+	
+	local xs, ys;
+	local p, rf, rp, x, y;
+	
+	VuhDoNewOptionsTabbedFrame:SetMovable(true);
+	VuhDoNewOptionsTabbedFrame:EnableMouse(true);
+	VuhDoNewOptionsTabbedFrame:RegisterForDrag("LeftButton");
+	
+	VuhDoNewOptionsTabbedFrame:SetScript("OnDragStart", function(aFrame)
+		xs, ys = GetCursorPosition();
+		p, rf, rp, x, y = aFrame:GetPoint();
+		
+		overlay:Show();
+		
+		overlay:SetScript("OnUpdate", function(self, aTimeDelta)
+			if not xs then 
+				return;
+			end
+
+			local cx,cy = GetCursorPosition();
+			local uiScale = UIParent:GetEffectiveScale();
+			local mx, my = (cx - xs) / uiScale, (cy - ys) / uiScale;
+
+			self:ClearAllPoints();
+			self:SetPoint(p, rf, rp, x + mx, y + my);
+		end);
+		
+		aFrame:SetAlpha(0);
+		VuhDoNewOptionsScaleSlider:SetAlpha(0);
+		aFrame:StartMoving();
+	end);
+	
+	VuhDoNewOptionsTabbedFrame:SetScript("OnDragStop", function(aFrame)
+		local xe, ye = GetCursorPosition();
+
+		aFrame:StopMovingOrSizing();
+		
+		overlay:Hide();
+		
+		local uiScale = UIParent:GetEffectiveScale();
+		local mx, my = (xe - xs) / uiScale, (ye - ys) / uiScale;
+
+		aFrame:ClearAllPoints();
+		aFrame:SetPoint(p, rf, rp, x + mx, y + my);
+
+		overlay:Hide();
+		aFrame:SetAlpha(1);
+		VuhDoNewOptionsScaleSlider:SetAlpha(1);
+	end);
+
 end
+
