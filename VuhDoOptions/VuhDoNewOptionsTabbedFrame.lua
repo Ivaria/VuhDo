@@ -17,18 +17,14 @@ VUHDO_IS_CONFIG = false;
 
 --
 function VUHDO_tabbedFrameOnMouseDown(aPanel)
-	-- 8.2 introduced a bug that renders VuhDo Options useless when the main frame is moved
-	-- disable moving the options frame for now
-	--aPanel:StartMoving();
+	aPanel:StartMoving();
 end
 
 
 
 --
 function VUHDO_tabbedFrameOnMouseUp(aPanel)
-	-- 8.2 introduced a bug that renders VuhDo Options useless when the main frame is moved
-	-- disable moving the options frame for now
-	--aPanel:StopMovingOrSizing();
+	aPanel:StopMovingOrSizing();
 end
 
 
@@ -222,51 +218,5 @@ function VUHDO_initOptionsSettings()
 			["scale"] = 1;
 		};
 	end
-
-	-- workaround the bug introduced in 8.2 that causes issues moving frame
-	-- TODO: fix the root cause so we can go back to actually moving the frame
-	
-	local xs, ys;
-	local p, rf, rp, x, y;
-	
-	VuhDoNewOptionsTabbedFrame:SetMovable(true);
-	VuhDoNewOptionsTabbedFrame:EnableMouse(true);
-	VuhDoNewOptionsTabbedFrame:RegisterForDrag("LeftButton");
-	
-	VuhDoNewOptionsTabbedFrame:SetScript("OnDragStart", function(aFrame)
-		xs, ys = GetCursorPosition();
-		p, rf, rp, x, y = aFrame:GetPoint();
-		
-		aFrame:SetScript("OnUpdate", function(self, aTimeDelta)
-			if not xs then 
-				return;
-			end
-
-			local cx, cy = GetCursorPosition();
-			local uiScale = UIParent:GetEffectiveScale();
-			local mx, my = (cx - xs) / uiScale, (cy - ys) / uiScale;
-
-			self:ClearAllPoints();
-			self:SetPoint(p, rf, rp, x + mx, y + my);
-		end);
-		
-		aFrame:StartMoving();
-	end);
-	
-	VuhDoNewOptionsTabbedFrame:SetScript("OnDragStop", function(aFrame)
-		local xe, ye = GetCursorPosition();
-
-		aFrame:StopMovingOrSizing();
-		
-		local uiScale = UIParent:GetEffectiveScale();
-		local mx, my = (xe - xs) / uiScale, (ye - ys) / uiScale;
-
-		aFrame:ClearAllPoints();
-		aFrame:SetPoint(p, rf, rp, x + mx, y + my);
-		
-		aFrame:SetScript("OnUpdate", VUHDO_optionsOnUpdate)
-
-	end);
-
 end
 
