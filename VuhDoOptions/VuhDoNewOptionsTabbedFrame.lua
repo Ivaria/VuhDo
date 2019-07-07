@@ -222,7 +222,10 @@ function VUHDO_initOptionsSettings()
 			["scale"] = 1;
 		};
 	end
-	
+
+	-- workaround the bug introduced in 8.2 that causes issues moving frame
+	-- essentially create an proxy frame and then move the main frame on drag stop
+	-- TODO: fix the root cause so we can go back to actually moving the frame
 	local overlay = CreateFrame("Frame", "VuhDoDragOverlay", UIParent);
 	overlay:ClearAllPoints();
 	overlay:SetPoint(VuhDoNewOptionsTabbedFrame:GetPoint());
