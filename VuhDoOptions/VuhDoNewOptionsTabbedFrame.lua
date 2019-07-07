@@ -260,7 +260,7 @@ function VUHDO_initOptionsSettings()
 				return;
 			end
 
-			local cx,cy = GetCursorPosition();
+			local cx, cy = GetCursorPosition();
 			local uiScale = UIParent:GetEffectiveScale();
 			local mx, my = (cx - xs) / uiScale, (cy - ys) / uiScale;
 
