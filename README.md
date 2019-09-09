@@ -11,8 +11,8 @@ Please file CurseForge tickets to report any bugs or to make feature requests.
 
 Further reading:
 
-Frequently Asked Questions FAQ (Thanks Zohar).
-Exhaustive VuhDo setup walkthrough (Thanks Zohar).
+- Frequently Asked Questions FAQ (Thanks Zohar).
+- Exhaustive VuhDo setup walkthrough (Thanks Zohar).
 
 What is VuhDo?
 
@@ -56,7 +56,7 @@ Special Features:
 - Up to 10 independent raid member panels
 - Completely free arrangement of raid members: You can move any group to any position in any panel: 
 You can select to see your groups by class, group number role or any combination.
-Easy group arrangement via Dragâ€™nâ€™Drop. 
+Easy group arrangement via Drag-n-Drop. 
 You can additionally setup to display Pets, Vehicles, Main Tanks, private Tanks.
 A panel setup wizard lets you setup most common settings with a few clicks
 - You can store different skins and arrangements of panels separately
