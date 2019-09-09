@@ -1,18 +1,16 @@
-Brave souls can get the alpha of VuhDo for Classic WoW here for now!
-
 Get VuhDo release v3.107 now with support for patch 8.2 Rise of Azshara!
 
-To get started read the updated guide over at Icy-Veins.
+To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
-Download user created VuhDo profiles, key layouts and custom bouquets over on wago.io!
+Download user created VuhDo profiles, key layouts and custom bouquets over on [wago.io](https://wago.io)!
 
 Keep those feature requests and bug reports coming!
 Please file CurseForge tickets to report any bugs or to make feature requests.
 
 Further reading:
 
-- Frequently Asked Questions FAQ (Thanks Zohar).
-- Exhaustive VuhDo setup walkthrough (Thanks Zohar).
+- [Frequently Asked Questions FAQ](http://vuhdoguide.blogspot.com/2011/08/frequently-asked-questions_18.html) (Thanks Zohar).
+- [Exhaustive VuhDo setup walkthrough](http://vuhdoguide.blogspot.com/2011/08/vuhdo-setup-walkthrough.html) (Thanks Zohar).
 
 What is VuhDo?
 
