@@ -1,11 +1,11 @@
-Get VuhDo release v3.107 now with support for patch 8.2 Rise of Azshara!
+Get [VuhDo release v3.107](https://www.curseforge.com/wow/addons/vuhdo) now with support for patch 8.2 Rise of Azshara!
 
 To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
 Download user created VuhDo profiles, key layouts and custom bouquets over on [wago.io](https://wago.io)!
 
 Keep those feature requests and bug reports coming!
-Please file CurseForge tickets to report any bugs or to make feature requests.
+Please [file VuhDo GitLab issues](https://gitlab.vuhdo.io/vuhdo/vuhdo/issues/new) to report any bugs or to make feature requests.
 
 Further reading:
 
