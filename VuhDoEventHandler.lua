@@ -52,7 +52,7 @@ local UnitIsTrivial = UnitIsTrivial;
 local GetSpellCooldown = GetSpellCooldown;
 local HasFullControl = HasFullControl;
 local pairs = pairs;
-local UnitThreatSituation = UnitThreatSituation;
+local VUHDO_unitThreatSituation = VUHDO_unitThreatSituation;
 local InCombatLockdown = InCombatLockdown;
 local type = type;
 
@@ -198,7 +198,7 @@ local tEmpty = {};
 local function VUHDO_updateThreat(aUnit)
 	tInfo = (VUHDO_RAID or tEmpty)[aUnit];
 	if tInfo then
-		tInfo["threat"] = UnitThreatSituation(aUnit) or 0;
+		tInfo["threat"] = VUHDO_unitThreatSituation(aUnit) or 0;
 
 		if VUHDO_INTERNAL_TOGGLES[17] then -- VUHDO_UPDATE_THREAT_LEVEL
 			VUHDO_updateBouquetsForEvent(aUnit, 17); -- VUHDO_UPDATE_THREAT_LEVEL
@@ -695,7 +695,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent then
 		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
 			if "player" == anArg1 then
-				local tSpecNum = tostring(GetSpecialization()) or "1";
+				local tSpecNum = tostring(VUHDO_getSpecialization()) or "1";
 
 				-- event sometimes fires multiple times so we must de-dupe
 				if VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNum] then
@@ -1090,7 +1090,7 @@ local function VUHDO_updateAllRange()
 		end
 
 		-- Check if unit is phased
-		if UnitIsWarModePhased(tUnit) or not UnitInPhase(tUnit) then
+		if VUHDO_unitIsWarModePhased(tUnit) or not UnitInPhase(tUnit) then
 			tIsInRange = false;
 		else
 			-- Check if unit is in range

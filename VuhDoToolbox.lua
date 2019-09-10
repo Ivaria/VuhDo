@@ -21,7 +21,7 @@ local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
 local GetSpellInfo = GetSpellInfo;
 local SetMapToCurrentZone = SetMapToCurrentZone;
-local UnitAlternatePowerInfo = UnitAlternatePowerInfo;
+local VUHDO_unitAlternatePowerInfo = VUHDO_unitAlternatePowerInfo;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local GetPlayerFacing = GetPlayerFacing;
@@ -285,7 +285,7 @@ function VUHDO_isInRange(aUnit)
 		return true;
 	elseif VUHDO_isSpecialUnit(aUnit) then 
 		return VUHDO_isTargetInRange(aUnit);
-	elseif UnitIsWarModePhased(aUnit) or not UnitInPhase(aUnit) then
+	elseif VUHDO_unitIsWarModePhased(aUnit) or not UnitInPhase(aUnit) then
 		return false;
 	elseif (sIsGuessRange) then 
 		return UnitInRange(aUnit);
@@ -540,7 +540,7 @@ end
 local tResurrectionSpells;
 local tKnownResurrectionSpells;
 function VUHDO_getResurrectionSpells()
-	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[GetSpecialization() or 0];
+	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[VUHDO_getSpecialization() or 0];
 
 	if tResurrectionSpells then
 		tKnownResurrectionSpells = { };
@@ -752,7 +752,7 @@ end
 
 --
 function VUHDO_isAltPowerActive(aUnit)
-	local tBarType, _, _, _, _, tIsHideFromOthers = UnitAlternatePowerInfo(aUnit);
+	local tBarType, _, _, _, _, tIsHideFromOthers = VUHDO_unitAlternatePowerInfo(aUnit);
 	return tBarType and (not tIsHideFromOthers or "player" == aUnit);
 end
 
@@ -998,98 +998,145 @@ end
 ---------------------------------
 -- CLASSIC COMPATIBILITY LAYER --
 ---------------------------------
-function GetSpecialization()
+function VUHDO_getSpecialization()
 
-	return 1;
-
-end
-
-
-
-function GetSpecializationInfo()
-
-	return 1, "Unknown", _, _, _, "NONE";
+	if not GetSpecialization then
+		return 1;
+	else
+		return GetSpecialization();
+	end
 
 end
 
 
 
-function GetInspectSpecialization()
+function VUHDO_getSpecializationInfo(...)
 
-	return 0;
-
-end
-
-
-
-function GetSpecializationRoleByID()
-
-	return "NONE";
+	if not GetSpecializationInfo then 
+		return 1, "Unknown", _, _, _, "NONE";
+	else
+		return GetSpecializationInfo(...);
+	end
 
 end
 
 
 
-function UnitGetIncomingHeals()
+function VUHDO_getInspectSpecialization(...)
 
-	return 0;
-
-end
-
-
-
-function UnitGetTotalAbsorbs()
-
-	return 0;
+	if not GetInspectSpecialization then
+		return 0;
+	else
+		return GetInspectSpecialization(...);
+	end
 
 end
 
 
 
-function UnitThreatSituation()
+function VUHDO_getSpecializationRoleByID(...)
 
-	return 0;
-
-end
-
-
-
-function UnitIsWarModePhased()
-
-	return false;
+	if not GetSpecializationRoleByID then
+		return "NONE";
+	else
+		return GetSpecializationRoleByID(...);
+	end
 
 end
 
 
 
-function UnitHasVehicleUI()
+function VUHDO_unitGetIncomingHeals(...)
 
-	return false;
-
-end
-
-
-
-function UnitGroupRolesAssigned()
-
-	return "NONE";
+	if not UnitGetIncomingHeals then
+		return 0;
+	else
+		return UnitGetIncomingHeals(...);
+	end
 
 end
 
 
 
-function UnitAlternatePowerInfo()
+function VUHDO_unitGetTotalAbsorbs(...)
 
-	return false;
+	if not UnitGetTotalAbsorbs then
+		return 0;
+	else
+		return UnitGetTotalAbsorbs(...);
+	end
 
 end
 
 
 
-C_IncomingSummon = { };
-function C_IncomingSummon.HasIncomingSummon()
+function VUHDO_unitThreatSituation(...)
 
-	return false;
+	if not UnitThreatSituation then
+		return 0;
+	else
+		return UnitThreatSituation(...);
+	end
+
+end
+
+
+
+function VUHDO_unitIsWarModePhased(...)
+
+	if not UnitIsWarModePhased then
+		return false;
+	else
+		return UnitIsWarModePhased(...);
+	end
+
+end
+
+
+
+function VUHDO_unitHasVehicleUI(...)
+
+	if not UnitHasVehicleUI then
+		return false;
+	else
+		return UnitHasVehicleUI(...);
+	end
+
+end
+
+
+
+function VUHDO_unitGroupRolesAssigned(...)
+
+	if not UnitGroupRolesAssigned then
+		return "NONE";
+	else
+		return UnitGroupRolesAssigned(...);
+	end
+
+end
+
+
+
+function VUHDO_unitAlternatePowerInfo(...)
+
+	if not UnitAlternatePowerInfo then 
+		return false;
+	else
+		return UnitAlternatePowerInfo(...);
+	end
+
+end
+
+
+
+function VUHDO_hasIncomingSummon(...)
+
+	if not C_IncomingSummon or not C_IncomingSummon.HasIncomingSummon then
+		return false;
+	else
+		return C_IncomingSummon.HasIncomingSummon(...);
+	end
 
 end
 
