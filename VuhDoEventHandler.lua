@@ -1556,6 +1556,15 @@ function VUHDO_OnLoad(anInstance)
 
 	VUHDO_ALL_EVENTS = nil;
 
+	if VUHDO_LibClassicHealComm then 
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealStarted", "HealComm_HealUpdated");
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealStopped");
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealDelayed", "HealComm_HealUpdated");
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealUpdated");
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_ModifierChanged");
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_GUIDDisappeared");
+	end
+
 	SLASH_VUHDO1 = "/vuhdo";
 	SLASH_VUHDO2 = "/vd";
 	SlashCmdList["VUHDO"] = function(aMessage)

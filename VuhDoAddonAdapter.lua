@@ -16,6 +16,15 @@ VUHDO_LibBase64 = LibStub:GetLibrary("LibBase64-1.0");
 
 VUHDO_LibCustomGlow = LibStub("LibCustomGlow-1.0");
 
+VUHDO_LibClassicHealComm = LibStub("LibClassicHealComm-1.0", true);
+
+VUHDO_LibClassicDurations = LibStub("LibClassicDurations", true);
+
+if VUHDO_LibClassicDurations then
+    VUHDO_LibClassicDurations:Register("VuhDo");
+    UnitAura = VUHDO_LibClassicDurations.UnitAuraWrapper;
+end
+
 VUHDO_LibSharedMedia:Register("font", "Arial Black", "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf");
 VUHDO_LibSharedMedia:Register("font", "Emblem",	"Interface\\AddOns\\VuhDo\\Fonts\\Emblem.ttf");
 VUHDO_LibSharedMedia:Register("font", "Vixar",	"Interface\\AddOns\\VuhDo\\Fonts\\vixar.ttf");

@@ -1049,7 +1049,13 @@ end
 function VUHDO_unitGetIncomingHeals(...)
 
 	if not UnitGetIncomingHeals then
-		return 0;
+		if VUHDO_LibClassicHealComm then
+			local targetGUID = UnitGUID(...);
+
+			return (VUHDO_LibClassicHealComm:GetHealAmount(targetGUID, VUHDO_LibClassicHealComm.ALL_HEALS) or 0) * (VUHDO_LibClassicHealComm:GetHealModifier(targetGUID) or 1);
+		else
+			return 0;
+		end
 	else
 		return UnitGetIncomingHeals(...);
 	end
