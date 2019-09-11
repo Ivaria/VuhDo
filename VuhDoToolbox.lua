@@ -969,6 +969,15 @@ function VUHDO_unitAura(aUnit, aSpell, aFilter)
 		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
 
 		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
+			if VUHDO_LibClassicDurations then
+		                local tNewDuration, tNewExpirationTime = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tSource, tSpellName);
+		
+				if tDuration == 0 and tNewDuration then 
+					tDuration = tNewDuration;
+					tExpirationTime = tNewExpirationTime;
+				end
+			end
+
 			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3;
 		end
 	end
