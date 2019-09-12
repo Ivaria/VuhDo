@@ -206,27 +206,27 @@ end
 
 VUHDO_TEXT_PROVIDERS = {
 	["OVERHEAL_KILO_N_K"] = {
-		["displayName"] = "Overheal: <#nk>",
+		["displayName"] = "Overheal: <#n>",
 		["calculator"] = VUHDO_overhealCalculator,
-		["validator"] = VUHDO_kiloValidator,
+		["validator"] = VUHDO_absoluteValidator,
 		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE },
 	},
 	["OVERHEAL_KILO_PLUS_N_K"] = {
-		["displayName"] = "Overheal: +<#n>k",
+		["displayName"] = "Overheal: +<#n>",
 		["calculator"] = VUHDO_overhealCalculator,
-		["validator"] = VUHDO_plusKiloValidator,
+		["validator"] = VUHDO_absoluteValidator,
 		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE },
 	},
 	["INCOMING_HEAL_NK"] = {
-		["displayName"] = "Incoming Heal: <#nk>",
+		["displayName"] = "Incoming Heal: <#n>",
 		["calculator"] = VUHDO_incomingHealCalculator,
-		["validator"] = VUHDO_kiloValidator,
+		["validator"] = VUHDO_absoluteValidator,
 		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE },
 	},
 	["SHIELD_ABSORB_OVERALL_N_K"] = {
-		["displayName"] = "Shield absorb total: <#nk>",
+		["displayName"] = "Shield absorb total: <#n>",
 		["calculator"] = VUHDO_shieldAbsorbCalculator,
-		["validator"] = VUHDO_kiloValidator,
+		["validator"] = VUHDO_absoluteValidator,
 		["interests"] = { VUHDO_UPDATE_SHIELD },
 	},
 	["THREAT_PERCENT"] = {

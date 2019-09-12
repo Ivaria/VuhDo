@@ -1557,8 +1557,18 @@ function VUHDO_OnLoad(anInstance)
 	VUHDO_ALL_EVENTS = nil;
 
 	if VUHDO_LibClassicHealComm then 
-		local function HealComm_HealUpdated(event, casterGUID, spellID, healType, endTime, ...)
-			return;
+		local function HealComm_HealUpdated(aEvent, aCasterGUID, aSpellID, aHealType, aEndTime, ...)
+			local tTargets = { n = select("#", ...), ... };
+
+			for i = 1, tTargets.n do
+				local tTarget = VUHDO_RAID_GUIDS[tTargets[i]];
+
+				if (VUHDO_RAID or tEmptyRaid)[tTarget] then -- auch target, focus
+					VUHDO_updateHealth(tTarget, 9); -- VUHDO_UPDATE_INC
+					VUHDO_updateBouquetsForEvent(tTarget, 9); -- VUHDO_UPDATE_ALT_POWER
+				end
+			end
+			
 		end
 		anInstance.HealComm_HealUpdated = HealComm_HealUpdated;
 
