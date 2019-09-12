@@ -471,6 +471,10 @@ end
 
 --
 function VUHDO_isSpellKnown(aSpellName)
+	if not aSpellName then 
+		return false; 
+	end
+
 	return (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
 		or (type(aSpellName) == "number" and IsPlayerSpell(aSpellName))
 		or GetSpellBookItemInfo(aSpellName) ~= nil
