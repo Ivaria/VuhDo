@@ -226,13 +226,16 @@ local tSpellName;
 local function VUHDO_updateShields(aUnit)
 	for tSpellId, _ in pairs(VUHDO_SHIELDS) do
 		tSpellName = select(1, GetSpellInfo(tSpellId));
-		tRemain = select(16, VUHDO_unitBuff(aUnit, tSpellName));
 
-		if tRemain and "number" == type(tRemain) then
-			if tRemain > 0 then
-				VUHDO_updateShieldValue(aUnit, tSpellName, tRemain, nil);
-			else
-				VUHDO_removeShield(aUnit, tSpellName);
+		if tSpellName then
+			tRemain = select(16, VUHDO_unitBuff(aUnit, tSpellName));
+
+			if tRemain and "number" == type(tRemain) then
+				if tRemain > 0 then
+					VUHDO_updateShieldValue(aUnit, tSpellName, tRemain, nil);
+				else
+					VUHDO_removeShield(aUnit, tSpellName);
+				end
 			end
 		end
 	end
