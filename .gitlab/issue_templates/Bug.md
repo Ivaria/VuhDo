@@ -4,7 +4,7 @@ Please first disable all add-ons other than VuhDo and VuhDo Options and see if y
 
 **Describe your environment:**
 
-* *VuhDo version (e.g. v3.100)*
+* *VuhDo version (e.g. v3.102, Classic or Retail)*
 	* You can retrieve this by running the following command in-game: `/dump GetAddOnMetadata("VuhDo", "Version")`
 * *World of Warcraft region (ie. Americas/Oceanic, EU, CN or KR)*
 * *World of Warcraft client language (eg. enUS)*
