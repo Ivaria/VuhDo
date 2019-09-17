@@ -222,7 +222,7 @@ VUHDO_TEXT_PROVIDERS = {
 	["OVERHEAL_KILO_PLUS_N_K"] = {
 		["displayName"] = "Overheal: +<#n>",
 		["calculator"] = VUHDO_overhealCalculator,
-		["validator"] = VUHDO_kiloValidator,
+		["validator"] = VUHDO_plusKiloValidator,
 		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE },
 	},
 	["INCOMING_HEAL_NK"] = {
