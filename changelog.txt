@@ -15,6 +15,7 @@ Bugfixes:
 -- Fixed incoming heal display
 --   Note: Only works with others players using LibHealComm
 -- Fixed compatability layer to not modify global functions
+-- Fixed text providers using kilo/+kilo displaying zero values
 
 
 Improvements:
