@@ -1,3 +1,28 @@
+Version 3.102-classic
+
+
+Known issues:
+-- Spells by rank can be specified using a rank suffix:
+--  Example: Lesser Heal(Rank 1)
+-- Buff Watch is not currently working (missing many spells)
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+
+
+Bugfixes:
+-- Better display of small numbers in text providers
+-- Fixed timer display for other players buffs/debuffs
+-- Fixed incoming heal display
+--   Note: Only works with others players using LibHealComm
+-- Fixed compatability layer to not modify global functions
+
+
+Improvements:
+-- Added support for LibClassicHealComm-1.0
+-- Added support for LibClassicDurations
+
+
+--------------------------------------------------------------
 Version 3.102
 
 
