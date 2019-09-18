@@ -5,6 +5,9 @@ stages:
 .releases: &releases
   only:
     - /^\d[\d\.]*(-(alpha|beta)\d+)?$/
+    
+before_script:
+  - apt-get update -qq && apt-get install -y -qq bash
 
 build:
   stage: build
