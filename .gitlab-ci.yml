@@ -4,7 +4,7 @@ stages:
 
 .releases: &releases
   only:
-    - /^\d[\d\.]*(-(alpha|beta)\d+)?$/
+    - /^v\d[\d\.]*(-classic-?)?(-(alpha|beta)-\d+)?$/
     
 before_script:
   - apk add --no-cache bash curl git subversion zip luacheck
