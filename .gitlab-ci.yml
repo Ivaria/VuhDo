@@ -12,7 +12,7 @@ before_script:
 luacheck:
   stage: build
   script:
-    - luacheck . --no-color -q
+    - luacheck . -q && echo "Lua check passed!" || echo "Lua check failed!"
 
 package:
   stage: build
