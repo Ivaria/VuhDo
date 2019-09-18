@@ -58,11 +58,9 @@ fi
 strtotime() {
 	value="$1" # datetime string
 	format="$2" # strptime string
-	if date --version &>/dev/null; then # gnu
-		date -d "$value" +%s
-	else # bsd
-		date -j -f "$format" "$value" "+%s"
-	fi
+
+	date -d "$value" +%s
+
 }
 
 # Script return code
