@@ -7,13 +7,12 @@ stages:
     - /^\d[\d\.]*(-(alpha|beta)\d+)?$/
     
 before_script:
-  - apk add --no-cache bash curl git subversion zip luarocks
-  - luarocks install --local luacheck
+  - apk add --no-cache bash curl git subversion zip luacheck
 
 luacheck:
   stage: build
   script:
-    - .luarocks/bin/luacheck . --no-color -q
+    - luacheck . --no-color -q
 
 package:
   stage: build
