@@ -12,7 +12,7 @@ build:
     - tags
     - web
   script:
-    - release.sh -d
+    - /bin/sh release.sh -d
   artifacts:
     paths:
       - .release/VuhDo/
@@ -26,7 +26,7 @@ curseforge:
     name: CurseForge
     url: https://www.curseforge.com/wow/addons/vuhdo
   script:
-    - release.sh -ocelzWHG
+    - /bin/sh release.sh -ocelzWHG
 
 wowinterface:
   <<: *releases
@@ -35,7 +35,7 @@ wowinterface:
     name: WoWInterface
     url: https://www.wowinterface.com/downloads/info14239-VuhDo.html
   script:
-    - release.sh -ocelzLHG
+    - /bin/sh release.sh -ocelzLHG
 
 gitlab:
   <<: *releases
@@ -44,4 +44,4 @@ gitlab:
     name: GitLab
     url: https://gitlab.vuhdo.io/vuhdo/vuhdo/releases
   script:
-    - release.sh -ocelzLWH
+    - /bin/sh release.sh -ocelzLWH
