@@ -7,8 +7,7 @@ stages:
     - /^\d[\d\.]*(-(alpha|beta)\d+)?$/
     
 before_script:
-  - apk add --no-cache bash
-  - apk add --no-cache curl
+  - apk add --no-cache bash curl git svn
 
 build:
   stage: build
