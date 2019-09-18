@@ -1,0 +1,46 @@
+stages:
+  - build
+  - deploy
+
+.releases: &releases
+  only:
+    - /^\d[\d\.]*(-(alpha|beta)\d+)?$/
+
+build:
+  stage: build
+  only:
+    - tags
+    - web
+  script:
+    - release.sh -d
+  artifacts:
+    paths:
+      - .release/VuhDo/
+      - .release/*.zip
+  
+curseforge:
+  <<: *releases
+  stage: deploy
+  environment:
+    name: CurseForge
+    url: https://www.curseforge.com/wow/addons/vuhdo
+  script:
+    - release.sh -ocelzWHG
+
+wowinterface:
+  <<: *releases
+  stage: deploy
+  environment:
+    name: WoWInterface
+    url: https://www.wowinterface.com/downloads/info14239-VuhDo.html
+  script:
+    - release.sh -ocelzLHG
+
+gitlab:
+  <<: *releases
+  stage: deploy
+  environment:
+    name: GitLab
+    url: https://gitlab.vuhdo.io/vuhdo/vuhdo/releases
+  script:
+    - release.sh -ocelzLWH
