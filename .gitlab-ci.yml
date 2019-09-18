@@ -7,7 +7,8 @@ stages:
     - /^\d[\d\.]*(-(alpha|beta)\d+)?$/
     
 before_script:
-  - apt-get update -qq && apt-get install -y -qq bash
+  - apk add --no-cache bash
+  - apk add --no-cache curl
 
 build:
   stage: build
