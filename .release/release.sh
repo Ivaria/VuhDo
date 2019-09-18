@@ -56,7 +56,7 @@ fi
 
 # svn date helper function
 strtotime() {
-	value=$( echo $1 | sed -e "s/\([^+]*\)\(\+.*\)/\1/" ) # datetime string w/o TZ
+	value=$( echo "$1" | sed -e 's/\([^+]*\)\(\+.*\)/\1/' ) # datetime string w/o TZ
 	format="$2" # strptime string
 
 	date -d "$value" +%s
