@@ -2,14 +2,14 @@ Get [VuhDo release v3.107](https://www.curseforge.com/wow/addons/vuhdo) now with
 
 To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
-Download user created VuhDo profiles, key layouts and custom bouquets over on [wago.io](https://wago.io)!
+DownloadÂ user created VuhDo profiles, key layouts and custom bouquets over on [wago.io](https://wago.io)!
 
 Keep those feature requests and bug reports coming!
 Please [file VuhDo GitLab issues](https://gitlab.vuhdo.io/vuhdo/vuhdo/issues/new) to report any bugs or to make feature requests.
 
 Further reading:
 
-- [Frequently Asked Questions FAQ](http://vuhdoguide.blogspot.com/2011/08/frequently-asked-questions_18.html) (Thanks Zohar).
+- [Frequently Asked Questions FAQ](http://vuhdoguide.blogspot.com/2011/08/frequently-asked-questions_18.html)Â (Thanks Zohar).
 - [Exhaustive VuhDo setup walkthrough](http://vuhdoguide.blogspot.com/2011/08/vuhdo-setup-walkthrough.html) (Thanks Zohar).
 
 What is VuhDo?
@@ -67,22 +67,23 @@ Supported standards / Compatibility:
 To be absolutely clear VuhDo is still fully supported and will continue to see bug fixes / new features.
 
 Below we have archived the parting message from Iza @ EU-Gilneas, the original creator of this amazing addon:
-2014-04-25: I (Iza) am sorry to announce that I'm not
-going to further develop or maintain VuhDo anymore.
+> 2014-04-25: I (Iza) am sorry to announce that I'm not
+> going to further develop or maintain VuhDo anymore.
+> 
+> I haven't been actively playing wow for some years
+> now and lately - as you might have noticed - 
+> my efforts (and also interest) in maintaining and 
+> developing WoW addons tends to zero, so I'll be
+> gone for good I guess.
+> 
+> Thanks to a fine community for the great times 
+> and for sharing all the uncounted ideas and suggestions 
+> which finally have made VuhDo what I believe is a decent 
+> addon.
+> 
+> All the best to you & keep it going,
+> Iza
 
-I haven't been actively playing wow for some years
-now and lately - as you might have noticed - 
-my efforts (and also interest) in maintaining and 
-developing WoW addons tends to zero, so I'll be
-gone for good I guess.
-
-Thanks to a fine community for the great times 
-and for sharing all the uncounted ideas and suggestions 
-which finally have made VuhDo what I believe is a decent 
-addon.
-
-All the best to you & keep it going,
-Iza
 
 If you enjoy using VuhDo please consider a small donation for Iza.
-(use the Donate button on the project page)
+(use the Donate button on the CurseForge project page)
