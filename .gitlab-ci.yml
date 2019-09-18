@@ -16,6 +16,7 @@ build:
   artifacts:
     paths:
       - .release/VuhDo/
+      - .release/VuhDoOptions/
       - .release/*.zip
   
 curseforge:
