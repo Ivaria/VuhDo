@@ -696,9 +696,11 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
 			if "player" == anArg1 then
 				local tSpecNum = tostring(VUHDO_getSpecialization()) or "1";
+				local tBestProfile = VUHDO_getBestProfileAfterSpecChange();
 
 				-- event sometimes fires multiple times so we must de-dupe
-				if VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNum] then
+				if (VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNum]) or 
+					(VUHDO_CONFIG["CURRENT_PROFILE"] ~= tBestProfile) then
 					VUHDO_activateSpecc(tSpecNum);
 				end
 			end

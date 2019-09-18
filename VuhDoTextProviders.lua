@@ -13,44 +13,65 @@ end
 
 
 --
+local tChiCount;
+local tChiMax;
 local function VUHDO_chiCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_CHI), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_CHI)
+		tChiCount = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_CHI);
+		tChiMax = UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_CHI);
+
+		return (tChiCount > 0) and tChiCount or "", (tChiMax > 0) and tChiMax or "";
 	else
-		return 0, 0;
+		return "", nil;
 	end
 end
 
 
 
 --
+local tHolyPowerCount;
+local tHolyPowerMax;
 local function VUHDO_holyPowerCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER);
+		tHolyPowerCount = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER);
+		tHolyPowerMax = UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_HOLY_POWER);
+
+		return (tHolyPowerCount > 0) and tHolyPowerCount or "", (tHolyPowerMax > 0) and tHolyPowerMax or "";
 	else
-		return 0, 0;
+		return "", nil;
 	end
 end
 
 
 
 --
+local tComboPointsCount;
+local tComboPointsMax;
 local function VUHDO_comboPointsCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS);
+		tComboPointsCount = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS);
+		tComboPointsMax = UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_COMBO_POINTS);
+
+		return (tComboPointsCount > 0) and tComboPointsCount or "", (tComboPointsMax > 0) and tComboPointsMax or "";
+		
 	else
-		return 0, 0;
+		return "", nil;
 	end
 end
 
 
 
 --
+local tSoulShardsCount;
+local tSoulShardsMax;
 local function VUHDO_soulShardsCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS);
+		tSoulShardsCount = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS);
+		tSoulShardsMax = UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_SOUL_SHARDS);
+
+		return (tSoulShardsCount > 0) and tSoulShardsCount or "", (tSoulShardsMax > 0) and tSoulShardsMax or "";
 	else
-		return 0, 0;
+		return "", nil;
 	end
 end
 
@@ -58,6 +79,7 @@ end
 
 --
 local tReadyRuneCount;
+local tReadyRuneMax;
 local tIsRuneReady;
 local function VUHDO_runesCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] and anInfo["unit"] == "player" then
@@ -69,20 +91,27 @@ local function VUHDO_runesCalculator(anInfo)
 			tReadyRuneCount = tReadyRuneCount + (tIsRuneReady and 1 or 0);
 		end
 
-		return tReadyRuneCount, UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
+		tReadyRuneMax = UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_RUNES);
+
+		return (tReadyRuneCount > 0) and tReadyRuneCount or "", (tReadyRuneMax > 0) and tReadyRuneMax or "";
 	else
-		return 0, 0;
+		return "", nil;
 	end
 end
 
 
 
 --
+local tArcaneChargesCount;
+local tArcaneChargesMax;
 local function VUHDO_arcaneChargesCalculator(anInfo)
 	if anInfo["connected"] and not anInfo["dead"] then
-		return UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES), UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES);
+		tArcaneChargesCount = UnitPower(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES);
+		tArcaneChargesMax = UnitPowerMax(anInfo["unit"], VUHDO_UNIT_POWER_ARCANE_CHARGES);
+
+		return (tArcaneChargesCount > 0) and tArcaneChargesCount or "", (tArcaneChargesMax > 0) and tArcaneChargesMax or "";
 	else
-		return 0, 0;
+		return "", nil;
 	end
 end
 

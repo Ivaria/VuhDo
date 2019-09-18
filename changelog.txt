@@ -1,4 +1,4 @@
-Version 3.102-classic
+Version 3.107-classic
 
 
 Known issues:
@@ -24,6 +24,122 @@ Improvements:
 
 
 --------------------------------------------------------------
+Version 3.107
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+-- In 8.2.0 Blizzard removed the ability to play sounds by file path
+--   If you have LibSharedMedia installed make sure it is up to date
+--   You may need to reselect your sound options in VuhDo for debuffs
+
+
+Bugfixes:
+-- Real fix for 8.2 bug preventing moving of the VuhDo Options frame
+
+
+Improvements:
+
+
+--------------------------------------------------------------
+Version 3.106
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+-- In 8.2.0 Blizzard removed the ability to play sounds by file path
+--   If you have LibSharedMedia installed make sure it is up to date
+--   You may need to reselect your sound options in VuhDo for debuffs
+
+
+Bugfixes:
+-- Safer sound playback for profiles created w/ old versions of LSM
+-- Workaround for 8.2 bug preventing moving of the VuhDo Options frame
+
+
+Improvements:
+
+
+--------------------------------------------------------------
+Version 3.105
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+-- In 8.2.0 Blizzard removed the ability to play sounds by file path
+--   If you have LibSharedMedia installed make sure it is up to date
+--   You may need to reselect your sound options in VuhDo for debuffs
+-- VuhDo Options frame cannot be moved due to a bug introduced in 8.2
+
+
+Bugfixes:
+-- Fix auto loading of profiles w/o a key layout on spec change
+
+
+Improvements:
+
+
+--------------------------------------------------------------
+Version 3.104
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+-- In 8.2.0 Blizzard removed the ability to play sounds by file path
+--   If you have LibSharedMedia installed make sure it is up to date
+--   You may need to reselect your sound options in VuhDo for debuffs
+-- VuhDo Options frame cannot be moved due to a bug introduced in 8.2
+
+
+Bugfixes:
+-- Safer handling of sound playback
+-- Anchor VuhDo Options frame to top of the screen
+--  Note: Still working on a real fix to the frame moving bug in 8.2
+
+
+Improvements:
+-- Added default custom debuffs for Eternal Palace raid encounters
+
+
+--------------------------------------------------------------
+Version 3.103
+
+
+Known issues:
+-- BfA stat squish cleanup still a work in progress
+--   AOE Advice spell equations need complete overhaul
+--   Some text providers need changes to better display small numbers
+-- Debuff tooltips are currently bugged when using ElvUI
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'
+-- VuhDo Options frame cannot be moved due to a bug introduced in 8.2
+
+
+Bugfixes:
+-- Better handling of tooltips missing zone information
+-- Workaround bug with VuhDo Options frame when moving
+--  NOTE: This disables moving VuhDo Options for now
+
+
+Improvements:
+
+
+--------------------------------------------------------------
 Version 3.102
 
 
@@ -37,7 +153,9 @@ Known issues:
 
 Bugfixes:
 -- Re-enable LibSharedMedia fonts for zhCN, zhTW, and koKR locales
--- Fixed loading of profile/key layout on automatic spec change 
+-- Fixed loading of profile/key layout on automatic spec change
+-- Fixed referencing external sound files (8.2 restriction)
+-- Unit power text providers only display when non-zero
 
 
 Improvements:

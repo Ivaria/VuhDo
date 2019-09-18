@@ -412,10 +412,13 @@ function VUHDO_getUnitZoneName(aUnit)
 	else
 		VuhDoScanTooltip:SetOwner(VuhDo, "ANCHOR_NONE");
 		VuhDoScanTooltip:ClearLines();
-		VuhDoScanTooltip:SetUnit(aUnit)
-		tZone = VuhDoScanTooltipTextLeft3:GetText();
+		VuhDoScanTooltip:SetUnit(aUnit);
+
+		if VuhDoScanTooltip:NumLines() > 2 then
+			tZone = VuhDoScanTooltipTextLeft3:GetText();
+		end
 	
-		if tZone == "PvP" then 
+		if tZone and tZone == "PvP" and VuhDoScanTooltip:NumLines() > 3 then 
 			tZone = VuhDoScanTooltipTextLeft4:GetText();
 		end
 	end
@@ -1008,6 +1011,48 @@ end
 
 
 
+function VUHDO_playSoundFile(aSound)
+
+	if (aSound and (aSound == "Interface\\Quiet.ogg" or aSound == "Interface\\Quiet.mp3")) then
+		-- sweep and reset any sound settings referencing the old 'none' LSM default	
+		for _, tDebuffInfo in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"]) do
+			if (tDebuffInfo["SOUND"] and 
+				(tDebuffInfo["SOUND"] == "Interface\\Quiet.ogg" or 
+					tDebuffInfo["SOUND"] == "Interface\\Quiet.mp3")) then
+				tDebuffInfo["SOUND"] = nil;
+			end
+		end
+
+		-- reset custom debuff default sound if set to old 'none' LSM default
+		if (VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] and 
+			(VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] == "Interface\\Quiet.ogg" or 
+				VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] == "Interface\\Quiet.mp3")) then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] = nil;
+		end
+
+		-- reset standard debuff sound if set to old 'none' LSM default
+		if (VUHDO_CONFIG["SOUND_DEBUFF"] and 
+		      (VUHDO_CONFIG["SOUND_DEBUFF"] == "Interface\\Quiet.ogg" or 
+				VUHDO_CONFIG["SOUND_DEBUFF"] == "Interface\\Quiet.mp3")) then
+			VUHDO_CONFIG["SOUND_DEBUFF"] = nil;
+		end
+
+		-- return success because we've played nothing as requested (eg. Quiet.ogg)
+		return true;
+	end
+
+	local tSuccess, tError = pcall(PlaySoundFile, aSound);
+
+	if not tSuccess then
+		VUHDO_Msg(format(VUHDO_I18N_PLAY_SOUND_FILE_ERR, aSound, tError));
+	end
+
+	return tSuccess;
+
+end
+
+
+
 ---------------------------------
 -- CLASSIC COMPATIBILITY LAYER --
 ---------------------------------
@@ -1156,6 +1201,5 @@ function VUHDO_hasIncomingSummon(...)
 	else
 		return C_IncomingSummon.HasIncomingSummon(...);
 	end
-
 end
 
