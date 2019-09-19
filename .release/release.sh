@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-s
+
 # release.sh generates a zippable addon directory from a Git or SVN checkout.
 #
 # This is free and unencumbered software released into the public domain.
