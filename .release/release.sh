@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+s
 # release.sh generates a zippable addon directory from a Git or SVN checkout.
 #
 # This is free and unencumbered software released into the public domain.
@@ -56,11 +56,10 @@ fi
 
 # svn date helper function
 strtotime() {
-	value=$( echo "$1" | sed -e 's/\([^+]*\)\(\+.*\)/\1/' ) # datetime string w/o TZ
+	value=$( echo "$1" | sed -e 's/\([^+]*\) \+.*/\1/' ) # datetime string w/o TZ
 	format="$2" # strptime string
 
 	date -d "$value" +%s
-
 }
 
 # Script return code
@@ -440,8 +439,8 @@ set_info_svn() {
 		si_project_author=$( awk '/^Last Changed Author:/ { print $0; exit }' < "$_si_svninfo" | cut -d" " -f4- )
 		_si_timestamp=$( awk '/^Last Changed Date:/ { print $4,$5,$6; exit }' < "$_si_svninfo" )
 		si_project_timestamp=$( strtotime "$_si_timestamp" "%F %T %z" )
-		si_project_date_iso=$( TZ= printf "%(%Y-%m-%dT%H:%M:%SZ)T" "$_si_timestamp" )
-		si_project_date_integer=$( TZ= printf "%(%Y%m%d%H%M%S)T" "$_si_timestamp" )
+		si_project_date_iso=$( TZ= printf "%(%Y-%m-%dT%H:%M:%SZ)T" "$si_project_timestamp" )
+		si_project_date_integer=$( TZ= printf "%(%Y%m%d%H%M%S)T" "$si_project_timestamp" )
 		# SVN repositories have no project hash.
 		si_project_hash=
 		si_project_abbreviated_hash=
