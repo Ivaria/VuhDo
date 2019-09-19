@@ -7,7 +7,7 @@ stages:
     - /^v\d[\d\.]*(-classic-?)?(-(alpha|beta)-\d+)?$/
     
 before_script:
-  - apk add --no-cache bash curl git subversion zip luacheck
+  - apk add --no-cache bash curl git subversion zip jq luacheck
 
 luacheck:
   stage: build
