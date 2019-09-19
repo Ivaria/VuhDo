@@ -2451,7 +2451,7 @@ if [ -z "$skip_upload" ]; then
 				_glf_resultfile="$releasedir/gl_asset_result.json"
 				_glf_exit_code=0
 				echo -n "Uploading $_glf_file_name to GitLab... "
-				result=$( curl -sS --retry 3 --retry-delay 10 \
+				result=$( curl -sS --retry 3 --retry-delay 10 --request POST \
 						-w "%{http_code}" -o "$_glf_resultfile" \
 						-H "PRIVATE-TOKEN: $gitlab_token" \
 						-F "file=@$_glf_file_path" \
