@@ -2442,7 +2442,7 @@ if [ -z "$skip_upload" ]; then
 				done
 			}
 
-			gitlab_id=$(urlencode "$gitlab_slug")
+			gitlab_id=$( curl -sS --retry 3 --retry-delay 10 -H "PRIVATE-TOKEN: $gitlab_token" "https://gitlab.vuhdo.io/api/v4/projects?$gitlab_slug" | jq '.[0].id' )
 			gitlab_assets=
 
 			upload_gitlab_asset() {
