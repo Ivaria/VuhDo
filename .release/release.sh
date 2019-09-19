@@ -554,9 +554,9 @@ if [ -n "$ghgl_infer" ]; then
 		github_url=${si_repo_url%.git}
 		github_slug=${github_url#https://github.com/}
 	fi
-	if [[ -z "$gitlab_slug" && "$si_repo_url" == "https://gitlab.com"* ]]; then
+	if [[ -z "$gitlab_slug" && "$si_repo_url" == "https://gitlab.vuhdo.io"* ]]; then
 		gitlab_url=${si_repo_url%.git}
-		gitlab_slug=${gitlab_url#https://gitlab.com/}
+		gitlab_slug=${gitlab_url#https://gitlab.vuhdo.io/}
 	fi
 
 	github_slug=${github_slug:-$gitlab_slug}
@@ -567,7 +567,7 @@ if [ -n "$github_slug" ]; then
 	github_url="https://github.com/$github_slug"
 fi
 if [ -n "$gitlab_slug" ]; then
-	gitlab_url="https://gitlab.com/$gitlab_slug"
+	gitlab_url="https://gitlab.vuhdo.io/$gitlab_slug"
 fi
 
 githost_url=${github_url:-$gitlab_url}
@@ -2455,12 +2455,12 @@ if [ -z "$skip_upload" ]; then
 						-w "%{http_code}" -o "$_glf_resultfile" \
 						-H "PRIVATE-TOKEN: $gitlab_token" \
 						-F "file=@$_glf_file_path" \
-						"https://gitlab.com/api/v4/projects/$gitlab_id/uploads" )
+						"https://gitlab.vuhdo.io/api/v4/projects/$gitlab_id/uploads" )
 				if [ $? -eq 0 ]; then
 					if [ "$result" -eq "201" ]; then
 						echo "Success!"
 						_glf_file_url=$( cat "$_glf_resultfile" | jq '.url' )
-						gitlab_assets="${gitlab_assets:+,}{\"name\":\"$_glf_file_name\",\"url\":\"https://gitlab.com/$gitlab_slug${_glf_file_url:1:-1}\"}"
+						gitlab_assets="${gitlab_assets:+,}{\"name\":\"$_glf_file_name\",\"url\":\"https://gitlab.vuhdo.io/$gitlab_slug${_glf_file_url:1:-1}\"}"
 					else
 						echo "Error ($result)"
 						if [ -s "$_ghf_resultfile" ]; then
@@ -2480,7 +2480,7 @@ if [ -z "$skip_upload" ]; then
 			# Upload archives
 			if upload_gitlab_asset "$archive_name" "$archive" && { [[ ! -f "$nolib_archive" ]] || upload_gitlab_asset "$nolib_archive_name" "$nolib_archive"; } then
 				# delete existing release for the tag
-				curl -sS -X DELETE -H "PRIVATE-TOKEN: $gitlab_token" "https://gitlab.com/api/v4/projects/$gitlab_id/releases/$tag" > /dev/null
+				curl -sS -X DELETE -H "PRIVATE-TOKEN: $gitlab_token" "https://gitlab.vuhdo.io/api/v4/projects/$gitlab_id/releases/$tag" > /dev/null
 
 				_gl_payload=$( cat <<-EOF
 				{
@@ -2492,14 +2492,14 @@ if [ -z "$skip_upload" ]; then
 				EOF
 				)
 
-				echo "Creating GitLab release: https://gitlab.com/$gitlab_slug/releases"
+				echo "Creating GitLab release: https://gitlab.vuhdo.io/$gitlab_slug/releases"
 				resultfile="$releasedir/gl_result.json"
 				result=$( curl -sS --retry 3 --retry-delay 10 \
 						-w "%{http_code}" -o "$resultfile" \
 						-H "PRIVATE-TOKEN: $gitlab_token" \
 						-H "Content-Type: application/json" \
 						-d "$_gl_payload" \
-						"https://gitlab.com/api/v4/projects/$gitlab_id/releases" )
+						"https://gitlab.vuhdo.io/api/v4/projects/$gitlab_id/releases" )
 				if [ $? -eq 0 ]; then
 					if [ "$result" = "201" ]; then
 						echo "Success!"
