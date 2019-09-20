@@ -2299,6 +2299,7 @@ if [ -z "$skip_upload" ]; then
 			cp "$changelog_githost" "$_changelog_githost"
 			changelog_githost="$_changelog_githost"
 
+
 			if [[ -n "$slug" || -n "$addonid" ]]; then
 				echo -en "\n\nGet it from " >> "$changelog_githost"
 
@@ -2482,11 +2483,28 @@ if [ -z "$skip_upload" ]; then
 				# delete existing release for the tag
 				curl -sS -X DELETE -H "PRIVATE-TOKEN: $gitlab_token" "https://gitlab.vuhdo.io/api/v4/projects/$gitlab_id/releases/$tag" > /dev/null
 
+				_gl_payload_desc=$( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$/"/' )
+
+				if [[ -n "$slug" || -n "$addonid" ]]; then
+					_gl_payload_desc="$_gl_payload_desc"'\nGet it from '
+	
+					if [ -n "$slug" ]; then
+						_gl_payload_desc="$_gl_payload_desc""[$project_site_name]($project_site/projects/$slug)"
+					fi
+					if [[ -n "$slug" && -n "$addonid" ]]; then
+						_gl_payload_desc="$_gl_payload_desc or "
+					fi
+					if [ -n "$addonid" ]; then
+						_gl_payload_desc="$_gl_payload_desc""[WoWInterface](https://www.wowinterface.com/downloads/info$addonid.html)"
+					fi
+					_gl_payload_desc="$_gl_payload_desc\n"
+				fi
+				
 				_gl_payload=$( cat <<-EOF
 				{
 					"tag_name": "$tag",
 					"name": "$tag",
-					"description": $( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$/"/' ),
+					"description": "$_gl_payload_desc",
 					"assets": {"links":[$gitlab_assets]}
 				}
 				EOF
