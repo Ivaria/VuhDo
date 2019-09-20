@@ -1,5 +1,6 @@
 package-as: VuhDo
 manual-changelog: changelog.txt
+wowi-archive-previous: yes
 
 
 externals:
