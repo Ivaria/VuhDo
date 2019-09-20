@@ -2493,6 +2493,7 @@ if [ -z "$skip_upload" ]; then
 				)
 
 				echo "Creating GitLab release: https://gitlab.vuhdo.io/$gitlab_slug/releases"
+				echo "PAYLOAD[$gitlab_id]: $_gl_payload"
 				resultfile="$releasedir/gl_result.json"
 				result=$( curl -sS --retry 3 --retry-delay 10 \
 						-w "%{http_code}" -o "$resultfile" \
