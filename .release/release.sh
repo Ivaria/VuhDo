@@ -2486,7 +2486,7 @@ if [ -z "$skip_upload" ]; then
 				{
 					"tag_name": "$tag",
 					"name": "$tag",
-					"description": $( cat "$changelog_githost" | jq --slurp --raw-input '.' ),
+					"description": $( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$//' ),
 					"assets": {"links":[$gitlab_assets]}
 				}
 				EOF
