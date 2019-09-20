@@ -2483,7 +2483,7 @@ if [ -z "$skip_upload" ]; then
 				# delete existing release for the tag
 				curl -sS -X DELETE -H "PRIVATE-TOKEN: $gitlab_token" "https://gitlab.vuhdo.io/api/v4/projects/$gitlab_id/releases/$tag" > /dev/null
 
-				_gl_payload_desc=$( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$/"/' )
+				_gl_payload_desc=$( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$//' )
 
 				if [[ -n "$slug" || -n "$addonid" ]]; then
 					_gl_payload_desc="$_gl_payload_desc"'\nGet it from '
@@ -2510,6 +2510,7 @@ if [ -z "$skip_upload" ]; then
 				EOF
 				)
 
+				echo "PAYLOAD[$gitlab_id]: $_gl_payload"
 				echo "Creating GitLab release: https://gitlab.vuhdo.io/$gitlab_slug/releases"
 				resultfile="$releasedir/gl_result.json"
 				result=$( curl -sS --retry 3 --retry-delay 10 \
