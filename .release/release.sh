@@ -2486,14 +2486,13 @@ if [ -z "$skip_upload" ]; then
 				{
 					"tag_name": "$tag",
 					"name": "$tag",
-					"description": $( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$//' ),
+					"description": $( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$/"/' ),
 					"assets": {"links":[$gitlab_assets]}
 				}
 				EOF
 				)
 
 				echo "Creating GitLab release: https://gitlab.vuhdo.io/$gitlab_slug/releases"
-				echo "PAYLOAD[$gitlab_id]: $_gl_payload"
 				resultfile="$releasedir/gl_result.json"
 				result=$( curl -sS --retry 3 --retry-delay 10 \
 						-w "%{http_code}" -o "$resultfile" \
