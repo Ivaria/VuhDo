@@ -2497,20 +2497,18 @@ if [ -z "$skip_upload" ]; then
 					if [ -n "$addonid" ]; then
 						_gl_payload_desc="$_gl_payload_desc""[WoWInterface](https://www.wowinterface.com/downloads/info$addonid.html)"
 					fi
-					_gl_payload_desc="$_gl_payload_desc\n"
 				fi
 				
 				_gl_payload=$( cat <<-EOF
 				{
 					"tag_name": "$tag",
 					"name": "$tag",
-					"description": "$_gl_payload_desc",
+					"description": $_gl_payload_desc",
 					"assets": {"links":[$gitlab_assets]}
 				}
 				EOF
 				)
 
-				echo "PAYLOAD[$gitlab_id]: $_gl_payload"
 				echo "Creating GitLab release: https://gitlab.vuhdo.io/$gitlab_slug/releases"
 				resultfile="$releasedir/gl_result.json"
 				result=$( curl -sS --retry 3 --retry-delay 10 \
