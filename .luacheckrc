@@ -9,7 +9,8 @@ only = {
 	"1", -- globals
 }
 ignore = {
-	"11/SLASH_.*", -- slash handlers
+	"11/SLASH_.*", -- Setting an undefined (Slash handler) global variable
+	"11./BINDING_.*", -- Setting an undefined (Keybinding header) global variable
 	"1/[A-Z][A-Z][A-Z0-9_]+", -- three letter+ constants
 }
 globals = {
@@ -20,6 +21,33 @@ globals = {
 	"LibStub",
 
 	-- VuhDo
+	"VUHDO_CONFIG", 
+	"VUHDO_PANEL_SETUP", 
+	"VUHDO_SPELL_ASSIGNMENTS", 
+	"VUHDO_HOSTILE_SPELL_ASSIGNMENTS", 
+	"VUHDO_MM_SETTINGS", 
+	"VUHDO_PLAYER_TARGETS", 
+	"VUHDO_MAINTANK_NAMES", 
+	"VUHDO_BUFF_SETTINGS", 
+	"VUHDO_POWER_TYPE_COLORS", 
+	"VUHDO_SPELLS_KEYBOARD", 
+	"VUHDO_SPELL_CONFIG", 
+	"VUHDO_BUFF_ORDER", 
+	"VUHDO_SPEC_LAYOUTS", 
+	"VUHDO_GROUP_SIZE", 
+	"VUHDO_RAID", 
+	"VUHDO_INDICATOR_CONFIG", 
+	"VUHDO_DEFAULT_LAYOUT", 
+	"VUHDO_DEFAULT_PROFILE", 
+	"VUHDO_PROFILES", 
+	"VUHDO_MANUAL_ROLES", 
+	"VUHDO_SPELL_LAYOUTS", 
+	"VUHDO_USER_CLASS_COLORS", 
+	"VUHDO_DEBUFF_BLACKLIST", 
+	"VUHDO_BOUQUETS", 
+	"VUHDO_COMBAT_LOG_TRACE", 
+	"VUHDO_GLOBAL_CONFIG", 
+	"VUHDO_DEBUG",
 
 	-- Third Party Addons/Libs
 
