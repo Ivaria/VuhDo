@@ -16,6 +16,8 @@ Bugfixes:
 --   Note: Only works with others players using LibHealComm  
 -- Fixed compatability layer to not modify global functions  
 -- Fixed text providers using kilo/+kilo displaying zero values  
+-- Fixed classic dispel/cure debuff spells  
+-- Fixed misc classic spell IDs  
   
   
 Improvements:  
