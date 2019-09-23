@@ -412,6 +412,16 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			-- As of 8.x COMBAT_LOG_EVENT_UNFILTERED is now just an event with no arguments
 			anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17 = CombatLogGetCurrentEventInfo();
 
+			-- in classic, CLEU payload for spell ID is always 0
+			-- map this as best we can but lookups outside player spellbook will fail
+			if anArg12 == 0 then
+				local _, _, _, _, _, _, tSpellId = GetSpellInfo(anArg13);
+
+				if tSpellId then
+					anArg12 = tSpellId;
+				end
+			end
+
 			-- SWING_DAMAGE - the amount of damage is the 12th arg
 			-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
 			-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
