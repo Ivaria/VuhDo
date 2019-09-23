@@ -6,7 +6,10 @@ Known issues:
 --  Example: Lesser Heal(Rank 1)  
 -- Buff Watch is not currently working (missing many spells)  
 -- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
+-- Shield bar is not working due to unavailable Blizzard APIs  
+-- Threat is not working due to unavailable Blizzard APIs  
+-- Spell trace only works for known spells in the player's spellbook
   
   
 Bugfixes:  
@@ -18,6 +21,7 @@ Bugfixes:
 -- Fixed text providers using kilo/+kilo displaying zero values  
 -- Fixed classic dispel/cure debuff spells  
 -- Fixed misc classic spell IDs  
+-- Fixed spell trace for known player spells  
   
   
 Improvements:  
