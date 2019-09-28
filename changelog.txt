@@ -22,11 +22,13 @@ Bugfixes:
 -- Fixed classic dispel/cure debuff spells  
 -- Fixed misc classic spell IDs  
 -- Fixed spell trace for known player spells  
+-- Fixed unit threat indicators  
   
   
 Improvements:  
 -- Added support for LibClassicHealComm-1.0  
 -- Added support for LibClassicDurations  
+-- Added support for LibThreatClassic  
   
   
 --------------------------------------------------------------  
