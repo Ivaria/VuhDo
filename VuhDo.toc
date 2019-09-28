@@ -9,14 +9,20 @@
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 
-VuhDo.xml
-
 Libs\AceAddon-3.0\AceAddon-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
+Libs\AceBucket-3.0\AceBucket-3.0.xml
+Libs\AceComm-3.0\AceComm-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\AceSerializer-3.0\AceSerializer-3.0.xml
+
 Libs\UTF8\utf8.lua
 Libs\UTF8\utf8data.lua
+Libs\ThreatClassic-1.0\lib.xml
 
+VuhDo.xml
 VuhDoPanel.xml
 VuhDoBuffWatch.xml
 

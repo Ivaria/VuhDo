@@ -1134,12 +1134,39 @@ end
 
 
 
-function VUHDO_unitThreatSituation(...)
+function VUHDO_unitThreatSituation(aUnit)
+
+	if not aUnit then 
+		return nil; 
+	end
 
 	if not UnitThreatSituation then
-		return 0;
+		if VUHDO_LibThreatClassic then
+			local tOtherUnit = nil;
+
+			-- check target and boss unit threat
+			if UnitExists(aUnit .. "target") and UnitIsEnemy(aUnit, aUnit .. "target") then
+				tOtherUnit = aUnit .. "target";
+			elseif UnitExists("target") and UnitIsEnemy("player", "target") then
+				tOtherUnit = "target";
+			elseif UnitExists("boss1") and UnitIsEnemy("player", "boss1") then
+				tOtherUnit = "boss1";
+			elseif UnitExists("boss2") and UnitIsEnemy("player", "boss2") then
+				tOtherUnit = "boss2";
+			elseif UnitExists("boss3") and UnitIsEnemy("player", "boss3") then
+				tOtherUnit = "boss3";
+			elseif UnitExists("boss4") and UnitIsEnemy("player", "boss4") then
+				tOtherUnit = "boss4";
+			elseif UnitExists("boss5") and UnitIsEnemy("player", "boss5") then
+				tOtherUnit = "boss5";
+			end
+
+			return VUHDO_LibThreatClassic:UnitThreatSituation(aUnit, tOtherUnit);
+		else
+			return nil;
+		end
 	else
-		return UnitThreatSituation(...);
+		return UnitThreatSituation(aUnit);
 	end
 
 end
