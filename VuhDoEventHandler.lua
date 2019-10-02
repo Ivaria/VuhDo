@@ -43,7 +43,7 @@ local GetTime = GetTime;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitInRange = UnitInRange;
 local IsSpellInRange = IsSpellInRange;
-local UnitDetailedThreatSituation = UnitDetailedThreatSituation;
+local VUHDO_unitDetailedThreatSituation = VUHDO_unitDetailedThreatSituation;
 local UnitIsCharmed = UnitIsCharmed;
 local UnitCanAttack = UnitCanAttack;
 local UnitName = UnitName;
@@ -1052,7 +1052,7 @@ local function VUHDO_updateAllAggro()
 			tTarget = tInfo["targetUnit"];
 			if UnitIsEnemy(tUnit, tTarget) then
 				if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
-					_, _, tThreatPerc = UnitDetailedThreatSituation(tUnit, tTarget);
+					_, _, tThreatPerc = VUHDO_unitDetailedThreatSituation(tUnit, tTarget);
 					tInfo["threatPerc"] = tThreatPerc or 0;
 				end
 
@@ -1060,7 +1060,7 @@ local function VUHDO_updateAllAggro()
 
 				if tAggroUnit then
 					if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
-						_, _, tThreatPerc = UnitDetailedThreatSituation(tAggroUnit, tTarget);
+						_, _, tThreatPerc = VUHDO_unitDetailedThreatSituation(tAggroUnit, tTarget);
 						VUHDO_RAID[tAggroUnit]["threatPerc"] = tThreatPerc or 0;
 					end
 

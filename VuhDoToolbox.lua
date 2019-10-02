@@ -1173,6 +1173,26 @@ end
 
 
 
+function VUHDO_unitDetailedThreatSituation(aUnit, aOtherUnit)
+
+	if not aUnit or not aOtherUnit then 
+		return nil; 
+	end
+
+	if not UnitDetailedThreatSituation then
+		if VUHDO_LibThreatClassic then
+			return VUHDO_LibThreatClassic:UnitDetailedThreatSituation(aUnit, aOtherUnit);
+		else
+			return nil;
+		end
+	else
+		return UnitDetailedThreatSituation(aUnit, aOtherUnit);
+	end
+
+end
+
+
+
 function VUHDO_unitIsWarModePhased(...)
 
 	if not UnitIsWarModePhased then
