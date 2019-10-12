@@ -1588,8 +1588,19 @@ function VUHDO_OnLoad(anInstance)
 		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealStopped", HealComm_HealUpdated);
 		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealDelayed", HealComm_HealUpdated);
 		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealUpdated", HealComm_HealUpdated);
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_ModifierChanged", HealComm_HealUpdated);
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_GUIDDisappeared", HealComm_HealUpdated);
+
+		local function HealComm_HealModified(aEvent, aTargetGUID)
+			local tTarget = VUHDO_RAID_GUIDS[aTargetGUID];
+
+			if (VUHDO_RAID or tEmptyRaid)[tTarget] then -- auch target, focus
+				VUHDO_updateHealth(tTarget, 9); -- VUHDO_UPDATE_INC
+				VUHDO_updateBouquetsForEvent(tTarget, 9); -- VUHDO_UPDATE_ALT_POWER
+			end
+		end
+		anInstance.HealComm_HealModified = HealComm_HealModified;
+
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_ModifierChanged", HealComm_HealModified);
+		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_GUIDDisappeared", HealComm_HealModified);
 	end
 
 	SLASH_VUHDO1 = "/vuhdo";
