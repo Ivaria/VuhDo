@@ -13,7 +13,6 @@ Known issues:
   
   
 Bugfixes:  
--- Fix deletiion of debuff blacklist entries added by spell ID  
   
   
 Improvements:  
