@@ -1568,7 +1568,7 @@ function VUHDO_OnLoad(anInstance)
 
 	VUHDO_ALL_EVENTS = nil;
 
-	if VUHDO_LibClassicHealComm then 
+	if VUHDO_LibHealComm then 
 		local function HealComm_HealUpdated(aEvent, aCasterGUID, aSpellID, aHealType, aEndTime, ...)
 			local tTargets = { n = select("#", ...), ... };
 
@@ -1584,10 +1584,10 @@ function VUHDO_OnLoad(anInstance)
 		end
 		anInstance.HealComm_HealUpdated = HealComm_HealUpdated;
 
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealStarted", HealComm_HealUpdated);
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealStopped", HealComm_HealUpdated);
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealDelayed", HealComm_HealUpdated);
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_HealUpdated", HealComm_HealUpdated);
+		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealStarted", HealComm_HealUpdated);
+		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealStopped", HealComm_HealUpdated);
+		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealDelayed", HealComm_HealUpdated);
+		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealUpdated", HealComm_HealUpdated);
 
 		local function HealComm_HealModified(aEvent, aTargetGUID)
 			local tTarget = VUHDO_RAID_GUIDS[aTargetGUID];
@@ -1599,8 +1599,8 @@ function VUHDO_OnLoad(anInstance)
 		end
 		anInstance.HealComm_HealModified = HealComm_HealModified;
 
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_ModifierChanged", HealComm_HealModified);
-		VUHDO_LibClassicHealComm.RegisterCallback(anInstance, "HealComm_GUIDDisappeared", HealComm_HealModified);
+		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_ModifierChanged", HealComm_HealModified);
+		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_GUIDDisappeared", HealComm_HealModified);
 	end
 
 	SLASH_VUHDO1 = "/vuhdo";

@@ -16,7 +16,7 @@ VUHDO_LibBase64 = LibStub:GetLibrary("LibBase64-1.0");
 
 VUHDO_LibCustomGlow = LibStub("LibCustomGlow-1.0");
 
-VUHDO_LibClassicHealComm = LibStub("LibClassicHealComm-1.0");
+VUHDO_LibHealComm = LibStub("LibHealComm-4.0");
 
 VUHDO_LibClassicDurations = LibStub("LibClassicDurations");
 
