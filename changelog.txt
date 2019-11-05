@@ -13,6 +13,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Migrate to the blessed version of LibHealComm-4.0  
   
   
 Improvements:  
