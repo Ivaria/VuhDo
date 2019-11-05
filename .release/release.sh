@@ -2509,7 +2509,7 @@ if [ -z "$skip_upload" ]; then
 				EOF
 				)
 
-				echo "Creating GitLab release: https://gitlab.vuhdo.io/$gitlab_slug/releases"
+				echo "Creating GitLab release: https://gitlab.vuhdo.io/$gitlab_slug/releases [ \"name\": \"$tag\" ]"
 				resultfile="$releasedir/gl_result.json"
 				result=$( curl -sS --retry 3 --retry-delay 10 \
 						-w "%{http_code}" -o "$resultfile" \
