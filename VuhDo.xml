@@ -13,7 +13,7 @@
 	<Script file="Libs\LibCustomGlow-1.0\LibCustomGlow-1.0.lua" />
 
 	<Include file="Libs\LibClassicDurations\LibClassicDurations.xml"/>
-	<Script file="Libs\LibClassicHealComm-1.0\LibClassicHealComm-1.0.lua" />		
+	<Include file="Libs\LibHealComm-4.0\LibHealComm-4.0.xml" />		
 
 	<Script file="VuhDoLocalization_en.lua" />
 	<Script file="VuhDoLocalization_de.lua" />
