@@ -2502,6 +2502,7 @@ if [ -z "$skip_upload" ]; then
 				_gl_payload=$( cat <<-EOF
 				{
 					"tag_name": "$tag",
+					"ref": "$tag",
 					"name": "$tag",
 					"description": $_gl_payload_desc",
 					"assets": {"links":[$gitlab_assets]}
