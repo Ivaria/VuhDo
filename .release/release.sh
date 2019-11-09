@@ -2481,7 +2481,7 @@ if [ -z "$skip_upload" ]; then
 			# Upload archives
 			if upload_gitlab_asset "$archive_name" "$archive" && { [[ ! -f "$nolib_archive" ]] || upload_gitlab_asset "$nolib_archive_name" "$nolib_archive"; } then
 				# delete existing release for the tag
-				#curl -sS -X DELETE -H "PRIVATE-TOKEN: $gitlab_token" "https://gitlab.vuhdo.io/api/v4/projects/$gitlab_id/releases/$tag" > /dev/null
+				curl -sS -X DELETE -H "PRIVATE-TOKEN: $gitlab_token" "https://gitlab.vuhdo.io/api/v4/projects/$gitlab_id/releases/$tag" > /dev/null
 
 				_gl_payload_desc=$( cat "$changelog_githost" | jq --slurp --raw-input '.' | awk -F '--------------------------------------------------------------' '{print $1 FS "."}' | sed -e 's/.\{63\}$//' )
 
