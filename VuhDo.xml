@@ -19,6 +19,7 @@
 	<Script file="VuhDoLocalization_de.lua" />
 	<Script file="VuhDoLocalization_fr.lua" />
 	<Script file="VuhDoLocalization_es.lua" />
+	<Script file="VuhDoLocalization_ko.lua" />
 	<Script file="VuhDoLocalization_ru.lua" />
 	<Script file="VuhDoLocalization_zhCN.lua" />
 	<Script file="VuhDoLocalization_zhTW.lua" />
