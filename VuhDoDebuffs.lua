@@ -312,7 +312,7 @@ function VUHDO_determineDebuff(aUnit)
 				break;
 			end
 
-			tStacks = tStacks or 0;
+			if not tStacks or tStacks==0 then tStacks=1; end
 			if (tExpiry or 0) == 0 then tExpiry = (sCurIcons[tName] or sEmpty)[2] or tNow; end
 
 			-- Custom Debuff?
@@ -321,7 +321,7 @@ function VUHDO_determineDebuff(aUnit)
 			if tDebuffConfig[1] and ((tDebuffConfig[3] and tUnitCaster == "player") or (tDebuffConfig[4] and tUnitCaster ~= "player")) then -- Color?
 				sCurChosenType, sCurChosenName, sCurChosenSpellId = 6, tName, tSpellId; -- VUHDO_DEBUFF_TYPE_CUSTOM
 			end
-
+			
 			if sCurIcons[tName] then tStacks = tStacks + sCurIcons[tName][3]; end
 
 			if tDebuffConfig[2] and ((tDebuffConfig[3] and tUnitCaster == "player") or (tDebuffConfig[4] and tUnitCaster ~= "player")) then -- Icon?
