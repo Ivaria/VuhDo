@@ -312,7 +312,7 @@ function VUHDO_determineDebuff(aUnit)
 				break;
 			end
 
-			tStacks = tStacks or 0;
+			if not tStacks or tStacks==0 then tStacks=1; end
 			if (tExpiry or 0) == 0 then tExpiry = (sCurIcons[tName] or sEmpty)[2] or tNow; end
 
 			-- Custom Debuff?
