@@ -322,7 +322,6 @@ function VUHDO_determineDebuff(aUnit)
 				end
 			end
 
-			tStacks = tStacks or 0;
 			if (tExpiry or 0) == 0 then tExpiry = (sCurIcons[tName] or sEmpty)[2] or tNow; end
 
 			-- Custom Debuff?
@@ -332,7 +331,22 @@ function VUHDO_determineDebuff(aUnit)
 				sCurChosenType, sCurChosenName, sCurChosenSpellId = 6, tName, tSpellId; -- VUHDO_DEBUFF_TYPE_CUSTOM
 			end
 
-			if sCurIcons[tName] then tStacks = tStacks + sCurIcons[tName][3]; end
+			tStacks = tStacks or 0;
+
+			if sCurIcons[tName] then
+				-- if we de-dupe a debuff by name then ensure it is tracked as another "stack"
+				-- oddly by default UnitAura returns a "stack" of 0 for un-stackable debuffs 
+				-- in the common case (no de-dupe by name) we'll retain this default
+				if tStacks == 0 then
+					tStacks = 1;
+				end
+
+				if sCurIcons[tName][3] > 0 then 
+					tStacks = tStacks + sCurIcons[tName][3];
+				else
+					tStacks = tStacks + 1;
+				end
+			end
 
 			if tDebuffConfig[2] and ((tDebuffConfig[3] and tUnitCaster == "player") or (tDebuffConfig[4] and tUnitCaster ~= "player")) then -- Icon?
 				sCurIcons[tName] = VUHDO_getOrCreateIconArray(tIcon, tExpiry, tStacks, tDuration, false, tSpellId, tCnt);
