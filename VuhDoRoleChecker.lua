@@ -235,15 +235,15 @@ local function VUHDO_determineDfToolRole(anInfo)
 		or anInfo["classId"] == VUHDO_ID_PALADINS
 		or anInfo["classId"] == VUHDO_ID_DEATH_KNIGHT
 		or anInfo["classId"] == VUHDO_ID_MONKS 
-		or anInfo["classId"] == VUHDO_ID_DEMON_HUNTERS then
+		or anInfo["classId"] == VUHDO_ID_DEMON_HUNTERS
+		or anInfo["classID"] == VUHDO_ID_HUNTER --cannot determine whether the hunter is ranged or melee without specID which often fails
+		or (anInfo["classID"] == VUHDO_ID_SHAMAN and UnitStat(anInfo["unit"], 2) > UnitStat(anInfo["unit"], 4))
+		or (anInfo["classID"] == VUHDO_ID_DRUID and not UnitPowerType(anInfo["unit"]) == VUHDO_UNIT_POWER_LUNAR_POWER) then
 			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_MELEE_DAMAGE;
 			tReturnRole = VUHDO_ID_MELEE_DAMAGE;
-		elseif anInfo["classId"] == VUHDO_ID_PRIESTS then
+		else
 			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_RANGED_DAMAGE;
 			tReturnRole = VUHDO_ID_RANGED_DAMAGE;
-		else -- Shaman/Druid/Hunter
-			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_MELEE_DAMAGE;
-			tReturnRole = nil;
 		end
 
 	end
@@ -260,13 +260,9 @@ end
 --
 local tName;
 local tInfo;
-local tDefense;
-local tPowerType;
 local tBuffExist;
 local tFixRole;
-local tIntellect, tStrength, tAgility;
-local tClassId, tClassRole, tName;
-local tLevel;
+local tClassId, tClassRole, tSpecId;
 function VUHDO_determineRole(aUnit)
 	tInfo = VUHDO_RAID[aUnit];
 	if not tInfo or tInfo["isPet"] then	return nil; end
@@ -298,103 +294,105 @@ function VUHDO_determineRole(aUnit)
 	if VUHDO_FIX_ROLES[tName] then
 		return VUHDO_FIX_ROLES[tName];
 	end
-
+	-- 60:VUHDO_ID_MELEE_TANK 61:VUHDO_ID_MELEE_DAMAGE 62:VUHDO_ID_RANGED_DAMAGE 63:VUHDO_ID_RANGED_HEAL
+	tSpecID = GetInspectSpecialization(aUnit);
 	if 29 == tClassId then -- VUHDO_ID_DEATH_KNIGHT
-		tBuffExist = VUHDO_unitBuff(aUnit, VUHDO_SPELL_ID.BUFF_BLOOD_PRESENCE);
-		if tBuffExist then
-			--VUHDO_FIX_ROLES[tName] = 60; -- VUHDO_ID_MELEE_TANK
-			return 60; -- VUHDO_ID_MELEE_TANK
+		if tSpecID==250 then --Blood
+			return 60;
+		elseif tSpecID==251 then --Frost
+			return 61;
+		elseif tSpecID==252 then --Unholy
+			return 61;
 		else
-			VUHDO_FIX_ROLES[tName] = 61; -- VUHDO_ID_MELEE_DAMAGE
-			return 61; -- VUHDO_ID_MELEE_DAMAGE
+			return nil;
 		end
 
 	elseif 28 == tClassId then -- VUHDO_ID_PRIESTS
-		tPowerType = UnitPowerType(aUnit);
-		if VUHDO_UNIT_POWER_INSANITY == tPowerType then
-			VUHDO_FIX_ROLES[tName] = 62; -- VUHDO_ID_RANGED_DAMAGE
-			return 62; -- VUHDO_ID_RANGED_DAMAGE
+		if tSpecID==256 then --Discipline
+			return 63;
+		elseif tSpecID==257 then --Holy
+			return 63;
+		elseif tSpecID==258 then --Shadow
+			return 62;
 		else
-			return 63; -- VUHDO_ID_RANGED_HEAL
+			return nil;
 		end
 
 	elseif 20 == tClassId then -- VUHDO_ID_WARRIORS
-		if (0 > 2) then -- FIXME: need replacement for UnitDefense check
-			return 60; -- VUHDO_ID_MELEE_TANK
+		if tSpecID==71 then --Arms
+			return 61;
+		elseif tSpecID==72 then --Fury
+			return 61;
+		elseif tSpecID==73 then --Protection
+			return 60;
 		else
-			return 61; -- VUHDO_ID_MELEE_DAMAGE
+			return nil;
 		end
 
 	elseif 27 == tClassId then -- VUHDO_ID_DRUIDS
-		tPowerType = UnitPowerType(aUnit);
-		if VUHDO_UNIT_POWER_MANA == tPowerType then
-			return 63; -- VUHDO_ID_RANGED_HEAL
-		elseif VUHDO_UNIT_POWER_LUNAR_POWER == tPowerType then
-			VUHDO_FIX_ROLES[tName] = 62; --	VUHDO_ID_RANGED_DAMAGE
-			return 62; -- VUHDO_ID_RANGED_DAMAGE
-		elseif VUHDO_UNIT_POWER_RAGE == tPowerType then
-			VUHDO_FIX_ROLES[tName] = 60; -- VUHDO_ID_MELEE_TANK
-			return 60; -- VUHDO_ID_MELEE_TANK
-		elseif VUHDO_UNIT_POWER_ENERGY == tPowerType then
-			VUHDO_FIX_ROLES[tName] = 61; -- VUHDO_ID_MELEE_DAMAGE
-			return 61; -- VUHDO_ID_MELEE_DAMAGE
+		if tSpecID==102 then --Balance
+			return 62;
+		elseif tSpecID==103 then --Feral
+			return 61;
+		elseif tSpecID==104 then --Guardian
+			return 60;
+		elseif tSpecID==105 then --Restoration
+			return 63;
+		else
+			return nil;
 		end
 
 	elseif 23 == tClassId then -- VUHDO_ID_PALADINS
-		if 0 > 2 then -- FIXME: need replacement for UnitDefense check
-			return 60; -- VUHDO_ID_MELEE_TANK
+		if tSpecID==65 then --Holy
+			return 63;
+		elseif tSpecID==66 then --Protection
+			return 60;
+		elseif tSpecID==70 then --Retribution
+			return 61;
 		else
-			tIntellect = UnitStat(aUnit, 4);
-			tStrength = UnitStat(aUnit, 1);
-
-			if tIntellect > tStrength then
-				return 63; -- VUHDO_ID_RANGED_HEAL
-			else
-				return 61; -- VUHDO_ID_MELEE_DAMAGE
-			end
+			return nil;
 		end
 
 	elseif 26 == tClassId then -- VUHDO_ID_SHAMANS
-		tIntellect = UnitStat(aUnit, 4);
-		tAgility = UnitStat(aUnit, 2);
-
-		if tAgility > tIntellect then
-			return 61; -- VUHDO_ID_MELEE_DAMAGE
+		if tSpecID==263 then --Enhancement
+			return 61;
+		elseif tSpecID==262 then --Elemental
+			return 62;
+		elseif tSpecID==264 then --Restoration
+			return 63;
 		else
-			tPowerType = UnitPowerType(aUnit);
-			if VUHDO_UNIT_POWER_MAELSTROM == tPowerType then -- VUHDO_ID_RANGED_DAMAGE
-				return 62; -- VUHDO_ID_RANGED_DAMAGE
-			else
-				return 63; -- VUHDO_ID_RANGED_HEAL
-			end
+			return nil;
 		end
 
 	elseif 31 == tClassId then -- VUHDO_ID_DEMON_HUNTERS
-		tPowerType = UnitPowerType(aUnit);
-		if VUHDO_UNIT_POWER_PAIN == tPowerType then
-			return 60; -- VUHDO_ID_MELEE_TANK
+		if tSpecID==577 then --Havoc
+			return 61;
+		elseif tSpecID==581 then  --Vengeance
+			return 62;
 		else
-			return 61; -- VUHDO_ID_MELEE_DAMAGE
+			return nil
 		end
 
 	elseif 22 == tClassId then -- VUHDO_ID_HUNTERS
-		if UnitPowerMax(aUnit) == 100 then -- Survival
-			return 61; -- VUHDO_ID_MELEE_DAMAGE
+		if tSpecID==253 then --Beast Mastery
+			return 62;
+		elseif tSpecID==254 then --Marksmanship
+			return 62;
+		elseif tSpecID==255 then --Survival
+			return 61;
 		else
-			return 62; -- VUHDO_ID_RANGED_DAMAGE
+			return nil;
 		end
 
 	elseif 30 == tClassId then -- VUHDO_ID_MONKS
-		tPowerType = UnitPowerType(aUnit);
-
-		if VUHDO_UNIT_POWER_MANA == tPowerType then
-			return 63; -- VUHDO_ID_RANGED_HEAL
-		elseif VUHDO_UNIT_POWER_ENERGY == tPowerType then
-			if UnitPowerMax(aUnit, VUHDO_UNIT_POWER_CHI) > 4 then -- WW Monks have 5 Chi (6 w/ Ascension)
-				return 61; -- VUHDO_ID_MELEE_DAMAGE
-			else
-				return 60; -- VUHDO_ID_MELEE_TANK
-			end
+		if tSpecID==268 then --Brewmaster
+			return 60;
+		elseif tSpecID==270 then --Mistweaver
+			return 63;
+		elseif tSpecID==269 then --Windwalker
+			return 61;
+		else
+			return nil;
 		end
 
 	end
