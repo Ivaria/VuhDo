@@ -18,6 +18,7 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_LIGHT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.BUFF_STAY_OF_EXECUTION] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ETERNAL_FLAME] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.GLIMMER_OF_LIGHT] = { ["isHot"] = true, },
 
 	-- Priest
 	[VUHDO_SPELL_ID.RENEW] = { ["isHot"] = true },
