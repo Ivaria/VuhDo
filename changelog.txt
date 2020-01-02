@@ -16,7 +16,8 @@ Bugfixes:
 -- Use LibTotemInfo to replace removed Blizzard API GetTotemInfo  
   
   
-Improvements:  
+Improvements: 
+-- Bump TOC interface for 1.13.3  
   
   
 --------------------------------------------------------------  
