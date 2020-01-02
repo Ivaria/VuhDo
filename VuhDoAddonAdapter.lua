@@ -25,6 +25,7 @@ if VUHDO_LibClassicDurations then
 end
 
 VUHDO_LibThreatClassic = LibStub("ThreatClassic-1.0");
+VUHDO_LibTotemInfo = LibStub("LibTotemInfo-1.0");
 
 VUHDO_LibSharedMedia:Register("font", "Arial Black", "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf");
 VUHDO_LibSharedMedia:Register("font", "Emblem",	"Interface\\AddOns\\VuhDo\\Fonts\\Emblem.ttf");
