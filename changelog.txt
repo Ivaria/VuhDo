@@ -18,6 +18,7 @@ Bugfixes:
   
 Improvements:  
 -- Bump TOC interface for 1.13.3  
+-- Migrate threat detection to LibThreatClassic2  
   
   
 --------------------------------------------------------------  

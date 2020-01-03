@@ -29,7 +29,7 @@ externals:
     Libs/LibCustomGlow-1.0: git://github.com/Stanzilla/LibCustomGlow.git
     Libs/LibClassicDurations: https://repos.curseforge.com/wow/libclassicdurations
     Libs/LibHealComm-4.0: https://repos.wowace.com/wow/libhealcomm-4-0
-    Libs/ThreatClassic-1.0: https://github.com/EsreverWoW/LibThreatClassic.git
+    Libs/LibThreatClassic2: https://github.com/dfherr/LibThreatClassic2.git
     Libs/!LibTotemInfo: https://github.com/SwimmingTiger/LibTotemInfo.git
 
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk

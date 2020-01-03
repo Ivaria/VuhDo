@@ -20,7 +20,7 @@ Libs\AceSerializer-3.0\AceSerializer-3.0.xml
 
 Libs\UTF8\utf8.lua
 Libs\UTF8\utf8data.lua
-Libs\ThreatClassic-1.0\lib.xml
+Libs\LibThreatClassic2\lib.xml
 Libs\!LibTotemInfo\embeds.xml
 
 VuhDo.xml
