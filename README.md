@@ -49,16 +49,18 @@ What VuhDo can do:
 - You can easily keep track of all of your buffs 
 - You can rebuff automatically chosing the most suitable spell and target
 - You can smart buff your raid automatically selecting missing buffs
-
-Special Features:
+  
+Special Features:  
 - Up to 10 independent raid member panels
-- Completely free arrangement of raid members: You can move any group to any position in any panel: 
-You can select to see your groups by class, group number role or any combination.
-Easy group arrangement via Drag-n-Drop. 
-You can additionally setup to display Pets, Vehicles, Main Tanks, private Tanks.
-A panel setup wizard lets you setup most common settings with a few clicks
+- Completely free arrangement of raid members:  
+    - You can move any group to any position in any panel.  
+    - You can select to see your groups by class, group number role or any combination.  
+    - Easy group arrangement via Drag-n-Drop.  
+    - You can additionally setup to display Pets, Vehicles, Main Tanks, private Tanks.  
+- A panel setup wizard lets you setup most common settings with a few clicks
 - You can store different skins and arrangements of panels separately
-Supported standards / Compatibility:
+  
+Supported standards / Compatibility:  
 - CTRA/oRA: Main Tank setup / resurrection monitor
 - libSharedMedia: Fonts, Statusbar textures
 - Masque
@@ -84,6 +86,3 @@ Below we have archived the parting message from Iza @ EU-Gilneas, the original c
 > All the best to you & keep it going,
 > Iza
 
-
-If you enjoy using VuhDo please consider a small donation for Iza.
-(use the Donate button on the CurseForge project page)
