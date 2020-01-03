@@ -52,11 +52,12 @@ What VuhDo can do:
 
 Special Features:
 - Up to 10 independent raid member panels
-- Completely free arrangement of raid members: You can move any group to any position in any panel: 
-You can select to see your groups by class, group number role or any combination.
-Easy group arrangement via Drag-n-Drop. 
-You can additionally setup to display Pets, Vehicles, Main Tanks, private Tanks.
-A panel setup wizard lets you setup most common settings with a few clicks
+- Completely free arrangement of raid members:  
+    - You can move any group to any position in any panel.  
+    - You can select to see your groups by class, group number role or any combination.  
+    - Easy group arrangement via Drag-n-Drop.  
+    - You can additionally setup to display Pets, Vehicles, Main Tanks, private Tanks.  
+- A panel setup wizard lets you setup most common settings with a few clicks
 - You can store different skins and arrangements of panels separately
 Supported standards / Compatibility:
 - CTRA/oRA: Main Tank setup / resurrection monitor
