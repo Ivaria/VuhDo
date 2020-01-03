@@ -84,6 +84,3 @@ Below we have archived the parting message from Iza @ EU-Gilneas, the original c
 > All the best to you & keep it going,
 > Iza
 
-
-If you enjoy using VuhDo please consider a small donation for Iza.
-(use the Donate button on the CurseForge project page)
