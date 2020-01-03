@@ -145,10 +145,10 @@ function VUHDO_inspectRole(aUnit)
 			return VUHDO_ID_UNDEFINED;
 		end
 		
-		tTreeId, _, _, _, _, tRole = GetSpecializationInfo(tActiveTree, false, false);
+		tTreeId, _, _, _, _, tRole = VUHDO_getSpecializationInfo(tActiveTree, false, false);
 	else
-		tTreeId = GetInspectSpecialization(aUnit);
-		tRole = GetSpecializationRoleByID(tTreeId);
+		tTreeId = VUHDO_getInspectSpecialization(aUnit);
+		tRole = VUHDO_getSpecializationRoleByID(tTreeId);
 	end
 
 	if (tTreeId or 0) == 0 then
@@ -213,7 +213,7 @@ function VUHDO_inspectLockRole()
 	end
 
 	if "player" == VUHDO_NEXT_INSPECT_UNIT then
-		tActiveTree = GetSpecialization();
+		tActiveTree = VUHDO_getSpecialization();
 
 		if not tActiveTree then
 			VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_ID_UNDEFINED;
@@ -221,10 +221,10 @@ function VUHDO_inspectLockRole()
 			return;
 		end
 
-		tTreeId, _, _, _, _, tRole = GetSpecializationInfo(tActiveTree, false, false);
+		tTreeId, _, _, _, _, tRole = VUHDO_getSpecializationInfo(tActiveTree, false, false);
 	else
-		tTreeId = GetInspectSpecialization(VUHDO_NEXT_INSPECT_UNIT);
-		tRole = GetSpecializationRoleByID(tTreeId);
+		tTreeId = VUHDO_getInspectSpecialization(VUHDO_NEXT_INSPECT_UNIT);
+		tRole = VUHDO_getSpecializationRoleByID(tTreeId);
 	end
 
 	if (tTreeId or 0) == 0 then
