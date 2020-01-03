@@ -12,7 +12,8 @@ Known issues:
 --   You may need to reselect your sound options in VuhDo for debuffs  
   
   
-Bugfixes:  
+Bugfixes:
+-- Cleanup and improve group member role checking  
   
   
 Improvements:  
