@@ -19,6 +19,7 @@ Bugfixes:
 Improvements:  
 -- Added Paladin 'Glimmer of Light' as default HoT icon option  
 -- Added default custom debuffs for Ny'alotha raid encounters  
+-- Bump TOC interface for 8.3.0  
   
   
 --------------------------------------------------------------  
