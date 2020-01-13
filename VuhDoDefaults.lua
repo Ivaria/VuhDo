@@ -1949,6 +1949,62 @@ function VUHDO_loadDefaultConfig()
 		297907  -- Cursed Heart
 	);
 
+	-- 8.3.0 - Battle for Azeroth - Visions of N'Zoth
+	VUHDO_addCustomSpellIds(46,
+		-- [[ Ny'alotha, The Waking City ]]
+		-- Wrathion
+		306163, -- Incineration
+		314347, -- Noxious Choke
+		307013, -- Burning Madness
+		-- Maut
+		307806, -- Devour Magic
+		306301, -- Forbidden Mana
+		-- The Prophet Skitra
+		308059, -- ShadowShockApplied
+		307950, -- Shred Psyche
+		308065, -- Shred Psyche
+		-- Dark Inquisitor Xanesh
+		313198, -- Void-Touched
+		312406, -- Voidwoken
+		309569, -- Voidwoken
+		-- Vexiona
+		307314, -- Encroaching Shadows
+		307359, -- Despair
+		310323, -- Desolation
+		-- The Hivemind
+		313461, -- Corrosion
+		313129, -- Mindless
+		313460, -- Nullification
+		-- Ra-den
+		313227, -- Decaying Wound
+		310019, -- Charged Bonds
+		310022, -- Charged Bonds
+		313077, -- Unstable Nightmare
+		315252, -- Dread Inferno Fixate
+		316065, -- Corrupted Existence
+		-- Shad'har the Insatiable
+		307358, -- Debilitating Spit
+		307945, -- Umbral Eruption
+		306929, -- Bubbling Breath
+		307260, -- Fixate
+		-- Drest'agath
+		310552, -- Mind Flay
+		310358, -- Muttering Insanity
+		-- Il'gynoth
+		275269, -- Fixate
+		311159, -- Cursed Blood
+		-- Carapice of N'Zoth
+		307008, -- Breed Madness
+		306973, -- Madness Bomb
+		306984, -- Insanity Bomb
+		-- N'Zoth
+		308885, -- Mind Flay
+		317112, -- Evoke Anguish
+		309980, -- Paranoia
+		316541, -- Paranoia
+		316542  -- Paranoia
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
