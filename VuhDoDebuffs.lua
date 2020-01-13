@@ -298,8 +298,11 @@ local tCurChosenStoredName;
 function VUHDO_determineDebuff(aUnit)
 	tInfo = (VUHDO_RAID or sEmpty)[aUnit];
 
-	if not tInfo then	return 0, ""; -- VUHDO_DEBUFF_TYPE_NONE
-	elseif VUHDO_CONFIG_SHOW_RAID then return tInfo["debuff"], tInfo["debuffName"]; end
+	if not tInfo then 
+		return 0, ""; -- VUHDO_DEBUFF_TYPE_NONE
+	elseif VUHDO_CONFIG_SHOW_RAID then 
+		return tInfo["debuff"], tInfo["debuffName"]; 
+	end
 
 	tUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
 
@@ -378,6 +381,7 @@ function VUHDO_determineDebuff(aUnit)
 				end
 
 				-- Entweder Fähigkeit vorhanden ODER noch keiner gewählt UND auch nicht entfernbare
+				-- Either ability available OR none selected AND not removable (DETECT_DEBUFFS_REMOVABLE_ONLY_ICONS)
 				if tType and (tAbility or (sCurChosenType == 0 and sIsNotRemovableOnly)) then -- VUHDO_DEBUFF_TYPE_NONE
 					sCurChosenType = tType;
 					tUnitDebuffInfo["CHOSEN"][1], tUnitDebuffInfo["CHOSEN"][2] = tIcon, tStacks;

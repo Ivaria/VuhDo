@@ -42,6 +42,7 @@ Bugfixes:
   
 Improvements:  
 -- Added Paladin 'Glimmer of Light' as default HoT icon option  
+-- Added default custom debuffs for Ny'alotha raid encounters  
   
   
 --------------------------------------------------------------  
