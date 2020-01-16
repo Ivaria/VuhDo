@@ -1260,3 +1260,11 @@ function VUHDO_hasIncomingSummon(...)
 	end
 end
 
+
+
+function VUHDO_hasLFGRestriction()
+
+	return false;
+
+end
+

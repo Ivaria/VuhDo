@@ -1,3 +1,46 @@
+Version 3.111-classic   
+  
+  
+Known issues:  
+-- BfA stat squish cleanup still a work in progress  
+--   AOE Advice spell equations need complete overhaul  
+--   Some text providers need changes to better display small numbers  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+-- In 8.2.0 Blizzard removed the ability to play sounds by file path  
+--   If you have LibSharedMedia installed make sure it is up to date  
+--   You may need to reselect your sound options in VuhDo for debuffs  
+  
+  
+Bugfixes:  
+-- Fixed usage of deprecated Blizzard API HasLFGRestriction  
+  
+  
+Improvements:  
+  
+  
+--------------------------------------------------------------  
+Version 3.111  
+  
+  
+Known issues:  
+-- BfA stat squish cleanup still a work in progress  
+--   AOE Advice spell equations need complete overhaul  
+--   Some text providers need changes to better display small numbers  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+-- In 8.2.0 Blizzard removed the ability to play sounds by file path  
+--   If you have LibSharedMedia installed make sure it is up to date  
+--   You may need to reselect your sound options in VuhDo for debuffs  
+  
+  
+Bugfixes:  
+  
+  
+Improvements:  
+  
+  
+--------------------------------------------------------------  
 Version 3.110-classic   
   
   
@@ -43,6 +86,7 @@ Bugfixes:
 Improvements:  
 -- Added Paladin 'Glimmer of Light' as default HoT icon option  
 -- Added default custom debuffs for Ny'alotha raid encounters  
+-- Bump TOC interface for 8.3.0  
   
   
 --------------------------------------------------------------  
