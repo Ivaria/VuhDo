@@ -1262,7 +1262,7 @@ end
 
 
 
-function VUHDO_hasLFGRestriction()
+function VUHDO_hasLFGRestrictions()
 
 	return false;
 
