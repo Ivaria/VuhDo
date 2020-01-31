@@ -85,7 +85,7 @@ function VUHDO_customHealthInitLocalOverrides()
 	VUHDO_getOverhealText = _G["VUHDO_getOverhealText"];
 	VUHDO_getBarRoleIcon = _G["VUHDO_getBarRoleIcon"];
 	VUHDO_getBarIconFrame = _G["VUHDO_getBarIconFrame"];
-  VUHDO_updateClusterHighlights = _G["VUHDO_updateClusterHighlights"];
+	VUHDO_updateClusterHighlights = _G["VUHDO_updateClusterHighlights"];
 	VUHDO_customizeTargetBar = _G["VUHDO_customizeTargetBar"];
 	VUHDO_getColoredString = _G["VUHDO_getColoredString"];
 	VUHDO_textColor = _G["VUHDO_textColor"];
@@ -380,46 +380,54 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 	-- Basic name text
 	if tIsName then
 
-	  tOwnerInfo = VUHDO_RAID[tInfo["ownerUnit"]];
-	  tIndex = tInfo["name"] .. (tInfo["ownerUnit"] or "") .. tPanelNum;
+		tOwnerInfo = VUHDO_RAID[tInfo["ownerUnit"]];
+		tIndex = tInfo["name"] .. (tInfo["ownerUnit"] or "") .. tPanelNum;
 
-	  if not VUHDO_NAME_TEXTS[tIndex] then
+		if not VUHDO_NAME_TEXTS[tIndex] or tInfo["name"] ~= tNickname then
+			local tNickname;
 
-	  	if tSetup["ID_TEXT"]["showName"] then
-	  		tTextString = (tSetup["ID_TEXT"]["showClass"] and not tInfo["isPet"])
-	  			and tInfo["className"] .. ": " or "";
+			if VUHDO_LibNickTag and tSetup["ID_TEXT"]["showNickname"] then
+				tNickname = VUHDO_LibNickTag:GetNickname(tInfo["name"]) or tInfo["name"];
+			else
+				tNickname = tInfo["name"];
+			end
+
+			if tSetup["ID_TEXT"]["showName"] then
+				tTextString = (tSetup["ID_TEXT"]["showClass"] and not tInfo["isPet"]) 
+					and tInfo["className"] .. ": " or "";
 
 				tTextString = tTextString .. ((not tOwnerInfo or not tSetup["ID_TEXT"]["showPetOwners"])
-					and tInfo["name"] or tOwnerInfo["name"] .. ": " .. tInfo["name"]);
-	  	else
-	  		tTextString = (tSetup["ID_TEXT"]["showClass"] and not tInfo["isPet"])
-	  			and tInfo["className"] or "";
+					and tNickname or tOwnerInfo["name"] .. ": " .. tNickname);
+			else
+				tTextString = (tSetup["ID_TEXT"]["showClass"] and not tInfo["isPet"]) 
+					and tInfo["className"] or "";
 
-	  		if tOwnerInfo and tSetup["ID_TEXT"]["showPetOwners"] then
-	  			tTextString = tTextString .. tOwnerInfo["name"];
-	  		end
-	  	end
-	  	tMaxChars = tSetup["PANEL_COLOR"]["TEXT"]["maxChars"];
+				if tOwnerInfo and tSetup["ID_TEXT"]["showPetOwners"] then
+					tTextString = tTextString .. tOwnerInfo["name"];
+				end
+			end
 
-	  	if tMaxChars > 0 and #tTextString > tMaxChars then
-	  		tTextString = VUHDO_utf8Cut(tTextString, tMaxChars);
-	  	end
-	  	VUHDO_NAME_TEXTS[tIndex] = tTextString;
-	  else
-	  	tTextString = VUHDO_NAME_TEXTS[tIndex];
-	  end
+			tMaxChars = tSetup["PANEL_COLOR"]["TEXT"]["maxChars"];
 
-  	-- Add title flags
-  	if tSetup["ID_TEXT"]["showTags"] and not anIsTarget then
+		  	if tMaxChars > 0 and #tTextString > tMaxChars then
+		  		tTextString = VUHDO_utf8Cut(tTextString, tMaxChars);
+			end
 
-  		if "focus" == tUnit then 
-			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_FOC, tTextString);
-  		elseif "target" == tUnit then 
-			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_TAR, tTextString);
- 		elseif tOwnerInfo and tOwnerInfo["isVehicle"] then 
-			tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_VEHICLE, tTextString);
+			VUHDO_NAME_TEXTS[tIndex] = tTextString;
+		else
+		  	tTextString = VUHDO_NAME_TEXTS[tIndex];
 		end
-  	end
+
+		-- Add title flags
+		if tSetup["ID_TEXT"]["showTags"] and not anIsTarget then
+			if "focus" == tUnit then 
+				tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_FOC, tTextString);
+			elseif "target" == tUnit then 
+				tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_TAR, tTextString);
+			elseif tOwnerInfo and tOwnerInfo["isVehicle"] then 
+				tTextString = format("|cffff0000%s|r-%s", VUHDO_I18N_VEHICLE, tTextString);
+			end
+		end
 	end
 
 	tTagText = (tSetup["ID_TEXT"]["showTags"] and not anIsTarget)
@@ -489,11 +497,10 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 		end
 	end
 
-  -- Aggro Text
-  if tIsName then
-	  if tInfo["aggro"] and sIsAggroText then
-
-			tTextString = format("|cffff2020%s|r%s|cffff2020%s|r",
+	-- Aggro Text
+	if tIsName then 
+		if tInfo["aggro"] and sIsAggroText then
+			tTextString = format("|cffff2020%s|r%s|cffff2020%s|r", 
 				VUHDO_THREAT_CFG["AGGRO_TEXT_LEFT"], tTextString, VUHDO_THREAT_CFG["AGGRO_TEXT_RIGHT"]);
 		end
 

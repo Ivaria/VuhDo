@@ -2005,6 +2005,25 @@ function VUHDO_loadDefaultConfig()
 		316542  -- Paranoia
 	);
 
+	-- 8.3.0 - Battle for Azeroth - Visions of N'Zoth part 2
+	VUHDO_addCustomSpellIds(47,
+		-- [[ Ny'alotha, The Waking City ]]
+		-- Wrathion
+		-- Maut
+		-- The Prophet Skitra
+		-- Dark Inquisitor Xanesh
+		-- Vexiona
+		-- The Hivemind
+		-- Ra-den
+		306184  -- Unleashed Void
+		-- Shad'har the Insatiable
+		-- Drest'agath
+		-- Il'gynoth
+		-- Carapice of N'Zoth
+		-- N'Zoth
+	);
+
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
@@ -2379,7 +2398,8 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 	},
 
 	["ID_TEXT"] = {
-		["showName"] = true,
+		["showName"] = true, 
+		["showNickname"] = false,
 		["showClass"] = false,
 		["showTags"] = true,
 		["showPetOwners"] = true,
