@@ -1955,10 +1955,8 @@ function VUHDO_loadDefaultConfig()
 		-- Wrathion
 		306163, -- Incineration
 		314347, -- Noxious Choke
-		307013, -- Burning Madness
 		-- Maut
 		307806, -- Devour Magic
-		306301, -- Forbidden Mana
 		-- The Prophet Skitra
 		308059, -- ShadowShockApplied
 		307950, -- Shred Psyche
@@ -2012,6 +2010,7 @@ function VUHDO_loadDefaultConfig()
 		-- Maut
 		-- The Prophet Skitra
 		-- Dark Inquisitor Xanesh
+		306311, -- Soul Flay
 		-- Vexiona
 		-- The Hivemind
 		-- Ra-den
