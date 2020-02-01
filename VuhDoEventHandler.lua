@@ -1050,7 +1050,7 @@ local function VUHDO_updateAllAggro()
 				tInfo["aggro"] = true;
 			end
 			tTarget = tInfo["targetUnit"];
-			if UnitIsEnemy(tUnit, tTarget) then
+			if not UnitIsFriend(tUnit, tTarget) then
 				if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
 					_, _, tThreatPerc = VUHDO_unitDetailedThreatSituation(tUnit, tTarget);
 					tInfo["threatPerc"] = tThreatPerc or 0;

@@ -14,6 +14,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed usage of deprecated Blizzard API HasLFGRestriction  
+-- Fixed threat situation update for neutral mobs  
   
   
 Improvements:  
