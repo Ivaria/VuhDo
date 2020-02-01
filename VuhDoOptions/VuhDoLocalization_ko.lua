@@ -639,6 +639,7 @@ VUHDO_I18N_TT.K577 = "활성화 된 상태에서 바에 빛을 표시하려면 �
 VUHDO_I18N_TT.K578 = "아이콘 광택의 색상을 선택하십시오.";
 VUHDO_I18N_TT.K579 = "바 광택의 색상을 선택하십시오.";
 VUHDO_I18N_TT.K580 = "디버프 아이콘을 제외목록에 표시하려면 마우스 오른쪽 버튼으로 사용할 수정 키를 선택하십시오."
+VUHDO_I18N_TT.K581 = "Check to show player nickname on bars.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "기본 프로필";
 VUHDO_I18N_DEFAULT_LAYOUT = "기본 배치";
@@ -1143,4 +1144,6 @@ VUHDO_I18N_TRAIL_OF_LIGHT = "빛의 흔적";
 VUHDO_I18N_BAR_GLOW_COLOR = "바 반짝임";
 VUHDO_I18N_ICON_GLOW_COLOR = "아이콘 반짝임";
 VUHDO_I18N_BLACKLIST_KEY_MODIFIES = "무시 목록 수정 키";
+
+VUHDO_I18N_NICKNAME = "Details!\nNickname"
 

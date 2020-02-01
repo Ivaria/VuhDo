@@ -22,6 +22,7 @@ Libs\UTF8\utf8.lua
 Libs\UTF8\utf8data.lua
 Libs\LibThreatClassic2\lib.xml
 Libs\!LibTotemInfo\embeds.xml
+Libs\NickTag-1.0\NickTag-1.0.xml
 
 VuhDo.xml
 VuhDoPanel.xml

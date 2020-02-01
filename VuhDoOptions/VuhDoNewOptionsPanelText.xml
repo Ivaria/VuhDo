@@ -635,7 +635,7 @@
 
 			<Frame name="$parentShowWhatPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="120" y="186" />
+					<AbsDimension x="120" y="226" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -662,11 +662,28 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentClassCheckButton" text="VUHDO_I18N_CLASS" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentNicknameCheckButton" text="VUHDO_I18N_NICKNAME" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
 									<AbsDimension x="10" y="-69" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.#PNUM#.ID_TEXT.showNickname");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K581);
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_PANEL_SETUP.#PNUM#.ID_TEXT.showName", false);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentClassCheckButton" text="VUHDO_I18N_CLASS" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="10" y="-107" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -682,7 +699,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="10" y="-107" />
+									<AbsDimension x="10" y="-145" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -698,7 +715,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="10" y="-145" />
+									<AbsDimension x="10" y="-183" />
 								</Offset>
 							</Anchor>
 						</Anchors>
