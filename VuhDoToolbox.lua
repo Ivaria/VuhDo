@@ -38,6 +38,10 @@ local pairs = pairs;
 local type = type;
 local abs = abs;
 
+-- Number of seconds into the future to look for incoming heals
+-- This ensures we only include the next incoming tick of HoTs
+local VUHDO_INCOMING_HEAL_WINDOW = 4;
+
 local sEmpty = { };
 setmetatable(sEmpty, { __newindex = function(aTable, aKey, aValue) VUHDO_xMsg("WARNING: newindex on dummy array: ", aKey, aValue); end });
 
@@ -1117,9 +1121,10 @@ function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
 			if aCasterUnit then
 				local tCasterGUID = UnitGUID(aCasterUnit);
 
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, nil, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+
+				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 			else
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 			end
 		else
 			return 0;
