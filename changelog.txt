@@ -43,6 +43,7 @@ Improvements:
 -- Added option to display player nicknames from Details! add-on  
 --   See 'VuhDo Options > Panels > Text > Show Text > Show Nickname'  
 -- Added Ra-den Unleashed Void debuff absorb tracking  
+-- Added default custom debuffs for Ny'alotha raid encounters  
   
   
 --------------------------------------------------------------  
