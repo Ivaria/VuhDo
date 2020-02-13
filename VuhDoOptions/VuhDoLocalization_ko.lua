@@ -615,7 +615,7 @@ VUHDO_I18N_TT.K553 = "선택한 프로필을 이 계정의 모든 새 문자의 
 VUHDO_I18N_TT.K554 = "선택한 단축키 설정을 이 계정의 모든 새 문자의 기본값으로 설정하십시오.";
 VUHDO_I18N_TT.K555 = "Clique 호환 모드를 사용하는 경우에도 VuhDo 메뉴 명령이 적용되도록 하십시오.";
 VUHDO_I18N_TT.K556 = "우두머리의 NPC(예: 텍터스의 파편, 담쟁이 포자의 버섯)에 대한 추가 패널이 있는지 확인하십시오.";
-VUHDO_I18N_TT.K557 = "커스텀 플래그 기능의 본문. true 또는 false를 반환해야합니다. 예: return (\"YOURNAME\" == VUHDO_unitInfo\[\"name\"\])";
+VUHDO_I18N_TT.K557 = "커스텀 플래그 기능의 본문. true 또는 false를 반환해야합니다. 예: return (\"YOURNAME\" == VUHDO_unitInfo[\"name\"])";
 VUHDO_I18N_TT.K558 = "전투 중에 buff watch 를 숨깁니다.";
 VUHDO_I18N_TT.K559 = "주시대상 바 색상을 클릭하여 선택하십시오.";
 VUHDO_I18N_TT.K560 = "천공의 힘 바 색상을 선택하려면 클릭하십시오.";
