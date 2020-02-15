@@ -50,6 +50,7 @@ local VUHDO_DEBUFF_BLACKLIST = { };
 
 local UnitDebuff = UnitDebuff;
 local UnitBuff = UnitBuff;
+local UnitIsFriend = UnitIsFriend;
 local table = table;
 local GetTime = GetTime;
 local PlaySoundFile = PlaySoundFile;
@@ -346,7 +347,7 @@ function VUHDO_determineDebuff(aUnit)
 			end
 
 			tType = VUHDO_DEBUFF_TYPES[tTypeString];
-			tAbility = VUHDO_PLAYER_ABILITIES[tType];
+			tAbility = VUHDO_PLAYER_ABILITIES[tType] and UnitIsFriend("player", aUnit);
 			tIsRelevant = not VUHDO_IGNORE_DEBUFF_NAMES[tName]
 				and not (VUHDO_IGNORE_DEBUFFS_BY_CLASS[tInfo["class"] or ""] or sEmpty)[tName];
 
@@ -371,7 +372,7 @@ function VUHDO_determineDebuff(aUnit)
 				end
 
 				-- Entweder Fähigkeit vorhanden ODER noch keiner gewählt UND auch nicht entfernbare
-				-- Either ability available OR none selected AND not removable (DETECT_DEBUFFS_REMOVABLE_ONLY_ICONS)
+				-- Either ability available OR none selected AND not removable (DETECT_DEBUFFS_REMOVABLE_ONLY)
 				if tType and (tAbility or (sCurChosenType == 0 and sIsNotRemovableOnly)) then -- VUHDO_DEBUFF_TYPE_NONE
 					sCurChosenType = tType;
 					tUnitDebuffInfo["CHOSEN"][1], tUnitDebuffInfo["CHOSEN"][2] = tIcon, tStacks;
