@@ -35,6 +35,7 @@ Known issues:
   
 Bugfixes:  
 -- Debuffs are now considered 'removable only' if the unit is friendly  
+-- Use NickTag-1.0 minor version 11 to ensure Details! compatibility  
   
   
 Improvements:  
