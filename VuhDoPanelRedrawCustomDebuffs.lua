@@ -87,7 +87,8 @@ local tIconName;
 local tButton;
 function VUHDO_initCustomDebuffs()
 	-- Wir brauchen mind. 1 für LastCustomDebuffBouquet
-	if sMaxNum == 0 then VUHDO_getOrCreateCuDeButton(sButton, 40);
+	if sMaxNum == 0 then 
+		VUHDO_getOrCreateCuDeButton(sButton, 40);
 	else
 		for tCnt = 0, sMaxNum - 1 do
 			tIconIdx = 40 + tCnt;
@@ -107,7 +108,7 @@ function VUHDO_initCustomDebuffs()
 				sIsTooltipCache[tIconIdx] = VUHDO_isMostlyInBounds(tButton, sButton, 0.33);
 			end
 
-			if VUHDO_CONFIG["DEBUFF_TOOLTIP"] and sIsTooltipCache[tIconIdx] == 1 then
+			if sIsTooltipCache[tIconIdx] == 1 then
 				tFrame:SetWidth(sHeight);
 				tFrame:SetHeight(sHeight);
 			else
