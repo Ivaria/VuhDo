@@ -69,11 +69,8 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_isPanelVisible = _G["VUHDO_isPanelVisible"];
 	VUHDO_positionHealButton = _G["VUHDO_positionHealButton"];
 	VUHDO_positionTableHeaders = _G["VUHDO_positionTableHeaders"];
-	if (VUHDO_CONFIG["DEBUFF_TOOLTIP"]) then
-		sLastDebuffIcon = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39;
-	else
-		sLastDebuffIcon = -1;
-	end
+
+	sLastDebuffIcon = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39;
 	sShowPanels = VUHDO_CONFIG["SHOW_PANELS"];
 end
 -- BURST CACHE ---------------------------------------------------
