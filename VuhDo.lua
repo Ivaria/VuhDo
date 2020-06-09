@@ -386,9 +386,16 @@ function VUHDO_setHealth(aUnit, aMode)
 			if tIsDcChange then VUHDO_updateBouquetsForEvent(aUnit, 19); end-- VUHDO_UPDATE_DC
 
 			if 2 == aMode or 12 == aMode then -- VUHDO_UPDATE_HEALTH -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
-				tNewHealth = UnitHealth(aUnit);
 				if 12 == aMode then -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
 					tNewHealth = tInfo["loghealth"];
+				end
+				if 2 == aMode then
+					if tInfo["isUpdated"] == 1 then
+						tInfo["isUpdated"] = 0;
+						tNewHealth = tInfo["loghealth"];
+					else
+						tNewHealth = UnitHealth(aUnit);
+					end
 				end
 				if not tIsDead and tInfo["health"] > 0 then
 					tInfo["lifeLossPerc"] = tNewHealth / tInfo["health"];

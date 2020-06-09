@@ -30,12 +30,12 @@ local function VUHDO_addUnitHealth(aUnit, aDelta)
 
 	if not tInfo["dead"] then
 		tNewHealth = tInfo["health"] + aDelta;
-
 		if tNewHealth < 0 then tNewHealth = 0;
 		elseif tNewHealth > tInfo["healthmax"]  then tNewHealth = tInfo["healthmax"]; end
-
+		
+		tInfo["loghealth"] = tNewHealth;
 		if tInfo["health"] ~= tNewHealth then
-			tInfo["loghealth"] = tNewHealth;
+			tInfo["isUpdated"] = 1;
 			VUHDO_updateHealth(aUnit, 12); -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
 		end
 	end
