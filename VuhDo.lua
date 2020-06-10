@@ -333,6 +333,8 @@ function VUHDO_setHealth(aUnit, aMode)
 			tName, tRealm = UnitName(aUnit);
 			tInfo["healthmax"] = UnitHealthMax(aUnit);
 			tInfo["health"] = UnitHealth(aUnit);
+			tInfo["loghealth"] = UnitHealth(aUnit);
+			tInfo["isUpdated"] = 0;
 			tInfo["name"] = tName;
 			tInfo["number"] = VUHDO_getUnitNo(aUnit);
 			tInfo["unit"] = aUnit;
@@ -390,7 +392,7 @@ function VUHDO_setHealth(aUnit, aMode)
 					tNewHealth = tInfo["loghealth"];
 				end
 				if 2 == aMode then
-					if tInfo["isUpdated"] == 1 then
+					if tInfo["isUpdated"] == 1 or tInfo["loghealth"] == tInfo["healthmax"] then
 						tInfo["isUpdated"] = 0;
 						tNewHealth = tInfo["loghealth"];
 					else
