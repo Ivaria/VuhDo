@@ -395,7 +395,7 @@ function VUHDO_setHealth(aUnit, aMode)
 					if tInfo["isUpdated"] == 1 or UnitIsFeignDeath(aUnit) then
 						tInfo["isUpdated"] = 0;
 						tNewHealth = tInfo["loghealth"];
-					else 
+					else
 						tNewHealth = UnitHealth(aUnit); -- UnitHealth return 0 when hunter is feign death in classic wow
 					end
 				end
@@ -404,15 +404,11 @@ function VUHDO_setHealth(aUnit, aMode)
 				end
 
 				tInfo["health"] = tNewHealth;
-
-				if tInfo["dead"] ~= tIsDead then
-					if not tIsDead then
-						tInfo["healthmax"] = UnitHealthMax(aUnit);
-					end
-					tInfo["dead"] = tIsDead;
-					VUHDO_updateHealthBarsFor(aUnit, 10); -- VUHDO_UPDATE_ALIVE
-					VUHDO_updateBouquetsForEvent(aUnit, 10); -- VUHDO_UPDATE_ALIVE
+				if not tIsDead then
+					tInfo["healthmax"] = UnitHealthMax(aUnit);
 				end
+				VUHDO_updateHealthBarsFor(aUnit, 10); -- VUHDO_UPDATE_ALIVE
+				VUHDO_updateBouquetsForEvent(aUnit, 10); -- VUHDO_UPDATE_ALIVE
 
 			elseif 3 == aMode then -- VUHDO_UPDATE_HEALTH_MAX
 				tInfo["dead"] = tIsDead;
