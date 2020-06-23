@@ -381,9 +381,10 @@ function VUHDO_setHealth(aUnit, aMode)
 
 		elseif tInfo then
 			tIsAfk, tInfo["connected"], tIsDcChange = VUHDO_updateAfkDc(aUnit);
-			tInfo["dead"] = tIsDead;
 
-			if tIsDcChange then VUHDO_updateBouquetsForEvent(aUnit, 19); end-- VUHDO_UPDATE_DC
+			if tIsDcChange then
+				VUHDO_updateBouquetsForEvent(aUnit, 19); -- VUHDO_UPDATE_DC
+			end
 
 			if 2 == aMode then -- VUHDO_UPDATE_HEALTH
 				tNewHealth = UnitHealth(aUnit);
@@ -410,6 +411,8 @@ function VUHDO_setHealth(aUnit, aMode)
 			elseif 6 == aMode then -- VUHDO_UPDATE_AFK
 				tInfo["afk"] = tIsAfk;
 			end
+
+			tInfo["dead"] = tIsDead;
 		end
 	end
 end
