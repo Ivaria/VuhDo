@@ -394,9 +394,11 @@ function VUHDO_setHealth(aUnit, aMode)
 				if 2 == aMode then
 					if tInfo["isUpdated"] == 1 or UnitIsFeignDeath(aUnit) then
 						tInfo["isUpdated"] = 0;
-						tNewHealth = tInfo["loghealth"];
-					else
-						tNewHealth = UnitHealth(aUnit); -- UnitHealth return 0 when hunter is feign death in classic wow
+						do return end;
+					elseif not UnitIsDeadOrGhost(aUnit) and UnitHealth(aUnit) == 0 then
+						do return end;
+					else 
+						tNewHealth = UnitHealth(aUnit);
 					end
 				end
 				if not tIsDead and tInfo["health"] > 0 then
