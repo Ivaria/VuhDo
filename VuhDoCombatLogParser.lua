@@ -27,7 +27,9 @@ local tNewHealth;
 local tDeadInfo = { ["dead"] = true };
 local function VUHDO_addUnitHealth(aUnit, aDelta)
 	tInfo = VUHDO_RAID[aUnit] or tDeadInfo;
-	if abs(aDelta) > 10000 then -- sometimes combat log get 19000+ damage but nothing happend
+	if abs(aDelta) > 10000 then -- sometimes combat log get 19000+ damage but it's not correct
+		tInfo["isUpdated"] = 0;
+		VUHDO_updateHealth(aUnit, 2); -- VUHDO_UPDATE_HEALTH
 		do return end;
 	end
 	if not tInfo["dead"] then
