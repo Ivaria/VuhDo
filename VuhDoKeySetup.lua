@@ -126,12 +126,10 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 					if (VUHDO_RAID["player"] or tInvalidGroup)["group"] == tInfo["group"] then
 						sDropdown = _G['PartyMemberFrame' .. tInfo["number"] .. 'DropDown']
 					else
-						tIdent = tInfo["number"];
-						FriendsDropDown["name"] = tInfo["name"];
-						FriendsDropDown["id"] = tIdent;
-						FriendsDropDown["unit"] = tUnit;
-						FriendsDropDown["initialize"] = RaidFrameDropDown_Initialize;
-						FriendsDropDown["displayMode"] = "MENU";
+						local FriendsDropDown = CreateFrame("Frame","RaidMemberFrame",UIParent,"UIDropDownMenuTemplate");
+						UIDropDownMenu_Initialize(FriendsDropDown,function(FriendsDropDown)
+							UnitPopup_ShowMenu(FriendsDropDown, "RAID_PLAYER", tUnit, tInfo["name"], tInfo["number"]);
+						end,"MENU");
 						sDropdown = FriendsDropDown;
 					end
 				end
