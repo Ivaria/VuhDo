@@ -116,24 +116,22 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 			elseif UnitIsUnit(tUnit, "target") then
 				sDropdown = TargetFrameDropDown;
 			--[[elseif (UnitIsUnit(tUnit, "focus")) then
-				sDropdown = FocusFrameDropDown;]] -- Problem, wenn Fokus löschen
+				sDropdown = FocusFrameDropDown;]] -- Problem, wenn Fokus lï¿½schen
 			elseif UnitIsUnit(tUnit, "pet") then
 				sDropdown = PetFrameDropDown;
 			else
 				tInfo = VUHDO_RAID[tUnit];
 
 				if tInfo then
-					if (VUHDO_RAID["player"] or tInvalidGroup)["group"] == tInfo["group"] then
-						sDropdown = _G['PartyMemberFrame' .. tInfo["number"] .. 'DropDown']
-					else
-						tIdent = tInfo["number"];
-						FriendsDropDown["name"] = tInfo["name"];
-						FriendsDropDown["id"] = tIdent;
-						FriendsDropDown["unit"] = tUnit;
-						FriendsDropDown["initialize"] = RaidFrameDropDown_Initialize;
-						FriendsDropDown["displayMode"] = "MENU";
-						sDropdown = FriendsDropDown;
-					end
+					local FriendsDropDown = CreateFrame("Frame","FriendMemberFrame",UIParent,"UIDropDownMenuTemplate");
+					UIDropDownMenu_Initialize(FriendsDropDown,function(FriendsDropDown)
+						if UnitInRaid("player") then
+							UnitPopup_ShowMenu(FriendsDropDown, "RAID_PLAYER", tUnit, tInfo["name"],  tInfo["number"]);
+						else
+							UnitPopup_ShowMenu(FriendsDropDown, "PARTY", tUnit, tInfo["name"],  tInfo["number"]);
+						end
+					end,"MENU");
+					sDropdown = FriendsDropDown;
 				end
 			end
 
