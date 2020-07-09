@@ -35,6 +35,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed VUHDO_UPDATE_ALIVE handling on unit dead state change  
   
   
 Improvements:  
