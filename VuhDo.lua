@@ -98,7 +98,7 @@ local GetNumGroupMembers = GetNumGroupMembers;
 local UnitName = UnitName;
 local UnitPower = UnitPower;
 local UnitPowerMax = UnitPowerMax;
-local VUHDO_unitThreatSituation = VUHDO_unitThreatSituation;
+local UnitThreatSituation = UnitThreatSituation;
 local UnitClass = UnitClass;
 local UnitPowerType = UnitPowerType;
 local VUHDO_unitHasVehicleUI = VUHDO_unitHasVehicleUI;
@@ -349,7 +349,7 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["dead"] = tIsDead;
 			tInfo["afk"] = tIsAfk;
 			tInfo["connected"] = tIsConnected;
-			tInfo["threat"] = VUHDO_unitThreatSituation(aUnit) or 0;
+			tInfo["threat"] = UnitThreatSituation(aUnit) or 0;
 			tInfo["threatPerc"] = 0;
 			tInfo["isVehicle"] = VUHDO_unitHasVehicleUI(aUnit);
 			tInfo["className"] = tLocalClass or "";

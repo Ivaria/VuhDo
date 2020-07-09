@@ -15,7 +15,8 @@ Bugfixes:
   
   
 Improvements:  
--- Bump TOC interface for 1.13.4  
+-- Bump TOC interface for 1.13.5  
+-- Migrate from LibThreatClassic2 to restored Blizzard APIs  
   
   
 --------------------------------------------------------------  
