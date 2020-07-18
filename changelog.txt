@@ -11,6 +11,7 @@ Known issues:
   
 Bugfixes:  
 -- Removed deprecated event UNIT_HEALTH_FREQUENT  
+-- Migrated backdrops to BackdropTemplate and BackdropTemplateMixin  
   
   
 Improvements:  

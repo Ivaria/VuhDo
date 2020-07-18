@@ -47,6 +47,16 @@ VUHDO_PLAYER_NAME = nil;
 VUHDO_PLAYER_RAID_ID = nil;
 VUHDO_PLAYER_GROUP = nil;
 
+-- Backdrops
+BACKDROP_VUHDO_TOOLTIP = {
+	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", 
+	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+	tile = true,
+	tileSize = 8,
+	edgeSize = 8,
+	insets = {  left = 3, right = 3, top = 3, bottom = 3 },
+};
+
 -- BURST CACHE ---------------------------------------------------
 local VUHDO_CONFIG;
 local VUHDO_PET_2_OWNER;
