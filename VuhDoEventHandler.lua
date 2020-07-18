@@ -43,7 +43,7 @@ local GetTime = GetTime;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitInRange = UnitInRange;
 local IsSpellInRange = IsSpellInRange;
-local VUHDO_unitDetailedThreatSituation = VUHDO_unitDetailedThreatSituation;
+local UnitDetailedThreatSituation = UnitDetailedThreatSituation;
 local UnitIsCharmed = UnitIsCharmed;
 local UnitCanAttack = UnitCanAttack;
 local UnitName = UnitName;
@@ -52,7 +52,7 @@ local UnitIsTrivial = UnitIsTrivial;
 local GetSpellCooldown = GetSpellCooldown;
 local HasFullControl = HasFullControl;
 local pairs = pairs;
-local VUHDO_unitThreatSituation = VUHDO_unitThreatSituation;
+local UnitThreatSituation = UnitThreatSituation;
 local InCombatLockdown = InCombatLockdown;
 local type = type;
 
@@ -198,7 +198,7 @@ local tEmpty = {};
 local function VUHDO_updateThreat(aUnit)
 	tInfo = (VUHDO_RAID or tEmpty)[aUnit];
 	if tInfo then
-		tInfo["threat"] = VUHDO_unitThreatSituation(aUnit) or 0;
+		tInfo["threat"] = UnitThreatSituation(aUnit) or 0;
 
 		if VUHDO_INTERNAL_TOGGLES[17] then -- VUHDO_UPDATE_THREAT_LEVEL
 			VUHDO_updateBouquetsForEvent(aUnit, 17); -- VUHDO_UPDATE_THREAT_LEVEL
@@ -1052,7 +1052,7 @@ local function VUHDO_updateAllAggro()
 			tTarget = tInfo["targetUnit"];
 			if not UnitIsFriend(tUnit, tTarget) then
 				if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
-					_, _, tThreatPerc = VUHDO_unitDetailedThreatSituation(tUnit, tTarget);
+					_, _, tThreatPerc = UnitDetailedThreatSituation(tUnit, tTarget);
 					tInfo["threatPerc"] = tThreatPerc or 0;
 				end
 
@@ -1060,7 +1060,7 @@ local function VUHDO_updateAllAggro()
 
 				if tAggroUnit then
 					if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
-						_, _, tThreatPerc = VUHDO_unitDetailedThreatSituation(tAggroUnit, tTarget);
+						_, _, tThreatPerc = UnitDetailedThreatSituation(tAggroUnit, tTarget);
 						VUHDO_RAID[tAggroUnit]["threatPerc"] = tThreatPerc or 0;
 					end
 

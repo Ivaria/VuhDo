@@ -1,4 +1,4 @@
-## Interface: 11304
+## Interface: 11305
 ## Title: VuhDo ['vu:du:]
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
 ## Version: 3.114-classic

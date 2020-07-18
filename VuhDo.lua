@@ -98,7 +98,7 @@ local GetNumGroupMembers = GetNumGroupMembers;
 local UnitName = UnitName;
 local UnitPower = UnitPower;
 local UnitPowerMax = UnitPowerMax;
-local VUHDO_unitThreatSituation = VUHDO_unitThreatSituation;
+local UnitThreatSituation = UnitThreatSituation;
 local UnitClass = UnitClass;
 local UnitPowerType = UnitPowerType;
 local VUHDO_unitHasVehicleUI = VUHDO_unitHasVehicleUI;
@@ -350,7 +350,7 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["dead"] = tIsDead;
 			tInfo["afk"] = tIsAfk;
 			tInfo["connected"] = tIsConnected;
-			tInfo["threat"] = VUHDO_unitThreatSituation(aUnit) or 0;
+			tInfo["threat"] = UnitThreatSituation(aUnit) or 0;
 			tInfo["threatPerc"] = 0;
 			tInfo["isVehicle"] = VUHDO_unitHasVehicleUI(aUnit);
 			tInfo["className"] = tLocalClass or "";
@@ -385,7 +385,9 @@ function VUHDO_setHealth(aUnit, aMode)
             -- update tInfo["dead"] avoid messages being ignored by the filter
 			tInfo["dead"] = tIsDead;
 
-			if tIsDcChange then VUHDO_updateBouquetsForEvent(aUnit, 19); end-- VUHDO_UPDATE_DC
+			if tIsDcChange then
+				VUHDO_updateBouquetsForEvent(aUnit, 19); -- VUHDO_UPDATE_DC
+			end
 
 			if 2 == aMode or 12 == aMode then -- VUHDO_UPDATE_HEALTH -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
 				if 12 == aMode then -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
@@ -426,6 +428,8 @@ function VUHDO_setHealth(aUnit, aMode)
 			elseif 6 == aMode then -- VUHDO_UPDATE_AFK
 				tInfo["afk"] = tIsAfk;
 			end
+
+			tInfo["dead"] = tIsDead;
 		end
 	end
 end

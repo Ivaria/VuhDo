@@ -15,7 +15,8 @@ Bugfixes:
   
   
 Improvements:  
--- Bump TOC interface for 1.13.4  
+-- Bump TOC interface for 1.13.5  
+-- Migrate from LibThreatClassic2 to restored Blizzard APIs  
   
   
 --------------------------------------------------------------  
@@ -34,6 +35,8 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed VUHDO_UPDATE_ALIVE handling on unit dead state change  
+-- Fixed handling of unit dropdown menu under some conditions  
   
   
 Improvements:  
