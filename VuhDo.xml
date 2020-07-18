@@ -101,7 +101,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="VuhDoTooltip" frameStrata="TOOLTIP" movable="true" parent="UIParent" hidden="true" inherits="BackdropTemplate">
+	<Frame name="VuhDoTooltip" frameStrata="TOOLTIP" movable="true" parent="UIParent" hidden="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 			<KeyValues>
 				<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_TOOLTIP" type="global" />
 			</KeyValues>

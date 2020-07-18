@@ -229,7 +229,7 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<Slider name="$parentSlider" setallpoints="true" enableMouse="true" minValue="0" maxValue="100" defaultValue="0" valueStep="1" orientation="VERTICAL" inherits="BackdropTemplate">
+					<Slider name="$parentSlider" setallpoints="true" enableMouse="true" minValue="0" maxValue="100" defaultValue="0" valueStep="1" orientation="VERTICAL" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 						<KeyValues>
 							<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_COLOR_PICKER_SLIDER_8_8_1111" type="global" />
 						</KeyValues>

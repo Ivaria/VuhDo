@@ -1255,7 +1255,7 @@
 		<AbsDimension x="140" y="50" />
 	</Size>
 	<Frames>
-		<Slider name="$parentSlider" enableMouse="true" minValue="0" maxValue="100" defaultValue="0" valueStep="1" orientation="HORIZONTAL" inherits="BackdropTemplate">
+		<Slider name="$parentSlider" enableMouse="true" minValue="0" maxValue="100" defaultValue="0" valueStep="1" orientation="HORIZONTAL" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 			<KeyValues>
 				<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_H_SLIDER_8_8_1111" type="global" />
 			</KeyValues>
@@ -1322,7 +1322,7 @@
 		<AbsDimension x="18" y="50" />
 	</Size>
 	<Frames>
-		<Slider name="$parentSlider" setallpoints="true" enableMouse="true" minValue="0" maxValue="100" defaultValue="0" valueStep="1" orientation="VERTICAL" inherits="BackdropTemplate">
+		<Slider name="$parentSlider" setallpoints="true" enableMouse="true" minValue="0" maxValue="100" defaultValue="0" valueStep="1" orientation="VERTICAL" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 			<KeyValues>
 				<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_H_SLIDER_8_8_1111" type="global" />
 			</KeyValues>
@@ -1960,7 +1960,7 @@
 				</Anchor>
 			</Anchors>
 			<ScrollChild>
-				<Frame name="$parentSelectPanel">
+				<Frame name="$parentSelectPanel" mixin="BackdropTemplateMixin">
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -2099,7 +2099,7 @@
 				</Anchor>
 			</Anchors>
 			<ScrollChild>
-				<Frame name="$parentSelectPanel">
+				<Frame name="$parentSelectPanel" mixin="BackdropTemplateMixin">
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -2125,7 +2125,7 @@
 	</Scripts>
 </Button>
 
-<Frame name="VuhDoFrameTemplate" toplevel="true" movable="true" virtual="true" inherits="BackdropTemplate">
+<Frame name="VuhDoFrameTemplate" toplevel="true" movable="true" virtual="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 	<KeyValues>
 		<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_FRAME_16_16_1111" type="global" />
 	</KeyValues>
@@ -2137,7 +2137,7 @@
 	</KeyValues>
 </Frame>
 
-<Frame name="VuhDoWhitePanelTemplate" virtual="true" inherits="BackdropTemplate">
+<Frame name="VuhDoWhitePanelTemplate" virtual="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 	<KeyValues>
 		<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_WHITE_PANEL_16_16_3333" type="global" />
 	</KeyValues>
@@ -2197,7 +2197,7 @@
 </Slider>
 
 
-<ScrollFrame name="VuhDoScrollPanelTemplate" virtual="true" inherits="BackdropTemplate">
+<ScrollFrame name="VuhDoScrollPanelTemplate" virtual="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 	<KeyValues>
 		<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_SCROLL_PANEL_16_16_0000" type="global" />
 	</KeyValues>
@@ -2247,7 +2247,7 @@
 	</Scripts>
 </ScrollFrame>
 
-<ScrollFrame name="VuhDoScrollPanelTemplate2" virtual="true" inherits="BackdropTemplate">
+<ScrollFrame name="VuhDoScrollPanelTemplate2" virtual="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 	<KeyValues>
 		<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_SCROLL_PANEL_2_16_16_0000" type="global" />
 	</KeyValues>
@@ -2412,7 +2412,7 @@
 				</Anchor>
 			</Anchors>
 			<ScrollChild>
-				<Frame name="$parentSelectPanel">
+				<Frame name="$parentSelectPanel" mixin="BackdropTemplateMixin">
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -2439,7 +2439,7 @@
 </Button>
 
 
-<Frame name="VuhDoPanelAppendBottomTemplate" virtual="true" inherits="BackdropTemplate">
+<Frame name="VuhDoPanelAppendBottomTemplate" virtual="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 	<KeyValues>
 		<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_PANEL_APPEND_BOTTOM_16_16_1111" type="global" />
 	</KeyValues>
