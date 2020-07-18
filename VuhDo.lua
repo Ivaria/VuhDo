@@ -334,7 +334,6 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["healthmax"] = UnitHealthMax(aUnit);
 			tInfo["health"] = UnitHealth(aUnit);
 			tInfo["loghealth"] = UnitHealth(aUnit);
-			tInfo["isUpdated"] = 0;
 			tInfo["name"] = tName;
 			tInfo["number"] = VUHDO_getUnitNo(aUnit);
 			tInfo["unit"] = aUnit;
@@ -383,6 +382,7 @@ function VUHDO_setHealth(aUnit, aMode)
 
 		elseif tInfo then
 			tIsAfk, tInfo["connected"], tIsDcChange = VUHDO_updateAfkDc(aUnit);
+            -- update tInfo["dead"] avoid messages being ignored by the filter
 			tInfo["dead"] = tIsDead;
 
 			if tIsDcChange then VUHDO_updateBouquetsForEvent(aUnit, 19); end-- VUHDO_UPDATE_DC
@@ -392,10 +392,14 @@ function VUHDO_setHealth(aUnit, aMode)
 					tNewHealth = tInfo["loghealth"];
 				end
 				if 2 == aMode then
-					if tInfo["isUpdated"] == 1 or UnitIsFeignDeath(aUnit) then
-						tInfo["isUpdated"] = 0;
+                    -- Filter exception UNIT_HEALTH_FREQUENT event in classic
+                    -- Sometimes there is a UNIT_HEALTH_FREQUENT event in the interim period  
+					if tInfo["updateTime"] ==  GetTime() then
 						do return end;
-					elseif not UnitIsDeadOrGhost(aUnit) and UnitHealth(aUnit) == 0 then
+                    -- Filter exception health data from UnitHealth API
+                    -- UnitHealth will return 0 if the hunter cast FeignDeath 
+                    -- Sometimes UnitIsDeadOrGhost return false and UnitHealth return 0 before UnitIsFeignDeath return true
+					elseif UnitIsFeignDeath(aUnit)  or not UnitIsDeadOrGhost(aUnit) and UnitHealth(aUnit) == 0 then
 						do return end;
 					else 
 						tNewHealth = UnitHealth(aUnit);
@@ -409,6 +413,7 @@ function VUHDO_setHealth(aUnit, aMode)
 				if not tIsDead then
 					tInfo["healthmax"] = UnitHealthMax(aUnit);
 				end
+                -- Force update health bar immediately
 				VUHDO_updateHealthBarsFor(aUnit, 10); -- VUHDO_UPDATE_ALIVE
 				VUHDO_updateBouquetsForEvent(aUnit, 10); -- VUHDO_UPDATE_ALIVE
 
