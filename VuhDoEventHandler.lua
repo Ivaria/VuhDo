@@ -442,15 +442,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
 		end
 
---	elseif "UNIT_HEALTH" == anEvent then
-		-- as of patch 7.1 we are seeing empty units on health related events
---		if anArg1 and (VUHDO_RAID or tEmptyRaid)[anArg1] then 
---			VUHDO_updateHealth(anArg1, 2); -- VUHDO_UPDATE_HEALTH
---		end
-
-	-- TODO: is it ok to listen to both UNIT_HEALTH and UNIT_HEALTH_FREQUENT?
-	-- TODO: add options based on desired responsiveness and performance
-	elseif "UNIT_HEALTH_FREQUENT" == anEvent then
+	elseif "UNIT_HEALTH" == anEvent then
 		-- as of patch 7.1 we are seeing empty units on health related events
 		if anArg1 and ((VUHDO_RAID or tEmptyRaid)[anArg1] or VUHDO_isBossUnit(anArg1)) then
  			VUHDO_updateHealth(anArg1, 2);
@@ -1498,7 +1490,7 @@ end
 
 local VUHDO_ALL_EVENTS = {
 	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD",
-	"UNIT_HEALTH_FREQUENT", "UNIT_MAXHEALTH", -- "UNIT_HEALTH",
+	"UNIT_MAXHEALTH", "UNIT_HEALTH",  
 	"UNIT_AURA",
 	"UNIT_TARGET",
 	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",  
