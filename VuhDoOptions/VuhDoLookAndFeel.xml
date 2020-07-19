@@ -2219,6 +2219,7 @@
 	</Frames>
 	<Scripts>
 		<OnLoad>
+			self:OnBackdropLoaded();		
 			ScrollFrame_OnLoad(self);
 		</OnLoad>
 		<OnScrollRangeChanged>
@@ -2269,6 +2270,7 @@
 	</Frames>
 	<Scripts>
 		<OnLoad>
+			self:OnBackdropLoaded();		
 			ScrollFrame_OnLoad(self);
 		</OnLoad>
 		<OnScrollRangeChanged>
