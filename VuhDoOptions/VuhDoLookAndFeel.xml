@@ -1960,7 +1960,10 @@
 				</Anchor>
 			</Anchors>
 			<ScrollChild>
-				<Frame name="$parentSelectPanel" mixin="BackdropTemplateMixin">
+				<Frame name="$parentSelectPanel" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
+					<!--					<KeyValues>
+						<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_SCROLL_PANEL_2_16_16_0000" type="global" />
+					</KeyValues> -->
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -2099,7 +2102,10 @@
 				</Anchor>
 			</Anchors>
 			<ScrollChild>
-				<Frame name="$parentSelectPanel" mixin="BackdropTemplateMixin">
+				<Frame name="$parentSelectPanel" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
+					<!--					<KeyValues>
+						<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_SCROLL_PANEL_2_16_16_0000" type="global" />
+					</KeyValues> -->
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
@@ -2412,7 +2418,10 @@
 				</Anchor>
 			</Anchors>
 			<ScrollChild>
-				<Frame name="$parentSelectPanel" mixin="BackdropTemplateMixin">
+				<Frame name="$parentSelectPanel" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
+					<!--					<KeyValues>
+						<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_SCROLL_PANEL_2_16_16_0000" type="global" />
+					</KeyValues> -->
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
