@@ -76,7 +76,6 @@ BACKDROP_VUHDO_WHITE_SQUARE_16_16_0000 = {
 	tile = true, 
 	tileSize = 16, 
 	edgeSize = 16,
-	insets = { left = 0, right = 0, top = 0, bottom = 0 },
 };
 
 BACKDROP_VUHDO_PANEL_SCROLL_BAR_8_8_1111 = {
@@ -94,7 +93,6 @@ BACKDROP_VUHDO_SCROLL_PANEL_16_16_0000 = {
 	tile = true,
 	tileSize = 16,
 	edgeSize = 16,
-	insets = {  left = 0, right = 0, top = 0, bottom = 0 },
 };
 
 BACKDROP_VUHDO_SCROLL_PANEL_2_16_16_0000 = {
@@ -103,7 +101,6 @@ BACKDROP_VUHDO_SCROLL_PANEL_2_16_16_0000 = {
 	tile = true,
 	tileSize = 16,
 	edgeSize = 16,
-	insets = {  left = 0, right = 0, top = 0, bottom = 0 },
 };
 
 BACKDROP_VUHDO_PANEL_APPEND_BOTTOM_16_16_1111 = {

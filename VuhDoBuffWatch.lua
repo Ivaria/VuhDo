@@ -36,7 +36,6 @@ BACKDROP_VUHDO_BUFF_SWATCH_PANEL_8_8_0000 = {
 	tile = true,
 	tileSize = 8,
 	edgeSize = 8,
-	insets = {  left = 0, right = 0, top = 0, bottom = 0 },
 };
 
 BACKDROP_COLOR_VUHDO_BUFF_SWATCH_PANEL = CreateColor(0, 0, 0);
