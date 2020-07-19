@@ -39,6 +39,8 @@ BACKDROP_VUHDO_BUFF_SWATCH_PANEL_8_8_0000 = {
 	insets = {  left = 0, right = 0, top = 0, bottom = 0 },
 };
 
+BACKDROP_COLOR_VUHDO_BUFF_SWATCH_PANEL = CreateColor(0, 0, 0);
+
 BACKDROP_VUHDO_BUFF_WATCH_MAIN_FRAME_16_16_5555 = {
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", 
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",

@@ -25,6 +25,7 @@
 	<Frame name="VuhDoBuffSwatchPanelTemplate" virtual="true" inherits="BackdropTemplate" mixin="BackdropTemplateMixin">
 		<KeyValues>
 			<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_BUFF_SWATCH_PANEL_8_8_0000" type="global" />
+			<KeyValue key="backdropColor" value="BACKDROP_COLOR_VUHDO_BUFF_SWATCH_PANEL" type="global" />
 		</KeyValues>
 		<Size>
 			<AbsDimension x="75" y="24" />
