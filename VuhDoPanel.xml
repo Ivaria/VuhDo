@@ -147,8 +147,7 @@
 			</OnLoad>
 		</Scripts>
 		<Frames>
-			<Frame name="$parentPlTg" setAllPoints="true" hidden="true" inherits="VuhDoPlayerTargetFrameTemplate">
-			</Frame>
+			<Frame name="$parentPlTg" setAllPoints="true" hidden="true" inherits="VuhDoPlayerTargetFrameTemplate" />
 
 			<StatusBar name="$parentBgBar" setAllPoints="true" hidden="true" inherits="VuhDoStatusBar">
 				<Frames>
@@ -330,6 +329,7 @@
 									<Frame name="$parentPlTg" setAllPoints="true" hidden="true" inherits="VuhDoPlayerTargetFrameTemplate">
 										<Scripts>
 											<OnLoad>
+												self:OnBackdropLoaded();	
 												self.addLevel = 2;
 											</OnLoad>
 										</Scripts>
@@ -338,6 +338,7 @@
 									<Frame name="$parentClu" setAllPoints="true" hidden="true" inherits="VuhDoPlayerTargetFrameTemplate">
 										<Scripts>
 											<OnLoad>
+												self:OnBackdropLoaded();	
 												self.addLevel = 2;
 											</OnLoad>
 										</Scripts>

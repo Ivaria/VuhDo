@@ -16,7 +16,7 @@ local _;
 
 -- Backdrops
 BACKDROP_VUHDO_PLAYER_TARGET_FRAME = {
-	bgFile = "Interface\\AddOns\\VuhDo\\Images\\white_square_16_16", 
+	edgeFile = "Interface\\AddOns\\VuhDo\\Images\\white_square_16_16", 
 	tile = false,
 	tileSize = 16,
 	edgeSize = 1,
