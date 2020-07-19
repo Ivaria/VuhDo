@@ -18,6 +18,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Improved localization for zhCN  
   
   
 --------------------------------------------------------------  
