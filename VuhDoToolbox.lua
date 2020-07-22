@@ -21,7 +21,8 @@ local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
 local GetSpellInfo = GetSpellInfo;
 local SetMapToCurrentZone = SetMapToCurrentZone;
-local UnitAlternatePowerInfo = UnitAlternatePowerInfo;
+local UnitPowerBarID = UnitPowerBarID;
+local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local GetPlayerFacing = GetPlayerFacing;
@@ -755,8 +756,16 @@ end
 
 --
 function VUHDO_isAltPowerActive(aUnit)
-	local tBarType, _, _, _, _, tIsHideFromOthers = UnitAlternatePowerInfo(aUnit);
-	return tBarType and (not tIsHideFromOthers or "player" == aUnit);
+
+	local tBarId = UnitPowerBarID(aUnit);
+	local tBarInfo = GetUnitPowerBarInfoByID(tBarId);
+
+	if tBarInfo then 
+		return tBarInfo.barType and (not tBarInfo.hideFromOthers or "player" == aUnit);
+	else
+		return false;
+	end
+
 end
 
 
