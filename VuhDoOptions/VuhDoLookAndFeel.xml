@@ -2218,8 +2218,7 @@
 		</Slider>
 	</Frames>
 	<Scripts>
-		<OnLoad>
-			self:OnBackdropLoaded();		
+		<OnLoad inherit="prepend">
 			ScrollFrame_OnLoad(self);
 		</OnLoad>
 		<OnScrollRangeChanged>
@@ -2269,8 +2268,7 @@
 		</Slider>
 	</Frames>
 	<Scripts>
-		<OnLoad>
-			self:OnBackdropLoaded();		
+		<OnLoad inherit="prepend">
 			ScrollFrame_OnLoad(self);
 		</OnLoad>
 		<OnScrollRangeChanged>

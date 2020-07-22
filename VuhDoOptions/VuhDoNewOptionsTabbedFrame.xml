@@ -245,8 +245,7 @@
 			</Frame>
 		</Frames>
 		<Scripts>
-			<OnLoad>
-				self:OnBackdropLoaded();	
+			<OnLoad inherit="prepend">
 				VUHDO_initOptionsSettings();
 			</OnLoad>
 			<OnMouseDown>VUHDO_tabbedFrameOnMouseDown(self)</OnMouseDown>

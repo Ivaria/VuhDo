@@ -328,8 +328,7 @@
 
 									<Frame name="$parentPlTg" setAllPoints="true" hidden="true" inherits="VuhDoPlayerTargetFrameTemplate">
 										<Scripts>
-											<OnLoad>
-												self:OnBackdropLoaded();	
+											<OnLoad inherit="prepend">
 												self.addLevel = 2;
 											</OnLoad>
 										</Scripts>
@@ -337,8 +336,7 @@
 
 									<Frame name="$parentClu" setAllPoints="true" hidden="true" inherits="VuhDoPlayerTargetFrameTemplate">
 										<Scripts>
-											<OnLoad>
-												self:OnBackdropLoaded();	
+											<OnLoad inherit="prepend">
 												self.addLevel = 2;
 											</OnLoad>
 										</Scripts>
