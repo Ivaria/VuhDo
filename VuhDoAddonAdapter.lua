@@ -14,8 +14,7 @@ VUHDO_LibCompressEncode = VUHDO_LibCompress:GetAddonEncodeTable();
 
 VUHDO_LibBase64 = LibStub:GetLibrary("LibBase64-1.0");
 VUHDO_LibCustomGlow = LibStub("LibCustomGlow-1.0");
--- disable NickTag support till Tercioo releases an update for Shadowlands
---VUHDO_LibNickTag = LibStub("NickTag-1.0");
+VUHDO_LibNickTag = LibStub("NickTag-1.0");
 
 VUHDO_LibSharedMedia:Register("font", "Arial Black", "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf");
 VUHDO_LibSharedMedia:Register("font", "Emblem",	"Interface\\AddOns\\VuhDo\\Fonts\\Emblem.ttf");
