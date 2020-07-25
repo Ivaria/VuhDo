@@ -29,14 +29,19 @@ local function VUHDO_addUnitHealth(aUnit, aDelta)
 	tInfo = VUHDO_RAID[aUnit] or tDeadInfo;
 
 	if not tInfo["dead"] then
-		tNewHealth = tInfo["health"] + aDelta;
-
+        -- Avoid the calculation to be disturbed by the exception data 
+		if tInfo["health"] ~= 0 then
+			tNewHealth = tInfo["health"] + aDelta;
+		else 
+			tNewHealth = tInfo["loghealth"] + aDelta;
+		end
 		if tNewHealth < 0 then tNewHealth = 0;
-		elseif tNewHealth > tInfo["healthmax"]  then tNewHealth = tInfo["healthmax"]; end
-
+		elseif tNewHealth > tInfo["healthmax"]  then tNewHealth = tInfo["healthmax"];end
+		
+		tInfo["loghealth"] = tNewHealth;
+		tInfo["updateTime"] = GetTime();
 		if tInfo["health"] ~= tNewHealth then
-			tInfo["health"] = tNewHealth;
-			VUHDO_updateHealth(aUnit, 2); -- VUHDO_UPDATE_HEALTH
+			VUHDO_updateHealth(aUnit, 12); -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
 		end
 	end
 end
