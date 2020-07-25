@@ -27,12 +27,7 @@ local tNewHealth;
 local tDeadInfo = { ["dead"] = true };
 local function VUHDO_addUnitHealth(aUnit, aDelta)
 	tInfo = VUHDO_RAID[aUnit] or tDeadInfo;
-    -- Filter exception data from combat log in classic 
-    -- sometimes combat log get 19000+ damage but it's not correct E.g Ragnaros's Melt Weapon
-	if abs(aDelta) > 10000 then 
-		VUHDO_updateHealth(aUnit, 2); -- VUHDO_UPDATE_HEALTH
-		do return end;
-	end
+
 	if not tInfo["dead"] then
         -- Avoid the calculation to be disturbed by the exception data 
 		if tInfo["health"] ~= 0 then
