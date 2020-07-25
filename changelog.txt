@@ -12,6 +12,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed combat log event based health updates  
   
   
 Improvements:  
