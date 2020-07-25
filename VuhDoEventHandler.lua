@@ -421,6 +421,12 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 					anArg12 = tSpellId;
 				end
 			end
+            -- Filter exception data from combat log in classic
+            -- sometimes combat log get 19000+ damage but it's not correct E.g Ragnaros's Melt Weapon
+			local type, _, _, _, _, npc_id, _ = strsplit("-",anArg4);
+			if(type == "Creature" and npc_id == "11502") then
+				return
+			end
 
 			-- SWING_DAMAGE - the amount of damage is the 12th arg
 			-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
