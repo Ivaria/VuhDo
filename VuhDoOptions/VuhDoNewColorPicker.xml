@@ -279,7 +279,7 @@
 
 		</Frames>
 		<Scripts>
-			<OnLoad>
+			<OnLoad inherit="prepend">
 				VUHDO_lnfPatchFont(self, "OldColorLabel");
 				VUHDO_lnfPatchFont(self, "NewColorLabel");
 				self:SetScript("OnColorSelect", VUHDO_colorPickerColorSelectCallback);
