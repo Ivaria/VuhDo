@@ -286,7 +286,7 @@ function VUHDO_isInRange(aUnit)
 		return true;
 	elseif VUHDO_isSpecialUnit(aUnit) then 
 		return VUHDO_isTargetInRange(aUnit);
-	elseif UnitIsWarModePhased(aUnit) or not UnitInPhase(aUnit) then
+	elseif UnitPhaseReason(aUnit) then
 		return false;
 	elseif (sIsGuessRange) then 
 		return UnitInRange(aUnit);

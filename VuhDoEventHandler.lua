@@ -1083,7 +1083,7 @@ local function VUHDO_updateAllRange()
 		end
 
 		-- Check if unit is phased
-		if UnitIsWarModePhased(tUnit) or not UnitInPhase(tUnit) then
+		if UnitPhaseReason(tUnit) then
 			tIsInRange = false;
 		else
 			-- Check if unit is in range
