@@ -14,6 +14,7 @@ Bugfixes:
 -- Removed deprecated event UNIT_HEALTH_FREQUENT  
 -- Removed deprecated Blizzard APIs GetNumFriends/GetFriendInfo  
 -- Removed deprecated Blizzard API UnitAlternatePowerInfo  
+-- Removed deprecated Blizzard APIs UnitIsWarModePhased/UnitInPhase  
 -- Migrated backdrops to BackdropTemplate and BackdropTemplateMixin  
   
   
