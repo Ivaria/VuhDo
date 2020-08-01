@@ -1050,7 +1050,7 @@ local function VUHDO_updateAllAggro()
 				tInfo["aggro"] = true;
 			end
 			tTarget = tInfo["targetUnit"];
-			if not UnitIsFriend(tUnit, tTarget) then
+			if tTarget and UnitExists(tTarget) and not UnitIsFriend(tUnit, tTarget) then
 				if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
 					_, _, tThreatPerc = UnitDetailedThreatSituation(tUnit, tTarget);
 					tInfo["threatPerc"] = tThreatPerc or 0;
@@ -1058,7 +1058,7 @@ local function VUHDO_updateAllAggro()
 
 				tAggroUnit = VUHDO_RAID_NAMES[UnitName(tTarget .. "target")];
 
-				if tAggroUnit then
+				if tAggroUnit and UnitExists(tAggroUnit) then
 					if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
 						_, _, tThreatPerc = UnitDetailedThreatSituation(tAggroUnit, tTarget);
 						VUHDO_RAID[tAggroUnit]["threatPerc"] = tThreatPerc or 0;
