@@ -24,19 +24,26 @@ end
 
 --
 local tInfo;
+local tNpcId;
 local tNewHealth;
 local tDeadInfo = { ["dead"] = true };
 local function VUHDO_addUnitHealth(aUnit, aDelta, aSrcGUID)
 	tInfo = VUHDO_RAID[aUnit] or tDeadInfo;
 
 	if not tInfo["dead"] then
-	        -- Filter exception data from combat log in classic
-		-- sometimes combat log shows 19000+ damage but it's not correct E.g Ragnaros's Melt Weapon
-		if (abs(aDelta) > 10000 and select(6, strsplit("-", aSrcGUID)) == "11502") then
-			return;
+	        -- filter exception data from combat log in classic
+		-- sometimes combat log shows 19000+ damage but it's not correct e.g Ragnaros's Melt Weapon
+		if abs(aDelta) > 10000 then
+			tNpcId = select(6, strsplit("-", aSrcGUID));
+
+			-- 11502 - Ragnaros
+			-- 11583 - Nefarian
+			if tNpcId and (tNpcId == "11502" or tNpcId == "11583") then
+				return;
+			end
 		end
 
-		-- Avoid the calculation to be disturbed by the exception data
+		-- avoid the calculation to be disturbed by the exception data
 		if tInfo["health"] ~= 0 then
 			tNewHealth = tInfo["health"] + aDelta;
 		else 
