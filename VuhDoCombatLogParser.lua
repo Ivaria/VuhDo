@@ -25,6 +25,7 @@ end
 --
 local tInfo;
 local tNpcId;
+local tSrc;
 local tNewHealth;
 local tDeadInfo = { ["dead"] = true };
 local function VUHDO_addUnitHealth(aUnit, aDelta, aSrcGUID)
@@ -40,6 +41,12 @@ local function VUHDO_addUnitHealth(aUnit, aDelta, aSrcGUID)
 			-- 11583 - Nefarian
 			if tNpcId and (tNpcId == "11502" or tNpcId == "11583") then
 				return;
+			end
+
+            tSrc = select(1, strsplit("-", aSrcGUID))
+            -- 18168 - Force Reactive Disk
+			if tSrc and tSrc == "Player" and abs(aDelta) == 18168 then
+				return
 			end
 		end
 
