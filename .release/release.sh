@@ -66,7 +66,7 @@ strtotime() {
 exit_code=0
 
 # Game versions for uploading
-game_version="8.3.0"
+game_version=
 game_version_id=
 toc_version=
 classic=
