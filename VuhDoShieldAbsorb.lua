@@ -2,7 +2,7 @@ local _;
 local select = select;
 local type = type;
 
-local VUHDO_unitGetTotalAbsorbs = VUHDO_unitGetTotalAbsorbs;
+local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
 
 local VUHDO_SHIELDS = {
 	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD -- ok
@@ -229,16 +229,13 @@ local tSpellName;
 local function VUHDO_updateShields(aUnit)
 	for tSpellId, _ in pairs(VUHDO_SHIELDS) do
 		tSpellName = select(1, GetSpellInfo(tSpellId));
+		tRemain = select(16, VUHDO_unitBuff(aUnit, tSpellName));
 
-		if tSpellName then
-			tRemain = select(16, VUHDO_unitBuff(aUnit, tSpellName));
-
-			if tRemain and "number" == type(tRemain) then
-				if tRemain > 0 then
-					VUHDO_updateShieldValue(aUnit, tSpellName, tRemain, nil);
-				else
-					VUHDO_removeShield(aUnit, tSpellName);
-				end
+		if tRemain and "number" == type(tRemain) then
+			if tRemain > 0 then
+				VUHDO_updateShieldValue(aUnit, tSpellName, tRemain, nil);
+			else
+				VUHDO_removeShield(aUnit, tSpellName);
 			end
 		end
 	end
@@ -271,7 +268,7 @@ end
 --
 local tSummeLeft;
 function VUHDO_getUnitOverallShieldRemain(aUnit)
-	return VUHDO_unitGetTotalAbsorbs(aUnit) or 0;
+	return UnitGetTotalAbsorbs(aUnit) or 0;
 end
 
 

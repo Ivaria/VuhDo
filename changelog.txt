@@ -1,26 +1,3 @@
-Version 3.114-classic  
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently fully working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook  
-  
-  
-Bugfixes:  
--- Fixed combat log event based health updates  
-  
-  
-Improvements:  
--- Bump TOC interface for 1.13.5  
--- Migrate from LibThreatClassic2 to restored Blizzard APIs  
-  
-  
---------------------------------------------------------------  
 Version 3.114  
   
   
@@ -45,26 +22,6 @@ Improvements:
   
   
 --------------------------------------------------------------  
-Version 3.113-classic  
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently fully working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook  
-  
-  
-Bugfixes:  
-  
-  
-Improvements:  
-  
-  
---------------------------------------------------------------  
 Version 3.113  
   
   
@@ -81,26 +38,6 @@ Known issues:
   
 Bugfixes:  
 -- Debuff icon button frames now properly refresh unit IDs  
-  
-  
-Improvements:  
-  
-  
---------------------------------------------------------------  
-Version 3.112-classic  
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently fully working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook  
-  
-  
-Bugfixes:  
   
   
 Improvements:  
@@ -131,29 +68,6 @@ Improvements:
   
   
 --------------------------------------------------------------  
-Version 3.111-classic   
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently fully working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook  
-  
-  
-Bugfixes:  
--- Fixed usage of deprecated Blizzard API HasLFGRestriction  
--- Fixed threat situation update for neutral mobs  
-  
-  
-Improvements:  
--- Incoming heal amount now includes only the next tick of HoTs  
-  
-  
---------------------------------------------------------------  
 Version 3.111  
   
   
@@ -176,29 +90,6 @@ Improvements:
 --   See 'VuhDo Options > Panels > Text > Show Text > Show Nickname'  
 -- Added Ra-den Unleashed Void debuff absorb tracking  
 -- Added default custom debuffs for Ny'alotha raid encounters  
-  
-  
---------------------------------------------------------------  
-Version 3.110-classic  
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently fully working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook  
-  
-  
-Bugfixes:  
--- Use LibTotemInfo to replace removed Blizzard API GetTotemInfo  
-  
-  
-Improvements:  
--- Bump TOC interface for 1.13.3  
--- Migrate threat detection to LibThreatClassic2  
   
   
 --------------------------------------------------------------  
@@ -227,26 +118,6 @@ Improvements:
   
   
 --------------------------------------------------------------  
-Version 3.109-classic  
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently fully working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook  
-  
-  
-Bugfixes:  
-  
-  
-Improvements:  
-  
-  
---------------------------------------------------------------  
 Version 3.109  
   
   
@@ -270,27 +141,6 @@ Improvements:
   
   
 --------------------------------------------------------------  
-Version 3.108-classic  
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently fully working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook  
-  
-  
-Bugfixes:  
--- Migrate to the blessed version of LibHealComm-4.0  
-  
-  
-Improvements:  
-  
-  
---------------------------------------------------------------    
 Version 3.108  
   
   
@@ -310,40 +160,6 @@ Bugfixes:
   
   
 Improvements:  
-  
-  
---------------------------------------------------------------    
-Version 3.107-classic  
-  
-  
-Known issues:  
--- Spells by rank can be specified using a rank suffix:  
---  Example: Lesser Heal(Rank 1)  
--- Buff Watch is not currently working (missing many spells)  
--- Debuff tooltips are currently bugged when using ElvUI  
---   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'    
--- Shield bar is not working due to unavailable Blizzard APIs  
--- Threat is not working due to unavailable Blizzard APIs  
--- Spell trace only works for known spells in the player's spellbook
-  
-  
-Bugfixes:  
--- Better display of small numbers in text providers  
--- Fixed timer display for other players buffs/debuffs  
--- Fixed incoming heal display  
---   Note: Only works with others players using LibHealComm  
--- Fixed compatability layer to not modify global functions  
--- Fixed text providers using kilo/+kilo displaying zero values  
--- Fixed classic dispel/cure debuff spells  
--- Fixed misc classic spell IDs  
--- Fixed spell trace for known player spells  
--- Fixed unit threat indicators  
-  
-  
-Improvements:  
--- Added support for LibClassicHealComm-1.0  
--- Added support for LibClassicDurations  
--- Added support for LibThreatClassic  
   
   
 --------------------------------------------------------------  

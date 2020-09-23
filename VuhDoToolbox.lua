@@ -21,7 +21,7 @@ local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
 local GetSpellInfo = GetSpellInfo;
 local SetMapToCurrentZone = SetMapToCurrentZone;
-local VUHDO_unitAlternatePowerInfo = VUHDO_unitAlternatePowerInfo;
+local UnitAlternatePowerInfo = UnitAlternatePowerInfo;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local GetPlayerFacing = GetPlayerFacing;
@@ -37,10 +37,6 @@ local floor = floor;
 local pairs = pairs;
 local type = type;
 local abs = abs;
-
--- Number of seconds into the future to look for incoming heals
--- This ensures we only include the next incoming tick of HoTs
-local VUHDO_INCOMING_HEAL_WINDOW = 4;
 
 local sEmpty = { };
 setmetatable(sEmpty, { __newindex = function(aTable, aKey, aValue) VUHDO_xMsg("WARNING: newindex on dummy array: ", aKey, aValue); end });
@@ -289,7 +285,7 @@ function VUHDO_isInRange(aUnit)
 		return true;
 	elseif VUHDO_isSpecialUnit(aUnit) then 
 		return VUHDO_isTargetInRange(aUnit);
-	elseif VUHDO_unitIsWarModePhased(aUnit) or not UnitInPhase(aUnit) then
+	elseif UnitIsWarModePhased(aUnit) or not UnitInPhase(aUnit) then
 		return false;
 	elseif (sIsGuessRange) then 
 		return UnitInRange(aUnit);
@@ -478,10 +474,6 @@ end
 
 --
 function VUHDO_isSpellKnown(aSpellName)
-	if not aSpellName then 
-		return false; 
-	end
-
 	return (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
 		or (type(aSpellName) == "number" and IsPlayerSpell(aSpellName))
 		or GetSpellBookItemInfo(aSpellName) ~= nil
@@ -551,7 +543,7 @@ end
 local tResurrectionSpells;
 local tKnownResurrectionSpells;
 function VUHDO_getResurrectionSpells()
-	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[VUHDO_getSpecialization() or 0];
+	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[GetSpecialization() or 0];
 
 	if tResurrectionSpells then
 		tKnownResurrectionSpells = { };
@@ -763,7 +755,7 @@ end
 
 --
 function VUHDO_isAltPowerActive(aUnit)
-	local tBarType, _, _, _, _, tIsHideFromOthers = VUHDO_unitAlternatePowerInfo(aUnit);
+	local tBarType, _, _, _, _, tIsHideFromOthers = UnitAlternatePowerInfo(aUnit);
 	return tBarType and (not tIsHideFromOthers or "player" == aUnit);
 end
 
@@ -980,15 +972,6 @@ function VUHDO_unitAura(aUnit, aSpell, aFilter)
 		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
 
 		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
-			if VUHDO_LibClassicDurations and tSpellId then
-		                local tNewDuration, tNewExpirationTime = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tSource, tSpellName);
-		
-				if tDuration == 0 and tNewDuration then 
-					tDuration = tNewDuration;
-					tExpirationTime = tNewExpirationTime;
-				end
-			end
-
 			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3;
 		end
 	end
@@ -1052,165 +1035,6 @@ function VUHDO_playSoundFile(aSound)
 	end
 
 	return tSuccess;
-
-end
-
-
-
----------------------------------
--- CLASSIC COMPATIBILITY LAYER --
----------------------------------
-function VUHDO_getSpecialization()
-
-	if not GetSpecialization then
-		return 1;
-	else
-		return GetSpecialization();
-	end
-
-end
-
-
-
-function VUHDO_getSpecializationInfo(...)
-
-	if not GetSpecializationInfo then 
-		return 1, "Unknown", _, _, _, "NONE";
-	else
-		return GetSpecializationInfo(...);
-	end
-
-end
-
-
-
-function VUHDO_getInspectSpecialization(...)
-
-	if not GetInspectSpecialization then
-		return 0;
-	else
-		return GetInspectSpecialization(...);
-	end
-
-end
-
-
-
-function VUHDO_getSpecializationRoleByID(...)
-
-	if not GetSpecializationRoleByID then
-		return "NONE";
-	else
-		return GetSpecializationRoleByID(...);
-	end
-
-end
-
-
-
-function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
-
-	if not aUnit then
-		return 0;
-	end
-
-	if not UnitGetIncomingHeals then
-		if VUHDO_LibHealComm then
-			local tTargetGUID = UnitGUID(aUnit);
-
-			if aCasterUnit then
-				local tCasterGUID = UnitGUID(aCasterUnit);
-
-
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-			else
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-			end
-		else
-			return 0;
-		end
-	else
-		return UnitGetIncomingHeals(aUnit, aCasterUnit);
-	end
-
-end
-
-
-
-function VUHDO_unitGetTotalAbsorbs(...)
-
-	if not UnitGetTotalAbsorbs then
-		return 0;
-	else
-		return UnitGetTotalAbsorbs(...);
-	end
-
-end
-
-
-
-function VUHDO_unitIsWarModePhased(...)
-
-	if not UnitIsWarModePhased then
-		return false;
-	else
-		return UnitIsWarModePhased(...);
-	end
-
-end
-
-
-
-function VUHDO_unitHasVehicleUI(...)
-
-	if not UnitHasVehicleUI then
-		return false;
-	else
-		return UnitHasVehicleUI(...);
-	end
-
-end
-
-
-
-function VUHDO_unitGroupRolesAssigned(...)
-
-	if not UnitGroupRolesAssigned then
-		return "NONE";
-	else
-		return UnitGroupRolesAssigned(...);
-	end
-
-end
-
-
-
-function VUHDO_unitAlternatePowerInfo(...)
-
-	if not UnitAlternatePowerInfo then 
-		return false;
-	else
-		return UnitAlternatePowerInfo(...);
-	end
-
-end
-
-
-
-function VUHDO_hasIncomingSummon(...)
-
-	if not C_IncomingSummon or not C_IncomingSummon.HasIncomingSummon then
-		return false;
-	else
-		return C_IncomingSummon.HasIncomingSummon(...);
-	end
-end
-
-
-
-function VUHDO_hasLFGRestrictions()
-
-	return false;
 
 end
 

@@ -1,5 +1,6 @@
 --
 local UnitPower = UnitPower;
+local UnitGetIncomingHeals = UnitGetIncomingHeals;
 local pairs = pairs;
 local ipairs = ipairs;
 local floor = floor;
@@ -241,11 +242,7 @@ local function VUHDO_isAoeSpellEnabled(aSpell)
 	elseif not VUHDO_CONFIG["AOE_ADVISOR"]["knownOnly"] then
 		return true;
 	else
-		if VUHDO_AOE_SPELLS[aSpell]["name"] then
-			return VUHDO_isSpellKnown(VUHDO_AOE_SPELLS[aSpell]["name"]);
-		else
-			return false;
-		end
+		return VUHDO_isSpellKnown(VUHDO_AOE_SPELLS[aSpell]["name"]);
 	end
 end
 
@@ -268,7 +265,7 @@ local function VUHDO_aoeGetIncHeals(aUnit, aCastTime)
 		return 0;
 	end
 
-	return (VUHDO_unitGetIncomingHeals(aUnit) or 0) - (VUHDO_unitGetIncomingHeals(aUnit, "player") or 0);
+	return (UnitGetIncomingHeals(aUnit) or 0) - (UnitGetIncomingHeals(aUnit, "player") or 0);
 end
 
 

@@ -121,7 +121,7 @@ function VUHDO_skinsInitAutoCheckButton(aButton, anIndex)
 		end
 
 		if tIndexName then
-			local _, tSpecName = VUHDO_getSpecializationInfo(tSpecId);
+			local _, tSpecName = GetSpecializationInfo(tSpecId);
 
 			if tSpecName then
 				_G[aButton:GetName() .. "Label"]:SetText(tIndexName .. "\n(" .. string.sub(tSpecName,1,4) .. ")");

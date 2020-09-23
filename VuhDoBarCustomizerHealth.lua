@@ -690,7 +690,7 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 	tAllButtons = VUHDO_getUnitButtons(aUnit);
 	if not tAllButtons then	return; end
 
-	if 2 == anUpdateMode or 12 == anUpdateMode then -- VUHDO_UPDATE_HEALTH --VUHDO_UPDATE_HEALTH_COMBAT_LOG
+	if 2 == anUpdateMode then -- VUHDO_UPDATE_HEALTH
 		VUHDO_determineIncHeal(aUnit);
 
 		tInfo = VUHDO_RAID[aUnit];
