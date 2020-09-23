@@ -60,4 +60,4 @@ gitlab:
   script:
     - cd .release
     - chmod +x ./release.sh
-    - ./release.sh -ocelzLWH
+    - echo ./release.sh -ocelzLWH
