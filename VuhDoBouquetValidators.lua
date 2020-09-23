@@ -205,7 +205,7 @@ end
 
 --
 local function VUHDO_isPhasedValidator(anInfo, _)
-	if UnitIsWarModePhased(anInfo["unit"]) or not UnitInPhase(anInfo["unit"]) then
+	if VUHDO_unitIsWarModePhased(anInfo["unit"]) or not UnitInPhase(anInfo["unit"]) then
 		return true, "Interface\\TargetingFrame\\UI-PhasingIcon", 
 			-1, -1, -1, nil, nil, 0.15625, 0.84375, 0.15625, 0.84375;
 	else
@@ -217,7 +217,7 @@ end
 
 --
 local function VUHDO_isWarModePhasedValidator(anInfo, _)
-	if UnitIsWarModePhased(anInfo["unit"]) then
+	if VUHDO_unitIsWarModePhased(anInfo["unit"]) then
 		return true, "Interface\\TargetingFrame\\UI-PhasingIcon", 
 			-1, -1, -1, nil, nil, 0.15625, 0.84375, 0.15625, 0.84375;
 	else
@@ -779,7 +779,7 @@ end
 local function VUHDO_statusExcessAbsorbValidator(anInfo, _)
 	local healthmax = anInfo["healthmax"];
 
-	local excessAbsorb = (UnitGetTotalAbsorbs(anInfo["unit"]) or 0) + anInfo["health"] - healthmax;
+	local excessAbsorb = (VUHDO_unitGetTotalAbsorbs(anInfo["unit"]) or 0) + anInfo["health"] - healthmax;
 
 	if excessAbsorb < 0 then
 		return true, nil, 0, -1, healthmax;
@@ -792,7 +792,7 @@ end
 
 --
 local function VUHDO_statusTotalAbsorbValidator(anInfo, _)
-	return true, nil, UnitGetTotalAbsorbs(anInfo["unit"]) or 0, -1, anInfo["healthmax"];
+	return true, nil, VUHDO_unitGetTotalAbsorbs(anInfo["unit"]) or 0, -1, anInfo["healthmax"];
 end
 
 
@@ -824,7 +824,7 @@ end
 
 --
 local function VUHDO_hasSummonIconValidator(anInfo, _)
-	if C_IncomingSummon.HasIncomingSummon(anInfo["unit"]) then
+	if VUHDO_hasIncomingSummon(anInfo["unit"]) then
 		local status = C_IncomingSummon.IncomingSummonStatus(anInfo["unit"]);
 
 		if (status == Enum.SummonStatus.Pending) then
@@ -1472,28 +1472,28 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_BOUQUET_HEALTH_BELOW,
 		["validator"] = VUHDO_healthBelowValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_PERCENT,
-		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX },
+		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_HEALTH_COMBAT_LOG },
 	},
 
 	["HEALTH_ABOVE"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_HEALTH_ABOVE,
 		["validator"] = VUHDO_healthAboveValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_PERCENT,
-		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX },
+		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_HEALTH_COMBAT_LOG },
 	},
 
 	["HEALTH_BELOW_ABS"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_HEALTH_BELOW_ABS,
 		["validator"] = VUHDO_healthBelowAbsValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HEALTH,
-		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX },
+		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_HEALTH_COMBAT_LOG },
 	},
 
 	["HEALTH_ABOVE_ABS"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_HEALTH_ABOVE_ABS,
 		["validator"] = VUHDO_healthAboveAbsValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_HEALTH,
-		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX },
+		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_HEALTH_COMBAT_LOG },
 	},
 
 	["MANA_BELOW"] = {
@@ -1631,7 +1631,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_BOUQUET_STATUS_HEALTH,
 		["validator"] = VUHDO_statusHealthValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
-		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_INC },
+		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH_COMBAT_LOG },
 	},
 
 	["STATUS_MANA"] = {
@@ -1676,7 +1676,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_BOUQUET_STATUS_EXCESS_ABSORB,
 		["validator"] = VUHDO_statusExcessAbsorbValidator,
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
-		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_SHIELD },
+		["interests"] = { VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_SHIELD, VUHDO_UPDATE_HEALTH_COMBAT_LOG },
 	},
 
 	["STATUS_TOTAL_ABSORB"] = {
@@ -1938,7 +1938,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_customFlagValidator, 
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG,
 		["updateCyclic"] = true,
-		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE, VUHDO_UPDATE_NUM_CLUSTER }, --ignoring some for now (eg. VUHDO_UPDATE_MANA, VUHDO_UPDATE_DC, etc.)
+		["interests"] = { VUHDO_UPDATE_INC, VUHDO_UPDATE_HEALTH, VUHDO_UPDATE_RANGE, VUHDO_UPDATE_HEALTH_MAX, VUHDO_UPDATE_ALIVE, VUHDO_UPDATE_NUM_CLUSTER ,VUHDO_UPDATE_HEALTH_COMBAT_LOG}, --ignoring some for now (eg. VUHDO_UPDATE_MANA, VUHDO_UPDATE_DC, etc.)
 	},
 
 };

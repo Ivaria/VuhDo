@@ -27,11 +27,11 @@ local VUHDO_DEBUFF_TYPES = {
 
 
 VUHDO_DEBUFF_BLACKLIST = {
-	[GetSpellInfo(69127)] = true, -- Chill of the Throne
-	[GetSpellInfo(57724)] = true, -- Sated (Bloodlust)
-	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
-	[GetSpellInfo(57723)] = true, -- Exhaustion (Heroism)
-	[GetSpellInfo(80354)] = true  -- Temporal Displacement
+--	[GetSpellInfo(69127)] = true, -- Chill of the Throne
+--	[GetSpellInfo(57724)] = true, -- Sated (Bloodlust)
+--	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
+--	[GetSpellInfo(57723)] = true, -- Exhaustion (Heroism)
+--	[GetSpellInfo(80354)] = true  -- Temporal Displacement
 };
 
 
@@ -312,8 +312,18 @@ function VUHDO_determineDebuff(aUnit)
 
 		for tCnt = 1, huge do
 			tName, tIcon, tStacks, tTypeString, tDuration, tExpiry, tUnitCaster, _, _, tSpellId, _, tIsBossDebuff = UnitDebuff(aUnit, tCnt);
+
 			if not tIcon then 
 				break;
+			end
+
+			if VUHDO_LibClassicDurations then
+				local tNewDuration, tNewExpiry = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tUnitCaster, tName);
+		
+				if tDuration == 0 and tNewDuration then 
+					tDuration = tNewDuration;
+					tExpiry = tNewExpiry;
+				end
 			end
 
 			if (tExpiry or 0) == 0 then tExpiry = (sCurIcons[tName] or sEmpty)[2] or tNow; end
@@ -382,7 +392,19 @@ function VUHDO_determineDebuff(aUnit)
 
 		for tCnt = 1, huge do
 			tName, tIcon, tStacks, _, tDuration, tExpiry, tUnitCaster, _, _, tSpellId = UnitBuff(aUnit, tCnt);
-			if not tIcon then	break; end
+
+			if not tIcon then 
+				break; 
+			end
+
+			if VUHDO_LibClassicDurations then
+				local tNewDuration, tNewExpiry = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tUnitCaster, tName);
+		
+				if tDuration == 0 and tNewDuration then 
+					tDuration = tNewDuration;
+					tExpiry = tNewExpiry;
+				end
+			end
 
 			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
 
