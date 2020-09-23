@@ -23,7 +23,8 @@ externals:
     Libs/LibCompress: svn://svn.wowace.com/wow/libcompress/mainline/trunk
     Libs/LibBase64-1.0: git://git.wowace.com/wow/libbase64-1-0/mainline.git
     Libs/LibDBIcon-1.0: svn://svn.wowace.com/wow/libdbicon-1-0/mainline/trunk/LibDBIcon-1.0
-    Libs/LibCustomGlow-1.0: git://github.com/Stanzilla/LibCustomGlow.git
+    Libs/LibCustomGlow-1.0: 
+        url: https://github.com/Stanzilla/LibCustomGlow
 
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
 	
