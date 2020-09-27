@@ -41,7 +41,7 @@ local function VUHDO_addUnitHealth(aUnit, aDelta, aSrcGUID)
 				return;
 			end
 
-            -- 18168 - Force Reactive Disk
+			-- 18168 - Force Reactive Disk
 			if tSrc and tSrc == "Player" and abs(aDelta) == 18168 then
 				return;
 			end
