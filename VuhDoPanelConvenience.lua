@@ -90,7 +90,7 @@ end
 
 
 --
-function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
+function VUHDO_getOrCreateCustomDebuffButton(aButton, anIconNumber)
 	if not VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] then
 		local tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
 		local tFrameName = tParentName .. "Ic" .. anIconNumber;
@@ -587,7 +587,7 @@ function VUHDO_refactorStatusbar(tBar)
 			self["texture"]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0);
 			self["txOrient"] = VUHDO_STATUSBAR_TOP_TO_BOTTOM;
 		end
-		self:SetValue(0); -- Wichtig, wenn Units nicht existieren und keine bouquets gecheckt werden
+		self:SetValue(0); -- Important, when units doesn't exists, and no bouquet is checked
 	end
 
 

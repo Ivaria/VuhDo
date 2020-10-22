@@ -212,6 +212,7 @@ function VUHDO_initButtonFacade(anInstance)
 	if VUHDO_LibButtonFacade then
 		VUHDO_LibButtonFacade:Group("VuhDo", VUHDO_I18N_BUFF_WATCH);
 		VUHDO_LibButtonFacade:Group("VuhDo", VUHDO_I18N_HOTS);
+		VUHDO_LibButtonFacade:Group("VuhDo", VUHDO_I18N_DEBUFFS);
 	end
 end
 
@@ -219,9 +220,7 @@ end
 
 --
 function VUHDO_initMinimap()
-
 	VUHDO_initShowMinimap();
-
 end
 
 

@@ -44,7 +44,7 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	sCuDeStoredSettings = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"];
 	sMaxIcons = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"];
-	if (sMaxIcons < 1) then -- Damit das Bouquet item "Letzter Debuff" funktioniert
+	if (sMaxIcons < 1) then -- For the Bouquet Item "Last Debuff" to work
 		sMaxIcons = 1;
 	end
 	sIsName = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isName"];

@@ -395,8 +395,8 @@
 									<StatusBar name="$parentHotBar2" inherits="VuhDoHotBarTemplate"> </StatusBar>
 									<StatusBar name="$parentHotBar3" inherits="VuhDoHotBarTemplate"> </StatusBar>
 
-									-- HOTs Ic1-5, 9, 10 muss Button sein fuer Masque
-									-- Custom debuffs 40 - 44
+									-- HoTs Icons, 1-5, 9, 10 - must be Buttons for Masque skinning
+									-- Custom debuffs 40 - 44 - same
 
 									<Frame name="$parentIc" setAllPoints="true">
 										<Layers>

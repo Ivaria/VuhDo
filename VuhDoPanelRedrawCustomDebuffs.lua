@@ -86,14 +86,14 @@ local tIconIdx;
 local tIconName;
 local tButton;
 function VUHDO_initCustomDebuffs()
-	-- Wir brauchen mind. 1 für LastCustomDebuffBouquet
+	-- We need at least 1 for LastCustomDebuffBouquet
 	if sMaxNum == 0 then 
-		VUHDO_getOrCreateCuDeButton(sButton, 40);
+		VUHDO_getOrCreateCustomDebuffButton(sButton, 40);
 	else
 		for tCnt = 0, sMaxNum - 1 do
 			tIconIdx = 40 + tCnt;
 
-			tButton = VUHDO_getOrCreateCuDeButton(sButton, tIconIdx);
+			tButton = VUHDO_getOrCreateCustomDebuffButton(sButton, tIconIdx);
 			tButton:ClearAllPoints();
 			tButton:SetPoint(sPoint, sHealthBar:GetName(), sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
 			tButton:SetWidth(sHeight);
