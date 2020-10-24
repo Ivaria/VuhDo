@@ -13,7 +13,7 @@ Please first disable all add-ons other than VuhDo and VuhDo Options and see if y
 **Summary of the issue:**
 
 Describe your issue here.
-
+swiftmendable does not recognize wild growth as a hot that can trigger it. Also swiftmendable is being triggered by other the hots from other druids. it should only trigger from your own Rejuvenatiins, Regrowths and Wild Growth HOTs.
 **Expected behaviour:**
 
 Tell me what you feel should be happening.
