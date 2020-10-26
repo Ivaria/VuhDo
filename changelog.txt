@@ -13,6 +13,7 @@ Bugfixes:
 -- Fixed backdrop border colors for panel borders, etc.  
 -- Fixed Druid 'Swiftmend' to trigger on 'Wild Growth' HoT presence  
 -- Fixed Druid 'Swiftmend' to not trigger on other players HoTs  
+-- Fixed mouse/key binding of Hunter ability 'Concussive Shot'  
   
   
 Improvements:  
