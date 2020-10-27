@@ -18,6 +18,8 @@ Bugfixes:
   
 Improvements:  
 -- Added Shaman spell 'Water Shield' to Buff Watch  
+-- Added Shaman spell 'Windfury Weapon' to Buff Watch  
+-- Added Shaman spell 'Flametongue Weapon' to Buff Watch  
 -- Added Rogue ability 'Instant Poison' to Buff Watch  
 -- Added Rogue ability 'Numbing Poison' to Buff Watch  
   
