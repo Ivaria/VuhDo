@@ -22,6 +22,9 @@ Improvements:
 -- Added Shaman spell 'Flametongue Weapon' to Buff Watch  
 -- Added Rogue ability 'Instant Poison' to Buff Watch  
 -- Added Rogue ability 'Numbing Poison' to Buff Watch  
+-- Added new default bouquet 'Monk Stagger'  
+-- Updated default bouquet 'Raid Cooldowns'  
+-- Updated default bouquet 'Tank Cooldowns Extd'  
   
   
 --------------------------------------------------------------  
