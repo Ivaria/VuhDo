@@ -11,9 +11,13 @@ Known issues:
   
 Bugfixes:  
 -- Priest spell 'Holy Fire' will now be properly recognized  
+-- Removed deprecated Priest spell 'Clarity of Will'  
+-- Removed deprecated Priest spell 'Luminous Barrier'  
   
   
 Improvements:  
+-- Added Priest 'Spirit Shell' absorb tracking  
+-- Added Priest 'Spirit Shell' as a default HoT icon option  
   
   
 --------------------------------------------------------------  
