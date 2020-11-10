@@ -11,8 +11,6 @@ Known issues:
   
 Bugfixes:  
 -- Priest spell 'Holy Fire' will now be properly recognized  
--- Priest spell 'Shadow Mend' will now be properly recognized  
--- Priest spell 'Flash Heal' will now be properly recognized  
 -- Removed deprecated Priest spell 'Clarity of Will'  
 -- Removed deprecated Priest spell 'Luminous Barrier'  
   
