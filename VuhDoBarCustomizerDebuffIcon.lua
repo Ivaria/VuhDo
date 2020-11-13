@@ -61,6 +61,7 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		["isBarGlow"] = false,
 		["isIconGlow"] = false,
 	};
+	sIsShowOnlyForFriendly = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"];
 
 end
 
@@ -284,7 +285,7 @@ function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDurati
 		end
 	end
 
-	if not tFound then
+	if not tFound and (not sIsShowOnlyForFriendly or UnitIsFriend("player", aUnit)) then
 		VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, aCnt);
 	end
 
