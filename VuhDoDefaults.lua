@@ -594,6 +594,7 @@ local VUHDO_DEFAULT_CONFIG = {
 		["timer"] = true,
 		["max_num"] = 3,
 		["isNoRangeFade"] = false,
+		["showOnlyForFriendly"] = false,
 		["isIcon"] = true,
 		["isColor"] = false,
 		["isStacks"] = false,
