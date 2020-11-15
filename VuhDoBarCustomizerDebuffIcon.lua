@@ -61,7 +61,6 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		["isBarGlow"] = false,
 		["isIconGlow"] = false,
 	};
-
 	sIsShowOnlyForFriendly = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"];
 
 end
