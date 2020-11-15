@@ -99,7 +99,6 @@ function VUHDO_debuffsInitLocalOverrides()
 			sColorArray[tCnt] = { };
 		end
 	end]]
-
 	sIsShowOnlyForFriendly = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"];
 end
 
@@ -373,7 +372,7 @@ function VUHDO_determineDebuff(aUnit)
 					sCurIsStandard = true;
 				end
 
-				-- Entweder Fhigkeit vorhanden ODER noch keiner gewhlt UND auch nicht entfernbare
+				-- Entweder Fähigkeit vorhanden ODER noch keiner gewählt UND auch nicht entfernbare
 				-- Either ability available OR none selected AND not removable (DETECT_DEBUFFS_REMOVABLE_ONLY)
 				if tType and (tAbility or (sCurChosenType == 0 and sIsNotRemovableOnly)) then -- VUHDO_DEBUFF_TYPE_NONE
 					sCurChosenType = tType;
