@@ -67,6 +67,7 @@ local sIsUseDebuffIconBossOnly;
 local sIsMiBuColorsInFight;
 local sStdDebuffSound;
 local sAllDebuffSettings;
+local sIsShowOnlyForFriendly;
 local sEmpty = { };
 --local sColorArray = nil;
 
@@ -85,6 +86,8 @@ function VUHDO_debuffsInitLocalOverrides()
 	sIsMiBuColorsInFight = VUHDO_BUFF_SETTINGS["CONFIG"]["BAR_COLORS_IN_FIGHT"];
 	sStdDebuffSound = VUHDO_CONFIG["SOUND_DEBUFF"];
 	sAllDebuffSettings = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"];
+	sIsShowOnlyForFriendly = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"];
+
 	VUHDO_DEBUFF_COLORS = {
 		[1] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF1"],
 		[2] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF2"],
@@ -99,7 +102,6 @@ function VUHDO_debuffsInitLocalOverrides()
 			sColorArray[tCnt] = { };
 		end
 	end]]
-	sIsShowOnlyForFriendly = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"];
 end
 
 ----------------------------------------------------

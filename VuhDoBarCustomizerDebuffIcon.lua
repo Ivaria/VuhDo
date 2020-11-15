@@ -2,6 +2,7 @@ VUHDO_MAY_DEBUFF_ANIM = true;
 
 local VUHDO_DEBUFF_ICONS = { };
 local sIsName;
+local sIsShowOnlyForFriendly;
 
 -- BURST CACHE ---------------------------------------------------
 
@@ -48,6 +49,7 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		sMaxIcons = 1;
 	end
 	sIsName = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isName"];
+	sIsShowOnlyForFriendly = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"];
 
 	sStaticConfig = {
 		["isStaticConfig"] = true,
@@ -61,7 +63,6 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		["isBarGlow"] = false,
 		["isIconGlow"] = false,
 	};
-	sIsShowOnlyForFriendly = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"];
 
 end
 
