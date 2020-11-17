@@ -14,7 +14,7 @@ local VUHDO_SHIELDS = {
 	[1463] = 8, -- Incanter's Ward (mage talent)
 	[114893] = 10, -- Stone Bulwark Totem (shaman talent)
 	[187805] = 15, -- VUHDO_SPELL_ID.BUFF_ETHERALUS
-	[114908] = 15, -- VUHDO_SPELL_ID.SPIRIT_SHELL
+	[114908] = 10, -- VUHDO_SPELL_ID.SPIRIT_SHELL
 }
 
 
