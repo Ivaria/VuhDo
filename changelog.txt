@@ -19,6 +19,7 @@ Improvements:
 -- Added Priest 'Spirit Shell' absorb tracking  
 -- Added Priest 'Spirit Shell' as a default HoT icon option  
 -- Added option to only show debuff icons for friendly units  
+-- Bump TOC interface for 9.0.2  
   
   
 --------------------------------------------------------------  
