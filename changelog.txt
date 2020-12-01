@@ -1,3 +1,105 @@
+Version 3.118  
+  
+  
+Known issues:  
+-- Shadowlands stat squish cleanup still a work in progress  
+--   AOE Advice spell equations need complete overhaul  
+--   Some text providers need changes to better display small numbers  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+  
+  
+Bugfixes:  
+  
+  
+Improvements:  
+-- Added default custom debuffs for Castle Nathria raid encounters  
+-- Added Sun King's Salvation 'Cloak of Flames' debuff absorb tracking  
+-- Added new bouquet validator 'Flag: Friend'  
+-- Added new bouquet validator 'Flag: Foe'  
+  
+  
+--------------------------------------------------------------  
+Version 3.117  
+  
+  
+Known issues:  
+-- Shadowlands stat squish cleanup still a work in progress  
+--   AOE Advice spell equations need complete overhaul  
+--   Some text providers need changes to better display small numbers  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+  
+  
+Bugfixes:  
+-- Priest spell 'Holy Fire' will now be properly recognized  
+-- Removed deprecated Priest spell 'Clarity of Will'  
+-- Removed deprecated Priest spell 'Luminous Barrier'  
+  
+  
+Improvements:  
+-- Added Priest 'Spirit Shell' absorb tracking  
+-- Added Priest 'Spirit Shell' as a default HoT icon option  
+-- Added option to only show debuff icons for friendly units  
+-- Bump TOC interface for 9.0.2  
+  
+  
+--------------------------------------------------------------  
+Version 3.116  
+  
+  
+Known issues:  
+-- Shadowlands stat squish cleanup still a work in progress  
+--   AOE Advice spell equations need complete overhaul  
+--   Some text providers need changes to better display small numbers  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+  
+  
+Bugfixes:  
+-- Fixed backdrop border colors for panel borders, etc.  
+-- Fixed Druid 'Swiftmend' to trigger on 'Wild Growth' HoT presence  
+-- Fixed Druid 'Swiftmend' to not trigger on other players HoTs  
+-- Fixed mouse/key binding of Hunter ability 'Concussive Shot'  
+  
+  
+Improvements:  
+-- Added Shaman spell 'Water Shield' to Buff Watch  
+-- Added Shaman spell 'Windfury Weapon' to Buff Watch  
+-- Added Shaman spell 'Flametongue Weapon' to Buff Watch  
+-- Added Rogue ability 'Instant Poison' to Buff Watch  
+-- Added Rogue ability 'Numbing Poison' to Buff Watch  
+-- Added new default bouquet 'Monk Stagger'  
+-- Updated default bouquet 'Raid Cooldowns'  
+-- Updated default bouquet 'Tank Cooldowns Extd'  
+  
+  
+--------------------------------------------------------------  
+Version 3.115  
+  
+  
+Known issues:  
+-- Shadowlands stat squish cleanup still a work in progress  
+--   AOE Advice spell equations need complete overhaul  
+--   Some text providers need changes to better display small numbers  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+  
+  
+Bugfixes:  
+-- Removed deprecated debuff 'Bloodbath'  
+-- Removed deprecated event UNIT_HEALTH_FREQUENT  
+-- Removed deprecated Blizzard APIs GetNumFriends/GetFriendInfo  
+-- Removed deprecated Blizzard API UnitAlternatePowerInfo  
+-- Removed deprecated Blizzard APIs UnitIsWarModePhased/UnitInPhase  
+-- Migrated backdrops to BackdropTemplate and BackdropTemplateMixin  
+  
+  
+Improvements:  
+-- Bump TOC interface for 9.0.1   
+  
+  
+--------------------------------------------------------------  
 Version 3.114  
   
   
@@ -18,6 +120,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Improved localization for zhCN  
   
   
 --------------------------------------------------------------  

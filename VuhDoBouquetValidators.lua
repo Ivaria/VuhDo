@@ -13,19 +13,6 @@ VUHDO_FORCE_RESET = false;
 local floor = floor;
 local select = select;
 local twipe = table.wipe;
-local GetRaidTargetIndex = GetRaidTargetIndex;
-local UnitPower = UnitPower;
-local UnitPowerMax = UnitPowerMax;
-local UnitIsFriend = UnitIsFriend;
-local UnitIsEnemy = UnitIsEnemy;
-local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
-local UnitIsPlayer = UnitIsPlayer;
-local UnitIsTapped = UnitIsTapped;
-local UnitIsTappedByPlayer = UnitIsTappedByPlayer;
-local GetTexCoordsForRole = GetTexCoordsForRole;
-local UnitIsPVP = UnitIsPVP;
-local UnitFactionGroup = UnitFactionGroup;
-local UnitHasIncomingResurrection = UnitHasIncomingResurrection;
 local _;
 
 local VUHDO_RAID = { };
@@ -205,7 +192,7 @@ end
 
 --
 local function VUHDO_isPhasedValidator(anInfo, _)
-	if UnitIsWarModePhased(anInfo["unit"]) or not UnitInPhase(anInfo["unit"]) then
+	if UnitPhaseReason(anInfo["unit"]) then
 		return true, "Interface\\TargetingFrame\\UI-PhasingIcon", 
 			-1, -1, -1, nil, nil, 0.15625, 0.84375, 0.15625, 0.84375;
 	else
@@ -217,12 +204,16 @@ end
 
 --
 local function VUHDO_isWarModePhasedValidator(anInfo, _)
-	if UnitIsWarModePhased(anInfo["unit"]) then
+
+	local tPhaseReason = UnitPhaseReason(anInfo["unit"]);
+
+	if tPhaseReason and tPhaseReason == Enum.PhaseReason.WarMode then
 		return true, "Interface\\TargetingFrame\\UI-PhasingIcon", 
 			-1, -1, -1, nil, nil, 0.15625, 0.84375, 0.15625, 0.84375;
 	else
 		return false, nil, -1, -1, -1;
 	end
+
 end
 
 
@@ -1073,6 +1064,16 @@ local function VUHDO_pvpIconValidator(anInfo, _)
 	end
 end
 
+--
+local function VUHDO_friendValidator(anInfo, _)
+  return UnitIsFriend("player", anInfo["unit"]), nil, -1, -1, -1;
+end
+
+--
+local function VUHDO_foeValidator(anInfo, _)
+  return not UnitIsFriend("player", anInfo["unit"]), nil, -1, -1, -1;
+end
+
 
 
 --
@@ -1891,6 +1892,18 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_DEF_PVP_STATUS,
 		["validator"] = VUHDO_pvpIconValidator,
 		["interests"] = { VUHDO_UPDATE_MINOR_FLAGS },
+	},
+
+	["FRIEND"] = {
+		["displayName"] = VUHDO_I18N_FRIEND_STATUS,
+		["validator"] = VUHDO_friendValidator,
+		["interests"] = { },
+	},
+
+	["FOE"] = {
+		["displayName"] = VUHDO_I18N_FOE_STATUS,
+		["validator"] = VUHDO_foeValidator,
+		["interests"] = { },
 	},
 
 	["OVERFLOW_COUNTER"] = {

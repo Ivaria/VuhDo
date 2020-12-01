@@ -1493,6 +1493,7 @@ globals = {
 	"ContainerRefundItemPurchase",
 	"ConvertToParty",
 	"ConvertToRaid",
+	"CreateColor",
 	"CreateFont",
 	"CreateForbiddenFrame",
 	"CreateFrame",

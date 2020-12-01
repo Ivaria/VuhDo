@@ -442,15 +442,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
 		end
 
---	elseif "UNIT_HEALTH" == anEvent then
-		-- as of patch 7.1 we are seeing empty units on health related events
---		if anArg1 and (VUHDO_RAID or tEmptyRaid)[anArg1] then 
---			VUHDO_updateHealth(anArg1, 2); -- VUHDO_UPDATE_HEALTH
---		end
-
-	-- TODO: is it ok to listen to both UNIT_HEALTH and UNIT_HEALTH_FREQUENT?
-	-- TODO: add options based on desired responsiveness and performance
-	elseif "UNIT_HEALTH_FREQUENT" == anEvent then
+	elseif "UNIT_HEALTH" == anEvent then
 		-- as of patch 7.1 we are seeing empty units on health related events
 		if anArg1 and ((VUHDO_RAID or tEmptyRaid)[anArg1] or VUHDO_isBossUnit(anArg1)) then
  			VUHDO_updateHealth(anArg1, 2);
@@ -487,6 +479,13 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
 			VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 			VUHDO_updateShieldBar(anArg1);
+
+			-- 9.0.1 added Priest 'Spirit Shell' which does not fire SPELL_AURA__REFRESH events as normal
+			-- instead use this event handler to track the 'Spirit Shell' absorb amount
+			if VUHDO_getShieldPerc(anArg1, VUHDO_SPELL_ID.SPIRIT_SHELL) > 0 then
+				-- 114908 is the spell ID of the 'Spirit Shell' absorb aura
+				VUHDO_updateShield(anArg1, 114908);
+			end
 		end
 
 	elseif "UNIT_SPELLCAST_SUCCEEDED" == anEvent then
@@ -735,7 +734,7 @@ end
 --
 local function VUHDO_printAbout()
 
-	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v" .. VUHDO_VERSION .. " (use /vd). Currently maintained by Ivaria@US-Hyjal in honor of Marshy.");
+	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v" .. VUHDO_VERSION .. " (use /vd). Currently maintained by Ivaria@US-Hyjal in honor of Marshy and our newborn daughter Kiana.");
 
 end
 
@@ -1091,7 +1090,7 @@ local function VUHDO_updateAllRange()
 		end
 
 		-- Check if unit is phased
-		if UnitIsWarModePhased(tUnit) or not UnitInPhase(tUnit) then
+		if UnitPhaseReason(tUnit) then
 			tIsInRange = false;
 		else
 			-- Check if unit is in range
@@ -1498,7 +1497,7 @@ end
 
 local VUHDO_ALL_EVENTS = {
 	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD",
-	"UNIT_HEALTH_FREQUENT", "UNIT_MAXHEALTH", -- "UNIT_HEALTH",
+	"UNIT_MAXHEALTH", "UNIT_HEALTH",  
 	"UNIT_AURA",
 	"UNIT_TARGET",
 	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",  

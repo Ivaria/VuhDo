@@ -13,14 +13,14 @@ local VUHDO_SHIELDS = {
 	[108416] = 20, -- Sacrificial Pact (warlock talent)
 	[1463] = 8, -- Incanter's Ward (mage talent)
 	[114893] = 10, -- Stone Bulwark Totem (shaman talent)
-	[152118] = 15, -- VUHDO_SPELL_ID.CLARITY_OF_WILL
 	[187805] = 15, -- VUHDO_SPELL_ID.BUFF_ETHERALUS
-	[271466] = 10, -- VUHDO_SPELL_ID.LUMINOUS_BARRIER
+	[114908] = 10, -- VUHDO_SPELL_ID.SPIRIT_SHELL
 }
 
 
 --
 local VUHDO_PUMP_SHIELDS = {
+	[VUHDO_SPELL_ID.SPIRIT_SHELL] = 0.6, 
 }
 
 
@@ -76,6 +76,11 @@ local VUHDO_ABSORB_DEBUFFS = {
 
 	-- Patch 8.3.0 - Battle for Azeroth - Ny'alotha
 	[306184] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_UNLEASHED_VOID)), 40; end, -- Unleashed Void
+
+	-- Patch 9.0.2 - Shadowlands - Castle Nathria
+	[338600] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_CLOAK_OF_FLAMES)), 10 * 60; end, -- Cloak of Flames
+	[343026] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_CLOAK_OF_FLAMES)), 10 * 60; end, -- Cloak of Flames
+	[337859] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_CLOAK_OF_FLAMES)), 10 * 60; end, -- Cloak of Flames
 
 	--[79105] = function(aUnit) return 280000, 60 * 60; end, -- @TESTING PW:F
 };
@@ -137,9 +142,6 @@ local function VUHDO_initShieldValue(aUnit, aShieldName, anAmount, aDuration)
 
 	if sIsPumpAegis and VUHDO_PUMP_SHIELDS[aShieldName] then
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = VUHDO_RAID["player"]["healthmax"] * VUHDO_PUMP_SHIELDS[aShieldName];
-	elseif aShieldName == VUHDO_SPELL_ID.CLARITY_OF_WILL then
-		-- as of patch 7.0 Priest CoW is capped at twice the initial cast amount
-		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount * 2;
 	else
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 	end
@@ -151,7 +153,7 @@ end
 
 
 --
-local function VUHDO_updateShieldValue(aUnit, aShieldName, anAmount, aDuration)
+local function VUHDO_updateShieldValue(aUnit, aShieldName, anAmount, aDuration, aExpirationTime)
 	if not VUHDO_SHIELD_SIZE[aUnit][aShieldName] then
 		--VUHDO_xMsg("ERROR: Failed to update shield " .. aShieldName .. " on " .. aUnit);
 		return;
@@ -162,10 +164,13 @@ local function VUHDO_updateShieldValue(aUnit, aShieldName, anAmount, aDuration)
 		return;
 	end
 
-	if aDuration then
+	if aDuration then 
 		VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] = GetTime() + aDuration;
+		
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 		--VUHDO_xMsg("Shield overwritten");
+	elseif (aExpirationTime or 0) > VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] then
+		VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] = aExpirationTime;
 	elseif VUHDO_SHIELD_SIZE[aUnit][aShieldName] < anAmount then
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 	end
@@ -224,21 +229,32 @@ end
 
 
 --
+local tExpirationTime;
 local tRemain;
 local tSpellName;
-local function VUHDO_updateShields(aUnit)
-	for tSpellId, _ in pairs(VUHDO_SHIELDS) do
-		tSpellName = select(1, GetSpellInfo(tSpellId));
-		tRemain = select(16, VUHDO_unitBuff(aUnit, tSpellName));
+function VUHDO_updateShield(aUnit, aSpellId)
 
-		if tRemain and "number" == type(tRemain) then
-			if tRemain > 0 then
-				VUHDO_updateShieldValue(aUnit, tSpellName, tRemain, nil);
-			else
-				VUHDO_removeShield(aUnit, tSpellName);
-			end
+	tSpellName, _, _, _, _, tExpirationTime, _, _, _, _, _, _, _, _, _, tRemain = VUHDO_unitBuff(aUnit, aSpellId);
+
+	if tRemain and "number" == type(tRemain) then
+		if tRemain > 0 then
+			VUHDO_updateShieldValue(aUnit, tSpellName, tRemain, nil, tExpirationTime);
+		else
+			VUHDO_removeShield(aUnit, tSpellName);
 		end
 	end
+
+end
+
+
+
+--
+local function VUHDO_updateShields(aUnit)
+
+	for tSpellId, _ in pairs(VUHDO_SHIELDS) do
+		VUHDO_updateShield(aUnit, tSpellId);
+	end
+
 end
 
 
@@ -289,7 +305,7 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 	--VUHDO_Msg(aSpellId);
 
 	--[[if ("SPELL_AURA_APPLIED" == aMessage) then
-	VUHDO_xMsg(aShieldName, aSpellId);
+		VUHDO_xMsg(aShieldName, aSpellId);
 	end]]
 
 	if VUHDO_SHIELDS[aSpellId] then
@@ -322,7 +338,7 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		and (tonumber(anAbsorbAmount) or 0) > 0 then
 		tShieldName = VUHDO_DEBUFF_SHIELDS[tUnit];
 		tDelta = VUHDO_getShieldLeftAmount(tUnit, tShieldName) - anAbsorbAmount;
-		VUHDO_updateShieldValue(tUnit, tShieldName, tDelta, nil);
+		VUHDO_updateShieldValue(tUnit, tShieldName, tDelta);
 	elseif "UNIT_DIED" == aMessage then
 		VUHDO_SHIELD_SIZE[tUnit] = nil;
 		VUHDO_SHIELD_LEFT[tUnit] = nil;
