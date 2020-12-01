@@ -1121,10 +1121,10 @@ function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
 			if aCasterUnit then
 				local tCasterGUID = UnitGUID(aCasterUnit);
 
-
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 			else
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+
+				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 			end
 		else
 			return 0;
@@ -1135,7 +1135,29 @@ function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
 
 end
 
+function VUHDO_checkUnitGetPlayerHealsFirst(aUnit)
+	if not aUnit then
+		return 0;
+	end
 
+	if VUHDO_LibHealComm then
+		local tTargetGUID = UnitGUID(aUnit);
+		local firsttime,tCasterGUID = VUHDO_LibHealComm:GetNextHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW);
+		if tCasterGUID and tCasterGUID == UnitGUID("player") then
+			local num = VUHDO_LibHealComm:GetNumHeals(tTargetGUID,GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0;
+			if num > 1 then
+				local secondtime = VUHDO_LibHealComm:GetNextHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, firsttime + VUHDO_INCOMING_HEAL_WINDOW);
+				local _, _, window = GetNetStats();
+				if firsttime and secondtime and window and (secondtime - firsttime) < (window / 1000) then
+					return -1; -- is conflict
+				end
+			end
+			return 0; -- player first
+		end
+	end
+
+	return 1; -- others first
+end
 
 function VUHDO_unitGetTotalAbsorbs(...)
 

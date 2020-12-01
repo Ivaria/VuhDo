@@ -213,9 +213,12 @@ local tInfo;
 local tOpacity;
 local tHealthBar;
 local tIncBar;
+local isPlayerFirst;
+local IncNum;
 local function VUHDO_updateIncHeal(aUnit)
 	tInfo = VUHDO_RAID[aUnit];
 	tAllButtons = VUHDO_getUnitButtons(VUHDO_resolveVehicleUnit(aUnit));
+	isPlayerFirst = VUHDO_checkUnitGetPlayerHealsFirst(aUnit);
 
 	if not tInfo or not tAllButtons then return; end
 
@@ -227,7 +230,21 @@ local function VUHDO_updateIncHeal(aUnit)
 		if tAmountInc > 0 and tInfo["healthmax"] > 0 then
 			tIncBar:SetValueRange(tInfo["health"] / tInfo["healthmax"], tHealthPlusInc);
 			tHealthBar = VUHDO_getHealthBar(tButton, 1);
- 			tIncColor["R"], tIncColor["G"], tIncColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
+			tIncColor["R"], tIncColor["G"], tIncColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
+			if isPlayerFirst == -1 then -- is conflict
+                       -- TODO:read config from menu
+					tIncColor["R"] = 1;
+					tIncColor["G"] = 1;
+					tIncColor["B"] = 0;
+			elseif isPlayerFirst == 0 then -- player first
+					tIncColor["R"] = 0;
+					tIncColor["G"] = 1;
+					tIncColor["B"] = 0;
+			else -- others first
+				tIncColor["R"] = 1;
+				tIncColor["G"] = 0;
+				tIncColor["B"] = 0;
+			end
  			tIncColor = VUHDO_getDiffColor(tIncColor, VUHDO_PANEL_SETUP["BAR_COLORS"]["INCOMING"]);
  			if tIncColor["O"] and tOpacity then
  				tIncColor["O"] = tIncColor["O"] * tOpacity * (tHealthBar:GetAlpha() or 1);
@@ -252,7 +269,7 @@ function VUHDO_overhealTextCallback(aUnit, aPanelNum, aProviderName, aText, aVal
 		tBar = VUHDO_getHealthBar(tButton, 1);
 		VUHDO_getOverhealText(tBar):SetText(aText);
 
-		-- Sonderwurst Overheal wirklich nötig?
+		-- Sonderwurst Overheal wirklich nï¿½tig?
 		if strfind(aProviderName, "OVERHEAL", 1, true) then
 			tInfo = VUHDO_RAID[aUnit];
 			if tInfo then
@@ -727,7 +744,7 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 	elseif 5 == anUpdateMode then -- VUHDO_UPDATE_RANGE
 		VUHDO_determineIncHeal(aUnit);
 		for _, tButton in pairs(tAllButtons) do
-			VUHDO_customizeText(tButton, 2, false); -- für d/c tag -- VUHDO_UPDATE_HEALTH
+			VUHDO_customizeText(tButton, 2, false); -- fï¿½r d/c tag -- VUHDO_UPDATE_HEALTH
 			VUHDO_customizeDebuffIconsRange(tButton);
 		end
 		VUHDO_updateIncHeal(aUnit);
