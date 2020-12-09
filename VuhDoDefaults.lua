@@ -926,7 +926,7 @@ function VUHDO_loadDefaultConfig()
 		30109,  -- Slime Burst
 		-- Loatheb
 		29204,  -- Inevitable Doom
-        29184,  -- Corrupted Mind
+		29184,  -- Corrupted Mind
 		-- Instructor Razuvious
 		26613,  -- Unbalancing Strike
 		-- Gothik the Harvester
