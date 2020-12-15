@@ -956,6 +956,7 @@ function VUHDO_loadDefaultConfig()
 		28479,  -- Frostbolt
 		28478,  -- Frostbolt
 		27819,  -- Detonate Mana
+		27808,  -- Frost Blast
 		28408,  -- Chains of Kel'Thuzad
 		28409,  -- Chains of Kel'Thuzad
 		28410   -- Chains of Kel'Thuzad
