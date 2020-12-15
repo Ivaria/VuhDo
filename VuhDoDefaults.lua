@@ -945,6 +945,8 @@ function VUHDO_loadDefaultConfig()
 		-- Thaddius
 		28125,  -- War Stomp
 		28167,  -- Chain Lightning
+		28059,  -- Positive Charge
+		28084,	-- Negative Charge
 		-- Sapphiron
 		28542,  -- Life Drain
 		15847,  -- Tail Sweep
