@@ -953,10 +953,10 @@ function VUHDO_loadDefaultConfig()
 		28547,  -- Chill
 		28522,  -- Icebolt
 		-- Kel'Thuzad
-		29879,  -- Frost Blast
-		10187,  -- Blizzard
-		28479,  -- Frostbolt
-		28478,  -- Frostbolt
+		-- 29879,  -- Frost Blast
+		-- 10187,  -- Blizzard
+		-- 28479,  -- Frostbolt
+		-- 28478,  -- Frostbolt
 		27819,  -- Detonate Mana
 		27808,  -- Frost Blast
 		28408,  -- Chains of Kel'Thuzad
