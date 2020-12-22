@@ -13,10 +13,15 @@ Known issues:
   
 Bugfixes:  
 -- Fixed combat log event based health updates  
+-- Fixed Buff Watch granting irrelevant buffs to non-mana users  
+-- Fixed Priest spell 'Fear Ward' in Buff Watch  
+-- Fixed Priest spell 'Levitate' in BUff Watch  
+-- Removed Priest spell 'Vampiric Embrace' from Buff Watch  
   
   
 Improvements:  
 -- Bump TOC interface for 1.13.6  
+-- Added Troll Priest spell 'Shadowguard' to Buff Watch  
   
   
 --------------------------------------------------------------  
