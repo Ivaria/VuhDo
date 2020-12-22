@@ -66,14 +66,14 @@ strtotime() {
 exit_code=0
 
 # Game versions for uploading
-game_version="8.3.0"
+game_version="9.0.2"
 game_version_id=
 toc_version=
 classic=
 
 # Classic version info for special handling
-CLASSIC_INTERFACE="11305"
-CLASSIC_VERSION="1.13.5"
+CLASSIC_INTERFACE="11306"
+CLASSIC_VERSION="1.13.6"
 
 # Secrets for uploading
 cf_token=$CF_API_KEY
