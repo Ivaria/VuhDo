@@ -83,12 +83,12 @@ local VUHDO_ABSORB_DEBUFFS = {
 	[337859] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_CLOAK_OF_FLAMES)), 10 * 60; end, -- Cloak of Flames
 
 	-- Patch 9.0.2 - Shadowlands - Necrotic Wake
-	[320462] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT)), 1 * 60; end, -- Necrotic Bolt
-	[320170] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT)), 2 * 60; end, -- Necrotic Bolt 
+	[320462] = function(aUnit) return select(17, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT)), 1 * 60; end, -- Necrotic Bolt
+	[320170] = function(aUnit) return select(17, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT)), 2 * 60; end, -- Necrotic Bolt 
 
 	-- Patch 9.0.2 - Shadowlands - Theater of Pain
-	[330784] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT)), 1 * 60; end, -- Necrotic Bolt
-	[330868] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT_VOLLEY)), 1 * 60; end, -- Necrotic Bolt Volley
+	[330784] = function(aUnit) return select(17, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT)), 1 * 60; end, -- Necrotic Bolt
+	[330868] = function(aUnit) return select(17, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_BOLT_VOLLEY)), 1 * 60; end, -- Necrotic Bolt Volley
 
 	-- Patch 9.0.2 - Death Knight ability
 	[223929] = function(aUnit) return select(16, VUHDO_unitDebuff(aUnit, VUHDO_SPELL_ID.DEBUFF_NECROTIC_WOUND)), 18; end, -- Necrotic Wound 
