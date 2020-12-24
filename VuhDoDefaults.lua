@@ -2092,6 +2092,18 @@ function VUHDO_loadDefaultConfig()
 		327992  -- Desolation (ground damage)
 	);
 
+	-- 9.0.2 - Shadowlands
+	VUHDO_addCustomSpellIds(49, 
+		-- [[ Necrotic Wake ]]
+		320462, -- Necrotic Bolt
+		320170, -- Necrotic Bolt
+		-- [[ Theater of Pain ]]
+		330784, -- Necrotic Bolt
+		330868, -- Necrotic Bolt Volley
+		-- Death Knight player ability
+		223929  -- Necrotic Wound
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
