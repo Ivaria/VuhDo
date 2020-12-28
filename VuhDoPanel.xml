@@ -284,7 +284,14 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<StatusBar name="$parentShBar" inherits="VuhDoStatusBar"> </StatusBar>
+					<StatusBar name="$parentShBar" inherits="VuhDoStatusBar">
+						<Scripts>
+							<OnLoad>
+								VUHDO_refactorStatusbar(self);
+								self.addLevel = 2;
+							</OnLoad>
+						</Scripts>
+					</StatusBar>
 
 					<StatusBar name="$parentIcBar" inherits="VuhDoStatusBar">
 						<Frames>
