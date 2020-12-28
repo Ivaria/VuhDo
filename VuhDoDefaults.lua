@@ -880,9 +880,9 @@ function VUHDO_loadDefaultConfig()
 		19134,  -- Intimidating Shout
 		26072,  -- Dust Cloud
 		25051,  -- Sunder Armor
-		26049,  -- Mana Burn
+		-- 26049,  -- Mana Burn
 		26180,  -- Wyvern Sting
-		26211,  -- Hamstring
+		-- 26211,  -- Hamstring
 		26070,  -- Fear
 		26102,  -- Sand Blast
 		24573,  -- Mortal Strike
@@ -902,9 +902,9 @@ function VUHDO_loadDefaultConfig()
 		-- [[ Naxxramas ]]
 		-- Anub'Rekhan
 		28969,  -- Acid Spit
-		28783,  -- Impale
+		-- 28783,  -- Impale
 		28786,  -- Locust Swarm
-		28991,  -- Web
+		-- 28991,  -- Web
 		-- Anub'Rekhan
 		22886,  -- Berserker Charge
 		28796,  -- Poison Bolt Volley
@@ -921,12 +921,13 @@ function VUHDO_loadDefaultConfig()
 		29214,  -- Wrath of the Plaguebringer
 		-- Heigan the Unclean
 		29998,  -- Decrepit Fever
-		29371,  -- Eruption
+		-- 29371,  -- Eruption
 		30113,  -- Putrid Bite
 		30109,  -- Slime Burst
 		-- Loatheb
 		29204,  -- Inevitable Doom
 		29184,  -- Corrupted Mind
+		11196,  -- Recently Bandaged
 		-- Instructor Razuvious
 		26613,  -- Unbalancing Strike
 		-- Gothik the Harvester
@@ -935,18 +936,20 @@ function VUHDO_loadDefaultConfig()
 		28884,  -- Meteor
 		28882,  -- Righteous Fire
 		-- Patchwerk
-		28308,  -- Hateful Strike
+		-- 28308,  -- Hateful Strike
 		-- Grobbulus
 		28153,  -- Disease Cloud
 		28206,  -- Mutagen Explosion
 		28169,  -- Mutating Injection
 		-- Gluth
 		29685,  -- Terrifying Roar
+		25646,	-- Mortal Wound
+		29306,  -- Infected Wound
 		-- Thaddius
 		28125,  -- War Stomp
 		28167,  -- Chain Lightning
-		28059,  -- Positive Charge
-		28084,	-- Negative Charge
+		-- 28059,  -- Positive Charge
+		-- 28084,	-- Negative Charge
 		-- Sapphiron
 		28542,  -- Life Drain
 		15847,  -- Tail Sweep
