@@ -10,6 +10,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Slash command arguments can now be properly quoted  
   
   
 Improvements:  
