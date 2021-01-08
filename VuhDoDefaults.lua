@@ -2031,9 +2031,9 @@ function VUHDO_loadDefaultConfig()
 		342077, -- Echolocation
 		341684, -- The Blood Lantern
 		341489, -- Bloodlight
-        330713, -- Earsplitting Shriek
+		330713, -- Earsplitting Shriek
 		-- 340324, -- Sanguine Ichor (ground damage)
-        -- 345397, -- Wave of Blood
+		-- 345397, -- Wave of Blood
 		-- Huntsman Altimor
 		335111, -- Huntsmans Mark
 		334971, -- Jagged Claws
