@@ -339,6 +339,10 @@ end
 
 function VUHDO_splitStringQuoted(aText) 
 
+	if VUHDO_strempty(aText) then
+		return { "" };
+	end
+
 	local tSplit = {};
 	local tPrevToken, tQuoteToken; 
 
