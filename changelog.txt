@@ -11,6 +11,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed NPE when slash command had zero arguments  
+-- Fixed class name text for classless units (defaults to creature type)  
   
   
 Improvements:  
