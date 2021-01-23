@@ -10,8 +10,9 @@ Known issues:
   
   
 Bugfixes:  
--- Fixed NPE when slash command had zero arguments  
+-- Fixed error when slash command had zero arguments  
 -- Fixed class name text for classless units (defaults to creature type)  
+-- Fixed error on target switch in combat with show class name enabled  
   
   
 Improvements:  
