@@ -16,6 +16,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Hunter 'Primal Fury' debuff 'Fatigued' to default ignore list  
   
   
 --------------------------------------------------------------  
