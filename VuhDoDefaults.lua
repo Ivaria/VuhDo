@@ -2104,7 +2104,7 @@ function VUHDO_loadDefaultConfig()
 		223929  -- Necrotic Wound
 	);
 
-	-- 9.0.2 - Shadowlands - More Castle Nathria debuffs
+	-- 9.0.2 - Shadowlands
 	VUHDO_addCustomSpellIds(50, 
 		-- [[ Castle Nathria ]]
 		-- Shriekwing
@@ -2116,7 +2116,7 @@ function VUHDO_loadDefaultConfig()
 		-- Lady Inerva Darkvein
 		326538, -- Anima Web
 		324982, -- Shared Suffering
-		340452, -- Change of Heart
+		-- 340452, -- Change of Heart (tank)
 		-- Artificer Xy'Mox
 		328468, -- Dimensional Tear
 		326302, -- Stasis Trap
@@ -2131,11 +2131,11 @@ function VUHDO_loadDefaultConfig()
 		342735, -- Ravenous Feast
 		342698, -- Volatile Anima Infection
 		-- Sire Denathrius
-		332797, -- Fatal Finesse (DoT debuff part)
+		332797, -- Fatal Finesse (DoT debuff)
 		335873, -- Rancor (ground damage)
-		329951, -- Impale
-		332619, -- Shattering Pain (tank)
-		334016  -- Unworthy
+		329951  -- Impale
+		-- 332619  -- Shattering Pain (tank)
+		-- 334016  -- Unworthy
 	);
 
 	local debuffRemovalList = {};
