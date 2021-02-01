@@ -252,7 +252,7 @@ function VUHDO_overhealTextCallback(aUnit, aPanelNum, aProviderName, aText, aVal
 		tBar = VUHDO_getHealthBar(tButton, 1);
 		VUHDO_getOverhealText(tBar):SetText(aText);
 
-		-- Sonderwurst Overheal wirklich nothing?
+		-- Sonderwurst Overheal wirklich ntig?
 		if strfind(aProviderName, "OVERHEAL", 1, true) then
 			tInfo = VUHDO_RAID[aUnit];
 			if tInfo then
@@ -727,7 +727,7 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 	elseif 5 == anUpdateMode then -- VUHDO_UPDATE_RANGE
 		VUHDO_determineIncHeal(aUnit);
 		for _, tButton in pairs(tAllButtons) do
-			VUHDO_customizeText(tButton, 2, false); -- for d/c tag -- VUHDO_UPDATE_HEALTH
+			VUHDO_customizeText(tButton, 2, false); -- fr d/c tag -- VUHDO_UPDATE_HEALTH
 			VUHDO_customizeDebuffIconsRange(tButton);
 		end
 		VUHDO_updateIncHeal(aUnit);
