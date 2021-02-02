@@ -638,6 +638,7 @@ VUHDO_I18N_TT.K578 = "选择图标闪光的颜色.";
 VUHDO_I18N_TT.K579 = "选择技能条闪光的颜色.";
 VUHDO_I18N_TT.K580 = "选择一个修改键，使用鼠标右键将debuff图标列入黑名单."
 VUHDO_I18N_TT.K581 = "选中可在栏上显示玩家昵称.";
+VUHDO_I18N_TT.K582 = "牧师选项: 满血也仍显示护盾剩余量. 醒目：仍处於测试阶段.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "预设存档";
 VUHDO_I18N_DEFAULT_LAYOUT = "预设按键配置";
@@ -1002,6 +1003,7 @@ VUHDO_I18N_SWIFTMEND_INDICATOR =  "特殊点";
 VUHDO_I18N_MOUSEOVER_HIGHLIGHTER =  "滑鼠悬停";
 VUHDO_I18N_OUTER_BORDER =  "外框";
 VUHDO_I18N_SHIELD_ABSORPTION =  "盾状态";
+VUHDO_I18N_SHOW_SHIELD_MAX_HEALTH = "满血显示盾";
 VUHDO_I18N_BACKGROUND_BAR =  "条背景";
 VUHDO_I18N_THREAT_MARKS =  "仇恨标示";
 VUHDO_I18N_HEALTH_BAR =  "血量条";

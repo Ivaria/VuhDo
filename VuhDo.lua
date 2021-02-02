@@ -342,7 +342,7 @@ function VUHDO_setHealth(aUnit, aMode)
 
 			tName, tRealm = UnitName(aUnit);
 			tInfo["healthmax"] = UnitHealthMax(aUnit);
-			tInfo["abshealthmax"] = VUHDO_getAbsorbHealtMax(aUnit);
+			tInfo["shieldplushealth"] = VUHDO_getSheildPlusHealth(aUnit);
 			tInfo["health"] = UnitHealth(aUnit);
 			tInfo["name"] = tName;
 			tInfo["number"] = VUHDO_getUnitNo(aUnit);
@@ -408,7 +408,7 @@ function VUHDO_setHealth(aUnit, aMode)
 				if tInfo["dead"] ~= tIsDead then
 					if not tIsDead then
 						tInfo["healthmax"] = UnitHealthMax(aUnit);
-						tInfo["abshealthmax"] = VUHDO_getAbsorbHealtMax(aUnit);
+						tInfo["shieldplushealth"] = VUHDO_getSheildPlusHealth(aUnit);
 					end
 					tInfo["dead"] = tIsDead;
 					VUHDO_updateHealthBarsFor(aUnit, 10); -- VUHDO_UPDATE_ALIVE
@@ -418,7 +418,7 @@ function VUHDO_setHealth(aUnit, aMode)
 			elseif 3 == aMode then -- VUHDO_UPDATE_HEALTH_MAX
 				tInfo["dead"] = tIsDead;
 				tInfo["healthmax"] = UnitHealthMax(aUnit);
-				tInfo["abshealthmax"] = VUHDO_getAbsorbHealtMax(aUnit);
+				tInfo["shieldplushealth"] = VUHDO_getSheildPlusHealth(aUnit);
 				tInfo["sortMaxHp"] = VUHDO_getUnitSortMaxHp(aUnit);
 
 			elseif 6 == aMode then -- VUHDO_UPDATE_AFK

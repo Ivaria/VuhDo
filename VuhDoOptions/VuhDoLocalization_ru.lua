@@ -1178,6 +1178,7 @@ VUHDO_I18N_SWIFTMEND_INDICATOR =  "Особая Точка";
 VUHDO_I18N_MOUSEOVER_HIGHLIGHTER =  "Наведение";
 VUHDO_I18N_OUTER_BORDER =  "Внешняя";
 VUHDO_I18N_SHIELD_ABSORPTION =  "Статус\nЩита";
+VUHDO_I18N_SHOW_SHIELD_MAX_HEALTH = "Show Shield at max hp";
 VUHDO_I18N_BACKGROUND_BAR =  "Фон Полосы";
 VUHDO_I18N_THREAT_MARKS =  "Метки Угрозы";
 VUHDO_I18N_HEALTH_BAR =  "Полоса Здоровья";

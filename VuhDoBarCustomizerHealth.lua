@@ -158,7 +158,7 @@ local function VUHDO_getHealthPlusIncQuota(aUnit)
 		if not VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
 			tHealthPlusInc = VUHDO_getUnitHealthModiPercent(tInfo, tAmountInc);
 		else
-			tHealthPlusInc = tInfo["abshealthmax"] == 0 and 0 or min(tInfo["health"] + tAmountInc , tInfo["healthmax"]) / tInfo["abshealthmax"];
+			tHealthPlusInc = tInfo["shieldplushealth"] == 0 and 0 or min(tInfo["health"] + tAmountInc , tInfo["healthmax"]) / tInfo["shieldplushealth"];
 		end
 		tHealthPlusInc = tHealthPlusInc > 1 and 1 or tHealthPlusInc;
 		return tHealthPlusInc, tAmountInc;
@@ -187,14 +187,14 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota)
 	end
 	aHealthPlusIncQuota = aHealthPlusIncQuota and aHealthPlusIncQuota or VUHDO_getHealthPlusIncQuota(aUnit);
 
-	tInfo["abshealthmax"] = VUHDO_getAbsorbHealtMax(aUnit);
+	tInfo["shieldplushealth"] = VUHDO_getSheildPlusHealth(aUnit);
 
-	tAbsorbAmount = VUHDO_getUnitOverallShieldRemain(aUnit) / tInfo["abshealthmax"];
+	tAbsorbAmount = VUHDO_getUnitOverallShieldRemain(aUnit) / tInfo["shieldplushealth"];
 	
   for _, tButton in pairs(tAllButtons) do
     tShieldBar = VUHDO_getHealthBar(tButton, 19);
 	tHealthBar = VUHDO_getHealthBar(tButton, 1);
-	tHealthPerc = tInfo["abshealthmax"] == 0 and 0 or tInfo["health"] / tInfo["abshealthmax"] ;
+	tHealthPerc = tInfo["shieldplushealth"] == 0 and 0 or tInfo["health"] / tInfo["shieldplushealth"] ;
 	if tAbsorbAmount > 0 then
 			tShieldBar:SetValueRange(aHealthPlusIncQuota, aHealthPlusIncQuota + tAbsorbAmount);
  			tShieldColor["R"], tShieldColor["G"], tShieldColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
@@ -230,14 +230,14 @@ local function VUHDO_updateIncHeal(aUnit)
 
 	if not tInfo or not tAllButtons then return; end
 
-	tInfo["abshealthmax"] = VUHDO_getAbsorbHealtMax(aUnit);
+	tInfo["shieldplushealth"] = VUHDO_getSheildPlusHealth(aUnit);
 	tHealthPlusInc, tAmountInc = VUHDO_getHealthPlusIncQuota(aUnit);
 
 	for _, tButton in pairs(tAllButtons) do
   	tIncBar = VUHDO_getHealthBar(tButton, 6);
 
-		if tAmountInc > 0 and tInfo["abshealthmax"] > 0 then
-			tIncBar:SetValueRange(tInfo["health"] / tInfo["abshealthmax"], tHealthPlusInc);
+		if tAmountInc > 0 and tInfo["shieldplushealth"] > 0 then
+			tIncBar:SetValueRange(tInfo["health"] / tInfo["shieldplushealth"], tHealthPlusInc);
 			tHealthBar = VUHDO_getHealthBar(tButton, 1);
  			tIncColor["R"], tIncColor["G"], tIncColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
  			tIncColor = VUHDO_getDiffColor(tIncColor, VUHDO_PANEL_SETUP["BAR_COLORS"]["INCOMING"]);
@@ -541,13 +541,13 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 	aMaxValue = aMaxValue or 0;
 	aCurrValue = aCurrValue or 0;
 
-	tInfo = VUHDO_RAID[aUnit]
+	tInfo = VUHDO_RAID[aUnit];
 
 	tQuota = (aCurrValue == 0 and aMaxValue == 0) and 0
 		or aMaxValue > 1 and aCurrValue / aMaxValue or 0;
 
-	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] and tInfo and tInfo["abshealthmax"] and tInfo["abshealthmax"] > 0 then
-		tQuota = tInfo["health"] / tInfo["abshealthmax"] or 0
+	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] and tInfo and tInfo["shieldplushealth"] and tInfo["shieldplushealth"] > 0 then
+		tQuota = tInfo["health"] / tInfo["shieldplushealth"] or 0
 	end
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
@@ -595,8 +595,8 @@ function VUHDO_healthBarBouquetCallbackCustom(aUnit, anIsActive, anIcon, aCurrVa
 		or 0;
 
 	tInfo = VUHDO_RAID[aUnit]
-	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] and tInfo and tInfo["abshealthmax"] > 0 then
-		tQuota = tInfo["health"] / tInfo["abshealthmax"] or 0
+	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] and tInfo and tInfo["shieldplushealth"] > 0 then
+		tQuota = tInfo["health"] / tInfo["shieldplushealth"] or 0
 	end
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do

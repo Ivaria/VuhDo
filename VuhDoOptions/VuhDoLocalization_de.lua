@@ -637,6 +637,7 @@ VUHDO_I18N_TT.K578 = "Select a color for the icon glow.";
 VUHDO_I18N_TT.K579 = "Select a color for the bar glow.";
 VUHDO_I18N_TT.K580 = "Select a modifier key to use with the right mouse button to blacklist debuff icons."
 VUHDO_I18N_TT.K581 = "Check to show player nickname on bars.";
+VUHDO_I18N_TT.K582 = "Priest only option: Show shield at max health. This is EXPERIMENTAL.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1002,6 +1003,7 @@ VUHDO_I18N_SWIFTMEND_INDICATOR =  "Spezial-Punkt";
 VUHDO_I18N_MOUSEOVER_HIGHLIGHTER =  "Mouseover";
 VUHDO_I18N_OUTER_BORDER =  "Äußerer";
 VUHDO_I18N_SHIELD_ABSORPTION =  "Schild-Status";
+VUHDO_I18N_SHOW_SHIELD_MAX_HEALTH = "Show Shield at max hp";
 VUHDO_I18N_BACKGROUND_BAR =  "Balkenhintergrund";
 VUHDO_I18N_THREAT_MARKS =  "Bedrohungsmarken";
 VUHDO_I18N_HEALTH_BAR =  "Lebensbalken";

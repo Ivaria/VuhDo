@@ -371,9 +371,9 @@ end
 local tAbsorb
 local thealth
 local tmaxhealth
-function VUHDO_getAbsorbHealtMax(aUnit)
+function VUHDO_getSheildPlusHealth(aUnit)
 	tmaxhealth = UnitHealthMax(aUnit) or 0;
-	if not VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
+	if not VUHDO_CONFIG["SHOW_SHIELD_BAR"] or not VUHDO_PANEL_SETUP["BAR_COLORS"]["HOTS"]["showShieldAbsorb"] then
 		return tmaxhealth;
 	else
 		tAbsorb = VUHDO_getUnitOverallShieldRemain(aUnit) or 0;

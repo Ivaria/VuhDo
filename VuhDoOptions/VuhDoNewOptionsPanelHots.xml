@@ -945,14 +945,33 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-33" />
+									<AbsDimension x="13" y="-25" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.showShieldAtMaxHealth");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K420);
+							</OnLoad>
+							<OnClick>
+								VUHDO_lnfCheckButtonUpdateModel(self);
+								VUHDO_lnfCheckButtonClicked(self);
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<CheckButton name="$parentShowAbsorbsAtMaxHealthButton" text="VUHDO_I18N_SHOW_SHIELD_MAX_HEALTH" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-53" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.showShieldAbsorb");
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K420);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K582);
 							</OnLoad>
 							<OnClick>
 								VUHDO_lnfCheckButtonUpdateModel(self);
@@ -965,7 +984,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-71" />
+									<AbsDimension x="13" y="-81" />
 								</Offset>
 							</Anchor>
 						</Anchors>

@@ -638,6 +638,7 @@ VUHDO_I18N_TT.K578 = "Select a color for the icon glow.";
 VUHDO_I18N_TT.K579 = "Select a color for the bar glow.";
 VUHDO_I18N_TT.K580 = "Select a modifier key to use with the right mouse button to blacklist debuff icons."
 VUHDO_I18N_TT.K581 = "Check to show player nickname on bars.";
+VUHDO_I18N_TT.K582 = "牧师选项: 满血也仍显示护盾剩余量. 醒目：仍处於测试阶段.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1001,6 +1002,7 @@ VUHDO_I18N_SWIFTMEND_INDICATOR =  "特殊點";
 VUHDO_I18N_MOUSEOVER_HIGHLIGHTER =  "滑鼠懸停";
 VUHDO_I18N_OUTER_BORDER =  "外框";
 VUHDO_I18N_SHIELD_ABSORPTION =  "盾狀態";
+VUHDO_I18N_SHOW_SHIELD_MAX_HEALTH = "满血显示盾";
 VUHDO_I18N_BACKGROUND_BAR =  "條背景";
 VUHDO_I18N_THREAT_MARKS =  "仇恨標示";
 VUHDO_I18N_HEALTH_BAR =  "血量條";
