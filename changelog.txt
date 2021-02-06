@@ -19,6 +19,7 @@ Bugfixes:
 Improvements:  
 -- Added Hunter 'Primal Fury' debuff 'Fatigued' to default ignore list  
 -- Added additional default custom debuffs for Castle Nathria encounters  
+-- Upgraded NickTag-1.0 library dependency to minor 14  
   
   
 --------------------------------------------------------------  
