@@ -951,7 +951,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.showShieldAtMaxHealth");
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.showShieldAbsorb");
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K420);
 							</OnLoad>
 							<OnClick>
@@ -970,7 +970,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.showShieldAbsorb");
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.showShieldAtMaxHealth");
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K582);
 							</OnLoad>
 							<OnClick>
