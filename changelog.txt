@@ -13,6 +13,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed global cooldown bar  
+-- Fixed damage flash when using combat log based health updates  
   
   
 Improvements:  
