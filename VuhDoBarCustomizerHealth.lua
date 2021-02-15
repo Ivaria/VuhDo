@@ -155,7 +155,11 @@ local function VUHDO_getHealthPlusIncQuota(aUnit)
 		return 0, 0;
 	else
 		tAmountInc = VUHDO_getIncHealOnUnit(aUnit);
-		tHealthPlusInc = VUHDO_getUnitHealthModiPercent(tInfo, tAmountInc);
+		if not VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
+			tHealthPlusInc = VUHDO_getUnitHealthModiPercent(tInfo, tAmountInc);
+		else
+			tHealthPlusInc = tInfo["shieldplushealth"] == 0 and 0 or min(tInfo["health"] + tAmountInc , tInfo["healthmax"]) / tInfo["shieldplushealth"];
+		end
 		tHealthPlusInc = tHealthPlusInc > 1 and 1 or tHealthPlusInc;
 		return tHealthPlusInc, tAmountInc;
 	end
@@ -170,6 +174,8 @@ local tAbsorbAmount;
 local tOpacity;
 local tHealthBar;
 local tIncBar;
+local tAbsorb;
+local tHealthPerC;
 function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota)
 	if not VUHDO_CONFIG["SHOW_SHIELD_BAR"] then return; end
 
@@ -181,22 +187,27 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota)
 	end
 	aHealthPlusIncQuota = aHealthPlusIncQuota and aHealthPlusIncQuota or VUHDO_getHealthPlusIncQuota(aUnit);
 
-	tAbsorbAmount = VUHDO_getUnitOverallShieldRemain(aUnit) / tInfo["healthmax"];
+	tInfo["shieldplushealth"] = VUHDO_getSheildPlusHealth(aUnit);
+
+	tAbsorbAmount = VUHDO_getUnitOverallShieldRemain(aUnit) / tInfo["shieldplushealth"];
+	
   for _, tButton in pairs(tAllButtons) do
     tShieldBar = VUHDO_getHealthBar(tButton, 19);
-
-    if tAbsorbAmount > 0 then
+	tHealthBar = VUHDO_getHealthBar(tButton, 1);
+	tHealthPerc = tInfo["shieldplushealth"] == 0 and 0 or tInfo["health"] / tInfo["shieldplushealth"] ;
+	if tAbsorbAmount > 0 then
 			tShieldBar:SetValueRange(aHealthPlusIncQuota, aHealthPlusIncQuota + tAbsorbAmount);
-			tHealthBar = VUHDO_getHealthBar(tButton, 1);
  			tShieldColor["R"], tShieldColor["G"], tShieldColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
  			tShieldColor = VUHDO_getDiffColor(tShieldColor, VUHDO_PANEL_SETUP["BAR_COLORS"]["SHIELD"]);
  			if tShieldColor["O"] and tOpacity then
  				tShieldColor["O"] = tShieldColor["O"] * tOpacity * (tHealthBar:GetAlpha() or 1);
  			end
 
-    	VUHDO_setStatusBarColor(tShieldBar, tShieldColor);
+		VUHDO_setStatusBarColor(tShieldBar, tShieldColor);
+		tHealthBar:SetValue(tHealthPerc);
     else
-    	tShieldBar:SetValueRange(0,0);
+		tShieldBar:SetValueRange(0,0);
+		tHealthBar:SetValue(tHealthPerc);
     end
   end
 end
@@ -219,13 +230,14 @@ local function VUHDO_updateIncHeal(aUnit)
 
 	if not tInfo or not tAllButtons then return; end
 
+	tInfo["shieldplushealth"] = VUHDO_getSheildPlusHealth(aUnit);
 	tHealthPlusInc, tAmountInc = VUHDO_getHealthPlusIncQuota(aUnit);
 
 	for _, tButton in pairs(tAllButtons) do
   	tIncBar = VUHDO_getHealthBar(tButton, 6);
 
-		if tAmountInc > 0 and tInfo["healthmax"] > 0 then
-			tIncBar:SetValueRange(tInfo["health"] / tInfo["healthmax"], tHealthPlusInc);
+		if tAmountInc > 0 and tInfo["shieldplushealth"] > 0 then
+			tIncBar:SetValueRange(tInfo["health"] / tInfo["shieldplushealth"], tHealthPlusInc);
 			tHealthBar = VUHDO_getHealthBar(tButton, 1);
  			tIncColor["R"], tIncColor["G"], tIncColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
  			tIncColor = VUHDO_getDiffColor(tIncColor, VUHDO_PANEL_SETUP["BAR_COLORS"]["INCOMING"]);
@@ -252,7 +264,7 @@ function VUHDO_overhealTextCallback(aUnit, aPanelNum, aProviderName, aText, aVal
 		tBar = VUHDO_getHealthBar(tButton, 1);
 		VUHDO_getOverhealText(tBar):SetText(aText);
 
-		-- Sonderwurst Overheal wirklich nötig?
+		-- Sonderwurst Overheal wirklich ntig?
 		if strfind(aProviderName, "OVERHEAL", 1, true) then
 			tInfo = VUHDO_RAID[aUnit];
 			if tInfo then
@@ -529,8 +541,14 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 	aMaxValue = aMaxValue or 0;
 	aCurrValue = aCurrValue or 0;
 
+	tInfo = VUHDO_RAID[aUnit];
+
 	tQuota = (aCurrValue == 0 and aMaxValue == 0) and 0
 		or aMaxValue > 1 and aCurrValue / aMaxValue or 0;
+
+	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] and tInfo and tInfo["shieldplushealth"] and tInfo["shieldplushealth"] > 0 then
+		tQuota = tInfo["health"] / tInfo["shieldplushealth"] or 0
+	end
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG["BOUQUETS"]["HEALTH_BAR_PANEL"][VUHDO_BUTTON_CACHE[tButton]] == "" then
@@ -551,7 +569,7 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 		end
 	end
 
-	tInfo = VUHDO_RAID[aUnit]
+	
 	if not tInfo then return; end
 
 	-- Targets und targets-of-target, die im Raid sind
@@ -575,6 +593,11 @@ function VUHDO_healthBarBouquetCallbackCustom(aUnit, anIsActive, anIcon, aCurrVa
 	tQuota = (aCurrValue == 0 and aMaxValue == 0) and 0
 		or aMaxValue > 1 and aCurrValue / aMaxValue
 		or 0;
+
+	tInfo = VUHDO_RAID[aUnit]
+	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] and tInfo and tInfo["shieldplushealth"] > 0 then
+		tQuota = tInfo["health"] / tInfo["shieldplushealth"] or 0
+	end
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG["BOUQUETS"]["HEALTH_BAR_PANEL"][VUHDO_BUTTON_CACHE[tButton]] == aBouquetName then
@@ -727,7 +750,7 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 	elseif 5 == anUpdateMode then -- VUHDO_UPDATE_RANGE
 		VUHDO_determineIncHeal(aUnit);
 		for _, tButton in pairs(tAllButtons) do
-			VUHDO_customizeText(tButton, 2, false); -- für d/c tag -- VUHDO_UPDATE_HEALTH
+			VUHDO_customizeText(tButton, 2, false); -- fr d/c tag -- VUHDO_UPDATE_HEALTH
 			VUHDO_customizeDebuffIconsRange(tButton);
 		end
 		VUHDO_updateIncHeal(aUnit);

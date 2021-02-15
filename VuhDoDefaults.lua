@@ -1665,7 +1665,7 @@ function VUHDO_loadDefaultConfig()
 ----		250191, -- Conflagration
 ----		254181, -- Seared Skin
 ----		248255, -- Infernal Rockets
---		-- Kin’garoth
+--		-- Kingaroth
 ----		254919, -- Forging Strike
 --		249535, -- Demolished (M)
 --		246706, -- Demolish
@@ -1697,7 +1697,7 @@ function VUHDO_loadDefaultConfig()
 ----		250757, -- Cosmic Glare (M)
 --		-- Aggramar
 ----		244291, -- Foe Breaker
-----		245990, -- Taeschalach’s Reach
+----		245990, -- Taeschalachs Reach
 --		245994, -- Scorching Blaze
 ----		246014, -- Searing Tempest
 ----		244736, -- Wake of Flame
@@ -1718,7 +1718,7 @@ function VUHDO_loadDefaultConfig()
 ----		258646, -- Gift of the Sky
 ----		255199, -- Avatar of Aggramar
 --		250669, -- Soulburst
-----		255200, -- Aggramar’s Boon
+----		255200, -- Aggramars Boon
 ----		257299, -- Ember of Rage
 ----		252729, -- Cosmic Ray
 ----		252634, -- Cosmic Smash
@@ -2342,6 +2342,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 			["isFadeOut"] = false,
 			["isFlashWhenLow"] = false,
 			["showShieldAbsorb"] = true,
+			["showShieldAtMaxHealth"] = false,
 			["isPumpDivineAegis"] = false,
 			["WARNING"] = {
 				["R"] = 0.5, ["G"] = 0.2,	["B"] = 0.2, ["O"] = 1,

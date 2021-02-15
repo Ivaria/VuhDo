@@ -284,7 +284,8 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<StatusBar name="$parentShBar" inherits="VuhDoStatusBar"> </StatusBar>
+					<StatusBar name="$parentShBar" inherits="VuhDoStatusBar">
+					</StatusBar>
 
 					<StatusBar name="$parentIcBar" inherits="VuhDoStatusBar">
 						<Frames>
