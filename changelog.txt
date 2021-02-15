@@ -11,6 +11,7 @@ Known issues:
   
 Bugfixes:  
 -- Added workaround for bug in Blizzard API UnitPhaseReason  
+-- Fixed shield bar display when health bar is inverted  
   
   
 Improvements:  

@@ -46,6 +46,7 @@ local VUHDO_getRedGreenForDistance;
 local VUHDO_getTexCoordsForCell;
 local VUHDO_getUnitGroupPrivileges;
 local VUHDO_getLatestCustomDebuff;
+local VUHDO_getUnitOverallShieldRemain;
 
 local sIsInverted;
 local sBarColors;
@@ -87,6 +88,7 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getTexCoordsForCell = _G["VUHDO_getTexCoordsForCell"];
 	VUHDO_getUnitGroupPrivileges = _G["VUHDO_getUnitGroupPrivileges"];
 	VUHDO_getLatestCustomDebuff = _G["VUHDO_getLatestCustomDebuff"];
+	VUHDO_getUnitOverallShieldRemain = _G["VUHDO_getUnitOverallShieldRemain"];
 
 	sIsInverted = VUHDO_INDICATOR_CONFIG["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
@@ -713,7 +715,7 @@ end
 local tHealth, tHealthMax;
 local function VUHDO_statusHealthValidator(anInfo, _)
 	if sIsInverted then
-		return true, nil, anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]), -1,
+		return true, nil, anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]) + VUHDO_getUnitOverallShieldRemain(anInfo["unit"]), -1,
 			anInfo["healthmax"], nil, anInfo["health"];
 	else
 		return true, nil, anInfo["health"], -1,
