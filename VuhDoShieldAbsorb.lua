@@ -293,7 +293,6 @@ end
 
 
 --
-local tSummeLeft;
 function VUHDO_getUnitOverallShieldRemain(aUnit)
 	return UnitGetTotalAbsorbs(aUnit) or 0;
 end

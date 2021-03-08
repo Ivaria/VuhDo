@@ -15,6 +15,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added overshield bar to display excess absorption amount  
   
   
 --------------------------------------------------------------  
