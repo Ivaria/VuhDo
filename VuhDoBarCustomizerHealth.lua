@@ -49,6 +49,7 @@ local UnitIsUnit = UnitIsUnit;
 local pairs = pairs;
 local twipe = table.wipe;
 local format = format;
+local min = math.min;
 local sIsOverhealText;
 local sIsAggroText;
 local sIsInvertGrowth;
@@ -211,8 +212,8 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota, aAmountInc)
 	tAbsorbAmount = tOverallShieldRemain / tInfo["healthmax"];
 	
 	tHealthDeficit = tInfo["healthmax"] - tInfo["health"];
-	tVisibleAmountInc = (aAmountInc <= tHealthDeficit) and aAmountInc or 0;
-	tOverallShieldRemain = (tOverallShieldRemain < tInfo["healthmax"]) and tOverallShieldRemain or tInfo["healthmax"];
+	tVisibleAmountInc = min(aAmountInc, tHealthDeficit);
+	tOverallShieldRemain = min(tOverallShieldRemain, tInfo["healthmax"]);
 
 	tOvershieldBarSizePercent = (tOverallShieldRemain - tHealthDeficit + tVisibleAmountInc) / tInfo["healthmax"]; 
 	tOvershieldBarOffsetPercent = (tHealthDeficit - tVisibleAmountInc) / tInfo["healthmax"]; 
@@ -284,7 +285,7 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota, aAmountInc)
 
 				tOvershieldBar:SetHeight(tOvershieldBarSize);
 				tOvershieldBar:SetTexCoord(0, tHealthBarWidth / tOvershieldBar.tileSize, 0, tOvershieldBarSize / tOvershieldBar.tileSize);
-			else -- not sIsInvertGrowth and tOrientation == "VERTICAL_INV"
+			else -- (not sIsInvertGrowth and tOrientation == "VERTICAL_INV") or (sIsInvertGrowth and tOrientation == "VERTICAL")
 				-- VUHDO_STATUSBAR_TOP_TO_BOTTOM
 				tOvershieldBarSize = tOvershieldBarSizePercent * tHealthBarHeight;
 				tOvershieldBarOffset = tOvershieldBarOffsetPercent * tHealthBarHeight;
