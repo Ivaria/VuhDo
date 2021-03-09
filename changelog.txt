@@ -18,6 +18,7 @@ Bugfixes:
 Improvements:  
 -- Added overshield bar to display excess absorption amount  
 -- Added Shaman 'Mana Tide Totem' to Buff Watch  
+-- Bump TOC interface for 9.0.5  
   
   
 --------------------------------------------------------------  
