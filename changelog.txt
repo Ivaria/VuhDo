@@ -16,6 +16,7 @@ Bugfixes:
   
 Improvements:  
 -- Added overshield bar to display excess absorption amount  
+-- Added Shaman 'Mana Tide Totem' to Buff Watch  
   
   
 --------------------------------------------------------------  
