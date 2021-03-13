@@ -715,8 +715,13 @@ end
 local tHealth, tHealthMax;
 local function VUHDO_statusHealthValidator(anInfo, _)
 	if sIsInverted then
-		return true, nil, anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]) + VUHDO_getUnitOverallShieldRemain(anInfo["unit"]), -1,
-			anInfo["healthmax"], nil, anInfo["health"];
+		if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
+			tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]) + VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
+		else
+			tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]);
+		end
+
+		return true, nil, tHealth, -1, anInfo["healthmax"], nil, anInfo["health"];
 	else
 		return true, nil, anInfo["health"], -1,
 			anInfo["healthmax"], nil, anInfo["health"];
