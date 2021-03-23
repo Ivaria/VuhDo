@@ -747,6 +747,14 @@ end
 
 
 --
+local function VUHDO_statusPowerTankOnlyValidator(anInfo, _)
+	return (anInfo["powertype"] ~= 0 and anInfo["role"] == VUHDO_ID_MELEE_TANK), nil, anInfo["power"], -1,
+		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[anInfo["powertype"] or 0]);
+end
+
+
+
+--
 local function VUHDO_statusOtherPowersValidator(anInfo, _)
 	return anInfo["powertype"] ~= 0, nil, anInfo["power"], -1,
 		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[anInfo["powertype"] or 0]);
@@ -1683,6 +1691,14 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
 		["no_color"] = true,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_DC },
+	},
+
+	["STATUS_POWER_TANK_ONLY"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_STATUS_POWER_TANK_ONLY,
+		["validator"] = VUHDO_statusPowerTankOnlyValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR,
+		["no_color"] = true,
+		["interests"] = { VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC },
 	},
 
 	["STATUS_OTHER_POWERS"] = {
