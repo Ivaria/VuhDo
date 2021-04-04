@@ -21,7 +21,8 @@ local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
 local GetSpellInfo = GetSpellInfo;
 local SetMapToCurrentZone = SetMapToCurrentZone;
-local VUHDO_unitAlternatePowerInfo = VUHDO_unitAlternatePowerInfo;
+local UnitPowerBarID = UnitPowerBarID;
+local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID;
 local WorldMapFrame = WorldMapFrame;
 local GetMouseFocus = GetMouseFocus;
 local GetPlayerFacing = GetPlayerFacing;
@@ -37,10 +38,6 @@ local floor = floor;
 local pairs = pairs;
 local type = type;
 local abs = abs;
-
--- Number of seconds into the future to look for incoming heals
--- This ensures we only include the next incoming tick of HoTs
-local VUHDO_INCOMING_HEAL_WINDOW = 4;
 
 local sEmpty = { };
 setmetatable(sEmpty, { __newindex = function(aTable, aKey, aValue) VUHDO_xMsg("WARNING: newindex on dummy array: ", aKey, aValue); end });
@@ -283,13 +280,32 @@ local VUHDO_isTargetInRange = VUHDO_isTargetInRange;
 
 
 
+-- FIXME: workaround for Blizzard API bug: https://github.com/Stanzilla/WoWUIBugs/issues/49
+function VUHDO_unitPhaseReason(aUnit) 
+
+	if not aUnit then
+		return nil;
+	end
+
+	local tPhaseReason = UnitPhaseReason(aUnit);
+
+	if (tPhaseReason == Enum.PhaseReason.WarMode or tPhaseReason == Enum.PhaseReason.ChromieTime) and UnitIsVisible(aUnit) then
+		return nil;
+	else
+		return tPhaseReason;
+	end
+
+end
+
+
+
 -- returns whether or not a unit is in range
 function VUHDO_isInRange(aUnit)
 	if "player" == aUnit then 
 		return true;
 	elseif VUHDO_isSpecialUnit(aUnit) then 
 		return VUHDO_isTargetInRange(aUnit);
-	elseif VUHDO_unitIsWarModePhased(aUnit) or not UnitInPhase(aUnit) then
+	elseif VUHDO_unitPhaseReason(aUnit) then
 		return false;
 	elseif (sIsGuessRange) then 
 		return UnitInRange(aUnit);
@@ -314,7 +330,7 @@ function VUHDO_textParse(aString)
 		aString = gsub(aString, "  ", " ");
 	end
 
-	return VUHDO_splitString(aString, " ");
+	return VUHDO_splitStringQuoted(aString);
 end
 
 
@@ -339,6 +355,43 @@ function VUHDO_splitString(aText, aChar)
 end
 
 
+
+function VUHDO_splitStringQuoted(aText) 
+
+	if VUHDO_strempty(aText) then
+		return { "" };
+	end
+
+	local tSplit = {};
+	local tPrevToken, tQuoteToken; 
+
+	for tToken in string.gmatch(aText, "%S+") do 
+		local tStartQuote = string.match(tToken, [[^(['"])]]); 
+		local tEndQuote = string.match(tToken, [[(['"])$]]);
+
+		if tStartQuote and not tEndQuote and not tQuoteToken then 
+			tPrevToken = tToken; 
+			tQuoteToken = tStartQuote; 
+		elseif tPrevToken and tQuoteToken == tEndQuote then 
+			tToken = tPrevToken .. ' ' .. tToken;
+
+			tPrevToken = nil;
+			tQuoteToken = nil;
+		elseif tPrevToken then 
+			tPrevToken = tPrevToken .. ' ' .. tToken; 
+		end 
+
+		if not tPrevToken then
+			tToken = string.gsub(tToken, [[^(['"])]], "");
+			tToken = string.gsub(tToken, [[(['"])$]], "");
+
+			table.insert(tSplit, tToken); 
+		end
+	end
+
+	return tSplit;
+
+end
 
 -- returns true if player currently is in a battleground
 local tType;
@@ -478,8 +531,8 @@ end
 
 --
 function VUHDO_isSpellKnown(aSpellName)
-	if not aSpellName then 
-		return false; 
+	if not aSpellName then
+		return false;
 	end
 
 	return (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
@@ -551,7 +604,7 @@ end
 local tResurrectionSpells;
 local tKnownResurrectionSpells;
 function VUHDO_getResurrectionSpells()
-	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[VUHDO_getSpecialization() or 0];
+	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[GetSpecialization() or 0];
 
 	if tResurrectionSpells then
 		tKnownResurrectionSpells = { };
@@ -763,8 +816,16 @@ end
 
 --
 function VUHDO_isAltPowerActive(aUnit)
-	local tBarType, _, _, _, _, tIsHideFromOthers = VUHDO_unitAlternatePowerInfo(aUnit);
-	return tBarType and (not tIsHideFromOthers or "player" == aUnit);
+
+	local tBarId = UnitPowerBarID(aUnit);
+	local tBarInfo = GetUnitPowerBarInfoByID(tBarId);
+
+	if tBarInfo then 
+		return tBarInfo.barType and (not tBarInfo.hideFromOthers or "player" == aUnit);
+	else
+		return false;
+	end
+
 end
 
 
