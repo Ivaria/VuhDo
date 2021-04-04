@@ -39,6 +39,10 @@ local pairs = pairs;
 local type = type;
 local abs = abs;
 
+-- Number of seconds into the future to look for incoming heals
+-- This ensures we only include the next incoming tick of HoTs
+local VUHDO_INCOMING_HEAL_WINDOW = 4;
+
 local sEmpty = { };
 setmetatable(sEmpty, { __newindex = function(aTable, aKey, aValue) VUHDO_xMsg("WARNING: newindex on dummy array: ", aKey, aValue); end });
 
@@ -284,6 +288,10 @@ local VUHDO_isTargetInRange = VUHDO_isTargetInRange;
 function VUHDO_unitPhaseReason(aUnit) 
 
 	if not aUnit then
+		return nil;
+	end
+
+	if not UnitPhaseReason then
 		return nil;
 	end
 
@@ -816,6 +824,10 @@ end
 
 --
 function VUHDO_isAltPowerActive(aUnit)
+
+	if not UnitPowerBarID or not GetUnitPowerBarInfoByID then
+		return false;
+	end
 
 	local tBarId = UnitPowerBarID(aUnit);
 	local tBarInfo = GetUnitPowerBarInfoByID(tBarId);
