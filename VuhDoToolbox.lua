@@ -604,7 +604,7 @@ end
 local tResurrectionSpells;
 local tKnownResurrectionSpells;
 function VUHDO_getResurrectionSpells()
-	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[GetSpecialization() or 0];
+	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[VUHDO_getSpecialization() or 0];
 
 	if tResurrectionSpells then
 		tKnownResurrectionSpells = { };
