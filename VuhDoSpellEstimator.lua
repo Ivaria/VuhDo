@@ -29,7 +29,6 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.ECHO_OF_LIGHT] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.SERENDIPITY] = { ["isHot"] = true, ["nodefault"] = true	},
 	[VUHDO_SPELL_ID.ATONEMENT] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true },
 
 	-- Shaman
 	[VUHDO_SPELL_ID.RIPTIDE] = { ["isHot"] = true	},
