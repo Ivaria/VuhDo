@@ -851,7 +851,19 @@ function VUHDO_loadDefaultConfig()
 	end
 
 	-- add relevant custom debuffs for raid bosses
+	-- 1.13.2 - Classic
+	VUHDO_addCustomSpellIds(45, 
+		-- [[ MolTon Core ]]
+		-- Baron Geddon
+		20475   -- Living Bomb
+	);
+	
 	-- TODO: Naxxramas left off at 47, start TBCC at 48
+--	VUHDO_addCustomSpellIds(48, 
+--		-- [[ Gruul's Lair ]]
+--		-- Gruul
+--		33813  -- Hurtful Strike (Tank)
+--	);
 
 	local debuffRemovalList = {};
 
