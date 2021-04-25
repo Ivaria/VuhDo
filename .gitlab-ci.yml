@@ -16,25 +16,18 @@ luacheck:
     - luacheck . -q && echo "Lua check passed!" || echo "Lua check failed!"
 
 package:
-  stage: build
+  <<: *releases
+  stage: deploy
   only:
     - tags
     - web
   script:
     - cd .release
     - chmod +x ./release.sh
-    - ./release.sh -d
+    - ./release.sh
   artifacts:
     paths:
       - .release/VuhDo/
       - .release/VuhDoOptions/
       - .release/*.zip
   
-upload:
-  <<: *releases
-  stage: deploy
-  script:
-    - cd .release
-    - chmod +x ./release.sh
-    - ./release.sh -ocelz
-

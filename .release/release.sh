@@ -2252,11 +2252,6 @@ if [ -z "$skip_zipfile" ]; then
 	upload_wago=$( [[ -z "$skip_upload" && -n "$wagoid" && -n "$wago_token" ]] && echo true )
 	upload_github=$( [[ -z "$skip_upload" && -n "$tag" && -n "$project_github_slug" && -n "$github_token" ]] && echo true )
 
-	echo "Upload to CurseForge: $upload_curseforge"
-	echo "Upload to WoWInterface: $upload_wowinterface"
-	echo "Upload to Wago: $upload_wago"
-	echo "Upload to GitHub: $upload_github"
-
 	if [[ -n "$upload_curseforge" || -n "$upload_wowinterface" || -n "$upload_github" || -n "$upload_wago" ]] && ! hash jq &>/dev/null; then
 		echo "Skipping upload because \"jq\" was not found."
 		echo
