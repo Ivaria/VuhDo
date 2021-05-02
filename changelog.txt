@@ -11,6 +11,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed HoT icon clock sweep for auras with zero duration  
+-- Fixed entry selection of comboboxes with over 100 options  
   
   
 Improvements:  
