@@ -1,10 +1,17 @@
-## Interface: 11306
+## Interface: 11307
+
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
-## Version: 3.117-classic
+## Version: 3.118-classic
 ## Notes: VuhDo Options
+
+## X-Curse-Project-ID: 7950
+## X-WoWI-ID: 24919
+## X-Wago-ID: yQKynG71
+
 ## SavedVariables: VUHDO_OPTIONS_SETTINGS
 ## SavedVariablesPerCharacter: VUHDO_GLOBAL_ICONS, VUHDO_GI_SCAN_IDX
+
 ## DefaultState: Enabled
 ## Dependencies: VuhDo
 ## LoadOnDemand: 0

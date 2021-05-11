@@ -8,6 +8,7 @@ stages:
     
 before_script:
   - apk add --no-cache bash curl git subversion zip jq luacheck
+  - apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted pandoc
 
 luacheck:
   stage: build
@@ -15,49 +16,18 @@ luacheck:
     - luacheck . -q && echo "Lua check passed!" || echo "Lua check failed!"
 
 package:
-  stage: build
+  <<: *releases
+  stage: deploy
   only:
     - tags
     - web
   script:
     - cd .release
     - chmod +x ./release.sh
-    - ./release.sh -d
+    - ./release.sh
   artifacts:
     paths:
       - .release/VuhDo/
       - .release/VuhDoOptions/
       - .release/*.zip
   
-curseforge:
-  <<: *releases
-  stage: deploy
-  environment:
-    name: CurseForge
-    url: https://www.curseforge.com/wow/addons/vuhdo
-  script:
-    - cd .release
-    - chmod +x ./release.sh
-    - ./release.sh -ocelzWHG
-
-wowinterface:
-  <<: *releases
-  stage: deploy
-  environment:
-    name: WoWInterface
-    url: https://www.wowinterface.com/downloads/info14239-VuhDo.html
-  script:
-    - cd .release
-    - chmod +x ./release.sh
-    - ./release.sh -ocelzLHG
-
-gitlab:
-  <<: *releases
-  stage: deploy
-  environment:
-    name: GitLab
-    url: https://gitlab.vuhdo.io/vuhdo/vuhdo/releases
-  script:
-    - cd .release
-    - chmod +x ./release.sh
-    - echo ./release.sh -ocelzLWH
