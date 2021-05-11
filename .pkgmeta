@@ -13,8 +13,6 @@ externals:
     Libs/AceAddon-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceAddon-3.0
     Libs/AceGUI-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceGUI-3.0
     Libs/AceConfig-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceConfig-3.0
-    Libs/AceBucket-3.0: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
-    Libs/AceEvent-3.0: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
     Libs/AceComm-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceComm-3.0
     Libs/AceLocale-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceLocale-3.0
     Libs/AceTimer-3.0: svn://svn.wowace.com/wow/ace3/mainline/trunk/AceTimer-3.0
@@ -27,8 +25,13 @@ externals:
     Libs/LibDBIcon-1.0: svn://svn.wowace.com/wow/libdbicon-1-0/mainline/trunk/LibDBIcon-1.0
     Libs/LibCustomGlow-1.0:
         url: https://github.com/Stanzilla/LibCustomGlow.git
+    Libs/NickTag-1.0:
+        url: https://github.com/Tercioo/NickTag-1.0
+
+    Libs/AceBucket-3.0: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
+    Libs/AceEvent-3.0: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
     Libs/LibClassicDurations: https://repos.curseforge.com/wow/libclassicdurations
-    Libs/LibHealComm-4.0: https://repos.wowace.com/wow/libhealcomm-4-0
+    Libs/LibHealComm-4.0: https://github.com/Azilroka/LibHealComm-4.0.git
     Libs/!LibTotemInfo: https://github.com/SwimmingTiger/LibTotemInfo.git
 
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
