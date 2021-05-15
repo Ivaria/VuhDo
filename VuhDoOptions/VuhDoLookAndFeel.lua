@@ -352,7 +352,7 @@ function VUHDO_lnfComboItemOnLeave(aComboItem)
 	if aComboItem.parentCombo["isScrollable"] then aComboItem:SetBackdropColor(0, 0, 0, 0);
 	else aComboItem:SetBackdropColor(1, 1, 1, 1); end
 
-	tComboBox = aComboItem.parentCombo;
+	local tComboBox = aComboItem.parentCombo;
 	if not tComboBox["isMulti"] then
 		_G[aComboItem:GetName() .. "Icon"]:SetScale(1);
 		_G[aComboItem:GetName() .. "Icon"]:SetPoint("RIGHT", aComboItem:GetName(), "RIGHT", -6, 0);
