@@ -364,7 +364,7 @@ end
 --
 local function VUHDO_hideAllComponentExtensions(aComponent)
 	local tRootPane = aComponent:GetParent():GetParent();
-	local tSubPanel, tComponent;
+	local tSubPanel, tComponent, tSelectPanel;
 
 	for tCnt = 1, select("#", tRootPane:GetChildren()) do
 		tSubPanel = select(tCnt, tRootPane:GetChildren());
