@@ -112,7 +112,7 @@ BACKDROP_VUHDO_PANEL_APPEND_BOTTOM_16_16_1111 = {
 	insets = {  left = 1, right = 1, top = 1, bottom = 1 },
 };
 
-
+local tIsInCustomFunction = false;
 
 --
 function VUHDO_lnfCheckButtonOnLoad(aCheckButton)
@@ -999,7 +999,6 @@ local tTexture;
 local tTable;
 local tFunction;
 local tArrayModel;
-local tIsInCustomFunction = false;
 function VUHDO_lnfComboSetSelectedValue(aComboBox, aValue, anIsEditBox)
 	tTable = aComboBox:GetAttribute("combo_table");
 	if not tTable then return; end
