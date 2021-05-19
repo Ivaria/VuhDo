@@ -402,6 +402,8 @@ local function VUHDO_makeHotColor(...)
 	tColor["isClock"] = false;
 	tColor["countdownMode"] = 1;
 	tColor["useOpacity"] = false;
+	tColor["isFadeOut"] = false;
+	tColor["isFlashWhenLow"] = false;
 	return tColor;
 end
 
@@ -2345,8 +2347,6 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["HOTS"] = {
 			["useColorText"] = true,
 			["useColorBack"] = true,
-			["isFadeOut"] = false,
-			["isFlashWhenLow"] = false,
 			["showShieldAbsorb"] = true,
 			["isPumpDivineAegis"] = false,
 			["WARNING"] = {
