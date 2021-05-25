@@ -1,7 +1,7 @@
 local _;
 
 -- For initializing the minimap
-VUHDO_MM_SETTINGS = { };
+VUHDO_MM_SETTINGS = VUHDO_MM_SETTINGS or { };
 
 VUHDO_LibSharedMedia = LibStub("LibSharedMedia-3.0");
 VUHDO_LibDataBroker = LibStub("LibDataBroker-1.1", true);
@@ -230,7 +230,7 @@ end
 function VUHDO_initShowMinimap()
 
 	if VUHDO_LibDataBroker and VUHDO_LibDBIcon then
-		if VUHDO_CONFIG["SHOW_MINIMAP"] then
+		if not VUHDO_MM_SETTINGS.hide then
 			VUHDO_LibDBIcon:Show("VuhDo");
 		else
 			VUHDO_LibDBIcon:Hide("VuhDo");
