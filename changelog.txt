@@ -13,11 +13,21 @@ Known issues:
 Bugfixes:  
 -- Fixed Shaman spell 'Earth Shield' in Buff Watch  
 -- Fixed Shaman spell 'Lightning Shield' in Buff Watch  
+-- Fixed Shaman spell 'Fire Elemental Totem' in Buff Watch  
+-- Fixed Shaman spell 'Grounding Totem' in Buff Watch  
+-- Fixed Shaman spell 'Earth Elemental Totem' in Buff Watch  
+-- Removed Shaman spell 'Windwalk Totem' from Buff Watch  
+-- Removed Shaman spell 'Capacitor Totem' from Buff Watch  
+-- Removed Shaman spell 'Spirit Link Totem' from Buff Watch  
+-- Removed Shaman spell 'Healing Tide Totem' from Buff Watch  
+-- Removed Shaman spell 'Stone Bulwark Totem' from Buff Watch  
+-- Removed Shaman spell 'Earthgrab Totem' from Buff Watch  
   
   
 Improvements:  
 -- Added Shaman spell 'Water Shield' to Buff Watch  
 -- Added Shaman spell 'Rockbiter Weapon' to Buff Watch  
+-- Added Shaman spell 'Mana Tide Totem' to Buff Watch  
   
   
 --------------------------------------------------------------  
