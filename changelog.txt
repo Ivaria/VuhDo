@@ -11,9 +11,13 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Shaman spell 'Earth Shield' in Buff Watch  
+-- Fixed Shaman spell 'Lightning Shield' in Buff Watch  
   
   
 Improvements:  
+-- Added Shaman spell 'Water Shield' to Buff Watch  
+-- Added Shaman spell 'Rockbiter Weapon' to Buff Watch  
   
   
 --------------------------------------------------------------  
