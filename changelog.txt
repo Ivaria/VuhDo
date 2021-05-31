@@ -28,6 +28,7 @@ Improvements:
 -- Added Shaman spell 'Water Shield' to Buff Watch  
 -- Added Shaman spell 'Rockbiter Weapon' to Buff Watch  
 -- Added Shaman spell 'Mana Tide Totem' to Buff Watch  
+-- Added Priest spell 'Touch of Weakness' to Buff Watch  
   
   
 --------------------------------------------------------------  

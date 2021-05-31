@@ -182,6 +182,7 @@ VUHDO_SPELL_ID.BUFF_VAMPIRIC_EMBRACE            = VUHDO_getSpellInfo(15286);
 VUHDO_SPELL_ID.BUFF_LEVITATE                    = VUHDO_getSpellInfo(1706);
 VUHDO_SPELL_ID.BUFF_INNER_FIRE                  = VUHDO_getSpellInfo(588);
 VUHDO_SPELL_ID.BUFF_SHADOWGUARD                 = VUHDO_getSpellInfo(18137);
+VUHDO_SPELL_ID.BUFF_TOUCH_OF_WEAKNESS           = VUHDO_getSpellInfo(19266);
 
 
 -- Shaman
