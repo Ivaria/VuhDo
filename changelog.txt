@@ -11,6 +11,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Paladin spell 'Blessing of Wisdom' in Buff Watch  
 -- Fixed Shaman spell 'Earth Shield' in Buff Watch  
 -- Fixed Shaman spell 'Lightning Shield' in Buff Watch  
 -- Fixed Shaman spell 'Fire Elemental Totem' in Buff Watch  
@@ -29,6 +30,7 @@ Improvements:
 -- Added Shaman spell 'Rockbiter Weapon' to Buff Watch  
 -- Added Shaman spell 'Mana Tide Totem' to Buff Watch  
 -- Added Priest spell 'Touch of Weakness' to Buff Watch  
+-- Added Paladin spell 'Blessing of Might' to Buff Watch  
   
   
 --------------------------------------------------------------  
