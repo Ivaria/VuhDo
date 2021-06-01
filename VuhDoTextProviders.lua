@@ -173,8 +173,6 @@ local function VUHDO_kiloValidator(anInfo, aValue)
 	
 	if aValue > 100 then
 		return VUHDO_round(aValue * 0.001, 1) or "";
-	elseif aValue > 0 then
-		return aValue;
 	end
 
 end
