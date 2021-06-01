@@ -1,5 +1,6 @@
 ----------------------------------------------------
 local UnitGetIncomingHeals = VUHDO_unitGetIncomingHeals;
+local UnitGetIncomingHealsNum = VUHDO_unitGetIncomingHealsNum;
 local sIsOthers, sIsOwn, sIsNoInc;
 function VUHDO_healCommAdapterInitLocalOverrides()
 	sIsOthers = VUHDO_CONFIG["SHOW_INCOMING"];
@@ -10,6 +11,7 @@ end
 
 
 local VUHDO_INC_HEAL = { };
+local VUHDO_INC_HEAL_NUM = { };
 
 
 
@@ -18,7 +20,9 @@ function VUHDO_getIncHealOnUnit(aUnit)
 	return VUHDO_INC_HEAL[aUnit] or 0;
 end
 
-
+function VUHDO_getIncHealNum(aUnit)
+	return VUHDO_INC_HEAL_NUM[aUnit] or 0;
+end
 
 --
 local tAllIncoming;
@@ -35,4 +39,6 @@ function VUHDO_determineIncHeal(aUnit)
 	else
 		VUHDO_INC_HEAL[aUnit] = UnitGetIncomingHeals(aUnit, "player");
 	end
+
+	VUHDO_INC_HEAL_NUM[aUnit] = UnitGetIncomingHealsNum(aUnit);
 end

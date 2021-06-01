@@ -585,6 +585,14 @@ end
 
 
 --
+local function VUHDO_incomingHealNumValidator(anInfo, someCustom)
+	tNumInCluster = VUHDO_getIncHealNum(anInfo["unit"]);
+	return tNumInCluster >= someCustom["custom"][1], nil, -1, tNumInCluster, -1;
+end
+
+
+
+--
 local tNumInCluster;
 local function VUHDO_numInClusterValidator(anInfo, someCustom)
 	tNumInCluster = VUHDO_getNumInUnitCluster(anInfo["unit"]);
@@ -1617,6 +1625,13 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_SECONDS,
 		["updateCyclic"] = true,
 		["interests"] = { },
+	},
+	
+	["INCOMING_HEAL_NUM"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_INCOMING_HEAL_NUM,
+		["validator"] = VUHDO_incomingHealNumValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_PLAYERS,
+		["interests"] = { VUHDO_UPDATE_INC },
 	},
 
 	["NUM_CLUSTER"] = {

@@ -1201,6 +1201,27 @@ end
 
 
 
+function VUHDO_unitGetIncomingHealsNum(aUnit)
+
+	if not aUnit then
+		return 0;
+	end
+
+	if not UnitGetIncomingHealsNum then
+		if VUHDO_LibHealComm then
+			local tTargetGUID = UnitGUID(aUnit);
+			return (VUHDO_LibHealComm:GetNumHeals(tTargetGUID) or 0);
+		else
+			return 0;
+		end
+	else
+		return UnitGetIncomingHealsNum(aUnit, aCasterUnit);
+	end
+
+end
+
+
+
 function VUHDO_unitGetTotalAbsorbs(...)
 
 	if not UnitGetTotalAbsorbs then

@@ -1,4 +1,4 @@
-﻿
+
 -- @EXACT = true: Translation has to be the exact(!) match in the clients language,
 --                beacause it carries technical semantics
 -- @EXACT = false: Translation can be done freely, because text is only descriptive
@@ -283,6 +283,7 @@ VUHDO_I18N_BOUQUET_DEBUFF_BAR_COLOR = "Flag: Debuff, configured";
 VUHDO_I18N_DEF_BOUQUET_BAR_HEALTH = "Health Bar: (generic, gradient)";
 VUHDO_I18N_UPDATE_RAID_TARGET = "Flag: Raid target color";
 VUHDO_I18N_BOUQUET_OVERHEAL_HIGHLIGHT = "Color: Overheal Highlighter";
+VUHDO_I18N_BOUQUET_INCOMING_HEAL_NUM = "Color: Incoming Heal Num Indicator";
 VUHDO_I18N_BOUQUET_EMERGENCY_COLOR = "Color: Emergency";
 VUHDO_I18N_BOUQUET_HEALTH_ABOVE = "Flag: Health > %";
 VUHDO_I18N_BOUQUET_RESURRECTION = "Flag: Resurrection";
