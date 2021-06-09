@@ -454,7 +454,7 @@
 						</Anchors>
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="Clock" justifyH="RIGHT" inherits="VuDoDefaultFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_CLOCK" justifyH="RIGHT" inherits="VuDoDefaultFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>
