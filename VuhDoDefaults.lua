@@ -2677,7 +2677,8 @@ function VUHDO_loadDefaultPanelSetup()
 
 		VUHDO_PANEL_SETUP[tPanelNum] = VUHDO_ensureSanity("VUHDO_PANEL_SETUP[" .. tPanelNum .. "]", VUHDO_PANEL_SETUP[tPanelNum], VUHDO_DEFAULT_PER_PANEL_SETUP);
 	end
-
+	
+	VUHDO_upgradePanelSetup(VUHDO_PANEL_SETUP)
 	VUHDO_PANEL_SETUP = VUHDO_ensureSanity("VUHDO_PANEL_SETUP", VUHDO_PANEL_SETUP, VUHDO_DEFAULT_PANEL_SETUP);
 	VUHDO_DEFAULT_PANEL_SETUP = VUHDO_compressAndPackTable(VUHDO_DEFAULT_PANEL_SETUP);
 	VUHDO_DEFAULT_PER_PANEL_SETUP = VUHDO_compressAndPackTable(VUHDO_DEFAULT_PER_PANEL_SETUP);
@@ -2685,7 +2686,25 @@ function VUHDO_loadDefaultPanelSetup()
 	VUHDO_fixHotSettings();
 end
 
-
+-- upgrade the panel setup to a newer version of the data model in a way that
+-- preserves the users setup the best
+function VUHDO_upgradePanelSetup(panelSetup)
+	-- Initialize per-hot setting for flash & fade by using the global setting
+	-- (if it exists) as default
+	local hotColors = panelSetup["BAR_COLORS"]["HOTS"] -- Original location of isFadeOut and isFlashWhenLow
+	local globalFade = hotColors["isFadeOut"]
+	local globalFlash = hotColors["isFlashWhenLow"]
+	local hotColorsSlot
+	for _, hotId in ipairs({1, 2, 3, 4, 5, 9, 10}) do
+		hotColorsSlot = panelSetup["BAR_COLORS"]["HOT" .. hotId] -- New per-hot location
+		if globalFade ~= nil and hotColorsSlot["isFadeOut"] == nil then
+			hotColorsSlot["isFadeOut"] = globalFade
+		end
+		if globalFlash ~= nil and hotColorsSlot["isFlashWhenLow"] == nil then
+			hotColorsSlot["isFlashWhenLow"] = globalFlash
+		end
+	end
+end
 
 local VUHDO_DEFAULT_BUFF_CONFIG = {
   ["VERSION"] = 4,
