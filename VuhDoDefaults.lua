@@ -859,11 +859,99 @@ function VUHDO_loadDefaultConfig()
 	);
 	
 	-- TODO: Naxxramas left off at 47, start TBCC at 48
---	VUHDO_addCustomSpellIds(48, 
---		-- [[ Gruul's Lair ]]
---		-- Gruul
---		33813  -- Hurtful Strike (Tank)
---	);
+	VUHDO_addCustomSpellIds(48, 
+		39171,  -- Mortal Strike
+		29572, -- Mortal Strike
+		8379, -- Disarm
+		30901, -- Sunder Armor
+		29321, -- Fear
+		30530,  -- Fear
+		6016, -- Pierce Armor
+		29574, -- Rend
+		29928, -- Immolate
+		12024, -- Net
+		-- [[ Gruul's Lair ]]
+		-- High King Maulgar
+		16508, -- Intimidating Roar
+		33130, -- Death Coil
+		33129, -- Dark Decay
+		-- Gruul
+		36240, -- Cave In
+		36297, -- Reverberation
+		-- 33813  -- Hurtful Strike (Tank)
+		-- [[Magtheridon's Lair]]
+		-- Magtheridon
+		30757,  -- Conflagration
+		-- [[Karazhan]]
+		29323, -- Absorb Vitality
+		29540, -- Curse of Past Burdens
+		29618, -- Burning Brand
+		29684, -- Shield Slam
+		29546, -- Oath of Fealty
+		29690, -- Drunken Skull Crack
+		29497, -- Jealousy
+		29491, -- Impending Betrayal
+		29490, -- Seduction
+		29505, -- Banshee Shriek
+		29670, -- Ice Tomb
+		29679, -- Bad Poetry
+		29768, -- Overload
+		29882, -- Loose Mana
+		29900, -- Unstable Magic
+		29942, -- Infected Blood
+		-- Attumen the Huntsman
+		29711, -- Knockdown
+		-- 29833, -- Intangible Presence
+		-- Moroes
+		37066, -- Garrote
+		29425, -- Gouge
+		34694, -- Blind
+		13005, -- Hammer of Justice
+		-- Maiden of Virtue
+		29512, -- Holy Ground
+		29511, -- Repentance
+		29522, -- Holy Fire
+		-- Opera Hall
+		30822, -- Poisoned Thrust
+		30890, -- Blinding Passion
+		30761, -- Wide Swipe
+		30752, -- Terrifying Howl
+		31042, -- Shred Armor
+		31046, -- Brain Bash
+		31013, -- Frightened Scream
+		31069, -- Brain Wipe
+		-- Prince Malchezaar
+		39095, -- Amplify Damage
+		30843, -- Enfeeble
+		30898, -- Shadow Word: Pain
+		30854, -- Shadow Word: Pain
+		-- Shade of Aran 
+		29951, -- Blizzard
+		29946, -- Flame Wreath
+		30035, -- Mass Slow
+		29991, -- Chains of Ice
+		29964, -- Dragon's Breath
+		29990, -- Slow
+		-- Terestian Illhoof
+		30115, -- Sacrifice
+		30053, -- Amplify Flames
+		-- Netherspite
+		38637, -- Nether Exhaustion
+		38638, -- Nether Exhaustion
+		38639, -- Nether Exhaustion
+		30421, -- Nether Portal - Perseverence
+		30422, -- Nether Portal - Serenity
+		30423, -- Nether Portal - Dominance
+		-- Nightbane
+		38927, -- Fel Ache
+		30210, -- Smoldering Breath
+		30129, -- Charred Earth
+		25653, -- Tail Sweep
+		30130, -- Distracting Ash
+		36922, -- Bellowing Roar
+		22686 -- Bellowing Roar
+
+	);
 
 	local debuffRemovalList = {};
 
