@@ -859,7 +859,7 @@ function VUHDO_loadDefaultConfig()
 	);
 	
 	-- TODO: Naxxramas left off at 47, start TBCC at 48
-	VUHDO_addCustomSpellIds(48, 
+	VUHDO_addCustomSpellIds(49, 
 		39171,  -- Mortal Strike
 		29572, -- Mortal Strike
 		8379, -- Disarm
