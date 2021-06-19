@@ -12,6 +12,7 @@ Known issues:
 Bugfixes:  
 -- Fixed minimap icon visibility toggle  
 -- Fixed loading of custom debuff settings on profile change  
+-- Fixed combobox last item selection  
   
   
 Improvements:  
