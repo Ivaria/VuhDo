@@ -425,7 +425,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			-- SWING_DAMAGE - the amount of damage is the 12th arg
 			-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
 			-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
-			VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15, anArg4);
+			VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15);
 
 			if VUHDO_INTERNAL_TOGGLES[36] then -- VUHDO_UPDATE_SHIELD
 				-- for SPELL events with _AURA suffixes the amount healed is the 16th arg
