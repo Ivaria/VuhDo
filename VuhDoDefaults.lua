@@ -2138,6 +2138,15 @@ function VUHDO_loadDefaultConfig()
 		-- 334016  -- Unworthy
 	);
 
+	-- 9.1.0 - Shadowlands
+	VUHDO_addCustomSpellIds(51, 
+		-- [[ Sanctum of Domination ]]
+		-- Trash
+		351091, -- Destabilize (heal absorb)
+		-- Sylvanas Windrunner
+		347704  -- Veil of Darkness (heal absorb)
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
