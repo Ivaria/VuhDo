@@ -8,6 +8,9 @@ Known issues:
 --   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
 -- Shield bar is not working due to unavailable Blizzard APIs  
 -- Spell trace only works for known spells in the player's spellbook  
+-- Group roster changes will not be reflected during combat  
+--   Swapping a player between groups during combat will cause  
+--   unpredictable, negative results.  Be warned!  
   
   
 Bugfixes:  
