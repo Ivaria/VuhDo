@@ -38,6 +38,10 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default custom debuffs for Sanctum of Domination raid encounters  
+-- Added Sylvanas 'Veil of Darkness' debuff absorb tracking  
+-- Added Hopebreaker 'Destabilize' debuff absorb tracking  
+-- Bump TOC interface for 9.1.0  
   
   
 --------------------------------------------------------------  
