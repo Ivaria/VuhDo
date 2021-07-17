@@ -2568,10 +2568,16 @@ function VUHDO_loadProfile(aName)
 
 	if (VUHDO_initCustomDebuffComboModel ~= nil) then
 		VUHDO_initCustomDebuffComboModel();
+
+		VuhDoNewOptionsDebuffsCustomStorePanelEditBox:SetText("");
+		VUHDO_customDebuffUpdateEditBox(VuhDoNewOptionsDebuffsCustomStorePanelEditBox);
 	end
 
 	if (VUHDO_initSpellTraceComboModel ~= nil) then
 		VUHDO_initSpellTraceComboModel();
+
+		VuhDoNewOptionsGeneralSpellTraceStorePanelEditBox:SetText("");
+		VUHDO_spellTraceUpdateEditBox(VuhDoNewOptionsGeneralSpellTraceStorePanelEditBox);
 	end
 
 	collectgarbage('collect');
