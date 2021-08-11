@@ -883,6 +883,7 @@ function VUHDO_loadDefaultConfig()
 		-- [[Magtheridon's Lair]]
 		-- Magtheridon
 		30757,  -- Conflagration
+        44032,  -- Mind Exhaustion
 		-- [[Karazhan]]
 		29323, -- Absorb Vitality
 		29540, -- Curse of Past Burdens
@@ -900,6 +901,7 @@ function VUHDO_loadDefaultConfig()
 		29882, -- Loose Mana
 		29900, -- Unstable Magic
 		29942, -- Infected Blood
+        18812, -- Knockdown
 		-- Attumen the Huntsman
 		29711, -- Knockdown
 		-- 29833, -- Intangible Presence
@@ -914,6 +916,7 @@ function VUHDO_loadDefaultConfig()
 		29522, -- Holy Fire
 		-- Opera Hall
 		30822, -- Poisoned Thrust
+        30889, -- Powerful Attraction
 		30890, -- Blinding Passion
 		30761, -- Wide Swipe
 		30752, -- Terrifying Howl
@@ -950,7 +953,14 @@ function VUHDO_loadDefaultConfig()
 		25653, -- Tail Sweep
 		30130, -- Distracting Ash
 		36922, -- Bellowing Roar
-		22686 -- Bellowing Roar
+		22686, -- Bellowing Roar
+		-- [[World boss]]
+		-- Doom Lord Kazzak
+		21063, -- Twisted Reflection
+        32960, -- Mark of Kazzak
+		-- Doomwalker
+        33661, -- Crush Armor
+        32686  -- Earthquake
 
 	);
 
