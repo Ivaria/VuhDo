@@ -114,7 +114,7 @@ local tUnit;
 local tImpact;
 function VUHDO_parseCombatLogEvent(aMsg, aDstGUID, aMsg1, aMsg2, aMsg4)
 	tUnit = VUHDO_RAID_GUIDS[aDstGUID];
-	if not tUnit then return 0; end
+	if not tUnit then return; end
 
 	-- as of patch 7.1 we are seeing empty values on health related events
 	tImpact = tonumber(VUHDO_getTargetHealthImpact(aMsg, aMsg1, aMsg2, aMsg4)) or 0;
