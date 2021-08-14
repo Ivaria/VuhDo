@@ -966,7 +966,7 @@ function VUHDO_loadDefaultConfig()
 
     --  tbcc phase 2
 	VUHDO_addCustomSpellIds(50, 
-		-- [[ Serpentshrine ]]
+		-- [[ Serpentshrine Cavern ]]
 		-- Trash
 		38924,   -- Spore Burst
         39044,   -- Serpentshrine Parasite
@@ -1028,8 +1028,52 @@ function VUHDO_loadDefaultConfig()
         38316,   -- Entangle
         38575,   -- Toxic Spores
         38511,   -- Persuasion
-        38509   -- Shock Blast
-
+        38509,   -- Shock Blast
+        -- [[ Tempest Keep  ]]
+        -- Trash
+        37124,  -- Starfall
+        37122,  -- Domination
+        39077,  -- Hammer of Justice
+        37160,  -- Silence
+        37155,  -- Immolation
+        37118,  -- Shell Shock
+        37120,  -- Fragmentation Bomb
+        37123,  -- Saw Blade
+        37132,  -- Arcane Shock
+        37279,  -- Rain of Fire
+        -- 37133,  -- Arcane Buffet
+        37275,  -- Shadow Word: Pain
+        37276,  -- Mind Flay
+        37263,  -- Blizzard
+        -- Al'ar
+        35383,  -- Flame Patch
+        35410,  -- Melt Armor
+        34121,  -- Flame Buffet
+        35412,  -- Charge
+        -- Void Reaver
+        34190,  -- Arcane Orb
+        -- High Astromancer Solarian
+        33044,  -- Wrath of the Astromancer
+        33045,  -- Wrath of the Astromancer
+        33040,  -- Wrath of the Astromancer
+        33048,  -- Wrath of the Astromancer
+        33049,  -- Wrath of the Astromancer
+        33023,  -- Mark of Solarian
+        -- 33390,  -- Arcane Torrent
+        -- Kael'thas Sunstrider
+        37027,  -- Remote Toy
+        30225,  -- Silence
+        37018,  -- Conflagration
+        36991,  -- Rend
+        36965,  -- Rend
+        --36970,  -- Arcane Burst
+        44863,  -- Bellowing Roar
+        36797,  -- Mind Control
+        36834,  -- Arcane Disruption
+        36482,  -- Armor Disruption
+        36731,  -- Flame Strike
+        36478,  -- Magic Disruption
+        35859  -- Nether Vapor
 	);
 
 	local debuffRemovalList = {};
