@@ -875,7 +875,6 @@ function VUHDO_loadDefaultConfig()
 		33130, -- Death Coil
 		33129, -- Dark Decay
 		33173, -- Greater Polymorph
-
 		-- Gruul
 		36240, -- Cave In
 		36297, -- Reverberation
