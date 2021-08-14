@@ -16,14 +16,18 @@ Known issues:
 Bugfixes:  
 -- Fixed Druid spell 'Thorns' in Buff Watch  
 -- Fixed various Shaman totem spells in Buff Watch  
+-- Fixed combat log based health updates  
   
   
 Improvements:  
+-- Added default custom debuffs for phase 1 raid encounters  
 -- Added Paladin spell 'Righteous Fury' to Buff Watch  
 -- Added Shaman spell 'Windfury' to Buff Watch  
 -- Added Shaman spell 'Grace of Air' to Buff Watch  
 -- Added Shaman spell 'Wrath of Air' to Buff Watch  
 -- Added Shaman spell 'Strength of Earth' to Buff Watch  
+-- Added Mage spell 'Mage Armor' to Buff Watch  
+-- Added Mage spell 'Molten Armor' to Buff Watch  
   
   
 --------------------------------------------------------------  
