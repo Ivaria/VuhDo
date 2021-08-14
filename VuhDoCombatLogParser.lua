@@ -4,6 +4,7 @@ local VUHDO_INTERNAL_TOGGLES = { };
 
 local strsplit = strsplit;
 local pairs = pairs;
+local select = select;
 
 local VUHDO_updateHealth;
 local sCurrentTarget = nil;
@@ -29,14 +30,25 @@ local function VUHDO_addUnitHealth(aUnit, aDelta)
 	tInfo = VUHDO_RAID[aUnit] or tDeadInfo;
 
 	if not tInfo["dead"] then
-		tNewHealth = tInfo["health"] + aDelta;
 
-		if tNewHealth < 0 then tNewHealth = 0;
-		elseif tNewHealth > tInfo["healthmax"]  then tNewHealth = tInfo["healthmax"]; end
+		-- avoid the calculation to be disturbed by the exception data
+		if UnitHealth(aUnit) ~= 0 or tInfo["health"] ~= 0 then
+			tNewHealth = tInfo["health"] + aDelta;
+		else 
+			tNewHealth = tInfo["loghealth"] + aDelta;
+		end
 
+		if tNewHealth < 0 then 
+			tNewHealth = 0;
+		elseif tNewHealth > tInfo["healthmax"] then 
+			tNewHealth = tInfo["healthmax"]; 
+		end
+		
+		tInfo["loghealth"] = tNewHealth;
+		tInfo["updateTime"] = GetTime();
+		
 		if tInfo["health"] ~= tNewHealth then
-			tInfo["health"] = tNewHealth;
-			VUHDO_updateHealth(aUnit, 2); -- VUHDO_UPDATE_HEALTH
+			VUHDO_updateHealth(aUnit, 12); -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
 		end
 	end
 end
