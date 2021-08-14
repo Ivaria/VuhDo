@@ -874,7 +874,7 @@ function VUHDO_loadDefaultConfig()
 		16508, -- Intimidating Roar
 		33130, -- Death Coil
 		33129, -- Dark Decay
-        33173, -- Greater Polymorph
+		33173, -- Greater Polymorph
 		-- Gruul
 		36240, -- Cave In
 		36297, -- Reverberation
@@ -882,7 +882,7 @@ function VUHDO_loadDefaultConfig()
 		-- [[Magtheridon's Lair]]
 		-- Magtheridon
 		30757,  -- Conflagration
-        44032,  -- Mind Exhaustion
+		44032,  -- Mind Exhaustion
 		-- [[Karazhan]]
 		29323, -- Absorb Vitality
 		29540, -- Curse of Past Burdens
@@ -900,7 +900,7 @@ function VUHDO_loadDefaultConfig()
 		29882, -- Loose Mana
 		29900, -- Unstable Magic
 		29942, -- Infected Blood
-        18812, -- Knockdown
+		18812, -- Knockdown
 		-- Attumen the Huntsman
 		29711, -- Knockdown
 		-- 29833, -- Intangible Presence
@@ -915,7 +915,7 @@ function VUHDO_loadDefaultConfig()
 		29522, -- Holy Fire
 		-- Opera Hall
 		30822, -- Poisoned Thrust
-        30889, -- Powerful Attraction
+		30889, -- Powerful Attraction
 		30890, -- Blinding Passion
 		30761, -- Wide Swipe
 		30752, -- Terrifying Howl
@@ -956,11 +956,10 @@ function VUHDO_loadDefaultConfig()
 		-- [[World boss]]
 		-- Doom Lord Kazzak
 		21063, -- Twisted Reflection
-        32960, -- Mark of Kazzak
+		32960, -- Mark of Kazzak
 		-- Doomwalker
-        33661, -- Crush Armor
-        32686  -- Earthquake
-
+		33661, -- Crush Armor
+		32686  -- Earthquake
 	);
 
 	local debuffRemovalList = {};

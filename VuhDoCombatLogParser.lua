@@ -124,7 +124,6 @@ function VUHDO_parseCombatLogEvent(aMsg, aDstGUID, aMsg1, aMsg2, aMsg4)
 		if tUnit == sCurrentTarget then	VUHDO_addUnitHealth("target", tImpact);	end
 		if tUnit == sCurrentFocus then VUHDO_addUnitHealth("focus", tImpact); end
 	end
-	return;
 end
 
 
