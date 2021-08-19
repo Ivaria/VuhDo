@@ -974,7 +974,7 @@ function VUHDO_loadDefaultConfig()
 		38585,   -- Holy Fire
 		38572,   -- Mortal Cleave
 		38603,   -- Corrupt Devotion Aura
-		38635,   -- Rain of Fire
+		-- 38635,   -- Rain of Fire
 		38634,   -- Arcane Lightning
 		39029,   -- Virulent Poison
 		38655,   -- Poison Bolt Volley
@@ -986,19 +986,19 @@ function VUHDO_loadDefaultConfig()
 		38653,   -- Spore Cloud
 		-- Hydross the Unstable
 		38246,   -- Vile Sludge
-		38215,   -- Mark of Hydross - 10%
-		38216,   -- Mark of Hydross - 25%
-		38217,   -- Mark of Hydross - 50%
-		38218,   -- Mark of Hydross - 100%
-		38231,   -- Mark of Hydross - 250%
-		40584,   -- Mark of Hydross - 500%
+		-- 38215,   -- Mark of Hydross - 10%
+		-- 38216,   -- Mark of Hydross - 25%
+		-- 38217,   -- Mark of Hydross - 50%
+		-- 38218,   -- Mark of Hydross - 100%
+		-- 38231,   -- Mark of Hydross - 250%
+		-- 40584,   -- Mark of Hydross - 500%
 		38235,   -- Water Tomb
-		38219,   -- Mark of Corruption - 10%
-		38220,   -- Mark of Corruption - 25%
-		38221,   -- Mark of Corruption - 50%
-		38222,   -- Mark of Corruption - 100%
-		38230,   -- Mark of Corruption - 250%
-		40583,   -- Mark of Corruption - 500%
+		-- 38219,   -- Mark of Corruption - 10%
+		-- 38220,   -- Mark of Corruption - 25%
+		-- 38221,   -- Mark of Corruption - 50%
+		-- 38222,   -- Mark of Corruption - 100%
+		-- 38230,   -- Mark of Corruption - 250%
+		-- 40583,   -- Mark of Corruption - 500%
 		-- The Lurker Below 
 		37284,   -- Scalding Water
 		-- Leotheras the Blind
