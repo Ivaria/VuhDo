@@ -973,7 +973,7 @@ function VUHDO_loadDefaultConfig()
 		38591,   -- Shatter Armor
 		38585,   -- Holy Fire
 		38572,   -- Mortal Cleave
-		38603,   -- Corrupt Devotion Aura
+		-- 38603,   -- Corrupt Devotion Aura
 		-- 38635,   -- Rain of Fire
 		38634,   -- Arcane Lightning
 		39029,   -- Virulent Poison
@@ -984,6 +984,7 @@ function VUHDO_loadDefaultConfig()
 		39042,   -- Rampant Infection
 		38652,   -- Spore Cloud
 		38653,   -- Spore Cloud
+		37641,   -- Whirlwind
 		-- Hydross the Unstable
 		38246,   -- Vile Sludge
 		-- 38215,   -- Mark of Hydross - 10%
