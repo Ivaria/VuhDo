@@ -1,4 +1,4 @@
-Get [VuhDo release v3.125](https://www.curseforge.com/wow/addons/vuhdo/download/3370058) now with support for patch 9.1.0 Chains of Domination!
+Get [VuhDo release v3.126](https://www.curseforge.com/wow/addons/vuhdo/download/3439198) now with support for patch 9.1.0 Chains of Domination!
 
 To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
