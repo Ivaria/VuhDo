@@ -974,7 +974,7 @@ function VUHDO_loadDefaultConfig()
 		38585,   -- Holy Fire
 		38572,   -- Mortal Cleave
 		-- 38603,   -- Corrupt Devotion Aura
-		-- 38635,   -- Rain of Fire
+		38635,   -- Rain of Fire
 		38634,   -- Arcane Lightning
 		39029,   -- Virulent Poison
 		38655,   -- Poison Bolt Volley
