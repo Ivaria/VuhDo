@@ -15,6 +15,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Disable use of UnitGetIncomingHeals API until Blizzard hotfix  
   
   
 Improvements:  

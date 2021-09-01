@@ -1178,23 +1178,19 @@ function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
 		return 0;
 	end
 
-	if not UnitGetIncomingHeals then
-		if VUHDO_LibHealComm then
-			local tTargetGUID = UnitGUID(aUnit);
+	if VUHDO_LibHealComm then
+		local tTargetGUID = UnitGUID(aUnit);
 
-			if aCasterUnit then
-				local tCasterGUID = UnitGUID(aCasterUnit);
+		if aCasterUnit then
+			local tCasterGUID = UnitGUID(aCasterUnit);
 
 
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-			else
-				return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-			end
+			return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 		else
-			return 0;
+			return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 		end
 	else
-		return UnitGetIncomingHeals(aUnit, aCasterUnit);
+		return 0;
 	end
 
 end
