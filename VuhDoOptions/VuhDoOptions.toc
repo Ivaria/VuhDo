@@ -1,8 +1,8 @@
-## Interface: 20501
+## Interface: 20502
 
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
-## Version: 3.126-tbcc
+## Version: 3.127-tbcc
 ## Notes: VuhDo Options
 
 ## X-Curse-Project-ID: 7950
