@@ -458,12 +458,12 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
  			VUHDO_updateHealth(anArg1, 2);
  		end
 
---[[	elseif "UNIT_HEAL_PREDICTION" == anEvent then
+	elseif "UNIT_HEAL_PREDICTION" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
 			VUHDO_updateHealth(anArg1, 9); -- VUHDO_UPDATE_INC
 			VUHDO_updateBouquetsForEvent(anArg1, 9); -- VUHDO_UPDATE_ALT_POWER
 		end
-]];
+
 	elseif "UNIT_POWER_UPDATE" == anEvent or "UNIT_POWER_FREQUENT" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 			if "CHI" == anArg2 then
@@ -990,8 +990,8 @@ function VUHDO_updateGlobalToggles()
 		= (VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_TARGET"])
 		or VUHDO_isModelConfigured(VUHDO_ID_TARGET);
 
---	VUHDO_UnRegisterEvent(VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"],
---		"UNIT_HEAL_PREDICTION");
+	VUHDO_UnRegisterEvent(VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"],
+		"UNIT_HEAL_PREDICTION");
 
 	VUHDO_UnRegisterEvent(not VUHDO_CONFIG["IS_READY_CHECK_DISABLED"],
 		"READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED");
@@ -1534,7 +1534,7 @@ local VUHDO_ALL_EVENTS = {
 	"INSPECT_READY",
 	"MODIFIER_STATE_CHANGED",
 	"UNIT_CONNECTION",
---	"UNIT_HEAL_PREDICTION",
+	"UNIT_HEAL_PREDICTION",
 	"UNIT_POWER_BAR_SHOW","UNIT_POWER_BAR_HIDE",
 	"UNIT_NAME_UPDATE",
 	"LFG_PROPOSAL_SHOW", "LFG_PROPOSAL_FAILED", "LFG_PROPOSAL_SUCCEEDED",
@@ -1567,41 +1567,6 @@ function VUHDO_OnLoad(anInstance)
 	end
 
 	VUHDO_ALL_EVENTS = nil;
-
-	if VUHDO_LibHealComm then 
-		local function HealComm_HealUpdated(aEvent, aCasterGUID, aSpellID, aHealType, aEndTime, ...)
-			local tTargets = { n = select("#", ...), ... };
-
-			for i = 1, tTargets.n do
-				local tTarget = VUHDO_RAID_GUIDS[tTargets[i]];
-
-				if (VUHDO_RAID or tEmptyRaid)[tTarget] then -- auch target, focus
-					VUHDO_updateHealth(tTarget, 9); -- VUHDO_UPDATE_INC
-					VUHDO_updateBouquetsForEvent(tTarget, 9); -- VUHDO_UPDATE_ALT_POWER
-				end
-			end
-			
-		end
-		anInstance.HealComm_HealUpdated = HealComm_HealUpdated;
-
-		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealStarted", HealComm_HealUpdated);
-		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealStopped", HealComm_HealUpdated);
-		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealDelayed", HealComm_HealUpdated);
-		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_HealUpdated", HealComm_HealUpdated);
-
-		local function HealComm_HealModified(aEvent, aTargetGUID)
-			local tTarget = VUHDO_RAID_GUIDS[aTargetGUID];
-
-			if (VUHDO_RAID or tEmptyRaid)[tTarget] then -- auch target, focus
-				VUHDO_updateHealth(tTarget, 9); -- VUHDO_UPDATE_INC
-				VUHDO_updateBouquetsForEvent(tTarget, 9); -- VUHDO_UPDATE_ALT_POWER
-			end
-		end
-		anInstance.HealComm_HealModified = HealComm_HealModified;
-
-		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_ModifierChanged", HealComm_HealModified);
-		VUHDO_LibHealComm.RegisterCallback(anInstance, "HealComm_GUIDDisappeared", HealComm_HealModified);
-	end
 
 	SLASH_VUHDO1 = "/vuhdo";
 	SLASH_VUHDO2 = "/vd";
