@@ -857,15 +857,15 @@ function VUHDO_loadDefaultConfig()
 		20475   -- Living Bomb
 	);
 	
-	-- TODO: Naxxramas left off at 47, start TBCC at 48
+	-- TBCC phase 1
 	VUHDO_addCustomSpellIds(49, 
-		39171,  -- Mortal Strike
+		39171, -- Mortal Strike
 		29572, -- Mortal Strike
-		8379, -- Disarm
+		8379,  -- Disarm
 		30901, -- Sunder Armor
 		29321, -- Fear
-		30530,  -- Fear
-		6016, -- Pierce Armor
+		30530, -- Fear
+		6016,  -- Pierce Armor
 		29574, -- Rend
 		29928, -- Immolate
 		12024, -- Net
@@ -962,7 +962,7 @@ function VUHDO_loadDefaultConfig()
 		32686  -- Earthquake
 	);
 
-    --  tbcc phase 2
+	--  TBCC phase 2
 	VUHDO_addCustomSpellIds(50, 
 		-- [[ Serpentshrine Cavern ]]
 		-- Trash
@@ -1072,7 +1072,7 @@ function VUHDO_loadDefaultConfig()
 		36482,  -- Armor Disruption
 		36731,  -- Flame Strike
 		36478,  -- Magic Disruption
-		35859  -- Nether Vapor
+		35859   -- Nether Vapor
 	);
 
 	local debuffRemovalList = {};
