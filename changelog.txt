@@ -18,6 +18,7 @@ Bugfixes:
   
 Improvements:  
 -- Migrated to built-in APIs/events for incoming healing  
+-- Added option to use incoming healing from LibHealComm  
   
   
 --------------------------------------------------------------  

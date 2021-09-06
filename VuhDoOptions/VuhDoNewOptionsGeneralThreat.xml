@@ -220,7 +220,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="43" y="-26" />
+							<AbsDimension x="43" y="-64" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -289,6 +289,23 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
+
+					<CheckButton name="$parentLibHealCommCheckButton" text="VUHDO_I18N_LIBHEALCOMM" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-107" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.SHOW_LIBHEALCOMM_INCOMING");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K582);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 
 					<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>

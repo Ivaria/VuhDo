@@ -1,6 +1,6 @@
 --
 local UnitPower = UnitPower;
-local UnitGetIncomingHeals = UnitGetIncomingHeals;
+local UnitGetIncomingHeals = VUHDO_unitGetIncomingHeals;
 local pairs = pairs;
 local ipairs = ipairs;
 local floor = floor;
