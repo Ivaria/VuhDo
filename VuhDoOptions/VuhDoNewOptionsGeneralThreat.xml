@@ -215,12 +215,12 @@
 
 			<Frame name="$parentIncomingPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="244" y="112" />
+					<AbsDimension x="244" y="150" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="43" y="-64" />
+							<AbsDimension x="43" y="-26" />
 						</Offset>
 					</Anchor>
 				</Anchors>

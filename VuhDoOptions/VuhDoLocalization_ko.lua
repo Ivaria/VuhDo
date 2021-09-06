@@ -1153,3 +1153,5 @@ VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TOOLTIP = "Shows debuffs only for frien
 
 VUHDO_I18N_SHOW_OVERSHIELD = "Show\nOvershield";
 VUHDO_I18N_OVERSHIELD_BAR = "Overshield Bar";
+
+VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
