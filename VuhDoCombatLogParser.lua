@@ -57,14 +57,14 @@ end
 
 --
 local tPre, tSuf, tSpec;
-local function VUHDO_getTargetHealthImpact(aMsg, aMsg1, aMsg2, aMsg4, aMsg5)
+local function VUHDO_getTargetHealthImpact(aMsg, aMsg1, aMsg2, aMsg4, aSourceFlags)
 	tPre, tSuf, tSpec = strsplit("_", aMsg);
 
 	if "SPELL" == tPre then
 		-- Filter subEvent SPELL_DURABILITY_DAMAGE 
 		-- and sourceflag COMBATLOG_OBJECT_TYPE_PLAYER COMBATLOG_OBJECT_REACTION_FRIENDLY 0x00000510
 		-- Avoid some items such as Force Reactive Disk break the parser
-		if tSuf == "DURABILITY" and tSpec == "DAMAGE" and bit.band(aMsg5,1296) == 1296 then
+		if tSuf == "DURABILITY" and tSpec == "DAMAGE" and bit.band(aSourceFlags,1296) == 1296 then
 			return 0;
 		end
 
@@ -119,12 +119,12 @@ end
 --
 local tUnit;
 local tImpact;
-function VUHDO_parseCombatLogEvent(aMsg, aDstGUID, aMsg1, aMsg2, aMsg4, aMsg5)
+function VUHDO_parseCombatLogEvent(aMsg, aDstGUID, aMsg1, aMsg2, aMsg4, aSourceFlags)
 	tUnit = VUHDO_RAID_GUIDS[aDstGUID];
 	if not tUnit then return; end
 
 	-- as of patch 7.1 we are seeing empty values on health related events
-	tImpact = tonumber(VUHDO_getTargetHealthImpact(aMsg, aMsg1, aMsg2, aMsg4, aMsg5)) or 0;
+	tImpact = tonumber(VUHDO_getTargetHealthImpact(aMsg, aMsg1, aMsg2, aMsg4, aSourceFlags)) or 0;
 
 	if tImpact ~= 0 then
 		VUHDO_addUnitHealth(tUnit, tImpact);
