@@ -15,6 +15,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed LibHealComm tracking of Priest T4 set bonus 'Renewal'  
+-- Fixed combat log event based health updates  
   
   
 Improvements:  
