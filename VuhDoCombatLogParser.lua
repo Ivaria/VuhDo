@@ -61,10 +61,9 @@ local function VUHDO_getTargetHealthImpact(aMsg, aMsg1, aMsg2, aMsg4, aSourceFla
 	tPre, tSuf, tSpec = strsplit("_", aMsg);
 
 	if "SPELL" == tPre then
-		-- Filter subEvent SPELL_DURABILITY_DAMAGE 
-		-- and sourceflag COMBATLOG_OBJECT_TYPE_PLAYER COMBATLOG_OBJECT_REACTION_FRIENDLY 0x00000510
-		-- Avoid some items such as Force Reactive Disk break the parser
-		if tSuf == "DURABILITY" and tSpec == "DAMAGE" and bit.band(aSourceFlags,1296) == 1296 then
+		-- Filter subEvent SPELL_DURABILITY_DAMAGE and sourceFlag COMBATLOG_OBJECT_TYPE_PLAYER COMBATLOG_OBJECT_REACTION_FRIENDLY 0x00000510 (1296)
+		-- Avoid that some items such as 'Force Reactive Disk' break the parser
+		if tSuf == "DURABILITY" and tSpec == "DAMAGE" and bit.band(aSourceFlags, 1296) == 1296 then
 			return 0;
 		end
 
