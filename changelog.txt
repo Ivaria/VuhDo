@@ -19,6 +19,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default custom debuffs for phase 2 raid encounters  
 -- Migrated to built-in APIs/events for incoming healing  
 -- Added option to use incoming healing from LibHealComm  
 -- Listen to UNIT_HEALTH_FREQUENT events for health updates  
