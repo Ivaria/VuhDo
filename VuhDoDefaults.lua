@@ -1058,7 +1058,7 @@ function VUHDO_loadDefaultConfig()
 		33040,  -- Wrath of the Astromancer
 		33048,  -- Wrath of the Astromancer
 		33049,  -- Wrath of the Astromancer
-		33023,  -- Mark of Solarian
+		-- 33023,  -- Mark of Solarian
 		-- 33390,  -- Arcane Torrent
 		-- Kael'thas Sunstrider
 		37027,  -- Remote Toy
