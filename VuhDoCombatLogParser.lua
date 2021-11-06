@@ -26,10 +26,26 @@ end
 local tInfo;
 local tNewHealth;
 local tDeadInfo = { ["dead"] = true };
-local function VUHDO_addUnitHealth(aUnit, aDelta)
+local function VUHDO_addUnitHealth(aUnit, aDelta, aSrcGUID)
 	tInfo = VUHDO_RAID[aUnit] or tDeadInfo;
 
 	if not tInfo["dead"] then
+	        -- filter exception data from combat log in classic
+		-- sometimes combat log shows 19000+ damage but it's not correct e.g Ragnaros's Melt Weapon
+		if aSrcGUID and abs(aDelta) > 10000 then
+			local tSrc, _, _, _, _, tNpcId = strsplit("-", aSrcGUID);
+
+			-- 11502 - Ragnaros
+			-- 11583 - Nefarian
+			if tNpcId and (tNpcId == "11502" or tNpcId == "11583") then
+				return;
+			end
+
+			-- 18168 - Force Reactive Disk
+			if tSrc and tSrc == "Player" and abs(aDelta) == 18168 then
+				return;
+			end
+		end
 
 		-- avoid the calculation to be disturbed by the exception data
 		if UnitHealth(aUnit) ~= 0 or tInfo["health"] ~= 0 then
@@ -118,7 +134,7 @@ end
 --
 local tUnit;
 local tImpact;
-function VUHDO_parseCombatLogEvent(aMsg, aDstGUID, aMsg1, aMsg2, aMsg4, aSourceFlags)
+function VUHDO_parseCombatLogEvent(aMsg, aDstGUID, aMsg1, aMsg2, aMsg4, aSourceGUID, aSourceFlags)
 	tUnit = VUHDO_RAID_GUIDS[aDstGUID];
 	if not tUnit then return; end
 
@@ -126,9 +142,9 @@ function VUHDO_parseCombatLogEvent(aMsg, aDstGUID, aMsg1, aMsg2, aMsg4, aSourceF
 	tImpact = tonumber(VUHDO_getTargetHealthImpact(aMsg, aMsg1, aMsg2, aMsg4, aSourceFlags)) or 0;
 
 	if tImpact ~= 0 then
-		VUHDO_addUnitHealth(tUnit, tImpact);
-		if tUnit == sCurrentTarget then	VUHDO_addUnitHealth("target", tImpact);	end
-		if tUnit == sCurrentFocus then VUHDO_addUnitHealth("focus", tImpact); end
+		VUHDO_addUnitHealth(tUnit, tImpact, aSourceGUID);
+		if tUnit == sCurrentTarget then	VUHDO_addUnitHealth("target", tImpact, aSourceGUID); end
+		if tUnit == sCurrentFocus then VUHDO_addUnitHealth("focus", tImpact, aSourceGUID); end
 	end
 end
 
