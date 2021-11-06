@@ -33,6 +33,8 @@ externals:
     Libs/!LibTotemInfo: https://github.com/SwimmingTiger/LibTotemInfo.git
     Libs/LibHealComm-4.0: https://repos.curseforge.com/wow/libhealcomm-4-0
 
+    Libs/LibClassicDurations: https://repos.curseforge.com/wow/libclassicdurations
+
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
     
     

@@ -25,4 +25,6 @@
 	<Include file="!LibTotemInfo\embeds.xml" />
 	<Include file="LibHealComm-4.0\LibHealComm-4.0.xml" />
 
+	<Include file="LibClassicDurations\LibClassicDurations.xml" />
+
 </Ui>
