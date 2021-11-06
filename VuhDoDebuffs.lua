@@ -320,6 +320,15 @@ function VUHDO_determineDebuff(aUnit)
 				break;
 			end
 
+			if VUHDO_LibClassicDurations then
+				local tNewDuration, tNewExpiry = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tUnitCaster, tName);
+		
+				if tDuration == 0 and tNewDuration then 
+					tDuration = tNewDuration;
+					tExpiry = tNewExpiry;
+				end
+			end
+
 			if (tExpiry or 0) == 0 then tExpiry = (sCurIcons[tName] or sEmpty)[2] or tNow; end
 
 			-- Custom Debuff?
@@ -389,6 +398,15 @@ function VUHDO_determineDebuff(aUnit)
 
 			if not tIcon then 
 				break; 
+			end
+
+			if VUHDO_LibClassicDurations then
+				local tNewDuration, tNewExpiry = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tUnitCaster, tName);
+		
+				if tDuration == 0 and tNewDuration then 
+					tDuration = tNewDuration;
+					tExpiry = tNewExpiry;
+				end
 			end
 
 			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
