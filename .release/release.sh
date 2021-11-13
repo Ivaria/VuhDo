@@ -87,7 +87,7 @@ escape_substr() {
 filename_filter() {
 	local classic alpha beta invalid
 	[ -n "$skip_invalid" ] && invalid="&" || invalid="_"
-	if [[ "$game_type" != "retail" ]] && [[ "$game_type" != "classic" || "${si_project_version,,}" != *"-classic"* ]] && [[ "$game_type" != "bcc" || "${si_project_version,,}" != *"-bcc"* ]]; then
+	if [[ "$game_type" != "retail" ]] && [[ "$game_type" != "classic" || "${si_project_version,,}" != *"-classic"* ]] && [[ "$game_type" != "bcc" || "${si_project_version,,}" != *"-bcc"* || "${si_project_version,,}" != *"-tbcc"* ]]; then
 		# only append the game type if the tag doesn't include it
 		classic="-$game_type"
 	fi
