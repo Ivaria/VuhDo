@@ -21,6 +21,7 @@ Bugfixes:
   
 Improvements:  
 -- Added additional Shaman totems to Buff Watch  
+-- Added additional Shaman weapon enchants to Buff Watch  
   
   
 --------------------------------------------------------------  
