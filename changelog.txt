@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed health updates for Warlocks being healed while casting 'Life Tap'  
   
   
 Improvements:  
