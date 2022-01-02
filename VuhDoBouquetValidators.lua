@@ -1197,7 +1197,8 @@ local VUHDO_BLOCKED_FUNCTIONS = {
 	SetBindingMacro = true, 
 	GuildDisband = true, 
 	GuildUninvite = true, 
-	securecall = true
+	securecall = true, 
+	DeleteCursorItem = true
 };
 
 local VUHDO_BLOCKED_TABLES = {
