@@ -325,20 +325,22 @@ local function VUHDO_updateIncHeal(aUnit)
 	tHealthPlusInc, tAmountInc = VUHDO_getHealthPlusIncQuota(aUnit);
 
 	for _, tButton in pairs(tAllButtons) do
-  	tIncBar = VUHDO_getHealthBar(tButton, 6);
+		tIncBar = VUHDO_getHealthBar(tButton, 6);
 
 		if tAmountInc > 0 and tInfo["healthmax"] > 0 then
 			tIncBar:SetValueRange(tInfo["health"] / tInfo["healthmax"], tHealthPlusInc);
+			
 			tHealthBar = VUHDO_getHealthBar(tButton, 1);
  			tIncColor["R"], tIncColor["G"], tIncColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
  			tIncColor = VUHDO_getDiffColor(tIncColor, VUHDO_PANEL_SETUP["BAR_COLORS"]["INCOMING"]);
- 			if tIncColor["O"] and tOpacity then
+ 			
+			if tIncColor["O"] and tOpacity then
  				tIncColor["O"] = tIncColor["O"] * tOpacity * (tHealthBar:GetAlpha() or 1);
- 			end
+			end
 
-    	VUHDO_setStatusBarColor(tIncBar, tIncColor);
+			VUHDO_setStatusBarColor(tIncBar, tIncColor);
 		else
-  		tIncBar:SetValueRange(0,0);
+			tIncBar:SetValueRange(0,0);
 		end
 	end
 
@@ -351,22 +353,22 @@ end
 local tRatio, tBar, tScale;
 function VUHDO_overhealTextCallback(aUnit, aPanelNum, aProviderName, aText, aValue)
 	for _, tButton in pairs(VUHDO_getUnitButtonsPanel(aUnit, aPanelNum)) do
-		--VUHDO_getOverhealText(VUHDO_getHealthBar(tButton, 1)):SetText(aText);
 		tBar = VUHDO_getHealthBar(tButton, 1);
 		VUHDO_getOverhealText(tBar):SetText(aText);
 
 		-- Sonderwurst Overheal wirklich nötig?
 		if strfind(aProviderName, "OVERHEAL", 1, true) then
 			tInfo = VUHDO_RAID[aUnit];
+			
 			if tInfo then
-  	  	if aValue > 0 and tInfo["healthmax"] > 0 then
+				if aValue > 0 and tInfo["healthmax"] > 0 then
 					tRatio = aValue / tInfo["healthmax"];
-				  tScale = VUHDO_PANEL_SETUP[aPanelNum]["OVERHEAL_TEXT"]["scale"];
-    			VUHDO_getOverhealPanel(tBar):SetScale(tRatio < 1 and (0.5 + tRatio) * tScale or 1.5 * tScale);
-	  	  end
-	  	end
-		end
+					tScale = VUHDO_PANEL_SETUP[aPanelNum]["OVERHEAL_TEXT"]["scale"];
 
+					VUHDO_getOverhealPanel(tBar):SetScale(tRatio < 1 and (0.5 + tRatio) * tScale or 1.5 * tScale);
+				end
+			end
+		end
 	end
 end
 
