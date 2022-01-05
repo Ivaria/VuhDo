@@ -1,8 +1,6 @@
-﻿if (GetLocale() ~= "ruRU") then
+if (GetLocale() ~= "ruRU") then
 	return;
 end
-
-
 -- New Options
 -- @EXACT = false
 VUHDO_I18N_SCANNERS = "Сканер";
@@ -744,7 +742,6 @@ VUHDO_I18N_TT.K578 = "Select a color for the icon glow.";
 VUHDO_I18N_TT.K579 = "Select a color for the bar glow.";
 VUHDO_I18N_TT.K580 = "Select a modifier key to use with the right mouse button to blacklist debuff icons."
 VUHDO_I18N_TT.K581 = "Check to show player nickname on bars.";
-VUHDO_I18N_TT.K582 = "Check to show incoming heal using LibHealComm-4.0.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1329,3 +1326,6 @@ VUHDO_I18N_SHOW_OVERSHIELD = "Show\nOvershield";
 VUHDO_I18N_OVERSHIELD_BAR = "Overshield Bar";
 
 VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
+
+VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
+VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
