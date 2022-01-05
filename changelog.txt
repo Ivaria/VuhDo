@@ -60,10 +60,10 @@ Known issues:
   
   
 Bugfixes:  
--- Fixed debuff absorb tracking for Sylvanas 'Veil of Darkness'  
   
   
 Improvements:  
+-- Added debuff absorb overlay bar to display healing absorption amount  
   
   
 --------------------------------------------------------------  
