@@ -441,7 +441,7 @@ local function VUHDO_updateIncHeal(aUnit)
 	end
 
 	VUHDO_updateShieldBar(aUnit, tHealthPlusInc, tAmountInc);
-	VUHDO_updateHealAbsorbBar(aUnit, tHealthPlusInc, tAmountInc);
+	VUHDO_updateHealAbsorbBar(aUnit);
 end
 
 
