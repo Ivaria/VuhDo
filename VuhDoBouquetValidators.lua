@@ -14,6 +14,7 @@ local floor = floor;
 local select = select;
 local twipe = table.wipe;
 local UnitGetTotalAbsorbs = VUHDO_unitGetTotalAbsorbs;
+local UnitGetTotalHealAbsorbs = VUHDO_unitGetTotalHealAbsorbs;
 local _;
 
 local VUHDO_RAID = { };
