@@ -14,6 +14,9 @@ Bugfixes:
   
 Improvements:  
 -- Added debuff absorb overlay bar to display healing absorption amount  
+-- Added new default bouquet 'Counter: All Heal Absorb #k'  
+-- Added new bouquet validator 'Counter: All Heal Absorb #k'  
+-- Added new bouquet validator 'Statusbar: Heal Absorb'  
   
   
 --------------------------------------------------------------  
