@@ -1,4 +1,4 @@
-﻿if (GetLocale() ~= "koKR") then
+if (GetLocale() ~= "koKR") then
 	return;
 end
 -- 지옥천사(윈드러너) 한글화

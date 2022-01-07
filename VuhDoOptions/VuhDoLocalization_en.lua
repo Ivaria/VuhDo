@@ -1,4 +1,4 @@
-﻿-- New Options
+-- New Options
 -- @EXACT = false
 VUHDO_I18N_SCANNERS = "Scanners";
 VUHDO_I18N_RESURRECT_SHORT = "Resurrect";
