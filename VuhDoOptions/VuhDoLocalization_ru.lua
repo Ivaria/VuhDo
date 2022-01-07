@@ -1,8 +1,6 @@
-﻿if (GetLocale() ~= "ruRU") then
+if (GetLocale() ~= "ruRU") then
 	return;
 end
-
-
 -- New Options
 -- @EXACT = false
 VUHDO_I18N_SCANNERS = "Сканер";
