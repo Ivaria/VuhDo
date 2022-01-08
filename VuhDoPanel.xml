@@ -454,7 +454,7 @@
 										<Texture name="$parentOvsBar" hidden="true" file="Interface\AddOns\VuhDo\Images\overshield_bar" hWrapMode="REPEAT" vWrapMode="REPEAT"> </Texture>
 									</Layer>
 									<Layer level="OVERLAY" textureSubLevel="5">
-										<Texture name="$parentHeAbBar" hidden="true" file="Interface\AddOns\VuhDo\Images\overshield_bar" hWrapMode="REPEAT" vWrapMode="REPEAT"> </Texture>
+										<Texture name="$parentHeAbBar" hidden="true" file="Interface\AddOns\VuhDo\Images\healabsorb_bar" hWrapMode="REPEAT" vWrapMode="REPEAT"> </Texture>
 									</Layer>
 									<Layer level="OVERLAY" textureSubLevel="6">
 										<Texture name="$parentAggro" hidden="true" file="Interface\AddOns\VuhDo\Images\aggro">
