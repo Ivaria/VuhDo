@@ -565,6 +565,9 @@
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.OVERSHIELD");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_OVERSHIELD_BAR, VUHDO_I18N_OVERSHIELD_BAR);
 								VUHDO_lnfSetTooltip(self, nil);
+
+								_G[self:GetName() .. "Texture"]:SetTexture("Interface\\AddOns\\VuhDo\\Images\\overshield_bar", "REPEAT");
+								_G[self:GetName() .. "Texture"]:SetTexCoord(0, self:GetWidth() / 32, 0, self:GetHeight() / 32);
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -582,6 +585,9 @@
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HEAL_ABSORB");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_HEAL_ABSORB_BAR, VUHDO_I18N_HEAL_ABSORB_BAR);
 								VUHDO_lnfSetTooltip(self, nil);
+
+								_G[self:GetName() .. "Texture"]:SetTexture("Interface\\AddOns\\VuhDo\\Images\\healabsorb_bar", "REPEAT");
+								_G[self:GetName() .. "Texture"]:SetTexCoord(0, self:GetWidth() / 32, 0, self:GetHeight() / 32);
 							</OnLoad>
 						</Scripts>
 					</Frame>
