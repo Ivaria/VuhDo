@@ -20,6 +20,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default custom debuffs for phase 3 raid encounters  
   
   
 -------------------------------------------------------------  
