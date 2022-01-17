@@ -1084,9 +1084,9 @@ function VUHDO_loadDefaultConfig()
 		41334,  -- Polymorph
 		39580,  -- Lightning Cloud
 		39647,  -- Curse of Mending
-		40099,  -- Vile Slime
+		-- 40099,  -- Vile Slime
 		40103,  -- Sludge Nova
-		41382,  -- Blizzard
+		-- 41382,  -- Blizzard
 		41346,  -- Poisonous Throw
 		41406,  -- Dementia
 		13444,  -- Sunder Armor
@@ -1111,8 +1111,8 @@ function VUHDO_loadDefaultConfig()
 		41392,  -- Riposte
 		41338,  -- Love Tap
 		40892,  -- Fixate
-		40946,  -- Rain of Chaos
-		39671,  -- Rain of Chaos
+		-- 40946,  -- Rain of Chaos
+		-- 39671,  -- Rain of Chaos
 		40864,  -- Throbbing Stun
 		39674,  -- Banish
 		3609,   -- Paralyzing Poison
@@ -1130,10 +1130,10 @@ function VUHDO_loadDefaultConfig()
 		-- Supremus
 		40953,  -- Immolation
 		40253,  -- Molten Flame
-		40875,  -- Freeze
+		-- 40875,  -- Freeze
 		-- Shade of Akama
-		41092,  -- Carnivorous Bite
-		42023,  -- Rain of Fire
+		-- 41092,  -- Carnivorous Bite
+		-- 42023,  -- Rain of Fire
 		41047,  -- Shadow Resonance
 		-- Teron Gorefiend
 		40251,  -- Shadow of Death
@@ -1145,6 +1145,7 @@ function VUHDO_loadDefaultConfig()
 		41303,  -- Soul Drain
 		41376,  -- Spite
 		41377,  -- Spite
+		41410,  -- Deaden
 		-- Gurtogg Bloodboil
 		40481,  -- Acidic Wound
 		42005,  -- Bloodboil
@@ -1157,9 +1158,9 @@ function VUHDO_loadDefaultConfig()
 		41001,  -- Fatal Attraction
 		40860,  -- Vile Beam
 		-- The Illidari Council
-		41541,  -- Consecration
-		41482,  -- Blizzard
-		41481,  -- Flamestrike
+		-- 41541,  -- Consecration
+		-- 41482,  -- Blizzard
+		-- 41481,  -- Flamestrike
 		41461,  -- Judgement of Blood
 		41485,  -- Deadly Poison
 		41472,  -- Divine Wrath
@@ -1189,7 +1190,7 @@ function VUHDO_loadDefaultConfig()
 		-- Azgalor
 		31341,  -- Unquenchable Flames
 		31406,  -- Cripple
-		31340,  -- Rain of Fire
+		-- 31340,  -- Rain of Fire
 		31408,  -- War Stomp
 		31347,  -- Doom
 		-- Archimonde
