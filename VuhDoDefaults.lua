@@ -1076,6 +1076,7 @@ function VUHDO_loadDefaultConfig()
 		36478,  -- Magic Disruption
 		35859   -- Nether Vapor
 	);
+
 	--  TBCC phase 3
 	VUHDO_addCustomSpellIds(51, 
 		-- [[ Black Temple ]]
@@ -1197,8 +1198,9 @@ function VUHDO_loadDefaultConfig()
 		31944,  -- Doomfire
 		31972,  -- Grip of the Legion
 		32014,  -- Air Burst
-		31970  -- Fear
+		31970   -- Fear
 	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
