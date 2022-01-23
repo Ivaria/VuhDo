@@ -45,6 +45,8 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default custom debuffs for phase 3 raid encounters  
+-- Bump TOC interface for 2.5.3  
   
   
 -------------------------------------------------------------  
