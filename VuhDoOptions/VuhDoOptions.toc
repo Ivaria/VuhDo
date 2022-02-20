@@ -1,4 +1,4 @@
-## Interface: 90105
+## Interface: 90200
 
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
