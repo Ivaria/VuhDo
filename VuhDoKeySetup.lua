@@ -241,6 +241,7 @@ local function VUHDO_getWheelDefString()
 	tString = "";
 	for tIndex, tValue in pairs(VUHDO_WHEEL_BINDINGS) do
 		tAssignIdx = VUHDO_WHEEL_INDEX_BINDING[tIndex];
+		VUHDO_xMsg("VUHDO_getWheelDefString", tIndex, tValue, tAssignIdx or "nil");
 		tFriendSpell = VUHDO_SPELLS_KEYBOARD["HOSTILE_WHEEL"][tAssignIdx][3];
 		tHostSpell = VUHDO_SPELLS_KEYBOARD["WHEEL"][tAssignIdx][3];
 

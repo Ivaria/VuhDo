@@ -277,17 +277,42 @@ local tDefaultWheelAssignments = {
 	["shift1"] = {"SHIFT-", "-w7", ""},
 	["shift2"] = {"SHIFT-", "-w8", ""},
 
+	["meta1"] = {"META-", "-w9", ""},
+	["meta2"] = {"META-", "-w10", ""},
+
 	["altctrl1"] = {"ALT-CTRL-", "-w9", ""},
 	["altctrl2"] = {"ALT-CTRL-", "-w10", ""},
 
 	["altshift1"] = {"ALT-SHIFT-", "-w11", ""},
 	["altshift2"] = {"ALT-SHIFT-", "-w12", ""},
 
-	["ctrlshift1"] = {"CTRL-SHIFT-", "-w13", ""},
-	["ctrlshift2"] = {"CTRL-SHIFT-", "-w14", ""},
+	["altmeta1"] = {"ALT-META-", "-w13", ""},
+	["altmeta2"] = {"ALT-META-", "-w14", ""},
 
-	["altctrlshift1"] = {"ALT-CTRL-SHIFT-", "-w15", ""},
-	["altctrlshift2"] = {"ALT-CTRL-SHIFT-", "-w16", ""},
+	["ctrlshift1"] = {"CTRL-SHIFT-", "-w15", ""},
+	["ctrlshift2"] = {"CTRL-SHIFT-", "-w16", ""},
+
+	["ctrlmeta1"] = {"CTRL-META-", "-w16", ""},
+	["ctrlmeta2"] = {"CTRL-META-", "-w17", ""},
+
+	["shiftmeta1"] = {"SHIFT-META-", "-w18", ""},
+	["shiftmeta2"] = {"SHIFT-META-", "-w19", ""},
+
+	["altctrlshift1"] = {"ALT-CTRL-SHIFT-", "-w20", ""},
+	["altctrlshift2"] = {"ALT-CTRL-SHIFT-", "-w21", ""},
+
+	["altctrlmeta1"] = {"ALT-CTRL-META-", "-w22", ""},
+	["altctrlmeta2"] = {"ALT-CTRL-META-", "-w23", ""},
+	
+	["altshiftmeta1"] = {"ALT-SHIFT-META-", "-w20", ""},
+	["altshiftmeta2"] = {"ALT-SHIFT-META-", "-w21", ""},
+	
+	["altctrlshift1"] = {"ALT-CTRL-SHIFT-", "-w20", ""},
+	["altctrlshift2"] = {"ALT-CTRL-SHIFT-", "-w21", ""},
+
+	["altctrlshift1"] = {"ALT-CTRL-SHIFT-", "-w20", ""},
+	["altctrlshift2"] = {"ALT-CTRL-SHIFT-", "-w21", ""},
+
 };
 
 

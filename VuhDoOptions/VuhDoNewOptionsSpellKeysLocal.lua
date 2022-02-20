@@ -222,6 +222,7 @@ function VUHDO_spellsKeysLocalAssignKey(self, aKey)
 
 		return;
 	end
+
 	if (IsShiftKeyDown()) then
 		aKey = "SHIFT-"..aKey;
 	end
@@ -232,6 +233,10 @@ function VUHDO_spellsKeysLocalAssignKey(self, aKey)
 
 	if (IsAltKeyDown()) then
 		aKey = "ALT-" .. aKey;
+	end
+
+	if (IsMetaKeyDown()) then
+		aKey = "META-" .. aKey;
 	end
 
 	local tIsSameKey = VUHDO_SPELLS_KEYBOARD["INTERNAL"][tAssignIndex][2] == aKey;

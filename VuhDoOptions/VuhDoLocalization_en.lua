@@ -1149,3 +1149,8 @@ VUHDO_I18N_OVERSHIELD_BAR = "Overshield Bar";
 
 VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
+
+VUHDO_I18N_META = "Meta / Command";
+VUHDO_I18N_PLUS_META = "+Meta";
+VUHDO_I18N_PLUS_CTRL_META = "+Ctrl+Meta";
+VUHDO_I18N_PLUS_SHIFT_META = "+Shift+Meta";

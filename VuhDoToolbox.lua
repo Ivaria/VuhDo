@@ -945,10 +945,11 @@ end
 
 
 function VUHDO_getCurrentKeyModifierString()
-	return format("%s%s%s",
+	return format("%s%s%s%s",
 		IsAltKeyDown() and "alt" or "",
 		IsControlKeyDown() and "ctrl" or "",
-		IsShiftKeyDown() and "shift" or "");
+		IsShiftKeyDown() and "shift" or "",
+		IsMetaKeyDown() and "meta" or "");
 end
 
 

@@ -91,26 +91,50 @@
 						local blacklistModi = VUHDO_CONFIG["CUSTOM_DEBUFF"].blacklistModi or "ALT-CTRL-SHIFT";
 
 						if blacklistModi ~= "OFF" then
-							if blacklistModi == "ALT-CTRL-SHIFT" and 
-								IsAltKeyDown() and IsControlKeyDown() and IsShiftKeyDown() then
-								VUHDO_addDebuffToBlacklist(self);	
+							if blacklistModi == "ALT-CTRL-SHIFT" and IsAltKeyDown() 
+								and IsControlKeyDown() and IsShiftKeyDown() and not IsMetaKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "ALT-CTRL-SHIFT-META" and IsAltKeyDown() 
+								and IsControlKeyDown() and IsShiftKeyDown() and IsMetaKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "CTRL-SHIFT-META" and IsControlKeyDown() 
+								and IsShiftKeyDown() and IsMetaKeyDown() and not IsAltKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "ALT-CTRL-META" and IsAltKeyDown() 
+								and IsControlKeyDown() and IsMetaKeyDown() and not IsShiftKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "ALT-SHIFT-META" and IsAltKeyDown() 
+								and IsShiftKeyDown() and IsMetaKeyDown() and not IsControlKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
 							elseif blacklistModi == "ALT-SHIFT" and IsAltKeyDown() and 
-								IsShiftKeyDown() and not IsControlKeyDown() then
+								IsShiftKeyDown() and not IsControlKeyDown() and not IsMetaKeyDown() then
 								VUHDO_addDebuffToBlacklist(self);
 							elseif blacklistModi == "ALT-CTRL" and IsAltKeyDown() and 
-								IsControlKeyDown() and not IsShiftKeyDown() then
+								IsControlKeyDown() and not IsShiftKeyDown() and not IsMetaKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "ALT-META" and IsAltKeyDown() and 
+								IsMetaKeyDown() and not IsControlKeyDown() and not IsShiftKeyDown() then
 								VUHDO_addDebuffToBlacklist(self);
 							elseif blacklistModi == "CTRL-SHIFT" and IsControlKeyDown() and 
-								IsShiftKeyDown() and not IsAltKeyDown() then
+								IsShiftKeyDown() and not IsAltKeyDown() and not IsMetaKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "CTRL-META" and IsControlKeyDown() and 
+								IsMetaKeyDown() and not IsAltKeyDown() and not IsShiftKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "SHIFT-META" and IsShiftKeyDown() and 
+								IsMetaKeyDown() and not IsAltKeyDown() and not IsControlKeyDown() then
+								VUHDO_addDebuffToBlacklist(self);
+							elseif blacklistModi == "META" and IsMetaKeyDown() and 
+								not IsAltKeyDown() and not IsControlKeyDown() and not IsShiftKeyDown() then
 								VUHDO_addDebuffToBlacklist(self);
 							elseif blacklistModi == "SHIFT" and IsShiftKeyDown() and 
-								not IsAltKeyDown() and not IsControlKeyDown() then
+								not IsAltKeyDown() and not IsControlKeyDown() and not IsMetaKeyDown() then
 								VUHDO_addDebuffToBlacklist(self);
 							elseif blacklistModi == "CTRL" and IsControlKeyDown() and 
-								not IsAltKeyDown() and not IsShiftKeyDown() then
+								not IsAltKeyDown() and not IsShiftKeyDown() and not IsMetaKeyDown() then
 								VUHDO_addDebuffToBlacklist(self);
 							elseif blacklistModi == "ALT" and IsAltKeyDown() and 
-								not IsControlKeyDown() and not IsShiftKeyDown() then
+								not IsControlKeyDown() and not IsShiftKeyDown() and not IsMetaKeyDown() then
 								VUHDO_addDebuffToBlacklist(self);
 							end
 						end
