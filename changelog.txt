@@ -20,6 +20,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Bump TOC interface for 1.14.2  
   
   
 -------------------------------------------------------------  
@@ -63,6 +64,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Bump TOC interface for 9.2.0  
 -- Added class color option for incoming heal/shield/etc. bars  
   
   
