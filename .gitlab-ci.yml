@@ -1,4 +1,5 @@
 stages:
+  - CHCP 65001
   - build
   - deploy
 
