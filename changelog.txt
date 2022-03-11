@@ -13,6 +13,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Increased maximum number of NPC units from 5 to 8  
   
   
 --------------------------------------------------------------  
