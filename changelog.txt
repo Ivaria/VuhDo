@@ -14,6 +14,7 @@ Bugfixes:
   
 Improvements:  
 -- Increased maximum number of NPC units from 5 to 8  
+-- Added default custom debuffs for Sepulcher raid encounters  
   
   
 --------------------------------------------------------------  
