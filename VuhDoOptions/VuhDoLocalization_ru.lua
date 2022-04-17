@@ -717,7 +717,7 @@ VUHDO_I18N_TT.K553 = "Сделать профиль стандартным дл�
 VUHDO_I18N_TT.K554 = "Сделать текущую раскладку стандартной для всех новых персонажей на этом аккаунте.";
 VUHDO_I18N_TT.K555 = "Отметьте, чтобы позволить VuhDo привязкам работать во время работы Clique с режимом поддержки.";
 VUHDO_I18N_TT.K556 = "Отметьте, чтобы иметь дополнительную панель для NPC боссов (осколки на Тектонике, грибы на Бурогрибе).";
-VUHDO_I18N_TT.K557 = "Содержание функции пользовательского бафа. Должно возвращать true или false. Пример: return (\"YOURNAME\" == VUHDO_unitInfo[\"name\"])";
+VUHDO_I18N_TT.K557 = "Содержание функции пользовательского бафа. Должно возвращать true или false. Пример: return (\"YOURNAME\" == VUHDO_unitInfo[\"name\"])"; -- Should i keep it untranslated ?
 VUHDO_I18N_TT.K558 = "Спрятать трекер бафов вне боя.";
 VUHDO_I18N_TT.K559 = "Выбрать цвет индикатора концентрации.";
 VUHDO_I18N_TT.K560 = "Выбрать цвет индикатора астральной мощи.";
@@ -1325,5 +1325,5 @@ VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TOOLTIP = "Показывать дэб�
 VUHDO_I18N_SHOW_OVERSHIELD = "Показывать\nИзбыточный щит";
 VUHDO_I18N_OVERSHIELD_BAR = "Избыточный щит";
 
-VUHDO_I18N_SHOW_HEAL_ABSORB = "Показывать\nАбсорб хила";
+VUHDO_I18N_SHOW_HEAL_ABSORB = "Показывать\nАбсорб хила"; -- "Поглощение" не звучит / doesn't sound as well as i'd want it to
 VUHDO_I18N_HEAL_ABSORB_BAR = "Абсорб хила";
