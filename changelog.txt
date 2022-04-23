@@ -123,7 +123,6 @@ Known issues:
   
   
 Bugfixes:  
--- Fixed hiding of standard Blizzard UI frames (e.g. party, raid)  
   
   
 Improvements:  
