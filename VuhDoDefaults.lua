@@ -1201,6 +1201,49 @@ function VUHDO_loadDefaultConfig()
 		31970   -- Fear
 	);
 
+	--  TBCC phase 4
+	VUHDO_addCustomSpellIds(53, 
+		-- [[ Zul'Aman ]]
+		-- Trash
+		43362,  -- Electrified Net
+		43359,  -- Call of the Beast
+		43530,  -- Piercing Howl
+		42497,  -- Furious Roar
+		43361,  -- Domesticate
+		20989,  -- Sleep
+		43529,  -- Mortal Strike
+		43364,  -- Tranquilizing Poison
+		35011,  -- Knockdown
+		43358,  -- Gut Rip
+		43356,  -- Pounce
+		-- Akil'zon
+		44008,  -- Static Disruption
+		43621,  -- Gust of Wind
+		--43648,  -- Electrical Storm
+		-- Nalorakk
+		44955,  -- Mangle
+		42395,  -- Lacerating Slash
+		42397,  -- Rend Flesh
+		-- 42398,  -- Deafening Roar
+		-- Jan'alai
+		43140,  -- Flame Breath
+		-- Halazzi
+		43303,  -- Flame Shock
+		43243,  -- Shred Armor
+		-- Hex Lord Malacrass
+		43501,  -- Siphon Soul
+		43522,  -- Unstable Affliction
+		43439,  -- Curse of Doom
+		43446,  -- Explosive Trap Effect
+		43590,  -- Psychic Wail
+		43448,  -- Freezing Trap
+		-- Zul'jin
+		43150,  -- Claw Rage
+		43095,  -- Creeping Paralysis
+		43437,  -- Paralyzed
+		43093   -- Grievous Throw
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
