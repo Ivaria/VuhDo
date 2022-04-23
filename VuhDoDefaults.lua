@@ -1202,7 +1202,7 @@ function VUHDO_loadDefaultConfig()
 	);
 
 	--  TBCC phase 4
-	VUHDO_addCustomSpellIds(53, 
+	VUHDO_addCustomSpellIds(52, 
 		-- [[ Zul'Aman ]]
 		-- Trash
 		43362,  -- Electrified Net
