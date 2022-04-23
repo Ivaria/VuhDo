@@ -1324,5 +1324,6 @@ VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TOOLTIP = "Показывать дэб�
 VUHDO_I18N_SHOW_OVERSHIELD = "Показывать\nИзбыточный щит";
 VUHDO_I18N_OVERSHIELD_BAR = "Избыточный щит";
 
-VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
-VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
+VUHDO_I18N_SHOW_HEAL_ABSORB = "Показывать\nАбсорб хила";
+VUHDO_I18N_HEAL_ABSORB_BAR = "Абсорб хила";
+
