@@ -13,6 +13,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Fixed string localizations for Russian (ruRU)  
   
   
 --------------------------------------------------------------  
