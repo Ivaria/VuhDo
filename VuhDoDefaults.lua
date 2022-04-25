@@ -1244,6 +1244,68 @@ function VUHDO_loadDefaultConfig()
 		43093   -- Grievous Throw
 	);
 
+	--  TBCC phase 5
+	VUHDO_addCustomSpellIds(54, 
+		-- [[ Sunwell Plateau ]]
+		-- Trash
+		46557, -- Slaying Shot
+		--39171, -- Mortal Strike
+		46543,  -- Ignite Mana
+		46560,  -- Shadow Word: Pain
+		46562,  -- Mind Flay
+		46561,  -- Fear
+		46469,  -- Melt Armor
+		46279,  -- Flame Buffet
+		46297,  -- Piercing Shadow
+		46298,  -- Shrink
+		46294,  -- Fevered Fatigue
+		46299,  -- Wavering Will
+		46293,  -- Corrosive Poison
+		46295,  -- Hex
+		46296,  -- Necrotic Poison
+		--45770,  -- Shadow Bolt Volley
+		46466,  -- Drain Life
+		45029,  -- Corrupting Strike
+		46283,  -- Death Coil
+		46427,  -- Domination
+		46483,  -- Volatile Disease
+		-- Kalecgos
+		45034,  -- Curse of Boundless Agony
+		45032,  -- Curse of Boundless Agony
+		45004,  -- Wild Magic
+		44978,  -- Wild Magic
+		45001,  -- Wild Magic
+		--45002,  -- Wild Magic
+		45006,  -- Wild Magic
+		45010,  -- Wild Magic
+		45029,  -- Corrupting Strike
+		-- Brutallus
+		45150,  -- Meteor Slash
+		46394,  -- Burn
+		45185,  -- Stomp
+		-- Felmyst
+		45717,  -- Fog of Corruption
+		45866,  -- Corrosion
+		45855,  -- Gas Nova
+		45662,  -- Encapsulate
+		45402,  -- Demonic Vapor
+		-- Eredar Twins
+		46771,  -- Flame Sear
+		45348,  -- Flame Touched
+		45347,  -- Dark Touched
+		--45271,  -- Dark Strike
+		45256,  -- Confounding Blow
+		45342,  -- Conflagration
+		45270,  -- Shadowfury
+		-- M'uru
+		45996,  -- Darkness
+		-- Kil'jaeden
+		45641,  -- Fire Bloom
+		45442,  -- Soul Flay
+		45885,  -- Shadow Spike
+		46190  -- Curse of Agony
+	);
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
