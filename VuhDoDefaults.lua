@@ -1245,7 +1245,7 @@ function VUHDO_loadDefaultConfig()
 	);
 
 	--  TBCC phase 5
-	VUHDO_addCustomSpellIds(54, 
+	VUHDO_addCustomSpellIds(53, 
 		-- [[ Sunwell Plateau ]]
 		-- Trash
 		46557, -- Slaying Shot
