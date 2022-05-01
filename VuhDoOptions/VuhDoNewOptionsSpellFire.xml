@@ -369,6 +369,22 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentSnowBallCheckButton" text="VUHDO_I18N_SNOW_BALL" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-107" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_SPELL_CONFIG.autoSnowBall");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K583);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 					<Frame name="$parentSmartCastLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
@@ -382,7 +398,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-120" />
+									<AbsDimension x="13" y="-145" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -398,7 +414,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="40" y="-145" />
+									<AbsDimension x="40" y="-160" />
 								</Offset>
 							</Anchor>
 						</Anchors>

@@ -637,6 +637,7 @@ VUHDO_I18N_TT.K579 = "Select a color for the bar glow.";
 VUHDO_I18N_TT.K580 = "Select a modifier key to use with the right mouse button to blacklist debuff icons."
 VUHDO_I18N_TT.K581 = "Check to show player nickname on bars.";
 VUHDO_I18N_TT.K582 = "Check to show incoming heal using LibHealComm-4.0.";
+VUHDO_I18N_TT.K583 = "Automatically use snow ball to enemy focus or mouseover target unit mid-fight";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1152,3 +1153,4 @@ VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
 
 VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
+VUHDO_I18N_SNOW_BALL = "Snow Ball";

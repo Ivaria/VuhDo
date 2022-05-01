@@ -351,6 +351,7 @@ local tSpellPost;
 local tVehicleCond;
 local tStopText;
 local tCastText;
+local tSnowBallText;
 local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, aPet)
 	if VUHDO_SPELL_CONFIG["IS_CANCEL_CURRENT"] then
 		tStopText = "/stopcasting\n";
@@ -358,7 +359,13 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		tStopText = "";
 	end
 
-	tText = sStopTargetText .. tStopText .. VUHDO_getFireText(anAction);
+	if VUHDO_SPELL_CONFIG["autoSnowBall"] then
+		tSnowBallText = "/use [@focus,exists,harm,combat][@vuhdotarget,exists,harm,combat] item:17202\n";
+	else
+		tSnowBallText = "";
+	end
+
+	tText = tSnowBallText .. sStopTargetText .. tStopText .. VUHDO_getFireText(anAction);
 
 	if (VUHDO_SPELLS[anAction] or sEmpty)["nohelp"] or VUHDO_PROHIBIT_HELP[anAction] then
 		tModiSpell = "";

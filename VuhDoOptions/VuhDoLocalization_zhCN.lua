@@ -638,7 +638,8 @@ VUHDO_I18N_TT.K578 = "选择图标闪光的颜色.";
 VUHDO_I18N_TT.K579 = "选择技能条闪光的颜色.";
 VUHDO_I18N_TT.K580 = "选择一个修改键，使用鼠标右键将debuff图标列入黑名单."
 VUHDO_I18N_TT.K581 = "选中可在栏上显示玩家昵称.";
-VUHDO_I18N_TT.K582 = "Check to show incoming heal using LibHealComm-4.0.";
+VUHDO_I18N_TT.K582 = "使用LibHealComm-4.0显示治疗预估";
+VUHDO_I18N_TT.K583 = "战斗中自动对焦点、指向单位敌对目标使用雪球";
 
 VUHDO_I18N_DEFAULT_PROFILE = "预设存档";
 VUHDO_I18N_DEFAULT_LAYOUT = "预设按键配置";
@@ -1150,7 +1151,8 @@ VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TOOLTIP = "仅为友方单位显示减�
 VUHDO_I18N_SHOW_OVERSHIELD = "显示\n溢余护盾";
 VUHDO_I18N_OVERSHIELD_BAR = "溢余护盾";
 
-VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
+VUHDO_I18N_LIBHEALCOMM = "使用 Lib\nHealComm";
 
-VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
-VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
+VUHDO_I18N_SHOW_HEAL_ABSORB = "显示\n治疗吸收";
+VUHDO_I18N_HEAL_ABSORB_BAR = "治疗吸收条";
+VUHDO_I18N_SNOW_BALL = "雪球";
