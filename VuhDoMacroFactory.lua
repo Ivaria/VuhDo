@@ -64,22 +64,24 @@ end
 
 
 --
-local tInstant, tModi2;
+local tInstant, tModi2, tCustomUnit;
 local function VUHDO_getInstantFireText(aSlotNum)
 	tInstant = VUHDO_SPELL_CONFIG["FIRE_CUSTOM_" .. aSlotNum .. "_SPELL"];
 	if VUHDO_SPELL_CONFIG["IS_FIRE_CUSTOM_" .. aSlotNum] and not VUHDO_strempty(tInstant) then
+
+		tCustomUnit = VUHDO_SPELL_CONFIG["custom" .. aSlotNum .. "Unit"] or ""
 
 		if VUHDO_SPELL_CONFIG["IS_FIRE_OUT_FIGHT"] then
 			if (VUHDO_SPELLS[tInstant] or sEmpty)["noselftarget"] then
 				tModi2 = " ";
 			else
-				tModi2 = " [@player] ";
+				tModi2 = " " .. "[" .. tCustomUnit .. "]" .. " ";
 			end
 		else
 			if (VUHDO_SPELLS[tInstant] or sEmpty)["noselftarget"] then
 				tModi2 = " [combat] ";
 			else
-				tModi2 = " [combat,@player] ";
+				tModi2 = " " .. "[combat," .. tCustomUnit .. "]" .. " ";
 			end
 		end
 
@@ -351,7 +353,6 @@ local tSpellPost;
 local tVehicleCond;
 local tStopText;
 local tCastText;
-local tSnowBallText;
 local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, aPet)
 	if VUHDO_SPELL_CONFIG["IS_CANCEL_CURRENT"] then
 		tStopText = "/stopcasting\n";
@@ -359,13 +360,7 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		tStopText = "";
 	end
 
-	if VUHDO_SPELL_CONFIG["autoSnowBall"] then
-		tSnowBallText = "/use [@focus,exists,harm,combat][@vuhdotarget,exists,harm,combat] item:17202\n";
-	else
-		tSnowBallText = "";
-	end
-
-	tText = tSnowBallText .. sStopTargetText .. tStopText .. VUHDO_getFireText(anAction);
+	tText = sStopTargetText .. tStopText .. VUHDO_getFireText(anAction);
 
 	if (VUHDO_SPELLS[anAction] or sEmpty)["nohelp"] or VUHDO_PROHIBIT_HELP[anAction] then
 		tModiSpell = "";

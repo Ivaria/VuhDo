@@ -742,7 +742,8 @@ VUHDO_I18N_TT.K578 = "Выбрать цвет подсветки иконки.";
 VUHDO_I18N_TT.K579 = "Выбрать цвет подсветки фрейма.";
 VUHDO_I18N_TT.K580 = "Выберите модификатор для использования с ПКМ для добавления дебафов в чёрный список."
 VUHDO_I18N_TT.K581 = "Отметьте, чтобы показывать ники на фреймах.";
-VUHDO_I18N_TT.K583 = "Automatically use snow ball to enemy focus or mouseover target unit mid-fight";
+VUHDO_I18N_TT.K582 = "Check to show incoming heal using LibHealComm-4.0.";
+VUHDO_I18N_TT.K583 = "Select the unit";
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный профиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";
 VUHDO_I18N_APPLY_TO_ALL = "Применить\nко всем";
@@ -1329,4 +1330,15 @@ VUHDO_I18N_SHOW_HEAL_ABSORB = "Показывать\nАбсорб хила";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Абсорб хила";
 
 VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
-VUHDO_I18N_SNOW_BALL = "Snow Ball";
+
+VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
+VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
+
+VUHDO_I18N_PLAYER = "Player unit";
+VUHDO_I18N_FOCUS = "Focus unit";
+VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target Unit";
+VUHDO_I18N_MOUSEOVER = "Mouseover unit";
+VUHDO_I18N_TARGETS_HARM = "Target enemy unit";
+VUHDO_I18N_FOCUS_HARM = "Focus enemy unit";
+VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target enemy unit";
+VUHDO_I18N_MOUSEOVER_HARM = "Mouseover enemy unit";

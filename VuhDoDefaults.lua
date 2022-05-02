@@ -261,7 +261,8 @@ VUHDO_DEFAULT_SPELL_CONFIG = {
 	["IS_LOAD_HOTS"] = false,
 	["smartCastModi"] = "all",
 	["autoBattleRez"] = true,
-	["autoSnowBall"] = false,
+	["custom1Unit"] = "@player",
+	["custom2Unit"] = "@player",
 }
 
 

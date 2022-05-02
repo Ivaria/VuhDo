@@ -16,7 +16,7 @@
 
 					<EditBox name="$parentCustom2EditBox" inherits="VuhDoEditBoxTemplate">
 						<Size>
-							<AbsDimension x="221" y="32" />
+							<AbsDimension x="121" y="32" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -41,7 +41,7 @@
 
 					<EditBox name="$parentCustom1EditBox" inherits="VuhDoEditBoxTemplate">
 						<Size>
-							<AbsDimension x="221" y="32" />
+							<AbsDimension x="121" y="32" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -157,6 +157,68 @@
 							</Layer>
 						</Layers>
 					</Frame>
+
+					<Button name="$parentCustom1UnitComboBox" inherits="VuhDoComboBoxTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="253" y="-69" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_setComboModel(self, "VUHDO_SPELL_CONFIG.custom1Unit",
+									{
+										{ "@player", VUHDO_I18N_PLAYER },
+										{ "@target", VUHDO_I18N_TARGETS },
+										{ "@focus", VUHDO_I18N_FOCUS },
+										{ "@vdtarget", VUHDO_I18N_MOUSEOVER_TARGET },
+										{ "@vuhdo", VUHDO_I18N_MOUSEOVER },
+										{ "@target,harm", VUHDO_I18N_TARGETS_HARM },
+										{ "@focus,harm", VUHDO_I18N_FOCUS_HARM },
+										{ "@vdtarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_HARM },
+										{ "@vuhdo,harm", VUHDO_I18N_MOUSEOVER_HARM },
+									}
+								);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K583);
+							</OnLoad>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentCustom2UnitComboBox" inherits="VuhDoComboBoxTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="253" y="-107" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_setComboModel(self, "VUHDO_SPELL_CONFIG.custom2Unit",
+									{
+										{ "@player", VUHDO_I18N_PLAYER },
+										{ "@target", VUHDO_I18N_TARGETS },
+										{ "@focus", VUHDO_I18N_FOCUS },
+										{ "@vdtarget", VUHDO_I18N_MOUSEOVER_TARGET },
+										{ "@vuhdo", VUHDO_I18N_MOUSEOVER },
+										{ "@target,harm", VUHDO_I18N_TARGETS_HARM },
+										{ "@focus,harm", VUHDO_I18N_FOCUS_HARM },
+										{ "@vdtarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_HARM },
+										{ "@vuhdo,harm", VUHDO_I18N_MOUSEOVER_HARM },
+									}
+								);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K583);
+							</OnLoad>
+						</Scripts>
+					</Button>
 
 				</Frames>
 			</Frame>
@@ -369,22 +431,6 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentSnowBallCheckButton" text="VUHDO_I18N_SNOW_BALL" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="13" y="-107" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_SPELL_CONFIG.autoSnowBall");
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K583);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
 					<Frame name="$parentSmartCastLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
 							<Layer>
@@ -398,7 +444,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-145" />
+									<AbsDimension x="13" y="-120" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -414,7 +460,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="40" y="-160" />
+									<AbsDimension x="40" y="-145" />
 								</Offset>
 							</Anchor>
 						</Anchors>
