@@ -75,13 +75,13 @@ local function VUHDO_getInstantFireText(aSlotNum)
 			if (VUHDO_SPELLS[tInstant] or sEmpty)["noselftarget"] then
 				tModi2 = " ";
 			else
-				tModi2 = " " .. "[" .. tCustomUnit .. "]" .. " ";
+				tModi2 = " " .. "[" .. tCustomUnit .. ",exists]" .. " ";
 			end
 		else
 			if (VUHDO_SPELLS[tInstant] or sEmpty)["noselftarget"] then
 				tModi2 = " [combat] ";
 			else
-				tModi2 = " " .. "[combat," .. tCustomUnit .. "]" .. " ";
+				tModi2 = " " .. "[combat," .. tCustomUnit .. ",exists]" .. " ";
 			end
 		end
 
