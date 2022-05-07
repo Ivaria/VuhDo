@@ -640,6 +640,7 @@ VUHDO_I18N_TT.K578 = "아이콘 광택의 색상을 선택하십시오.";
 VUHDO_I18N_TT.K579 = "바 광택의 색상을 선택하십시오.";
 VUHDO_I18N_TT.K580 = "디버프 아이콘을 제외목록에 표시하려면 마우스 오른쪽 버튼으로 사용할 수정 키를 선택하십시오."
 VUHDO_I18N_TT.K581 = "Check to show player nickname on bars.";
+VUHDO_I18N_TT.K583 = "Select the unit";
 
 VUHDO_I18N_DEFAULT_PROFILE = "기본 프로필";
 VUHDO_I18N_DEFAULT_LAYOUT = "기본 배치";
@@ -1155,3 +1156,12 @@ VUHDO_I18N_OVERSHIELD_BAR = "Overshield Bar";
 
 VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
+
+VUHDO_I18N_PLAYER = "Player unit";
+VUHDO_I18N_FOCUS = "Focus unit";
+VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target Unit";
+VUHDO_I18N_MOUSEOVER = "Mouseover unit";
+VUHDO_I18N_TARGETS_HARM = "Target enemy unit";
+VUHDO_I18N_FOCUS_HARM = "Focus enemy unit";
+VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target enemy unit";
+VUHDO_I18N_MOUSEOVER_HARM = "Mouseover enemy unit";
