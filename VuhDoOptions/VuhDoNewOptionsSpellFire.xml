@@ -184,7 +184,7 @@
 										{ "@vuhdo,harm", VUHDO_I18N_MOUSEOVER_HARM },
 									}
 								);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K583);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K582);
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -215,7 +215,7 @@
 										{ "@vuhdo,harm", VUHDO_I18N_MOUSEOVER_HARM },
 									}
 								);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K583);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K582);
 							</OnLoad>
 						</Scripts>
 					</Button>
