@@ -1329,13 +1329,6 @@ VUHDO_I18N_OVERSHIELD_BAR = "Избыточный щит";
 VUHDO_I18N_SHOW_HEAL_ABSORB = "Показывать\nАбсорб хила";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Абсорб хила";
 
-<<<<<<< HEAD
-=======
-VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
-
-VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
-VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
-
 VUHDO_I18N_PLAYER = "Player unit";
 VUHDO_I18N_FOCUS = "Focus unit";
 VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target Unit";
@@ -1344,4 +1337,3 @@ VUHDO_I18N_TARGETS_HARM = "Target enemy unit";
 VUHDO_I18N_FOCUS_HARM = "Focus enemy unit";
 VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target enemy unit";
 VUHDO_I18N_MOUSEOVER_HARM = "Mouseover enemy unit";
->>>>>>> 52a0e0c (Merge branch 'auto_snow_ball' into 'tbcc')

@@ -1150,12 +1150,6 @@ VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TOOLTIP = "仅为友方单位显示减�
 VUHDO_I18N_SHOW_OVERSHIELD = "显示\n溢余护盾";
 VUHDO_I18N_OVERSHIELD_BAR = "溢余护盾";
 
-<<<<<<< HEAD
-VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
-VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
-=======
-VUHDO_I18N_LIBHEALCOMM = "使用 Lib\nHealComm";
-
 VUHDO_I18N_SHOW_HEAL_ABSORB = "显示\n治疗吸收";
 VUHDO_I18N_HEAL_ABSORB_BAR = "治疗吸收条";
 
@@ -1167,5 +1161,3 @@ VUHDO_I18N_TARGETS_HARM = "敌对目标";
 VUHDO_I18N_FOCUS_HARM = "敌对焦点";
 VUHDO_I18N_MOUSEOVER_TARGET_HARM = "鼠标指向单位的敌对目标";
 VUHDO_I18N_MOUSEOVER_HARM = "鼠标指向敌对单位";
-
->>>>>>> 52a0e0c (Merge branch 'auto_snow_ball' into 'tbcc')
