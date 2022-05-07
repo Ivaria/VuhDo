@@ -174,14 +174,18 @@
 								VUHDO_setComboModel(self, "VUHDO_SPELL_CONFIG.custom1Unit",
 									{
 										{ "@player", VUHDO_I18N_PLAYER },
-										{ "@target", VUHDO_I18N_TARGETS },
+										{ "@target", VUHDO_I18N_TARGET },
+										{ "@targettarget", VUHDO_I18N_TARGET_TARGET },
 										{ "@focus", VUHDO_I18N_FOCUS },
-										{ "@vdtarget", VUHDO_I18N_MOUSEOVER_TARGET },
 										{ "@vuhdo", VUHDO_I18N_MOUSEOVER },
-										{ "@target,harm", VUHDO_I18N_TARGETS_HARM },
+										{ "@vdtarget", VUHDO_I18N_MOUSEOVER_TARGET },
+										{ "@vdtargettarget", VUHDO_I18N_MOUSEOVER_TARGET_TARGET },
+										{ "@target,harm", VUHDO_I18N_TARGET_HARM },
+										{ "@targettarget,harm", VUHDO_I18N_TARGET_TARGET_HARM },
 										{ "@focus,harm", VUHDO_I18N_FOCUS_HARM },
-										{ "@vdtarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_HARM },
 										{ "@vuhdo,harm", VUHDO_I18N_MOUSEOVER_HARM },
+										{ "@vdtarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_HARM },
+										{ "@vdtargettarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM },
 									}
 								);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K582);
@@ -205,14 +209,18 @@
 								VUHDO_setComboModel(self, "VUHDO_SPELL_CONFIG.custom2Unit",
 									{
 										{ "@player", VUHDO_I18N_PLAYER },
-										{ "@target", VUHDO_I18N_TARGETS },
+										{ "@target", VUHDO_I18N_TARGET },
+										{ "@targettarget", VUHDO_I18N_TARGET_TARGET },
 										{ "@focus", VUHDO_I18N_FOCUS },
-										{ "@vdtarget", VUHDO_I18N_MOUSEOVER_TARGET },
 										{ "@vuhdo", VUHDO_I18N_MOUSEOVER },
-										{ "@target,harm", VUHDO_I18N_TARGETS_HARM },
+										{ "@vdtarget", VUHDO_I18N_MOUSEOVER_TARGET },
+										{ "@vdtargettarget", VUHDO_I18N_MOUSEOVER_TARGET_TARGET },
+										{ "@target,harm", VUHDO_I18N_TARGET_HARM },
+										{ "@targettarget,harm", VUHDO_I18N_TARGET_TARGET_HARM },
 										{ "@focus,harm", VUHDO_I18N_FOCUS_HARM },
-										{ "@vdtarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_HARM },
 										{ "@vuhdo,harm", VUHDO_I18N_MOUSEOVER_HARM },
+										{ "@vdtarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_HARM },
+										{ "@vdtargettarget,harm", VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM },
 									}
 								);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K582);
