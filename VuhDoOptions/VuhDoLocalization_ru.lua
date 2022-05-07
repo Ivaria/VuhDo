@@ -742,8 +742,8 @@ VUHDO_I18N_TT.K578 = "Выбрать цвет подсветки иконки.";
 VUHDO_I18N_TT.K579 = "Выбрать цвет подсветки фрейма.";
 VUHDO_I18N_TT.K580 = "Выберите модификатор для использования с ПКМ для добавления дебафов в чёрный список."
 VUHDO_I18N_TT.K581 = "Отметьте, чтобы показывать ники на фреймах.";
-VUHDO_I18N_TT.K582 = "Check to show incoming heal using LibHealComm-4.0.";
-VUHDO_I18N_TT.K583 = "Select the unit";
+VUHDO_I18N_TT.K582 = "Select the unit";
+
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный профиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";
 VUHDO_I18N_APPLY_TO_ALL = "Применить\nко всем";
