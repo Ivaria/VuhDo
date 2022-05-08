@@ -742,6 +742,12 @@ VUHDO_I18N_TT.K578 = "Выбрать цвет подсветки иконки.";
 VUHDO_I18N_TT.K579 = "Выбрать цвет подсветки фрейма.";
 VUHDO_I18N_TT.K580 = "Выберите модификатор для использования с ПКМ для добавления дебафов в чёрный список."
 VUHDO_I18N_TT.K581 = "Отметьте, чтобы показывать ники на фреймах.";
+VUHDO_I18N_TT.K582 = "Select the unit";
+
+-- TBCC game version specific strings (tooltip IDs begin at K900)
+
+VUHDO_I18N_TT.K900 = "Check to show incoming heal using LibHealComm-4.0.";
+
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный профиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";
 VUHDO_I18N_APPLY_TO_ALL = "Применить\nко всем";
@@ -1326,5 +1332,21 @@ VUHDO_I18N_OVERSHIELD_BAR = "Избыточный щит";
 
 VUHDO_I18N_SHOW_HEAL_ABSORB = "Показывать\nАбсорб хила";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Абсорб хила";
+
+VUHDO_I18N_PLAYER = "Player unit";
+VUHDO_I18N_TARGET = "Target unit"
+VUHDO_I18N_TARGET_TARGET = "Target's target unit"
+VUHDO_I18N_FOCUS = "Focus unit";
+VUHDO_I18N_MOUSEOVER = "Mouseover unit";
+VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target unit";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Mouseover's target's target unit";
+VUHDO_I18N_TARGET_HARM = "Target unit (hostile only)";
+VUHDO_I18N_TARGET_TARGET_HARM = "Target's target unit (hostile only)";
+VUHDO_I18N_FOCUS_HARM = "Focus unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_HARM = "Mouseover unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Mouseover's target's target unit (hostile only)";
+
+-- TBCC game version specific strings
 
 VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";

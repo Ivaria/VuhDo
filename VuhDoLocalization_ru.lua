@@ -571,3 +571,6 @@ VUHDO_I18N_DEF_BOUQUET_BAR_MANA_TANK_ONLY = "Манабар: Ресурс (Та�
 VUHDO_I18N_DEF_COUNTER_HEAL_ABSORB = "Счётчик: Всё поглощение исцеления # тыс.";
 VUHDO_I18N_DEF_STATUS_HEAL_ABSORB = "Статус: Поглощение исцеления";
 
+-- 3.135
+VUHDO_I18N_TRINKET_1 = "Trinket 1";
+VUHDO_I18N_TRINKET_2 = "Trinket 2";
