@@ -46,6 +46,7 @@ Bugfixes:
   
 Improvements:  
 -- Added default custom debuffs for phase 4 encounters  
+-- Added default custom debuffs for phase 5 encounters  
   
   
 -------------------------------------------------------------  
