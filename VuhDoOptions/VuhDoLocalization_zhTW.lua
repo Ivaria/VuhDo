@@ -1158,13 +1158,18 @@ VUHDO_I18N_SHOW_HEAL_ABSORB = "Show\nHeal Absorb";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
 
 VUHDO_I18N_PLAYER = "Player unit";
+VUHDO_I18N_TARGET = "Target unit"
+VUHDO_I18N_TARGET_TARGET = "Target's target unit"
 VUHDO_I18N_FOCUS = "Focus unit";
-VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target Unit";
 VUHDO_I18N_MOUSEOVER = "Mouseover unit";
-VUHDO_I18N_TARGETS_HARM = "Target enemy unit";
-VUHDO_I18N_FOCUS_HARM = "Focus enemy unit";
-VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target enemy unit";
-VUHDO_I18N_MOUSEOVER_HARM = "Mouseover enemy unit";
+VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target unit";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Mouseover's target's target unit";
+VUHDO_I18N_TARGET_HARM = "Target unit (hostile only)";
+VUHDO_I18N_TARGET_TARGET_HARM = "Target's target unit (hostile only)";
+VUHDO_I18N_FOCUS_HARM = "Focus unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_HARM = "Mouseover unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Mouseover's target's target unit (hostile only)";
 
 -- TBCC game version specific strings
 

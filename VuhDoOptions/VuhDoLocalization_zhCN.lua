@@ -1158,13 +1158,18 @@ VUHDO_I18N_SHOW_HEAL_ABSORB = "显示\n治疗吸收";
 VUHDO_I18N_HEAL_ABSORB_BAR = "治疗吸收条";
 
 VUHDO_I18N_PLAYER = "自己";
+VUHDO_I18N_TARGET = "Target unit"
+VUHDO_I18N_TARGET_TARGET = "Target's target unit"
 VUHDO_I18N_FOCUS = "焦点";
-VUHDO_I18N_MOUSEOVER_TARGET = "鼠标指向单位的目标";
-VUHDO_I18N_MOUSEOVER = "鼠标指向单位";
-VUHDO_I18N_TARGETS_HARM = "敌对目标";
-VUHDO_I18N_FOCUS_HARM = "敌对焦点";
-VUHDO_I18N_MOUSEOVER_TARGET_HARM = "鼠标指向单位的敌对目标";
-VUHDO_I18N_MOUSEOVER_HARM = "鼠标指向敌对单位";
+VUHDO_I18N_MOUSEOVER = "Mouseover unit";
+VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target unit";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Mouseover's target's target unit";
+VUHDO_I18N_TARGET_HARM = "Target unit (hostile only)";
+VUHDO_I18N_TARGET_TARGET_HARM = "Target's target unit (hostile only)";
+VUHDO_I18N_FOCUS_HARM = "Focus unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_HARM = "Mouseover unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target unit (hostile only)";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Mouseover's target's target unit (hostile only)";
 
 -- TBCC game version specific strings
 
