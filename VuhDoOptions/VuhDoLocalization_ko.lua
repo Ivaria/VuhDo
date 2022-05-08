@@ -640,7 +640,7 @@ VUHDO_I18N_TT.K578 = "아이콘 광택의 색상을 선택하십시오.";
 VUHDO_I18N_TT.K579 = "바 광택의 색상을 선택하십시오.";
 VUHDO_I18N_TT.K580 = "디버프 아이콘을 제외목록에 표시하려면 마우스 오른쪽 버튼으로 사용할 수정 키를 선택하십시오."
 VUHDO_I18N_TT.K581 = "Check to show player nickname on bars.";
-VUHDO_I18N_TT.K582 = "Select the unit";
+VUHDO_I18N_TT.K582 = "Select the unit to target.";
 
 -- TBCC game version specific strings (tooltip IDs begin at K900)
 
