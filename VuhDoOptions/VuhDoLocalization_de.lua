@@ -1164,3 +1164,5 @@ VUHDO_I18N_FOCUS_HARM = "Focus unit (hostile only)";
 VUHDO_I18N_MOUSEOVER_HARM = "Mouseover unit (hostile only)";
 VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target unit (hostile only)";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Mouseover's target's target unit (hostile only)";
+
+VUHDO_I18N_CLOCK = "Clock";
