@@ -93,6 +93,7 @@
 			<Scripts>
 				<OnLoad>
 					VUHDO_initHotFadeCheckButton(self);
+					VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.isFadeOut", true);
 				</OnLoad>
 			</Scripts>
 		</CheckButton>
@@ -108,6 +109,7 @@
 			<Scripts>
 				<OnLoad>
 					VUHDO_initHotFlashCheckButton(self);
+					VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.isFlashWhenLow", true);
 				</OnLoad>
 			</Scripts>
 		</CheckButton>
@@ -119,12 +121,12 @@
 		<Frames>
 			<Frame name="$parentHotsPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="464" y="364" />
+					<AbsDimension x="457" y="409" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="31" y="-31" />
+							<AbsDimension x="21" y="-21" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -365,6 +367,58 @@
 						</Layers>
 					</Frame>
 
+					<CheckButton name="$parentFadeCheckButton" text="VUHDO_I18N_FADE_OUT" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-369" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.isFadeOut");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K583);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentFlashCheckButton" text="VUHDO_I18N_FLASH" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="119" y="-369" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.isFlashWhenLow");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K584);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+
+					<Frame name="$parentBackgroundLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="75" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-352" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_BACKGROUND" justifyH="RIGHT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
 					<Frame name="$parentOffLabel" inherits="VuhDoLabelFrameTemplate">
 						<Size>
 							<AbsDimension x="75" y="18" />
@@ -477,6 +531,11 @@
 								</FontString>
 							</Layer>
 						</Layers>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.isFadeOut", true);
+							</OnLoad>
+						</Scripts>
 					</Frame>
 
 					<Frame name="$parentFlashLabel" inherits="VuhDoLabelFrameTemplate">
@@ -496,7 +555,13 @@
 								</FontString>
 							</Layer>
 						</Layers>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_PANEL_SETUP.BAR_COLORS.HOTS.isFlashWhenLow", true);
+							</OnLoad>
+						</Scripts>
 					</Frame>
+
 					<Frame name="$parentHot1RadiGroup" inherits="VuhDoHotTimerRadioGroup">
 						<Anchors>
 							<Anchor point="TOPLEFT">

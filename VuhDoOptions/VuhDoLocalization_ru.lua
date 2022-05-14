@@ -743,6 +743,8 @@ VUHDO_I18N_TT.K579 = "Выбрать цвет подсветки фрейма.";
 VUHDO_I18N_TT.K580 = "Выберите модификатор для использования с ПКМ для добавления дебафов в чёрный список."
 VUHDO_I18N_TT.K581 = "Отметьте, чтобы показывать ники на фреймах.";
 VUHDO_I18N_TT.K582 = "Select the unit to target.";
+VUHDO_I18N_TT.K583 = "Check to make all HoT icons fade out when the HoT is expiring.";
+VUHDO_I18N_TT.K584 = "Check to make all HoT icons flash when the HoT is expiring.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный профиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";

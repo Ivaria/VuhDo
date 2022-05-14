@@ -639,6 +639,8 @@ VUHDO_I18N_TT.K579 = "选择技能条闪光的颜色.";
 VUHDO_I18N_TT.K580 = "选择一个修改键，使用鼠标右键将debuff图标列入黑名单."
 VUHDO_I18N_TT.K581 = "选中可在栏上显示玩家昵称.";
 VUHDO_I18N_TT.K582 = "选择释放的目标";
+VUHDO_I18N_TT.K583 = "Check to make all HoT icons fade out when the HoT is expiring.";
+VUHDO_I18N_TT.K584 = "Check to make all HoT icons flash when the HoT is expiring.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "预设存档";
 VUHDO_I18N_DEFAULT_LAYOUT = "预设按键配置";
