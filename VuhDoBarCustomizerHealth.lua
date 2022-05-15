@@ -487,7 +487,7 @@ function VUHDO_overhealTextCallback(aUnit, aPanelNum, aProviderName, aText, aVal
 		tBar = VUHDO_getHealthBar(tButton, 1);
 		VUHDO_getOverhealText(tBar):SetText(aText);
 
-		-- Sonderwurst Overheal wirklich nötig?
+		-- Overheal really necessary ? -Sonderwurst
 		if strfind(aProviderName, "OVERHEAL", 1, true) then
 			tInfo = VUHDO_RAID[aUnit];
 			
@@ -780,7 +780,7 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 						VUHDO_getLifeText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
 					end
 				end
-			  tHealthBar:SetValue(tQuota);
+			    tHealthBar:SetValue(tQuota);
 			else
 				tHealthBar:SetValue(0);
 			end
@@ -791,7 +791,7 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 	if not tInfo then return; end
 
 	-- Targets und targets-of-target, die im Raid sind
-  tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[tInfo["name"]];
+    tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[tInfo["name"]];
 	if not tAllButtons then return; end
 
 	VUHDO_CUSTOM_INFO["fixResolveId"] = aUnit;
@@ -824,7 +824,7 @@ function VUHDO_healthBarBouquetCallbackCustom(aUnit, anIsActive, anIcon, aCurrVa
 						VUHDO_getLifeText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
 					end
 				end
-			  tHealthBar:SetValue(tQuota);
+			  	tHealthBar:SetValue(tQuota);
 			else
 				tHealthBar:SetValue(0);
 			end
@@ -963,7 +963,7 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 	elseif 5 == anUpdateMode then -- VUHDO_UPDATE_RANGE
 		VUHDO_determineIncHeal(aUnit);
 		for _, tButton in pairs(tAllButtons) do
-			VUHDO_customizeText(tButton, 2, false); -- für d/c tag -- VUHDO_UPDATE_HEALTH
+			VUHDO_customizeText(tButton, 2, false); -- for d/c tag -- VUHDO_UPDATE_HEALTH
 			VUHDO_customizeDebuffIconsRange(tButton);
 		end
 		VUHDO_updateIncHeal(aUnit);

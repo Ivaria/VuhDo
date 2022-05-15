@@ -181,9 +181,9 @@ local VUHDO_customizeTargetBar = VUHDO_customizeTargetBar;
 
 
 
--- Wir merken uns die Target-Buttons, wenn das Ziel im Raid ist,
--- um Gesundheitsupdates mit dem regulären Mechanismus durchzuführen
--- die Target-Buttons sind also durch den Target-Namen indiziert.
+-- We remember the target buttons when the target is in the raid
+-- to perform health updates using the regular mechanism.
+-- The target buttons are indexed by target name aswell.
 local tName;
 local function VUHDO_rememberTargetButton(aTargetUnit, aButton)
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
@@ -202,9 +202,8 @@ end
 
 
 
--- Lösche alle Target-Buttons der Person, deren Ziel sich geändert hat
--- Wobei die Buttons mit dem Namen des TARGETS indiziert sind, welchen
--- wir uns VUHDO_IN_RAID_TARGETS aber gemerkt haben
+-- Delete all target buttons for the person whose target has changed.
+-- Those buttons are indexed with the name of the TARGET, which we have VUHDO_IN_RAID_TARGETS noted.
 local tName;
 local function VUHDO_forgetTargetButton(aTargetUnit, aButton)
 	tName = VUHDO_IN_RAID_TARGETS[aTargetUnit];
