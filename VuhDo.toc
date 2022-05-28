@@ -1,8 +1,8 @@
-## Interface: 90200
+## Interface: 90205
 
 ## Title: VuhDo ['vu:du:]
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
-## Version: 3.135
+## Version: 3.136
 ## Notes: Raid Frames providing click-heal functionality, buff and debuff control, main tank management and much more
 
 ## X-Curse-Project-ID: 7950
