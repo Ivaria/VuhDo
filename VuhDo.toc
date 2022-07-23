@@ -1,4 +1,4 @@
-## Interface: 30400
+## Interface: 20504
 
 ## Title: VuhDo ['vu:du:]
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
