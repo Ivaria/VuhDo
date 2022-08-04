@@ -1317,7 +1317,31 @@ function VUHDO_loadDefaultConfig()
 		-- 3.4.0 - wotlkc - phase 1
 		VUHDO_addCustomSpellIds(54, 
 		-- [[ Obsidian Sanctum ]]
+		60708,  -- Fade Armor
+		57491,  -- Flame Tsunami
+		-- 58766,  -- Gift of Twilight
+		-- 60430,  -- Molten Fury
+		-- 58105,  -- Power of Shadron
+		-- 61248,  -- Power of Tenebron
+		-- 61251,  -- Power of Vesperon
+		58957,  -- Tail Lash
+		-- 61885,  -- Twilight Residue
+		-- 60639,  -- Twilight Revenge
+		-- 61254,  -- Will of Sartharion
 		-- [[ Eye of Eternity ]]
+		60072,  -- Arcane Breath
+		-- 56438,  -- Arcane Overload
+		-- 57060,  -- Haste
+		55849,  -- Power Spark
+		56152,  -- Power Spark
+		57428,  -- Static Field
+		56505,  -- Surge of Power
+		60936,  -- Surge of Power
+		61071,  -- Vortex
+		61072,  -- Vortex
+		61073,  -- Vortex
+		61074,  -- Vortex
+		61075,  -- Vortex
 		-- [[ Naxxramas ]]
 		-- Trash
 		28467,  -- Mortal Wound
