@@ -83,6 +83,7 @@ declare -A si_game_type_interface=()      # type -> game type toc (last file)
 declare -A toc_interfaces=()              # path -> all toc interface values (: delim)
 declare -A toc_root_interface=()          # path -> base interface value
 declare -A toc_root_paths=()              # path -> directory name
+declare -a toc_paths=()                   # toc path in order of processing
 
 # Script return code
 exit_code=0
@@ -1164,7 +1165,7 @@ set_build_version() {
 	local toc_game_type version
 
 	if [[ -z "$game_version" ]]; then
-		for path in "${!toc_interfaces[@]}"; do
+		for path in "${toc_paths[@]}"; do
 			if [[ -z "$split" && -z "$game_type" ]]; then
 				# no split and no game type means we should use the root interface value
 				# (blows up if one isn't set? should)
@@ -1181,7 +1182,8 @@ set_build_version() {
 					30*) toc_game_type="wrath" ;;
 					*) toc_game_type="retail"
 				esac
-				if [[ -z $game_type || $game_type == "$toc_game_type" ]]; then
+				# root addon interfaces take priority
+				if [[ -z $game_type || $game_type == "$toc_game_type" ]] && [[ -z ${game_type_interface[$toc_game_type]} || ${toc_root_paths[${path%/*}]} == "$package" ]]; then
 					game_type_interface[$toc_game_type]="$toc_version"
 					game_type_version[$toc_game_type]=$( printf "%d.%d.%d" "${toc_version:0:1}" "${toc_version:1:2}" "${toc_version:3:2}" )
 				fi
@@ -1191,7 +1193,10 @@ set_build_version() {
 		if [[ -n "$game_type" ]]; then
 			game_version="${game_type_version[$game_type]}"
 		else
-			game_version=$( IFS=',' ; echo "${game_type_version[*]}" )
+			game_version=$(
+				readarray -t sorted < <(printf '%s\n' "${game_type_version[@]}" | sort -r)
+				IFS=',' ; echo "${sorted[*]}"
+			)
 		fi
 	fi
 
@@ -1220,6 +1225,7 @@ fi
 for toc_path in "$topdir/$package"{,-Mainline,_Mainline,-Classic,_Classic,-Vanilla,_Vanilla,-BCC,_BCC,-TBC,_TBC,-Wrath,_Wrath,-WOTLKC,_WOTLKC}.toc; do
 	if [[ -f "$toc_path" ]]; then
 		set_toc_project_info "$toc_path"
+		toc_paths+=("$toc_path")
 		toc_root_paths["$topdir"]="$package"
 	fi
 done
@@ -1237,6 +1243,9 @@ for path in "${!toc_root_paths[@]}"; do
 		if [[ -f "$toc_path" ]]; then
 			set_toc_project_info "$toc_path"
 			do_toc "$toc_path" "${toc_root_paths[$path]}"
+			if [[ " ${toc_paths[*]} " != *" $toc_path "* ]]; then
+				toc_paths+=("$toc_path")
+			fi
 		fi
 	done
 done
@@ -1253,15 +1262,11 @@ if [[ -n "$slug" && "$slug" -gt 0 && -z "$fallback_toc_file" ]]; then
 fi
 
 if [[ -n "$split" ]]; then
-	# if [[ ${#toc_interfaces[@]} -gt 1 ]]; then
-	# 	echo "Creating TOC files is enabled but there are already multiple TOC files:" >&2
-	# 	for path in "${!toc_interfaces[@]}"; do
-	# 		echo "  ${path##$topdir/}" >&2
-	# 	done
-	# 	exit 1
-	# fi
 	if [[ "${toc_interfaces[*]}" != *":"* ]]; then
-		echo "Creating TOC files is enabled but there is only one TOC interface version: ${toc_interfaces[*]}" >&2
+		echo "Creating TOC files is enabled but there is only one TOC interface version per file?" >&2
+		for path in "${toc_paths[@]}"; do
+			[[ -n ${toc_interfaces[$path]} ]] && echo "  ${path##$topdir/} [${toc_interfaces[$path]}]" >&2
+		done
 		exit 1
 	fi
 fi
@@ -1493,7 +1498,7 @@ localization_filter() {
 						echo -n "$_ul_prefix"
 
 						# Fetch the localization data, but don't output anything if there is an error.
-						curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    Error! "$0"\n           "url; print o >"/dev/stderr"; exit 1 } /<!DOCTYPE/ { print "    Error! Invalid output\n           "url >"/dev/stderr"; exit 1 } /^'"$_ul_tablename"' = '"$_ul_tablename"' or \{\}/ { next } { print }'
+						curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    \033[01;31mError! "$0"\033[0m\n           "url; print o >"/dev/fd/3"; exit 1 } /<!DOCTYPE/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^<html>/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^'"$_ul_tablename"' = '"$_ul_tablename"' or \{\}/ { next } { print }' || exit 1
 
 						# Insert a trailing blank line to match CF packager.
 						if [ -z "$_ul_eof" ]; then
@@ -1501,7 +1506,7 @@ localization_filter() {
 						fi
 					else
 						# Parse out a single phrase. This is kind of expensive, but caching would be way too much effort to optimize for what is basically an edge case.
-						_ul_value=$( curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    Error! "$0"\n           "url; print o >"/dev/stderr"; exit 1 } /<!DOCTYPE/ { print "    Error! Invalid output\n           "url >"/dev/stderr"; exit 1 } { print }' | sed -n '/L\["'"$_ul_singlekey"'"\]/p' | sed 's/^.* = "\(.*\)"/\1/' )
+						_ul_value=$( curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    \033[01;31mError! "$0"\033[0m\n           "url; print o >"/dev/fd/3"; exit 1 } /<!DOCTYPE/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^<html>/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } { print }' | sed -n '/L\["'"$_ul_singlekey"'"\]/p' | sed 's/^.* = "\(.*\)"/\1/' )
 						if [ -n "$_ul_value" ] && [ "$_ul_value" != "$_ul_singlekey" ]; then
 							# The result is different from the base value so print out the line.
 							echo "${_ul_prefix}${_ul_value}${_ul_line##*)@}"
@@ -1547,7 +1552,9 @@ toc_interface_filter() {
 			sed -e $'1s/^\xEF\xBB\xBF//' -e '1i\
 ## Interface: '"$toc_version" -e '/^## Interface-/d'
 		fi
-		[[ -z "$split" ]] && echo "    Set Interface to ${toc_version}" >&3
+		if [[ -z "$split" ]]; then
+			echo "    Set Interface to ${toc_version}" >&3
+		fi
 	else # cleanup
 		sed -e $'1s/^\xEF\xBB\xBF//' -e '/^## Interface-/d'
 	fi
@@ -1691,7 +1698,7 @@ copy_directory_tree() {
 							[ "$_cdt_gametype" != "classic" ] && _cdt_filters+="|lua_filter version-classic"
 							[ "$_cdt_gametype" != "bcc" ] && _cdt_filters+="|lua_filter version-bcc"
 							[ "$_cdt_gametype" != "wrath" ] && _cdt_filters+="|lua_filter version-wrath"
-							[ -n "$_cdt_localization" ] && _cdt_filters+="|localization_filter"
+							[ -n "$_cdt_localization" ] && grep -q "@localization" "$_cdt_srcdir/$file" && _cdt_filters+="|localization_filter"
 							;;
 						*.xml)
 							[ -n "$_cdt_do_not_package" ] && _cdt_filters+="|do_not_package_filter xml"
@@ -1727,7 +1734,7 @@ copy_directory_tree() {
 								_cdt_filters+="|toc_filter version-bcc $([[ "$_cdt_gametype" != "bcc" ]] && echo "true")"
 								_cdt_filters+="|toc_filter version-wrath $([[ "$_cdt_gametype" != "wrath" ]] && echo "true")"
 								_cdt_filters+="|toc_interface_filter '${si_game_type_interface_all[${_cdt_gametype:- }]}' '${toc_root_interface["$_cdt_srcdir/$file"]}'"
-								[ -n "$_cdt_localization" ] && _cdt_filters+="|localization_filter"
+								[ -n "$_cdt_localization" ] && grep -q "@localization" "$_cdt_srcdir/$file" && _cdt_filters+="|localization_filter"
 							fi
 							;;
 					esac
@@ -1749,7 +1756,8 @@ copy_directory_tree() {
 						exit 1
 					fi
 
-					eval < "$_cdt_srcdir/$file" "$_cdt_filters" 3>&1 > "$_cdt_destdir/$file"
+					set -o pipefail
+					eval < "$_cdt_srcdir/$file" "$_cdt_filters" 3>&1 > "$_cdt_destdir/$file" || exit 1
 
 					# Create game type specific TOCs
 					if [[ -n $_cdt_split && -n ${toc_root_interface["$_cdt_srcdir/$file"]} ]]; then
@@ -2726,7 +2734,7 @@ upload_wago() {
 		return 0
 	fi
 
-	local _wago_support_property _wago_versions
+	local _wago_versions _wago_game_version _wago_support_property
 	_wago_versions=$( curl -s https://addons.wago.io/api/data/game | jq -c '.patches' 2>/dev/null )
 	if [ -n "$_wago_versions" ]; then
 		_wago_support_property=
@@ -2749,7 +2757,9 @@ upload_wago() {
 				echo "WARNING: No Wago game version match for \"${game_type_version[$type]}\", using \"$version\"" >&2
 			fi
 			_wago_support_property+="\"supported_${wago_type}_patch\": \"${version}\", "
+			_wago_game_version+=",${version}"
 		done
+		_wago_game_version="${_wago_game_version#,}"
 	fi
 	if [ -z "$_wago_support_property" ]; then
 		echo "Error fetching game version info from https://addons.wago.io/api/data/game"
@@ -2779,7 +2789,7 @@ upload_wago() {
 	EOF
 	)
 
-	echo "Uploading $archive_name ($game_version $file_type) to Wago"
+	echo "Uploading $archive_name ($_wago_game_version $file_type) to Wago"
 	resultfile="$releasedir/wago_result.json"
 	if result=$( echo "$_wago_payload" | curl -sS --retry 3 --retry-delay 10 \
 			-w "%{http_code}" -o "$resultfile" \
