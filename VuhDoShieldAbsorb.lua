@@ -5,16 +5,21 @@ local type = type;
 local UnitGetTotalAbsorbs = VUHDO_unitGetTotalAbsorbs;
 
 local VUHDO_SHIELDS = {
-	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD -- ok
-	[123258] = 15, -- Power Word: Shield (Improved)
-	[11426] = 60, -- VUHDO_SPELL_ID.ICE_BARRIER -- ok
-	[116849] = 12, -- Life Cocoon
-	--[77535] = 10, -- Blood Shield (Blood DK) - Physical damage ONLY
-	[108416] = 20, -- Sacrificial Pact (warlock talent)
-	[1463] = 8, -- Incanter's Ward (mage talent)
-	[114893] = 10, -- Stone Bulwark Totem (shaman talent)
-	[187805] = 15, -- VUHDO_SPELL_ID.BUFF_ETHERALUS
-	[114908] = 10, -- VUHDO_SPELL_ID.SPIRIT_SHELL
+	[17] = 30,  --Power Word: Shield rank 1
+	[592] = 30,  --Power Word: Shield rank 2
+	[600] = 30,  --Power Word: Shield rank 3
+	[3747] = 30,  --Power Word: Shield rank 4
+	[6056] = 30,  --Power Word: Shield rank 5
+	[6066] = 30,  --Power Word: Shield rank 6
+	[10898] = 30,  --Power Word: Shield rank 7
+	[10899] = 30,  --Power Word: Shield rank 8
+	[10900] = 30,  --Power Word: Shield rank 9
+	[10901] = 30,  --Power Word: Shield rank 10
+	[25217] = 30, --Power Word: Shield rank 11
+	[25218] = 30, --Power Word: Shield rank 12
+	[48065] = 30, --Power Word: Shield rank 13
+	[48066] = 30, --Power Word: Shield rank 14
+	[56160] = 30, --Glyph of Power Word: Shield
 }
 
 
@@ -301,7 +306,16 @@ end
 
 --
 function VUHDO_getUnitOverallShieldRemain(aUnit)
-	return UnitGetTotalAbsorbs(aUnit) or 0;
+	local aRemain = UnitGetTotalAbsorbs(aUnit)
+	if aRemain > 0 then return aRemain end
+	if VUHDO_SHIELD_LEFT[aUnit] then
+		for _, value in pairs(VUHDO_SHIELD_LEFT[aUnit]) do
+			if value then
+				aRemain = aRemain + value
+			end
+		end
+	end
+	return aRemain;
 end
 
 
@@ -310,7 +324,7 @@ end
 local tUnit;
 local VUHDO_DEBUFF_SHIELDS = { };
 local tDelta, tShieldName;
-function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldName, anAmount, aSpellId, anAbsorbAmount)
+function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldName, anAmount, aSpellId, anAbsorbAmount, anHealAmount, anCritical, anAbsorbSpellName, anAbsorbSpellSchool, anAbsorbSpellDamageAmount ,anAbsorbSwingDamageAmount)
 	tUnit = VUHDO_RAID_GUIDS[aDstGuid];
 	if not tUnit then return; end
 
@@ -327,15 +341,21 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 
 	if VUHDO_SHIELDS[aSpellId] then
 
-		if "SPELL_AURA_REFRESH" == aMessage then
+		if "SPELL_AURA_REFRESH" == aMessage and anAmount then --anAmount is always nil at wotlkc
 			VUHDO_updateShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
-		elseif "SPELL_AURA_APPLIED" == aMessage then
+		elseif "SPELL_AURA_APPLIED" == aMessage and anAmount then --anAmount is always nil at wotlkc
 			VUHDO_initShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
 			VUHDO_SHIELD_LAST_SOURCE_GUID[tUnit][aShieldName] = aSrcGuid;
 		elseif "SPELL_AURA_REMOVED" == aMessage
 			or "SPELL_AURA_BROKEN" == aMessage
 			or "SPELL_AURA_BROKEN_SPELL" == aMessage then
 			VUHDO_removeShield(tUnit, aShieldName);
+		elseif "SPELL_HEAL" == aMessage and aSpellId == 56160 then --Glyph of Power Word: Shield
+			anAmount = (anHealAmount + anAmount) * 5
+			if anCritical then
+				anAmount = math.floor(anAmount / 1.5)
+			end
+			VUHDO_initShieldValue(tUnit, VUHDO_SPELL_ID.POWERWORD_SHIELD , anAmount, VUHDO_SHIELDS[aSpellId]);
 		end
 	elseif VUHDO_ABSORB_DEBUFFS[aSpellId] then
 
@@ -368,6 +388,18 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		 "SPELL_AURA_BROKEN_SPELL" == aMessage) then
 		VUHDO_updateAllHoTs();
 		VUHDO_updateAllCyclicBouquets(true);
+	elseif "SPELL_ABSORBED" == aMessage then
+		if anAbsorbSpellSchool then
+			tShieldName = anAbsorbSpellName
+			anAmount = anAbsorbSpellDamageAmount or 0
+		else
+			tShieldName = anAbsorbAmount
+			anAmount = anAbsorbSwingDamageAmount or 0
+		end
+		if VUHDO_SHIELD_LEFT[tUnit][tShieldName] then
+			tDelta = VUHDO_getShieldLeftAmount(tUnit, tShieldName) - anAmount;
+			VUHDO_updateShieldValue(tUnit, tShieldName, tDelta);
+		end
 	end
 
 	VUHDO_updateBouquetsForEvent(tUnit, 36); -- VUHDO_UPDATE_SHIELD
