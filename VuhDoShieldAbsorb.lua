@@ -351,7 +351,7 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 			or "SPELL_AURA_BROKEN_SPELL" == aMessage then
 			VUHDO_removeShield(tUnit, aShieldName);
 		elseif "SPELL_HEAL" == aMessage and aSpellId == 56160 then --Glyph of Power Word: Shield
-			anAmount = (anHealAmount + anAmount) * 5
+			anAmount = anHealAmount * 5
 			if anCritical then
 				anAmount = math.floor(anAmount / 1.5)
 			end
