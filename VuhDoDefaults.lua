@@ -1324,89 +1324,122 @@ function VUHDO_loadDefaultConfig()
 		-- 58105,  -- Power of Shadron
 		-- 61248,  -- Power of Tenebron
 		-- 61251,  -- Power of Vesperon
+		56910,  -- Tail Lash
 		58957,  -- Tail Lash
 		-- 61885,  -- Twilight Residue
 		-- 60639,  -- Twilight Revenge
 		-- 61254,  -- Will of Sartharion
+		57634,  -- Magma
 		-- [[ Eye of Eternity ]]
+		56272,  -- Arcane Breath
 		60072,  -- Arcane Breath
 		-- 56438,  -- Arcane Overload
 		-- 57060,  -- Haste
-		55849,  -- Power Spark
-		56152,  -- Power Spark
+		-- 55849,  -- Power Spark
+		-- 56152,  -- Power Spark
 		57428,  -- Static Field
-		56505,  -- Surge of Power
+		55849,  -- Surge of Power
+		-- 61071,  -- Vortex
+		-- 61072,  -- Vortex
+		-- 61073,  -- Vortex
+		-- 61074,  -- Vortex
+		-- 61075,  -- Vortex
 		60936,  -- Surge of Power
-		61071,  -- Vortex
-		61072,  -- Vortex
-		61073,  -- Vortex
-		61074,  -- Vortex
-		61075,  -- Vortex
 		-- [[ Naxxramas ]]
 		-- Trash
 		28467,  -- Mortal Wound
+		55334,  -- Strangulate
 		55314,  -- Strangulate
+		54714,  -- Acid Volley
 		29325,  -- Acid Volley
+		54331,  -- Acidic Sludge
 		27891,  -- Acidic Sludge
+		55322,  -- Blood Plague
 		55264,  -- Blood Plague
+		28440,  -- Veil of Shadow
 		53803,  -- Veil of Shadow
+		54708,  -- Rend
 		54703,  -- Rend
+		59899,  -- Poison Charge
 		56674,  -- Poison Charge
+		54326,  -- Bile Vomit
 		27807,  -- Bile Vomit
+		54709,  -- Flesh Rot
 		56674,  -- Flesh Rot
+		56624,  -- Virulent Poison
 		56605,  -- Virulent Poison
+		54772,  -- Putrid Bite
 		30113,  -- Putrid Bite
 		33661,  -- Crush Armor
+		54769,  -- Slime Burst
 		30109,  -- Slime Burst
+		54805,  -- Mind Flay
 		28310,  -- Mind Flay
+		29407,  -- Mind Flay
 		16856,  -- Mortal Strike
+		56427,  -- War Stomp
 		27758,  -- War Stomp
 		30091,  -- Flamestrike
+		56538,  -- Plague Splash
 		54780,  -- Plague Splash
 		55318,  -- Pierce Armor
 		29848,  -- Polymorph
 		6713,   -- Disarm
-		29407,  -- Mind Flay
 		28169,  -- Mutating Injection
+		30080,  -- Retching Plague
+		30081,  -- Retching Plague
 		56444,  -- Retching Plague
 		-- Anub'Rekhan
+		56098,  -- Acid Spit
 		28969,  -- Acid Spit
 		-- 28783,  -- Impale
+		54022,  -- Locust Swarm
 		28786,  -- Locust Swarm
 		-- 28991,  -- Web
 		-- Grand Widow Faerlina
 		-- 22886,  -- Berserker Charge
 		28796,  -- Poison Bolt Volley
-		28794,  -- Rain of Fire
+		54098,  -- Poison Bolt Volley
+		-- 28794,  -- Rain of Fire
 		-- 30225,  -- Silence
 		-- Maexxna
 		54121,  -- Necrotic Poison
-		29484,  -- Web Spray
+		28776,  -- Necrotic Poison
+		-- 29484,  -- Web Spray
 		28622,  -- Web Wrap
 		-- Noth the Plaguebringer
+		54814,  -- Cripple
 		29212,  -- Cripple
 		32736,  -- Mortal Strike
 		29213,  -- Curse of the Plaguebringer
+		54835,  -- Curse of the Plaguebringer
 		29214,  -- Wrath of the Plaguebringer
+		54836,  -- Wrath of the Plaguebringer
 		-- Heigan the Unclean
 		29998,  -- Decrepit Fever
+		55011,  -- Decrepit Fever
 		29310,  -- Spell Disruption
 		-- 29371,  -- Eruption
-		30113,  -- Putrid Bite
-		30109,  -- Slime Burst
+		54772,  -- Putrid Bite
+		54769,  -- Slime Burst
+		56538,  -- Plague Splash
 		-- Loatheb
 		29204,  -- Inevitable Doom
+		55052,  -- Inevitable Doom
 		55593,  -- Necrotic Aura
-		29865,  -- Deathbloom
+		-- 29865,  -- Deathbloom
+		-- 55053,  -- Deathbloom
 		-- Instructor Razuvious
 		55470,  -- Unbalancing Strike
 		55550,  -- Jagged Knife
 		-- Gothik the Harvester
 		27994,  -- Drain Life
+		55646,  -- Drain Life
 		27825,  -- Shadow Mark
 		27993,  -- Stomp
 		-- The Four Horsemen
 		28882,  -- Unholy Shadow
+		57369,  -- Unholy Shadow
 		-- Patchwerk
 		-- Grobbulus
 		-- 28153,  -- Disease Cloud
@@ -1420,8 +1453,10 @@ function VUHDO_loadDefaultConfig()
 		-- 28084,	-- Negative Charge
 		-- Sapphiron
 		28542,  -- Life Drain
+		55665,  -- Life Drain
 		15847,  -- Tail Sweep
 		28547,  -- Chill
+		55699,  -- Chill
 		28522,  -- Icebolt
 		-- Kel'Thuzad
 		-- 29879,  -- Frost Blast
@@ -1434,6 +1469,7 @@ function VUHDO_loadDefaultConfig()
 		-- 28409,  -- Chains of Kel'Thuzad
 		28410   -- Chains of Kel'Thuzad
 	);
+
 
 	local debuffRemovalList = {};
 
