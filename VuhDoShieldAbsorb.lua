@@ -119,6 +119,8 @@ local sMissedEvents = {
 
 local VUHDO_SHIELD_LEFT = { };
 setmetatable(VUHDO_SHIELD_LEFT, VUHDO_META_NEW_ARRAY);
+local VUHDO_SHIELD_LEFT_TEMP = { };
+setmetatable(VUHDO_SHIELD_LEFT_TEMP, VUHDO_META_NEW_ARRAY);
 local VUHDO_SHIELD_SIZE = { };
 setmetatable(VUHDO_SHIELD_SIZE, VUHDO_META_NEW_ARRAY);
 local VUHDO_SHIELD_EXPIRY = { };
@@ -341,9 +343,15 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 
 	if VUHDO_SHIELDS[aSpellId] then
 
-		if "SPELL_AURA_REFRESH" == aMessage and anAmount then --anAmount is always nil at wotlkc
+		if "SPELL_AURA_REFRESH" == aMessage then 
+			if not anAmount then --anAmount is always nil at wotlkc
+				anAmount = VUHDO_SHIELD_LEFT_TEMP[tUnit][aShieldName] or 0
+			end
 			VUHDO_updateShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
-		elseif "SPELL_AURA_APPLIED" == aMessage and anAmount then --anAmount is always nil at wotlkc
+		elseif "SPELL_AURA_APPLIED" == aMessage then 
+			if not anAmount then --anAmount is always nil at wotlkc
+				anAmount = VUHDO_SHIELD_LEFT_TEMP[tUnit][aShieldName] or 0
+			end
 			VUHDO_initShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
 			VUHDO_SHIELD_LAST_SOURCE_GUID[tUnit][aShieldName] = aSrcGuid;
 		elseif "SPELL_AURA_REMOVED" == aMessage
@@ -355,7 +363,7 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 			if anCritical then
 				anAmount = math.floor(anAmount / 1.5)
 			end
-			VUHDO_initShieldValue(tUnit, VUHDO_SPELL_ID.POWERWORD_SHIELD , anAmount, VUHDO_SHIELDS[aSpellId]);
+			VUHDO_SHIELD_LEFT_TEMP[tUnit][VUHDO_SPELL_ID.POWERWORD_SHIELD] = anAmount -- save shield value into temp table
 		end
 	elseif VUHDO_ABSORB_DEBUFFS[aSpellId] then
 
