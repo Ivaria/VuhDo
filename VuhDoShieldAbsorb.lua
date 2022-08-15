@@ -326,7 +326,7 @@ end
 local tUnit;
 local VUHDO_DEBUFF_SHIELDS = { };
 local tDelta, tShieldName;
-function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldName, anAmount, aSpellId, anAbsorbAmount, anHealAmount, anCritical, anAbsorbSpellName, anAbsorbSpellSchool, anAbsorbSpellDamageAmount ,anAbsorbSwingDamageAmount)
+function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldName, anAmount, aSpellId, anAbsorbAmount, aHealAmount, aCritical, anAbsorbSpellName, anAbsorbSpellSchool, anAbsorbSpellDamageAmount ,anAbsorbSwingDamageAmount)
 	tUnit = VUHDO_RAID_GUIDS[aDstGuid];
 	if not tUnit then return; end
 
@@ -359,8 +359,8 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 			or "SPELL_AURA_BROKEN_SPELL" == aMessage then
 			VUHDO_removeShield(tUnit, aShieldName);
 		elseif "SPELL_HEAL" == aMessage and aSpellId == 56160 then --Glyph of Power Word: Shield
-			anAmount = anHealAmount * 5
-			if anCritical then
+			anAmount = aHealAmount * 5
+			if aCritical then
 				anAmount = math.floor(anAmount / 1.5)
 			end
 			VUHDO_SHIELD_LEFT_TEMP[tUnit][VUHDO_SPELL_ID.POWERWORD_SHIELD] = anAmount -- save shield value into temp table
