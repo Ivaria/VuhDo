@@ -70,6 +70,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added shield workaround for Priest 'Power Word: Shield' glyph  
 -- Bump TOC interface for 3.4.0  
   
   
