@@ -2,7 +2,7 @@
 
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
-## Version: 3.137
+## Version: 3.138
 ## Notes: VuhDo Options
 
 ## X-Curse-Project-ID: 7950
