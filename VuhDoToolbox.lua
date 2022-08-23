@@ -1054,10 +1054,10 @@ function VUHDO_unitAura(aUnit, aSpell, aFilter)
 	end
 
 	for tCnt = 1, 40 do
-		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
+		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tShouldConsolidate, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
 
 		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
-			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3;
+			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tShouldConsolidate, tValue1, tValue2, tValue3;
 		end
 	end
 
