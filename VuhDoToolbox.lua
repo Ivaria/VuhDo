@@ -1054,7 +1054,7 @@ function VUHDO_unitAura(aUnit, aSpell, aFilter)
 	end
 
 	for tCnt = 1, 40 do
-		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
+		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tShouldConsolidate, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
 
 		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
 			if VUHDO_LibClassicDurations and tSpellId then
@@ -1298,6 +1298,16 @@ end
 function VUHDO_hasLFGRestrictions()
 
 	return false;
+
+end
+
+
+
+function VUHDO_unitTargetsVehicleInRaidUI(...)
+
+	-- for now UnitTargetsVehicleInRaidUI always returns false on WotLK Classic
+	-- force to true so we fall back on UnitHasVehicleUI to determine isVehicle
+	return true;
 
 end
 
