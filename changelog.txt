@@ -22,6 +22,7 @@ Bugfixes:
 Improvements:  
 -- Added default custom debuffs for phase 1 raid encounters  
 -- Fixed vehicle targeting e.g. Malygos encounter  
+-- Fixed auto-activate of profile/key layout on spec change  
   
   
 --------------------------------------------------------------  
