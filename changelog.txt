@@ -24,6 +24,7 @@ Improvements:
 -- Fixed vehicle targeting e.g. Malygos encounter  
 -- Fixed auto-activate of profile/key layout on spec change  
 -- Fixed detection of debuff type curse on Shamans with 'Cleanse Spirit'  
+-- Fixed detection of debuff type disease on Shamans with 'Cure Toxins'  
   
   
 --------------------------------------------------------------  
