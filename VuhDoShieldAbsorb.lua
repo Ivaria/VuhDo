@@ -214,7 +214,6 @@ local function VUHDO_removeShield(aUnit, aShieldName)
 	VUHDO_SHIELD_LEFT[aUnit][aShieldName] = nil;
 	VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] = nil;
 	VUHDO_SHIELD_LAST_SOURCE_GUID[aUnit][aShieldName] = nil;
-	VUHDO_SHIELD_LEFT_TEMP[aUnit][aShieldName] = nil;
 	--VUHDO_xMsg("Removed shield " .. aShieldName .. " from " .. aUnit);
 end
 
