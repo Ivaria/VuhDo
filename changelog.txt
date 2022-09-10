@@ -20,6 +20,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Shaman weapon echant 'Earthliving Weapon' to Buff Watch  
   
   
 --------------------------------------------------------------  
