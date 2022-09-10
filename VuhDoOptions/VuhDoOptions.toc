@@ -2,7 +2,7 @@
 
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
-## Version: 3.138-wotlkc
+## Version: 3.139-wotlkc
 ## Notes: VuhDo Options
 
 ## X-Curse-Project-ID: 7950
