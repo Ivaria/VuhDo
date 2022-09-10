@@ -1301,13 +1301,3 @@ function VUHDO_hasLFGRestrictions()
 
 end
 
-
-
-function VUHDO_unitTargetsVehicleInRaidUI(...)
-
-	-- for now UnitTargetsVehicleInRaidUI always returns false on WotLK Classic
-	-- force to true so we fall back on UnitHasVehicleUI to determine isVehicle
-	return true;
-
-end
-
