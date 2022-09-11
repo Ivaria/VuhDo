@@ -20,7 +20,8 @@ Bugfixes:
   
   
 Improvements:  
--- Added Shaman weapon echant 'Earthliving Weapon' to Buff Watch  
+-- Added Shaman weapon enchant 'Earthliving Weapon' to Buff Watch  
+-- Added Priest 'Vampiric Embrace' to Buff Watch  
   
   
 --------------------------------------------------------------  
