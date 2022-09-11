@@ -62,6 +62,10 @@ VUHDO_SPELLS = {
 
 	-- 6.2 Healer Legendary Ring
 	[VUHDO_SPELL_ID.BUFF_ETHERALUS] = { ["isHot"] = true },
+
+	-- Evoker
+	[VUHDO_SPELL_ID.REVERSION] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.DREAM_FLIGHT_HOT] = { ["isHot"] = true },
 };
 local VUHDO_SPELLS = VUHDO_SPELLS;
 
