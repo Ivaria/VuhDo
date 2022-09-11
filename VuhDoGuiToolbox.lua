@@ -530,23 +530,24 @@ end
 local function VUHDO_hideBlizzParty()
 	HIDE_PARTY_INTERFACE = "1";
 
-	hooksecurefunc("ShowPartyFrame",
+	local tPartyFrame = _G["PartyFrame"];
+
+	hooksecurefunc(tPartyFrame, "UpdatePartyFrames",
 		function()
 			if not InCombatLockdown() then
-				for tCnt = 1, 4 do
-					VUHDO_hideFrame(_G["PartyMemberFrame" .. tCnt]);
-				end
+				_G["PartyFrame"]:HidePartyFrames();
 			end
 		end
 	);
 
-	local tPartyFrame;
-	for tCnt = 1, 4 do
-		tPartyFrame = _G["PartyMemberFrame" .. tCnt];
-		VUHDO_unregisterAndSaveEvents(false,
-			tPartyFrame, _G["PartyMemberFrame" .. tCnt .. "HealthBar"], _G["PartyMemberFrame" .. tCnt .. "ManaBar"]
-		);
-		VUHDO_hideFrame(tPartyFrame);
+	for tCnt = 1, MAX_PARTY_MEMBERS do
+		local tPartyMemberFrame = tPartyFrame.PartyMemberFramePool:Acquire();
+
+		VUHDO_unregisterAndSaveEvents(false, tPartyMemberFrame, tPartyMemberFrame.HealthBar, tPartyMemberFrame.ManaBar);
+		 
+		if (UnitExists("party" .. tCnt)) then
+			VUHDO_hideFrame(tPartyMemberFrame);
+		end
 	end
 
 	if (CompactPartyFrame ~= nil and CompactPartyFrame:IsVisible()) then
@@ -558,29 +559,32 @@ end
 
 --
 local function VUHDO_showBlizzParty()
-	if VUHDO_GROUP_TYPE_PARTY ~= VUHDO_getCurrentGroupType() then return; end
+	if VUHDO_GROUP_TYPE_PARTY ~= VUHDO_getCurrentGroupType() then 
+		return;
+	end
 
 	if tonumber(GetCVar("useCompactPartyFrames")) == 0 then
 		HIDE_PARTY_INTERFACE = "0";
 
-		hooksecurefunc("ShowPartyFrame",
+		local tPartyFrame = _G["PartyFrame"];
+
+		hooksecurefunc(tPartyFrame, "UpdatePartyFrames",
 			function()
 				if not InCombatLockdown() then
-					for tCnt = 1, 4 do
-						VUHDO_showFrame(_G["PartyMemberFrame" .. tCnt]);
+					for tPartyMemberFrame in _G["PartyFrame"].PartyMemberFramePool:EnumerateActive() do
+						tPartyMemberFrame:Show();
 					end
 				end
 			end
 		);
 
-		local tPartyFrame;
-		for tCnt = 1, 4 do
-			tPartyFrame = _G["PartyMemberFrame" .. tCnt];
-			VUHDO_registerOriginalEvents(false,
-				tPartyFrame, _G["PartyMemberFrame" .. tCnt .. "HealthBar"], _G["PartyMemberFrame" .. tCnt .. "ManaBar"]);
+		for tCnt = 1, MAX_PARTY_MEMBERS do
+			local tPartyMemberFrame = tPartyFrame.PartyMemberFramePool:Acquire();
+
+			VUHDO_registerOriginalEvents(false, tPartyMemberFrame, tPartyMemberFrame.HealthBar, tPartyMemberFrame.ManaBar);
 
 			if (UnitExists("party" .. tCnt)) then
-				VUHDO_showFrame(tPartyFrame);
+				VUHDO_showFrame(tPartyMemberFrame);
 			end
 		end
 	else
