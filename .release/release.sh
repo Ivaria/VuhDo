@@ -91,9 +91,10 @@ exit_code=0
 retry() {
 	local result=0
 	local count=1
-	while [[ "$count" -le 3 ]]; do
+	local max=10
+	while [[ "$count" -le "$max" ]]; do
 		[[ "$result" -ne 0 ]] && {
-			echo -e "\033[01;31mRetrying (${count}/3)\033[0m" >&2
+			echo -e "\033[01;31mRetrying (${count}/${max})\033[0m" >&2
 		}
 		"$@" && { result=0 && break; } || result="$?"
 		count="$((count + 1))"
@@ -160,6 +161,18 @@ toc_filter() {
 			-e "/#@non-${keyword}@/,/#@end-non-${keyword}@/s/^#[[:blank:]]\{1,\}//" \
 			-e "/#@\(end-\)\{0,1\}non-${keyword}@/d"
 	fi
+}
+
+toc_to_type() {
+	local toc_version="$1"
+	local -n game_type="$2" || return 1
+	case $toc_version in
+		11???) game_type="classic" ;;
+		20???) game_type="bcc" ;;
+		30???) game_type="wrath" ;;
+		*) game_type="retail"
+	esac
+	# return game_type
 }
 
 
@@ -484,6 +497,11 @@ si_file_date_iso= # Turns into the last changed date (by UTC) of the file in ISO
 si_file_date_integer= # Turns into the last changed date (by UTC) of the file in a readable integer fashion. e.g. 20080501123456
 si_file_timestamp= # Turns into the last changed date (by UTC) of the file in POSIX timestamp. e.g. 1209663296
 
+si_build_timestamp=$( date "+%s" )
+si_build_date=$( TZ='' printf "%(%Y-%m-%d)T" "$si_build_timestamp" )
+si_build_date_iso=$( TZ='' printf "%(%Y-%m-%dT%H:%M:%SZ)T" "$si_build_timestamp" )
+si_build_date_integer=$( TZ='' printf "%(%Y%m%d%H%M%S)T" "$si_build_timestamp" )
+
 # SVN date helper function
 strtotime() {
 	local value="$1" # datetime string
@@ -644,44 +662,50 @@ set_info_hg() {
 
 set_info_file() {
 	local _si_file="$1"
-	if [[ "$si_repo_type" = "git" ]]; then
+	if [[ $si_repo_type == "git" ]]; then
 		local _si_file_dir=${_si_file%/*} # set the working directory to file's directory to allow for submodule file info
 		_si_file=${_si_file##*/} # just need the filename
 		# Populate filter vars from the last commit the file was included in.
-		si_file_hash=$( git -C "$_si_file_dir" log --max-count=1 --format="%H" -- "$_si_file" 2>/dev/null )
-		si_file_abbreviated_hash=$( git -C "$_si_file_dir" log --max-count=1 --abbrev=7 --format="%h" -- "$_si_file" 2>/dev/null )
 		si_file_author=$( git -C "$_si_file_dir" log --max-count=1 --format="%an" -- "$_si_file" 2>/dev/null )
 		si_file_timestamp=$( git -C "$_si_file_dir" log --max-count=1 --format="%at" -- "$_si_file" 2>/dev/null )
-		si_file_date_iso=$( TZ='' printf "%(%Y-%m-%dT%H:%M:%SZ)T" "$si_file_timestamp" )
-		si_file_date_integer=$( TZ='' printf "%(%Y%m%d%H%M%S)T" "$si_file_timestamp" )
 		si_file_revision=$( git -C "$_si_file_dir" rev-list --count "$si_file_hash" 2>/dev/null ) # XXX checkout depth affects rev-list, see set_info_git
+		si_file_hash=$( git -C "$_si_file_dir" log --max-count=1 --format="%H" -- "$_si_file" 2>/dev/null )
+		si_file_abbreviated_hash=$( git -C "$_si_file_dir" log --max-count=1 --abbrev=7 --format="%h" -- "$_si_file" 2>/dev/null )
 
-	elif [[ "$si_repo_type" = "svn" ]]; then
+	elif [[ $si_repo_type == "svn" ]]; then
 		local _sif_svninfo _si_timestamp
 		_sif_svninfo=$( svn info "$_si_file" 2>/dev/null )
-		if [[ -n "$_sif_svninfo" ]]; then
+		if [[ -n $_sif_svninfo ]]; then
 			# Populate filter vars.
-			si_file_revision=$( awk '/^Last Changed Rev:/ { print $NF; exit }' <<< "$_sif_svninfo" )
 			si_file_author=$( awk '/^Last Changed Author:/ { print $0; exit }' <<< "$_sif_svninfo" | cut -d" " -f4- )
 			_si_timestamp=$( awk '/^Last Changed Date:/ { print $4,$5,$6; exit }' <<< "$_sif_svninfo" )
 			si_file_timestamp=$( strtotime "$_si_timestamp" "%F %T %z" )
-			si_file_date_iso=$( TZ='' printf "%(%Y-%m-%dT%H:%M:%SZ)T" "$si_file_timestamp" )
-			si_file_date_integer=$( TZ='' printf "%(%Y%m%d%H%M%S)T" "$si_file_timestamp" )
+			si_file_revision=$( awk '/^Last Changed Rev:/ { print $NF; exit }' <<< "$_sif_svninfo" )
 			# Use the file checksum.
 			si_file_hash=$( awk '/^Checksum:/ { print $2; exit }' <<< "$_sif_svninfo" )
 			si_file_abbreviated_hash=${si_file_hash:0:7}
+		else
+			si_file_author=
+			si_file_timestamp=
+			si_file_revision=
+			si_file_hash=
+			si_file_abbreviated_hash=
+			si_file_date_iso=
+			si_file_date_integer=
 		fi
 
-	elif [[ "$si_repo_type" = "hg" ]]; then
+	elif [[ $si_repo_type == "hg" ]]; then
 		# Populate filter vars.
-		si_file_hash=$( hg log --limit 1 --template '{node}' "$_si_file" 2>/dev/null )
-		si_file_abbreviated_hash=$( hg log --limit 1 --template '{node|short}' "$_si_file" 2>/dev/null )
 		si_file_author=$( hg log --limit 1 --template '{author}' "$_si_file" 2>/dev/null )
 		si_file_timestamp=$( hg log --limit 1 --template '{date}' "$_si_file" 2>/dev/null | cut -d. -f1 )
+		si_file_revision=$( hg log --limit 1 --template '{rev}' "$_si_file" 2>/dev/null )
+		si_file_hash=$( hg log --limit 1 --template '{node}' "$_si_file" 2>/dev/null )
+		si_file_abbreviated_hash=$( hg log --limit 1 --template '{node|short}' "$_si_file" 2>/dev/null )
+
+	fi
+	if [[ -n $si_file_timestamp ]]; then
 		si_file_date_iso=$( TZ='' printf "%(%Y-%m-%dT%H:%M:%SZ)T" "$si_file_timestamp" )
 		si_file_date_integer=$( TZ='' printf "%(%Y%m%d%H%M%S)T" "$si_file_timestamp" )
-		si_file_revision=$( hg log --limit 1 --template '{rev}' "$_si_file" 2>/dev/null )
-
 	fi
 }
 
@@ -1064,13 +1088,11 @@ do_toc() {
 	)
 
 	toc_version=$( awk '/^## Interface:/ { print $NF; exit }' <<< "$toc_file" )
-	case $toc_version in
-		"") toc_game_type= ;;
-		11*) toc_game_type="classic" ;;
-		20*) toc_game_type="bcc" ;;
-		30*) toc_game_type="wrath" ;;
-		*) toc_game_type="retail"
-	esac
+	if [[ -z $toc_version ]]; then
+		toc_game_type=
+	else
+		toc_to_type "$toc_version" "toc_game_type"
+	fi
 	si_game_type_interface=()
 	si_game_type_interface_all=()
 	[[ -n "$toc_game_type" ]] && si_game_type_interface_all["$toc_game_type"]="$toc_version"
@@ -1105,12 +1127,7 @@ do_toc() {
 
 		if [[ -z "$toc_version" ]] || [[ -n "$game_type" && -n "$game_type_toc_version" && "$game_type_toc_version" != "$toc_version" ]]; then
 			toc_version="$game_type_toc_version"
-			case $toc_version in
-				11*) toc_game_type="classic" ;;
-				20*) toc_game_type="bcc" ;;
-				30*) toc_game_type="wrath" ;;
-				*) toc_game_type="retail"
-			esac
+			toc_to_type "$toc_version" "toc_game_type"
 		fi
 
 		# Check @non-@ blocks for other interface lines
@@ -1173,19 +1190,14 @@ set_build_version() {
 			else
 				version="${toc_interfaces[$path]}"
 			fi
-			declare -a versions
+			local -a versions
 			IFS=':' read -ra versions <<< "$version"
 			for toc_version in "${versions[@]}"; do
-				case $toc_version in
-					11*) toc_game_type="classic" ;;
-					20*) toc_game_type="bcc" ;;
-					30*) toc_game_type="wrath" ;;
-					*) toc_game_type="retail"
-				esac
+				toc_to_type "$toc_version" "toc_game_type"
 				# root addon interfaces take priority
 				if [[ -z $game_type || $game_type == "$toc_game_type" ]] && [[ -z ${game_type_interface[$toc_game_type]} || ${toc_root_paths[${path%/*}]} == "$package" ]]; then
 					game_type_interface[$toc_game_type]="$toc_version"
-					game_type_version[$toc_game_type]=$( printf "%d.%d.%d" "${toc_version:0:1}" "${toc_version:1:2}" "${toc_version:3:2}" )
+					game_type_version[$toc_game_type]=$( printf "%d.%d.%d" "${toc_version:0: -4}" "${toc_version: -4:2}" "${toc_version: -2:2}" )
 				fi
 			done
 		done
@@ -1356,7 +1368,11 @@ vcs_filter() {
 		-e "s/@file-author@/$( escape_substr "$si_file_author" )/g" \
 		-e "s/@file-date-iso@/$si_file_date_iso/g" \
 		-e "s/@file-date-integer@/$si_file_date_integer/g" \
-		-e "s/@file-timestamp@/$si_file_timestamp/g"
+		-e "s/@file-timestamp@/$si_file_timestamp/g" \
+		-e "s/@build-date@/$si_build_date/g" \
+		-e "s/@build-date-iso@/$si_build_date_iso/g" \
+		-e "s/@build-date-integer@/$si_build_date_integer/g" \
+		-e "s/@build-timestamp@/$si_build_timestamp/g"
 }
 
 # Find URL of localization api.
@@ -1657,7 +1673,8 @@ copy_directory_tree() {
 	_cdt_find_cmd+=" -o \! -name \".\" -print"
 	( cd "$_cdt_srcdir" && eval "$_cdt_find_cmd" ) | while read -r file; do
 		file=${file#./}
-		if [ -f "$_cdt_srcdir/$file" ]; then
+		_cdt_source_file="$_cdt_srcdir/$file"
+		if [ -f "$_cdt_source_file" ]; then
 			_cdt_skip_copy=
 			_cdt_only_copy=
 			# Prefix external files with the relative pkgdir path
@@ -1685,8 +1702,9 @@ copy_directory_tree() {
 				# Check if the file matches a pattern for keyword replacement.
 				if [ -n "$_cdt_only_copy" ] || ! match_pattern "$file" "*.lua:*.md:*.toc:*.txt:*.xml"; then
 					echo "  Copying: $file (unchanged)"
-					cp "$_cdt_srcdir/$file" "$_cdt_destdir/$dir"
+					cp "$_cdt_source_file" "$_cdt_destdir/$dir"
 				else
+					_cdt_file_gametype="$_cdt_gametype"
 					# Set the filters for replacement based on file extension.
 					_cdt_filters="vcs_filter"
 					case $file in
@@ -1694,47 +1712,42 @@ copy_directory_tree() {
 							[ -n "$_cdt_do_not_package" ] && _cdt_filters+="|do_not_package_filter lua"
 							[ -n "$_cdt_debug" ] && _cdt_filters+="|lua_filter debug"
 							[ -n "$_cdt_alpha" ] && _cdt_filters+="|lua_filter alpha"
-							[ "$_cdt_gametype" != "retail" ] && _cdt_filters+="|lua_filter version-retail|lua_filter retail"
-							[ "$_cdt_gametype" != "classic" ] && _cdt_filters+="|lua_filter version-classic"
-							[ "$_cdt_gametype" != "bcc" ] && _cdt_filters+="|lua_filter version-bcc"
-							[ "$_cdt_gametype" != "wrath" ] && _cdt_filters+="|lua_filter version-wrath"
-							[ -n "$_cdt_localization" ] && grep -q "@localization" "$_cdt_srcdir/$file" && _cdt_filters+="|localization_filter"
+							[ "$_cdt_file_gametype" != "retail" ] && _cdt_filters+="|lua_filter version-retail|lua_filter retail"
+							[ "$_cdt_file_gametype" != "classic" ] && _cdt_filters+="|lua_filter version-classic"
+							[ "$_cdt_file_gametype" != "bcc" ] && _cdt_filters+="|lua_filter version-bcc"
+							[ "$_cdt_file_gametype" != "wrath" ] && _cdt_filters+="|lua_filter version-wrath"
+							[ -n "$_cdt_localization" ] && grep -q "@localization" "$_cdt_source_file" && _cdt_filters+="|localization_filter"
 							;;
 						*.xml)
 							[ -n "$_cdt_do_not_package" ] && _cdt_filters+="|do_not_package_filter xml"
 							[ -n "$_cdt_nolib" ] && _cdt_filters+="|xml_filter no-lib-strip"
 							[ -n "$_cdt_debug" ] && _cdt_filters+="|xml_filter debug"
 							[ -n "$_cdt_alpha" ] && _cdt_filters+="|xml_filter alpha"
-							[ "$_cdt_gametype" != "retail" ] && _cdt_filters+="|xml_filter version-retail|xml_filter retail"
-							[ "$_cdt_gametype" != "classic" ] && _cdt_filters+="|xml_filter version-classic"
-							[ "$_cdt_gametype" != "bcc" ] && _cdt_filters+="|xml_filter version-bcc"
-							[ "$_cdt_gametype" != "wrath" ] && _cdt_filters+="|xml_filter version-wrath"
+							[ "$_cdt_file_gametype" != "retail" ] && _cdt_filters+="|xml_filter version-retail|xml_filter retail"
+							[ "$_cdt_file_gametype" != "classic" ] && _cdt_filters+="|xml_filter version-classic"
+							[ "$_cdt_file_gametype" != "bcc" ] && _cdt_filters+="|xml_filter version-bcc"
+							[ "$_cdt_file_gametype" != "wrath" ] && _cdt_filters+="|xml_filter version-wrath"
 							;;
 						*.toc)
 							# We only care about processing project TOC files
-							if [[ -n ${toc_root_interface["$_cdt_srcdir/$file"]} ]]; then
-								_cdt_toc_dir="$_cdt_srcdir/${file%/*}"
-								do_toc "$_cdt_srcdir/$file" "${toc_root_paths["$_cdt_toc_dir"]}"
+							if [[ -n ${toc_root_interface["$_cdt_source_file"]} ]]; then
+								_cdt_toc_dir="${_cdt_source_file%/*}"
+								do_toc "$_cdt_source_file" "${toc_root_paths["$_cdt_toc_dir"]}"
 								# Process the fallback TOC file according to it's base interface version
-								if [[ -z $_cdt_gametype && -n $_cdt_split ]]; then
-									case ${toc_root_interface["$_cdt_srcdir/$file"]} in
-										11*) _cdt_gametype="classic" ;;
-										20*) _cdt_gametype="bcc" ;;
-										30*) _cdt_gametype="wrath" ;;
-										*) _cdt_gametype="retail"
-									esac
+								if [[ -z $_cdt_file_gametype && -n $_cdt_split ]]; then
+									toc_to_type "${toc_root_interface["$_cdt_source_file"]}" "_cdt_file_gametype"
 								fi
 								_cdt_filters+="|do_not_package_filter toc"
 								[ -n "$_cdt_nolib" ] && _cdt_filters+="|toc_filter no-lib-strip true" # leave the tokens in the file normally
 								_cdt_filters+="|toc_filter debug ${_cdt_debug}"
 								_cdt_filters+="|toc_filter alpha ${_cdt_alpha}"
-								_cdt_filters+="|toc_filter retail $([[ "$_cdt_gametype" != "retail" ]] && echo "true")"
-								_cdt_filters+="|toc_filter version-retail $([[ "$_cdt_gametype" != "retail" ]] && echo "true")"
-								_cdt_filters+="|toc_filter version-classic $([[ "$_cdt_gametype" != "classic" ]] && echo "true")"
-								_cdt_filters+="|toc_filter version-bcc $([[ "$_cdt_gametype" != "bcc" ]] && echo "true")"
-								_cdt_filters+="|toc_filter version-wrath $([[ "$_cdt_gametype" != "wrath" ]] && echo "true")"
-								_cdt_filters+="|toc_interface_filter '${si_game_type_interface_all[${_cdt_gametype:- }]}' '${toc_root_interface["$_cdt_srcdir/$file"]}'"
-								[ -n "$_cdt_localization" ] && grep -q "@localization" "$_cdt_srcdir/$file" && _cdt_filters+="|localization_filter"
+								_cdt_filters+="|toc_filter retail $([[ "$_cdt_file_gametype" != "retail" ]] && echo "true")"
+								_cdt_filters+="|toc_filter version-retail $([[ "$_cdt_file_gametype" != "retail" ]] && echo "true")"
+								_cdt_filters+="|toc_filter version-classic $([[ "$_cdt_file_gametype" != "classic" ]] && echo "true")"
+								_cdt_filters+="|toc_filter version-bcc $([[ "$_cdt_file_gametype" != "bcc" ]] && echo "true")"
+								_cdt_filters+="|toc_filter version-wrath $([[ "$_cdt_file_gametype" != "wrath" ]] && echo "true")"
+								_cdt_filters+="|toc_interface_filter '${si_game_type_interface_all[${_cdt_file_gametype:- }]}' '${toc_root_interface["$_cdt_source_file"]}'"
+								[ -n "$_cdt_localization" ] && grep -q "@localization" "$_cdt_source_file" && _cdt_filters+="|localization_filter"
 							fi
 							;;
 					esac
@@ -1743,26 +1756,26 @@ copy_directory_tree() {
 					_cdt_filters+="|line_ending_filter"
 
 					# Set version control values for the file.
-					set_info_file "$_cdt_srcdir/$file"
+					set_info_file "$_cdt_source_file"
 
 					echo "  Copying: $file"
 
 					# Make sure we're not causing any surprises
-					if [[ -z $_cdt_gametype && ( $file == *".lua" || $file == *".xml" || $file == *".toc" ) ]] && grep -q '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_srcdir/$file"; then
+					if [[ -z $_cdt_file_gametype && ( $file == *".lua" || $file == *".xml" || $file == *".toc" ) ]] && grep -q '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_source_file"; then
 						echo "    Error! Build type version keywords are not allowed in a multi-version build." >&2
 						echo "           These should be replaced with lua conditional statements:" >&2
-						grep -n '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_srcdir/$file" | sed 's/^/             /' >&2
+						grep -n '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_source_file" | sed 's/^/             /' >&2
 						echo "           See https://wowpedia.fandom.com/wiki/WOW_PROJECT_ID" >&2
 						exit 1
 					fi
 
 					set -o pipefail
-					eval < "$_cdt_srcdir/$file" "$_cdt_filters" 3>&1 > "$_cdt_destdir/$file" || exit 1
+					eval < "$_cdt_source_file" "$_cdt_filters" 3>&1 > "$_cdt_destdir/$file" || exit 1
 
 					# Create game type specific TOCs
-					if [[ -n $_cdt_split && -n ${toc_root_interface["$_cdt_srcdir/$file"]} ]]; then
+					if [[ -n $_cdt_split && -n ${toc_root_interface["$_cdt_source_file"]} ]]; then
 						local toc_version new_file
-						local root_toc_version="${toc_root_interface["$_cdt_srcdir/$file"]}"
+						local root_toc_version="${toc_root_interface["$_cdt_source_file"]}"
 						for type in "${!si_game_type_interface[@]}"; do
 							toc_version="${si_game_type_interface[$type]}"
 							new_file="${file%.toc}"
@@ -1788,7 +1801,7 @@ copy_directory_tree() {
 							_cdt_filters+="|toc_interface_filter '$toc_version' '$root_toc_version'"
 							_cdt_filters+="|line_ending_filter"
 
-							eval < "$_cdt_srcdir/$file" "$_cdt_filters" 3>&1 > "$_cdt_destdir/$new_file"
+							eval < "$_cdt_source_file" "$_cdt_filters" 3>&1 > "$_cdt_destdir/$new_file"
 						done
 
 						# Remove the fallback TOC file if it doesn't have an interface value or if you a TOC file for each game type
@@ -1814,13 +1827,6 @@ if [ -z "$skip_copying" ]; then
 	[ -n "$split" ] && cdt_args+="S"
 	[ -n "$game_type" ] && cdt_args+=" -g $game_type"
 	[ -n "$ignore" ] && cdt_args+=" -i \"$ignore\""
-	if [ -n "$changelog" ]; then
-		if [ -z "$unchanged" ]; then
-			unchanged="$changelog"
-		else
-			unchanged="$unchanged:$changelog"
-		fi
-	fi
 	[ -n "$unchanged" ] && cdt_args+=" -u \"$unchanged\""
 	eval copy_directory_tree "$cdt_args" "\"$topdir\"" "\"$pkgdir\""
 fi
@@ -2154,17 +2160,25 @@ fi
 
 # Create a changelog in the package directory if the source directory does
 # not contain a manual changelog.
-if [ -n "$manual_changelog" ] && [ -f "$topdir/$changelog" ]; then
-	start_group "Using manual changelog at $changelog" "changelog"
-	head -n7 "$topdir/$changelog"
-	[ "$( wc -l < "$topdir/$changelog" )" -gt 7 ] && echo "..."
+
+changelog_path=
+if [[ -n "$manual_changelog" && -f "$topdir/$changelog" ]]; then
+	if [[ -f "$pkgdir/$changelog" ]]; then
+		# use the processed copy
+		changelog_path="$pkgdir/$changelog"
+	else
+		changelog_path="$topdir/$changelog"
+	fi
+	start_group "Using manual changelog $changelog" "changelog"
+	head -n7 "$changelog_path"
+	[ "$( wc -l < "$changelog_path" )" -gt 7 ] && echo "..."
 	end_group "changelog"
 
 	# Convert Markdown to BBCode (with HTML as an intermediary) for sending to WoWInterface
 	# Requires pandoc (http://pandoc.org/)
 	if [ "$changelog_markup" = "markdown" ] && [ -n "$wowi_convert_changelog" ] && hash pandoc &>/dev/null; then
 		wowi_changelog="$releasedir/WOWI-$project_version-CHANGELOG.txt"
-		pandoc -f commonmark -t html "$topdir/$changelog" | sed \
+		pandoc -f commonmark -t html "$changelog_path" | sed \
 			-e 's/<\(\/\)\?\(b\|i\|u\)>/[\1\2]/g' \
 			-e 's/<\(\/\)\?em>/[\1i]/g' \
 			-e 's/<\(\/\)\?strong>/[\1b]/g' \
@@ -2198,6 +2212,7 @@ else
 	fi
 	changelog="CHANGELOG.md"
 	changelog_markup="markdown"
+	changelog_path="$pkgdir/$changelog"
 
 	if [ -n "$wowi_gen_changelog" ] && [ -z "$wowi_convert_changelog" ]; then
 		wowi_markup="markdown"
@@ -2257,7 +2272,7 @@ else
 		fi
 		changelog_date=$( TZ='' printf "%(%Y-%m-%d)T" "$project_timestamp" )
 
-		cat <<- EOF | line_ending_filter > "$pkgdir/$changelog"
+		cat <<- EOF | line_ending_filter > "$changelog_path"
 		# $project
 
 		## $changelog_version ($changelog_date)
@@ -2270,7 +2285,7 @@ else
 			      -e 's/\[ci skip\]//g' -e 's/\[skip ci\]//g' \
 			      -e '/git-svn-id:/d' -e '/^[[:space:]]*This reverts commit [0-9a-f]\{40\}\.[[:space:]]*$/d' \
 			      -e '/^[[:space:]]*$/d' \
-			| line_ending_filter >> "$pkgdir/$changelog"
+			| line_ending_filter >> "$changelog_path"
 
 		# WoWI uses BBCode, generate something usable to post to the site
 		# the file is deleted on successful upload
@@ -2299,7 +2314,7 @@ else
 		fi
 		changelog_date=$( TZ='' printf "%(%Y-%m-%d)T" "$project_timestamp" )
 
-		cat <<- EOF | line_ending_filter > "$pkgdir/$changelog"
+		cat <<- EOF | line_ending_filter > "$changelog_path"
 		# $project
 
 		## $project_version ($changelog_date)
@@ -2313,7 +2328,7 @@ else
 			      -e 's/\([a-zA-Z0-9]\)_\([a-zA-Z0-9]\)/\1\\_\2/g' \
 			      -e 's/\[ci skip\]//g' -e 's/\[skip ci\]//g' \
 			      -e '/^[[:space:]]*$/d' \
-			| line_ending_filter >> "$pkgdir/$changelog"
+			| line_ending_filter >> "$changelog_path"
 
 		# WoWI uses BBCode, generate something usable to post to the site
 		# the file is deleted on successful upload
@@ -2344,13 +2359,13 @@ else
 		fi
 		changelog_date=$( TZ='' printf "%(%Y-%m-%d)T" "$project_timestamp" )
 
-		cat <<- EOF | line_ending_filter > "$pkgdir/$changelog"
+		cat <<- EOF | line_ending_filter > "$changelog_path"
 		# $project
 
 		## $project_version ($changelog_date)
 
 		EOF
-		hg --cwd "$topdir" log -r "$_changelog_range" --template '- {fill(desc|strip, 76, "", "  ")}\n' | line_ending_filter >> "$pkgdir/$changelog"
+		hg --cwd "$topdir" log -r "$_changelog_range" --template '- {fill(desc|strip, 76, "", "  ")}\n' | line_ending_filter >> "$changelog_path"
 
 		# WoWI uses BBCode, generate something usable to post to the site
 		# the file is deleted on successful upload
@@ -2367,7 +2382,7 @@ else
 		fi
 	fi
 
-	echo "$(<"$pkgdir/$changelog")"
+	echo "$(<"$changelog_path")"
 	end_group "changelog"
 fi
 
@@ -2574,7 +2589,7 @@ upload_curseforge() {
 	  "displayName": "$archive_label",
 	  "gameVersions": $_cf_game_version_id,
 	  "releaseType": "$file_type",
-	  "changelog": $( jq --slurp --raw-input '.' < "$pkgdir/$changelog" ),
+	  "changelog": $( jq --slurp --raw-input '.' < "$changelog_path" ),
 	  "changelogType": "$changelog_markup"
 	}
 	EOF
@@ -2677,7 +2692,7 @@ upload_wowinterface() {
 	if [ -f "$wowi_changelog" ]; then
 		_wowi_args+=("-F changelog=<$wowi_changelog")
 	elif [ -n "$manual_changelog" ] || [ "$wowi_markup" = "markdown" ]; then
-		_wowi_args+=("-F changelog=<$pkgdir/$changelog")
+		_wowi_args+=("-F changelog=<$changelog_path")
 	fi
 	if [ -z "$wowi_archive" ]; then
 		_wowi_args+=("-F archive=No")
@@ -2784,7 +2799,7 @@ upload_wago() {
 	  "label": "$archive_label",
 	  $_wago_support_property
 	  "stability": "$_wago_stability",
-	  "changelog": $( jq --slurp --raw-input '.' < "$pkgdir/$changelog" )
+	  "changelog": $( jq --slurp --raw-input '.' < "$changelog_path" )
 	}
 	EOF
 	)
@@ -2916,7 +2931,7 @@ upload_github() {
 	{
 	  "tag_name": "$tag",
 	  "name": "$tag",
-	  "body": $( jq --slurp --raw-input '.' < "$pkgdir/$changelog" ),
+	  "body": $( jq --slurp --raw-input '.' < "$changelog_path" ),
 	  "draft": false,
 	  "prerelease": $( [[ "$file_type" != "release" ]] && echo true || echo false )
 	}
