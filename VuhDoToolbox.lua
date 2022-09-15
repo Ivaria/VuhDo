@@ -540,14 +540,28 @@ end
 
 --
 function VUHDO_getTalentSpellId(aTalentName)
-	for tier=1,7 do
-		for column=1,3 do
-			-- as of Legion "active spec group" is always 1
-			local _, name, _, selected, _, spellId, _, _, _, _, _ = GetTalentInfo(tier, column, 1);
-	
-			if selected and (name == aTalentName 
-				or (type(aTalentName) == "number" and spellId == aTalentName)) then
-				return spellId;
+	local tActiveConfigId = C_ClassTalents.GetActiveConfigID();
+	local tConfigInfo = C_Traits.GetConfigInfo(tActiveConfigId);
+
+	for _, tTreeId in pairs(tConfigInfo.treeIDs) do
+		local tTreeNodes = C_Traits.GetTreeNodes(tTreeId);
+
+		for _, tNodeId in pairs(tTreeNodes) do
+			local tNodeInfo = C_Traits.GetNodeInfo(tActiveConfigId, tNodeId);
+
+			if tNodeInfo.ranksPurchased > 0 then
+				local tEntryInfo = C_Traits.GetEntryInfo(tActiveConfigId, tNodeInfo.entryIDs[1]);
+				local tDefinitionInfo = C_Traits.GetDefinitionInfo(tEntryInfo.definitionID);
+
+				if type(aTalentName) == "number" and tDefinitionInfo.spellID == aTalentName then
+					return tDefinitionInfo.spellID;
+				else
+					local tSpellName = GetSpellInfo(tDefinitionInfo.spellID);
+
+					if tSpellName == aTalentName then
+						return tDefinitionInfo.spellID;
+					end
+				end
 			end
 		end
 	end
