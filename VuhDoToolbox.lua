@@ -541,6 +541,12 @@ end
 --
 function VUHDO_getTalentSpellId(aTalentName)
 	local tActiveConfigId = C_ClassTalents.GetActiveConfigID();
+
+	-- on initial PLAYER_ENTER_WORLD talents are not yet available
+	if not tActiveConfigId then
+		return;
+	end
+
 	local tConfigInfo = C_Traits.GetConfigInfo(tActiveConfigId);
 
 	for _, tTreeId in pairs(tConfigInfo.treeIDs) do
