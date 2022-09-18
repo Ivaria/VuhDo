@@ -39,6 +39,15 @@ local pairs = pairs;
 local type = type;
 local abs = abs;
 
+-- talent cache maps for new large Dragonflight talent trees
+local VUHDO_TALENT_SPELL_ID_CACHE = {
+	-- [<spell ID>] = <spell name>,
+};
+
+local VUHDO_TALENT_SPELL_NAME_CACHE = {
+	-- [<spell name>] = <spell ID>,
+};
+
 local sEmpty = { };
 setmetatable(sEmpty, { __newindex = function(aTable, aKey, aValue) VUHDO_xMsg("WARNING: newindex on dummy array: ", aKey, aValue); end });
 
@@ -539,13 +548,17 @@ end
 
 
 --
-function VUHDO_getTalentSpellId(aTalentName)
+function VUHDO_initTalentSpellCaches()
+
 	local tActiveConfigId = C_ClassTalents.GetActiveConfigID();
 
 	-- on initial PLAYER_ENTER_WORLD talents are not yet available
 	if not tActiveConfigId then
 		return;
 	end
+
+	twipe(VUHDO_TALENT_SPELL_ID_CACHE);
+	twipe(VUHDO_TALENT_SPELL_NAME_CACHE);
 
 	local tConfigInfo = C_Traits.GetConfigInfo(tActiveConfigId);
 
@@ -559,21 +572,31 @@ function VUHDO_getTalentSpellId(aTalentName)
 				local tEntryInfo = C_Traits.GetEntryInfo(tActiveConfigId, tNodeInfo.entryIDs[1]);
 				local tDefinitionInfo = C_Traits.GetDefinitionInfo(tEntryInfo.definitionID);
 
-				if type(aTalentName) == "number" and tDefinitionInfo.spellID == aTalentName then
-					return tDefinitionInfo.spellID;
-				else
-					local tSpellName = GetSpellInfo(tDefinitionInfo.spellID);
+				local tSpellName = GetSpellInfo(tDefinitionInfo.spellID);
 
-					if tSpellName == aTalentName then
-						return tDefinitionInfo.spellID;
-					end
-				end
+				VUHDO_TALENT_SPELL_ID_CACHE[tDefinitionInfo.spellID] = tSpellName;
+				VUHDO_TALENT_SPELL_NAME_CACHE[tSpellName] = tDefinitionInfo.spellID;
 			end
 		end
 	end
 
-	return nil;
+	return;
+
 end
+
+
+
+--
+function VUHDO_getTalentSpellId(aTalentName)
+
+	if type(aTalentName) == "number" then
+		return VUHDO_TALENT_SPELL_ID_CACHE[aTalentName] or nil;
+	else
+		return VUHDO_TALENT_SPELL_NAME_CACHE[aTalentName] or nil;
+	end
+
+end
+
 
 
 --
