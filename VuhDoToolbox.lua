@@ -40,11 +40,11 @@ local type = type;
 local abs = abs;
 
 -- talent cache maps for new large Dragonflight talent trees
-local VUHDO_TALENT_SPELL_ID_CACHE = {
+local VUHDO_TALENT_CACHE_SPELL_ID = {
 	-- [<spell ID>] = <spell name>,
 };
 
-local VUHDO_TALENT_SPELL_NAME_CACHE = {
+local VUHDO_TALENT_CACHE_SPELL_NAME = {
 	-- [<spell name>] = <spell ID>,
 };
 
@@ -557,8 +557,8 @@ function VUHDO_initTalentSpellCaches()
 		return;
 	end
 
-	twipe(VUHDO_TALENT_SPELL_ID_CACHE);
-	twipe(VUHDO_TALENT_SPELL_NAME_CACHE);
+	twipe(VUHDO_TALENT_CACHE_SPELL_ID);
+	twipe(VUHDO_TALENT_CACHE_SPELL_NAME);
 
 	local tConfigInfo = C_Traits.GetConfigInfo(tActiveConfigId);
 
@@ -574,8 +574,8 @@ function VUHDO_initTalentSpellCaches()
 
 				local tSpellName = GetSpellInfo(tDefinitionInfo.spellID);
 
-				VUHDO_TALENT_SPELL_ID_CACHE[tDefinitionInfo.spellID] = tSpellName;
-				VUHDO_TALENT_SPELL_NAME_CACHE[tSpellName] = tDefinitionInfo.spellID;
+				VUHDO_TALENT_CACHE_SPELL_ID[tDefinitionInfo.spellID] = tSpellName;
+				VUHDO_TALENT_CACHE_SPELL_NAME[tSpellName] = tDefinitionInfo.spellID;
 			end
 		end
 	end
@@ -590,9 +590,9 @@ end
 function VUHDO_getTalentSpellId(aTalentName)
 
 	if type(aTalentName) == "number" then
-		return VUHDO_TALENT_SPELL_ID_CACHE[aTalentName] or nil;
+		return VUHDO_TALENT_CACHE_SPELL_ID[aTalentName] or nil;
 	else
-		return VUHDO_TALENT_SPELL_NAME_CACHE[aTalentName] or nil;
+		return VUHDO_TALENT_CACHE_SPELL_NAME[aTalentName] or nil;
 	end
 
 end
