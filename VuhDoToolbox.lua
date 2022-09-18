@@ -590,7 +590,7 @@ end
 function VUHDO_getTalentSpellId(aTalentName)
 
 	if type(aTalentName) == "number" then
-		return VUHDO_TALENT_CACHE_SPELL_ID[aTalentName] or nil;
+		return VUHDO_TALENT_CACHE_SPELL_ID[aTalentName] and aTalentName or nil;
 	else
 		return VUHDO_TALENT_CACHE_SPELL_NAME[aTalentName] or nil;
 	end
