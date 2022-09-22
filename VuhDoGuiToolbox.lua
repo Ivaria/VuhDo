@@ -724,7 +724,7 @@ end
 
 --
 function VUHDO_lnfPatchFont(aComponent, aLabelName)
-	if not sIsNotInChina then _G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_OPTIONS_FONT_NAME, 12); end
+	if not sIsNotInChina then _G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_OPTIONS_FONT_NAME, 12, ""); end
 end
 
 
@@ -794,7 +794,7 @@ function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
 		aLabel:SetShadowColor(0, 0, 0, tShadowAlpha);
 	end
 
-	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline);
+	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline or "");
 	
 	aLabel:SetShadowOffset(1, -1);
 
