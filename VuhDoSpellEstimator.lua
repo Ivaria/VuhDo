@@ -30,6 +30,7 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.SERENDIPITY] = { ["isHot"] = true, ["nodefault"] = true	},
 	[VUHDO_SPELL_ID.ATONEMENT] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.DIVINE_AEGIS] = { ["isHot"] = true },
 
 	-- Shaman
 	[VUHDO_SPELL_ID.RIPTIDE] = { ["isHot"] = true	},
@@ -77,7 +78,7 @@ function VUHDO_initFromSpellbook()
 	twipe(VUHDO_PLAYER_HOTS);
 
 	for tSpellName, someParams in pairs(VUHDO_SPELLS) do
-		if someParams["isHot"] and VUHDO_isSpellKnown(tSpellName) then
+		if someParams["isHot"] and (VUHDO_isSpellKnown(tSpellName) or VUHDO_isTalentKnown(tSpellName)) then
 			VUHDO_PLAYER_HOTS[#VUHDO_PLAYER_HOTS + 1] = tSpellName;
 		end
 	end
