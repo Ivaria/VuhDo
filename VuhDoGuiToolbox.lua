@@ -403,16 +403,16 @@ local sFrameOrigParents = {};
 --
 local function VUHDO_hideFrame(aFrame)
 
-	if not sFrameHideParents[aFrame:GetName()] then
+	if not sFrameHideParents[aFrame] then
 		local tFrameParent = CreateFrame("Frame");
 		tFrameParent:Hide();
 
-		sFrameHideParents[aFrame:GetName()] = tFrameParent;
+		sFrameHideParents[aFrame] = tFrameParent;
 	end
 
-	if not sFrameOrigParents[aFrame:GetName()] then
-		sFrameOrigParents[aFrame:GetName()] = aFrame:GetParent();
-		aFrame:SetParent(sFrameHideParents[aFrame:GetName()]);
+	if not sFrameOrigParents[aFrame] then
+		sFrameOrigParents[aFrame] = aFrame:GetParent();
+		aFrame:SetParent(sFrameHideParents[aFrame]);
 	end
 
 end
@@ -422,11 +422,13 @@ end
 --
 local function VUHDO_showFrame(aFrame)
 
-	if sFrameOrigParents[aFrame:GetName()] then
-		aFrame:SetParent(sFrameOrigParents[aFrame:GetName()]);
+	if sFrameOrigParents[aFrame] then
+		aFrame:SetParent(sFrameOrigParents[aFrame]);
 		aFrame:Show();
 
-		sFrameOrigParents[aFrame:GetName()] = nil;
+		sFrameOrigParents[aFrame] = nil;
+	else
+		aFrame:Show();
 	end
 
 end
@@ -492,14 +494,14 @@ end
 
 --
 local function VUHDO_hideBlizzRaid()
-	VUHDO_unregisterAndSaveEvents(true, CompactRaidFrameContainer);
+	VUHDO_unregisterAndSaveEvents(true, CompactRaidFrameManager.container);
 end
 
 
 
 --
 local function VUHDO_showBlizzRaid()
-	VUHDO_registerOriginalEvents(VUHDO_GROUP_TYPE_SOLO ~= VUHDO_getCurrentGroupType(), CompactRaidFrameContainer);
+	VUHDO_registerOriginalEvents(VUHDO_GROUP_TYPE_SOLO ~= VUHDO_getCurrentGroupType(), CompactRaidFrameManager.container);
 end
 
 
@@ -528,30 +530,28 @@ end
 
 --
 local function VUHDO_hideBlizzParty()
-	HIDE_PARTY_INTERFACE = "1";
+	if not EditModeManagerFrame:UseRaidStylePartyFrames() then
+		local tPartyFrame = _G["PartyFrame"];
 
-	local tPartyFrame = _G["PartyFrame"];
+		hooksecurefunc(tPartyFrame, "UpdatePartyFrames",
+			function()
+				if not InCombatLockdown() then
+					_G["PartyFrame"]:HidePartyFrames();
+				end
+			end
+		);
 
-	hooksecurefunc(tPartyFrame, "UpdatePartyFrames",
-		function()
-			if not InCombatLockdown() then
-				_G["PartyFrame"]:HidePartyFrames();
+		for tPartyMemberFrame in tPartyFrame.PartyMemberFramePool:EnumerateActive() do
+			VUHDO_unregisterAndSaveEvents(false, tPartyMemberFrame, tPartyMemberFrame.HealthBar, tPartyMemberFrame.ManaBar);
+
+			if tPartyMemberFrame.layoutIndex > 0 and UnitExists("party" .. tPartyMemberFrame.layoutIndex) then
+				VUHDO_hideFrame(tPartyMemberFrame);
 			end
 		end
-	);
-
-	for tCnt = 1, MAX_PARTY_MEMBERS do
-		local tPartyMemberFrame = tPartyFrame.PartyMemberFramePool:Acquire();
-
-		VUHDO_unregisterAndSaveEvents(false, tPartyMemberFrame, tPartyMemberFrame.HealthBar, tPartyMemberFrame.ManaBar);
-		 
-		if (UnitExists("party" .. tCnt)) then
-			VUHDO_hideFrame(tPartyMemberFrame);
+	else
+		if (CompactPartyFrame ~= nil and CompactPartyFrame:IsVisible()) then
+			VUHDO_unregisterAndSaveEvents(true, CompactPartyFrame);
 		end
-	end
-
-	if (CompactPartyFrame ~= nil and CompactPartyFrame:IsVisible()) then
-		VUHDO_unregisterAndSaveEvents(true, CompactPartyFrame);
 	end
 end
 
@@ -563,9 +563,7 @@ local function VUHDO_showBlizzParty()
 		return;
 	end
 
-	if tonumber(GetCVar("useCompactPartyFrames")) == 0 then
-		HIDE_PARTY_INTERFACE = "0";
-
+	if not EditModeManagerFrame:UseRaidStylePartyFrames() then
 		local tPartyFrame = _G["PartyFrame"];
 
 		hooksecurefunc(tPartyFrame, "UpdatePartyFrames",
@@ -573,17 +571,19 @@ local function VUHDO_showBlizzParty()
 				if not InCombatLockdown() then
 					for tPartyMemberFrame in _G["PartyFrame"].PartyMemberFramePool:EnumerateActive() do
 						tPartyMemberFrame:Show();
+						tPartyMemberFrame:UpdateMember();
 					end
+
+					_G["PartyFrame"]:UpdatePartyMemberBackground();
+					_G["PartyFrame"]:Layout();
 				end
 			end
 		);
 
-		for tCnt = 1, MAX_PARTY_MEMBERS do
-			local tPartyMemberFrame = tPartyFrame.PartyMemberFramePool:Acquire();
-
+		for tPartyMemberFrame in tPartyFrame.PartyMemberFramePool:EnumerateActive() do
 			VUHDO_registerOriginalEvents(false, tPartyMemberFrame, tPartyMemberFrame.HealthBar, tPartyMemberFrame.ManaBar);
 
-			if (UnitExists("party" .. tCnt)) then
+			if tPartyMemberFrame.layoutIndex > 0 and UnitExists("party" .. tPartyMemberFrame.layoutIndex) then
 				VUHDO_showFrame(tPartyMemberFrame);
 			end
 		end
@@ -606,6 +606,7 @@ end
 local function VUHDO_showBlizzPlayer()
 	VUHDO_registerOriginalEvents(false, PlayerFrame, PlayerFrameHealthBar, PlayerFrameManaBar);
 	VUHDO_showFrame(PlayerFrame);
+
 	if "DEATHKNIGHT" == VUHDO_PLAYER_CLASS then
 		VUHDO_registerOriginalEvents(true, RuneFrame);
 	end
@@ -616,7 +617,8 @@ end
 --
 local function VUHDO_hideBlizzTarget()
 	VUHDO_unregisterAndSaveEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
-	VUHDO_unregisterAndSaveEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+	VUHDO_unregisterAndSaveEvents(false, TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, TargetFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+
 	ComboFrame:ClearAllPoints();
 end
 
@@ -625,7 +627,8 @@ end
 --
 local function VUHDO_showBlizzTarget()
 	VUHDO_registerOriginalEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
-	VUHDO_registerOriginalEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+	VUHDO_registerOriginalEvents(false, TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, TargetFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+
 	ComboFrame:SetPoint("TOPRIGHT", "TargetFrame", "TOPRIGHT", -44, -9);
 end
 
@@ -647,6 +650,7 @@ end
 --
 local function VUHDO_hideBlizzFocus()
 	VUHDO_unregisterAndSaveEvents(true, FocusFrame);
+	VUHDO_unregisterAndSaveEvents(false, FocusFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, FocusFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
 end
 
 
@@ -654,6 +658,7 @@ end
 --
 local function VUHDO_showBlizzFocus()
 	VUHDO_registerOriginalEvents(true, FocusFrame);
+	VUHDO_registerOriginalEvents(false, FocusFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, FocusFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
 end
 
 
