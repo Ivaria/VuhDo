@@ -19,6 +19,7 @@ Known issues:
 Bugfixes:  
 -- Fixed vehicle health updates when panels contain no pet groups  
 -- Added workaround for even more broken Blizzard APIs for incoming healing  
+-- Fixed Shaman weapon echants in Buff Watch  
   
   
 Improvements:  

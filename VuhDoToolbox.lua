@@ -509,7 +509,7 @@ function VUHDO_getWeaponEnchantName(aSlot)
 	for tCnt = 1, VuhDoScanTooltip:NumLines() do
 		tName = strmatch(_G["VuhDoScanTooltipTextLeft" .. tCnt]:GetText(), "^.+ %(%d+%s+.+%)$");
 		if tName then
-			tEnchant = gsub(tName, " %(.+%)", "");
+			tEnchant = gsub(tName, " [0-9]+ %(.+%)", "");
 			return tEnchant;
 		end
 	end
