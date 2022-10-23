@@ -23,6 +23,8 @@ Bugfixes:
 Improvements:  
 -- Added Warrior ability 'Commanding Shout' to Buff Watch  
 -- Added Paladin spell 'Sacred Shield' to Buff Watch  
+-- Added Mage spell 'Dalaran Intellect' to Buff Watch  
+-- Added Mage spell 'Dalaran Brilliance' to Buff Watch  
   
   
 --------------------------------------------------------------  
