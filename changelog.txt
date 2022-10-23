@@ -11,12 +11,13 @@ Known issues:
 -- Group roster changes will not be reflected during combat  
 --   Swapping a player between groups during combat will cause  
 --   unpredictable, negative results.  Be warned!  
--- Built-in Blizzard APIs for incoming healing are no longer working  
---   LibHealComm will always be used for now regardless of setting under:  
+-- Built-in Blizzard APIs for incoming healing only partially working  
+--   If other healers are using LibHealComm enable it under:  
 --   'VuhDo Options > General > Threat / Incoming > Incoming Heal > Use LibHealComm'  
   
   
 Bugfixes:  
+-- LibHealComm no longer forced as Blizzard APIs have been partially fixed  
   
   
 Improvements:  
