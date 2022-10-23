@@ -21,6 +21,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Warrior ability 'Commanding Shout' to Buff Watch  
   
   
 --------------------------------------------------------------  
