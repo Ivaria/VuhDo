@@ -22,6 +22,7 @@ Bugfixes:
   
 Improvements:  
 -- Added Warrior ability 'Commanding Shout' to Buff Watch  
+-- Added Paladin spell 'Sacred Shield' to Buff Watch  
   
   
 --------------------------------------------------------------  
