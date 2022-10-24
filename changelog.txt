@@ -13,6 +13,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Bump TOC interface for 10.0.0 Dragonflight pre-patch  
   
   
 --------------------------------------------------------------  
