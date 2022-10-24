@@ -26,7 +26,7 @@ externals:
     Libs/LibCustomGlow-1.0:
         url: https://github.com/Stanzilla/LibCustomGlow
     Libs/NickTag-1.0:
-        url: https://github.com/Tercioo/NickTag-1.0
+        url: https://github.com/Ivaria/NickTag-1.0
 
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
 	
