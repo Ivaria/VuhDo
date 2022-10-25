@@ -20,6 +20,8 @@ local VUHDO_SHIELDS = {
 	[48065] = 30, -- Power Word: Shield (rank 13)
 	[48066] = 30, -- Power Word: Shield (rank 14)
 	[56160] = 30, -- Glyph of Power Word: Shield
+	[47753] = 12, -- Divine Aegis
+	[64413] = 8, -- Protection of Ancient Kings
 }
 
 
@@ -119,8 +121,8 @@ local sMissedEvents = {
 
 local VUHDO_SHIELD_LEFT = { };
 setmetatable(VUHDO_SHIELD_LEFT, VUHDO_META_NEW_ARRAY);
-local VUHDO_SHIELD_LEFT_TEMP = { };
-setmetatable(VUHDO_SHIELD_LEFT_TEMP, VUHDO_META_NEW_ARRAY);
+local VUHDO_SHIELD_LEFT_SIMULATOR = { };
+setmetatable(VUHDO_SHIELD_LEFT_SIMULATOR, VUHDO_META_NEW_ARRAY);
 local VUHDO_SHIELD_SIZE = { };
 setmetatable(VUHDO_SHIELD_SIZE, VUHDO_META_NEW_ARRAY);
 local VUHDO_SHIELD_EXPIRY = { };
@@ -214,6 +216,11 @@ local function VUHDO_removeShield(aUnit, aShieldName)
 	VUHDO_SHIELD_LEFT[aUnit][aShieldName] = nil;
 	VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] = nil;
 	VUHDO_SHIELD_LAST_SOURCE_GUID[aUnit][aShieldName] = nil;
+	-- the simulator data of PWS have to be kept in order to avoid user casting high level PWS on a lower one and lose data
+	-- the simulator data of Divine Aegis or Protection of Ancient Kings have to be cleared in order to recompute the accumulation value from 0
+	if aSheildName ~= VUHDO_SPELL_ID.POWERWORD_SHIELD then 
+		VUHDO_SHIELD_LEFT_SIMULATOR[aUnit][aShieldName] = nil
+	end
 	--VUHDO_xMsg("Removed shield " .. aShieldName .. " from " .. aUnit);
 end
 
@@ -346,17 +353,44 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		VUHDO_xMsg(aShieldName, aSpellId);
 	end]]
 
+	-- Wotlkc Shield Simulator
+	if "SPELL_HEAL" == aMessage then 
+		-- TODO : Test Val'anyr, Hammer of Ancient Kings in PTR server
+		-- anAmount = math.floor(aHealAmount * 0.15) -- the Protection of Ancient Kings amount is 15% of the heal amount
+		-- VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.PROTECTION_OF_ANCIENT_KINGS] = (VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.PROTECTION_OF_ANCIENT_KINGS] or 0 ) + anAmount;
+
+		-- Divine Aegis
+		if aCritical then
+			if VUHDO_RAID_GUIDS[aSrcGuid] and VUHDO_RAID[VUHDO_RAID_GUIDS[aSrcGuid]]["classId"] == VUHDO_ID_PRIESTS then
+				anAmount = math.floor(aHealAmount * 0.3) -- the Divine Aegis amount is 30% of the crittical heal amount
+				-- the max amount of Divine Aegis is 10K and the amount can be added up
+				VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.DIVINE_AEGIS] = min(10000 , ((VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.DIVINE_AEGIS] or 0 ) + anAmount));
+			end
+		end
+
+		-- Glyph of Power Word: Shield
+		if aSpellId == 56160 then 
+			anAmount = aHealAmount / 0.2; -- the glyph heal amount is 20% of the absorb amount
+
+			if aCritical then
+				anAmount = math.floor(anAmount / 1.5); -- critical heals in Wrath Classic are 150%
+			end
+
+			VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.POWERWORD_SHIELD] = anAmount;
+		end
+	end
+
 	if VUHDO_SHIELDS[aSpellId] then
 
 		if "SPELL_AURA_REFRESH" == aMessage then 
 			if not anAmount then -- anAmount is always nil in Wrath Classic
-				anAmount = VUHDO_SHIELD_LEFT_TEMP[tUnit][aShieldName] or 0;
+				anAmount = VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][aShieldName] or 0;
 			end
 
 			VUHDO_updateShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
 		elseif "SPELL_AURA_APPLIED" == aMessage then 
 			if not anAmount then -- anAmount is always nil in Wrath Classic
-				anAmount = VUHDO_SHIELD_LEFT_TEMP[tUnit][aShieldName] or 0;
+				anAmount = VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][aShieldName] or 0;
 			end
 
 			VUHDO_initShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
@@ -365,14 +399,6 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 			or "SPELL_AURA_BROKEN" == aMessage
 			or "SPELL_AURA_BROKEN_SPELL" == aMessage then
 			VUHDO_removeShield(tUnit, aShieldName);
-		elseif "SPELL_HEAL" == aMessage and aSpellId == 56160 then -- Glyph of Power Word: Shield
-			anAmount = aHealAmount / 0.2; -- the glyph heal amount is 20% of the absorb amount
-
-			if aCritical then
-				anAmount = math.floor(anAmount / 1.5); -- critical heals in Wrath Classic are 150%
-			end
-
-			VUHDO_SHIELD_LEFT_TEMP[tUnit][VUHDO_SPELL_ID.POWERWORD_SHIELD] = anAmount;
 		end
 	elseif VUHDO_ABSORB_DEBUFFS[aSpellId] then
 
