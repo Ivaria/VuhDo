@@ -357,14 +357,13 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 	if "SPELL_HEAL" == aMessage then 
 		-- TODO : Test Val'anyr, Hammer of Ancient Kings in PTR server
 		-- anAmount = math.floor(aHealAmount * 0.15) -- the Protection of Ancient Kings amount is 15% of the heal amount
-		-- VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.PROTECTION_OF_ANCIENT_KINGS] = (VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.PROTECTION_OF_ANCIENT_KINGS] or 0 ) + anAmount;
+		-- VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.PROTECTION_OF_ANCIENT_KINGS] = anAmount;
 
 		-- Divine Aegis
 		if aCritical then
 			if VUHDO_RAID_GUIDS[aSrcGuid] and VUHDO_RAID[VUHDO_RAID_GUIDS[aSrcGuid]]["classId"] == VUHDO_ID_PRIESTS then
 				anAmount = math.floor(aHealAmount * 0.3) -- the Divine Aegis amount is 30% of the crittical heal amount
-				-- the max amount of Divine Aegis is 10K and the amount can be added up
-				VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.DIVINE_AEGIS] = min(10000 , ((VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.DIVINE_AEGIS] or 0 ) + anAmount));
+				VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][VUHDO_SPELL_ID.DIVINE_AEGIS] = anAmount;
 			end
 		end
 
@@ -385,6 +384,14 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		if "SPELL_AURA_REFRESH" == aMessage then 
 			if not anAmount then -- anAmount is always nil in Wrath Classic
 				anAmount = VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][aShieldName] or 0;
+				-- TODO: Test Val'anyr, Hammer of Ancient Kings in PTR server
+				-- if aShieldName == VUHDO_SPELL_ID.PROTECTION_OF_ANCIENT_KINGS then
+				-- 	anAmount = min(10000 , ((VUHDO_SHIELD_LEFT[tUnit][aShieldName] or 0 ) + anAmount))
+				-- end
+				-- the max amount of Divine Aegis is 10K and the amount can be added up
+				if aShieldName == VUHDO_SPELL_ID.DIVINE_AEGIS then
+					anAmount = min(10000 , ((VUHDO_SHIELD_LEFT[tUnit][aShieldName] or 0 ) + anAmount))
+				end
 			end
 
 			VUHDO_updateShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
