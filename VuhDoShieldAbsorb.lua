@@ -398,6 +398,14 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		elseif "SPELL_AURA_APPLIED" == aMessage then 
 			if not anAmount then -- anAmount is always nil in Wrath Classic
 				anAmount = VUHDO_SHIELD_LEFT_SIMULATOR[tUnit][aShieldName] or 0;
+				-- TODO: Test Val'anyr, Hammer of Ancient Kings in PTR server
+				-- if aShieldName == VUHDO_SPELL_ID.PROTECTION_OF_ANCIENT_KINGS then
+				-- 	anAmount = min(10000 , ((VUHDO_SHIELD_LEFT[tUnit][aShieldName] or 0 ) + anAmount))
+				-- end
+				-- the max amount of Divine Aegis is 10K and the amount can be added up
+				if aShieldName == VUHDO_SPELL_ID.DIVINE_AEGIS then
+					anAmount = min(10000 , ((VUHDO_SHIELD_LEFT[tUnit][aShieldName] or 0 ) + anAmount))
+				end
 			end
 
 			VUHDO_initShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
