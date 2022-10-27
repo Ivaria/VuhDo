@@ -640,6 +640,7 @@ VUHDO_I18N_TT.K582 = "Select the unit to target.";
 VUHDO_I18N_TT.K583 = "Check to make all HoT icons fade out when the HoT is expiring.";
 VUHDO_I18N_TT.K584 = "Check to make all HoT icons flash when the HoT is expiring.";
 VUHDO_I18N_TT.K585 = "Select a color for Evokers";
+VUHDO_I18N_TT.K586 = "Enable to show text only with no icon.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -817,6 +818,7 @@ VUHDO_I18N_SOLIDD = "Solid";
 VUHDO_I18N_HORIZONTAL = "Horizontal";
 VUHDO_I18N_FLAT_TEXTURE = "Flat";
 VUHDO_I18N_HOT_ICONS = "HoT Icons";
+VUHDO_I18N_TEXT_ONLY = "Text only";
 VUHDO_I18N_TARGET_OF_TARGET = "Target of target";
 VUHDO_I18N_VERBOSE = "Verbose";
 VUHDO_I18N_1_DOT = "1.";
