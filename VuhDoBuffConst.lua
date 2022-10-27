@@ -44,6 +44,9 @@ local GROUP_STAM = {
 	VUHDO_SPELL_ID.BUFF_POWER_WORD_FORTITUDE,
 };
 
+local GROUP_VERS = {
+	VUHDO_SPELL_ID.BUFF_MARK_OF_THE_WILD,
+}
 
 
 --
@@ -154,7 +157,9 @@ VUHDO_CLASS_BUFFS = {
 	},
 
 	["DRUID"] = { 
-		-- TODO: what would be useful for Druids?
+		[VUHDO_SPELL_ID.BUFF_MARK_OF_THE_WILD] = {
+			{ VUHDO_SPELL_ID.BUFF_MARK_OF_THE_WILD, VUHDO_BUFF_TARGET_RAID, GROUP_VERS },
+		},
 	},
 
 	["WARLOCK"] = {
