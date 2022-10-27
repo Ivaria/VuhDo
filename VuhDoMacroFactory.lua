@@ -100,12 +100,15 @@ local function VUHDO_getFireText(anAction)
 	if VUHDO_isFireSomething(anAction) then
 		if not sFireText then
 			sFireText = "";
+
+			-- FIXME: Patch 10.0.0 is causing game stutters when console commands are run
 			if VUHDO_IS_SFX_ENABLED then
-				sFireText = sFireText .. "/console Sound_EnableSFX 0\n";
+				--sFireText = sFireText .. "/console Sound_EnableSFX 0\n";
 			end
 
+			-- FIXME: Patch 10.0.0 is causing game stutters when console commands are run
 			if VUHDO_IS_SOUND_ERRORSPEECH_ENABLED then
-				sFireText = sFireText .. "/console Sound_EnableErrorSpeech 0\n";
+				--sFireText = sFireText .. "/console Sound_EnableErrorSpeech 0\n";
 			end
 
 			tModi = VUHDO_SPELL_CONFIG["IS_FIRE_OUT_FIGHT"] and " " or " [combat] ";
@@ -128,12 +131,14 @@ local function VUHDO_getFireText(anAction)
 			sFireText = sFireText .. VUHDO_getInstantFireText(2);
 
 			-- Ton wieder an
+			-- FIXME: Patch 10.0.0 is causing game stutters when console commands are run
 			if VUHDO_IS_SOUND_ERRORSPEECH_ENABLED then
-				sFireText = sFireText .. "/console Sound_EnableErrorSpeech 1\n";
+				--sFireText = sFireText .. "/console Sound_EnableErrorSpeech 1\n";
 			end
 
+			-- FIXME: Patch 10.0.0 is causing game stutters when console commands are run
 			if VUHDO_IS_SFX_ENABLED then
-				sFireText = sFireText .. "/console Sound_EnableSFX 1\n";
+				--sFireText = sFireText .. "/console Sound_EnableSFX 1\n";
 			end
 
 			sFireText = sFireText .. "/run UIErrorsFrame:Clear()\n";
