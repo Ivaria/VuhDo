@@ -20,6 +20,7 @@ Bugfixes:
   
 Improvements:  
 -- Added Druid spell 'Mark of the Wild' to Buff Watch  
+-- Added Shaman talented self-cast spell 'Earth Shield' to Buff Watch  
   
   
 --------------------------------------------------------------  
