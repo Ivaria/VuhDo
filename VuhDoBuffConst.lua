@@ -44,6 +44,14 @@ local GROUP_STAM = {
 	VUHDO_SPELL_ID.BUFF_POWER_WORD_FORTITUDE,
 };
 
+local GROUP_MOVEMENT_SPELL_REDUCTION = {
+	VUHDO_SPELL_ID.BUFF_BLESSING_OF_THE_BRONZE,
+ };
+
+ local GROUP_VERS = {
+	VUHDO_SPELL_ID.BUFF_BLESSING_OF_THE_BRONZE,
+ };
+
 
 
 --
@@ -70,6 +78,9 @@ VUHDO_CLASS_BUFFS = {
 		},
 		[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = {
 			{ VUHDO_SPELL_ID.PAIN_SUPPRESSION, VUHDO_BUFF_TARGET_UNIQUE },
+		},
+		[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = {
+			{ VUHDO_SPELL_ID.GUARDIAN_SPIRIT, VUHDO_BUFF_TARGET_UNIQUE },
 		},
 	},
 
@@ -155,6 +166,9 @@ VUHDO_CLASS_BUFFS = {
 
 	["DRUID"] = { 
 		-- TODO: what would be useful for Druids?
+		[VUHDO_SPELL_ID.BUFF_MARK_OF_THE_WILD] = {
+			{ VUHDO_SPELL_ID.BUFF_MARK_OF_THE_WILD, VUHDO_BUFF_TARGET_RAID, GROUP_VERS},
+		},
 	},
 
 	["WARLOCK"] = {
@@ -190,6 +204,9 @@ VUHDO_CLASS_BUFFS = {
 		},
 		[VUHDO_SPELL_ID.BUFF_ARCANE_FAMILIAR] = {
 			{ VUHDO_SPELL_ID.BUFF_ARCANE_FAMILIAR, VUHDO_BUFF_TARGET_SELF },
+		},
+		[VUHDO_SPELL_ID.BUFF_TIMEWARP] = {
+			{ VUHDO_SPELL_ID.BUFF_TIMEWARP, VUHDO_BUFF_TARGET_RAID },
 		},
 	},
 
@@ -244,14 +261,22 @@ VUHDO_CLASS_BUFFS = {
 
 	["MONK"] = {
 		-- TODO: What would be useful for Monks?
+		-- Monks do not provide a class buff currently.
 	},
 
 	["DEMONHUNTER"] = {
 		-- TODO: add the class buffs that Demon Hunters provide
+		-- Demon Hunters do not provide a class buff currently.
 	},
 
 	["EVOKER"] = {
 		-- TODO: add the class buffs that Evokers provide
+		[VUHDO_SPELL_ID.BUFF_BLESSING_OF_THE_BRONZE] = {
+			{ VUHDO_SPELL_ID.BUFF_BLESSING_OF_THE_BRONZE, VUHDO_BUFF_TARGET_RAID, GROUP_MOVEMENT_SPELL_REDUCTION},
+		},
+		[VUHDO_SPELL_ID.BUFF_FURY_OF_THE_ASPECTS] = {
+			{ VUHDO_SPELL_ID.BUFF_FURY_OF_THE_ASPECTS, VUHDO_BUFF_TARGET_RAID },
+		},
 	},
 };
 
