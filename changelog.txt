@@ -17,6 +17,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Druid spell 'Mark of the Wild' to Buff Watch  
   
   
 --------------------------------------------------------------  
