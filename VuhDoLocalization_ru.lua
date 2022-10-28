@@ -577,3 +577,6 @@ VUHDO_I18N_TRINKET_2 = "Тринкет 2";
 
 -- 3.139
 VUHDO_I18N_EVOKERS = "Evokers";
+
+-- 3.143
+VUHDO_I18N_BUFFC_EARTH_SHIELD = "Earth Shield (Self)";
