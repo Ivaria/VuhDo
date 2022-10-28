@@ -339,7 +339,11 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		end
 	end
 
-	tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"], tIsChargeAlpha and tHotColor["O"] or 1);
+	if tIsChargeAlpha then
+		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"], tHotColor["O"]);
+	else
+		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"]);
+	end
 
 	if tIsChargeShown then
 		tChargeTexture:SetTexture(VUHDO_CHARGE_TEXTURES[aTimes]);
