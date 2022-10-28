@@ -167,6 +167,8 @@ local function VUHDO_initHotIcon(anIndex)
 			tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\hot_flat_16_16");
 		elseif sIconRadio == 2 then -- Glossy
 			tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\icon_white_square");
+			elseif sIconRadio == 4 then -- Text only
+            tHotIcon:Hide();
 		else
 			local tHotName = sHotConfig["SLOTS"][anIndex];
 			if VUHDO_CAST_ICON_DIFF[tHotName] then
