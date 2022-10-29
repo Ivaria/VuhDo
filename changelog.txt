@@ -21,6 +21,11 @@ Bugfixes:
 Improvements:  
 -- Added Druid spell 'Mark of the Wild' to Buff Watch  
 -- Added Shaman talented self-cast spell 'Earth Shield' to Buff Watch  
+-- Added Priest spell 'Guardian Spirit' to Buff Watch  
+-- Added Mage spell 'Timewarp' to Buff Watch  
+-- Added Hunter spell 'Ancient Hysteria' to Buff Watch  
+-- Added Evoker spell 'Blessing of the Bronze' to Buff Watch  
+-- Added Evoker spell 'Fury of the Aspects' to Buff Watch  
   
   
 --------------------------------------------------------------  
