@@ -21,6 +21,14 @@ Bugfixes:
 Improvements:  
 -- Added Druid spell 'Mark of the Wild' to Buff Watch  
 -- Added Shaman talented self-cast spell 'Earth Shield' to Buff Watch  
+-- Added Shaman totem 'Liquid Magma Totem' to Buff Watch  
+-- Added Shaman totem 'Wind Rush Totem' to Buff Watch  
+-- Added Shaman totem 'Tranquil Air Totem' to Buff Watch  
+-- Added Shaman totem 'Storm Elemental Totem' to Buff Watch  
+-- Added Shaman totem 'Stoneskin Totem' to Buff Watch  
+-- Added Shaman totem 'Mana Spring Totem' to Buff Watch  
+-- Added Shaman totem 'Poison Cleansing Totem' to Buff Watch  
+-- Added Shaman weapon enchant 'Earthliving Weapon' to Buff Watch  
 -- Added Priest spell 'Guardian Spirit' to Buff Watch  
 -- Added Mage spell 'Timewarp' to Buff Watch  
 -- Added Hunter spell 'Ancient Hysteria' to Buff Watch  
