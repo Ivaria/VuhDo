@@ -19,7 +19,7 @@ local sIsAnyAutoFireConfigured;
 local _;
 
 CreateFrame("Button", "VDSTB", nil, "SecureActionButtonTemplate"):SetAttribute("type", "stop"); -- Calls SpellStopTargeting
-local sStopTargetText = "/click VDSTB\n";
+local sStopTargetText = "/click VDSTB LeftButton\n";
 
 
 function VUHDO_macroFactoryInitLocalOverrides()
@@ -303,7 +303,7 @@ end
 
 --
 function VUHDO_buildExtraActionButtonMacroText(aTarget)
-	return "/tar [@" .. aTarget .. "]\n/click ExtraActionButton1\n/targetlasttarget";
+	return "/tar [@" .. aTarget .. "]\n/click ExtraActionButton1 LeftButton\n/targetlasttarget";
 end
 
 
