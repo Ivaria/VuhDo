@@ -317,6 +317,7 @@ end
 
 local VUHDO_PROHIBIT_HELP = {
 	[VUHDO_SPELL_ID.REBIRTH] = true,
+	[VUHDO_SPELL_ID.INTERCESSION] = true,
 	[VUHDO_SPELL_ID.REDEMPTION] = true,
 	[VUHDO_SPELL_ID.ABSOLUTION] = true,
 	[VUHDO_SPELL_ID.ANCESTRAL_SPIRIT] = true,
@@ -338,15 +339,24 @@ local function VUHDO_getAutoBattleRezText(anIsKeyboard)
 
 	if ("DRUID" == VUHDO_PLAYER_CLASS or "PALADIN" == VUHDO_PLAYER_CLASS) and VUHDO_SPELL_CONFIG["autoBattleRez"] then
 		tRezText = "/use [dead,combat,@" .. (anIsKeyboard and "mouseover" or "vuhdo");
+		
 		if VUHDO_SPELL_CONFIG["smartCastModi"] ~= "all" then
 			tRezText = tRezText .. ",mod:" .. VUHDO_SPELL_CONFIG["smartCastModi"];
 		end
-		tRezText = tRezText .. "] " .. VUHDO_SPELL_ID.REBIRTH .. "\n";
+
+		tRezText = tRezText .. "] ";
+
+		if "DRUID" == VUHDO_PLAYER_CLASS then
+			tRezText = tRezText .. VUHDO_SPELL_ID.REBIRTH .. "\n";
+		elseif "PALADIN" == VUHDO_PLAYER_CLASS then
+			tRezText = tRezText .. VUHDO_SPELL_ID.INTERCESSION .. "\n";
+		end
 	else
 		tRezText = "";
 	end
 
 	return tRezText;
+
 end
 
 
@@ -388,7 +398,7 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		tText = tText .. tCastText .. "[" .. tModiSpell .. "@mouseover] " .. anAction .. "\n";
 		tText = tText .. tSpellPost;
 	else
-		if aPet and VUHDO_SPELL_ID.REBIRTH ~= anAction then
+		if aPet and VUHDO_SPELL_ID.REBIRTH ~= anAction and VUHDO_SPELL_ID.INTERCESSION ~= anAction then
 			tVehicleCond = "[nodead,help,@vdpet]";
 		else
 			tVehicleCond = "";

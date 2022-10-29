@@ -34,6 +34,7 @@ Improvements:
 -- Added Hunter spell 'Ancient Hysteria' to Buff Watch  
 -- Added Evoker spell 'Blessing of the Bronze' to Buff Watch  
 -- Added Evoker spell 'Fury of the Aspects' to Buff Watch  
+-- Added Paladin battle resurrection spell 'Intercession'  
   
   
 --------------------------------------------------------------  
