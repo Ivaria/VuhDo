@@ -30,7 +30,6 @@ externals:
 
     Libs/AceBucket-3.0: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
     Libs/AceEvent-3.0: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
-    Libs/!LibTotemInfo: https://github.com/SwimmingTiger/LibTotemInfo.git
     Libs/LibHealComm-4.0: https://repos.curseforge.com/wow/libhealcomm-4-0
 
     Libs/LibClassicDurations: https://repos.curseforge.com/wow/libclassicdurations

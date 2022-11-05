@@ -17,7 +17,6 @@ VUHDO_LibCustomGlow = LibStub("LibCustomGlow-1.0");
 VUHDO_LibNickTag = LibStub("NickTag-1.0");
 
 VUHDO_LibHealComm = LibStub("LibHealComm-4.0");
-VUHDO_LibTotemInfo = LibStub("LibTotemInfo-1.0");
 
 VUHDO_LibClassicDurations = LibStub("LibClassicDurations");
 
