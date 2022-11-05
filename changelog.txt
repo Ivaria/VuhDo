@@ -17,7 +17,7 @@ Known issues:
   
   
 Bugfixes:  
--- Fixed Paladin ability 'Sacred Shield' in Buff Watch to be a unique cast  
+-- Fixed Shaman totem timers for Buff Watch  
   
   
 Improvements:  
