@@ -31,7 +31,8 @@
 #   SC2295: Expansions inside ${..} need to be quoted separately, otherwise they will match as a pattern.
 #   SC2030: Modification of var is local (to subshell caused by pipeline).
 #   SC2031: var was modified in a subshell. That change might be lost.
-# shellcheck disable=SC2295,SC2030,SC2031
+#   SC2001: See if you can use ${variable//search/replace} instead.
+# shellcheck disable=SC2295,SC2030,SC2031,SC2001
 
 ## USER OPTIONS
 
@@ -255,7 +256,7 @@ while getopts ":celLzusSop:dw:a:r:t:g:m:n:" opt; do
 						fi
 						# Only one version per game type is allowed
 						if [ -n "${game_type_version[$game_type]}" ]; then
-							echo "Invalid argument for option \"-g\" ($i) - Only one version per game type is supported." >&2
+							echo "Invalid argument for option \"-g\" (${game_type_version[$game_type]}, $i) - Only one version per game type is supported." >&2
 							usage
 							exit 1
 						fi
@@ -586,7 +587,6 @@ set_info_svn() {
 			# Check if the latest tag matches the working copy revision (/trunk checkout instead of /tags)
 			_si_tag_line=$( retry svn log --verbose --limit 1 "$si_repo_url/tags" 2>/dev/null | awk '/^   A/ { print $0; exit }' )
 			_si_tag=$( echo "$_si_tag_line" | awk '/^   A/ { print $2 }' | awk -F/ '{ print $NF }' )
-			# shellcheck disable=SC2001
 			_si_tag_from_revision=$( echo "$_si_tag_line" | sed -e 's/^.*:\([0-9]\{1,\}\)).*$/\1/' ) # (from /project/trunk:N)
 
 			if [[ "$_si_tag_from_revision" == "$_si_revision" ]]; then
@@ -786,6 +786,8 @@ yaml_keyvalue() {
 yaml_listitem() {
 	yaml_item=${1#-}
 	yaml_item=${yaml_item#"${yaml_item%%[! ]*}"} # trim leading whitespace
+	yaml_item=${yaml_item#[\'\"]} # trim leading quotes
+	yaml_item=${yaml_item%[\'\"]} # trim trailing quotes
 }
 
 ###
@@ -808,6 +810,7 @@ changelog=
 changelog_markup="text"
 enable_nolib_creation=
 ignore=
+license=
 unchanged=
 zip_root_dirs=()
 nolib_exclude=
@@ -913,6 +916,9 @@ if [ -f "$pkgmeta_file" ]; then
 							split="true"
 						fi
 						;;
+					license-output)
+						license=$yaml_value
+						;;
 					manual-changelog)
 						changelog=$yaml_value
 						manual_changelog="true"
@@ -947,45 +953,17 @@ if [ -f "$pkgmeta_file" ]; then
 						# Get the YAML list item.
 						yaml_listitem "$yaml_line"
 						case $pkgmeta_phase in
-							ignore)
-								pattern=$yaml_item
-								if [ -d "$topdir/$pattern" ]; then
-									pattern="$pattern/*"
-								elif [ ! -f "$topdir/$pattern" ]; then
-									# doesn't exist so match both a file and a path
-									pattern="$pattern:$pattern/*"
-								fi
-								if [ -z "$ignore" ]; then
-									ignore="$pattern"
-								else
-									ignore="$ignore:$pattern"
-								fi
-								;;
-							plain-copy)
-								pattern=$yaml_item
-								if [ -d "$topdir/$pattern" ]; then
-									pattern="$pattern/*"
-								elif [ ! -f "$topdir/$pattern" ]; then
-									# doesn't exist so match both a file and a path
-									pattern="$pattern:$pattern/*"
-								fi
-								if [ -z "$unchanged" ]; then
-									unchanged="$pattern"
-								else
-									unchanged="$unchanged:$pattern"
-								fi
-								;;
 							tools-used)
-								relations["$yaml_item"]="tool"
+								relations["${yaml_item,,}"]="tool"
 								;;
 							required-dependencies)
-								relations["$yaml_item"]="requiredDependency"
+								relations["${yaml_item,,}"]="requiredDependency"
 								;;
 							optional-dependencies)
-								relations["$yaml_item"]="optionalDependency"
+								relations["${yaml_item,,}"]="optionalDependency"
 								;;
 							embedded-libraries)
-								relations["$yaml_item"]="embeddedLibrary"
+								relations["${yaml_item,,}"]="embeddedLibrary"
 								;;
 						esac
 						;;
@@ -1024,53 +1002,46 @@ if [ -f "$pkgmeta_file" ]; then
 fi
 
 # Add untracked/ignored files to the ignore list
-if [ "$repository_type" = "git" ]; then
-	OLDIFS=$IFS
-	IFS=$'\n'
-	for _vcs_ignore in $( git -C "$topdir" ls-files --others --directory ); do
-		if [ -d "$topdir/$_vcs_ignore" ]; then
-			_vcs_ignore="$_vcs_ignore*"
-		fi
-		if [ -z "$ignore" ]; then
-			ignore="$_vcs_ignore"
+
+vcs_addignore() {
+	local _ignored_path="$1"
+	if [[ -d "$topdir/$_ignored_path" ]]; then
+		_ignored_path="$_ignored_path*"
+	fi
+	# Don't ignore a manual changelog generated for the build
+	if [[ -z $changelog || $_ignored_path != "$changelog" ]]; then
+		if [[ -z "$ignore" ]]; then
+			ignore="$_ignored_path"
 		else
-			ignore="$ignore:$_vcs_ignore"
-		fi
-	done
-	IFS=$OLDIFS
-elif [ "$repository_type" = "svn" ]; then
-	# svn always being difficult.
-	OLDIFS=$IFS
-	IFS=$'\n'
-	for _vcs_ignore in $( cd "$topdir" && svn status --no-ignore --ignore-externals | awk '/^[?IX]/' | cut -c9- ); do
-		_vcs_ignore="${_vcs_ignore//\\//}"
-		if [ -d "$topdir/$_vcs_ignore" ]; then
-			_vcs_ignore="$_vcs_ignore/*"
-		fi
-		if [ -z "$ignore" ]; then
-			ignore="$_vcs_ignore"
-		else
-			ignore="$ignore:$_vcs_ignore"
-		fi
-	done
-	IFS=$OLDIFS
-elif [ "$repository_type" = "hg" ]; then
-	_vcs_ignore=$( hg --cwd "$topdir" status --ignored --unknown --no-status --print0 | tr '\0' ':' )
-	if [ -n "$_vcs_ignore" ]; then
-		_vcs_ignore="${_vcs_ignore%:}"
-		if [ -z "$ignore" ]; then
-			ignore="$_vcs_ignore"
-		else
-			ignore="$ignore:$_vcs_ignore"
+			ignore="$ignore:$_ignored_path"
 		fi
 	fi
+}
+
+OLDIFS=$IFS
+IFS=$'\n'
+if [ "$repository_type" = "git" ]; then
+	for _vcs_ignore in $( git -C "$topdir" ls-files --others --directory ); do
+		vcs_addignore "$_vcs_ignore"
+	done
+elif [ "$repository_type" = "svn" ]; then
+	for _vcs_ignore in $( cd "$topdir" && svn status --no-ignore --ignore-externals | awk '/^[?IX]/ { print $2 }' ); do
+		vcs_addignore "${_vcs_ignore//\\//}"
+	done
+elif [ "$repository_type" = "hg" ]; then
+	for _vcs_ignore in $( hg --cwd "$topdir" status --ignored --unknown --no-status ); do
+		vcs_addignore "$_vcs_ignore"
+	done
 fi
+IFS=$OLDIFS
+
+
+# Add .pkgmeta ignored files to the ignore list
+parse_ignore "$pkgmeta_file"
 
 ###
 ### Process TOC file
 ###
-
-fallback_toc_file=
 
 do_toc() {
 	local toc_file toc_version toc_game_type root_toc_version
@@ -1245,7 +1216,6 @@ done
 for path in "${!toc_root_paths[@]}"; do
 	if [[ -f "$path/$package.toc" ]]; then
 		set_toc_project_info "$path/$package.toc"
-		fallback_toc_file="$path/$package.toc"
 	fi
 done
 
@@ -1264,12 +1234,6 @@ done
 
 if [[ ${#toc_interfaces[@]} -eq 0 ]]; then
 	echo "Could not find an addon TOC file. In another directory? Make sure it matches the 'package-as' in .pkgmeta" >&2
-	exit 1
-fi
-
-# CurseForge still requires a fallback TOC file
-if [[ -n "$slug" && "$slug" -gt 0 && -z "$fallback_toc_file" ]]; then
-	echo "CurseForge still requires a fallback TOC file (\"$package.toc\") when using multiple TOC files." >&2
 	exit 1
 fi
 
@@ -1659,6 +1623,7 @@ copy_directory_tree() {
 	if [ ! -d "$_cdt_destdir" ]; then
 		mkdir -p "$_cdt_destdir"
 	fi
+
 	# Create a "find" command to list all of the files in the current directory, minus any ones we need to prune.
 	_cdt_find_cmd="find ."
 	# Prune everything that begins with a dot except for the current directory ".".
@@ -1671,7 +1636,9 @@ copy_directory_tree() {
 	esac
 	# Print the filename, but suppress the current directory ".".
 	_cdt_find_cmd+=" -o \! -name \".\" -print"
-	( cd "$_cdt_srcdir" && eval "$_cdt_find_cmd" ) | while read -r file; do
+
+	local file
+	while read -r file; do # <( cd "$_cdt_srcdir" && eval "$_cdt_find_cmd" )
 		file=${file#./}
 		_cdt_source_file="$_cdt_srcdir/$file"
 		if [ -f "$_cdt_source_file" ]; then
@@ -1695,14 +1662,23 @@ copy_directory_tree() {
 			if [ -n "$_cdt_skip_copy" ]; then
 				echo "  Ignoring: $file"
 			else
-				dir=${file%/*}
-				if [ "$dir" != "$file" ]; then
-					mkdir -p "$_cdt_destdir/$dir"
+				_cdt_subdir=${file%/*}
+				if [ "$_cdt_subdir" != "$file" ]; then
+					mkdir -p "$_cdt_destdir/$_cdt_subdir"
+				fi
+				# Check for marked hard embedded libraries
+				_cdt_external_slug=
+				if [[ $_cdt_source_file == *".lua" ]] && _cdt_external_slug=$( grep -Po "(?i)(?<=@)curseforge-project-slug[[:space:]]*:[[:space:]]*[^@]+(?=@)" "$_cdt_source_file"); then
+					_cdt_external_slug="${_cdt_external_slug##*:}"
+					_cdt_external_slug="${_cdt_external_slug//[[:space:]]/}"
+					if [[ -n $_cdt_external_slug ]]; then
+						relations["${_cdt_external_slug,,}"]="embeddedLibrary"
+					fi
 				fi
 				# Check if the file matches a pattern for keyword replacement.
 				if [ -n "$_cdt_only_copy" ] || ! match_pattern "$file" "*.lua:*.md:*.toc:*.txt:*.xml"; then
-					echo "  Copying: $file (unchanged)"
-					cp "$_cdt_source_file" "$_cdt_destdir/$dir"
+					echo "  Copying: $file (unchanged)${_cdt_external_slug:+(embedded: "$_cdt_external_slug")}"
+					cp "$_cdt_source_file" "$_cdt_destdir/$_cdt_subdir"
 				else
 					_cdt_file_gametype="$_cdt_gametype"
 					# Set the filters for replacement based on file extension.
@@ -1758,7 +1734,7 @@ copy_directory_tree() {
 					# Set version control values for the file.
 					set_info_file "$_cdt_source_file"
 
-					echo "  Copying: $file"
+					echo "  Copying: $file${_cdt_external_slug:+ (embedded: "$_cdt_external_slug")}"
 
 					# Make sure we're not causing any surprises
 					if [[ -z $_cdt_file_gametype && ( $file == *".lua" || $file == *".xml" || $file == *".toc" ) ]] && grep -q '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_source_file"; then
@@ -1803,17 +1779,11 @@ copy_directory_tree() {
 
 							eval < "$_cdt_source_file" "$_cdt_filters" 3>&1 > "$_cdt_destdir/$new_file"
 						done
-
-						# Remove the fallback TOC file if it doesn't have an interface value or if you a TOC file for each game type
-						# if [[ -z $root_toc_version || ${#si_game_type_interface[@]} -eq 3 ]]; then
-						# 	echo "    Removing $file"
-						# 	rm -f "$_cdt_destdir/$file"
-						# fi
 					fi
 				fi
 			fi
 		fi
-	done || exit 1 # actually exit if we end with an error
+	done < <( cd "$_cdt_srcdir" && eval "$_cdt_find_cmd" )
 	if [ -z "$_external_dir" ]; then
 		end_group "copy"
 	fi
@@ -2021,7 +1991,7 @@ process_external() {
 		fi
 
 		if [ -n "$external_slug" ]; then
-			relations["$external_slug"]="embeddedLibrary"
+			relations["${external_slug,,}"]="embeddedLibrary"
 		fi
 
 		echo "Fetching external: $external_dir"
@@ -2176,7 +2146,7 @@ if [[ -n "$manual_changelog" && -f "$topdir/$changelog" ]]; then
 
 	# Convert Markdown to BBCode (with HTML as an intermediary) for sending to WoWInterface
 	# Requires pandoc (http://pandoc.org/)
-	if [ "$changelog_markup" = "markdown" ] && [ -n "$wowi_convert_changelog" ] && hash pandoc &>/dev/null; then
+	if [ "$changelog_markup" = "markdown" ] && [ -n "$wowi_convert_changelog" ] && command -v pandoc &>/dev/null; then
 		wowi_changelog="$releasedir/WOWI-$project_version-CHANGELOG.txt"
 		pandoc -f commonmark -t html "$changelog_path" | sed \
 			-e 's/<\(\/\)\?\(b\|i\|u\)>/[\1\2]/g' \
@@ -2387,6 +2357,24 @@ else
 fi
 
 ###
+### Create a license if not present and .pkgmeta requests one.
+###
+
+if [[ -n "$license" && ! -f "$topdir/$license" && -n "$slug" ]]; then
+	start_group "Saving license as $license" "license"
+	# curseforge.com is protected by cloudflare, but wowace.com isn't? >.>
+	if license_text=$( curl -sf --retry 3 --retry-delay 10 "https://www.wowace.com/project/$slug/license" 2>/dev/null ); then
+		# text is wrapped with \n\n<div class="module">\n\t<p>\n\t\t ... \n\t</p>\n</div>\n
+		echo "$license_text" | sed -e '1,4d' -e '5s/^\s*//' -e '$d' | sed '$d' > "$pkgdir/$license"
+		head -n10 "$pkgdir/$license"
+		[[ "$( wc -l < "$pkgdir/$license" )" -gt 10 ]] && echo "..."
+	else
+		echo "There was an error saving the license. ($?)"
+	fi
+	end_group "license"
+fi
+
+###
 ### Process .pkgmeta to perform move-folders actions.
 ###
 
@@ -2430,6 +2418,10 @@ if [ -f "$pkgmeta_file" ]; then
 									echo "Moving $yaml_key to $yaml_value"
 									mv -f "$srcdir"/* "$destdir" && rm -fr "$srcdir"
 									zip_root_dirs+=("$yaml_value")
+									# Copy the license into $destdir if one doesn't already exist.
+									if [[ -n "$license" && -f "$pkgdir/$license" && ! -f "$destdir/$license" ]]; then
+										cp -f "$pkgdir/$license" "$destdir/$license"
+									fi
 									# Check to see if the base source directory is empty
 									_mf_basedir="/${yaml_key%/*}"
 									while [[ -n "$_mf_basedir" && -z "$( ls -A "${releasedir}${_mf_basedir}" )" ]]; do
@@ -2483,7 +2475,7 @@ if [ -z "$skip_zipfile" ]; then
 	fi
 
 	if [ -n "$GITHUB_ACTIONS" ]; then
-		echo "::set-output name=archive_path::${archive}"
+		echo "ARCHIVE_PATH=${archive}" >> $GITHUB_OUTPUT
 	fi
 
 	start_group "Creating archive: $archive_name ($archive_label)" "archive"
@@ -2553,7 +2545,7 @@ upload_curseforge() {
 			esac
 
 			# check the version
-			if ! jq -e --arg v "$version_name" 'map(select(.name == $v)) | length > 0' <<< "$_cf_versions" &>/dev/null; then
+			if ! jq -e --arg v "$version_name" --argjson t "$game_id" 'map(select(.gameVersionTypeID == $t and .name == $v)) | length > 0' <<< "$_cf_versions" &>/dev/null; then
 				# no match, so grab the next highest version (try to avoid testing versions)
 				version_name=$( echo "$_cf_versions" | jq -r --arg v "$version_name" --argjson t "$game_id" 'map(select(.gameVersionTypeID == $t and .name < $v)) | max_by(.id) | .name // empty' )
 				if [[ -z $version_name ]]; then
@@ -3012,7 +3004,7 @@ upload_github() {
 
 
 if [[ -z $skip_upload && -n $archive && -s $archive ]]; then
-	if ! hash jq &>/dev/null; then
+	if ! command -v jq &>/dev/null; then
 		echo "Skipping upload because \"jq\" was not found."
 		echo
 		exit_code=1
