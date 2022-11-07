@@ -77,9 +77,15 @@ local function VUHDO_hasPanelVisibleButtons(aPanelNum)
 	else
 		for _, tButton in pairs(VUHDO_getPanelButtons(aPanelNum)) do
 			tUnit = tButton:GetAttribute("unit");
-			if not tUnit then return false;
-			elseif UnitExists(tUnit) then return true; end
+			
+			if not tUnit then
+				return false;
+			elseif UnitExists(tUnit) then
+				return true;
+			end
 		end
+
+		return false;
 	end
 end
 

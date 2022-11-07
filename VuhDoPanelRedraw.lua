@@ -110,6 +110,14 @@ function VUHDO_isPanelVisible(aPanelNum)
 		return true;
 	end
 
+	if VUHDO_isModelInPanel(aPanelNum, 82) then -- VUHDO_ID_TARGET
+		return true;
+	end
+
+	if VUHDO_isModelInPanel(aPanelNum, 83) then -- VUHDO_ID_FOCUS
+		return true;
+	end
+
 	if VUHDO_isModelInPanel(aPanelNum, 44) then -- VUHDO_ID_BOSSES
 		return true;
 	end
