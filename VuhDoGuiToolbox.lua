@@ -71,7 +71,7 @@ local function VUHDO_hasPanelVisibleButtons(aPanelNum)
 	if not sShowPanels or not VUHDO_IS_SHOWN_BY_GROUP then
 		return false;
 
-	elseif not sIsHideEmptyAndClickThrough or VUHDO_isConfigPanelShowing() then
+	elseif not sIsHideEmptyAndClickThrough or VUHDO_isConfigPanelShowing() or VUHDO_isConfigDemoUsers() then
 		return true;
 
 	else
