@@ -16,6 +16,7 @@ Bugfixes:
 -- Fixed visibility of empty panels containing only target/focus models  
 -- Fixed visibility of empty panels on show/hide of 'VuhDo Options > Move!'  
 -- Fixed VuhDo Options demo mode when 'Hide Panels > Empty' selected  
+-- Fixed keybindings under 'Game Menu > Options > Gameplay > Keybindings > AddOns'  
   
   
 Improvements:  
