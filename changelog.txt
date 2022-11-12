@@ -22,6 +22,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to only show text with no icon for HoT Icons  
   
   
 --------------------------------------------------------------  

@@ -818,7 +818,6 @@ VUHDO_I18N_SOLIDD = "Solid";
 VUHDO_I18N_HORIZONTAL = "Horizontal";
 VUHDO_I18N_FLAT_TEXTURE = "Flat";
 VUHDO_I18N_HOT_ICONS = "HoT Icons";
-VUHDO_I18N_TEXT_ONLY = "Text only";
 VUHDO_I18N_TARGET_OF_TARGET = "Target of target";
 VUHDO_I18N_VERBOSE = "Verbose";
 VUHDO_I18N_1_DOT = "1.";
@@ -1171,3 +1170,6 @@ VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target unit (hostile only)";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Mouseover's target's target unit (hostile only)";
 
 VUHDO_I18N_CLOCK = "Clock";
+
+VUHDO_I18N_TEXT_ONLY = "Text only";
+

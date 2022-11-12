@@ -648,6 +648,7 @@ VUHDO_I18N_TT.K582 = "Select the unit to target.";
 VUHDO_I18N_TT.K583 = "Check to make all HoT icons fade out when the HoT is expiring.";
 VUHDO_I18N_TT.K584 = "Check to make all HoT icons flash when the HoT is expiring.";
 VUHDO_I18N_TT.K585 = "Select a color for Evokers";
+VUHDO_I18N_TT.K586 = "Enable to show text only with no icon.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1184,3 +1185,5 @@ VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Mouseover's target unit (hostile only)";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Mouseover's target's target unit (hostile only)";
 
 VUHDO_I18N_CLOCK = "Clock";
+
+VUHDO_I18N_TEXT_ONLY = "Text only";

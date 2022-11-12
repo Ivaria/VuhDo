@@ -746,6 +746,7 @@ VUHDO_I18N_TT.K582 = "Выберите юнита для взятия в цел�
 VUHDO_I18N_TT.K583 = "Отметьте, что бы иконки всех ХоТ-ок затухали при спадении.";
 VUHDO_I18N_TT.K584 = "Отметьте, что бы иконки всех ХоТ-ок мигали при спадении.";
 VUHDO_I18N_TT.K585 = "Select a color for Evokers";
+VUHDO_I18N_TT.K586 = "Enable to show text only with no icon.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный\nпрофиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";
@@ -1347,3 +1348,5 @@ VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Цель юнита под мышкой (т�
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Цель цели юнита под мышкой (только враждебный)";
 
 VUHDO_I18N_CLOCK = "Стрелка\nЧасов";
+
+VUHDO_I18N_TEXT_ONLY = "Text only";
