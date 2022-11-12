@@ -17,6 +17,7 @@ Bugfixes:
 -- Fixed visibility of empty panels on show/hide of 'VuhDo Options > Move!'  
 -- Fixed VuhDo Options demo mode when 'Hide Panels > Empty' selected  
 -- Fixed keybindings under 'Game Menu > Options > Gameplay > Keybindings > AddOns'  
+-- Fixed mouse/key bindings after spells are learned from talent changes  
   
   
 Improvements:  
