@@ -32,14 +32,16 @@ VUHDO_INIT_DEBUFF_ABILITIES = {
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.PURIFY },
 	},
 	["SHAMAN"] = {
-		[VUHDO_DEBUFF_TYPE_CURSE] = { VUHDO_SPELL_ID.PURIFY_SPIRIT, VUHDO_SPELL_ID.CLEANSE_SPIRIT },
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.PURIFY_SPIRIT },
+		-- Shaman has two dispel spells with the same name ("Purify Spirit") so need to reference by ID
+		[VUHDO_DEBUFF_TYPE_CURSE] = { 383016, VUHDO_SPELL_ID.CLEANSE_SPIRIT },
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 383016, 77130 },
 	},
 	["WARLOCK"] = {
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { "*" },
 	},
 	["DEATHKNIGHT"] = { },
-	["MONK"] = { -- Monk has two dispel spells with the same name ("Detox") and needs to be referenced by ID
+	["MONK"] = {
+		-- Monk has two dispel spells with the same name ("Detox") so need to reference by ID
 		[VUHDO_DEBUFF_TYPE_POISON] = { 218164, 115450 },
 		[VUHDO_DEBUFF_TYPE_DISEASE] = { 218164, 115450 },
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { 115450 }, -- Now Mistweaver "Detox" only
