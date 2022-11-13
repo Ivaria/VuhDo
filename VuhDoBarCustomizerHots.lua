@@ -195,6 +195,7 @@ local tDuration;
 local tHotCfg;
 local tIsChargeAlpha;
 local tStarted;
+local tClockDuration;
 local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon, aDuration, aShieldCharges, aColor, anIndex, aClipL, aClipR, aClipT, aClipB)
 
 	tHotCfg = sBarColors[VUHDO_HOT_CFGS[anIndex]];
@@ -258,12 +259,18 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		end
 
 		tTimer:SetText(tDuration);
+
 		tStarted = floor(10 * (GetTime() - aDuration + aRest) + 0.5) * 0.1;
-		if aDuration > 0 and (tClock:GetAlpha() == 0 or (tClock:GetAttribute("started") or tStarted) ~= tStarted) then
+		tClockDuration = tClock:GetCooldownDuration() * 0.001;
+
+		if aDuration > 0 and 
+			(tClock:GetAlpha() == 0 or (tClock:GetAttribute("started") or tStarted) ~= tStarted or 
+			(tClock:IsVisible() and aDuration > tClockDuration)) then
 			tClock:SetAlpha(1);
 			tClock:SetCooldown(tStarted, aDuration);
 			tClock:SetAttribute("started", tStarted);
 		end
+
 		tIcon:SetAlpha(((sIsFade or tHotCfg["isFadeOut"]) and aRest < 10) and tHotCfg["O"] * aRest * 0.1 or tHotCfg["O"]);
 
 		if aRest > 5 then

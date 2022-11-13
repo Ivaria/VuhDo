@@ -19,6 +19,7 @@ Bugfixes:
 -- Fixed keybindings under 'Game Menu > Options > Gameplay > Keybindings > AddOns'  
 -- Fixed mouse/key bindings after spells are learned from talent changes  
 -- Fixed debuff types for both basic and talented Shaman 'Purify Spirit'  
+-- Fixed clock sweep for HoT Icons whose duration increases post application  
   
   
 Improvements:  

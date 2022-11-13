@@ -27,15 +27,16 @@ local VUHDO_STUB_COMPONENT = {
 	["GetName"] = function() return "VuhDoDummyStub" end,
 	["GetAttribute"] = function() return nil end,
 	["SetAttribute"] = function() end,
-  -- General
-  ["SetAllPoints"] = function() end,
-  ["SetAlpha"] = function(self, anAlpha) end,
-  ["GetAlpha"] = function() return 1 end,
-  ["Hide"] = function() end,
-  ["IsVisible"] = function() return false end,
+	-- General
+	["SetAllPoints"] = function() end,
+	["SetAlpha"] = function(self, anAlpha) end,
+	["GetAlpha"] = function() return 1 end,
+	["Hide"] = function() end,
+	["IsVisible"] = function() return false end,
 	-- Clock
-  ["SetReverse"] = function() end,
-  ["SetCooldown"] = function() end
+	["SetReverse"] = function() end,
+	["SetCooldown"] = function() end,
+	["GetCooldownDuration"] = function() return 0 end
 };
 
 
