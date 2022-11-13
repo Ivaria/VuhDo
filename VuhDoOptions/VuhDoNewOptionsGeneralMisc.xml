@@ -331,7 +331,7 @@
 				</Anchors>
 				<Frames>
 
-					<CheckButton name="$parentCliqueButton" text="VUHDO_I18N_CLIQUE_COMPAT_MODE" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentExternalCastButton" text="VUHDO_I18N_EXTERNAL_CASTING_COMPAT_MODE" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -341,7 +341,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.IS_CLIQUE_COMPAT_MODE");
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.EXTERNAL_CASTING_COMPAT_MODE");
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K465);
 							</OnLoad>
 							<OnClick>

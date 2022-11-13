@@ -297,7 +297,7 @@ function VuhDoActionPreClick(aButton, aMouseButton)
 	tKey = VUHDO_SPELL_ASSIGNMENTS[tModi .. SecureButton_GetButtonSuffix(aMouseButton)];
 
 	-- allow VuhDo menu command to be bound even when using Clique compat mode
-	if VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"] and 
+	if VUHDO_CONFIG["EXTERNAL_CASTING_COMPAT_MODE"] and 
 		(strlower(tKey and tKey[3] or "") ~= "menu" or not VUHDO_CONFIG["IS_CLIQUE_PASSTHROUGH"]) then 
 		return;
 	end

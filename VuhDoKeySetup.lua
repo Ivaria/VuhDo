@@ -29,7 +29,7 @@ local pairs = pairs;
 local strlower = strlower;
 local format = format;
 
-local sIsCliqueCompat;
+local sExternalCastingMode;
 
 function VUHDO_keySetupInitLocalOverrides()
 	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
@@ -48,7 +48,7 @@ function VUHDO_keySetupInitLocalOverrides()
 	VUHDO_replaceMacroTemplates = _G["VUHDO_replaceMacroTemplates"];
 	VUHDO_isActionValid = _G["VUHDO_isActionValid"];
 	VUHDO_isSpellKnown = _G["VUHDO_isSpellKnown"];
-	sIsCliqueCompat = VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"];
+	sExternalCastingMode = VUHDO_CONFIG["EXTERNAL_CASTING_COMPAT_MODE"];
 end
 
 
@@ -293,7 +293,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		aButton:SetAttribute("vd_tt_hook", true);
 	end
 
-	if sIsCliqueCompat then
+	if sExternalCastingMode then
 		aButton:EnableMouseWheel(1);
 		return;
 	end

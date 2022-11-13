@@ -262,7 +262,7 @@
 					VUHDO_newOptionsPanelFindDefaultPanel();
 				end
 				VUHDO_newOptionsBufferVars();
-				if (VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"]) then
+				if (VUHDO_CONFIG["EXTERNAL_CASTING_COMPAT_MODE"]) then
 					VuhDoNewOptionsTabbedFrameTabsPanelSpellsRadioButton:Hide();
 				end
 				VUHDO_commsSetReceiveModeEnabled(true);

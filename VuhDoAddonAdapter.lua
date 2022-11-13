@@ -181,11 +181,11 @@ end
 
 
 --
-function VUHDO_initCliqueSupport()
-	if not VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"] then return; end
+function VUHDO_initExternalCastSupport()
+	if not VUHDO_CONFIG["EXTERNAL_CASTING_COMPAT_MODE"] then return; end
 
-	if not IsAddOnLoaded("Clique") then
-		VUHDO_Msg("WARNING: Clique compatibility mode is enabled but clique doesn't seem to be loaded!", 1, 0.4, 0.4);
+	if not (IsAddOnLoaded("Clique") or IsAddOnLoaded("Clicked")) then
+		VUHDO_Msg("WARNING: External casting compatibility mode is enabled but Clique/Clicked doesn't seem to be loaded!", 1, 0.4, 0.4);
 	end
 
 	ClickCastFrames = ClickCastFrames or {};
