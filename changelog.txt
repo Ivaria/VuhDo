@@ -24,6 +24,7 @@ Bugfixes:
   
 Improvements:  
 -- Added option to only show text with no icon for HoT Icons  
+-- Bump TOC interface for 10.0.2  
   
   
 --------------------------------------------------------------  
