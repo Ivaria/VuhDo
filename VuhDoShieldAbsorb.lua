@@ -27,6 +27,7 @@ local VUHDO_PUMP_SHIELDS = {
 
 -- HoTs which we want to explicitly update on SPELL_AURA_APPLIED 
 -- This avoids any display delays on contingent auras (eg. Atonement)
+-- Note: if adding by spell ID table key must be a string e.g. ["17"] not [17]
 local VUHDO_IMMEDIATE_HOTS = {
 	[VUHDO_SPELL_ID.ATONEMENT] = true,
 }
@@ -366,7 +367,7 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		VUHDO_SHIELD_EXPIRY[tUnit] = nil;
 		VUHDO_DEBUFF_SHIELDS[tUnit] = nil;
 		VUHDO_SHIELD_LAST_SOURCE_GUID[tUnit] = nil;
-	elseif VUHDO_IMMEDIATE_HOTS[aShieldName] and VUHDO_ACTIVE_HOTS[aShieldName] and 
+	elseif ((VUHDO_IMMEDIATE_HOTS[aShieldName] and VUHDO_ACTIVE_HOTS[aShieldName]) or (VUHDO_IMMEDIATE_HOTS[tostring(aSpellId)] and VUHDO_ACTIVE_HOTS[tostring(aSpellId)])) and 
 		("SPELL_AURA_APPLIED" == aMessage or "SPELL_AURA_REMOVED" == aMessage or 
 		 "SPELL_AURA_REFRESH" == aMessage or "SPELL_AURA_BROKEN" == aMessage or 
 		 "SPELL_AURA_BROKEN_SPELL" == aMessage) then

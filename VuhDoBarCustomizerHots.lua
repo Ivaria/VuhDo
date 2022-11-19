@@ -373,14 +373,20 @@ end
 
 --
 local tAllButtons;
-local tShieldCharges;
+local tShieldCharges, tShieldName;
 local tIsMatch;
 local tIsMine, tIsOthers;
 local function VUHDO_updateHotIcons(aUnit, aHotName, aRest, aTimes, anIcon, aDuration, aMode, aColor, aHotSpellName, aClipL, aClipR, aClipT, aClipB)
 	tAllButtons = VUHDO_getUnitButtons(VUHDO_resolveVehicleUnit(aUnit));
 	if not tAllButtons then return; end
 
-	tShieldCharges = VUHDO_getShieldLeftCount(aUnit, aHotSpellName or aHotName, aMode) or 0; -- if not our shield don't show remaining absorption
+	tShieldName = aHotSpellName or aHotName;
+
+	if type(tonumber(tShieldName)) == "number" then
+		tShieldName = GetSpellInfo(tonumber(tShieldName));
+	end
+
+	tShieldCharges = VUHDO_getShieldLeftCount(aUnit, tShieldName, aMode) or 0; -- if not our shield don't show remaining absorption
 
 	for tIndex, tHotName in pairs(sHotSlots) do
 		if aHotName == tHotName then
@@ -449,7 +455,6 @@ local tCount;
 local tHotInfo;
 local tAlive;
 local function VUHDO_snapshotHot(aHotName, aRest, aStacks, anIcon, anIsMine, aDuration, aUnit, anExpiry)
-
 	aStacks = aStacks or 0;
 	tCount = aStacks == 0 and 1 or aStacks;
 	tAlive = GetTime() - anExpiry + (aDuration or 0);
@@ -512,7 +517,7 @@ local tStart, tEnabled;
 local tSmDuration;
 local tDiffIcon;
 local tHotFromBuff;
-local tIsCastByPlayer;
+local tIsCastByPlayer, tIsCacheByName;
 local tDuration;
 local tSpellId, tDebuffOffset;
 local tNow;
@@ -578,7 +583,9 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				tExpiry = (tNow + 9999);
 			end
 
-			if not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] then
+			tIsCacheByName = not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] and not VUHDO_ACTIVE_HOTS[tostring(tSpellId)];
+
+			if tIsCacheByName then
 				tHotFromBuff = sBuffs2Hots[tBuffName .. tBuffIcon] or sBuffs2Hots[tSpellId];
 			else
 				tHotFromBuff = sBuffs2Hots[tSpellId];
@@ -591,36 +598,36 @@ local function VUHDO_updateHots(aUnit, anInfo)
 					VUHDO_snapshotHot(tHotFromBuff, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
 				end
 			else -- not yet scanned
-				if not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] then
+				if tIsCacheByName then
 					sBuffs2Hots[tBuffName .. tBuffIcon] = "";
+				else
+					sBuffs2Hots[tSpellId] = "";
 				end
-
-				sBuffs2Hots[tSpellId] = "";
 
 				for tHotCmpName, _ in pairs(VUHDO_ACTIVE_HOTS) do
 					tDiffIcon = VUHDO_CAST_ICON_DIFF[tHotCmpName];
 
 					if tDiffIcon == tBuffIcon
-						or (tDiffIcon == nil and tBuffName == tHotCmpName)
-						or tostring(tSpellId or -1) == tHotCmpName then
+						or (tDiffIcon == nil and tIsCacheByName and tBuffName == tHotCmpName)
+						or (not tIsCacheByName and tostring(tSpellId or -1) == tHotCmpName) then
 						tRest = tExpiry - tNow;
 
 						if tRest > 0 then
 							VUHDO_snapshotHot(tHotCmpName, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
 						end
-						
-						if not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] then
-							sBuffs2Hots[tBuffName .. tBuffIcon] = tHotCmpName;
-						end
 
-						sBuffs2Hots[tSpellId] = tHotCmpName;
+						if tIsCacheByName then
+							sBuffs2Hots[tBuffName .. tBuffIcon] = tHotCmpName;
+						else
+							sBuffs2Hots[tSpellId] = tHotCmpName;
+						end
 
 						break;
 					end
 				end
 			end
 
-			if not tIsCastByPlayer and VUHDO_HEALING_HOTS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tBuffName] then
+			if not tIsCastByPlayer and ((tIsCacheByName and VUHDO_HEALING_HOTS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tBuffName]) or (not tIsCacheByName and VUHDO_HEALING_HOTS[tostring(tSpellId)] and not VUHDO_ACTIVE_HOTS_OTHERS[tostring(tSpellId)])) then
 				tOtherIcon = tBuffIcon;
 				tOtherHotCnt = tOtherHotCnt + 1;
 				sOthersHotsInfo[aUnit][1] = tOtherIcon;
