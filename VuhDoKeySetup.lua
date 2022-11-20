@@ -66,6 +66,8 @@ local VUHDO_REZ_SPELLS_NAMES = {
 	[VUHDO_SPELL_ID.MASS_RESURRECTION] = true,
 	[VUHDO_SPELL_ID.RESUSCITATE] = true,
 	[VUHDO_SPELL_ID.REAWAKEN] = true,
+	[VUHDO_SPELL_ID.RETURN] = true,
+	[VUHDO_SPELL_ID.MASS_RETURN] = true,
 };
 
 
@@ -419,7 +421,7 @@ function VUHDO_setupSmartCast(aButton)
 	tUnit = aButton["raidid"];
 	tInfo = VUHDO_RAID[tUnit];
 
-	if not tInfo then	return false; end
+	if not tInfo then return false; end
 
 	-- Resurrect?
 	if VUHDO_CONFIG["SMARTCAST_RESURRECT"] and tInfo["dead"] then
