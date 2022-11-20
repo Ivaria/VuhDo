@@ -627,7 +627,7 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				end
 			end
 
-			if not tIsCastByPlayer and ((tIsCacheByName and VUHDO_HEALING_HOTS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tBuffName]) or (not tIsCacheByName and VUHDO_HEALING_HOTS[tostring(tSpellId)] and not VUHDO_ACTIVE_HOTS_OTHERS[tostring(tSpellId)])) then
+			if not tIsCastByPlayer and ((tIsCacheByName and VUHDO_HEALING_HOTS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tBuffName]) or (not tIsCacheByName and VUHDO_HEALING_HOTS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tostring(tSpellId)])) then
 				tOtherIcon = tBuffIcon;
 				tOtherHotCnt = tOtherHotCnt + 1;
 				sOthersHotsInfo[aUnit][1] = tOtherIcon;

@@ -17,6 +17,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default HoTs for Preservation Evoker  
   
   
 --------------------------------------------------------------  

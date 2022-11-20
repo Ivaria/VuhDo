@@ -65,8 +65,14 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.BUFF_ETHERALUS] = { ["isHot"] = true },
 
 	-- Evoker
+	[VUHDO_SPELL_ID.DREAM_BREATH] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.DREAM_FLIGHT] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.ECHO] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.LIFEBIND] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.REVERSION] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.DREAM_FLIGHT_HOT] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.REWIND] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.TIME_DILATION] = { ["isHot"] = true },
+
 };
 local VUHDO_SPELLS = VUHDO_SPELLS;
 
