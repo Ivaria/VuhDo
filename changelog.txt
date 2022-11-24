@@ -15,6 +15,7 @@ Known issues:
 Bugfixes:  
 -- Fixed tracking of ambiguously named HoTs by spell ID  
 -- Fixed resurrection smart cast for Evoker 'Return' and 'Mass Return'  
+-- Fixed Evoker debuff abilities ('Naturalize' and 'Expunge')  
   
   
 Improvements:  
