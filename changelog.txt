@@ -20,6 +20,7 @@ Bugfixes:
   
 Improvements:  
 -- Added default HoTs for Preservation Evoker  
+-- Added Rogue non-lethal 'Atrophic Poison' to Buff Watch  
   
   
 --------------------------------------------------------------  
