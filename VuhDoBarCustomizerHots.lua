@@ -607,9 +607,9 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				for tHotCmpName, _ in pairs(VUHDO_ACTIVE_HOTS) do
 					tDiffIcon = VUHDO_CAST_ICON_DIFF[tHotCmpName];
 
-					if tDiffIcon == tBuffIcon
-						or (tDiffIcon == nil and tIsCacheByName and tBuffName == tHotCmpName)
-						or (not tIsCacheByName and tostring(tSpellId or -1) == tHotCmpName) then
+					if tDiffIcon == tBuffIcon 
+						or (VUHDO_ACTIVE_HOTS[tostring(tSpellId)] and tostring(tSpellId or -1) == tHotCmpName) 
+						or (not VUHDO_ACTIVE_HOTS[tostring(tSpellId)] and tDiffIcon == nil and tBuffName == tHotCmpName) then
 						tRest = tExpiry - tNow;
 
 						if tRest > 0 then
