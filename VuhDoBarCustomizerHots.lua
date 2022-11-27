@@ -42,11 +42,6 @@ local VUHDO_CHARGE_COLORS = { "HOT_CHARGE_1", "HOT_CHARGE_2", "HOT_CHARGE_3", "H
 
 local VUHDO_HOT_CFGS = { "HOT1", "HOT2", "HOT3", "HOT4", "HOT5", "HOT6", "HOT7", "HOT8", "HOT9", "HOT10", };
 
-local VUHDO_CACHE_SPELL_ONLY_BY_ID = { 
-	[VUHDO_SPELL_ID.SOOTHING_MIST] = true,
-	[VUHDO_SPELL_ID.RIPTIDE] = true,
-	[VUHDO_SPELL_ID.CENARION_WARD] = true,
-};
 
 -- BURST CACHE -------------------------------------------------
 
@@ -515,9 +510,8 @@ local tCaster;
 local tBuffName;
 local tStart, tEnabled;
 local tSmDuration;
-local tDiffIcon;
 local tHotFromBuff;
-local tIsCastByPlayer, tIsCacheByName;
+local tIsCastByPlayer;
 local tDuration;
 local tSpellId, tDebuffOffset;
 local tNow;
@@ -550,8 +544,8 @@ local function VUHDO_updateHots(aUnit, anInfo)
 	if VUHDO_shouldScanUnit(aUnit) then
 		tNow = GetTime();
 		tDebuffOffset = nil;
-		for tCnt = 1, huge do
 
+		for tCnt = 1, huge do
 			if not tDebuffOffset then
 				tBuffName, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnitBuff(aUnit, tCnt);
 
@@ -571,8 +565,10 @@ local function VUHDO_updateHots(aUnit, anInfo)
 			tIsCastByPlayer = tCaster == "player" or tCaster == VUHDO_PLAYER_RAID_ID;
 
 			if sIsPlayerKnowsSwiftmend and tIsCastByPlayer and not sIsSwiftmend then
-				if VUHDO_SPELL_ID.REGROWTH == tBuffName or VUHDO_SPELL_ID.WILD_GROWTH == tBuffName or VUHDO_SPELL_ID.REJUVENATION == tBuffName or VUHDO_SPELL_ID.GERMINATION == tBuffName then
+				if VUHDO_SPELL_ID.REGROWTH == tBuffName or VUHDO_SPELL_ID.WILD_GROWTH == tBuffName or 
+					VUHDO_SPELL_ID.REJUVENATION == tBuffName or VUHDO_SPELL_ID.GERMINATION == tBuffName then
 					tStart, tSmDuration, tEnabled = GetSpellCooldown(VUHDO_SPELL_ID.SWIFTMEND);
+
 					if tEnabled ~= 0 and (tStart == nil or tSmDuration == nil or tStart <= 0 or tSmDuration <= 1.6) then
 						sIsSwiftmend = true;
 					end
@@ -583,51 +579,26 @@ local function VUHDO_updateHots(aUnit, anInfo)
 				tExpiry = (tNow + 9999);
 			end
 
-			tIsCacheByName = not VUHDO_CACHE_SPELL_ONLY_BY_ID[tBuffName] and not VUHDO_ACTIVE_HOTS[tostring(tSpellId)];
+			if not VUHDO_IGNORE_HOT_IDS[tSpellId] then 
+				tHotFromBuff = nil;
 
-			if tIsCacheByName then
-				tHotFromBuff = sBuffs2Hots[tBuffName .. tBuffIcon] or sBuffs2Hots[tSpellId];
-			else
-				tHotFromBuff = sBuffs2Hots[tSpellId];
-			end
-
-			if tHotFromBuff == "" or VUHDO_IGNORE_HOT_IDS[tSpellId] then -- non hot buff
-			elseif tHotFromBuff then -- Hot buff cached
-				tRest = tExpiry - tNow;
-				if tRest > 0 then
-					VUHDO_snapshotHot(tHotFromBuff, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
-				end
-			else -- not yet scanned
-				if tIsCacheByName then
-					sBuffs2Hots[tBuffName .. tBuffIcon] = "";
-				else
-					sBuffs2Hots[tSpellId] = "";
+				if VUHDO_ACTIVE_HOTS[tostring(tSpellId or -1)] then
+					tHotFromBuff = tostring(tSpellId);
+				elseif VUHDO_ACTIVE_HOTS[tBuffName] then
+					tHotFromBuff = tBuffName;
 				end
 
-				for tHotCmpName, _ in pairs(VUHDO_ACTIVE_HOTS) do
-					tDiffIcon = VUHDO_CAST_ICON_DIFF[tHotCmpName];
+				if tHotFromBuff then
+					tRest = tExpiry - tNow;
 
-					if tDiffIcon == tBuffIcon 
-						or (VUHDO_ACTIVE_HOTS[tostring(tSpellId)] and tostring(tSpellId or -1) == tHotCmpName) 
-						or (not VUHDO_ACTIVE_HOTS[tostring(tSpellId)] and tDiffIcon == nil and tBuffName == tHotCmpName) then
-						tRest = tExpiry - tNow;
-
-						if tRest > 0 then
-							VUHDO_snapshotHot(tHotCmpName, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
-						end
-
-						if tIsCacheByName then
-							sBuffs2Hots[tBuffName .. tBuffIcon] = tHotCmpName;
-						else
-							sBuffs2Hots[tSpellId] = tHotCmpName;
-						end
-
-						break;
+					if tRest > 0 then
+						VUHDO_snapshotHot(tHotFromBuff, tRest, tStacks, tBuffIcon, tIsCastByPlayer, tDuration, aUnit, tExpiry);
 					end
 				end
 			end
 
-			if not tIsCastByPlayer and ((tIsCacheByName and VUHDO_HEALING_HOTS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tBuffName]) or (not tIsCacheByName and VUHDO_HEALING_HOTS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tostring(tSpellId)])) then
+			if not tIsCastByPlayer and VUHDO_HEALING_HOTS[tBuffName] and 
+				not VUHDO_ACTIVE_HOTS_OTHERS[tBuffName] and not VUHDO_ACTIVE_HOTS_OTHERS[tostring(tSpellId or -1)] then
 				tOtherIcon = tBuffIcon;
 				tOtherHotCnt = tOtherHotCnt + 1;
 				sOthersHotsInfo[aUnit][1] = tOtherIcon;
