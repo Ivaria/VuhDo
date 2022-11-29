@@ -775,12 +775,14 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 			if tQuota > 0 then
 				if aColor then
 					tHealthBar:SetVuhDoColor(aColor);
+
 					if aColor["useText"] then
 						VUHDO_getBarText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
 						VUHDO_getLifeText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
 					end
 				end
-			  tHealthBar:SetValue(tQuota);
+
+				tHealthBar:SetValue(tQuota);
 			else
 				tHealthBar:SetValue(0);
 			end
@@ -791,7 +793,7 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 	if not tInfo then return; end
 
 	-- Targets und targets-of-target, die im Raid sind
-  tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[tInfo["name"]];
+	tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[tInfo["name"]];
 	if not tAllButtons then return; end
 
 	VUHDO_CUSTOM_INFO["fixResolveId"] = aUnit;

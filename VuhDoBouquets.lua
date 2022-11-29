@@ -105,9 +105,13 @@ local tDestColor = { ["useBackground"] = true, ["useOpacity"] = true };
 local tRadio;
 local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue)
 	tRadio = anEntry["custom"]["radio"];
-	if 1 == tRadio then -- solid
 
-		return anEntry["color"];
+	if 1 == tRadio then -- solid
+		tColor = anEntry["color"];
+
+		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+
+		return tDestColor;
 	elseif 2 == tRadio then -- class color
 
 		tColor = VUHDO_USER_CLASS_COLORS[anInfo["classId"]] or anEntry["color"];
@@ -136,7 +140,11 @@ local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue
 		 		tB2 * tInvModi + tB1 * tModi, tO2 * tInvModi + tO1 * tModi;
 		return tDestColor;
 	else
-		return anEntry["color"];
+		tColor = anEntry["color"];
+
+		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+
+		return tDestColor;
 	end
 end
 

@@ -311,6 +311,10 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 
 	if (VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName] ~= nil
 		and VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName]["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR) then
+		-- VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR validators don't provide color checkboxes (e.g. 'useBackground')
+		-- implicitly force these color flags to 'true' to ensure application of the specified color(s)
+		tCurrentItem["color"]["useBackground"] = true;
+		tCurrentItem["color"]["useText"] = true;
 
 		tInnerPanel = _G[tPanel:GetName() .. "StatusbarFrame"];
 

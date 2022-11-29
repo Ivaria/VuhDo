@@ -16,6 +16,8 @@ Bugfixes:
 -- Fixed tracking of ambiguously named HoTs by spell ID  
 -- Fixed resurrection smart cast for Evoker 'Return' and 'Mass Return'  
 -- Fixed Evoker debuff abilities ('Naturalize' and 'Expunge')  
+-- Fixed 'Flag: Debuff, configured' validator when no debuffs present  
+-- Fixed safe color application for statusbar type bouquet validators  
   
   
 Improvements:  

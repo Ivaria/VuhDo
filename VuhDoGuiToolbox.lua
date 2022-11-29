@@ -832,6 +832,24 @@ end
 
 
 --
+local function VUHDO_clamp(aValue, aMin, aMax)
+
+	return math.min(math.max(aValue, aMin), aMax);
+
+end
+
+
+
+--
+function VUHDO_clampColor(aR, aG, aB, aO)
+
+	return aR and VUHDO_clamp(aR, 0, 1), aG and VUHDO_clamp(aG, 0, 1), aB and VUHDO_clamp(aB, 0, 1), aO and VUHDO_clamp(aO, 0, 1);
+
+end
+
+
+
+--
 function VUHDO_backColor(aColor)
 	return aColor["R"], aColor["G"], aColor["B"], aColor["O"];
 end
