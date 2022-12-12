@@ -565,13 +565,38 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		end
 
 	elseif "PLAYER_FOCUS_CHANGED" == anEvent then
-		VUHDO_removeAllDebuffIcons("focus");
-		VUHDO_quickRaidReload();
-		VUHDO_clParserSetCurrentFocus();
-		VUHDO_updateBouquetsForEvent(anArg1, 23); -- VUHDO_UPDATE_PLAYER_FOCUS
-		if VUHDO_RAID["focus"] ~= nil then
-			VUHDO_determineIncHeal("focus");
-			VUHDO_updateHealth("focus", 9); -- VUHDO_UPDATE_INC
+		if VUHDO_VARIABLES_LOADED then
+			if VUHDO_RAID["focus"] then
+				VUHDO_determineIncHeal("focus");
+				VUHDO_updateHealth("focus", 9); -- VUHDO_UPDATE_INC
+			end
+
+			VUHDO_clParserSetCurrentFocus();
+
+			if VUHDO_isModelConfigured(VUHDO_ID_FOCUS) or
+				(VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_FOCUS"]) then
+				if UnitExists("focus") then
+					VUHDO_setHealth("focus", 1); -- VUHDO_UPDATE_ALL
+				else
+					VUHDO_removeHots("focus");
+					VUHDO_resetDebuffsFor("focus");
+					VUHDO_removeAllDebuffIcons("focus");
+
+					if VUHDO_RAID["focus"] then
+						table.wipe(VUHDO_RAID["focus"]);
+					end
+
+					VUHDO_RAID["focus"] = nil;
+				end
+
+				VUHDO_updateHealthBarsFor("focus", 1); -- VUHDO_UPDATE_ALL
+				VUHDO_initEventBouquetsFor("focus");
+			end
+
+			VUHDO_updateBouquetsForEvent("player", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
+			VUHDO_updateBouquetsForEvent("focus", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
+
+			VUHDO_updatePanelVisibility();
 		end
 
 	elseif "PARTY_MEMBER_ENABLE" == anEvent or "PARTY_MEMBER_DISABLE" == anEvent then
