@@ -17,6 +17,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default custom debuffs for Vault of Incarnates raid encounters  
   
   
 --------------------------------------------------------------  

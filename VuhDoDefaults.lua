@@ -1765,509 +1765,544 @@ function VUHDO_loadDefaultConfig()
 --		251570  -- Soulbomb
 --	);
 
-	-- 8.0.1 - Battle for Azeroth - Uldir
-	VUHDO_addCustomSpellIds(38, 
-		-- [[ Uldir ]]
-		-- Taloc
-		271222, -- Plasma Discharge 
-		-- Mother
-		267821, -- Defense Grid
-		-- Devourer
-		262313, -- Malodorous Miasma
-		262314, -- Deadly Disease
-		-- Zek'voz
-		264219, -- Fixate
-		265360, -- Roiling Deceit
-		265662, -- Corruptors Pact
-		-- Vectis
-		265129, -- Omega Vector
-		265178, -- Mutagenic Pathogen
-		265212, -- Gestate
-		-- Zul
-		273365, -- Dark Revelation
-		269936, -- Fixate
-		274358, -- Rupturing Blood
-		274271, -- Deathwish
-		-- Mythrax
-		272336, -- Annihilation
-		272536, -- Imminent Ruin
-		-- G'huun
-		263334, -- Putrid Blood
-		263372  -- Power Matrix
+	-- -- 8.0.1 - Battle for Azeroth - Uldir
+	-- VUHDO_addCustomSpellIds(38, 
+	-- 	-- [[ Uldir ]]
+	-- 	-- Taloc
+	-- 	271222, -- Plasma Discharge 
+	-- 	-- Mother
+	-- 	267821, -- Defense Grid
+	-- 	-- Devourer
+	-- 	262313, -- Malodorous Miasma
+	-- 	262314, -- Deadly Disease
+	-- 	-- Zek'voz
+	-- 	264219, -- Fixate
+	-- 	265360, -- Roiling Deceit
+	-- 	265662, -- Corruptors Pact
+	-- 	-- Vectis
+	-- 	265129, -- Omega Vector
+	-- 	265178, -- Mutagenic Pathogen
+	-- 	265212, -- Gestate
+	-- 	-- Zul
+	-- 	273365, -- Dark Revelation
+	-- 	269936, -- Fixate
+	-- 	274358, -- Rupturing Blood
+	-- 	274271, -- Deathwish
+	-- 	-- Mythrax
+	-- 	272336, -- Annihilation
+	-- 	272536, -- Imminent Ruin
+	-- 	-- G'huun
+	-- 	263334, -- Putrid Blood
+	-- 	263372  -- Power Matrix
 
-	);
+	-- );
 
-	-- 8.0.1 - Battle for Azeroth - World Bosses
-	VUHDO_addCustomSpellIds(39,
-		-- [[ World Bosses ]]
-		-- T'zane
-		261552, -- Terror Wail
-		261632, -- Consuming Spirits
-		-- Ji'arak
-		261509, -- Clutch
-		260908, -- Storm Wing
-		-- Hailstone Construct
-		274891, -- Glacial Breath
-		-- The Lion's Roar
-		271246, -- Demolisher Cannon
-		-- Azurethos
-		274839, -- Azurethos' Fury
-		-- Warbringer Yenajz
-		274904, -- Reality Tear
-		274932  -- Endless Abyss
-		-- Dunegorger Kraulok
-	);
+	-- -- 8.0.1 - Battle for Azeroth - World Bosses
+	-- VUHDO_addCustomSpellIds(39,
+	-- 	-- [[ World Bosses ]]
+	-- 	-- T'zane
+	-- 	261552, -- Terror Wail
+	-- 	261632, -- Consuming Spirits
+	-- 	-- Ji'arak
+	-- 	261509, -- Clutch
+	-- 	260908, -- Storm Wing
+	-- 	-- Hailstone Construct
+	-- 	274891, -- Glacial Breath
+	-- 	-- The Lion's Roar
+	-- 	271246, -- Demolisher Cannon
+	-- 	-- Azurethos
+	-- 	274839, -- Azurethos' Fury
+	-- 	-- Warbringer Yenajz
+	-- 	274904, -- Reality Tear
+	-- 	274932  -- Endless Abyss
+	-- 	-- Dunegorger Kraulok
+	-- );
 		
-	-- 8.0.1 - Battle for Azeroth - Debuff Absorbs
-	VUHDO_addCustomSpellIds(40,
-		-- [[ The Underrot ]]
-		-- Diseased Lasher
-		278961, -- Decaying Mind
-		-- [[ Uldir - Vectis ]]
-		265206  -- Immunosuppression
-	);
+	-- -- 8.0.1 - Battle for Azeroth - Debuff Absorbs
+	-- VUHDO_addCustomSpellIds(40,
+	-- 	-- [[ The Underrot ]]
+	-- 	-- Diseased Lasher
+	-- 	278961, -- Decaying Mind
+	-- 	-- [[ Uldir - Vectis ]]
+	-- 	265206  -- Immunosuppression
+	-- );
 
-	-- 8.0.1 - Battle for Azeroth - Uldir part 2
-	VUHDO_addCustomSpellIds(41, 
-		-- [[ Uldir ]]
-		-- Taloc
-		275270, -- Fixate 
-		-- Mother
-		-- Devourer
-		-- Zek'voz
-		-- Vectis
-		265127, -- Lingering Infection
-		267160, -- Omega Vector		
-		267161, -- Omega Vector
-		267162, -- Omega Vector
-		267163, -- Omega Vector
-		267164, -- Omega Vector
-		267165, -- Omega Vector
-		267166, -- Omega Vector
-		267167, -- Omega Vector
-		267168, -- Omega Vector
-		-- Zul
-		276020, -- Fixate
-		-- Mythrax
-		-- G'huun
-		272506  -- Explosive Corruption
-	);
+	-- -- 8.0.1 - Battle for Azeroth - Uldir part 2
+	-- VUHDO_addCustomSpellIds(41, 
+	-- 	-- [[ Uldir ]]
+	-- 	-- Taloc
+	-- 	275270, -- Fixate 
+	-- 	-- Mother
+	-- 	-- Devourer
+	-- 	-- Zek'voz
+	-- 	-- Vectis
+	-- 	265127, -- Lingering Infection
+	-- 	267160, -- Omega Vector		
+	-- 	267161, -- Omega Vector
+	-- 	267162, -- Omega Vector
+	-- 	267163, -- Omega Vector
+	-- 	267164, -- Omega Vector
+	-- 	267165, -- Omega Vector
+	-- 	267166, -- Omega Vector
+	-- 	267167, -- Omega Vector
+	-- 	267168, -- Omega Vector
+	-- 	-- Zul
+	-- 	276020, -- Fixate
+	-- 	-- Mythrax
+	-- 	-- G'huun
+	-- 	272506  -- Explosive Corruption
+	-- );
 
-	-- 8.1 - Battle for Azeroth - Battle of Dazar'alor
-	VUHDO_addCustomSpellIds(42,
-		-- [[ Battle of Dazar'alor ]]
-		-- Champion of the Light
-		-- Grong (Horde & Alliance)
-		285875, -- Rending Bite
-		282215, -- Megatomic Seeker Missile
-		282471, -- Voodoo Blast
-		285659, -- Apetagonizer Core
-		286434, -- Necrotic Core
-		-- Jadefire Masters
-		285632, -- Stalking
-		286988, -- Searing Embers
-		-- Treasure Guardian Opulence
-		287072, -- Liquid Gold
-		283507, -- Volatile Charge
-		284519, -- Pulse Quickening Toxin
-		-- Conclave of the Chosen
-		282444, -- Lacerating Claws
-		286811, -- Akunda's Wrath
-		282209, -- Mark of Prey
-		-- King Rastakhan
-		285213, -- Caress of Death
-		288449, -- Death's Door
-		284662, -- Seal of Purification
-		285349, -- Plague of Fire
-		284781, -- Grevious Axe
-		-- High Tinker Mekkatorque
-		286480, -- Anti-Tampering Shock
-		282182, -- Buster Cannon
-		287757, -- Gigavolt Charge
-		283411, -- Gigavolt Blast
-		-- Stormwall Blockade
-		284405, -- Tempting Song
-		285000, -- Kelp Wrapping
-		285350, -- Storm's Wail
-		-- Lady Jaina Proudmoore
-		287365, -- Searing Pitch
-		288218, -- Broadside
-		289220, -- Heart of Frost
-		288038  -- Marked Target
-	);
+	-- -- 8.1 - Battle for Azeroth - Battle of Dazar'alor
+	-- VUHDO_addCustomSpellIds(42,
+	-- 	-- [[ Battle of Dazar'alor ]]
+	-- 	-- Champion of the Light
+	-- 	-- Grong (Horde & Alliance)
+	-- 	285875, -- Rending Bite
+	-- 	282215, -- Megatomic Seeker Missile
+	-- 	282471, -- Voodoo Blast
+	-- 	285659, -- Apetagonizer Core
+	-- 	286434, -- Necrotic Core
+	-- 	-- Jadefire Masters
+	-- 	285632, -- Stalking
+	-- 	286988, -- Searing Embers
+	-- 	-- Treasure Guardian Opulence
+	-- 	287072, -- Liquid Gold
+	-- 	283507, -- Volatile Charge
+	-- 	284519, -- Pulse Quickening Toxin
+	-- 	-- Conclave of the Chosen
+	-- 	282444, -- Lacerating Claws
+	-- 	286811, -- Akunda's Wrath
+	-- 	282209, -- Mark of Prey
+	-- 	-- King Rastakhan
+	-- 	285213, -- Caress of Death
+	-- 	288449, -- Death's Door
+	-- 	284662, -- Seal of Purification
+	-- 	285349, -- Plague of Fire
+	-- 	284781, -- Grevious Axe
+	-- 	-- High Tinker Mekkatorque
+	-- 	286480, -- Anti-Tampering Shock
+	-- 	282182, -- Buster Cannon
+	-- 	287757, -- Gigavolt Charge
+	-- 	283411, -- Gigavolt Blast
+	-- 	-- Stormwall Blockade
+	-- 	284405, -- Tempting Song
+	-- 	285000, -- Kelp Wrapping
+	-- 	285350, -- Storm's Wail
+	-- 	-- Lady Jaina Proudmoore
+	-- 	287365, -- Searing Pitch
+	-- 	288218, -- Broadside
+	-- 	289220, -- Heart of Frost
+	-- 	288038  -- Marked Target
+	-- );
 
-	-- 8.1.5 - Battle for Azeroth - Crucible of Storms
-	VUHDO_addCustomSpellIds(43, 
-		-- [[ Crucible of Storms ]]
-		-- Restless Cabal
-		293300, -- Storm Essence
-		282540, -- Agent of Demise
-		282432, -- Crushing Doubt
-		287762, -- Crushing Doubt
-		131097, -- Crushing Doubt
-		131098, -- Crushing Doubt
-		282437, -- Crushing Doubt
-		282386, -- Aphotic Blast
-		283524, -- Aphotic Blast
-		293488, -- Oceanic Essence
-		-- Uu'nat
-		285345, -- Maddening Eyes of N'zoth
-		285652, -- Insatiable Torment
-		295609, -- Insatiable Torment
-		286770, -- Embrace of the Void
-		284733, -- Embrace of the Void
-		283053, -- Embrace of the Void
-		282738, -- Embrace of the Void
-		285367  -- Piercing Gaze of N'zoth
-	);
+	-- -- 8.1.5 - Battle for Azeroth - Crucible of Storms
+	-- VUHDO_addCustomSpellIds(43, 
+	-- 	-- [[ Crucible of Storms ]]
+	-- 	-- Restless Cabal
+	-- 	293300, -- Storm Essence
+	-- 	282540, -- Agent of Demise
+	-- 	282432, -- Crushing Doubt
+	-- 	287762, -- Crushing Doubt
+	-- 	131097, -- Crushing Doubt
+	-- 	131098, -- Crushing Doubt
+	-- 	282437, -- Crushing Doubt
+	-- 	282386, -- Aphotic Blast
+	-- 	283524, -- Aphotic Blast
+	-- 	293488, -- Oceanic Essence
+	-- 	-- Uu'nat
+	-- 	285345, -- Maddening Eyes of N'zoth
+	-- 	285652, -- Insatiable Torment
+	-- 	295609, -- Insatiable Torment
+	-- 	286770, -- Embrace of the Void
+	-- 	284733, -- Embrace of the Void
+	-- 	283053, -- Embrace of the Void
+	-- 	282738, -- Embrace of the Void
+	-- 	285367  -- Piercing Gaze of N'zoth
+	-- );
 
-	--- 8.1.5 - Battle for Azeroth - Crucible of Storms part 2
-	VUHDO_addCustomSpellIds(44,
-		-- [[ Crucible of Storms ]]
-		-- Uu'nat
-		284722, -- Umbral Shell
-		286771  -- Umbral Shell
-	);
+	-- --- 8.1.5 - Battle for Azeroth - Crucible of Storms part 2
+	-- VUHDO_addCustomSpellIds(44,
+	-- 	-- [[ Crucible of Storms ]]
+	-- 	-- Uu'nat
+	-- 	284722, -- Umbral Shell
+	-- 	286771  -- Umbral Shell
+	-- );
 
-	--- 8.2.0 - Battle for Azeroth - Rise of Azshara
-	VUHDO_addCustomSpellIds(45,
-		-- [[ Eternal Palace ]]
-		-- Abyssal Commander
---		294715, -- Toxic Brand
---		294711, -- Frost Mark
-		295421, -- Overflowing Venom
-		295348, -- Overflowing Chill
-		300882, -- Inversion Sickness
-		300957, -- Inversion Sickness
-		-- Blackwater Behemoth
-		292127, -- Darkest Depths
---		292133, -- Bioluminescence
-		292307, -- Gaze from Below
-		292167, -- Toxic Spine
-		301494, -- Piercing Barb
-		298595, -- Glowing Stinger
-		-- Radiance of Aszhara
-		296737, -- Arcane Bomb
-		296746, -- Arcane Bomb
-		-- Lady Ashvane
-		296693, -- Waterlogged
-		297333, -- Briny Bubble
-		-- Orgozoa
-		298306, -- Incubation Fluid
-		295779, -- Aqua Lance
-		-- The Queen's Court
-		297586, -- Suffering
-		299914, -- Frenetic Charge
-		296851, -- Fanatical Verdict
-		300545, -- Mighty Rupture
-		-- Za'qul
-		292971, -- Hysteria
-		292963, -- Dread
-		293509, -- Manifest Nightmares
-		298192, -- Dark Beyond
-		-- Queen Azshara
---		298569, -- Drained Soul
---		301078, -- Charged Spear 
---		299094, -- Beckon
-		303828, -- Crushing Depths
-		303825, -- Crushing Depths
-		303657, -- Arcane Burst
-		300492, -- Static Shock
-		297907  -- Cursed Heart
-	);
+	-- --- 8.2.0 - Battle for Azeroth - Rise of Azshara
+	-- VUHDO_addCustomSpellIds(45,
+	-- 	-- [[ Eternal Palace ]]
+	-- 	-- Abyssal Commander
+-- --		294715, -- Toxic Brand
+-- --		294711, -- Frost Mark
+	-- 	295421, -- Overflowing Venom
+	-- 	295348, -- Overflowing Chill
+	-- 	300882, -- Inversion Sickness
+	-- 	300957, -- Inversion Sickness
+	-- 	-- Blackwater Behemoth
+	-- 	292127, -- Darkest Depths
+-- --		292133, -- Bioluminescence
+	-- 	292307, -- Gaze from Below
+	-- 	292167, -- Toxic Spine
+	-- 	301494, -- Piercing Barb
+	-- 	298595, -- Glowing Stinger
+	-- 	-- Radiance of Aszhara
+	-- 	296737, -- Arcane Bomb
+	-- 	296746, -- Arcane Bomb
+	-- 	-- Lady Ashvane
+	-- 	296693, -- Waterlogged
+	-- 	297333, -- Briny Bubble
+	-- 	-- Orgozoa
+	-- 	298306, -- Incubation Fluid
+	-- 	295779, -- Aqua Lance
+	-- 	-- The Queen's Court
+	-- 	297586, -- Suffering
+	-- 	299914, -- Frenetic Charge
+	-- 	296851, -- Fanatical Verdict
+	-- 	300545, -- Mighty Rupture
+	-- 	-- Za'qul
+	-- 	292971, -- Hysteria
+	-- 	292963, -- Dread
+	-- 	293509, -- Manifest Nightmares
+	-- 	298192, -- Dark Beyond
+	-- 	-- Queen Azshara
+-- --		298569, -- Drained Soul
+-- --		301078, -- Charged Spear 
+-- --		299094, -- Beckon
+	-- 	303828, -- Crushing Depths
+	-- 	303825, -- Crushing Depths
+	-- 	303657, -- Arcane Burst
+	-- 	300492, -- Static Shock
+	-- 	297907  -- Cursed Heart
+	-- );
 
-	-- 8.3.0 - Battle for Azeroth - Visions of N'Zoth
-	VUHDO_addCustomSpellIds(46,
-		-- [[ Ny'alotha, The Waking City ]]
-		-- Wrathion
-		306163, -- Incineration
-		314347, -- Noxious Choke
-		-- Maut
-		307806, -- Devour Magic
-		-- The Prophet Skitra
-		308059, -- Shadow Shock
-		307950, -- Shred Psyche
-		308065, -- Shred Psyche
-		-- Dark Inquisitor Xanesh
-		313198, -- Void-Touched
-		312406, -- Voidwoken
-		309569, -- Voidwoken
-		-- Vexiona
-		307314, -- Encroaching Shadows
-		307359, -- Despair
-		310323, -- Desolation
-		-- The Hivemind
-		313461, -- Corrosion
-		313129, -- Mindless
-		313460, -- Nullification
-		-- Ra-den
-		313227, -- Decaying Wound
-		310019, -- Charged Bonds
-		310022, -- Charged Bonds
-		313077, -- Unstable Nightmare
-		315252, -- Dread Inferno Fixate
-		316065, -- Corrupted Existence
-		-- Shad'har the Insatiable
-		307358, -- Debilitating Spit
-		307945, -- Umbral Eruption
-		306929, -- Bubbling Breath
-		307260, -- Fixate
-		-- Drest'agath
-		310552, -- Mind Flay
-		310358, -- Muttering Insanity
-		-- Il'gynoth
-		275269, -- Fixate
-		311159, -- Cursed Blood
-		-- Carapice of N'Zoth
-		307008, -- Breed Madness
-		306973, -- Madness Bomb
-		306984, -- Insanity Bomb
-		-- N'Zoth
-		308885, -- Mind Flay
-		317112, -- Evoke Anguish
-		309980, -- Paranoia
-		316541, -- Paranoia
-		316542  -- Paranoia
-	);
+	-- -- 8.3.0 - Battle for Azeroth - Visions of N'Zoth
+	-- VUHDO_addCustomSpellIds(46,
+	-- 	-- [[ Ny'alotha, The Waking City ]]
+	-- 	-- Wrathion
+	-- 	306163, -- Incineration
+	-- 	314347, -- Noxious Choke
+	-- 	-- Maut
+	-- 	307806, -- Devour Magic
+	-- 	-- The Prophet Skitra
+	-- 	308059, -- Shadow Shock
+	-- 	307950, -- Shred Psyche
+	-- 	308065, -- Shred Psyche
+	-- 	-- Dark Inquisitor Xanesh
+	-- 	313198, -- Void-Touched
+	-- 	312406, -- Voidwoken
+	-- 	309569, -- Voidwoken
+	-- 	-- Vexiona
+	-- 	307314, -- Encroaching Shadows
+	-- 	307359, -- Despair
+	-- 	310323, -- Desolation
+	-- 	-- The Hivemind
+	-- 	313461, -- Corrosion
+	-- 	313129, -- Mindless
+	-- 	313460, -- Nullification
+	-- 	-- Ra-den
+	-- 	313227, -- Decaying Wound
+	-- 	310019, -- Charged Bonds
+	-- 	310022, -- Charged Bonds
+	-- 	313077, -- Unstable Nightmare
+	-- 	315252, -- Dread Inferno Fixate
+	-- 	316065, -- Corrupted Existence
+	-- 	-- Shad'har the Insatiable
+	-- 	307358, -- Debilitating Spit
+	-- 	307945, -- Umbral Eruption
+	-- 	306929, -- Bubbling Breath
+	-- 	307260, -- Fixate
+	-- 	-- Drest'agath
+	-- 	310552, -- Mind Flay
+	-- 	310358, -- Muttering Insanity
+	-- 	-- Il'gynoth
+	-- 	275269, -- Fixate
+	-- 	311159, -- Cursed Blood
+	-- 	-- Carapice of N'Zoth
+	-- 	307008, -- Breed Madness
+	-- 	306973, -- Madness Bomb
+	-- 	306984, -- Insanity Bomb
+	-- 	-- N'Zoth
+	-- 	308885, -- Mind Flay
+	-- 	317112, -- Evoke Anguish
+	-- 	309980, -- Paranoia
+	-- 	316541, -- Paranoia
+	-- 	316542  -- Paranoia
+	-- );
 
-	-- 8.3.0 - Battle for Azeroth - Visions of N'Zoth part 2
-	VUHDO_addCustomSpellIds(47,
-		-- [[ Ny'alotha, The Waking City ]]
-		-- Wrathion
-		-- Maut
-		-- The Prophet Skitra
-		-- Dark Inquisitor Xanesh
-		306311, -- Soul Flay
-		-- Vexiona
-		-- The Hivemind
-		-- Ra-den
-		306184  -- Unleashed Void
-		-- Shad'har the Insatiable
-		-- Drest'agath
-		-- Il'gynoth
-		-- Carapice of N'Zoth
-		-- N'Zoth
-	);
+	-- -- 8.3.0 - Battle for Azeroth - Visions of N'Zoth part 2
+	-- VUHDO_addCustomSpellIds(47,
+	-- 	-- [[ Ny'alotha, The Waking City ]]
+	-- 	-- Wrathion
+	-- 	-- Maut
+	-- 	-- The Prophet Skitra
+	-- 	-- Dark Inquisitor Xanesh
+	-- 	306311, -- Soul Flay
+	-- 	-- Vexiona
+	-- 	-- The Hivemind
+	-- 	-- Ra-den
+	-- 	306184  -- Unleashed Void
+	-- 	-- Shad'har the Insatiable
+	-- 	-- Drest'agath
+	-- 	-- Il'gynoth
+	-- 	-- Carapice of N'Zoth
+	-- 	-- N'Zoth
+	-- );
 
-	-- 9.0.2 - Shadowlands
-	VUHDO_addCustomSpellIds(48, 
-		-- [[ Castle Nathria ]]
-		-- Shriekwing
-		328897, -- Exsanguinated
-		342077, -- Echolocation
-		341684, -- The Blood Lantern
-		341489, -- Bloodlight
-		-- 340324, -- Sanguine Ichor (ground damage)
-		-- Huntsman Altimor
-		335111, -- Huntsman's Mark
-		334971, -- Jagged Claws
-		334945, -- Vicious Lunge
-		334852, -- Petrifying Howl
-		-- 334893, -- Stone Shards (ground damage)
-		-- Sun King's Salvation
-		323402, -- Reflection of Guilt
-		-- 326456, -- Burning Remnants (tank)
-		328479, -- Eyes on Target
-		-- 325442, -- Vanquished (tank)
-		326583, -- Crimson Flurry
-		339251, -- Drained Soul
-		332871, -- Greater Castigation
-		338600, -- Cloak of Flames
-		343026, -- Cloak of Flames
-		337859, -- Cloak of Flames
-		-- 328579, -- Smoldering Remnants (ground damage)
-		-- Artificer Xy'Mox
-		328448, -- Dimensional Tear
-		325236, -- Glyph of Destruction
-		327902, -- Fixate
-		-- 327414, -- Possesion (mind control)
-		340860, -- Withering Touch
-		-- Hungering Destroyer
-		329298, -- Gluttonous Miasma
-		-- Lady Inerva Darkvein
-		-- 325382, -- Warped Desires (tank)
-		325936, -- Shared Cognition
-		324983, -- Shared Suffering
-		332664, -- Concentrated Anima
-		-- 331573, -- Unconscionable Guilt (tank)
-		-- 325713, -- Lingering Anima (ground damage)
-		-- The Council of Blood
-		330967, -- Fixate
-		-- 346651, -- Drain Essence (tank)
-		331706, -- Scarlet Letter
-		331637, -- Dark Recital
-		-- 347350, -- Dancing Fever (dispel, disease)
-		-- Sludgefist
-		331209, -- Hateful Gaze
-		342420, -- Chain Them!
-		342419, -- Chain Them!
-		335470, -- Chain Slam
-		-- 335361, -- Stonequake (ground damage)
-		-- Stone Legion Generals
-		333377, -- Wicked Mark
-		-- 334765, -- Heart Rend (dispel, magic)
-		339690, -- Crystalize
-		-- 342425, -- Stone Fist (tank)
-		342655, -- Volatile Anima Infusion
-		-- Sire Denathrius
-		327796, -- Night Hunter
-		329906, -- Carnage
-		-- 329181, -- Wracking Pain (tank)
-		-- 332585, -- Scorn (tank)
-		332794, -- Fatal Finesse
-		327992  -- Desolation (ground damage)
-	);
+	-- -- 9.0.2 - Shadowlands
+	-- VUHDO_addCustomSpellIds(48, 
+	-- 	-- [[ Castle Nathria ]]
+	-- 	-- Shriekwing
+	-- 	328897, -- Exsanguinated
+	-- 	342077, -- Echolocation
+	-- 	341684, -- The Blood Lantern
+	-- 	341489, -- Bloodlight
+	-- 	-- 340324, -- Sanguine Ichor (ground damage)
+	-- 	-- Huntsman Altimor
+	-- 	335111, -- Huntsman's Mark
+	-- 	334971, -- Jagged Claws
+	-- 	334945, -- Vicious Lunge
+	-- 	334852, -- Petrifying Howl
+	-- 	-- 334893, -- Stone Shards (ground damage)
+	-- 	-- Sun King's Salvation
+	-- 	323402, -- Reflection of Guilt
+	-- 	-- 326456, -- Burning Remnants (tank)
+	-- 	328479, -- Eyes on Target
+	-- 	-- 325442, -- Vanquished (tank)
+	-- 	326583, -- Crimson Flurry
+	-- 	339251, -- Drained Soul
+	-- 	332871, -- Greater Castigation
+	-- 	338600, -- Cloak of Flames
+	-- 	343026, -- Cloak of Flames
+	-- 	337859, -- Cloak of Flames
+	-- 	-- 328579, -- Smoldering Remnants (ground damage)
+	-- 	-- Artificer Xy'Mox
+	-- 	328448, -- Dimensional Tear
+	-- 	325236, -- Glyph of Destruction
+	-- 	327902, -- Fixate
+	-- 	-- 327414, -- Possesion (mind control)
+	-- 	340860, -- Withering Touch
+	-- 	-- Hungering Destroyer
+	-- 	329298, -- Gluttonous Miasma
+	-- 	-- Lady Inerva Darkvein
+	-- 	-- 325382, -- Warped Desires (tank)
+	-- 	325936, -- Shared Cognition
+	-- 	324983, -- Shared Suffering
+	-- 	332664, -- Concentrated Anima
+	-- 	-- 331573, -- Unconscionable Guilt (tank)
+	-- 	-- 325713, -- Lingering Anima (ground damage)
+	-- 	-- The Council of Blood
+	-- 	330967, -- Fixate
+	-- 	-- 346651, -- Drain Essence (tank)
+	-- 	331706, -- Scarlet Letter
+	-- 	331637, -- Dark Recital
+	-- 	-- 347350, -- Dancing Fever (dispel, disease)
+	-- 	-- Sludgefist
+	-- 	331209, -- Hateful Gaze
+	-- 	342420, -- Chain Them!
+	-- 	342419, -- Chain Them!
+	-- 	335470, -- Chain Slam
+	-- 	-- 335361, -- Stonequake (ground damage)
+	-- 	-- Stone Legion Generals
+	-- 	333377, -- Wicked Mark
+	-- 	-- 334765, -- Heart Rend (dispel, magic)
+	-- 	339690, -- Crystalize
+	-- 	-- 342425, -- Stone Fist (tank)
+	-- 	342655, -- Volatile Anima Infusion
+	-- 	-- Sire Denathrius
+	-- 	327796, -- Night Hunter
+	-- 	329906, -- Carnage
+	-- 	-- 329181, -- Wracking Pain (tank)
+	-- 	-- 332585, -- Scorn (tank)
+	-- 	332794, -- Fatal Finesse
+	-- 	327992  -- Desolation (ground damage)
+	-- );
 
-	-- 9.0.2 - Shadowlands
-	VUHDO_addCustomSpellIds(49, 
-		-- [[ Necrotic Wake ]]
-		320462, -- Necrotic Bolt
-		320170, -- Necrotic Bolt
-		-- [[ Theater of Pain ]]
-		330784, -- Necrotic Bolt
-		330868, -- Necrotic Bolt Volley
-		-- Death Knight player ability
-		223929  -- Necrotic Wound
-	);
+	-- -- 9.0.2 - Shadowlands
+	-- VUHDO_addCustomSpellIds(49, 
+	-- 	-- [[ Necrotic Wake ]]
+	-- 	320462, -- Necrotic Bolt
+	-- 	320170, -- Necrotic Bolt
+	-- 	-- [[ Theater of Pain ]]
+	-- 	330784, -- Necrotic Bolt
+	-- 	330868, -- Necrotic Bolt Volley
+	-- 	-- Death Knight player ability
+	-- 	223929  -- Necrotic Wound
+	-- );
 
-	-- 9.0.2 - Shadowlands
-	VUHDO_addCustomSpellIds(50, 
-		-- [[ Castle Nathria ]]
-		-- Shriekwing
-		330713, -- Earsplitting Shriek
-		-- Huntsman Altimor
-		335304, -- Sinseeker
-		335112, -- Huntsman's Mark
-		335113, -- Huntsman's Mark
-		-- Lady Inerva Darkvein
-		326538, -- Anima Web
-		324982, -- Shared Suffering
-		-- 340452, -- Change of Heart (tank)
-		-- Artificer Xy'Mox
-		328468, -- Dimensional Tear
-		326302, -- Stasis Trap
-		-- The Council of Blood
-		331636, -- Dark Recital
-		346651, -- Drain Essence
-		-- Sludgefist
-		339189, -- Chain Bleed
-		-- Stone Legion Generals
-		333913, -- Wicked Laceration
-		334771, -- Heart Hemorrhage
-		342735, -- Ravenous Feast
-		342698, -- Volatile Anima Infection
-		-- Sire Denathrius
-		332797, -- Fatal Finesse (DoT debuff)
-		335873, -- Rancor (ground damage)
-		329951  -- Impale
-		-- 332619  -- Shattering Pain (tank)
-		-- 334016  -- Unworthy
-	);
+	-- -- 9.0.2 - Shadowlands
+	-- VUHDO_addCustomSpellIds(50, 
+	-- 	-- [[ Castle Nathria ]]
+	-- 	-- Shriekwing
+	-- 	330713, -- Earsplitting Shriek
+	-- 	-- Huntsman Altimor
+	-- 	335304, -- Sinseeker
+	-- 	335112, -- Huntsman's Mark
+	-- 	335113, -- Huntsman's Mark
+	-- 	-- Lady Inerva Darkvein
+	-- 	326538, -- Anima Web
+	-- 	324982, -- Shared Suffering
+	-- 	-- 340452, -- Change of Heart (tank)
+	-- 	-- Artificer Xy'Mox
+	-- 	328468, -- Dimensional Tear
+	-- 	326302, -- Stasis Trap
+	-- 	-- The Council of Blood
+	-- 	331636, -- Dark Recital
+	-- 	346651, -- Drain Essence
+	-- 	-- Sludgefist
+	-- 	339189, -- Chain Bleed
+	-- 	-- Stone Legion Generals
+	-- 	333913, -- Wicked Laceration
+	-- 	334771, -- Heart Hemorrhage
+	-- 	342735, -- Ravenous Feast
+	-- 	342698, -- Volatile Anima Infection
+	-- 	-- Sire Denathrius
+	-- 	332797, -- Fatal Finesse (DoT debuff)
+	-- 	335873, -- Rancor (ground damage)
+	-- 	329951  -- Impale
+	-- 	-- 332619  -- Shattering Pain (tank)
+	-- 	-- 334016  -- Unworthy
+	-- );
 
-	-- 9.1.0 - Shadowlands
-	VUHDO_addCustomSpellIds(51, 
-		-- [[ Sanctum of Domination ]]
-		-- The Tarragrue
-		347668, -- Grasp of Death
-		-- Eye of the Jailer
-		350713, -- Slothful Corruption
-		-- The Nine
-		350542, -- Fragments of Destiny
-		-- 350184, -- Daschla's Mighty Impact
-		350109, -- Brynja's Mournful Dirge
-		-- Remnant of Ner'zhul
-		350073, -- Torment
-		-- 350469, -- Curse of Malevolence
-		-- Soulrender Dormazain
-		353429, -- Tormented
-		-- Painsmith Raznal
-		-- Guardian of the First Ones
-		350496, -- Threat Neutralization
-		352833, -- Disintegration
-		-- 350455, -- Unstable Energy
-		-- Fatescribe Roh-Kalo
-		353931, -- Twist Fate
-		350568, -- Call of Eternity
-		-- Kel'Thuzad
-		354289, -- Necrotic Miasma
-		348760, -- Frost Blast
-		-- Sylvanas Windrunner
-		347670, -- Shadow Dagger
-		347807, -- Barbed Arrow
-		347607, -- Banshee's Mark
-		351091, -- Destabilize (heal absorb)
-		347704  -- Veil of Darkness (heal absorb)
-	);
+	-- -- 9.1.0 - Shadowlands
+	-- VUHDO_addCustomSpellIds(51, 
+	-- 	-- [[ Sanctum of Domination ]]
+	-- 	-- The Tarragrue
+	-- 	347668, -- Grasp of Death
+	-- 	-- Eye of the Jailer
+	-- 	350713, -- Slothful Corruption
+	-- 	-- The Nine
+	-- 	350542, -- Fragments of Destiny
+	-- 	-- 350184, -- Daschla's Mighty Impact
+	-- 	350109, -- Brynja's Mournful Dirge
+	-- 	-- Remnant of Ner'zhul
+	-- 	350073, -- Torment
+	-- 	-- 350469, -- Curse of Malevolence
+	-- 	-- Soulrender Dormazain
+	-- 	353429, -- Tormented
+	-- 	-- Painsmith Raznal
+	-- 	-- Guardian of the First Ones
+	-- 	350496, -- Threat Neutralization
+	-- 	352833, -- Disintegration
+	-- 	-- 350455, -- Unstable Energy
+	-- 	-- Fatescribe Roh-Kalo
+	-- 	353931, -- Twist Fate
+	-- 	350568, -- Call of Eternity
+	-- 	-- Kel'Thuzad
+	-- 	354289, -- Necrotic Miasma
+	-- 	348760, -- Frost Blast
+	-- 	-- Sylvanas Windrunner
+	-- 	347670, -- Shadow Dagger
+	-- 	347807, -- Barbed Arrow
+	-- 	347607, -- Banshee's Mark
+	-- 	351091, -- Destabilize (heal absorb)
+	-- 	347704  -- Veil of Darkness (heal absorb)
+	-- );
 
-	-- 9.2.0 - Shadowlands
-	VUHDO_addCustomSpellIds(52,
-		-- [[ Sepulcher of the First Ones ]]
-		-- Vigilant Guardian
-		360458, -- Unstable Core
-		366393, -- Searing Ablation
-		367571, -- Sear
-		-- Skolex, the Insatiable Ravener
-		-- 359778, -- Ephemera Dust
-		-- 364522, -- Devouring Blood (dispel, magic)
-		360448, -- Retch
-		359981, -- Rend
-		366070, -- Volatile Residue (ground damage)
-		-- Artificer Xy'mox
-		362882, -- Stasis Trap
-		362803, -- Glyph Of Relocation
-		364030, -- Debilitating Ray
-		365681, -- Massive Blast
-		-- Halondrus the Reclaimer
-		361309, -- Lightshatter Beam
-		-- 365297, -- Crushing Prism (dispel, magic)
-		368957, -- Volatile Charges
-		369207, -- Planetcracker Beam (ground damage)
-		-- Dausegne, the Fallen Oracle
-		-- 361966, -- Infused Strikes (tank)
-		364289, -- Staggering Barrage
-		361018, -- Staggering Barrage
-		361225, -- Encroaching Dominion (ground damage)
-		-- Prototype Pantheon
-		360259, -- Gloom Bolt
-		-- 360687, -- Runecarvers Deathtouch (dispel, magic)
-		361067, -- Bastions Ward
-		362352, -- Pinned
-		362383, -- Anima Bolt
-		-- Lihuvim, Principal Architect
-		362622, -- Unstable Mote
-		363795, -- Deconstructing Energy
-		364073, -- Degenerate
-		360869, -- Requisitioned (fixate)
-		-- 360159, -- Unstable Mote (ground damage)
-		-- Anduin Wrynn
-		365293, -- Befouled Barrier
-		-- 364031, -- Gloom (dispel, magic)
-		365024, -- Wicked Star
-		365021, -- Wicked Star
-		366849, -- Domination Word: Pain
-		-- Lords of Dread
-		360006, -- Cloud of Carrion
-		360012, -- Cloud of Carrion
-		359963, -- Opened Veins
-		-- 360148, -- Bursting Dread (dispel, magic)
-		-- 360241, -- Unsettling Dreams (dispel, magic)
-		360287, -- Anguishing Strike
-		-- Rygelon
-		361548, -- Dark Eclipse
-		362806, -- Dark Eclipse
-		362081, -- Cosmic Ejection
-		-- 362172, -- Corrupted Wound (tank)
-		362798, -- Cosmic Radiation (ground damage)
-		362088, -- Cosmic Irregularity
-		-- The Jailer
-		365153, -- Dominating Will
-		359868, -- Shattering Blast
-		-- 362075, -- Domination (mind control)
-		366132, -- Tyranny
-		366020, -- Mark Of Tyranny
-		360282, -- Rune of Damnation
-		360281, -- Rune of Damnation
-		365219  -- Chains Of Anguish
+	-- -- 9.2.0 - Shadowlands
+	-- VUHDO_addCustomSpellIds(52,
+	-- 	-- [[ Sepulcher of the First Ones ]]
+	-- 	-- Vigilant Guardian
+	-- 	360458, -- Unstable Core
+	-- 	366393, -- Searing Ablation
+	-- 	367571, -- Sear
+	-- 	-- Skolex, the Insatiable Ravener
+	-- 	-- 359778, -- Ephemera Dust
+	-- 	-- 364522, -- Devouring Blood (dispel, magic)
+	-- 	360448, -- Retch
+	-- 	359981, -- Rend
+	-- 	366070, -- Volatile Residue (ground damage)
+	-- 	-- Artificer Xy'mox
+	-- 	362882, -- Stasis Trap
+	-- 	362803, -- Glyph Of Relocation
+	-- 	364030, -- Debilitating Ray
+	-- 	365681, -- Massive Blast
+	-- 	-- Halondrus the Reclaimer
+	-- 	361309, -- Lightshatter Beam
+	-- 	-- 365297, -- Crushing Prism (dispel, magic)
+	-- 	368957, -- Volatile Charges
+	-- 	369207, -- Planetcracker Beam (ground damage)
+	-- 	-- Dausegne, the Fallen Oracle
+	-- 	-- 361966, -- Infused Strikes (tank)
+	-- 	364289, -- Staggering Barrage
+	-- 	361018, -- Staggering Barrage
+	-- 	361225, -- Encroaching Dominion (ground damage)
+	-- 	-- Prototype Pantheon
+	-- 	360259, -- Gloom Bolt
+	-- 	-- 360687, -- Runecarvers Deathtouch (dispel, magic)
+	-- 	361067, -- Bastions Ward
+	-- 	362352, -- Pinned
+	-- 	362383, -- Anima Bolt
+	-- 	-- Lihuvim, Principal Architect
+	-- 	362622, -- Unstable Mote
+	-- 	363795, -- Deconstructing Energy
+	-- 	364073, -- Degenerate
+	-- 	360869, -- Requisitioned (fixate)
+	-- 	-- 360159, -- Unstable Mote (ground damage)
+	-- 	-- Anduin Wrynn
+	-- 	365293, -- Befouled Barrier
+	-- 	-- 364031, -- Gloom (dispel, magic)
+	-- 	365024, -- Wicked Star
+	-- 	365021, -- Wicked Star
+	-- 	366849, -- Domination Word: Pain
+	-- 	-- Lords of Dread
+	-- 	360006, -- Cloud of Carrion
+	-- 	360012, -- Cloud of Carrion
+	-- 	359963, -- Opened Veins
+	-- 	-- 360148, -- Bursting Dread (dispel, magic)
+	-- 	-- 360241, -- Unsettling Dreams (dispel, magic)
+	-- 	360287, -- Anguishing Strike
+	-- 	-- Rygelon
+	-- 	361548, -- Dark Eclipse
+	-- 	362806, -- Dark Eclipse
+	-- 	362081, -- Cosmic Ejection
+	-- 	-- 362172, -- Corrupted Wound (tank)
+	-- 	362798, -- Cosmic Radiation (ground damage)
+	-- 	362088, -- Cosmic Irregularity
+	-- 	-- The Jailer
+	-- 	365153, -- Dominating Will
+	-- 	359868, -- Shattering Blast
+	-- 	-- 362075, -- Domination (mind control)
+	-- 	366132, -- Tyranny
+	-- 	366020, -- Mark Of Tyranny
+	-- 	360282, -- Rune of Damnation
+	-- 	360281, -- Rune of Damnation
+	-- 	365219  -- Chains Of Anguish
+	-- );
+
+	-- 10.0.2 Dragonflight
+	VUHDO_addCustomSpellIds(53,
+		-- [[ Vault of the Incarnates ]]
+		-- Eranog
+		394917, -- Leaping Flames
+		370597, -- Kill Order
+		396023, -- Incinerating Roar
+		-- Terros
+		381595, -- Seismic Assault
+		382458, -- Resonant Aftermath
+		391592, -- Infused Fallout
+		-- The Primal Council
+		371624, -- Conductive Mark
+		-- Sennarth the Cold Breath
+		371976, -- Chilling Blast
+		372082, -- Enveloping Webs
+		373048, -- Suffocating Webs
+		373027, -- Suffocating Webs
+		-- Dathea Ascended
+		391686, -- Conductive Mark
+		-- Kurog Grimtotem
+		391019, -- Frigid Torrent
+		396106, -- Dominance
+		372517, -- Frozen Solid
+		391056, -- Enveloping Earth
+		391055, -- Enveloping Earth
+		373487, -- Lightning Crash
+		374623, -- Frost Binds
+		-- Broodkeeper Diurna
+		388716, -- Icy Shroud
+		388918, -- Frozen Shroud
+		375575  -- Flame Sentry
+		-- Raszageth
 	);
 
 	local debuffRemovalList = {};
