@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Priest 'Levitate' only self-casting in Buff Watch  
   
   
 Improvements:  
