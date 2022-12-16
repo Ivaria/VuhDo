@@ -39,14 +39,15 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.TIDAL_WAVES] = { ["isHot"] = true, ["nodefault"] = true },
 
 	-- Druid
-	[VUHDO_SPELL_ID.REJUVENATION] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.REGROWTH] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.LIFEBLOOM] = { ["isHot"] = true },
-	[VUHDO_SPELL_ID.WILD_GROWTH] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.ADAPTIVE_SWARM] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.CENARION_WARD] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.GENESIS] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.GERMINATION] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.LIFEBLOOM] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.REGROWTH] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.REJUVENATION] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.SPRING_BLOSSOMS] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.WILD_GROWTH] = { ["isHot"] = true },
 
 	-- Hunter
 	[VUHDO_SPELL_ID.MEND_PET] = { ["isHot"] = true },
