@@ -322,6 +322,11 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		tHotColor = VUHDO_copyColor(tHotCfg);
 		if sIsHotShowIcon then
 			tHotColor["R"], tHotColor["G"], tHotColor["B"] = 1, 1, 1;
+
+			if aColor and aColor["useOpacity"] and aColor["O"] then
+				tHotColor["useOpacity"] = true;
+				tHotColor["O"] = aColor["O"];
+			end
 		elseif aTimes <= 1 or not sHotCols["useColorText"] then
 			tTimer:SetTextColor(VUHDO_textColor(tHotColor));
 		end
@@ -341,7 +346,7 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		end
 	end
 
-	if tIsChargeAlpha then
+	if (tIsChargeAlpha or tHotColor["useOpacity"]) and tHotColor["O"] then
 		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"], tHotColor["O"]);
 	else
 		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"]);

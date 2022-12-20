@@ -126,10 +126,19 @@ local VUHDO_getUnitHealthModiPercent = VUHDO_getUnitHealthModiPercent;
 --
 local tOpacity;
 local function VUHDO_setStatusBarColor(aBar, aColor)
+
 	tOpacity = aColor["useOpacity"] and aColor["O"] or nil;
 
-	if aColor["useBackground"] then	aBar:SetStatusBarColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
-	elseif tOpacity then aBar:SetAlpha(tOpacity); end
+	if aColor["useBackground"] then
+		if tOpacity then
+			aBar:SetStatusBarColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
+		else
+			aBar:SetStatusBarColor(aColor["R"], aColor["G"], aColor["B"]);
+		end
+	elseif tOpacity then
+		aBar:SetAlpha(tOpacity);
+	end
+
 end
 
 
@@ -140,8 +149,12 @@ local function VUHDO_setTextureColor(aTexture, aColor)
 
 	tOpacity = aColor["useOpacity"] and aColor["O"] or nil;
 
-	if aColor["useBackground"] then	
-		aTexture:SetVertexColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
+	if aColor["useBackground"] then
+		if tOpacity then
+			aTexture:SetVertexColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
+		else
+			aTexture:SetVertexColor(aColor["R"], aColor["G"], aColor["B"]);
+		end
 	elseif tOpacity then 
 		aTexture:SetAlpha(tOpacity); 
 	end

@@ -206,7 +206,6 @@ local tTimer;
 local tCounter;
 local tDuration;
 local tBuffInfo;
-local tColor;
 local tTimer2
 local tClipL, tClipR, tClipT, tClipB;
 local tType;
@@ -279,10 +278,18 @@ local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 			if tIsActive then
 				tIcon, tTimer, tCounter, tDuration = tBuffInfo[3], tBuffInfo[tInfos["alive"] and 5 or 1], tBuffInfo[2], tBuffInfo[4];
 
-				if tTimer then tTimer = floor(tTimer * 10) * 0.1;	end
+				if tTimer then
+					tTimer = floor(tTimer * 10) * 0.1;
+				end
+				
 				tColor = tInfos["color"];
-				if tInfos["icon"] ~= 1 then tIcon = VUHDO_CUSTOM_ICONS[tInfos["icon"]][2];
-				else tColor["isDefault"] = true; end
+			
+				if tInfos["icon"] ~= 1 then
+					tIcon = VUHDO_CUSTOM_ICONS[tInfos["icon"]][2];
+					tColor["isDefault"] = false;
+				else
+					tColor["isDefault"] = true;
+				end
 			end
 			tTimer2, tClipL, tClipR, tClipT, tClipB = nil, nil, nil, nil, nil;
 		end
