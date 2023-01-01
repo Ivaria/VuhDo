@@ -14,7 +14,9 @@ Known issues:
   
 Bugfixes:  
 -- Fixed latency when changing the player focus unit  
--- Fixed bouquest validator icon opacity  
+-- Fixed bouquet validator icon opacity  
+-- Fixed bouquet validator display when bouquet has zero validators  
+-- Fixed bouquet validator invalid colors with safe fallback  
   
   
 Improvements:  
