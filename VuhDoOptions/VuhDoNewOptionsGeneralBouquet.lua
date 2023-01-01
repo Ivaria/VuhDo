@@ -274,7 +274,6 @@ local tBouquetName, tBouquet, tInfo, tCurrentItem;
 local tInnerPanel, tRadioButton, tSlider;
 function VUHDO_rebuildBouquetContextEditors(anIndex)
 
-	VUHDO_xMsg("VUHDO_rebuildBouquetContextEditors", "anIndex", anIndex, "VUHDO_CURR_SELECTED_ITEM_INDEX", VUHDO_CURR_SELECTED_ITEM_INDEX);
 	if (anIndex ~= nil) then
 		tIndex = anIndex;
 	elseif (tIndex == nil) then
@@ -634,7 +633,6 @@ end
 
 --
 function VUHDO_bouquetItemButtonOnClick(aPanel)
-	VUHDO_xMsg("VUHDO_bouquetItemButtonOnClick", aPanel.buffIdx);
 	VUHDO_rebuildAllBouquetItems(nil, aPanel.buffIdx);
 end
 
@@ -699,7 +697,6 @@ end
 --
 function VUHDO_bouquetsBuffComboValueChanged(aComboBox, aValue)
 	if (not VUHDO_SUPPRESS_COMBO_FEEDBACK) then
-		VUHDO_xMsg("VUHDO_bouquetsBuffComboValueChanged", VUHDO_CURR_SELECTED_ITEM_INDEX);
 		VUHDO_rebuildAllBouquetItems(nil, VUHDO_CURR_SELECTED_ITEM_INDEX);
 	end
 end
