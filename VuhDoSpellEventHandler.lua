@@ -76,7 +76,7 @@ function VUHDO_spellcastSucceeded(aUnit, aSpellId)
 		tSpellName = GetSpellInfo(aSpellId);
 	end
 
-	if tSpellName and VUHDO_ACTIVE_HOTS[tSpellName] then
+	if tSpellName and (VUHDO_ACTIVE_HOTS[tSpellName] or VUHDO_ACTIVE_HOTS[tostring(aSpellId)]) then
 		VUHDO_updateAllHoTs();
 		VUHDO_updateAllCyclicBouquets(true);
 	end

@@ -97,6 +97,8 @@ end
 
 --
 function VUHDO_clParserSetCurrentFocus()
+
+	local tOldFocus = sCurrentFocus;
 	sCurrentFocus = nil;
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
@@ -108,6 +110,14 @@ function VUHDO_clParserSetCurrentFocus()
 			end
 			break;
 		end
+	end
+
+	if tOldFocus then
+		VUHDO_updateBouquetsForEvent(tOldFocus, 23); -- VUHDO_UPDATE_PLAYER_FOCUS
+	end
+
+	if sCurrentFocus then
+		VUHDO_updateBouquetsForEvent(sCurrentFocus, 23); -- VUHDO_UPDATE_PLAYER_FOCUS
 	end
 
 end
