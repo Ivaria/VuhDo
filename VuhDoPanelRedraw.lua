@@ -857,7 +857,7 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	VUHDO_initFlashBar();
 	VUHDO_initReadyCheckIcon();
 
-	if VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"] then
+	if VUHDO_CONFIG["EXTERNAL_CASTING_COMPAT_MODE"] then
 		ClickCastFrames = ClickCastFrames or {};
 		ClickCastFrames[aButton] = true;
 		ClickCastFrames[_G[aButton:GetName() .. "Tg"]] = true;
