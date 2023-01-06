@@ -562,6 +562,10 @@ end
 --
 function VUHDO_initTalentSpellCaches()
 
+	if not C_ClassTalents then
+		return;
+	end
+
 	local tActiveConfigId = C_ClassTalents.GetActiveConfigID();
 
 	-- on initial PLAYER_ENTER_WORLD talents are not yet available
