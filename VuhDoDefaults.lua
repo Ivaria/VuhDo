@@ -2278,12 +2278,17 @@ function VUHDO_loadDefaultConfig()
 		370597, -- Kill Order
 		396023, -- Incinerating Roar
 		-- Terros
+		381315, -- Awakened Earth
+		380487, -- Rock Blast
 		381595, -- Seismic Assault
 		382458, -- Resonant Aftermath
 		391592, -- Infused Fallout
 		-- The Primal Council
 		371624, -- Conductive Mark
+		371836, -- Primal Blizzard
+		374039, -- Meteor Axes
 		-- Sennarth the Cold Breath
+		372044, -- Wrapped in Webs
 		371976, -- Chilling Blast
 		372082, -- Enveloping Webs
 		373048, -- Suffocating Webs
@@ -2291,6 +2296,9 @@ function VUHDO_loadDefaultConfig()
 		-- Dathea Ascended
 		391686, -- Conductive Mark
 		-- Kurog Grimtotem
+		372044, -- Absolute Zero
+		382563, -- Magma Burst
+		391696, -- Lethal Current
 		391019, -- Frigid Torrent
 		396106, -- Dominance
 		372517, -- Frozen Solid
@@ -2300,9 +2308,14 @@ function VUHDO_loadDefaultConfig()
 		374623, -- Frost Binds
 		-- Broodkeeper Diurna
 		388716, -- Icy Shroud
+		388717, -- Icy Shroud
+		388920, -- Frozen Shroud
 		388918, -- Frozen Shroud
-		375575  -- Flame Sentry
+		375575, -- Flame Sentry
 		-- Raszageth
+		381615, -- Static Charge
+		399713, -- Fulminating Charge
+		377467  -- Magnetic Charge
 	);
 
 	local debuffRemovalList = {};
