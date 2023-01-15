@@ -71,15 +71,21 @@ local function VUHDO_hasPanelVisibleButtons(aPanelNum)
 	if not sShowPanels or not VUHDO_IS_SHOWN_BY_GROUP then
 		return false;
 
-	elseif not sIsHideEmptyAndClickThrough or VUHDO_isConfigPanelShowing() then
+	elseif not sIsHideEmptyAndClickThrough or VUHDO_isConfigPanelShowing() or VUHDO_isConfigDemoUsers() then
 		return true;
 
 	else
 		for _, tButton in pairs(VUHDO_getPanelButtons(aPanelNum)) do
 			tUnit = tButton:GetAttribute("unit");
-			if not tUnit then return false;
-			elseif UnitExists(tUnit) then return true; end
+			
+			if not tUnit then
+				return false;
+			elseif UnitExists(tUnit) then
+				return true;
+			end
 		end
+
+		return false;
 	end
 end
 
@@ -406,16 +412,16 @@ local sFrameOrigParents = {};
 --
 local function VUHDO_hideFrame(aFrame)
 
-	if not sFrameHideParents[aFrame:GetName()] then
+	if not sFrameHideParents[aFrame] then
 		local tFrameParent = CreateFrame("Frame");
 		tFrameParent:Hide();
 
-		sFrameHideParents[aFrame:GetName()] = tFrameParent;
+		sFrameHideParents[aFrame] = tFrameParent;
 	end
 
-	if not sFrameOrigParents[aFrame:GetName()] then
-		sFrameOrigParents[aFrame:GetName()] = aFrame:GetParent();
-		aFrame:SetParent(sFrameHideParents[aFrame:GetName()]);
+	if not sFrameOrigParents[aFrame] then
+		sFrameOrigParents[aFrame] = aFrame:GetParent();
+		aFrame:SetParent(sFrameHideParents[aFrame]);
 	end
 
 end
@@ -425,11 +431,13 @@ end
 --
 local function VUHDO_showFrame(aFrame)
 
-	if sFrameOrigParents[aFrame:GetName()] then
-		aFrame:SetParent(sFrameOrigParents[aFrame:GetName()]);
+	if sFrameOrigParents[aFrame] then
+		aFrame:SetParent(sFrameOrigParents[aFrame]);
 		aFrame:Show();
 
-		sFrameOrigParents[aFrame:GetName()] = nil;
+		sFrameOrigParents[aFrame] = nil;
+	else
+		aFrame:Show();
 	end
 
 end
@@ -561,7 +569,9 @@ end
 
 --
 local function VUHDO_showBlizzParty()
-	if VUHDO_GROUP_TYPE_PARTY ~= VUHDO_getCurrentGroupType() then return; end
+	if VUHDO_GROUP_TYPE_PARTY ~= VUHDO_getCurrentGroupType() then 
+		return;
+	end
 
 	if tonumber(GetCVar("useCompactPartyFrames")) == 0 then
 		HIDE_PARTY_INTERFACE = "0";
@@ -605,6 +615,7 @@ end
 local function VUHDO_showBlizzPlayer()
 	VUHDO_registerOriginalEvents(false, PlayerFrame, PlayerFrameHealthBar, PlayerFrameManaBar);
 	VUHDO_showFrame(PlayerFrame);
+
 	if "DEATHKNIGHT" == VUHDO_PLAYER_CLASS then
 		VUHDO_registerOriginalEvents(true, RuneFrame);
 	end
@@ -616,6 +627,7 @@ end
 local function VUHDO_hideBlizzTarget()
 	VUHDO_unregisterAndSaveEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
 	VUHDO_unregisterAndSaveEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+
 	ComboFrame:ClearAllPoints();
 end
 
@@ -625,6 +637,7 @@ end
 local function VUHDO_showBlizzTarget()
 	VUHDO_registerOriginalEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
 	VUHDO_registerOriginalEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+
 	ComboFrame:SetPoint("TOPRIGHT", "TargetFrame", "TOPRIGHT", -44, -9);
 end
 
@@ -646,6 +659,7 @@ end
 --
 local function VUHDO_hideBlizzFocus()
 	VUHDO_unregisterAndSaveEvents(true, FocusFrame);
+	VUHDO_unregisterAndSaveEvents(false, FocusFrameHealthBar, FocusFrameManaBar);
 end
 
 
@@ -653,6 +667,7 @@ end
 --
 local function VUHDO_showBlizzFocus()
 	VUHDO_registerOriginalEvents(true, FocusFrame);
+	VUHDO_registerOriginalEvents(false, FocusFrameHealthBar, FocusFrameManaBar);
 end
 
 
@@ -723,7 +738,7 @@ end
 
 --
 function VUHDO_lnfPatchFont(aComponent, aLabelName)
-	if not sIsNotInChina then _G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_OPTIONS_FONT_NAME, 12); end
+	if not sIsNotInChina then _G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_OPTIONS_FONT_NAME, 12, ""); end
 end
 
 
@@ -793,7 +808,7 @@ function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
 		aLabel:SetShadowColor(0, 0, 0, tShadowAlpha);
 	end
 
-	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline);
+	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline or "");
 	
 	aLabel:SetShadowOffset(1, -1);
 
@@ -815,6 +830,24 @@ function VUHDO_setupAllButtonsUnitWatch(anIsRegister)
 			UnregisterUnitWatch(tButton)
 		end
 	end
+end
+
+
+
+--
+local function VUHDO_clamp(aValue, aMin, aMax)
+
+	return math.min(math.max(aValue, aMin), aMax);
+
+end
+
+
+
+--
+function VUHDO_clampColor(aR, aG, aB, aO)
+
+	return aR and VUHDO_clamp(aR, 0, 1), aG and VUHDO_clamp(aG, 0, 1), aB and VUHDO_clamp(aB, 0, 1), aO and VUHDO_clamp(aO, 0, 1);
+
 end
 
 

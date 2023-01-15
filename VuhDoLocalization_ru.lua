@@ -574,3 +574,9 @@ VUHDO_I18N_DEF_STATUS_HEAL_ABSORB = "Статус: Поглощение исце
 -- 3.135
 VUHDO_I18N_TRINKET_1 = "Тринкет 1";
 VUHDO_I18N_TRINKET_2 = "Тринкет 2";
+
+-- 3.139
+VUHDO_I18N_EVOKERS = "Пробудители";
+
+-- 3.143
+VUHDO_I18N_BUFFC_EARTH_SHIELD = "Щит земли (Свой)";

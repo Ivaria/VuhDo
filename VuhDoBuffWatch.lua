@@ -147,7 +147,7 @@ end
 
 
 local function VUHDO_getWeaponEnchantMacroText(anEnchantName, aTargetType)
-	return format("/use [@none] %s\n/use %d\n/click StaticPopup1Button1",
+	return format("/use [@none] %s\n/use %d\n/click StaticPopup1Button1 LeftButton",
 		anEnchantName, VUHDO_BUFF_TARGET_ENCHANT == aTargetType and 16 or 17);
 end
 
@@ -196,7 +196,8 @@ end
 
 --
 function VUHDO_buffSelectDropdownOnLoad()
-	UIDropDownMenu_Initialize(VuhDoBuffSelectDropdown, VUHDO_buffSelectDropdown_Initialize, "MENU", 1);
+	UIDropDownMenu_SetInitializeFunction(VuhDoBuffSelectDropdown, VUHDO_buffSelectDropdown_Initialize);
+	UIDropDownMenu_SetDisplayMode(VuhDoBuffSelectDropdown, "MENU");
 end
 
 

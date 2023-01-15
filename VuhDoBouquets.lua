@@ -105,9 +105,13 @@ local tDestColor = { ["useBackground"] = true, ["useOpacity"] = true };
 local tRadio;
 local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue)
 	tRadio = anEntry["custom"]["radio"];
-	if 1 == tRadio then -- solid
 
-		return anEntry["color"];
+	if 1 == tRadio then -- solid
+		tColor = anEntry["color"];
+
+		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+
+		return tDestColor;
 	elseif 2 == tRadio then -- class color
 
 		tColor = VUHDO_USER_CLASS_COLORS[anInfo["classId"]] or anEntry["color"];
@@ -136,7 +140,11 @@ local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue
 		 		tB2 * tInvModi + tB1 * tModi, tO2 * tInvModi + tO1 * tModi;
 		return tDestColor;
 	else
-		return anEntry["color"];
+		tColor = anEntry["color"];
+
+		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+
+		return tDestColor;
 	end
 end
 
@@ -198,7 +206,6 @@ local tTimer;
 local tCounter;
 local tDuration;
 local tBuffInfo;
-local tColor;
 local tTimer2
 local tClipL, tClipR, tClipT, tClipB;
 local tType;
@@ -271,10 +278,18 @@ local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 			if tIsActive then
 				tIcon, tTimer, tCounter, tDuration = tBuffInfo[3], tBuffInfo[tInfos["alive"] and 5 or 1], tBuffInfo[2], tBuffInfo[4];
 
-				if tTimer then tTimer = floor(tTimer * 10) * 0.1;	end
+				if tTimer then
+					tTimer = floor(tTimer * 10) * 0.1;
+				end
+				
 				tColor = tInfos["color"];
-				if tInfos["icon"] ~= 1 then tIcon = VUHDO_CUSTOM_ICONS[tInfos["icon"]][2];
-				else tColor["isDefault"] = true; end
+			
+				if tInfos["icon"] ~= 1 then
+					tIcon = VUHDO_CUSTOM_ICONS[tInfos["icon"]][2];
+					tColor["isDefault"] = false;
+				else
+					tColor["isDefault"] = true;
+				end
 			end
 			tTimer2, tClipL, tClipR, tClipT, tClipB = nil, nil, nil, nil, nil;
 		end
