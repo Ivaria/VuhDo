@@ -350,8 +350,6 @@ local function VUHDO_getAutoBattleRezText(anIsKeyboard)
 
 		if "DRUID" == VUHDO_PLAYER_CLASS then
 			tRezText = tRezText .. VUHDO_SPELL_ID.REBIRTH .. "\n";
-		elseif "PALADIN" == VUHDO_PLAYER_CLASS then
-			tRezText = tRezText .. VUHDO_SPELL_ID.INTERCESSION .. "\n";
 		end
 	else
 		tRezText = "";
