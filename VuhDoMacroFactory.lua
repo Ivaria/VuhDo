@@ -346,11 +346,7 @@ local function VUHDO_getAutoBattleRezText(anIsKeyboard)
 			tRezText = tRezText .. ",mod:" .. VUHDO_SPELL_CONFIG["smartCastModi"];
 		end
 
-		tRezText = tRezText .. "] ";
-
-		if "DRUID" == VUHDO_PLAYER_CLASS then
-			tRezText = tRezText .. VUHDO_SPELL_ID.REBIRTH .. "\n";
-		end
+		tRezText = tRezText .. "] " .. VUHDO_SPELL_ID.REBIRTH .. "\n";
 	else
 		tRezText = "";
 	end
