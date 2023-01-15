@@ -96,6 +96,12 @@ VUHDO_CLASS_BUFFS = {
 		[VUHDO_SPELL_ID.BUFF_LEVITATE] = {
 			{ VUHDO_SPELL_ID.BUFF_LEVITATE, VUHDO_BUFF_TARGET_SINGLE },
 		},
+		[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = {
+			{ VUHDO_SPELL_ID.PAIN_SUPPRESSION, VUHDO_BUFF_TARGET_UNIQUE },
+		},
+		[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = {
+			{ VUHDO_SPELL_ID.GUARDIAN_SPIRIT, VUHDO_BUFF_TARGET_UNIQUE },
+		},
 		[VUHDO_SPELL_ID.BUFF_INNER_FIRE] = {
 			{ VUHDO_SPELL_ID.BUFF_INNER_FIRE, VUHDO_BUFF_TARGET_SELF },
 		}, 
@@ -287,13 +293,11 @@ VUHDO_CLASS_BUFFS = {
 		},
 	},
 
-	["MONK"] = {
-		-- TODO: What would be useful for Monks?
-	},
+	["MONK"] = { },
 
-	["DEMONHUNTER"] = {
-		-- TODO: add the class buffs that Demon Hunters provide
-	},
+	["DEMONHUNTER"] = { },
+
+	["EVOKER"] = { },
 };
 
 

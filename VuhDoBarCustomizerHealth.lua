@@ -126,10 +126,19 @@ local VUHDO_getUnitHealthModiPercent = VUHDO_getUnitHealthModiPercent;
 --
 local tOpacity;
 local function VUHDO_setStatusBarColor(aBar, aColor)
+
 	tOpacity = aColor["useOpacity"] and aColor["O"] or nil;
 
-	if aColor["useBackground"] then	aBar:SetStatusBarColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
-	elseif tOpacity then aBar:SetAlpha(tOpacity); end
+	if aColor["useBackground"] then
+		if tOpacity then
+			aBar:SetStatusBarColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
+		else
+			aBar:SetStatusBarColor(aColor["R"], aColor["G"], aColor["B"]);
+		end
+	elseif tOpacity then
+		aBar:SetAlpha(tOpacity);
+	end
+
 end
 
 
@@ -140,8 +149,12 @@ local function VUHDO_setTextureColor(aTexture, aColor)
 
 	tOpacity = aColor["useOpacity"] and aColor["O"] or nil;
 
-	if aColor["useBackground"] then	
-		aTexture:SetVertexColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
+	if aColor["useBackground"] then
+		if tOpacity then
+			aTexture:SetVertexColor(aColor["R"], aColor["G"], aColor["B"], tOpacity);
+		else
+			aTexture:SetVertexColor(aColor["R"], aColor["G"], aColor["B"]);
+		end
 	elseif tOpacity then 
 		aTexture:SetAlpha(tOpacity); 
 	end
@@ -775,12 +788,14 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 			if tQuota > 0 then
 				if aColor then
 					tHealthBar:SetVuhDoColor(aColor);
+
 					if aColor["useText"] then
 						VUHDO_getBarText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
 						VUHDO_getLifeText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
 					end
 				end
-			  tHealthBar:SetValue(tQuota);
+
+				tHealthBar:SetValue(tQuota);
 			else
 				tHealthBar:SetValue(0);
 			end
@@ -791,7 +806,7 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 	if not tInfo then return; end
 
 	-- Targets und targets-of-target, die im Raid sind
-  tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[tInfo["name"]];
+	tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[tInfo["name"]];
 	if not tAllButtons then return; end
 
 	VUHDO_CUSTOM_INFO["fixResolveId"] = aUnit;

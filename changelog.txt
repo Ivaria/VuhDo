@@ -40,9 +40,13 @@ Known issues:
   
 Bugfixes:  
 -- Fixed latency when changing the player focus unit  
+-- Fixed bouquet validator icon opacity  
+-- Fixed bouquet validator display when bouquet has zero validators  
+-- Fixed bouquet validator invalid colors with safe fallback  
   
   
 Improvements:  
+-- Added default custom debuffs for Vault of Incarnates raid encounters  
   
   
 --------------------------------------------------------------  
@@ -265,6 +269,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Bump TOC interface for 10.0.0 Dragonflight pre-patch  
   
   
 --------------------------------------------------------------  

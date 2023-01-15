@@ -303,7 +303,7 @@ local tDebuffInfo;
 local function VUHDO_debuffBarColorValidator(anInfo, _)
 	if anInfo["charmed"] then
 		return true, nil, -1, -1, -1, VUHDO_getDebuffColor(anInfo);
-	elseif 0 ~= anInfo["debuff"] then -- VUHDO_DEBUFF_TYPE_NONE
+	elseif anInfo["debuff"] and anInfo["debuff"] > 0 then -- VUHDO_DEBUFF_TYPE_NONE
 		tDebuffInfo = VUHDO_getChosenDebuffInfo(anInfo["unit"]);
 		return true, tDebuffInfo[1], -1, tDebuffInfo[2], -1, VUHDO_getDebuffColor(anInfo);
 	else
