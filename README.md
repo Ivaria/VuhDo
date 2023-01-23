@@ -1,4 +1,4 @@
-Get [VuhDo release v3.143](https://www.curseforge.com/wow/addons/vuhdo/download/4060917) now with support for Dragonflight Pre-Patch 10.0.0!
+Get [VuhDo release v3.146](https://www.curseforge.com/wow/addons/vuhdo/download/4351156) now with support for Dragonflight 10.0.2!
 
 To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
