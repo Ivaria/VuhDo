@@ -1,5 +1,10 @@
-VUHDO_VERSION = GetAddOnMetadata("VuhDo", "Version");
-VUHDO_MIN_TOC_VERSION = 100002;
+VUHDO_VERSION = C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata("VuhDo", "Version");
+
+if not VUHDO_VERSION and GetAddOnMetadata then
+	VUHDO_VERSION = GetAddOnMetadata("VuhDo", "Version");
+end
+
+VUHDO_MIN_TOC_VERSION = 100007;
 VUHDO_COMMS_PREFIX = "VUHDO";
 
 VUHDO_YES = 1;
