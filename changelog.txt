@@ -41,6 +41,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added integration with Blizzard UI minimap add-on compartment  
   
   
 --------------------------------------------------------------  
