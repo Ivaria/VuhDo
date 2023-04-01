@@ -89,7 +89,11 @@ function VUHDO_initFuBar()
 			icon = VUHDO_STANDARD_ICON,
 			OnClick = function(aClickedFrame, aButton)
 				if aButton == "RightButton" then
-					ToggleDropDownMenu(1, nil, VuhDoMinimapDropDown, aClickedFrame:GetName(), 0, -5);
+					if AddonCompartmentFrame and aClickedFrame:GetParent() == DropDownList1 then
+						ToggleDropDownMenu(1, nil, VuhDoMinimapDropDown, "cursor", 0, 0);
+					else
+						ToggleDropDownMenu(1, nil, VuhDoMinimapDropDown, aClickedFrame:GetName(), 0, -5);
+					end
 				else
 					VUHDO_slashCmd("opt");
 				end
