@@ -4,6 +4,7 @@
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
 ## Version: 3.149-wotlkc
 ## Notes: Raid Frames providing click-heal functionality, buff and debuff control, main tank management and much more
+## IconTexture: Interface\AddOns\VuhDo\Images\TemporaryPortrait-Female-BloodElf-VuhDo
 
 ## X-Curse-Project-ID: 7950
 ## X-WoWI-ID: 26372
