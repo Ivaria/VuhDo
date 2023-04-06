@@ -1176,8 +1176,11 @@ local VUHDO_BLOCKED_FUNCTIONS = {
 	setfenv = true, 
 	loadstring = true, 
 	pcall = true, 
-	xpcall = true, 
+	xpcall = true,
+
+
 	-- blocked WoW API
+	ChatEdit_SendText = true,
 	SendMail = true, 
 	SetTradeMoney = true, 
 	AddTradeMoney = true, 
@@ -1201,10 +1204,26 @@ local VUHDO_BLOCKED_FUNCTIONS = {
 };
 
 local VUHDO_BLOCKED_TABLES = {
-	SlashCmdList = true, 
+	-- Could be used to break the secure env
+	SlashCmdList = true,
+
+	-- Frames with potentially private information or abuse potential
 	SendMailMailButton = true, 
 	SendMailMoneyGold = true, 
-	MailFrameTab2 = true
+	MailFrameTab2 = true,
+	BankFrame = true,
+	TradeFrame = true,
+	GuildBankFrame = true,
+	MailFrame = true,
+	C_GMTicketInfo = true,
+
+	-- Addon Tables that regularly run custom lua code
+	WeakAurasSaved = true,
+	WeakAurasOptions = true,
+	WeakAurasOptionsSaved = true,
+	PlaterDB = true,
+	_detalhes_global = true,
+	_detalhes = true, -- _detalhes == Details!
 };
 
 
