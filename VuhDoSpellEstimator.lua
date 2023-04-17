@@ -47,6 +47,7 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.GENESIS] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.GERMINATION] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.SPRING_BLOSSOMS] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.ADAPTIVE_SWARM] = { ["isHot"] = true },
 
 	-- Hunter
 	[VUHDO_SPELL_ID.MEND_PET] = { ["isHot"] = true },
