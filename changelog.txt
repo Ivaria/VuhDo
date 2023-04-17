@@ -17,6 +17,7 @@ Bugfixes:
   
 Improvements:  
 -- Added integration with Blizzard UI minimap add-on compartment  
+-- Added Druid 'Adaptive Swarm' as a default HoT  
   
   
 --------------------------------------------------------------  
