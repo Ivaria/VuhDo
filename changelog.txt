@@ -16,6 +16,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Bump TOC interface for 10.1.0
 -- Added integration with Blizzard UI minimap add-on compartment  
 -- Added Druid 'Adaptive Swarm' as a default HoT  
   
