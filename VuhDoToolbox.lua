@@ -569,16 +569,18 @@ function VUHDO_initTalentSpellCaches()
 			local tNodeInfo = C_Traits.GetNodeInfo(tActiveConfigId, tNodeId);
 
 			if tNodeInfo and tNodeInfo.ranksPurchased > 0 then
-				local tEntryInfo = C_Traits.GetEntryInfo(tActiveConfigId, tNodeInfo.entryIDs[1]);
-				
-				if tEntryInfo then
-					local tDefinitionInfo = C_Traits.GetDefinitionInfo(tEntryInfo.definitionID);
+				for _, entryId in pairs(tNodeInfo.entryIDs) do
+					local tEntryInfo = C_Traits.GetEntryInfo(tActiveConfigId, entryId);
 
-					if tDefinitionInfo then
-						local tSpellName = GetSpellInfo(tDefinitionInfo.spellID);
+					if tEntryInfo then
+						local tDefinitionInfo = C_Traits.GetDefinitionInfo(tEntryInfo.definitionID);
 
-						VUHDO_TALENT_CACHE_SPELL_ID[tDefinitionInfo.spellID] = tSpellName;
-						VUHDO_TALENT_CACHE_SPELL_NAME[tSpellName] = tDefinitionInfo.spellID;
+						if tDefinitionInfo then
+							local tSpellName = GetSpellInfo(tDefinitionInfo.spellID);
+
+							VUHDO_TALENT_CACHE_SPELL_ID[tDefinitionInfo.spellID] = tSpellName;
+							VUHDO_TALENT_CACHE_SPELL_NAME[tSpellName] = tDefinitionInfo.spellID;
+						end
 					end
 				end
 			end

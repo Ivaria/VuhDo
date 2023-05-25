@@ -12,7 +12,9 @@ Known issues:
 --   and set 'Self Cast Key' to 'None'  
   
   
-Bugfixes:  
+Bugfixes:
+-- Recognize second choice in choice talents
+--    Example: Beacon of Virtue
   
   
 Improvements:  
