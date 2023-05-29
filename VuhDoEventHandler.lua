@@ -917,6 +917,14 @@ function VUHDO_slashCmd(aCommand)
 		VUHDO_initShowMinimap();
 
 		VUHDO_Msg(VUHDO_I18N_MM_ICON .. (VUHDO_MM_SETTINGS["hide"] and VUHDO_I18N_CHAT_HIDDEN or VUHDO_I18N_CHAT_SHOWN));
+	elseif strfind(tCommandWord, "compart") then
+		VUHDO_MM_SETTINGS["addon_compartment_hide"] = VUHDO_forceBooleanValue(VUHDO_MM_SETTINGS["addon_compartment_hide"]);
+		VUHDO_MM_SETTINGS["addon_compartment_hide"] = not VUHDO_MM_SETTINGS["addon_compartment_hide"];
+
+		VUHDO_initShowAddOnCompartment();
+
+		VUHDO_Msg(VUHDO_I18N_ADDON_COMPARTMENT_ICON .. 
+			(VUHDO_MM_SETTINGS["addon_compartment_hide"] and VUHDO_I18N_CHAT_HIDDEN or VUHDO_I18N_CHAT_SHOWN));
 	elseif tCommandWord == "ui" then
 		VUHDO_reloadUI(false);
 	elseif strfind(tCommandWord, "role") then

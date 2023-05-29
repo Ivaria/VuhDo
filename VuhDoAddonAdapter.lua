@@ -6,7 +6,6 @@ VUHDO_MM_SETTINGS = VUHDO_MM_SETTINGS or { };
 VUHDO_LibSharedMedia = LibStub("LibSharedMedia-3.0");
 VUHDO_LibDataBroker = LibStub("LibDataBroker-1.1", true);
 VUHDO_LibDBIcon = LibStub("LibDBIcon-1.0");
-VUHDO_LibDBCompartment = LibStub:GetLibrary("LibDBCompartment-1.0");
 
 VUHDO_LibButtonFacade = nil;
 
@@ -116,10 +115,6 @@ function VUHDO_initFuBar()
 			end
 
 			VUHDO_LibDBIcon:Register("VuhDo", minimapObject, VUHDO_MM_SETTINGS);
-
-			if VUHDO_LibDBCompartment then
-				VUHDO_LibDBCompartment:Register("VuhDo", minimapObject);
-			end
 
 			VUHDO_initMinimap();
 		end
@@ -238,6 +233,7 @@ end
 function VUHDO_initMinimap()
 
 	VUHDO_initShowMinimap();
+	VUHDO_initShowAddOnCompartment();
 
 end
 
@@ -251,6 +247,21 @@ function VUHDO_initShowMinimap()
 			VUHDO_LibDBIcon:Show("VuhDo");
 		else
 			VUHDO_LibDBIcon:Hide("VuhDo");
+		end
+	end
+
+end
+
+
+
+--
+function VUHDO_initShowAddOnCompartment()
+
+	if VUHDO_LibDataBroker and VUHDO_LibDBIcon then
+		if not VUHDO_MM_SETTINGS["addon_compartment_hide"] then
+			VUHDO_LibDBIcon:AddButtonToCompartment("VuhDo");
+		else
+			VUHDO_LibDBIcon:RemoveButtonFromCompartment("VuhDo");
 		end
 	end
 
