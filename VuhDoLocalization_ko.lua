@@ -60,6 +60,7 @@ VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "§|cffffe566opt|r[ions] - 
 VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "§|cffffe566res|r[et] - 패널 위치 초기화";
 VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "§|cffffe566lock|r - 패널 위치 잠금 토글";
 VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "§|cffffe566mm, map, minimap|r - 미니맵 아이콘 토글";
+VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "|n|cffffe566compart|r[ment] - Toggle AddOn Compartment Icon";
 VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "§|cffffe566show, hide, toggle|r - 패널 켜기/끄기 전환";
 VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "§|cffffe566load|r - [Profile],[Key Layout]";
 VUHDO_I18N_COMMAND_LIST = VUHDO_I18N_COMMAND_LIST .. "§[broad]|cffffe566cast, mt|r[s] - 메인 탱커 알림";
@@ -509,3 +510,6 @@ VUHDO_I18N_EVOKERS = "Evokers";
 
 -- 3.143
 VUHDO_I18N_BUFFC_EARTH_SHIELD = "Earth Shield (Self)";
+
+-- 3.150
+VUHDO_I18N_ADDON_COMPARTMENT_ICON = "AddOn Compartment Icon is now ";
