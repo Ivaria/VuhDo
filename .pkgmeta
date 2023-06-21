@@ -27,6 +27,9 @@ externals:
         url: https://github.com/Stanzilla/LibCustomGlow
     Libs/NickTag-1.0:
         url: https://github.com/Ivaria/NickTag-1.0
+    Libs/TaintLess:
+        url: https://www.townlong-yak.com/addons.git/taintless
+        commit: default
 
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
 	
