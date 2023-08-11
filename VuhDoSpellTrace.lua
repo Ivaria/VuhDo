@@ -5,12 +5,24 @@ local tinsert = table.insert;
 local twipe = table.wipe;
 
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
-	-- [<unit GUID>] = {
+	-- [<target unit GUID>] = {
 	--	["latest"] = <latest trace spell ID>,
 	--	["spells"] = {
 	--		[<spell ID>] = {
 	--			["icon"] = <spell icon>,
 	--			["startTime"] = <epoch time event received>,
+	--		},
+	--	},
+	-- },
+};
+
+local VUHDO_INCOMING_TRACE_SPELLS = {
+	-- [<target unit GUID>] = {
+	--	["latest"] = <latest incoming trace spell ID>,
+	--	["spells"] = {
+	--		[<spell ID>] = {
+	--			["icon"] = <spell icon>,
+	--			["startTime"] = <epoch time SPELL_CAST_START event received>,
 	--		},
 	--	},
 	-- },
@@ -85,7 +97,8 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 	local tSpellId = tostring(aSpellId);
 
 	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
-		(aMessage ~= "SPELL_HEAL" and aMessage ~= "SPELL_PERIODIC_HEAL") then
+		(--aMessage ~= "SPELL_CAST_START" and aMessage ~= "SPELL_CAST_SUCCESS" and aMessage ~= "SPELL_CAST_FAILED" and 
+		aMessage ~= "SPELL_HEAL" and aMessage ~= "SPELL_PERIODIC_HEAL") then
 		return;
 	end
 

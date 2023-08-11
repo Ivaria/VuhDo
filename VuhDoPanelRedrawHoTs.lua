@@ -163,7 +163,9 @@ local function VUHDO_initHotIcon(anIndex)
 		tCounter:Hide();
 		tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\cluster2");
 	else
-		if sIconRadio == 3 then -- Flat
+		if sIconRadio == 4 then -- Text only
+			tHotIcon:Hide();
+		elseif sIconRadio == 3 then -- Flat
 			tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\hot_flat_16_16");
 		elseif sIconRadio == 2 then -- Glossy
 			tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\icon_white_square");

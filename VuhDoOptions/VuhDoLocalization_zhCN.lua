@@ -641,6 +641,8 @@ VUHDO_I18N_TT.K581 = "选中可在栏上显示玩家昵称.";
 VUHDO_I18N_TT.K582 = "选择释放的目标";
 VUHDO_I18N_TT.K583 = "Check to make all HoT icons fade out when the HoT is expiring.";
 VUHDO_I18N_TT.K584 = "Check to make all HoT icons flash when the HoT is expiring.";
+VUHDO_I18N_TT.K585 = "Select a color for Evokers";
+VUHDO_I18N_TT.K586 = "Enable to show text only with no icon.";
 
 -- TBCC game version specific strings (tooltip IDs begin at K900)
 
@@ -1174,6 +1176,8 @@ VUHDO_I18N_MOUSEOVER_TARGET_HARM = "鼠标指向的目标单位 (仅敌对)";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "鼠标指向目标的目标单位 (仅敌对)";
 
 VUHDO_I18N_CLOCK = "时钟";
+
+VUHDO_I18N_TEXT_ONLY = "Text only";
 
 -- TBCC game version specific strings
 

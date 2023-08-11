@@ -276,13 +276,11 @@ VUHDO_CLASS_BUFFS = {
 		},
 	},
 
-	["MONK"] = {
-		-- TODO: What would be useful for Monks?
-	},
+	["MONK"] = { },
 
-	["DEMONHUNTER"] = {
-		-- TODO: add the class buffs that Demon Hunters provide
-	},
+	["DEMONHUNTER"] = { },
+
+	["EVOKER"] = { },
 };
 
 
