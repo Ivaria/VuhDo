@@ -69,6 +69,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Paladin shield for talent 'Overflowing Light'  
   
   
 --------------------------------------------------------------  
