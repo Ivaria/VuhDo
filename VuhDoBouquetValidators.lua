@@ -134,7 +134,7 @@ end
 local tInfo;
 local function VUHDO_spellTraceSingleValidator(anInfo, aCustom)
 
-	if aCustom and aCustom["custom"] and aCustom["custom"]["spellTrace"] then
+	if aCustom and aCustom["custom"] and aCustom["custom"]["spellTrace"] and aCustom["custom"]["spellTrace"] ~= "" then
 		tInfo = VUHDO_getSpellTraceForUnit(anInfo["unit"], aCustom["custom"]["spellTrace"]);
 
 		if tInfo then
