@@ -347,6 +347,8 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 	_G[tPanel:GetName() .. "BuffOrIndicatorFrameMineOthersFrame"]:Hide();
 	_G[tPanel:GetName() .. "BuffOrIndicatorFramePercentFrame"]:Hide();
 	_G[tPanel:GetName() .. "BuffOrIndicatorFrameCustomFlagEditBox"]:Hide();
+	_G[tPanel:GetName() .. "BuffOrIndicatorFrameSpellTraceEditLabel"]:Hide();
+	_G[tPanel:GetName() .. "BuffOrIndicatorFrameSpellTraceEditBox"]:Hide();
 
 	tBuffName = VUHDO_lnfGetValueFrom(tModel .. ".name");
 
@@ -489,9 +491,18 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 				tSubPanel = _G[tInnerPanel:GetName() .. "CustomFlagEditBox"];
 				VUHDO_lnfSetModel(tSubPanel, tModel .. ".custom.function");
 				tSubPanel:Show();
+			elseif (VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName]["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_SPELL_TRACE) then
+				_G[tInnerPanel:GetName() .. "SpellTraceEditLabel"]:Show();
+
+				tSubPanel = _G[tInnerPanel:GetName() .. "SpellTraceEditBox"];
+
+				VUHDO_lnfSetModel(tSubPanel, tModel .. ".custom.spellTrace");
+				tSubPanel:Show();
 			else
 				_G[tInnerPanel:GetName() .. "PercentFrame"]:Hide();
 				_G[tInnerPanel:GetName() .. "CustomFlagEditBox"]:Hide();
+				_G[tInnerPanel:GetName() .. "SpellTraceEditLabel"]:Hide();
+				_G[tInnerPanel:GetName() .. "SpellTraceEditBox"]:Hide();
 			end
 
 			if (VUHDO_BOUQUET_BUFFS_SPECIAL[tBuffName]["no_color"]) then

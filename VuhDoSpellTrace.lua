@@ -222,7 +222,7 @@ end
 
 
 --
-function VUHDO_getSpellTraceForUnit(aUnit)
+function VUHDO_getSpellTraceForUnit(aUnit, aSpell)
 
 	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or not aUnit then
 		return;
@@ -234,11 +234,19 @@ function VUHDO_getSpellTraceForUnit(aUnit)
 		return;
 	end
 
-	local tLatestTraceSpellId = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["latest"];
+	if aSpell then
+		if VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"] and VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][aSpell] then
+			return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][aSpell];
+		end
+	else
+		local tLatestTraceSpellId = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["latest"];
 
-	if tLatestTraceSpellId then
-		return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tLatestTraceSpellId];
+		if tLatestTraceSpellId then
+			return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tLatestTraceSpellId];
+		end
 	end
+
+	return;
 
 end
 
