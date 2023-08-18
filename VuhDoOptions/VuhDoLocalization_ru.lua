@@ -747,6 +747,9 @@ VUHDO_I18N_TT.K583 = "Отметьте, что бы иконки всех ХоТ
 VUHDO_I18N_TT.K584 = "Отметьте, что бы иконки всех ХоТ-ок мигали при спадении.";
 VUHDO_I18N_TT.K585 = "Выберите цвет для Пробудителей";
 VUHDO_I18N_TT.K586 = "Отметьте, что бы показывать только текст без иконки.";
+VUHDO_I18N_TT.K587 = "Track incoming spell cast only.";
+VUHDO_I18N_TT.K588 = "Show incoming spell casts from friendly units.";
+VUHDO_I18N_TT.K589 = "Show incoming spell casts from enemy units.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный\nпрофиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";
@@ -1350,3 +1353,6 @@ VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Цель цели юнита под �
 VUHDO_I18N_CLOCK = "Стрелка\nЧасов";
 
 VUHDO_I18N_TEXT_ONLY = "Только текст";
+
+VUHDO_I18N_SHOW_FRIENDLY = "Show\nFriendly";
+VUHDO_I18N_SHOW_ENEMY = "Show\nEnemy";

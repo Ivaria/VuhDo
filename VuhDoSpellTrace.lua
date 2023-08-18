@@ -1,3 +1,4 @@
+local next = next;
 local pairs = pairs;
 local tostring = tostring;
 local tonumber = tonumber;
@@ -11,10 +12,21 @@ local VUHDO_ACTIVE_TRACE_SPELLS = {
 	--		[<spell ID>] = {
 	--			["icon"] = <spell icon>,
 	--			["startTime"] = <epoch time event received>,
+	--			["isIncoming"] = <true|false>,
+	--			["castTime"] = <spell cast duration>,
+	--			["srcGuid"] = <source unit GUID>,
 	--		},
 	--	},
 	-- },
 };
+
+local VUHDO_ACTIVE_TRACE_GUIDS = {
+	-- [<source unit GUID>] = {
+	--	[<spell ID>] = {
+	--		["dstGuid"] = <destination unit GUID>,
+	--	},
+	-- },
+}
 
 local VUHDO_TRAIL_OF_LIGHT_SPELL_ID = 200128;
 local VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT = { };
@@ -79,10 +91,72 @@ end
 
 
 --
-function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellId, anAmount)
+local function VUHDO_addSpellTrace(aSrcGuid, aDstGuid, aSpellId)
 
 	-- ensure table keys are always strings
 	local tSpellId = tostring(aSpellId);
+
+	if not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid] or not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"] then
+		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid] = {
+			["spells"] = { },
+		};
+	end
+
+	if not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] then
+		local tName, _, tIcon, tCastTime = GetSpellInfo(tSpellId);
+
+		if not tName then
+			return;
+		end
+
+		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] = {
+			["icon"] = tIcon,
+			["castTime"] = tCastTime,
+		};
+	end
+
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId]["srcGuid"] = aSrcGuid;
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId]["startTime"] = GetTime();
+
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = tSpellId;
+
+	if not VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid] then
+		VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid] = { };
+	end
+
+	VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] = aDstGuid;
+
+end
+
+
+
+--
+local function VUHDO_removeSpellTrace(aSrcGuid, aDstGuid, aSpellId)
+
+	-- ensure table keys are always strings
+	local tSpellId = tostring(aSpellId);
+
+	if not aDstGuid or not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid] or not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"] or 
+		not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] then
+		return;
+	end
+	
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] = nil;
+
+	if VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] == tSpellId then
+		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = nil;
+	end
+
+	if VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] then
+		VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] = nil;
+	end
+
+end
+
+
+
+--
+function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName, aSpellId, anAmount)
 
 	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace or 
 		(aMessage ~= "SPELL_HEAL" and aMessage ~= "SPELL_PERIODIC_HEAL") then
@@ -136,8 +210,11 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 		end
 	end
 
+	-- ensure table keys are always strings
+	local tSpellId = tostring(aSpellId);
+
 	-- spells can be traced by name or spell ID
-	if not sSpellTraceStoredSettings[tSpellId] then
+	if not tSpellId or not sSpellTraceStoredSettings[tSpellId] then
 		tSpellId = aSpellName;
 
 		if not sSpellTraceStoredSettings[tSpellId] then
@@ -145,36 +222,126 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 		end
 	end
 
-	if not VUHDO_RAID_GUIDS[aDstGuid] or 
+	-- incoming casts cannot be tracked via CLEU because the payload does not include  
+	if sSpellTraceStoredSettings[tSpellId]["isIncoming"] then
+		return;
+	end
+
+	if not aDstGuid or not VUHDO_RAID_GUIDS[aDstGuid] or 
 		(aSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
 		(aSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) then
 		return;
 	end
 
-	if not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid] or not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"] or 
-		not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] then
-		local tName, _, tIcon = GetSpellInfo(aSpellId);
-
-		if not tName then
-			return;
-		end
-
-		if not VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid] then
-			VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid] = { 
-				["spells"] = { },
-			};
-		end
-
-		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId] = {
-			["icon"] = tIcon,
-		};
-	end
-
-	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["spells"][tSpellId]["startTime"] = GetTime();
-
-	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = tSpellId;
+	VUHDO_addSpellTrace(aSrcGuid, aDstGuid, tSpellId);
 
 	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[aDstGuid], VUHDO_UPDATE_SPELL_TRACE);
+
+end
+
+
+
+--
+function VUHDO_addIncomingSpellTrace(aSrcUnit, aCastGuid, aSpellId)
+
+	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace then
+		return;
+	end
+
+	-- ensure table keys are always strings
+	local tSpellId = tostring(aSpellId);
+
+	-- incoming spells can only be traced by spell ID
+	if not tSpellId or not sSpellTraceStoredSettings[tSpellId] or not sSpellTraceStoredSettings[tSpellId]["isIncoming"] then
+		return;
+	end
+
+	local tSrcGuid = UnitGUID(aSrcUnit);
+
+	if not tSrcGuid then
+		return;
+	end
+
+	local tSpellName, _, _, tCastStart, tCastEnd, _, _, _, tCastInfoSpellId = UnitCastingInfo(aSrcUnit);
+
+	if not tSpellName then
+		tSpellName, _, _, tCastStart, tCastEnd, _, _, tCastInfoSpellId = UnitChannelInfo(aSrcUnit);
+	end
+
+	if tSpellName and tCastInfoSpellId then
+		-- ensure table keys are always strings
+		tSpellId = tostring(tCastInfoSpellId);
+	else
+		return;
+	end
+
+	local tDstUnit = aSrcUnit .. "target";
+	local tUnit;
+
+	if UnitExists(tDstUnit) then
+		for tRaidUnit, _ in pairs(VUHDO_RAID) do
+			if UnitIsUnit(tDstUnit, tRaidUnit) then
+				tUnit = tRaidUnit;
+
+				break;
+			end
+		end
+	end
+
+	if not tUnit then
+		return;
+	end
+
+	local tDstGuid = UnitGUID(tUnit);
+
+	if not tDstGuid or not VUHDO_RAID_GUIDS[tDstGuid] or 
+		(tSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
+		(tSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) then
+		return;
+	end
+
+	VUHDO_addSpellTrace(tSrcGuid, tDstGuid, tSpellId);
+
+	VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid]["spells"][tSpellId]["isIncoming"] = true;
+	VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid]["spells"][tSpellId]["castTime"] = tCastEnd - tCastStart;
+
+	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[tDstGuid], VUHDO_UPDATE_SPELL_TRACE);
+
+end
+
+
+
+--
+function VUHDO_removeIncomingSpellTrace(aSrcUnit, aCastGuid, aSpellId)
+
+	if not VUHDO_INTERNAL_TOGGLES[37] or not sShowSpellTrace then
+		return;
+	end
+
+	-- ensure table keys are always strings
+	local tSpellId = tostring(aSpellId);
+
+	-- spells can only be traced by spell ID
+	if not tSpellId or not sSpellTraceStoredSettings[tSpellId] or not sSpellTraceStoredSettings[tSpellId]["isIncoming"] then
+		return;
+	end
+
+	local tSrcGuid = UnitGUID(aSrcUnit);
+	local tDstGuid;
+
+	if tSrcGuid and VUHDO_ACTIVE_TRACE_GUIDS[tSrcGuid] then
+		tDstGuid = VUHDO_ACTIVE_TRACE_GUIDS[tSrcGuid][tSpellId];
+	end
+
+	if not tDstGuid or not VUHDO_RAID_GUIDS[tDstGuid] or 
+		(tSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
+		(tSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) then
+		return;
+	end
+
+	VUHDO_removeSpellTrace(tSrcGuid, tDstGuid, tSpellId);
+	
+	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[tDstGuid], VUHDO_UPDATE_SPELL_TRACE);
 
 end
 
@@ -190,16 +357,19 @@ function VUHDO_updateSpellTrace()
 
 		for tSpellId, tActiveTraceSpell in pairs(tActiveTraceSpells) do
 			if tActiveTraceSpell then
-				local tDuration = tonumber(sSpellTraceStoredSettings[tSpellId]["duration"] or sSpellTraceDefaultDuration) or sSpellTraceDefaultDuration;
+				local tDuration;
+
+				if tActiveTraceSpell["isIncoming"] then
+					-- castTime is in ms but GetTime() returns seconds
+					tDuration = tActiveTraceSpell["castTime"] / 1000;
+				else 
+					tDuration = tonumber(sSpellTraceStoredSettings[tSpellId]["duration"] or sSpellTraceDefaultDuration) or sSpellTraceDefaultDuration;
+				end
 
 				local tRemaining = tDuration - (tCurrentTime - tActiveTraceSpell["startTime"]);
 
 				if tRemaining <= 0 then
-					VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tSpellId] = nil;
-
-					if tActiveTrace["latest"] == tSpellId then
-						VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["latest"] = nil;
-					end
+					VUHDO_removeSpellTrace(tActiveTraceSpell["srcGuid"], tUnitGuid, tSpellId);
 
 					local tUnit = VUHDO_RAID_GUIDS[tUnitGuid];
 
@@ -207,13 +377,17 @@ function VUHDO_updateSpellTrace()
 						VUHDO_updateBouquetsForEvent(tUnit, VUHDO_UPDATE_SPELL_TRACE);
 					end
 				end
-
-				i = i + 1;
 			end
 		end
 
-		if i == 0 then
+		if next(VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"]) == nil then
 			VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid] = nil;
+		end
+	end
+
+	for tSrcGuid, tActiveTraceSpells in pairs(VUHDO_ACTIVE_TRACE_GUIDS) do
+		if next(tActiveTraceSpells) == nil then
+			VUHDO_ACTIVE_TRACE_GUIDS[tSrcGuid] = nil;
 		end
 	end
 
@@ -262,6 +436,15 @@ end
 
 
 --
+function VUHDO_getActiveSpellTraceGuids()
+
+	return VUHDO_ACTIVE_TRACE_GUIDS;
+
+end
+
+
+
+--
 function VUHDO_getSpellTraceTrailOfLight()
 
 	return VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT;
@@ -288,4 +471,3 @@ function VUHDO_getSpellTraceTrailOfLightForUnit(aUnit)
 	return { ["icon"] = sTrailOfLightIcon, };
 
 end
-
