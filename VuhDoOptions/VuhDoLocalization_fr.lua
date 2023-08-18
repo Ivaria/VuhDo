@@ -651,6 +651,9 @@ VUHDO_I18N_TT.K583 = "Check to make all HoT icons fade out when the HoT is expir
 VUHDO_I18N_TT.K584 = "Check to make all HoT icons flash when the HoT is expiring.";
 VUHDO_I18N_TT.K585 = "Select a color for Evokers";
 VUHDO_I18N_TT.K586 = "Enable to show text only with no icon.";
+VUHDO_I18N_TT.K587 = "Track incoming spell cast only.";
+VUHDO_I18N_TT.K588 = "Show incoming spell casts from friendly units.";
+VUHDO_I18N_TT.K589 = "Show incoming spell casts from enemy units.";
 
 -- TBCC game version specific strings (tooltip IDs begin at K900)
 
@@ -1192,6 +1195,9 @@ VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Mouseover's target's target unit (hos
 VUHDO_I18N_CLOCK = "Clock";
 
 VUHDO_I18N_TEXT_ONLY = "Text only";
+
+VUHDO_I18N_SHOW_FRIENDLY = "Show\nFriendly";
+VUHDO_I18N_SHOW_ENEMY = "Show\nEnemy";
 
 -- TBCC game version specific strings
 

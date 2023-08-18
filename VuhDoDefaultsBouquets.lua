@@ -1099,6 +1099,7 @@ VUHDO_SANE_BOUQUET_ITEM = {
 		["radio"] = 1,
 		["bright"] = 1.0,
 		["function"] = "return true;",
+		["spellTrace"] = "",
 	},
 };
 
