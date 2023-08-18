@@ -43,6 +43,10 @@ Bugfixes:
   
 Improvements:  
 -- Added Paladin shield for talent 'Overflowing Light'  
+-- Added bouquet validator to track only a single Spell Trace  
+-- Added incoming spell traces to track incoming spell casts  
+--   Tracking of incoming spell casts is by spell ID only  
+--   Works only for explicit caster targets (e.g. no mouseovers)  
   
   
 --------------------------------------------------------------  

@@ -511,6 +511,7 @@ local function VUHDO_spellTraceAddDefaultSettings(aSpellName)
 			["isMine"] = VUHDO_CONFIG["SPELL_TRACE"]["isMine"],
 			["isOthers"] = VUHDO_CONFIG["SPELL_TRACE"]["isOthers"],
 			["duration"] = VUHDO_CONFIG["SPELL_TRACE"]["duration"],
+			["isIncoming"] = VUHDO_CONFIG["SPELL_TRACE"]["isIncoming"],
 		}
 	end
 
@@ -665,6 +666,9 @@ local VUHDO_DEFAULT_CONFIG = {
 		["showTrailOfLight"] = false,
 		["SELECTED"] = "",
 		["STORED"] = { },
+		["isIncoming"] = false,
+		["showIncomingFriendly"] = false,
+		["showIncomingEnemy"] = false,
 	},
 
 	["THREAT"] = {
@@ -813,6 +817,7 @@ local VUHDO_DEFAULT_SPELL_TRACE_STORED_SETTINGS = {
 	["isMine"] = true,
 	["isOthers"] = false,
 	["duration"] = 2,
+	["isIncoming"] = false,
 };
 
 

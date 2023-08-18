@@ -7,6 +7,7 @@ VUHDO_BOUQUET_CUSTOM_TYPE_HOLY_POWER = 6;
 VUHDO_BOUQUET_CUSTOM_TYPE_SECONDS = 7;
 VUHDO_BOUQUET_CUSTOM_TYPE_STACKS = 8;
 VUHDO_BOUQUET_CUSTOM_TYPE_CUSTOM_FLAG = 9;
+VUHDO_BOUQUET_CUSTOM_TYPE_SPELL_TRACE = 10;
 
 VUHDO_FORCE_RESET = false;
 
@@ -127,6 +128,24 @@ local function VUHDO_spellTraceValidator(anInfo, _)
 	else
 		return false, nil, -1, -1, -1;
 	end
+end
+
+
+
+--
+local tInfo;
+local function VUHDO_spellTraceSingleValidator(anInfo, aCustom)
+
+	if aCustom and aCustom["custom"] and aCustom["custom"]["spellTrace"] and aCustom["custom"]["spellTrace"] ~= "" then
+		tInfo = VUHDO_getSpellTraceForUnit(anInfo["unit"], aCustom["custom"]["spellTrace"]);
+
+		if tInfo then
+			return true, tInfo["icon"], -1, -1, -1;
+		end
+	end
+
+	return false, nil, -1, -1, -1;
+
 end
 
 
@@ -1939,6 +1958,13 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 	["SPELL_TRACE"] = {
 		["displayName"] = VUHDO_I18N_SPELL_TRACE,
 		["validator"] = VUHDO_spellTraceValidator,
+		["interests"] = { VUHDO_UPDATE_SPELL_TRACE },
+	},
+
+	["SPELL_TRACE_SINGLE"] = {
+		["displayName"] = VUHDO_I18N_SPELL_TRACE_SINGLE,
+		["validator"] = VUHDO_spellTraceSingleValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_SPELL_TRACE,
 		["interests"] = { VUHDO_UPDATE_SPELL_TRACE },
 	},
 
