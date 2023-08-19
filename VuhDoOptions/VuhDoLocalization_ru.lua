@@ -747,7 +747,7 @@ VUHDO_I18N_TT.K583 = "Отметьте, что бы иконки всех ХоТ
 VUHDO_I18N_TT.K584 = "Отметьте, что бы иконки всех ХоТ-ок мигали при спадении.";
 VUHDO_I18N_TT.K585 = "Выберите цвет для Пробудителей";
 VUHDO_I18N_TT.K586 = "Отметьте, что бы показывать только текст без иконки.";
-VUHDO_I18N_TT.K587 = "Track incoming spell cast only.";
+VUHDO_I18N_TT.K587 = "Show incoming spell casts only. Spells must be tracked by spell ID not name.";
 VUHDO_I18N_TT.K588 = "Show incoming spell casts from friendly units.";
 VUHDO_I18N_TT.K589 = "Show incoming spell casts from enemy units.";
 
