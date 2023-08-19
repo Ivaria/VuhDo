@@ -2189,7 +2189,7 @@
 	</Frames>
 	<Scripts>
 		<OnLoad inherit="prepend">
-			ScrollFrame_OnLoad(self);
+			UIPanelScrollFrame_OnLoad(self);
 		</OnLoad>
 		<OnScrollRangeChanged>
 			ScrollFrame_OnScrollRangeChanged(self, xrange, yrange);
@@ -2239,7 +2239,7 @@
 	</Frames>
 	<Scripts>
 		<OnLoad inherit="prepend">
-			ScrollFrame_OnLoad(self);
+			UIPanelScrollFrame_OnLoad(self);
 		</OnLoad>
 		<OnScrollRangeChanged>
 			ScrollFrame_OnScrollRangeChanged(self, xrange, yrange);
