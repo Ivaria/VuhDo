@@ -82,6 +82,12 @@ end
 
 --
 function VUHDO_tabbedPanelOkayClicked(aButton)
+	if InCombatLockdown() then
+		VUHDO_Msg("Options cannot be saved in combat!", 1, 0.4, 0.4);
+
+		return;
+	end
+
 	VUHDO_B_CONFIG = nil;
 	VUHDO_B_INDICATOR_CONFIG = nil;
 	VUHDO_B_PANEL_SETUP = nil;
@@ -121,8 +127,13 @@ end
 
 --
 function VUHDO_tabbedPanelCancelClicked()
-	VUHDO_newOptionsRestoreVars();
-	VUHDO_initKeyboardMacros();
+	if InCombatLockdown() then
+		VuhDoNewOptionsTabbedFrame:Hide();
+	else
+		VUHDO_newOptionsRestoreVars();
+		VUHDO_initKeyboardMacros();
+	end
+
 	VUHDO_MAY_DEBUFF_ANIM = true;
 end
 
