@@ -66,6 +66,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed smart cast of resurrection for Augmentation Evoker  
+-- Fixed duplicate scroll bar on combobox dropdowns  
   
   
 Improvements:  
