@@ -750,6 +750,8 @@ VUHDO_I18N_TT.K586 = "Отметьте, что бы показывать тол�
 VUHDO_I18N_TT.K587 = "Show incoming spell casts only. Spells must be tracked by spell ID not name.";
 VUHDO_I18N_TT.K588 = "Show incoming spell casts from friendly units.";
 VUHDO_I18N_TT.K589 = "Show incoming spell casts from enemy units.";
+VUHDO_I18N_TT.K590 = "Show all incoming spell casts.";
+VUHDO_I18N_TT.K591 = "Filter to show only incoming spell casts from boss/NPC units.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный\nпрофиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";
@@ -1356,3 +1358,5 @@ VUHDO_I18N_TEXT_ONLY = "Только текст";
 
 VUHDO_I18N_SHOW_FRIENDLY = "Show\nFriendly";
 VUHDO_I18N_SHOW_ENEMY = "Show\nEnemy";
+VUHDO_I18N_SHOW_ALL = "Show All";
+VUHDO_I18N_BOSS_ONLY = "Boss Only";
