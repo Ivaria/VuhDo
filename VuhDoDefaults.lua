@@ -669,6 +669,8 @@ local VUHDO_DEFAULT_CONFIG = {
 		["isIncoming"] = false,
 		["showIncomingFriendly"] = false,
 		["showIncomingEnemy"] = false,
+		["showIncomingAll"] = false,
+		["showIncomingBossOnly"] = false,
 	},
 
 	["THREAT"] = {
