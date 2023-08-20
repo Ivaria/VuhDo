@@ -7,7 +7,7 @@
 
 			<Frame name="$parentMainPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="125" y="92" />
+					<AbsDimension x="138" y="92" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -56,7 +56,7 @@
 
 			<Frame name="$parentIncomingPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="125" y="112" />
+					<AbsDimension x="230" y="146" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -110,6 +110,41 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
+
+					<CheckButton name="$parentShowIncomingAllCheckButton" text="VUHDO_I18N_SHOW_ALL" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-101" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.SPELL_TRACE.showIncomingAll");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K590);
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_CONFIG.SHOW_SPELL_TRACE", false);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentShowIncomingBossOnlyCheckButton" text="VUHDO_I18N_BOSS_ONLY" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="118" y="-101" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.SPELL_TRACE.showIncomingBossOnly");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K591);
+								VUHDO_lnfAddConstraint(self, VUHDO_LF_CONSTRAINT_DISABLE, "VUHDO_CONFIG.SHOW_SPELL_TRACE", false);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 
 				</Frames>
 			</Frame>

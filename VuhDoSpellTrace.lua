@@ -43,6 +43,8 @@ local VUHDO_RAID_GUIDS = { };
 local VUHDO_INTERNAL_TOGGLES = { };
 local sShowSpellTrace = nil;
 local sShowTrailOfLight = nil;
+local sShowIncomingAll = nil;
+local sShowIncomingBossOnly = nil;
 local sSpellTraceStoredSettings = nil;
 local sSpellTraceDefaultDuration = nil;
 function VUHDO_spellTraceInitLocalOverrides()
@@ -55,6 +57,8 @@ function VUHDO_spellTraceInitLocalOverrides()
 	sSpellTraceStoredSettings = VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"];
 	sSpellTraceDefaultDuration = VUHDO_CONFIG["SPELL_TRACE"]["duration"];
 	sShowTrailOfLight = VUHDO_CONFIG["SPELL_TRACE"]["showTrailOfLight"];
+	sShowIncomingAll = VUHDO_CONFIG["SPELL_TRACE"]["showIncomingAll"];
+	sShowIncomingBossOnly = VUHDO_CONFIG["SPELL_TRACE"]["showIncomingBossOnly"];
 
 	VUHDO_setKnowsTrailOfLight(VUHDO_isTalentKnown(VUHDO_SPELL_ID.TRAIL_OF_LIGHT));
 
@@ -253,7 +257,12 @@ function VUHDO_addIncomingSpellTrace(aSrcUnit, aCastGuid, aSpellId)
 	local tSpellId = tostring(aSpellId);
 
 	-- incoming spells can only be traced by spell ID
-	if not tSpellId or not sSpellTraceStoredSettings[tSpellId] or not sSpellTraceStoredSettings[tSpellId]["isIncoming"] then
+	if not tSpellId or ((not sSpellTraceStoredSettings[tSpellId] or not sSpellTraceStoredSettings[tSpellId]["isIncoming"]) and 
+		not sShowIncomingAll) then
+		return;
+	end
+
+	if sShowIncomingAll and sShowIncomingBossOnly and not VUHDO_isBossUnit(aSrcUnit) then
 		return;
 	end
 
@@ -296,8 +305,8 @@ function VUHDO_addIncomingSpellTrace(aSrcUnit, aCastGuid, aSpellId)
 	local tDstGuid = UnitGUID(tUnit);
 
 	if not tDstGuid or not VUHDO_RAID_GUIDS[tDstGuid] or 
-		(tSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
-		(tSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]) then
+		(not sShowIncomingAll and ((tSrcGuid ~= VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isOthers"]) or 
+		(tSrcGuid == VUHDO_PLAYER_GUID and not sSpellTraceStoredSettings[tSpellId]["isMine"]))) then
 		return;
 	end
 

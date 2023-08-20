@@ -147,7 +147,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentBossOnlyCheckButton" text="Boss only" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentBossOnlyCheckButton" text="VUHDO_I18N_BOSS_ONLY" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
