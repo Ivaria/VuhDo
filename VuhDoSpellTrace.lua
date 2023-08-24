@@ -151,7 +151,7 @@ local function VUHDO_removeSpellTrace(aSrcGuid, aDstGuid, aSpellId)
 		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = nil;
 	end
 
-	if VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] then
+	if VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid] and VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] then
 		VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] = nil;
 	end
 
