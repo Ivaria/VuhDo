@@ -142,6 +142,10 @@ local VUHDO_DEFAULT_PROFILES = {
 				},
 				["SWIFTMEND_INDICATOR"] = {
 					["SCALE"] = 1,
+					["isBarGlow"] = false,
+					["anchor"] = "TOPLEFT",
+					["xAdjust"] = 5.5,
+					["yAdjust"] = -14,
 				},
 				["SIDE_RIGHT"] = {
 					["turnAxis"] = false,
@@ -837,6 +841,10 @@ local VUHDO_DEFAULT_PROFILES = {
 				},
 				["SWIFTMEND_INDICATOR"] = {
 					["SCALE"] = 1,
+					["isBarGlow"] = false,
+					["anchor"] = "TOPLEFT",
+					["xAdjust"] = 5.5,
+					["yAdjust"] = -14,					
 				},
 				["SIDE_RIGHT"] = {
 					["turnAxis"] = false,

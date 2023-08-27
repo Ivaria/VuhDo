@@ -53,6 +53,163 @@
 		</Frames>
 	</Frame>
 
+	<Frame name="VuhDoMoreButtonsAnchorPanel" inherits="VuhDoBarExampleTexture" virtual="true">
+		<Size>
+			<AbsDimension x="100" y="64" />
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset>
+					<AbsDimension x="50" y="-120" />
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Layers>
+			<Layer>
+				<FontString name="$parentTitleString" text="VUHDO_I18N_IHEALTH_BARI" inherits="VuDoWhiteFontTemplate">
+					<Size>
+						<AbsDimension x="0" y="0" />
+					</Size>
+					<Anchors>
+						<Anchor point="CENTER">
+							<Offset>
+								<AbsDimension x="0" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+
+			<CheckButton name="$parentTopLeftRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="-10" y="10" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K392);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="$parentTopRightRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="75" y="10" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K393);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="$parentBottomLeftRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="-10" y="-44" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K394);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="$parentBottomRightRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="75" y="-44" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K395);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="$parentLeftRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="-10" y="-17" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K396);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="$parentTopRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="33" y="10" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K397);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="$parentBottomRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="33" y="-44" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K398);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="$parentRightRadioButton" inherits="VuhDoRadioBoxTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="75" y="-17" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K399);
+					</OnLoad>
+				</Scripts>
+			</CheckButton>
+
+		</Frames>
+		<Scripts>
+			<OnShow>
+				VUHDO_lnfPatchFont(self, "TitleString");
+			</OnShow>
+		</Scripts>
+	</Frame>
+
 	<Frame name="VuhDoBouquetSlotTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="145" y="64" />

@@ -35,6 +35,7 @@ local sIsManaBouquet;
 local sPanelSetup;
 local sShadowAlpha;
 local sOutlineText;
+local sSwiftmendIndicatorSetup;
 
 local VUHDO_getFont;
 local VUHDO_getHealthBar;
@@ -93,6 +94,17 @@ function VUHDO_initLocalVars(aPanelNum)
 	sSideBarRightWidth = VUHDO_getSideBarWidthRight(aPanelNum);
 	if (sManaBarHeight == 0) then
 		sManaBarHeight = 0.001;
+	end
+
+	sSwiftmendIndicatorSetup = VUHDO_INDICATOR_CONFIG["CUSTOM"]["SWIFTMEND_INDICATOR"];
+
+	if sSwiftmendIndicatorSetup["anchor"] == nil then
+		sSwiftmendIndicatorSetup["anchor"] = "TOPLEFT";
+	end
+
+	if sSwiftmendIndicatorSetup["xAdjust"] == nil or sSwiftmendIndicatorSetup["yAdjust"] == nil then
+		sSwiftmendIndicatorSetup["xAdjust"] = 5.5;
+		sSwiftmendIndicatorSetup["yAdjust"] = -14;
 	end
 end
 local VUHDO_initLocalVars = VUHDO_initLocalVars;
@@ -571,10 +583,15 @@ local function VUHDO_initSwiftmendIndicator()
 	tIcon:ClearAllPoints();
 	tIcon:Hide();
 
-	if VUHDO_INDICATOR_CONFIG["BOUQUETS"]["SWIFTMEND_INDICATOR"] == "" then return; end
+	if VUHDO_INDICATOR_CONFIG["BOUQUETS"]["SWIFTMEND_INDICATOR"] == "" then
+		return;
+	end
 
-	tIcon:SetPoint("CENTER",  sHealthBar:GetName(), "TOPLEFT",  sBarScaling["barWidth"] / 5.5, -sBarScaling["barHeight"]  / 14);
-	tHeight = sBarScaling["barHeight"] * 0.5 * VUHDO_INDICATOR_CONFIG["CUSTOM"]["SWIFTMEND_INDICATOR"]["SCALE"];
+	local tX = sSwiftmendIndicatorSetup["xAdjust"] * sBarScaling["barWidth"] * 0.01;
+	local tY = -sSwiftmendIndicatorSetup["yAdjust"] * sBarScaling["barHeight"] * 0.01;
+	tIcon:SetPoint(sSwiftmendIndicatorSetup["anchor"], sHealthBar:GetName(), sSwiftmendIndicatorSetup["anchor"], tX, tY);
+
+	tHeight = sBarScaling["barHeight"] * 0.5 * sSwiftmendIndicatorSetup["SCALE"];
 	tIcon:SetWidth(tHeight);
 	tIcon:SetHeight(tHeight);
 end
