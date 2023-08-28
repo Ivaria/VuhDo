@@ -1365,6 +1365,9 @@ VUHDO_I18N_SHOW_ENEMY = "Show\nEnemy";
 VUHDO_I18N_SHOW_ALL = "Show All";
 VUHDO_I18N_BOSS_ONLY = "Boss Only";
 
+VUHDO_I18N_X = "X";
+VUHDO_I18N_Y = "Y";
+
 -- TBCC game version specific strings
 
 VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
