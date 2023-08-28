@@ -68,13 +68,6 @@ local sIndicatorMetaModel = {
 		["model"] = "VUHDO_INDICATOR_CONFIG.BOUQUETS.SWIFTMEND_INDICATOR",
 		["icon"] = "Indicator_Swiftmend",
 		["custom"] = {
-			{
-				["name"] = VUHDO_I18N_SCALE,
-				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
-				["min"] = 0.5, ["max"] = 4, ["step"] = 0.05, ["unit"] = " x",
-				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.SCALE",
-				["tooltip"] = nil,
-			},
 --[[			{
 				["name"] = VUHDO_I18N_ICON_GLOW_COLOR,
 				["type"] = VUHDO_BOOLEAN_CONSTRAINTS,
@@ -106,7 +99,14 @@ local sIndicatorMetaModel = {
 				["min"] = -100, ["max"] = 100, ["step"] = 0.5, ["unit"] = "%",
 				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.yAdjust",
 				["tooltip"] = VUHDO_I18N_TT.K401,
-			},	
+			},
+			{
+				["name"] = VUHDO_I18N_SCALE,
+				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
+				["min"] = 0.5, ["max"] = 4, ["step"] = 0.05, ["unit"] = " x",
+				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.SCALE",
+				["tooltip"] = nil,
+			},
 		},
 	},
 
