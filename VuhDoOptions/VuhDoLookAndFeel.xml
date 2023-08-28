@@ -1264,25 +1264,45 @@
 				</Size>
 			</ThumbTexture>
 			<Scripts>
-				<OnShow>VUHDO_lnfPatchFont(self, "Title"); VUHDO_lnfPatchFont(self, "Value"); VUHDO_lnfSliderInitFromModel(self)</OnShow>
+				<OnShow>
+					VUHDO_lnfPatchFont(self, "Title");
+					VUHDO_lnfPatchFont(self, "Value");
+					VUHDO_lnfSliderInitFromModel(self);
+				</OnShow>
 				<OnValueChanged>
-				  if not self._onsetting then
-				    self._onsetting = true;
-				    self:SetValue(self:GetValue());
-				    value = self:GetValue()
-				    self._onsetting = false;
-				  else return; end
+					if not self._onsetting then
+						self._onsetting = true;
+
+						self:SetValue(self:GetValue());
+						value = self:GetValue()
+
+						self._onsetting = false;
+					else
+						return;
+					end
+						
 					VUHDO_lnfSliderUpdateModel(self);
 					VUHDO_lnfSliderOnValueChanged(self:GetParent());
-  			</OnValueChanged>
-				<OnEnter>VUHDO_lnfShowTooltip(self:GetParent())</OnEnter>
-				<OnLeave>VUHDO_lnfHideTooltip(self:GetParent())</OnLeave>
+				</OnValueChanged>
+				<OnMouseWheel>
+					self:SetValue(self:GetValue() + (delta * self:GetValueStep()));
+				</OnMouseWheel>
+				<OnEnter>
+					VUHDO_lnfShowTooltip(self:GetParent());
+				</OnEnter>
+				<OnLeave>
+					VUHDO_lnfHideTooltip(self:GetParent());
+				</OnLeave>
 			</Scripts>
 		</Slider>
 	</Frames>
 	<Scripts>
-		<OnEnter>VUHDO_lnfShowTooltip(self)</OnEnter>
-		<OnLeave>VUHDO_lnfHideTooltip(self)</OnLeave>
+		<OnEnter>
+			VUHDO_lnfShowTooltip(self);
+		</OnEnter>
+		<OnLeave>
+			VUHDO_lnfHideTooltip(self);
+		</OnLeave>
 	</Scripts>
 </Frame>
 
@@ -1325,24 +1345,44 @@
 			</ThumbTexture>
 			<Scripts>
 				<OnValueChanged>
-				  if not self._onsetting then
-				    self._onsetting = true;
-				    self:SetValue(self:GetValue());
-				    value = self:GetValue()
-				    self._onsetting = false;
-				  else return; end
+					if not self._onsetting then
+						self._onsetting = true;
+
+						self:SetValue(self:GetValue());
+						value = self:GetValue()
+
+						self._onsetting = false;
+					else
+						return;
+					end
+
 					VUHDO_lnfSliderUpdateModel(self);
 					VUHDO_lnfSliderOnValueChanged(self:GetParent());
 				</OnValueChanged>
-				<OnShow>VUHDO_lnfPatchFont(self, "Title"); VUHDO_lnfPatchFont(self, "Value"); VUHDO_lnfSliderInitFromModel(self)</OnShow>
-				<OnEnter>VUHDO_lnfShowTooltip(self:GetParent())</OnEnter>
-				<OnLeave>VUHDO_lnfHideTooltip(self:GetParent())</OnLeave>
+				<OnMouseWheel>
+					self:SetValue(self:GetValue() + (delta * self:GetValueStep()));
+				</OnMouseWheel>
+				<OnShow>
+					VUHDO_lnfPatchFont(self, "Title");
+					VUHDO_lnfPatchFont(self, "Value");
+					VUHDO_lnfSliderInitFromModel(self);
+				</OnShow>
+				<OnEnter>
+					VUHDO_lnfShowTooltip(self:GetParent());
+				</OnEnter>
+				<OnLeave>
+					VUHDO_lnfHideTooltip(self:GetParent());
+				</OnLeave>
 			</Scripts>
 		</Slider>
 	</Frames>
 	<Scripts>
-		<OnEnter>VUHDO_lnfShowTooltip(self)</OnEnter>
-		<OnLeave>VUHDO_lnfHideTooltip(self)</OnLeave>
+		<OnEnter>
+			VUHDO_lnfShowTooltip(self);
+		</OnEnter>
+		<OnLeave>
+			VUHDO_lnfHideTooltip(self);
+		</OnLeave>
 	</Scripts>
 </Frame>
 
