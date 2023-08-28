@@ -1,10 +1,14 @@
 local _;
 
+
 local VUHDO_MIN_MAX_CONSTRAINTS = 1;
 local VUHDO_ENUMERATOR_CONSTRAINTS = 2;
 local VUHDO_BOOLEAN_CONSTRAINTS = 3;
 local VUHDO_TEXT_OPTIONS_CONSTRAINTS = 4;
+local VUHDO_ANCHOR_CONSTRAINTS = 5;
 
+
+local sAnchorPoints = { "Top", "TopLeft", "TopRight", "Bottom", "BottomLeft", "BottomRight", "Left", "Right" };
 
 --
 local sIndicatorMetaModel = {
@@ -64,13 +68,6 @@ local sIndicatorMetaModel = {
 		["model"] = "VUHDO_INDICATOR_CONFIG.BOUQUETS.SWIFTMEND_INDICATOR",
 		["icon"] = "Indicator_Swiftmend",
 		["custom"] = {
-			{
-				["name"] = VUHDO_I18N_SCALE,
-				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
-				["min"] = 0.5, ["max"] = 4, ["step"] = 0.05, ["unit"] = " x",
-				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.SCALE",
-				["tooltip"] = nil,
-			},
 --[[			{
 				["name"] = VUHDO_I18N_ICON_GLOW_COLOR,
 				["type"] = VUHDO_BOOLEAN_CONSTRAINTS,
@@ -83,7 +80,33 @@ local sIndicatorMetaModel = {
 				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.isBarGlow",
 				["tooltip"] = VUHDO_I18N_TT.K577,
 			},
-			
+			{
+				["name"] = VUHDO_I18N_ANCHOR,
+				["type"] = VUHDO_ANCHOR_CONSTRAINTS,
+				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.anchor",
+				["tooltip"] = nil,
+			},
+			{
+				["name"] = VUHDO_I18N_X,
+				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
+				["min"] = -100, ["max"] = 100, ["step"] = 0.5, ["unit"] = "%",
+				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.xAdjust",
+				["tooltip"] = VUHDO_I18N_TT.K400,
+			},
+			{
+				["name"] = VUHDO_I18N_Y,
+				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
+				["min"] = -100, ["max"] = 100, ["step"] = 0.5, ["unit"] = "%",
+				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.yAdjust",
+				["tooltip"] = VUHDO_I18N_TT.K401,
+			},
+			{
+				["name"] = VUHDO_I18N_SCALE,
+				["type"] = VUHDO_MIN_MAX_CONSTRAINTS,
+				["min"] = 0.5, ["max"] = 4, ["step"] = 0.05, ["unit"] = " x",
+				["model"] = "VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.SCALE",
+				["tooltip"] = nil,
+			},
 		},
 	},
 
@@ -499,6 +522,32 @@ end
 
 
 --
+local tName;
+local tPanel, tCheckButton;
+local function VUHDO_createAnchorRadioForComponent(anIndex, tElement, aParent)
+
+	tName = "VuhDoIndicatorOptions" .. aParent:GetName() .. anIndex .. "AnchorTexture";
+	tPanel = _G[tName];
+
+	if tPanel == nil then
+		tPanel = CreateFrame("Frame", tName, aParent, "VuhDoMoreButtonsAnchorPanel");
+	end
+
+	for _, tPoint in pairs(sAnchorPoints) do
+		tCheckButton = _G[tName .. tPoint .. "RadioButton"];
+
+		if tCheckButton then
+			VUHDO_lnfSetRadioModel(tCheckButton, tElement["model"], string.upper(tPoint));
+		end
+	end
+
+	return tPanel;
+
+end
+
+
+
+--
 local tIndex, tElement, tComponent, tYCompOfs;
 local function VUHDO_buildCustomComponents(aPanel, someCustomElements)
 	tYCompOfs = -10;
@@ -511,6 +560,8 @@ local function VUHDO_buildCustomComponents(aPanel, someCustomElements)
 			tComponent = VUHDO_createCheckBoxForComponent(tIndex, tElement, aPanel);
 		elseif(VUHDO_TEXT_OPTIONS_CONSTRAINTS == tElement["type"]) then
 			tComponent = VUHDO_createTextOptionsButtonForComponent(tIndex, tElement, aPanel);
+		elseif(VUHDO_ANCHOR_CONSTRAINTS == tElement["type"]) then
+			tComponent = VUHDO_createAnchorRadioForComponent(tIndex, tElement, aPanel);
 		end
 
 		if (tComponent ~= nil) then
