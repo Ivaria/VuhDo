@@ -67,6 +67,7 @@ Bugfixes:
   
 Improvements:  
 -- Added position adjustments for the 'Special Dot' indicator  
+-- Bump TOC interface for 10.1.7  
   
   
 --------------------------------------------------------------  
