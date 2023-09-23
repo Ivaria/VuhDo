@@ -833,34 +833,17 @@
 						</Scripts>
 					</Frame>
 
-					<Button name="$parentMoreButton" text="VUHDO_I18N_MORE_BUTTON" inherits="VuhDoButtonTemplate">
+					<Button name="$parentMoreButton" text="VUHDO_I18N_SCALE" inherits="VuhDoButtonTemplate">
 						<Size>
 							<AbsDimension x="55" y="32" />
 						</Size>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="140" y="-178" />
+									<AbsDimension x="140" y="-7" />
 								</Offset>
 							</Anchor>
 						</Anchors>
-						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture name="$parentTexture" file="interface\AddOns\VuhDoOptions\Images\blue_lt_square_16_16">
-									<TexCoords left="0" right="1" top="0" bottom="1" />
-									<Anchors>
-										<Anchor point="RIGHT" relativePoint="CENTER">
-											<Offset>
-												<AbsDimension x="0" y="0" />
-											</Offset>
-										</Anchor>
-									</Anchors>
-									<Size>
-										<AbsDimension x="100" y="55" />
-									</Size>
-								</Texture>
-							</Layer>
-						</Layers>
 						<Scripts>
 							<OnClick>
 								VUHDO_optionsHotsToggleMorePanel(self:GetParent());
