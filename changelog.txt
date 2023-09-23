@@ -42,6 +42,7 @@ Bugfixes:
   
   
 Improvements:  
+-- HoT Icon scale now applies to all HoT Icon layouts  
   
   
 --------------------------------------------------------------  
