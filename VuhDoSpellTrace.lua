@@ -28,6 +28,9 @@ local VUHDO_ACTIVE_TRACE_GUIDS = {
 	-- },
 }
 
+local VUHDO_SPELL_TRACE_TYPE_INCOMING = -1;
+local VUHDO_SPELL_TRACE_TYPE_HEAL = -2;
+
 local VUHDO_TRAIL_OF_LIGHT_SPELL_ID = 200128;
 local VUHDO_SPELL_TRACE_TRAIL_OF_LIGHT = { };
 
@@ -151,6 +154,14 @@ local function VUHDO_removeSpellTrace(aSrcGuid, aDstGuid, aSpellId)
 		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latest"] = nil;
 	end
 
+	if VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latestIncoming"] == tSpellId then
+		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latestIncoming"] = nil;
+	end
+
+	if VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latestHeal"] == tSpellId then
+		VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latestHeal"] = nil;
+	end
+
 	if VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid] and VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] then
 		VUHDO_ACTIVE_TRACE_GUIDS[aSrcGuid][tSpellId] = nil;
 	end
@@ -239,6 +250,8 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 
 	VUHDO_addSpellTrace(aSrcGuid, aDstGuid, tSpellId);
 
+	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latestHeal"] = tSpellId;
+
 	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[aDstGuid], VUHDO_UPDATE_SPELL_TRACE);
 
 end
@@ -313,6 +326,8 @@ function VUHDO_addIncomingSpellTrace(aSrcUnit, aCastGuid, aSpellId)
 
 	VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid]["spells"][tSpellId]["isIncoming"] = true;
 	VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid]["spells"][tSpellId]["castTime"] = tCastEnd - tCastStart;
+	
+	VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid]["latestIncoming"] = tSpellId;
 
 	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[tDstGuid], VUHDO_UPDATE_SPELL_TRACE);
 
@@ -416,13 +431,23 @@ function VUHDO_getSpellTraceForUnit(aUnit, aSpell)
 	if not tUnitGuid or not VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid] then
 		return;
 	end
-
-	if aSpell then
+	
+	if aSpell and aSpell ~= VUHDO_SPELL_TRACE_TYPE_INCOMING and aSpell ~= VUHDO_SPELL_TRACE_TYPE_HEAL then	
 		if VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"] and VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][aSpell] then
 			return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][aSpell];
 		end
 	else
-		local tLatestTraceSpellId = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["latest"];
+		local tLatestTraceSpellId;
+
+		if aSpell then
+			if aSpell == VUHDO_SPELL_TRACE_TYPE_INCOMING then
+				tLatestTraceSpellId = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["latestIncoming"];
+			elseif aSpell == VUHDO_SPELL_TRACE_TYPE_HEAL then
+				tLatestTraceSpellId = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["latestHeal"];
+			end
+		else
+			tLatestTraceSpellId = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["latest"];
+		end
 
 		if tLatestTraceSpellId then
 			return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tLatestTraceSpellId];
@@ -430,6 +455,24 @@ function VUHDO_getSpellTraceForUnit(aUnit, aSpell)
 	end
 
 	return;
+
+end
+
+
+
+--
+function VUHDO_getSpellTraceIncomingForUnit(aUnit)
+
+	return VUHDO_getSpellTraceForUnit(aUnit, VUHDO_SPELL_TRACE_TYPE_INCOMING);
+
+end
+
+
+
+--
+function VUHDO_getSpellTraceHealForUnit(aUnit)
+
+	return VUHDO_getSpellTraceForUnit(aUnit, VUHDO_SPELL_TRACE_TYPE_HEAL);
 
 end
 
