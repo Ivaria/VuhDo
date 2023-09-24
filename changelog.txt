@@ -67,6 +67,8 @@ Bugfixes:
   
   
 Improvements:  
+-- Added bouquet validator to display latest incoming Spell Trace  
+-- Added bouquet validator to display latest healing Spell Trace  
 -- HoT Icon scale now applies to all HoT Icon layouts  
   
   

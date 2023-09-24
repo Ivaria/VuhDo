@@ -27,9 +27,7 @@ local VUHDO_getChosenDebuffInfo;
 local VUHDO_getCurrentPlayerTarget;
 local VUHDO_getCurrentPlayerFocus;
 local VUHDO_getCurrentMouseOver;
-local VUHDO_getDistanceBetween;
 local VUHDO_isUnitSwiftmendable;
-local VUHDO_getNumInUnitCluster;
 local VUHDO_getIsInHiglightCluster;
 local VUHDO_getDebuffColor;
 local VUHDO_getIsCurrentBouquetActive;
@@ -69,9 +67,7 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getCurrentPlayerTarget = _G["VUHDO_getCurrentPlayerTarget"];
 	VUHDO_getCurrentPlayerFocus = _G["VUHDO_getCurrentPlayerFocus"];
 	VUHDO_getCurrentMouseOver = _G["VUHDO_getCurrentMouseOver"];
-	VUHDO_getDistanceBetween = _G["VUHDO_getDistanceBetween"];
 	VUHDO_isUnitSwiftmendable = _G["VUHDO_isUnitSwiftmendable"];
-	VUHDO_getNumInUnitCluster = _G["VUHDO_getNumInUnitCluster"];
 	VUHDO_getIsInHiglightCluster = _G["VUHDO_getIsInHiglightCluster"];
 	VUHDO_getDebuffColor = _G["VUHDO_getDebuffColor"];
 	VUHDO_getCurrentBouquetColor = _G["VUHDO_getCurrentBouquetColor"];
@@ -121,6 +117,7 @@ local VUHDO_CHARGE_COLORS = {
 --
 local tInfo;
 local function VUHDO_spellTraceValidator(anInfo, _)
+
 	tInfo = VUHDO_getSpellTraceForUnit(anInfo["unit"]);
 
 	if tInfo then
@@ -128,6 +125,39 @@ local function VUHDO_spellTraceValidator(anInfo, _)
 	else
 		return false, nil, -1, -1, -1;
 	end
+
+end
+
+
+
+--
+local tInfo;
+local function VUHDO_spellTraceIncomingValidator(anInfo, _)
+
+	tInfo = VUHDO_getSpellTraceIncomingForUnit(anInfo["unit"]);
+
+	if tInfo then
+		return true, tInfo["icon"], -1, -1, -1;
+	else
+		return false, nil, -1, -1, -1;
+	end
+
+end
+
+
+
+--
+local tInfo;
+local function VUHDO_spellTraceHealValidator(anInfo, _)
+
+	tInfo = VUHDO_getSpellTraceHealForUnit(anInfo["unit"]);
+
+	if tInfo then
+		return true, tInfo["icon"], -1, -1, -1;
+	else
+		return false, nil, -1, -1, -1;
+	end
+
 end
 
 
@@ -153,6 +183,7 @@ end
 --
 local tInfo;
 local function VUHDO_trailOfLightValidator(anInfo, _)
+
 	tInfo = VUHDO_getSpellTraceTrailOfLightForUnit(anInfo["unit"]);
 
 	if tInfo then
@@ -160,6 +191,7 @@ local function VUHDO_trailOfLightValidator(anInfo, _)
 	else
 		return false, nil, -1, -1, -1;
 	end
+
 end
 
 
@@ -1958,6 +1990,18 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 	["SPELL_TRACE"] = {
 		["displayName"] = VUHDO_I18N_SPELL_TRACE,
 		["validator"] = VUHDO_spellTraceValidator,
+		["interests"] = { VUHDO_UPDATE_SPELL_TRACE },
+	},
+
+	["SPELL_TRACE_INCOMING"] = {
+		["displayName"] = VUHDO_I18N_SPELL_TRACE_INCOMING,
+		["validator"] = VUHDO_spellTraceIncomingValidator,
+		["interests"] = { VUHDO_UPDATE_SPELL_TRACE },
+	},
+
+	["SPELL_TRACE_HEAL"] = {
+		["displayName"] = VUHDO_I18N_SPELL_TRACE_HEAL,
+		["validator"] = VUHDO_spellTraceHealValidator,
 		["interests"] = { VUHDO_UPDATE_SPELL_TRACE },
 	},
 
