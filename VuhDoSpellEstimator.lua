@@ -32,6 +32,7 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.ATONEMENT] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.DIVINE_AEGIS] = { ["isHot"] = true },
+	[VUHDO_SPELL_ID.LUMINOUS_BARRIER] = { ["isHot"] = true },
 
 	-- Shaman
 	[VUHDO_SPELL_ID.RIPTIDE] = { ["isHot"] = true	},
