@@ -71,6 +71,7 @@ Improvements:
 -- Added bouquet validator to display latest healing Spell Trace  
 -- HoT Icon scale now applies to all HoT Icon layouts  
 -- Added Priest spell 'Luminous Barrier' absorb tracking  
+-- Added trinket ability 'Writhing Ward' absorb tracking  
   
   
 --------------------------------------------------------------  
