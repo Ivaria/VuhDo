@@ -76,6 +76,9 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.REWIND] = { ["isHot"] = true },
 	[VUHDO_SPELL_ID.TIME_DILATION] = { ["isHot"] = true },
 
+	-- Ward of Faceless Ire trinket
+	[VUHDO_SPELL_ID.WRITHING_WARD] = { ["isHot"] = true },
+
 };
 local VUHDO_SPELLS = VUHDO_SPELLS;
 
