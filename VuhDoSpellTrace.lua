@@ -7,7 +7,8 @@ local twipe = table.wipe;
 
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
 	-- [<unit GUID>] = {
-	--	["latest"] = <latest trace spell ID>,
+	--	["latestHeal"] = <latest trace spell ID>,
+	--	["latestIncoming"] = <latest trace spell ID>,
 	--	["spells"] = {
 	--		[<spell ID>] = {
 	--			["icon"] = <spell icon>,
