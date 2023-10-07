@@ -65,6 +65,7 @@ local sRangeRefreshSecs = 1.1;
 local sClusterRefreshSecs = 1.2;
 local sAoeRefreshSecs = 1.3;
 local sBuffsRefreshSecs;
+local sParseCombatLog;
 local VuhDoDirectionFrame;
 
 local function VUHDO_eventHandlerInitLocalOverrides()
@@ -108,7 +109,9 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	sRangeRefreshSecs = VUHDO_CONFIG["RANGE_CHECK_DELAY"] * 0.001;
 	sClusterRefreshSecs = VUHDO_CONFIG["CLUSTER"]["REFRESH"] * 0.001;
 	sAoeRefreshSecs = VUHDO_CONFIG["AOE_ADVISOR"]["refresh"] * 0.001;
-	sBuffsRefreshSecs = VUHDO_BUFF_SETTINGS["CONFIG"]["REFRESH_SECS"]
+	sBuffsRefreshSecs = VUHDO_BUFF_SETTINGS["CONFIG"]["REFRESH_SECS"];
+
+	sParseCombatLog = VUHDO_CONFIG["PARSE_COMBAT_LOG"];
 end
 
 ----------------------------------------------------
@@ -424,10 +427,12 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 				end
 			end
 
-			-- SWING_DAMAGE - the amount of damage is the 12th arg
-			-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
-			-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
-			VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15, anArg4, anArg6);
+			if sParseCombatLog then
+				-- SWING_DAMAGE - the amount of damage is the 12th arg
+				-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
+				-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
+				VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15, anArg4, anArg6);
+			end
 
 			if VUHDO_INTERNAL_TOGGLES[36] then -- VUHDO_UPDATE_SHIELD
 				-- for SPELL events with _AURA suffixes the amount healed is the 16th arg
@@ -1072,7 +1077,7 @@ function VUHDO_updateGlobalToggles()
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE] = VUHDO_CONFIG["SHOW_SPELL_TRACE"] 
 		or VUHDO_isAnyoneInterstedIn(VUHDO_UPDATE_SPELL_TRACE);
 
-	VUHDO_UnRegisterEvent(VUHDO_CONFIG["PARSE_COMBAT_LOG"] or VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE], 
+	VUHDO_UnRegisterEvent(sParseCombatLog or VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE], 
 		"COMBAT_LOG_EVENT_UNFILTERED");
 end
 
