@@ -31,8 +31,8 @@
 #   SC2295: Expansions inside ${..} need to be quoted separately, otherwise they will match as a pattern.
 #   SC2030: Modification of var is local (to subshell caused by pipeline).
 #   SC2031: var was modified in a subshell. That change might be lost.
-#   SC2001: See if you can use ${variable//search/replace} instead.
-# shellcheck disable=SC2295,SC2030,SC2031,SC2001
+#   SC2317: Command appears to be unreachable.
+# shellcheck disable=SC2295,SC2030,SC2031,SC2317
 
 ## USER OPTIONS
 
@@ -592,7 +592,9 @@ set_info_svn() {
 			# Check if the latest tag matches the working copy revision (/trunk checkout instead of /tags)
 			_si_tag_line=$( retry svn log --verbose --limit 1 "$si_repo_url/tags" 2>/dev/null | awk '/^   A/ { print $0; exit }' )
 			_si_tag=$( echo "$_si_tag_line" | awk '/^   A/ { print $2 }' | awk -F/ '{ print $NF }' )
-			_si_tag_from_revision=$( echo "$_si_tag_line" | sed -e 's/^.*:\([0-9]\{1,\}\)).*$/\1/' ) # (from /project/trunk:N)
+			# (from /project/trunk:REV)
+			_si_tag_from_revision=${_si_tag_line##*:}
+			_si_tag_from_revision=${_si_tag_from_revision%)*}
 
 			if [[ "$_si_tag_from_revision" == "$_si_revision" ]]; then
 				si_tag="$_si_tag"
@@ -1060,10 +1062,10 @@ do_toc() {
 	toc_file=$(
 		# remove BOM and CR and apply some non-version related TOC filters
 		[ "$file_type" != "alpha" ] && _tf_alpha="true"
-		sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | toc_filter alpha ${_tf_alpha} | toc_filter debug true
+		sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | toc_filter alpha ${_tf_alpha:+true} | toc_filter debug true
 	)
 
-	toc_version=$( awk '/^## Interface:/ { print $NF; exit }' <<< "$toc_file" )
+	toc_version=$( awk -F: '/^## Interface:/ { gsub(/[[:blank:]]/, "", $2); print $2; exit }' <<< "$toc_file" )
 	if [[ -z $toc_version ]]; then
 		toc_game_type=
 	else
@@ -1140,17 +1142,17 @@ set_toc_project_info() {
 	local toc_path="$1"
 	# Get the title of the addon for the changelog
 	if [ -z "$project" ]; then
-		project=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk '/^## Title:/ { print $0; exit }' | sed -e 's/|c[0-9A-Fa-f]\{8\}//g' -e 's/|r//g' -e 's/|T[^|]*|t//g' -e 's/## Title[[:space:]]*:[[:space:]]*\(.*\)/\1/' -e 's/[[:space:]]*$//' )
+		project=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk -F: '/^## Title:/ { gsub(/^[[:blank:]]+|[[:blank:]]+$/, "", $2); print $2; exit }' | sed -e 's/|c[0-9A-Fa-f]\{8\}//g' -e 's/|r//g' -e 's/|T[^|]*|t//g' )
 	fi
 	# Get project IDs for uploading
 	if [ -z "$slug" ]; then
-		slug=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk '/^## X-Curse-Project-ID:/ { print $NF; exit }' )
+		slug=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk -F: '/^## X-Curse-Project-ID:/ { gsub(/[[:blank:]]/, "", $2); print $2; exit }' )
 	fi
 	if [ -z "$addonid" ]; then
-		addonid=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk '/^## X-WoWI-ID:/ { print $NF; exit }' )
+		addonid=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk -F: '/^## X-WoWI-ID:/ { gsub(/[[:blank:]]/, "", $2); print $2; exit }' )
 	fi
 	if [ -z "$wagoid" ]; then
-		wagoid=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk '/^## X-Wago-ID:/ { print $NF; exit }' )
+		wagoid=$( sed -e $'1s/^\xEF\xBB\xBF//' -e $'s/\r//g' "$toc_path" | awk -F: '/^## X-Wago-ID:/ { gsub(/[[:blank:]]/, "", $2); print $2; exit }' )
 	fi
 }
 
@@ -1742,7 +1744,7 @@ copy_directory_tree() {
 					echo "  Copying: $file${_cdt_external_slug:+ (embedded: "$_cdt_external_slug")}"
 
 					# Make sure we're not causing any surprises
-					if [[ -z $_cdt_file_gametype && ( $file == *".lua" || $file == *".xml" || $file == *".toc" ) ]] && grep -q '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_source_file"; then
+					if [[ -z $_cdt_file_gametype && ( $file == *".lua" || $file == *".xml" || ( -z $_cdt_external && $file == *".toc" ) ) ]] && grep -q '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_source_file"; then
 						echo "    Error! Build type version keywords are not allowed in a multi-version build." >&2
 						echo "           These should be replaced with lua conditional statements:" >&2
 						grep -n '@\(non-\)\?version-\(retail\|classic\|bcc\|wrath\)@' "$_cdt_source_file" | sed 's/^/             /' >&2
@@ -1826,6 +1828,10 @@ checkout_external() {
 	_external_checkout_type=$6
 
 	_cqe_checkout_dir="$pkgdir/$_external_dir/.checkout"
+	if [[ -d $_cqe_checkout_dir ]]; then
+		# cleanup in case there was an aborted attempt to checkout
+		rm -rf "$_cqe_checkout_dir"
+	fi
 	mkdir -p "$_cqe_checkout_dir"
 	if [ "$_external_type" = "git" ]; then
 		if [ -z "$_external_tag" ]; then
@@ -1928,7 +1934,7 @@ checkout_external() {
 		# If a .pkgmeta file is present, process it for "ignore" and "plain-copy" lists.
 		parse_ignore "$_cqe_checkout_dir/.pkgmeta" "$_external_dir"
 		copy_directory_tree -dnpe -i "$ignore" -u "$unchanged" "$_cqe_checkout_dir" "$pkgdir/$_external_dir"
-	)
+	) || return 1
 	# Remove the ".checkout" subdirectory containing the full checkout.
 	if [ -d "$_cqe_checkout_dir" ]; then
 		rm -fr "$_cqe_checkout_dir"
@@ -2480,7 +2486,7 @@ if [ -z "$skip_zipfile" ]; then
 	fi
 
 	if [ -n "$GITHUB_ACTIONS" ]; then
-		echo "ARCHIVE_PATH=${archive}" >> $GITHUB_OUTPUT
+		echo "ARCHIVE_PATH=${archive}" >> "$GITHUB_OUTPUT"
 	fi
 
 	start_group "Creating archive: $archive_name ($archive_label)" "archive"
@@ -2534,7 +2540,7 @@ upload_curseforge() {
 	fi
 
 	local _cf_game_version_id _cf_game_version _cf_versions
-	_cf_versions=$( curl -s -H "x-api-token: $cf_token" $project_site/api/game/versions )
+	_cf_versions=$( curl -s -H "x-api-token: $cf_token" "$project_site/api/game/versions" )
 	if [[ -n $_cf_versions && $_cf_versions != *"errorMessage"* ]]; then
 		_cf_game_version_id=
 		_cf_game_version=
@@ -2635,6 +2641,7 @@ upload_curseforge() {
 
 	rm -f "$resultfile" 2>/dev/null
 
+	# shellcheck disable=SC2086  # why does this one instance raise an error? /shrug
 	return $return_code
 }
 
@@ -2801,7 +2808,7 @@ upload_wago() {
 	EOF
 	)
 
-	echo "Uploading $archive_name ($_wago_game_version $file_type) to Wago"
+	echo "Uploading $archive_name ($_wago_game_version $file_type) to https://addons.wago.io/addons/$wagoid"
 	resultfile="$releasedir/wago_result.json"
 	if result=$( echo "$_wago_payload" | curl -sS --retry 3 --retry-delay 10 \
 			-w "%{http_code}" -o "$resultfile" \

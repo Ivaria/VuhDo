@@ -1351,7 +1351,7 @@ end
 
 function VUHDO_hasLFGRestrictions()
 
-	return false;
+	return IsInGroup(LE_PARTY_CATEGORY_INSTANCE);
 
 end
 
