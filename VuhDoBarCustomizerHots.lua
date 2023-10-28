@@ -191,6 +191,7 @@ local tHotCfg;
 local tIsChargeAlpha;
 local tStarted;
 local tClockDuration;
+local tOpacity;
 local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon, aDuration, aShieldCharges, aColor, anIndex, aClipL, aClipR, aClipT, aClipB)
 
 	tHotCfg = sBarColors[VUHDO_HOT_CFGS[anIndex]];
@@ -320,13 +321,9 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		tTimer:SetTextColor(VUHDO_textColor(tHotColor));
 	else
 		tHotColor = VUHDO_copyColor(tHotCfg);
+		
 		if sIsHotShowIcon then
-			tHotColor["R"], tHotColor["G"], tHotColor["B"] = 1, 1, 1;
-
-			if aColor and aColor["useOpacity"] and aColor["O"] then
-				tHotColor["useOpacity"] = true;
-				tHotColor["O"] = aColor["O"];
-			end
+			tHotColor = aColor;
 		elseif aTimes <= 1 or not sHotCols["useColorText"] then
 			tTimer:SetTextColor(VUHDO_textColor(tHotColor));
 		end
@@ -346,23 +343,33 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		end
 	end
 
-	if (tIsChargeAlpha or tHotColor["useOpacity"]) and tHotColor["O"] then
-		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"], tHotColor["O"]);
+	tOpacity = (tIsChargeAlpha or tHotColor["useOpacity"]) and tHotColor["O"] or 1;
+
+	if tHotColor["useBackground"] and tHotColor["R"] then
+		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"], tOpacity);
 	else
-		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"]);
+		tIcon:SetVertexColor(1, 1, 1, tOpacity);
 	end
 
 	if tIsChargeShown then
 		tChargeTexture:SetTexture(VUHDO_CHARGE_TEXTURES[aTimes]);
-		if tHotColor["R"] then tChargeTexture:SetVertexColor(VUHDO_backColor(tHotColor)); end
+		
+		if tHotColor["R"] then
+			tChargeTexture:SetVertexColor(VUHDO_backColor(tHotColor));
+		end
+		
 		tChargeTexture:Show();
 	elseif aShieldCharges > 0 then
-		if sIsHotShowIcon then tHotColor = tHotCfg; end
+		if sIsHotShowIcon then
+			tHotColor = tHotCfg;
+		end
 
 		tChargeTexture:SetTexture(VUHDO_SHIELD_TEXTURES[aShieldCharges]);
+		
 		if tHotColor["R"] then
 			tChargeTexture:SetVertexColor(tHotColor["R"] + 0.15, tHotColor["G"] + 0.15, tHotColor["B"] + 0.15, tHotColor["O"]);
 		end
+		
 		tChargeTexture:Show();
 	else
 		tChargeTexture:Hide();
@@ -651,7 +658,8 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 				tIcon:SetTexture(anIcon);
 			end
 
-			tIcon:SetVertexColor(VUHDO_backColor(aColor));
+			tIcon:SetVertexColor(VUHDO_backColorWithFallback(aColor));
+
 			tIcon:SetTexCoord(aClipL or 0, aClipR or 1, aClipT or 0, aClipB or 1);
 
 			tIcon:Show();
