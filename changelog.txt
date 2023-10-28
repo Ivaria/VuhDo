@@ -63,9 +63,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed non-bar indicator display when a bouquet provides no background color  
   
   
 Improvements:  
+-- Bouquets will now apply the selected background color even when displaying icons  
   
   
 --------------------------------------------------------------  
