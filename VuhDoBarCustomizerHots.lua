@@ -192,6 +192,7 @@ local tIsChargeAlpha;
 local tStarted;
 local tClockDuration;
 local tOpacity;
+local tHotColor;
 local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon, aDuration, aShieldCharges, aColor, anIndex, aClipL, aClipR, aClipT, aClipB)
 
 	tHotCfg = sBarColors[VUHDO_HOT_CFGS[anIndex]];
@@ -343,9 +344,13 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		end
 	end
 
-	tOpacity = (tIsChargeAlpha or tHotColor["useOpacity"]) and tHotColor["O"] or 1;
+	if tHotColor and (tIsChargeAlpha or tHotColor["useOpacity"]) and tHotColor["O"] then
+		tOpacity = tHotColor["O"];
+	else
+		tOpacity = 1;
+	end
 
-	if tHotColor["useBackground"] and tHotColor["R"] then
+	if tHotColor and tHotColor["useBackground"] and tHotColor["R"] then
 		tIcon:SetVertexColor(tHotColor["R"], tHotColor["G"], tHotColor["B"], tOpacity);
 	else
 		tIcon:SetVertexColor(1, 1, 1, tOpacity);
@@ -353,10 +358,7 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 
 	if tIsChargeShown then
 		tChargeTexture:SetTexture(VUHDO_CHARGE_TEXTURES[aTimes]);
-		
-		if tHotColor["R"] then
-			tChargeTexture:SetVertexColor(VUHDO_backColor(tHotColor));
-		end
+		tChargeTexture:SetVertexColor(VUHDO_backColorWithFallback(tHotColor));
 		
 		tChargeTexture:Show();
 	elseif aShieldCharges > 0 then
@@ -366,7 +368,7 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 
 		tChargeTexture:SetTexture(VUHDO_SHIELD_TEXTURES[aShieldCharges]);
 		
-		if tHotColor["R"] then
+		if tHotColor and tHotColor["R"] then
 			tChargeTexture:SetVertexColor(tHotColor["R"] + 0.15, tHotColor["G"] + 0.15, tHotColor["B"] + 0.15, tHotColor["O"]);
 		end
 		
