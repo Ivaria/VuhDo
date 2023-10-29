@@ -324,7 +324,11 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		tHotColor = VUHDO_copyColor(tHotCfg);
 		
 		if sIsHotShowIcon then
-			tHotColor = aColor;
+			if aColor then
+				tHotColor = aColor;
+			else
+				tHotColor["R"], tHotColor["G"], tHotColor["B"] = 1, 1, 1;
+			end
 		elseif aTimes <= 1 or not sHotCols["useColorText"] then
 			tTimer:SetTextColor(VUHDO_textColor(tHotColor));
 		end
