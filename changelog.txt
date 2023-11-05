@@ -67,6 +67,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Bump TOC interface for 10.2.0  
 -- Bouquets will now apply the selected background color even when displaying icons  
   
   
