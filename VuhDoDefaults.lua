@@ -2781,6 +2781,14 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		},
 	},
 
+	["PRIVATE_AURA"] = {
+		["show"] = true,
+		["scale"] = 0.8,
+		["point"] = "LEFT",
+		["xAdjust"] = 5,
+		["yAdjust"] = 0,
+	},
+
 	["RAID_ICON"] = {
 		["show"] = true,
 		["scale"] = 1,

@@ -16,6 +16,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added display of private aura icons on unit health bars  
   
   
 --------------------------------------------------------------  
