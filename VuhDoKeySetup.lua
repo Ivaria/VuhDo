@@ -281,7 +281,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 
 	if aUnit then
 		aButton:SetAttribute("unit", aUnit);
-		aButton["raidid"] = aUnit;	
+		aButton["raidid"] = aUnit;
 	end
 
 	if not aButton:GetAttribute("vd_tt_hook") then
