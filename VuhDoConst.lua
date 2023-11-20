@@ -643,3 +643,5 @@ VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY = "_CuDe_Icon";
 VUHDO_CUSTOM_GLOW_SWIFTMEND_FRAME_KEY = "_SwMe_Frame";
 VUHDO_CUSTOM_GLOW_SWIFTMEND_ICON_KEY = "_SwMe_Icon";
 
+-- as of 10.2.0 the default Blizzard UI creates two Private Aura anchors
+VUHDO_MAX_PRIVATE_AURAS = 3;
