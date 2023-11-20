@@ -4,7 +4,7 @@ if not VUHDO_VERSION and GetAddOnMetadata then
 	VUHDO_VERSION = GetAddOnMetadata("VuhDo", "Version");
 end
 
-VUHDO_MIN_TOC_VERSION = 11404;
+VUHDO_MIN_TOC_VERSION = 11500;
 VUHDO_COMMS_PREFIX = "VUHDO";
 
 VUHDO_YES = 1;
