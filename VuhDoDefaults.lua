@@ -918,6 +918,10 @@ function VUHDO_loadDefaultConfig()
 			VUHDO_CONFIG["RANGE_PESSIMISTIC"] = VUHDO_DEFAULT_CONFIG["RANGE_PESSIMISTIC"];
 		end
 
+		if type(VUHDO_CONFIG["RANGE_SPELL"]) ~= "table" then
+			VUHDO_CONFIG["RANGE_SPELL"] = VUHDO_DEFAULT_CONFIG["RANGE_SPELL"];
+		end
+
 		for tUnitReaction, tRangeSpells in pairs(VUHDO_DEFAULT_RANGE_SPELLS[tClass]) do
 			local tIsGuessRange = true;
 
