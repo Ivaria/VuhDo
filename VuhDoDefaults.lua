@@ -914,7 +914,13 @@ function VUHDO_loadDefaultConfig()
 	end
 
 	if (VUHDO_DEFAULT_RANGE_SPELLS[tClass] ~= nil) then
+		if type(VUHDO_CONFIG["RANGE_PESSIMISTIC"]) ~= "table" then
+			VUHDO_CONFIG["RANGE_PESSIMISTIC"] = VUHDO_DEFAULT_CONFIG["RANGE_PESSIMISTIC"];
+		end
+
 		for tUnitReaction, tRangeSpells in pairs(VUHDO_DEFAULT_RANGE_SPELLS[tClass]) do
+			local tIsGuessRange = true;
+
 			if VUHDO_strempty(VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction]) then
 				for _, tRangeSpell in pairs(tRangeSpells) do
 					if type(tRangeSpell) == "number" then
@@ -923,14 +929,11 @@ function VUHDO_loadDefaultConfig()
 
 					if tRangeSpell ~= "!" then
 						VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction] = tRangeSpell;
-
-						if type(VUHDO_CONFIG["RANGE_PESSIMISTIC"]) ~= "table" then
-							VUHDO_CONFIG["RANGE_PESSIMISTIC"] = VUHDO_DEFAULT_CONFIG["RANGE_PESSIMISTIC"];
-						end
-
-						VUHDO_CONFIG["RANGE_PESSIMISTIC"][tUnitReaction] = false;
+						tIsGuessRange = false;
 					end
 				end
+
+				VUHDO_CONFIG["RANGE_PESSIMISTIC"][tUnitReaction] = tIsGuessRange;
 			end
 		end
 	end
