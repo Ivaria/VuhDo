@@ -29,6 +29,8 @@ local GetPlayerFacing = GetPlayerFacing;
 local GetSpellBookItemInfo = GetSpellBookItemInfo;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
+local IsSpellInRange = IsSpellInRange;
+local UnitInRange = UnitInRange;
 local IsAltKeyDown = IsAltKeyDown;
 local IsControlKeyDown = IsControlKeyDown;
 local IsShiftKeyDown = IsShiftKeyDown;
@@ -165,7 +167,8 @@ local VUHDO_CONFIG;
 local VUHDO_GROUPS_BUFFS;
 local VUHDO_BOSS_UNITS;
 local sRangeSpell;
-local sIsGuessRange = true;
+local sIsHelpfulGuessRange = true;
+local sIsHarmfulGuessRange = true;
 local sScanRange;
 local sZeroRange = "";
 
@@ -181,8 +184,11 @@ function VUHDO_toolboxInitLocalOverrides()
 	VUHDO_BOSS_UNITS = _G["VUHDO_BOSS_UNITS"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	sScanRange = tonumber(VUHDO_CONFIG["SCAN_RANGE"]);
+	
 	sRangeSpell = VUHDO_CONFIG["RANGE_SPELL"];
-	sIsGuessRange = VUHDO_CONFIG["RANGE_PESSIMISTIC"] or GetSpellInfo(VUHDO_CONFIG["RANGE_SPELL"]) == nil;
+	sIsHelpfulGuessRange = VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HELPFUL"] or GetSpellInfo(sRangeSpell["HELPFUL"]) == nil;
+	sIsHarmfulGuessRange = VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HARMFUL"] or GetSpellInfo(sRangeSpell["HARMFUL"]) == nil;
+
 	sZeroRange = "0.0 " .. VUHDO_I18N_YARDS;
 end
 
@@ -282,8 +288,31 @@ end
 
 
 --
+function VUHDO_checkInteractDistance(aUnit, aDistIndex)
+
+	if not InCombatLockdown() then
+		return CheckInteractDistance(aUnit, aDistIndex);
+	else
+		if not sIsHarmfulGuessRange and UnitCanAttack("player", aUnit) then
+			return (IsSpellInRange(sRangeSpell["HARMFUL"], aUnit) == 1) and true or false;
+		elseif not sIsHelpfulGuessRange then
+			return (IsSpellInRange(sRangeSpell["HELPFUL"], aUnit) == 1) and true or false;
+		else
+			-- default to showing in-range when we don't know any better
+			return true;
+		end
+	end
+	
+end
+local VUHDO_checkInteractDistance = VUHDO_checkInteractDistance;
+
+
+
+--
 function VUHDO_isTargetInRange(aUnit)
-	return UnitIsUnit("player", aUnit) or CheckInteractDistance(aUnit, 1);
+
+	return UnitIsUnit("player", aUnit) or VUHDO_checkInteractDistance(aUnit, 1);
+
 end
 local VUHDO_isTargetInRange = VUHDO_isTargetInRange;
 
@@ -310,16 +339,30 @@ end
 
 -- returns whether or not a unit is in range
 function VUHDO_isInRange(aUnit)
+	
 	if "player" == aUnit then 
 		return true;
 	elseif VUHDO_isSpecialUnit(aUnit) then 
 		return VUHDO_isTargetInRange(aUnit);
 	elseif VUHDO_unitPhaseReason(aUnit) then
 		return false;
-	elseif (sIsGuessRange) then 
-		return UnitInRange(aUnit);
 	else
-		local tIsSpellInRange = IsSpellInRange(sRangeSpell, aUnit);
+		local tIsGuessRange;
+		local tRangeSpell;
+
+		if UnitCanAttack("player", aUnit) then
+			tIsGuessRange = sIsHarmfulGuessRange;
+			tRangeSpell = sRangeSpell["HARMFUL"];
+		else
+			tIsGuessRange = sIsHelpfulGuessRange;
+			tRangeSpell = sRangeSpell["HELPFUL"];
+		end
+
+		if tIsGuessRange or not tRangeSpell then
+			return UnitInRange(aUnit);
+		end
+
+		local tIsSpellInRange = IsSpellInRange(tRangeSpell, aUnit);
 
 		if tIsSpellInRange ~= nil then
 			return (tIsSpellInRange == 1) and true or false;
@@ -327,6 +370,7 @@ function VUHDO_isInRange(aUnit)
 			return UnitInRange(aUnit);
 		end
 	end
+
 end
 
 

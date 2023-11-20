@@ -11,7 +11,6 @@ VUHDO_NEXT_INSPECT_TIME_OUT = nil;
 
 --------------------------------------------------------------
 local twipe = table.wipe;
-local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
 local NotifyInspect = NotifyInspect;
 local GetSpecializationInfo = GetSpecializationInfo;
@@ -21,6 +20,7 @@ local UnitGroupRolesAssigned = UnitGroupRolesAssigned;
 local UnitLevel = UnitLevel;
 local UnitPowerType = UnitPowerType;
 local VUHDO_isUnitInModel;
+local VUHDO_checkInteractDistance;
 local pairs = pairs;
 local _;
 
@@ -33,6 +33,7 @@ function VUHDO_roleCheckerInitLocalOverrides()
 	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_isUnitInModel = _G["VUHDO_isUnitInModel"];
+	VUHDO_checkInteractDistance = _G["VUHDO_checkInteractDistance"];
 end
 --------------------------------------------------------------
 
@@ -103,7 +104,7 @@ local function VUHDO_shouldBeInspected(aUnit)
 	end
 
 	-- In inspect range?
-	return CheckInteractDistance(aUnit, 1);
+	return VUHDO_checkInteractDistance(aUnit, 1);
 end
 
 

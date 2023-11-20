@@ -13,6 +13,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed range detection while in combat lockdown  
   
   
 Improvements:  
