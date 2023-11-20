@@ -38,9 +38,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed range detection while in combat lockdown  
   
   
 Improvements:  
+-- Added display of private aura icons on unit health bars  
   
   
 --------------------------------------------------------------  
