@@ -55,7 +55,10 @@ local UnitThreatSituation = UnitThreatSituation;
 local InCombatLockdown = InCombatLockdown;
 local type = type;
 
-local sRangeSpell, sIsHelpfulRangeKnown, sIsHarmfulRangeKnown, sIsHealerMode;
+local sRangeSpell;
+local sIsHelpfulRangeKnown = false;
+local sIsHarmfulRangeKnown = false;
+local sIsHealerMode;
 local sIsDirectionArrow = false;
 local VuhDoGcdStatusBar;
 local sHotToggleUpdateSecs = 1;
@@ -99,9 +102,13 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_getCurrentMouseOver = _G["VUHDO_getCurrentMouseOver"];
 	VUHDO_UIFrameFlash_OnUpdate = _G["VUHDO_UIFrameFlash_OnUpdate"];
 
-	sRangeSpell = VUHDO_CONFIG["RANGE_SPELL"];
-	sIsHelpfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HELPFUL"] and GetSpellInfo(sRangeSpell["HELPFUL"]) ~= nil;
-	sIsHarmfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HARMFUL"] and GetSpellInfo(sRangeSpell["HARMFUL"]) ~= nil;	
+	-- FIXME: why can't model sanity be run prior to burst cache initialization?
+	if type(VUHDO_CONFIG["RANGE_SPELL"]) == "table" and type(VUHDO_CONFIG["RANGE_PESSIMISTIC"]) == "table" then
+		sRangeSpell = VUHDO_CONFIG["RANGE_SPELL"];
+		sIsHelpfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HELPFUL"] and GetSpellInfo(sRangeSpell["HELPFUL"]) ~= nil;
+		sIsHarmfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HARMFUL"] and GetSpellInfo(sRangeSpell["HARMFUL"]) ~= nil;
+	end
+
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
 	sIsDirectionArrow = VUHDO_isShowDirectionArrow();
@@ -1177,7 +1184,7 @@ local function VUHDO_updateAllRange()
 
 			if tIsRangeKnown then
 				tIsInRange = tInfo["connected"] and 
-					(1 == IsSpellInRange(tRangeSpell, tUnit) or 
+					((tRangeSpell and 1 == IsSpellInRange(tRangeSpell, tUnit)) or 
 						((tInfo["dead"] or tInfo["charmed"]) and tInfo["baseRange"]) or "player" == tUnit or 
 						(VUHDO_isSpecialUnit(tUnit) and VUHDO_checkInteractDistance(tUnit, 1)));
 			else
