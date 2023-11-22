@@ -1357,12 +1357,12 @@ VUHDO_I18N_CLOCK = "Стрелка\nЧасов";
 
 VUHDO_I18N_TEXT_ONLY = "Только текст";
 
-VUHDO_I18N_SHOW_FRIENDLY = "Show\nFriendly";
-VUHDO_I18N_SHOW_ENEMY = "Show\nEnemy";
-VUHDO_I18N_SHOW_ALL = "Show All";
-VUHDO_I18N_BOSS_ONLY = "Boss Only";
+VUHDO_I18N_SHOW_FRIENDLY = "Союзники";
+VUHDO_I18N_SHOW_ENEMY = "Враги";
+VUHDO_I18N_SHOW_ALL = "Все";
+VUHDO_I18N_BOSS_ONLY = "Только\nБосс";
 
 VUHDO_I18N_X = "X";
 VUHDO_I18N_Y = "Y";
 
-VUHDO_I18N_PRIVATE_AURAS = "Private Auras";
+VUHDO_I18N_PRIVATE_AURAS = "Приватные Ауры";

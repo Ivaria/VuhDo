@@ -583,11 +583,11 @@ VUHDO_I18N_EVOKERS = "Пробудители";
 VUHDO_I18N_BUFFC_EARTH_SHIELD = "Щит земли (Свой)";
 
 -- 3.150
-VUHDO_I18N_ADDON_COMPARTMENT_ICON = "AddOn Compartment Icon is now ";
+VUHDO_I18N_ADDON_COMPARTMENT_ICON = "Иконка в списке аддонов: ";
 
 -- 3.152
-VUHDO_I18N_SPELL_TRACE_SINGLE = "Icon: Spell Trace (Single)";
+VUHDO_I18N_SPELL_TRACE_SINGLE = "Иконка: Отслеживание Спеллов (Single)";
 
 -- 3.154
-VUHDO_I18N_SPELL_TRACE_INCOMING = "Icon: Spell Trace (Incoming)";
-VUHDO_I18N_SPELL_TRACE_HEAL = "Icon: Spell Trace (Heal)";
+VUHDO_I18N_SPELL_TRACE_INCOMING = "Иконка: Отслеживание Спеллов (Входящие)";
+VUHDO_I18N_SPELL_TRACE_HEAL = "Иконка: Отслеживание Спеллов (Исцеление)";
