@@ -66,6 +66,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added text provider to display total heal absorption amount  
   
   
 --------------------------------------------------------------  
