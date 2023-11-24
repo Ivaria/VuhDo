@@ -1,5 +1,5 @@
 local floor = floor;
-local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
+local UnitGetTotalHealAbsorbs = VUHDO_unitGetTotalHealAbsorbs;
 local UnitPower = UnitPower;
 local UnitPowerMax = UnitPowerMax;
 
