@@ -65,10 +65,12 @@ Known issues:
 Bugfixes:  
 -- Fixed HoT Icon opacity, fade and flash effects
 -- Fixed HoT Icon timer text opacity  
+-- Fixed detection of spellbook and talent overrides  
   
   
 Improvements:  
 -- Added text provider to display total heal absorption amount  
+-- Added warning for ambiguous macro names on command binds e.g. menu  
   
   
 --------------------------------------------------------------  
