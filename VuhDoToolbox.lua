@@ -600,6 +600,7 @@ function VUHDO_isSpellKnown(aSpellName)
 	end
 
 	return (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
+		or (type(aSpellName) == "number" and IsSpellKnownOrOverridesKnown(aSpellName))
 		or (type(aSpellName) == "number" and IsPlayerSpell(aSpellName))
 		or GetSpellBookItemInfo(aSpellName) ~= nil
 		or VUHDO_NAME_TO_SPELL[aSpellName] ~= nil and GetSpellBookItemInfo(VUHDO_NAME_TO_SPELL[aSpellName]);
@@ -868,12 +869,15 @@ local tActionLowerName;
 local tIsMacroKnown;
 local tIsSpellKnown; 
 local tIsTalentKnown;
+local tIsHostileAction, tIsFriendlyAction;
 function VUHDO_isActionValid(anActionName, anIsCustom, anIsHostile)
 
 	if (anActionName or "") == "" then
 		return nil;
 	end
 
+	tIsHostileAction = false;
+	tIsFriendlyAction = false;
 	tActionLowerName = strlower(anActionName);
 
 	if anIsHostile then
@@ -882,7 +886,7 @@ function VUHDO_isActionValid(anActionName, anIsCustom, anIsHostile)
 		 or VUHDO_SPELL_KEY_TARGET == tActionLowerName 
 		 or VUHDO_SPELL_KEY_EXTRAACTIONBUTTON == tActionLowerName 
 		 or VUHDO_SPELL_KEY_MOUSELOOK == tActionLowerName) then
-			return VUHDO_I18N_COMMAND, 0.8, 1, 0.8, "CMD";
+			tIsHostileAction = true;
 		end
 	else
 		if VUHDO_SPELL_KEY_ASSIST == tActionLowerName 
@@ -892,12 +896,22 @@ function VUHDO_isActionValid(anActionName, anIsCustom, anIsHostile)
 		 or VUHDO_SPELL_KEY_TARGET == tActionLowerName 
 		 or VUHDO_SPELL_KEY_EXTRAACTIONBUTTON == tActionLowerName 
 		 or VUHDO_SPELL_KEY_MOUSELOOK == tActionLowerName 
-		 or VUHDO_SPELL_KEY_DROPDOWN == tActionLowerName then 
-			return VUHDO_I18N_COMMAND, 0.8, 1, 0.8, "CMD";
+		 or VUHDO_SPELL_KEY_DROPDOWN == tActionLowerName then
+			tIsFriendlyAction = true;
 		end
 	end
 
 	tIsMacroKnown = GetMacroIndexByName(anActionName) ~= 0;
+
+	if tIsHostileAction or tIsFriendlyAction then
+		if tIsMacroKnown then
+			VUHDO_Msg(format(VUHDO_I18N_AMBIGUOUS_MACRO, anActionName), 1, 0.3, 0.3);
+			return VUHDO_I18N_WARNING, 1, 0.3, 0.3, "WRN";
+		else
+			return VUHDO_I18N_COMMAND, 0.8, 1, 0.8, "CMD";
+		end
+	end
+
 	tIsSpellKnown = VUHDO_isSpellKnown(anActionName);
 
 	if not tIsSpellKnown then
