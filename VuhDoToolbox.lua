@@ -54,6 +54,20 @@ local VUHDO_TALENT_CACHE_SPELL_NAME = {
 	-- [<spell name>] = <spell ID>,
 };
 
+local VUHDO_RUNE_CACHE_SPELL_ID = {
+	-- [<spell ID>] = <spell name>,
+};
+
+local VUHDO_RUNE_CACHE_SPELL_NAME = {
+	-- [<spell name>] = <spell ID>,
+};
+
+local VUHDO_RUNE_INVENTORY_SLOTS = {
+	[INVSLOT_CHEST] = true,
+	[INVSLOT_LEGS] = true,
+	[INVSLOT_HAND] = true,
+};
+
 local sEmpty = { };
 setmetatable(sEmpty, { __newindex = function(aTable, aKey, aValue) VUHDO_xMsg("WARNING: newindex on dummy array: ", aKey, aValue); end });
 
@@ -595,6 +609,7 @@ end
 
 --
 function VUHDO_isSpellKnown(aSpellName)
+	
 	if not aSpellName then
 		return false;
 	end
@@ -603,7 +618,9 @@ function VUHDO_isSpellKnown(aSpellName)
 		or (type(aSpellName) == "number" and IsSpellKnownOrOverridesKnown(aSpellName))
 		or (type(aSpellName) == "number" and IsPlayerSpell(aSpellName))
 		or GetSpellBookItemInfo(aSpellName) ~= nil
-		or VUHDO_NAME_TO_SPELL[aSpellName] ~= nil and GetSpellBookItemInfo(VUHDO_NAME_TO_SPELL[aSpellName]);
+		or VUHDO_NAME_TO_SPELL[aSpellName] ~= nil and GetSpellBookItemInfo(VUHDO_NAME_TO_SPELL[aSpellName])
+		or VUHDO_isRuneSpellKnown(aSpellName);
+
 end
 
 
@@ -1416,3 +1433,50 @@ function VUHDO_hasLFGRestrictions()
 
 end
 
+
+
+function VUHDO_initRuneSpellCaches()
+
+	if not C_Engraving then
+		return;
+	end
+
+	twipe(VUHDO_RUNE_CACHE_SPELL_ID);
+	twipe(VUHDO_RUNE_CACHE_SPELL_NAME);
+
+	for tInventorySlotId, _ in pairs(VUHDO_RUNE_INVENTORY_SLOTS) do
+		local tRuneInfo = C_Engraving.GetRuneForEquipmentSlot(tInventorySlotId);
+
+		if tRuneInfo then
+			for _, tSpellId in ipairs(tRuneInfo.learnedAbilitySpellIDs) do
+				local tSpellName = GetSpellInfo(tSpellId);
+
+				if tSpellId then
+					VUHDO_RUNE_CACHE_SPELL_ID[tSpellId] = tSpellName;
+					VUHDO_RUNE_CACHE_SPELL_NAME[tSpellName] = tSpellId;
+				end
+			end
+		end
+	end
+
+end
+
+
+
+--
+function VUHDO_getRuneSpellId(aSpellName)
+
+	if type(aSpellName) == "number" then
+		return VUHDO_RUNE_CACHE_SPELL_ID[aSpellName] and aSpellName or nil;
+	else
+		return VUHDO_RUNE_CACHE_SPELL_NAME[aSpellName] or nil;
+	end
+
+end
+
+
+
+--
+function VUHDO_isRuneSpellKnown(aSpellName)
+	return VUHDO_getRuneSpellId(aSpellName) and true or false;
+end

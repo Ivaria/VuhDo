@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed recognizing spells and abilities granted by SoD rune engavings  
   
   
 Improvements:
