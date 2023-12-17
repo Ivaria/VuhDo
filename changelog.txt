@@ -20,7 +20,8 @@ Bugfixes:
 -- Fixed recognizing spells and abilities granted by SoD rune engavings  
   
   
-Improvements:
+Improvements:  
+-- Added Druid 'Omen of Clarity' to Buff Watch  
   
   
 --------------------------------------------------------------  
@@ -64,7 +65,7 @@ Known issues:
   
   
 Bugfixes:  
--- Fixed HoT Icon opacity, fade and flash effects
+-- Fixed HoT Icon opacity, fade and flash effects  
 -- Fixed HoT Icon timer text opacity  
 -- Fixed detection of spellbook and talent overrides  
   
