@@ -68,6 +68,7 @@ Bugfixes:
 -- Fixed HoT Icon opacity, fade and flash effects  
 -- Fixed HoT Icon timer text opacity  
 -- Fixed detection of spellbook and talent overrides  
+-- Fixed hiding empty panels when 'Own Group' filter is used  
   
   
 Improvements:  
