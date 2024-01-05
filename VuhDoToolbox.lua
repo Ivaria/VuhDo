@@ -1439,6 +1439,8 @@ function VUHDO_initRuneSpellCaches()
 
 	if not C_Engraving then
 		return;
+	else
+		C_Engraving.RefreshRunesList();
 	end
 
 	twipe(VUHDO_RUNE_CACHE_SPELL_ID);
