@@ -75,6 +75,7 @@ Improvements:
 -- Added text provider to display total heal absorption amount  
 -- Added warning for ambiguous macro names on command binds e.g. menu  
 -- Added new bouquet validator 'Statusbar: Health % if active'  
+-- Manual and Dungeon Finder roles now take priority over class roles  
   
   
 --------------------------------------------------------------  
