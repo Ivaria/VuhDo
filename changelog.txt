@@ -17,6 +17,7 @@ Bugfixes:
 -- Fixed HoT Icon timer text opacity  
 -- Fixed detection of spellbook and talent overrides  
 -- Fixed hiding empty panels when 'Own Group' filter is used  
+-- Fixed visibility of empty panels containing only target/focus models  
   
   
 Improvements:  
