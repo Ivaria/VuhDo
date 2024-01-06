@@ -21,6 +21,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added keybinding of rune alot abilities e.g. Chest Rune Ability  
 -- Added Druid 'Omen of Clarity' to Buff Watch  
   
   

@@ -547,3 +547,7 @@ VUHDO_I18N_TEXT_PROVIDER_MANA_KILO_OF = "Mana: <#nk>/<#nk>";
 VUHDO_I18N_TEXT_PROVIDER_MANA = "Mana: <#n>";
 VUHDO_I18N_TEXT_PROVIDER_MANA_KILO = "Mana: <#nk>";
 VUHDO_I18N_BOUQUET_STATUS_HEALTH_IF_ACTIVE = "Statusbar: Health % if active";
+
+VUHDO_I18N_CHEST_RUNE = "Chest Rune Ability";
+VUHDO_I18N_LEGS_RUNE = "Legs Rune Ability";
+VUHDO_I18N_HANDS_RUNE = "Hands Rune Ability";
