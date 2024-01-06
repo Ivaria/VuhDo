@@ -954,12 +954,6 @@ function VUHDO_isActionValid(anActionName, anIsCustom, anIsHostile)
 		return VUHDO_I18N_TRINKET_1, 1, 1, 0.8, "TKT1";
 	elseif tActionLowerName == "14" then
 		return VUHDO_I18N_TRINKET_2, 1, 1, 0.8, "TKT2";
-	elseif tActionLowerName == VUHDO_ACTION_CHEST_RUNE then
-		return VUHDO_I18N_CHEST_RUNE, 1, 1, 0.8, "RUN";
-	elseif tActionLowerName == VUHDO_ACTION_LEGS_RUNE then
-		return VUHDO_I18N_LEGS_RUNE, 1, 1, 0.8, "RUN";
-	elseif tActionLowerName == VUHDO_ACTION_HANDS_RUNE then
-		return VUHDO_I18N_HANDS_RUNE, 1, 1, 0.8, "RUN";
 	else
 		return nil;
 	end
