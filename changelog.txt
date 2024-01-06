@@ -18,6 +18,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed recognizing spells and abilities granted by SoD rune engavings  
+-- Fixed Shaman totem and weapon enchant spell IDs for Buff Watch  
   
   
 Improvements:  
