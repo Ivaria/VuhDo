@@ -1510,7 +1510,7 @@ function VUHDO_isRuneSpellKnown(aSpellName)
 	elseif VUHDO_isRuneSlotAction(aSpellName) then
 		return true;
 	else
-		false;
+		return false;
 	end
 
 end
