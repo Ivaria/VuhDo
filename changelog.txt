@@ -13,6 +13,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed HoT Icon opacity when using 'Glossy' or 'Flat' icons  
   
   
 Improvements:  

@@ -272,17 +272,17 @@ local function VUHDO_customizeHotIcons(aButton, aHotName, aRest, aTimes, anIcon,
 		tTimer:SetTextColor(VUHDO_textColor(tHotColor));
 	else
 		tHotColor = VUHDO_copyColor(tHotCfg);
-		
+
+		-- FIXME: color swatch should set isOpacity but doesn't
+		if tHotColor["O"] then
+			tHotColor["useOpacity"] = true;
+		end
+
 		if sIsHotShowIcon then
 			if aColor then
 				tHotColor = aColor;
 			else
 				tHotColor["R"], tHotColor["G"], tHotColor["B"] = 1, 1, 1;
-
-				-- FIXME: color swatch should set isOpacity but doesn't
-				if tHotColor["O"] then
-					tHotColor["useOpacity"] = true;
-				end
 			end
 		elseif tTimes <= 1 or not sHotCols["useColorText"] then
 			tTimer:SetTextColor(VUHDO_textColor(tHotColor));
