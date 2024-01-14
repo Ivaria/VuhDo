@@ -41,6 +41,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to turn axis for overshield and heal absorb bars  
   
   
 --------------------------------------------------------------  
