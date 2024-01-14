@@ -254,6 +254,7 @@ local VUHDO_DEFAULT_PROFILES = {
 					},
 					["sort"] = 0,
 					["isReverse"] = false,
+					["isPetsLast"] = false,
 				},
 				["PANEL_COLOR"] = {
 					["BACK"] = {
@@ -962,6 +963,7 @@ local VUHDO_DEFAULT_PROFILES = {
 					},
 					["sort"] = 0,
 					["isReverse"] = false,
+					["isPetsLast"] = false,
 				},
 				["TOOLTIP"] = {
 					["BACKGROUND"] = {
@@ -1131,6 +1133,7 @@ local VUHDO_DEFAULT_PROFILES = {
 					},
 					["sort"] = 0,
 					["isReverse"] = false,
+					["isPetsLast"] = false,
 				},
 				["TOOLTIP"] = {
 					["BACKGROUND"] = {
@@ -1299,6 +1302,7 @@ local VUHDO_DEFAULT_PROFILES = {
 					},
 					["sort"] = 0,
 					["isReverse"] = false,
+					["isPetsLast"] = false,
 				},
 				["TOOLTIP"] = {
 					["BACKGROUND"] = {
@@ -1467,6 +1471,7 @@ local VUHDO_DEFAULT_PROFILES = {
 					},
 					["sort"] = 0,
 					["isReverse"] = false,
+					["isPetsLast"] = false,
 				},
 				["TOOLTIP"] = {
 					["BACKGROUND"] = {
