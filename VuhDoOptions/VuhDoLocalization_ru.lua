@@ -753,6 +753,7 @@ VUHDO_I18N_TT.K590 = "Показывать все входящие заклин�
 VUHDO_I18N_TT.K591 = "Добавить фильтр на заклинания только от Боссов/НПС существ.";
 VUHDO_I18N_TT.K592 = "Отметьте, что бы показывать иконки от приватных аур на полосах здоровья.";
 VUHDO_I18N_TT.K593 = "Выберите размер для иконок приватных аур.";
+VUHDO_I18N_TT.K594 = "Check to sort pet units last.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный\nпрофиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";
@@ -1366,3 +1367,5 @@ VUHDO_I18N_X = "X";
 VUHDO_I18N_Y = "Y";
 
 VUHDO_I18N_PRIVATE_AURAS = "Приватные Ауры";
+
+VUHDO_I18N_PETS_LAST = "Pets last";

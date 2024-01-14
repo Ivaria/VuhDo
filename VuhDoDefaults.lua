@@ -2718,6 +2718,7 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["ordering"] = VUHDO_ORDERING_STRICT,
 		["sort"] = VUHDO_SORT_RAID_UNITID,
 		["isReverse"] = false,
+		["isPetsLast"] = false,
 	},
 --[[
 	["POSITION"] = {
