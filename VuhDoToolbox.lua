@@ -41,6 +41,18 @@ local pairs = pairs;
 local type = type;
 local abs = abs;
 
+local UnitAura = UnitAura or (C_UnitAuras and
+			(function(aUnit, anIndex, aFilter)
+				local tAuraData = C_UnitAuras.GetAuraDataByIndex(aUnit, anIndex, aFilter);
+
+				if not tAuraData then
+					return nil;
+				end
+
+				return AuraUtil.UnpackAuraData(tAuraData);
+			end)
+);
+
 -- talent cache maps for new large Dragonflight talent trees
 local VUHDO_TALENT_CACHE_SPELL_ID = {
 	-- [<spell ID>] = <spell name>,
