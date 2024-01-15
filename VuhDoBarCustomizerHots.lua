@@ -2,6 +2,30 @@ local _;
 local huge = math.huge;
 local format = format;
 
+local UnitBuff = UnitBuff or (C_UnitAuras and
+			(function(aUnit, anIndex, aFilter)
+				local tAuraData = C_UnitAuras.GetBuffDataByIndex(aUnit, anIndex, aFilter);
+
+				if not tAuraData then
+					return nil;
+				end
+
+				return AuraUtil.UnpackAuraData(tAuraData);
+			end)
+);
+
+local UnitDebuff = UnitDebuff or (C_UnitAuras and
+			(function(aUnit, anIndex, aFilter)
+				local tAuraData = C_UnitAuras.GetDebuffDataByIndex(aUnit, anIndex, aFilter);
+
+				if not tAuraData then
+					return nil;
+				end
+
+				return AuraUtil.UnpackAuraData(tAuraData);
+			end)
+);
+
 local sIsFade;
 local sIsFlashWhenLow;
 local sIsWarnColor;
