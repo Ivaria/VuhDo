@@ -1360,8 +1360,18 @@ local function VUHDO_customFlagValidator(anInfo, aCustom)
 				end
 			);
 
+			if ret3 == nil then
+				ret3 = -1
+			end
+			if ret4 == nil then
+				ret4 = -1
+			end
+			if ret5 == nil then
+				ret5 = -1
+			end
+
 			if ret and ret == true then
-				return true, nil, -1, -1, -1;
+				return true, ret2, ret3, ret4, ret5;
 			end
 		else
 			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD, 1.0, 0.0, 0.0);
