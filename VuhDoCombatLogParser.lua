@@ -27,21 +27,21 @@ local tInfo;
 local tNewHealth;
 local tDeadInfo = { ["dead"] = true };
 local function VUHDO_addUnitHealth(aUnit, aDelta)
+
 	tInfo = VUHDO_RAID[aUnit] or tDeadInfo;
 
 	if not tInfo["dead"] then
-
 		-- avoid the calculation to be disturbed by the exception data
 		if UnitHealth(aUnit) ~= 0 or tInfo["health"] ~= 0 then
 			tNewHealth = tInfo["health"] + aDelta;
-		else 
+		else
 			tNewHealth = tInfo["loghealth"] + aDelta;
 		end
 
-		if tNewHealth < 0 then 
+		if tNewHealth < 0 then
 			tNewHealth = 0;
-		elseif tNewHealth > tInfo["healthmax"] then 
-			tNewHealth = tInfo["healthmax"]; 
+		elseif tNewHealth > tInfo["healthmax"] then
+			tNewHealth = tInfo["healthmax"];
 		end
 		
 		tInfo["loghealth"] = tNewHealth;
@@ -50,6 +50,7 @@ local function VUHDO_addUnitHealth(aUnit, aDelta)
 			VUHDO_updateHealth(aUnit, 12); -- VUHDO_UPDATE_HEALTH_COMBAT_LOG
 		end
 	end
+
 end
 
 
