@@ -69,6 +69,7 @@ Bugfixes:
 Improvements:  
 -- Added option to turn axis for overshield and heal absorb bars  
 -- Added option to sort pet units last  
+-- Bump TOC interface for 10.2.5  
   
   
 --------------------------------------------------------------  
