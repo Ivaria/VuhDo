@@ -47,6 +47,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Mage 'Frost Armor' and 'Ice Armor' to Buff Watch  
   
   
 --------------------------------------------------------------  
