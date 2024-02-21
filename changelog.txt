@@ -45,6 +45,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Mage 'Focus Magic' to Buff Watch  
   
   
 --------------------------------------------------------------  
