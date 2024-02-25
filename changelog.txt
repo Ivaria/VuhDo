@@ -39,6 +39,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed 'Special Dot' indicator bar glow color  
   
   
 Improvements:  
