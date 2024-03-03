@@ -754,6 +754,7 @@ VUHDO_I18N_TT.K591 = "Добавить фильтр на заклинания т
 VUHDO_I18N_TT.K592 = "Отметьте, что бы показывать иконки от приватных аур на полосах здоровья.";
 VUHDO_I18N_TT.K593 = "Выберите размер для иконок приватных аур.";
 VUHDO_I18N_TT.K594 = "Check to sort pet units last.";
+VUHDO_I18N_TT.K595 = "Show effective HP (health including shields) of player.";
 
 -- TBCC game version specific strings (tooltip IDs begin at K900)
 
@@ -1373,6 +1374,8 @@ VUHDO_I18N_Y = "Y";
 VUHDO_I18N_PRIVATE_AURAS = "Приватные Ауры";
 
 VUHDO_I18N_PETS_LAST = "Pets last";
+
+VUHDO_I18N_SHOW_EFFECTIVE = "Show\nEffective";
 
 -- TBCC game version specific strings
 
