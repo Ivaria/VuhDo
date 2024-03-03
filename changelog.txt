@@ -44,6 +44,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to show effective health text  
   
   
 --------------------------------------------------------------  
