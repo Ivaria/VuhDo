@@ -15,6 +15,7 @@ Known issues:
 Bugfixes:  
 -- Fixed 'Special Dot' indicator bar glow color  
 -- Fixed HoT display when tracking the same aura in multiple indicators  
+-- Fixed throttling of combat log event triggered updates  
   
   
 Improvements:  
