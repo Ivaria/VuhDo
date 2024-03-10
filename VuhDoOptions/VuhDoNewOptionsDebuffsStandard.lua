@@ -222,10 +222,11 @@ function VUHDO_yesNoImportDebuffIgnoreCallback(aDecision)
 
 		VUHDO_debuffIgnoreImport(tEditBoxName);
 
-		VUHDO_initDebuffIgnoreComboModel();
-		VUHDO_lnfComboBoxInitFromModel(VuhDoNewOptionsDebuffsStandardIconsPanelIgnoreComboBox);
-
 		_G[tEditBoxName]:GetParent():GetParent():GetParent():Hide();
+
+		VUHDO_initDebuffIgnoreComboModel();
+		_G["VuhDoNewOptionsDebuffsStandardIconsPanelIgnoreComboBox"]:Hide();
+		_G["VuhDoNewOptionsDebuffsStandardIconsPanelIgnoreComboBox"]:Show();
 	end
 
 end
