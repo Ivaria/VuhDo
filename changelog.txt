@@ -20,6 +20,7 @@ Bugfixes:
   
 Improvements:  
 -- Added option to show effective health text  
+-- Added import and export of the standard debuff ignore list  
   
   
 --------------------------------------------------------------  
