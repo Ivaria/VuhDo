@@ -1376,6 +1376,7 @@ VUHDO_I18N_PRIVATE_AURAS = "Приватные Ауры";
 VUHDO_I18N_PETS_LAST = "Pets last";
 
 VUHDO_I18N_SHOW_EFFECTIVE = "Show\nEffective";
+VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "Debuff ignore list successfully imported.";
 
 -- TBCC game version specific strings
 
