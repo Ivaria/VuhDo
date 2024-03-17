@@ -24,7 +24,7 @@ package:
   script:
     - cd .release
     - chmod +x ./release.sh
-    - ./release.sh -w 0
+    - ./release.sh
   artifacts:
     paths:
       - .release/VuhDo/
