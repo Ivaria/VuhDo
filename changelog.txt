@@ -63,9 +63,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed detection of class dispel abilities  
   
   
 Improvements:  
+-- Bump TOC interface for 10.2.6  
   
   
 --------------------------------------------------------------  
