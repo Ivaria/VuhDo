@@ -822,6 +822,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			end
 		end
 ]];
+
 	elseif "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
 		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
 			local tSpecNum = tostring(VUHDO_getSpecialization()) or "1";
