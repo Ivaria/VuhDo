@@ -50,9 +50,9 @@ local format = format;
 local min = math.min;
 local sIsOverhealText;
 local sIsAggroText;
-local sIsInvertGrowth;
-local sIsTurnAxisOvershield;
-local sIsTurnAxisHealAbsorb;
+local sIsInvertGrowth = { };
+local sIsTurnAxisOvershield = { };
+local sIsTurnAxisHealAbsorb = { };
 local sLifeColor;
 local sIsNoRangeFade;
 

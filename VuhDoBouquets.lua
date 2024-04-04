@@ -398,6 +398,7 @@ end
 
 --
 local function VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction)
+
 	if VUHDO_strempty(aBouquetName) then
 		return;
 	elseif not VUHDO_BOUQUETS["STORED"][aBouquetName] then
@@ -417,6 +418,7 @@ local function VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction)
 	if VUHDO_hasCyclic(aBouquetName) then
 		VUHDO_CYCLIC_BOUQUETS[aBouquetName] = true;
 	end
+
 end
 
 
@@ -462,7 +464,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 	twipe(tAlreadyRegistered);
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
-		if VUHDO_PANEL_MODELS[tCnt] then
+		if VUHDO_PANEL_MODELS[tPanelNum] then
 			-- Bar (=Outer) Border
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BAR_BORDER"],
@@ -801,4 +803,16 @@ function VUHDO_isAnyoneInterstedIn(anUpdateMode)
 
 		return false;
 	end
+end
+
+function VUHDO_getRegisteredBouquets()
+
+	return VUHDO_REGISTERED_BOUQUETS;
+
+end
+
+function VUHDO_getActiveBouquets()
+
+	return VUHDO_ACTIVE_BOUQUETS;
+
 end
