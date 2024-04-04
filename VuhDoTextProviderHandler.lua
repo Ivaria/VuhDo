@@ -50,7 +50,7 @@ function VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType)
 				tText = VUHDO_TEXT_PROVIDERS[tProviderName]["validator"](tInfo, tValue, tMaxValue);
 
 				for tIndicatorName, tFunction in pairs(tAllIndicators) do
-					tFunction(aUnit, VUHDO_TEXT_INDICATOR_PANEL_NUMS[tIndicatorName], tProviderName, tText, tValue);
+					tFunction(aUnit, VUHDO_TEXT_INDICATOR_PANEL_NUMS[tIndicatorName], tProviderName, tText, tValue, tIndicatorName);
 				end
 
 			end
@@ -98,6 +98,7 @@ local function VUHDO_registerIndicatorForProvider(aProviderName, anIndicatorId, 
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_updateAllTextIndicatorsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
 	end
+
 end
 
 
@@ -134,16 +135,18 @@ local VUHDO_TEXT_INDICATOR_CALLBACKS = {
 
 --
 function VUHDO_registerAllTextIndicators()
+
 	table.wipe(VUHDO_REGISTERED_PROVIDERS);
 	table.wipe(VUHDO_TEXT_INDICATOR_PANEL_NUMS);
 	table.wipe(VUHDO_INTERESTED_PROVIDERS);
 
-	for tIndicatorName, tIndicatorConfig in pairs(VUHDO_INDICATOR_CONFIG["TEXT_INDICATORS"]) do
-		for tIndex, tProviderName in pairs(tIndicatorConfig["TEXT_PROVIDER"]) do
-			VUHDO_registerIndicatorForProvider(tProviderName, tIndicatorName .. tIndex, tIndex,
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		for tIndicatorName, tIndicatorConfig in pairs(VUHDO_INDICATOR_CONFIG[tPanelNum]["TEXT_INDICATORS"]) do
+			VUHDO_registerIndicatorForProvider(tIndicatorConfig["TEXT_PROVIDER"], tIndicatorName .. tPanelNum, tPanelNum, 
 				_G[VUHDO_TEXT_INDICATOR_CALLBACKS[tIndicatorName]]);
 		end
 	end
 
 	VUHDO_initTextProviderComboModel();
+
 end

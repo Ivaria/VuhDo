@@ -42,7 +42,7 @@ local VUHDO_getUnitGroupPrivileges;
 local VUHDO_getLatestCustomDebuff;
 local VUHDO_getUnitOverallShieldRemain;
 
-local sIsInverted;
+local sIsInverted = { };
 local sBarColors;
 local sIsDistance;
 
@@ -51,6 +51,7 @@ local sIsDistance;
 
 
 function VUHDO_bouquetValidatorsInitLocalOverrides()
+
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -77,9 +78,13 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getLatestCustomDebuff = _G["VUHDO_getLatestCustomDebuff"];
 	VUHDO_getUnitOverallShieldRemain = _G["VUHDO_getUnitOverallShieldRemain"];
 
-	sIsInverted = VUHDO_INDICATOR_CONFIG["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		sIsInverted[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
+	end
+
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
 	sIsDistance = VUHDO_CONFIG["DIRECTION"]["isDistanceText"];
+
 end
 
 
@@ -756,7 +761,8 @@ end
 local tHealth;
 local function VUHDO_statusHealthValidator(anInfo, _)
 
-	if sIsInverted then
+	-- FIXME: how to get panel num for button from within validator?
+	if sIsInverted[1] then
 		if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
 			tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]) + VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
 		else
@@ -876,7 +882,8 @@ local tHealth;
 local function VUHDO_statusHealthIfActiveValidator(anInfo, _)
 
 	if VUHDO_getIsCurrentBouquetActive() then
-		if sIsInverted then
+		-- FIXME: how to get panel num for button from within validator?
+		if sIsInverted[1] then
 			if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
 				tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]) + VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
 			else
