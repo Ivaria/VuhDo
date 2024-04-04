@@ -21,6 +21,7 @@ Bugfixes:
   
 Improvements:  
 -- Bump TOC interface for 1.15.2  
+-- Added support for dual spec  
   
   
 --------------------------------------------------------------  
