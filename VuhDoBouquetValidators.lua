@@ -42,7 +42,6 @@ local VUHDO_getUnitGroupPrivileges;
 local VUHDO_getLatestCustomDebuff;
 local VUHDO_getUnitOverallShieldRemain;
 
-local sIsInverted;
 local sBarColors;
 local sIsDistance;
 
@@ -51,6 +50,7 @@ local sIsDistance;
 
 
 function VUHDO_bouquetValidatorsInitLocalOverrides()
+
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -77,9 +77,9 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getLatestCustomDebuff = _G["VUHDO_getLatestCustomDebuff"];
 	VUHDO_getUnitOverallShieldRemain = _G["VUHDO_getUnitOverallShieldRemain"];
 
-	sIsInverted = VUHDO_INDICATOR_CONFIG["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
 	sIsDistance = VUHDO_CONFIG["DIRECTION"]["isDistanceText"];
+
 end
 
 
@@ -756,18 +756,7 @@ end
 local tHealth;
 local function VUHDO_statusHealthValidator(anInfo, _)
 
-	if sIsInverted then
-		if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
-			tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]) + VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
-		else
-			tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]);
-		end
-
-		return true, nil, tHealth, -1, anInfo["healthmax"], nil, anInfo["health"];
-	else
-		return true, nil, anInfo["health"], -1,
-			anInfo["healthmax"], nil, anInfo["health"];
-	end
+	return true, nil, anInfo["health"], -1, anInfo["healthmax"], nil, anInfo["health"];
 
 end
 
@@ -876,18 +865,7 @@ local tHealth;
 local function VUHDO_statusHealthIfActiveValidator(anInfo, _)
 
 	if VUHDO_getIsCurrentBouquetActive() then
-		if sIsInverted then
-			if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
-				tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]) + VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
-			else
-				tHealth = anInfo["health"] + VUHDO_getIncHealOnUnit(anInfo["unit"]);
-			end
-
-			return true, nil, tHealth, -1, anInfo["healthmax"], VUHDO_getCurrentBouquetColor(), anInfo["health"];
-		else
-			return true, nil, anInfo["health"], -1,
-				anInfo["healthmax"], VUHDO_getCurrentBouquetColor(), anInfo["health"];
-		end
+		return true, nil, anInfo["health"], -1, anInfo["healthmax"], VUHDO_getCurrentBouquetColor(), anInfo["health"];
 	else
 		return false, nil, -1, -1, -1;
 	end
