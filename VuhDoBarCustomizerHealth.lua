@@ -869,7 +869,7 @@ local function VUHDO_updateHealthBarValueForUnit(aUnit, aQuota, anInvertedQuota,
 				tQuota = aQuota;
 			end
 
-			if aQuota > 0 then
+			if tQuota > 0 then
 				if aColor then
 					tHealthBar:SetVuhDoColor(aColor);
 
@@ -879,7 +879,7 @@ local function VUHDO_updateHealthBarValueForUnit(aUnit, aQuota, anInvertedQuota,
 					end
 				end
 
-				tHealthBar:SetValue(aQuota);
+				tHealthBar:SetValue(tQuota);
 			else
 				tHealthBar:SetValue(0);
 			end
@@ -898,10 +898,14 @@ function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 	aMaxValue = aMaxValue or 0;
 	aCurrValue = aCurrValue or 0;
 
-	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
-		tHealth = aCurrValue + VUHDO_getIncHealOnUnit(aUnit) + VUHDO_getUnitOverallShieldRemain(aUnit);
+	if aCurrValue > 0 then
+		if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
+			tHealth = aCurrValue + VUHDO_getIncHealOnUnit(aUnit) + VUHDO_getUnitOverallShieldRemain(aUnit);
+		else
+			tHealth = aCurrValue + VUHDO_getIncHealOnUnit(aUnit);
+		end
 	else
-		tHealth = aCurrValue + VUHDO_getIncHealOnUnit(aUnit);
+		tHealth = aCurrValue;
 	end
 
 	tQuota = (aCurrValue == 0 and aMaxValue == 0) and 0 or aMaxValue > 1 and aCurrValue / aMaxValue or 0;
