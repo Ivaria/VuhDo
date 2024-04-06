@@ -550,25 +550,32 @@ end
 
 --
 local tRatio, tBar, tScale;
-function VUHDO_overhealTextCallback(aUnit, aPanelNum, aProviderName, aText, aValue)
-	for _, tButton in pairs(VUHDO_getUnitButtonsPanel(aUnit, aPanelNum)) do
-		tBar = VUHDO_getHealthBar(tButton, 1);
-		VUHDO_getOverhealText(tBar):SetText(aText);
+local tPanelNum;
+function VUHDO_overhealTextCallback(aUnit, aProviderName, aText, aValue, anIndicatorName)
 
-		-- Sonderwurst Overheal wirklich nötig?
-		if strfind(aProviderName, "OVERHEAL", 1, true) then
-			tInfo = VUHDO_RAID[aUnit];
+	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
+
+		if VUHDO_INDICATOR_CONFIG[tPanelNum]["TEXT_INDICATORS"][anIndicatorName]["TEXT_PROVIDER"] == aProviderName then
+			tBar = VUHDO_getHealthBar(tButton, 1);
+			VUHDO_getOverhealText(tBar):SetText(aText);
+
+			-- Sonderwurst Overheal wirklich nötig?
+			if strfind(aProviderName, "OVERHEAL", 1, true) then
+				tInfo = VUHDO_RAID[aUnit];
 			
-			if tInfo then
-				if aValue > 0 and tInfo["healthmax"] > 0 then
-					tRatio = aValue / tInfo["healthmax"];
-					tScale = VUHDO_PANEL_SETUP[aPanelNum]["OVERHEAL_TEXT"]["scale"];
+				if tInfo then
+					if aValue > 0 and tInfo["healthmax"] > 0 then
+						tRatio = aValue / tInfo["healthmax"];
+						tScale = VUHDO_PANEL_SETUP[tPanelNum]["OVERHEAL_TEXT"]["scale"];
 
-					VUHDO_getOverhealPanel(tBar):SetScale(tRatio < 1 and (0.5 + tRatio) * tScale or 1.5 * tScale);
+						VUHDO_getOverhealPanel(tBar):SetScale(tRatio < 1 and (0.5 + tRatio) * tScale or 1.5 * tScale);
+					end
 				end
 			end
 		end
 	end
+
 end
 
 

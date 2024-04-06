@@ -399,10 +399,11 @@ end
 --
 local function VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction)
 
-	if VUHDO_strempty(aBouquetName) then
+	if VUHDO_strempty(aBouquetName) or VUHDO_strempty(anOwnerName) then
 		return;
 	elseif not VUHDO_BOUQUETS["STORED"][aBouquetName] then
 		VUHDO_Msg(format(VUHDO_I18N_ERR_NO_BOUQUET, anOwnerName, aBouquetName), 1, 0.4, 0.4);
+
 		return;
 	end
 
@@ -430,10 +431,10 @@ function VUHDO_registerForBouquetUnique(aBouquetName, anOwnerName, aFunction, an
 		return;
 	end
 
-	if aBouquetName and aBouquetName ~= "" and not anAlreadyRegistered[aBouquetName] then
+	if not VUHDO_strempty(aBouquetName) and not VUHDO_strempty(anOwnerName) and not anAlreadyRegistered[aBouquetName .. anOwnerName] then
 		VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction);
 
-		anAlreadyRegistered[aBouquetName] = true;
+		anAlreadyRegistered[aBouquetName .. anOwnerName] = true;
 	end
 
 end
@@ -468,7 +469,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Bar (=Outer) Border
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BAR_BORDER"],
-				"Outer Border " .. tPanelNum,
+				"Outer Border",
 				VUHDO_barBorderBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -476,7 +477,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Cluster (=Inner) Border
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["CLUSTER_BORDER"],
-				"Inner Border " .. tPanelNum,
+				"Inner Border",
 				VUHDO_clusterBorderBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -484,7 +485,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Swiftmend Indicator
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SWIFTMEND_INDICATOR"],
-				"Special Dot " .. tPanelNum,
+				"Special Dot",
 				VUHDO_swiftmendIndicatorBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -492,7 +493,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Aggro Line
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["AGGRO_BAR"],
-				"Aggro Bar " .. tPanelNum,
+				"Aggro Bar",
 				VUHDO_aggroBarBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -500,7 +501,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Mouseover Highlighter
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MOUSEOVER_HIGHLIGHT"],
-				"Mouseover Highlight " .. tPanelNum,
+				"Mouseover Highlight",
 				VUHDO_highlighterBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -508,7 +509,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Threat Marks
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_MARK"],
-				"Threat Indicators " .. tPanelNum,
+				"Threat Indicators",
 				VUHDO_threatIndicatorsBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -516,7 +517,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Threat Bar
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_BAR"],
-				"Threat Bar " .. tPanelNum,
+				"Threat Bar",
 				VUHDO_threatBarBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -524,7 +525,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Mana Bar
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"],
-				"Mana Bar " .. tPanelNum,
+				"Mana Bar",
 				VUHDO_manaBarBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -532,7 +533,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Background Bar
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BACKGROUND_BAR"],
-				"Background Bar " .. tPanelNum,
+				"Background Bar",
 				VUHDO_backgroundBarBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -540,7 +541,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Health Bar
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["HEALTH_BAR"],
-				"Health Bar " .. tPanelNum,
+				"Health Bar",
 				VUHDO_healthBarBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -548,7 +549,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Side bar left
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SIDE_LEFT"],
-				"Side Bar Left " .. tPanelNum,
+				"Side Bar Left",
 				VUHDO_sideBarLeftBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -556,7 +557,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			-- Side bar right
 			VUHDO_registerForBouquetUnique(
 				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SIDE_RIGHT"],
-				"Side Bar Right " .. tPanelNum,
+				"Side Bar Right",
 				VUHDO_sideBarRightBouquetCallback,
 				tAlreadyRegistered
 			);
@@ -680,7 +681,7 @@ function VUHDO_updateBouquetsForEvent(aUnit, anEventType)
 			elseif aUnit then -- focus / n/a
 				for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[tName]) do
 					if VUHDO_isBouquetInterestedInEvent(tName, VUHDO_UPDATE_DC) then
-						tDelegate(aUnit, true, nil, 100, 0, 100, VUHDO_PANEL_SETUP["BAR_COLORS"]["OFFLINE"], nil, nil, 0);
+						tDelegate(aUnit, true, nil, 100, 0, 100, VUHDO_PANEL_SETUP["BAR_COLORS"]["OFFLINE"], nil, tName, 0);
 					end
 				end
 			end

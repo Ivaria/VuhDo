@@ -993,10 +993,13 @@ end
 
 
 --
-function VUHDO_indicatorTextCallback(aBarNum, aUnit, aPanelNum, aProviderName, aText, aValue, anIndicatorName)
+local tPanelNum;
+function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aText, aValue, anIndicatorName)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
-		if VUHDO_INDICATOR_CONFIG[aPanelNum]["TEXT_INDICATORS"][anIndicatorName]["TEXT_PROVIDER"] == aProviderName then
+		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
+
+		if VUHDO_INDICATOR_CONFIG[tPanelNum]["TEXT_INDICATORS"][anIndicatorName]["TEXT_PROVIDER"] == aProviderName then
 			VUHDO_getHealthBarText(tButton, aBarNum):SetText(aText);
 		end
 	end
