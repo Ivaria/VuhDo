@@ -937,7 +937,7 @@ local tAggroBar;
 function VUHDO_aggroBarBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
-		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["AGGRO_BAR"] == aBouquetName then
+		if aBouquetName == nil or VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["AGGRO_BAR"] == aBouquetName then
 			if anIsActive then
 				tAggroBar = VUHDO_getHealthBar(tButton, 4);
 				tAggroBar:SetVuhDoColor(aColor);
@@ -1158,10 +1158,14 @@ end
 --
 VUHDO_REMOVE_HOTS = true;
 function VUHDO_updateAllRaidBars()
-	for tCnt = 1, 10 do -- VUHDO_MAX_PANELS
-		if VUHDO_isPanelVisible(tCnt) then
-			for _, tButton in pairs(VUHDO_getPanelButtons(tCnt)) do
-				if not tButton:GetAttribute("unit") then break; end
+
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		if VUHDO_isPanelVisible(tPanelNum) then
+			for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
+				if not tButton:GetAttribute("unit") then
+					break;
+				end
+
 				VUHDO_customizeHealButton(tButton);
 			end
 		end
@@ -1177,8 +1181,12 @@ function VUHDO_updateAllRaidBars()
 	if VUHDO_REMOVE_HOTS then
 		VUHDO_removeAllHots();
 		VUHDO_updateAllHoTs();
-	  if VUHDO_INTERNAL_TOGGLES[18] then VUHDO_updateClusterHighlights(); end -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
+
+		if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
+			VUHDO_updateClusterHighlights();
+		end
 	else
 		VUHDO_REMOVE_HOTS = true;
 	end
+
 end

@@ -51,7 +51,12 @@ end
 local tInfo;
 local tPowerType;
 function VUHDO_updateManaBars(aUnit, aChange)
+
 	tInfo = VUHDO_RAID[aUnit];
+
+	if not tInfo then
+		return;
+	end
 
 	if (tInfo["isVehicle"]) then
 		aUnit = tInfo["petUnit"];
@@ -87,6 +92,7 @@ function VUHDO_updateManaBars(aUnit, aChange)
 			VUHDO_updateBouquetsForEvent(aUnit, 13); -- VUHDO_UPDATE_MANA
 		end
 	end
+
 end
 
 
@@ -111,7 +117,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
-		if VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] == aBouquetName then
+		if aBouquetName == nil or VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] == aBouquetName then
 			if anIsActive then
 				tManaBarHeight = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["manaBarHeight"];
 			end
@@ -161,7 +167,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 	for _, tButton in pairs(tAllButtons) do
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
-		if VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] == aBouquetName then
+		if aBouquetName == nil or VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] == aBouquetName then
 			tManaBar = VUHDO_getHealthBar(tButton, 2);
 
 			if tQuota > 0 then

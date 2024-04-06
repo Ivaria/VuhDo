@@ -392,6 +392,7 @@ end
 
 
 --
+local tUnit;
 local tInfo;
 local tManaHeight;
 local tPanelNum;
@@ -404,7 +405,9 @@ local function VUHDO_initManaBar(aButton, aManaBar, aWidth, anIsForceBar)
 	aManaBar:SetPoint("BOTTOMLEFT", aButton:GetName(),  "BOTTOMLEFT", 0, 0);
 	VUHDO_setLlcStatusBarTexture(aManaBar, VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["MANA_BAR"]["TEXTURE"]);
 
-	tInfo = VUHDO_RAID[aButton["raidid"]];
+	tUnit = aButton["raidid"];
+	tInfo = VUHDO_RAID[tUnit];
+
 	tManaHeight = (anIsForceBar or not tInfo or tIsManaBouquet) and sManaBarHeight or 0;
 
 	aManaBar:SetWidth(aWidth);
