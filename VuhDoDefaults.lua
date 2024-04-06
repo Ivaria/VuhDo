@@ -1630,9 +1630,7 @@ function VUHDO_loadDefaultPanelSetup()
 				tAktPanel["PANEL_COLOR"]["TEXT"]["textSize"] = 12;
 			end
 		end
-	end
 
-	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 		if not VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] and tPanelNum == 1 then
 			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = {
 				["x"] = 130,

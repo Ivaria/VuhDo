@@ -585,7 +585,9 @@ local VUHDO_IGNORE_HOT_IDS = {
 
 --
 function VUHDO_hotBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aClipT, aClipB)
+
 	VUHDO_updateHotIcons(aUnit, "BOUQUET_" .. (aBouquetName or ""), aTimer, aCounter, anIcon, aDuration, 0, aColor, aBuffName, aClipL, aClipR, aClipT, aClipB);
+
 end
 
 
@@ -723,70 +725,77 @@ end
 
 --
 local tIcon;
+local tPanelNum;
 function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aClipT, aClipB)
+
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
-		if anIsActive and aColor then
-			tIcon = VUHDO_getBarRoleIcon(tButton, 51);
+		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
-			if VUHDO_ATLAS_TEXTURES[anIcon] then
-				tIcon:SetAtlas(anIcon);
+		if VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SWIFTMEND_INDICATOR"] == aBouquetName then
+			if anIsActive and aColor then
+				tIcon = VUHDO_getBarRoleIcon(tButton, 51);
+
+				if VUHDO_ATLAS_TEXTURES[anIcon] then
+					tIcon:SetAtlas(anIcon);
+				else
+					tIcon:SetTexture(anIcon);
+				end
+
+				tIcon:SetVertexColor(VUHDO_backColorWithFallback(aColor));
+
+				tIcon:SetTexCoord(aClipL or 0, aClipR or 1, aClipT or 0, aClipB or 1);
+
+				tIcon:Show();
+
+				if VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"]["isBarGlow"] then
+					VUHDO_LibCustomGlow.PixelGlow_Start(
+						tButton,
+						{
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["R"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["G"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["B"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["O"]
+						},
+						14,                             -- number of particles
+						0.3,                            -- frequency
+						8,                              -- length
+						2,                              -- thickness
+						0,                              -- x offset
+						0,                              -- y offset
+						false,                          -- border
+						VUHDO_CUSTOM_GLOW_SWIFTMEND_FRAME_KEY
+					);
+				end
+
+				if VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["SWIFTMEND_INDICATOR"]["isIconGlow"] then
+					VUHDO_LibCustomGlow.PixelGlow_Start(
+						tIcon,
+						{
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["R"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["G"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["B"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["O"]
+						},
+						8,                                           -- number of particles
+						0.3,                                         -- frequency
+						6,                                           -- length
+						2,                                           -- thickness
+						0,                                           -- x offset
+						0,                                           -- y offset
+						false,                                       -- border
+						VUHDO_CUSTOM_GLOW_SWIFTMEND_ICON_KEY
+					);
+				end
 			else
-				tIcon:SetTexture(anIcon);
+				VUHDO_LibCustomGlow.PixelGlow_Stop(tButton, VUHDO_CUSTOM_GLOW_SWIFTMEND_FRAME_KEY);
+
+				tIcon = VUHDO_getBarRoleIcon(tButton, 51);
+				VUHDO_LibCustomGlow.PixelGlow_Stop(tIcon, VUHDO_CUSTOM_GLOW_SWIFTMEND_ICON_KEY);
+				tIcon:Hide();
 			end
-
-			tIcon:SetVertexColor(VUHDO_backColorWithFallback(aColor));
-
-			tIcon:SetTexCoord(aClipL or 0, aClipR or 1, aClipT or 0, aClipB or 1);
-
-			tIcon:Show();
-
-			if VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.isBarGlow then
-				VUHDO_LibCustomGlow.PixelGlow_Start(
-					tButton, 
-					{ 
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["R"],
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["G"],
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["B"],
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["O"]
-					}, 
-					14,                             -- number of particles
-					0.3,                            -- frequency
-					8,                              -- length
-					2,                              -- thickness
-					0,                              -- x offset
-					0,                              -- y offset
-					false,                          -- border
-					VUHDO_CUSTOM_GLOW_SWIFTMEND_FRAME_KEY
-				);
-			end
-
-			if VUHDO_INDICATOR_CONFIG.CUSTOM.SWIFTMEND_INDICATOR.isIconGlow then
-				VUHDO_LibCustomGlow.PixelGlow_Start(
-					tIcon, 
-					{ 
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["R"],
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["G"],
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["B"],
-						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["O"]
-					}, 
-					8,                                           -- number of particles
-					0.3,                                         -- frequency
-					6,                                           -- length
-					2,                                           -- thickness
-					0,                                           -- x offset
-					0,                                           -- y offset
-					false,                                       -- border
-					VUHDO_CUSTOM_GLOW_SWIFTMEND_ICON_KEY
-				);
-			end
-		else
-			VUHDO_LibCustomGlow.PixelGlow_Stop(tButton, VUHDO_CUSTOM_GLOW_SWIFTMEND_FRAME_KEY);
-
-			tIcon = VUHDO_getBarRoleIcon(tButton, 51);
-			VUHDO_LibCustomGlow.PixelGlow_Stop(tIcon, VUHDO_CUSTOM_GLOW_SWIFTMEND_ICON_KEY);
-			tIcon:Hide();
 		end
 	end
+
 end
 
 
