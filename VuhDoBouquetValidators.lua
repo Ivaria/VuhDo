@@ -1238,13 +1238,21 @@ local VUHDO_BLOCKED_FUNCTIONS = {
 	EditMacro = true,
 	DevTools_DumpCommand = true,
 	hash_SlashCmdList = true,
+	RegisterNewSlashCommand = true,
 	CreateMacro = true,
 	SetBindingMacro = true,
 	GuildDisband = true,
 	GuildUninvite = true,
 	securecall = true,
 	DeleteCursorItem = true,
-	ChatEdit_SendText = true
+	ChatEdit_SendText = true,
+	ChatEdit_ActivateChat = true,
+	ChatEdit_ParseText = true,
+	ChatEdit_OnEnterPressed = true,
+	GetButtonMetatable = true,
+	GetEditBoxMetatable = true,
+	GetFontStringMetatable = true,
+	GetFrameMetatable = true
 };
 
 local VUHDO_BLOCKED_TABLES = {
@@ -1262,7 +1270,9 @@ local VUHDO_BLOCKED_TABLES = {
 	WeakAurasOptionsSaved = true,
 	PlaterDB = true,
 	_detalhes_global = true,
-	_detalhes = true
+	_detalhes = true,
+	DEFAULT_CHAT_FRAME = true,
+	ChatFrame1 = true
 };
 
 
