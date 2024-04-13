@@ -40,18 +40,11 @@ local floor = floor;
 local pairs = pairs;
 local type = type;
 local abs = abs;
-
-local UnitAura = UnitAura or (C_UnitAuras and
-			(function(aUnit, anIndex, aFilter)
-				local tAuraData = C_UnitAuras.GetAuraDataByIndex(aUnit, anIndex, aFilter);
-
-				if not tAuraData then
-					return nil;
-				end
-
-				return AuraUtil.UnpackAuraData(tAuraData);
-			end)
-);
+local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot;
+local GetAuraDataBySpellName = C_UnitAuras.GetAuraDataBySpellName;
+local GetAuraSlots = C_UnitAuras.GetAuraSlots;
+local UnpackAuraData = AuraUtil.UnpackAuraData;
+local FindAura = AuraUtil.FindAura;
 
 -- Number of seconds into the future to look for incoming heals
 -- This ensures we only include the next incoming tick of HoTs
@@ -612,11 +605,21 @@ function VUHDO_isSpellKnown(aSpellName)
 		return false;
 	end
 
-	return (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
+	if (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
 		or (type(aSpellName) == "number" and IsSpellKnownOrOverridesKnown(aSpellName))
 		or (type(aSpellName) == "number" and IsPlayerSpell(aSpellName))
 		or GetSpellBookItemInfo(aSpellName) ~= nil
-		or VUHDO_NAME_TO_SPELL[aSpellName] ~= nil and GetSpellBookItemInfo(VUHDO_NAME_TO_SPELL[aSpellName]);
+		or VUHDO_NAME_TO_SPELL[aSpellName] ~= nil and GetSpellBookItemInfo(VUHDO_NAME_TO_SPELL[aSpellName]) then
+		return true;
+	elseif type(aSpellName) ~= "number" then
+		_, _, _, _, _, _, tSpellId = GetSpellInfo(aSpellName);
+
+		if tSpellId then
+			return IsSpellKnownOrOverridesKnown(tSpellId) or IsSpellKnown(tSpellId) or IsPlayerSpell(tSpellId);
+		end
+	end
+
+	return false;
 
 end
 
@@ -1176,21 +1179,30 @@ end
 
 
 
+--
+local function VUHDO_isSpellIdMatch(aMatchSpellId, _, _, _, _, _, _, _, _, _, _, _, aSpellId)
+
+	return aMatchSpellId == aSpellId;
+
+end
+
+
+
+--
+local tSpellId;
 function VUHDO_unitAura(aUnit, aSpell, aFilter)
 
 	if (aFilter == nil) then
 		aFilter = "HELPFUL";
 	end
 
-	for tCnt = 1, 40 do
-		local tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tShouldConsolidate, tValue1, tValue2, tValue3 = UnitAura(aUnit, tCnt, aFilter);
+	tSpellId = tonumber(aSpell);
 
-		if (aSpell == tSpellName or tonumber(aSpell) == tSpellId) then
-			return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tShouldConsolidate, tValue1, tValue2, tValue3;
-		end
+	if tSpellId == nil then
+		return UnpackAuraData(GetAuraDataBySpellName(aUnit, aSpell, aFilter));
+	else
+		return FindAura(VUHDO_isSpellIdMatch, aUnit, aFilter, tSpellId);
 	end
-
-	return nil;
 
 end
 
@@ -1212,6 +1224,57 @@ end
 
 
 
+--
+local tMaxCnt;
+local tSlot;
+local tDone;
+local tAuraInfo;
+local function VUHDO_forEachAuraHelper(aUnit, aFilter, aPredicate, aUsePackedAura, aContinuationToken, ...)
+
+	tMaxCnt = select('#', ...);
+
+	for tCnt = 1, tMaxCnt do
+		tSlot = select(tCnt, ...);
+
+		tAuraInfo = GetAuraDataBySlot(aUnit, tSlot);
+
+		if aUsePackedAura then
+			tDone = aPredicate(tAuraInfo);
+		else
+			tDone = aPredicate(UnpackAuraData(tAuraInfo));
+		end
+
+		if tDone then
+			return nil;
+		end
+	end
+
+	return aContinuationToken;
+
+end
+
+
+
+--
+local tContinuationToken;
+function VUHDO_forEachAura(aUnit, aFilter, aMaxCnt, aPredicate, aUsePackedAura)
+
+		if aMaxCnt and aMaxCnt <= 0 then
+			return;
+		end
+
+		tContinuationToken = nil;
+
+		repeat
+			tContinuationToken = VUHDO_forEachAuraHelper(aUnit, aFilter, aPredicate, aUsePackedAura, 
+				GetAuraSlots(aUnit, aFilter, aMaxCnt, tContinuationToken));
+		until tContinuationToken == nil;
+
+end
+
+
+
+--
 function VUHDO_playSoundFile(aSound)
 
 	if (aSound and (aSound == "Interface\\Quiet.ogg" or aSound == "Interface\\Quiet.mp3")) then
