@@ -65,29 +65,6 @@ end
 
 
 --
-local tSpellName;
-function VUHDO_spellcastSucceeded(aUnit, aSpellId)
-
-	if "player" ~= aUnit and VUHDO_PLAYER_RAID_ID ~= aUnit then 
-		return;
-	end
-
-	if aSpellId then
-		tSpellName = GetSpellInfo(aSpellId);
-	end
-
-	if tSpellName and (VUHDO_ACTIVE_HOTS[tSpellName] or VUHDO_ACTIVE_HOTS[tostring(aSpellId)]) then
-		VUHDO_updateAllHoTs();
-		VUHDO_updateAllCyclicBouquets(true);
-	end
-
-	VUHDO_aoeUpdateAll();
-
-end
-
-
-
---
 local tTargetUnit;
 local tCateg;
 local tSpellName;
