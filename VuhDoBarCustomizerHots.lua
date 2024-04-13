@@ -590,6 +590,10 @@ local function VUHDO_updateHotIconPredicate(anAuraData)
 
 	tBuffName, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnpackAuraData(anAuraData);
 
+	if not tBuffIcon then
+		return;
+	end
+
 	tIsCastByPlayer = tCaster == "player" or tCaster == VUHDO_PLAYER_RAID_ID;
 
 	if sIsPlayerKnowsSwiftmend and not sIsSwiftmend then
