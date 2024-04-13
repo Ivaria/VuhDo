@@ -308,7 +308,7 @@ local function VUHDO_determineDebuffPredicate(anAuraData)
 	end
 
 	if VUHDO_LibClassicDurations then
-		tNewDuration, tNewExpiry = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tUnitCaster, tName);
+		tNewDuration, tNewExpiry = VUHDO_LibClassicDurations:GetAuraDurationByUnit(tUnit, tSpellId, tUnitCaster, tName);
 
 		if tDuration == 0 and tNewDuration then 
 			tDuration = tNewDuration;

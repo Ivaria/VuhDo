@@ -1217,6 +1217,23 @@ end
 
 --
 local tSpellId;
+local tSpellName;
+local tIcon;
+local tCount;
+local tDebuffType;
+local tDuration;
+local tExpirationTime;
+local tSource;
+local tIsStealable;
+local tNameplateShowPersonal;
+local tCanApplyAura;
+local tIsBossDebuff;
+local tNameplateShowAll;
+local tTimeMod;
+local tValue1;
+local tValue2;
+local tValue3;
+local tNewDuration, tNewExpirationTime;
 function VUHDO_unitAura(aUnit, aSpell, aFilter)
 
 	if (aFilter == nil) then
@@ -1224,12 +1241,28 @@ function VUHDO_unitAura(aUnit, aSpell, aFilter)
 	end
 
 	tSpellId = tonumber(aSpell);
+	tIcon = nil;
 
 	if tSpellId == nil then
-		return UnpackAuraData(GetAuraDataBySpellName(aUnit, aSpell, aFilter));
+		tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = UnpackAuraData(GetAuraDataBySpellName(aUnit, aSpell, aFilter));
 	else
-		return FindAura(VUHDO_isSpellIdMatch, aUnit, aFilter, tSpellId);
+		tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3 = FindAura(VUHDO_isSpellIdMatch, aUnit, aFilter, tSpellId);
 	end
+
+	if not tIcon then
+		return;
+	end
+
+	if VUHDO_LibClassicDurations and tSpellId then
+                local tNewDuration, tNewExpirationTime = VUHDO_LibClassicDurations:GetAuraDurationByUnit(aUnit, tSpellId, tSource, tSpellName);
+
+		if tDuration == 0 and tNewDuration then
+			tDuration = tNewDuration;
+			tExpirationTime = tNewExpirationTime;
+		end
+	end
+
+	return tSpellName, tIcon, tCount, tDebuffType, tDuration, tExpirationTime, tSource, tIsStealable, tNameplateShowPersonal, tSpellId, tCanApplyAura, tIsBossDebuff, tNameplateShowAll, tTimeMod, tValue1, tValue2, tValue3;
 
 end
 
