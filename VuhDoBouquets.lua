@@ -657,7 +657,7 @@ end
 
 
 --
-local function VUHDO_isAnyBouquetInterstedIn(anUpdateMode)
+local function VUHDO_isAnyBouquetInterestedIn(anUpdateMode)
 	for tName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
 		if VUHDO_isBouquetInterestedInEvent(tName, anUpdateMode) then return true; end
 	end
@@ -781,9 +781,9 @@ end
 
 
 --
-function VUHDO_isAnyoneInterstedIn(anUpdateMode)
+function VUHDO_isAnyoneInterestedIn(anUpdateMode)
 
-	if (VUHDO_isAnyBouquetInterstedIn(anUpdateMode) or VUHDO_isAnyTextIndicatorInterestedIn(anUpdateMode)) then
+	if (VUHDO_isAnyBouquetInterestedIn(anUpdateMode) or VUHDO_isAnyTextIndicatorInterestedIn(anUpdateMode)) then
 		return true;
 	else
 		if 5 == anUpdateMode then -- VUHDO_UPDATE_RANGE

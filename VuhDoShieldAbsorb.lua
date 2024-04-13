@@ -325,15 +325,19 @@ end
 
 
 --
-local tUnit;
+local tUnit, tInfo;
 local VUHDO_DEBUFF_SHIELDS = { };
 local tDelta, tShieldName;
+local tDoUpdate;
 function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldName, anAmount, aSpellId, anAbsorbAmount)
+
 	tUnit = VUHDO_RAID_GUIDS[aDstGuid];
-	if not tUnit then return; end
+
+	if not tUnit then
+		return;
+	end
 
 	if sMissedEvents[aMessage] then
-		VUHDO_updateShields(tUnit);
 		return;
 	end
 
@@ -342,6 +346,8 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 	--[[if ("SPELL_AURA_APPLIED" == aMessage) then
 		VUHDO_xMsg(aShieldName, aSpellId);
 	end]]
+
+	tDoUpdate = true;
 
 	if VUHDO_SHIELDS[aSpellId] then
 
@@ -354,6 +360,8 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 			or "SPELL_AURA_BROKEN" == aMessage
 			or "SPELL_AURA_BROKEN_SPELL" == aMessage then
 			VUHDO_removeShield(tUnit, aShieldName);
+		else
+			tDoUpdate = false;
 		end
 	elseif VUHDO_ABSORB_DEBUFFS[aSpellId] then
 
@@ -367,28 +375,46 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 			or "SPELL_AURA_BROKEN_SPELL" == aMessage then
 			VUHDO_removeShield(tUnit, aShieldName);
 			VUHDO_DEBUFF_SHIELDS[tUnit] = nil;
+		else
+			tDoUpdate = false;
 		end
 	elseif ("SPELL_HEAL" == aMessage or "SPELL_PERIODIC_HEAL" == aMessage)
 		and VUHDO_DEBUFF_SHIELDS[tUnit]
 		and (tonumber(anAbsorbAmount) or 0) > 0 then
+
 		tShieldName = VUHDO_DEBUFF_SHIELDS[tUnit];
 		tDelta = VUHDO_getShieldLeftAmount(tUnit, tShieldName) - anAbsorbAmount;
 		VUHDO_updateShieldValue(tUnit, tShieldName, tDelta);
 	elseif "UNIT_DIED" == aMessage then
+
 		VUHDO_SHIELD_SIZE[tUnit] = nil;
 		VUHDO_SHIELD_LEFT[tUnit] = nil;
 		VUHDO_SHIELD_EXPIRY[tUnit] = nil;
 		VUHDO_DEBUFF_SHIELDS[tUnit] = nil;
 		VUHDO_SHIELD_LAST_SOURCE_GUID[tUnit] = nil;
-	elseif ((VUHDO_IMMEDIATE_HOTS[aShieldName] and VUHDO_ACTIVE_HOTS[aShieldName]) or (VUHDO_IMMEDIATE_HOTS[tostring(aSpellId)] and VUHDO_ACTIVE_HOTS[tostring(aSpellId)])) and 
-		("SPELL_AURA_APPLIED" == aMessage or "SPELL_AURA_REMOVED" == aMessage or 
-		 "SPELL_AURA_REFRESH" == aMessage or "SPELL_AURA_BROKEN" == aMessage or 
-		 "SPELL_AURA_BROKEN_SPELL" == aMessage) then
-		VUHDO_updateAllHoTs();
-		VUHDO_updateAllCyclicBouquets(true);
+	elseif ((VUHDO_IMMEDIATE_HOTS[aShieldName] and VUHDO_ACTIVE_HOTS[aShieldName]) or
+		(VUHDO_IMMEDIATE_HOTS[tostring(aSpellId)] and VUHDO_ACTIVE_HOTS[tostring(aSpellId)])) and
+		("SPELL_AURA_APPLIED" == aMessage or "SPELL_AURA_REMOVED" == aMessage or
+		"SPELL_AURA_REFRESH" == aMessage or "SPELL_AURA_BROKEN" == aMessage or
+		"SPELL_AURA_BROKEN_SPELL" == aMessage) then
+
+		tinfo = VUHDO_RAID[tUnit];
+
+		if tInfo then
+			VUHDO_updateHots(tUnit, tInfo);
+
+			-- FIXME: why all?
+			VUHDO_updateAllCyclicBouquets(true);
+		end
+	else
+		tDoUpdate = false;
 	end
 
-	VUHDO_updateBouquetsForEvent(tUnit, 36); -- VUHDO_UPDATE_SHIELD
-	VUHDO_updateShieldBar(tUnit);
-	VUHDO_updateHealAbsorbBar(tUnit);
+	if tDoUpdate then
+		VUHDO_updateBouquetsForEvent(tUnit, 36); -- VUHDO_UPDATE_SHIELD
+
+		VUHDO_updateShieldBar(tUnit);
+		VUHDO_updateHealAbsorbBar(tUnit);
+	end
+
 end
