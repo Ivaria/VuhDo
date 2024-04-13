@@ -438,6 +438,8 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 
 			-- FIXME: why all?
 			VUHDO_updateAllCyclicBouquets(true);
+		else
+			tDoUpdate = false;
 		end
 	elseif "SPELL_ABSORBED" == aMessage then
 		-- SPELL_ABSORBED optionally includes the spell payload if triggered from what would be SPELL_DAMAGE
