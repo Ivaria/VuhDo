@@ -591,6 +591,10 @@ local function VUHDO_updateHotIconPredicate(anAuraData)
 
 	tBuffName, tBuffIcon, tStacks, _, tDuration, tExpiry, tCaster, _, _, tSpellId = UnpackAuraData(anAuraData);
 
+	if not tBuffIcon then
+		return;
+	end
+
 	if VUHDO_LibClassicDurations then
 		tNewDuration, tNewExpiry = VUHDO_LibClassicDurations:GetAuraDurationByUnit(tUnit, tSpellId, tCaster, tBuffName);
 
