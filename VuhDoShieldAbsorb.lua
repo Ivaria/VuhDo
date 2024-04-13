@@ -405,6 +405,8 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 
 			-- FIXME: why all?
 			VUHDO_updateAllCyclicBouquets(true);
+		else
+			tDoUpdate = false;
 		end
 	else
 		tDoUpdate = false;
