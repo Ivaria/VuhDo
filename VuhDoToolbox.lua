@@ -1,5 +1,6 @@
 local _;
 
+local huge = math.huge;
 local strsub = strsub;
 local InCombatLockdown = InCombatLockdown;
 local twipe = table.wipe;
@@ -43,8 +44,9 @@ local abs = abs;
 local GetAuraDataBySlot = C_UnitAuras.GetAuraDataBySlot;
 local GetAuraDataBySpellName = C_UnitAuras.GetAuraDataBySpellName;
 local GetAuraSlots = C_UnitAuras.GetAuraSlots;
-local UnpackAuraData = AuraUtil.UnpackAuraData;
+local UnpackAuraData = AuraUtil.UnpackAuraData or VUHDO_unpackAuraData;
 local FindAura = AuraUtil.FindAura;
+local FindAuraByName = AuraUtil.FindAuraByName;
 
 -- talent cache maps for new large Dragonflight talent trees
 local VUHDO_TALENT_CACHE_SPELL_ID = {
@@ -1180,7 +1182,11 @@ function VUHDO_unitAura(aUnit, aSpell, aFilter)
 	tSpellId = tonumber(aSpell);
 
 	if tSpellId == nil then
-		return UnpackAuraData(GetAuraDataBySpellName(aUnit, aSpell, aFilter));
+		if UnpackAuraData and GetAuraDataBySpellName then
+			return UnpackAuraData(GetAuraDataBySpellName(aUnit, aSpell, aFilter));
+		else
+			return FindAuraByName(aSpell, aUnit, aFilter);
+		end
 	else
 		return FindAura(VUHDO_isSpellIdMatch, aUnit, aFilter, tSpellId);
 	end
@@ -1200,6 +1206,70 @@ end
 function VUHDO_unitDebuff(aUnit, aSpell)
 
 	return VUHDO_unitAura(aUnit, aSpell, "HARMFUL");
+
+end
+
+
+
+--
+local function VUHDO_packAuraDataHelper(aSpellName, anIcon, aCount, aDebuffType, aDuration, aExpirationTime, aSource, anIsStealable, aNameplateShowPersonal, aSpellId, aCanApplyAura, anIsBossDebuff, aNameplateShowAll, aTimeMod, ...)
+
+	return aSpellName, anIcon, aCount, aDebuffType, aDuration, aExpirationTime, aSource, anIsStealable, aNameplateShowPersonal, aSpellId, aCanApplyAura, anIsBossDebuff, aNameplateShowAll, aTimeMod, { ... };
+
+end
+
+
+
+--
+local function VUHDO_packAuraData(aSpellName, anIcon, aCount, aDebuffType, aDuration, aExpirationTime, aSource, anIsStealable, aNameplateShowPersonal, aSpellId, aCanApplyAura, anIsBossDebuff, aNameplateShowAll, aTimeMod, ...)
+
+	local tAuraData = { };
+
+	tAuraData.name,	tAuraData.icon,	tAuraData.applications,	tAuraData.dispelName, tAuraData.duration, tAuraData.expirationTime, tAuraData.sourceUnit,
+		tAuraData.isStealable, tAuraData.nameplateShowPersonal, tAuraData.spellId, tAuraData.canApplyAura, tAuraData.isBossAura, 
+		tAuraData.nameplateShowAll, tAuraData.timeMod, tAuraData.points = VUHDO_packAuraDataHelper(
+			aSpellName, anIcon, aCount, aDebuffType, aDuration, aExpirationTime, aSource, anIsStealable, aNameplateShowPersonal, aSpellId, 
+			aCanApplyAura, anIsBossDebuff, aNameplateShowAll, aTimeMod, ...);
+
+	return tAuraData;
+
+end
+
+
+
+--
+local function VUHDO_getAuraDataByIndex(aUnit, aIndex, aFilter)
+
+	return VUHDO_packAuraData(UnitAura(aUnit, aIndex, aFilter));
+
+
+end
+
+
+
+--
+function VUHDO_unpackAuraData(anAuraData)
+
+	if not anAuraData then
+		return nil;
+	end
+
+	return anAuraData.name,
+		anAuraData.icon,
+		anAuraData.applications,
+		anAuraData.dispelName,
+		anAuraData.duration,
+		anAuraData.expirationTime,
+		anAuraData.sourceUnit,
+		anAuraData.isStealable,
+		anAuraData.nameplateShowPersonal,
+		anAuraData.spellId,
+		anAuraData.canApplyAura,
+		anAuraData.isBossAura,
+		anAuraData.isFromPlayerOrPlayerPet,
+		anAuraData.nameplateShowAll,
+		anAuraData.timeMod,
+		unpack(anAuraData.points);
 
 end
 
@@ -1238,18 +1308,39 @@ end
 
 --
 local tContinuationToken;
+local tDone;
 function VUHDO_forEachAura(aUnit, aFilter, aMaxCnt, aPredicate, aUsePackedAura)
 
 		if aMaxCnt and aMaxCnt <= 0 then
 			return;
 		end
 
-		tContinuationToken = nil;
+		if GetAuraSlots then
+			tContinuationToken = nil;
 
-		repeat
-			tContinuationToken = VUHDO_forEachAuraHelper(aUnit, aFilter, aPredicate, aUsePackedAura, 
-				GetAuraSlots(aUnit, aFilter, aMaxCnt, tContinuationToken));
-		until tContinuationToken == nil;
+			repeat
+				tContinuationToken = VUHDO_forEachAuraHelper(aUnit, aFilter, aPredicate, aUsePackedAura, 
+					GetAuraSlots(aUnit, aFilter, aMaxCnt, tContinuationToken));
+			until tContinuationToken == nil;
+		else
+			for tCnt = 1, (aMaxCnt or huge) do
+				tAuraInfo = VUHDO_getAuraDataByIndex(aUnit, tCnt, aFilter);
+
+				if not tAuraInfo.icon then
+					return nil;
+				end
+
+				if aUsePackedAura then
+					tDone = aPredicate(tAuraInfo);
+				else
+					tDone = aPredicate(UnpackAuraData(tAuraInfo));
+				end
+
+				if tDone then
+					return nil;
+				end
+			end
+		end
 
 end
 
