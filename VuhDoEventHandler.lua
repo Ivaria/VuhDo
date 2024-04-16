@@ -475,7 +475,9 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			if VUHDO_INTERNAL_TOGGLES[36] then -- VUHDO_UPDATE_SHIELD
 				-- for SPELL events with _AURA suffixes the amount healed is the 16th arg
 				-- for SPELL_HEAL/SPELL_PERIODIC_HEAL the amount absorbed is the 17th arg
-				VUHDO_parseCombatLogShieldAbsorb(anArg2, anArg4, anArg8, anArg13, anArg16, anArg12, anArg17, anArg15, anArg18, anArg20, anArg21, anArg22, anArg19);
+				-- for SPELL_ABSORBED the absorb spell ID is either the 16th or 19th arg
+				-- FIXME: Wrath Classic the 19th arg for SPELL_ABSORBED is not absorb spell ID
+				VUHDO_parseCombatLogShieldAbsorb(anArg2, anArg4, anArg8, anArg13, anArg16, anArg12, anArg17, anArg19, anArg15, anArg18, anArg20, anArg21, anArg22, anArg19);
 			end
 
 			if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
