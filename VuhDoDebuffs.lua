@@ -59,7 +59,7 @@ local pairs = pairs;
 local _;
 local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
-local UnpackAuraData = AuraUtil.UnpackAuraData;
+local UnpackAuraData = AuraUtil.UnpackAuraData or VUHDO_unpackAuraData;
 
 local sIsNotRemovableOnly;
 local sIsNotRemovableOnlyIcons;

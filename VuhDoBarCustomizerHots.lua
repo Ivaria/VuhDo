@@ -55,7 +55,7 @@ local pairs = pairs;
 local twipe = table.wipe;
 local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
-local UnpackAuraData = AuraUtil.UnpackAuraData;
+local UnpackAuraData = AuraUtil.UnpackAuraData or VUHDO_unpackAuraData;
 
 local _G = _G;
 

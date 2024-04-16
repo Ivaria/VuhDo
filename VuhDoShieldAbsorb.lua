@@ -111,11 +111,14 @@ local VUHDO_ABSORB_DEBUFFS = {
 
 
 local sMissedEvents = {
+	["SPELL_ABSORBED"] = true
+--[[
 	["SWING_MISSED"] = true,
 	["RANGE_MISSED"] = true,
 	["SPELL_MISSED"] = true,
 	["SPELL_PERIODIC_MISSED"] = true,
 	["ENVIRONMENTAL_MISSED"] = true
+]];
 };
 
 
@@ -347,7 +350,7 @@ local tUnit, tInfo;
 local VUHDO_DEBUFF_SHIELDS = { };
 local tDelta, tShieldName;
 local tDoUpdate;
-function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldName, anAmount, aSpellId, anAbsorbAmount, aHealAmount, aCritical, anAbsorbSpellName, anAbsorbSpellSchool, anAbsorbSpellDamageAmount, anAbsorbSwingDamageAmount)
+function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldName, anAmount, aSpellId, anAbsorbAmount, anAbsorbSpellId, aHealAmount, aCritical, anAbsorbSpellName, anAbsorbSpellSchool, anAbsorbSpellDamageAmount, anAbsorbSwingDamageAmount)
 
 	tUnit = VUHDO_RAID_GUIDS[aDstGuid];
 
@@ -355,9 +358,21 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		return;
 	end
 
-	if sMissedEvents[aMessage] then
+	-- FIXME: Wrath Classic has special handling of SPELL_ABSORBED subevents so disable for now
+	-- only trigger a shield update on subevent SPELL_ABSORBED, no longer for *_MISSED events
+	-- event optionally includes the spell payload if trigger by SPELL_DAMAGE
+	-- this moves the absorb spell ID from the 16th arg (anAmount) to the 19th arg (anAbsorbSpellId)
+--[[	if sMissedEvents[aMessage] then
+		if type(anAmount) == "number" then
+			anAbsorbSpellId = anAmount;
+		end
+
+		if VUHDO_SHIELDS[anAbsorbSpellId] then
+			VUHDO_updateShield(tUnit, anAbsorbSpellId);
+		end
+
 		return;
-	end
+	end]];
 
 	--VUHDO_Msg(aSpellId);
 
@@ -457,6 +472,8 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		if VUHDO_SHIELD_LEFT[tUnit][tShieldName] then
 			tDelta = VUHDO_getShieldLeftAmount(tUnit, tShieldName) - anAmount;
 			VUHDO_updateShieldValue(tUnit, tShieldName, tDelta);
+		else
+			tDoUpdate = false;
 		end
 	else
 		tDoUpdate = false;
