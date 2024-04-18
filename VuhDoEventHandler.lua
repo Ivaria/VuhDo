@@ -384,6 +384,7 @@ end
 --
 local tLevel = 0;
 local function VUHDO_init()
+
 	if tLevel == 0 or VUHDO_VARIABLES_LOADED then
 		tLevel = 1;
 		return;
@@ -440,6 +441,10 @@ local function VUHDO_init()
 		VUHDO_loadDefaultProfile();
 		VUHDO_loadDefaultLayout();
 	end
+
+	-- FIXME: Classic Era patch 1.15.2 has a bug where spells are not initialized by VuhDo init time
+	C_Timer.After(0.3, VUHDO_initBuffs);
+
 end
 
 
