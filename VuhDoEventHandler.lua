@@ -417,8 +417,6 @@ local function VUHDO_init()
 	VUHDO_getAutoProfile();
 	VUHDO_initCliqueSupport();
 
-	VUHDO_initLibHealComm();
-
 	if VuhDoNewOptionsTabbedFrame then
 		VuhDoNewOptionsTabbedFrame:ClearAllPoints();
 		VuhDoNewOptionsTabbedFrame:SetPoint("CENTER",  "UIParent", "CENTER",  0,  0);

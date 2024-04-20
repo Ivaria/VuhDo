@@ -1461,27 +1461,12 @@ end
 
 
 
-function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
+function VUHDO_unitGetIncomingHeals(...)
 
-	if not aUnit then
+	if not UnitGetIncomingHeals then
 		return 0;
-	end
-
-	if VUHDO_LibHealComm and VUHDO_CONFIG["SHOW_LIBHEALCOMM_INCOMING"] then
-		local tTargetGUID = UnitGUID(aUnit);
-
-		if aCasterUnit then
-			local tCasterGUID = UnitGUID(aCasterUnit);
-
-
-			return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-		else
-			return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-		end
-	elseif UnitGetIncomingHeals then
-		return UnitGetIncomingHeals(aUnit, aCasterUnit);
 	else
-		return 0;
+		return UnitGetIncomingHeals(...);
 	end
 
 end
