@@ -7,6 +7,7 @@ local UnitGetTotalAbsorbs = VUHDO_unitGetTotalAbsorbs;
 local VUHDO_SHIELDS = {
 	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD
 	[47509] = 15, -- VUHDO_SPELL_ID.DIVINE_AEGIS
+	[47753] = 15, -- VUHDO_SPELL_ID.DIVINE_AEGIS
 	[76669] = 5, -- VUHDO_SPELL_ID.ILLUMINATED_HEALING
 	[11426] = 60, -- VUHDO_SPELL_ID.ICE_BARRIER
 	[1463] = 60, -- VUHDO_SPELL_ID.MANA_SHIELD
@@ -379,30 +380,14 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 	if VUHDO_SHIELDS[aSpellId] then
 
 		if "SPELL_AURA_REFRESH" == aMessage then 
-			if not anAmount then -- anAmount is always nil in Wrath Classic
-				anAmount = VUHDO_SHIELD_LEFT_TEMP[tUnit][aShieldName] or 0;
-			end
-
 			VUHDO_updateShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
 		elseif "SPELL_AURA_APPLIED" == aMessage then 
-			if not anAmount then -- anAmount is always nil in Wrath Classic
-				anAmount = VUHDO_SHIELD_LEFT_TEMP[tUnit][aShieldName] or 0;
-			end
-
 			VUHDO_initShieldValue(tUnit, aShieldName, anAmount, VUHDO_SHIELDS[aSpellId]);
 			VUHDO_SHIELD_LAST_SOURCE_GUID[tUnit][aShieldName] = aSrcGuid;
 		elseif "SPELL_AURA_REMOVED" == aMessage
 			or "SPELL_AURA_BROKEN" == aMessage
 			or "SPELL_AURA_BROKEN_SPELL" == aMessage then
 			VUHDO_removeShield(tUnit, aShieldName);
-		elseif "SPELL_HEAL" == aMessage and aSpellId == 56160 then -- Glyph of Power Word: Shield
-			anAmount = aHealAmount / 0.2; -- the glyph heal amount is 20% of the absorb amount
-
-			if aCritical then
-				anAmount = math.floor(anAmount / 1.5); -- critical heals in Wrath Classic are 150%
-			end
-
-			VUHDO_SHIELD_LEFT_TEMP[tUnit][VUHDO_SPELL_ID.POWERWORD_SHIELD] = anAmount;
 		else
 			tDoUpdate = false;
 		end
