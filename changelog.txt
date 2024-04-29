@@ -16,6 +16,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added per panel indicator settings under 'VuhDo Options > Panels'  
   
   
 --------------------------------------------------------------  
