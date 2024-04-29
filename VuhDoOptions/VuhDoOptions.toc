@@ -7,7 +7,7 @@
 ## IconTexture: Interface\AddOns\VuhDo\Images\TemporaryPortrait-Female-BloodElf-VuhDo
 
 ## X-Curse-Project-ID: 7950
-## X-WoWI-ID: 26372
+## X-WoWI-ID: 26722
 ## X-Wago-ID: yQKynG71
 
 ## SavedVariables: VUHDO_OPTIONS_SETTINGS
