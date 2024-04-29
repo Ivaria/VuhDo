@@ -450,10 +450,17 @@ function VUHDO_determineDebuff(aUnit)
 		-- Gained new custom debuff?
 		-- note we only play sounds for debuff customs with isIcon set to true
 		for tName, tDebuffInfo in pairs(sCurIcons) do
-			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] then 
+			if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] or not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][5] then 
 				if not sIsShowOnlyForFriendly or UnitIsFriend("player", aUnit) then
 					-- tExpiry, tStacks, tIcon
-					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7] };
+					if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] then
+						VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = { tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7], true };
+					else
+						VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1], VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2],
+							VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3], VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][4],
+							VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][5] = tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1],
+							tDebuffInfo[7], true;
+					end
 
 					VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7]);
 
@@ -471,10 +478,10 @@ function VUHDO_determineDebuff(aUnit)
 					VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
 				end
 			-- update number of stacks?
-			elseif VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1] ~= tDebuffInfo[2]
+			elseif VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][5] and (VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1] ~= tDebuffInfo[2]
 				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2] ~= tDebuffInfo[3] 
 				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][3] ~= tDebuffInfo[1]
-				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][4] ~= tDebuffInfo[7] then 
+				or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][4] ~= tDebuffInfo[7]) then
 
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][1] = tDebuffInfo[2];
 				VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][2] = tDebuffInfo[3];
@@ -502,8 +509,7 @@ function VUHDO_determineDebuff(aUnit)
 	-- Lost old custom debuff?
 	for tName, _ in pairs(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]) do
 		if not sCurIcons[tName] then
-			twipe(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName]);
-			VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName] = nil;
+			VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tName][5] = false;
 			VUHDO_removeDebuffIcon(aUnit, tName);
 			VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
 		end

@@ -5,8 +5,6 @@ local smatch = string.match;
 local InCombatLockdown = InCombatLockdown;
 local HasLFGRestrictions = VUHDO_hasLFGRestrictions;
 
-local VUHDO_updateAllHoTs;
-local VUHDO_updateAllCyclicBouquets;
 local VUHDO_initGcd;
 local VUHDO_strempty;
 
@@ -21,8 +19,6 @@ local sEmpty = { };
 
 
 function VUHDO_spellEventHandlerInitLocalOverrides()
-	VUHDO_updateAllHoTs = _G["VUHDO_updateAllHoTs"];
-	VUHDO_updateAllCyclicBouquets = _G["VUHDO_updateAllCyclicBouquets"];
 	VUHDO_initGcd = _G["VUHDO_initGcd"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
 
