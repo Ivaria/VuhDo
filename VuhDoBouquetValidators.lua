@@ -819,7 +819,7 @@ end
 local function VUHDO_statusExcessAbsorbValidator(anInfo, _)
 	local healthmax = anInfo["healthmax"];
 
-	local excessAbsorb = (UnitGetTotalAbsorbs(anInfo["unit"]) or 0) + anInfo["health"] - healthmax;
+	local excessAbsorb = (VUHDO_getUnitOverallShieldRemain(anInfo["unit"]) or 0) + anInfo["health"] - healthmax;
 
 	if excessAbsorb < 0 then
 		return true, nil, 0, -1, healthmax;
@@ -832,7 +832,7 @@ end
 
 --
 local function VUHDO_statusTotalAbsorbValidator(anInfo, _)
-	return true, nil, UnitGetTotalAbsorbs(anInfo["unit"]) or 0, -1, anInfo["healthmax"];
+	return true, nil, VUHDO_getUnitOverallShieldRemain(anInfo["unit"]) or 0, -1, anInfo["healthmax"];
 end
 
 
