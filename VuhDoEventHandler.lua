@@ -443,7 +443,7 @@ local function VUHDO_init()
 	end
 
 	-- FIXME: Classic Era patch 1.15.2 has a bug where spells are not initialized by VuhDo init time
-	C_Timer.After(0.3, VUHDO_initBuffs);
+	C_Timer.After(1, VUHDO_initBuffs);
 
 end
 
