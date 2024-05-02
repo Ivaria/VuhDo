@@ -13,6 +13,8 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Paladin aura buff types in Buff Watch  
+-- Fixed class debuff abilities provided by talents  
   
   
 Improvements:  
