@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Mage 'Molten Armor' in Buff Watch  
   
   
 Improvements:  
@@ -38,9 +39,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed binding Priest 'Holy Word' spells  
   
   
 Improvements:  
+-- Added Priest 'Chakra' to Buff Watch  
   
   
 --------------------------------------------------------------  
