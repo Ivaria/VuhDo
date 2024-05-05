@@ -13,9 +13,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed binding Priest 'Holy Word' spells  
   
   
 Improvements:  
+-- Added Priest 'Chakra' to Buff Watch  
   
   
 --------------------------------------------------------------  
