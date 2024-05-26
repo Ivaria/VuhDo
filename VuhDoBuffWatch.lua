@@ -394,7 +394,13 @@ function VUHDO_initBuffsFromSpellBook()
 			tParentSpellName = tCategSpells[1];
 
 			if VUHDO_isSpellKnown(tParentSpellName) then
-				tChildSpellName, _, tIcon, _, _, _, tSpellId = GetSpellInfo(tParentSpellName);
+				if VUHDO_isRuneSpellKnown(tParentSpellName) then
+					tSpellId = VUHDO_getRuneSpellId(tParentSpellName);
+				else
+					tSpellId = tParentSpellName;
+				end
+
+				tChildSpellName, _, tIcon, _, _, _, tSpellId = GetSpellInfo(tSpellId);
 
 				if tChildSpellName then
 					VUHDO_BUFFS[tChildSpellName] = {

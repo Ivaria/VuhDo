@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Buff Watch spells and abilities granted by SoD Runes  
   
   
 Improvements:  
