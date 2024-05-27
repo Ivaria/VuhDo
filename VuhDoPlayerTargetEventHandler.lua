@@ -65,12 +65,13 @@ function VUHDO_updatePlayerTarget()
 	VUHDO_clParserSetCurrentTarget(tTargetUnit);
 
 	if VUHDO_INTERNAL_TOGGLES[27] then -- VUHDO_UPDATE_PLAYER_TARGET
+		VUHDO_removeAllDebuffIcons("target");
+
 		if UnitExists("target") then
 			VUHDO_setHealth("target", 1); -- VUHDO_UPDATE_ALL
 		else
 			VUHDO_removeHots("target");
 			VUHDO_resetDebuffsFor("target");
-			VUHDO_removeAllDebuffIcons("target");
 			VUHDO_updateTargetBars("target");
 			table.wipe(VUHDO_RAID["target"] or tEmptyInfo);
 			VUHDO_RAID["target"] = nil;

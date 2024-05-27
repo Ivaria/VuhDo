@@ -298,7 +298,7 @@ local function VUHDO_addCurChosen(aUnit, anAuraInstanceId, aType, aName, aSpellI
 			aName or sCurChosen[aUnit][2] or VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[2],
 			aSpellId or sCurChosen[aUnit][3] or VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[3],
 			(anIsStandard ~= nil) and anIsStandard or (sCurChosen[aUnit][4] or VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[4]);
-		end
+	end
 
 end
 
@@ -444,6 +444,14 @@ local function VUHDO_initDebuffInfos(aUnit)
 		end
 	end
 
+	if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit] then
+		VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit] = { };
+	else
+		for tAuraInstanceId, _ in pairs(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]) do
+			VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId] = nil;
+		end
+	end
+
 	return tUnitDebuffInfo;
 
 end
@@ -476,6 +484,7 @@ end
 --
 local sUnit;
 local sNow;
+local sUnitDebuffInfo;
 
 local tDebuffConfig;
 local tIsShown;
@@ -485,7 +494,6 @@ local tAbility;
 local tIsRelevant;
 local tSchool;
 local tRemaining;
-local tUnitDebuffInfo;
 local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, aStacks, aTypeString, aDuration, anExpiry, aUnitCaster, aSpellId, anIsBossDebuff, anIsUpdate)
 
 	if not anIcon then
@@ -521,7 +529,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 		and not (VUHDO_IGNORE_DEBUFFS_BY_CLASS[tInfo["class"] or ""] or sEmpty)[aName];
 
 	if tType and tIsRelevant then
-		tSchool = tUnitDebuffInfo[tType];
+		tSchool = sUnitDebuffInfo[tType];
 		tRemaining = floor(anExpiry - sNow);
 
 		if (tSchool[2] or 0) < tRemaining then
@@ -546,7 +554,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 				VUHDO_addCurChosen(sUnit, anAuraInstanceId, tType, nil, nil, nil);
 			end
 
-			tUnitDebuffInfo["CHOSEN"][1], tUnitDebuffInfo["CHOSEN"][2] = anIcon, aStacks;
+			sUnitDebuffInfo["CHOSEN"][1], sUnitDebuffInfo["CHOSEN"][2] = anIcon, aStacks;
 		end
 	end
 
@@ -654,12 +662,12 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 		sNow = GetTime();
 
 		if not aUpdateInfo or (aUpdateInfo and aUpdateInfo.isFullUpdate) then
-			tUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
+			sUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
 
 			ForEachAura(aUnit, "HARMFUL", nil, VUHDO_determineAuraPredicate, true);
 			ForEachAura(aUnit, "HELPFUL", nil, VUHDO_determineAuraPredicate, true);
 		elseif aUpdateInfo then
-			tUnitDebuffInfo = (sCurIcons[aUnit] and sCurChosen[aUnit]) and VUHDO_UNIT_DEBUFF_INFOS[aUnit] or VUHDO_initDebuffInfos(aUnit);
+			sUnitDebuffInfo = (sCurIcons[aUnit] and sCurChosen[aUnit]) and VUHDO_UNIT_DEBUFF_INFOS[aUnit] or VUHDO_initDebuffInfos(aUnit);
 
 			if aUpdateInfo.addedAuras then
 				for _, tAuraData in pairs(aUpdateInfo.addedAuras) do
@@ -907,7 +915,6 @@ end
 --
 function VUHDO_resetDebuffsFor(aUnit)
 	VUHDO_initDebuffInfos(aUnit);
-	twipe(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]);
 end
 
 
