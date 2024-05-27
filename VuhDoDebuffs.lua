@@ -757,11 +757,10 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][3] ~= tDebuffInfo[1]
 					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][4] ~= tDebuffInfo[7]
 					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][5] ~= tName) then
-					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][1] = tDebuffInfo[2];
-					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][2] = tDebuffInfo[3];
-					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][3] = tDebuffInfo[1];
-					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][4] = tDebuffInfo[7];
-					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][5] = tName;
+					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][1], VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][2],
+					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][3], VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][4],
+					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][5] =
+						tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7], tName;
 
 					VUHDO_updateDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7]);
 
