@@ -744,6 +744,7 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 							and tCurChosenInfo[1] ~= VUHDO_LAST_UNIT_DEBUFFS[aUnit]
 							and tInfo["range"] then
 								VUHDO_LAST_UNIT_DEBUFFS[aUnit] = tCurChosenInfo[1];
+
 								tDoStdSound = true;
 						end
 
