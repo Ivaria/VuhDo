@@ -318,8 +318,9 @@ function VUHDO_setHealth(aUnit, aMode)
 
 		tIsDead = UnitIsDeadOrGhost(aUnit) and not UnitIsFeignDeath(aUnit);
 		if tIsDead then
-			VUHDO_removeAllDebuffIcons(aUnit);
 			VUHDO_removeHots(aUnit);
+			VUHDO_removeAllDebuffIcons(aUnit);
+
 			VUHDO_initEventBouquetsFor(aUnit);
 		end
 
@@ -821,13 +822,12 @@ function VUHDO_reloadRaidMembers()
 		end
 
 		for tBossUnitId, _ in pairs(VUHDO_BOSS_UNITS) do
-			VUHDO_removeAllDebuffIcons(tBossUnitId);
-
 			if UnitExists(tBossUnitId) then
 				VUHDO_setHealth(tBossUnitId, 1); -- VUHDO_UPDATE_ALL
 			else
 				-- FIXME: find a more efficient way to trigger boss removal
 				VUHDO_removeHots(tBossUnitId);
+				VUHDO_removeAllDebuffIcons(tBossUnitId);
 				VUHDO_resetDebuffsFor(tBossUnitId);
 
 				VUHDO_updateTargetBars(tBossUnitId);
@@ -924,8 +924,6 @@ function VUHDO_refreshRaidMembers()
 	end
 
 	for tBossUnitId, _ in pairs(VUHDO_BOSS_UNITS) do
-		VUHDO_removeAllDebuffIcons(tBossUnitId);
-
 		if UnitExists(tBossUnitId) then -- and UnitIsFriend("player", tBossUnitId) then
 			tInfo = VUHDO_RAID[tBossUnitId];
 
@@ -941,6 +939,7 @@ function VUHDO_refreshRaidMembers()
 		else
 			-- FIXME: find a more efficient way to trigger boss removal
 			VUHDO_removeHots(tBossUnitId);
+			VUHDO_removeAllDebuffIcons(tBossUnitId);
 			VUHDO_resetDebuffsFor(tBossUnitId);
 
 			VUHDO_updateTargetBars(tBossUnitId);

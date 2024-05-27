@@ -452,6 +452,8 @@ local function VUHDO_initDebuffInfos(aUnit)
 		end
 	end
 
+	VUHDO_removeAllDebuffIcons(aUnit);
+
 	return tUnitDebuffInfo;
 
 end
@@ -803,7 +805,6 @@ function VUHDO_updateAllCustomDebuffs(anIsEnableAnim)
 	VUHDO_MAY_DEBUFF_ANIM = false;
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		VUHDO_removeAllDebuffIcons(tUnit);
 		tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(tUnit);
 	end
 
