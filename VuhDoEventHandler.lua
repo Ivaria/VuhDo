@@ -482,7 +482,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "UNIT_AURA" == anEvent then
 		tInfo = (VUHDO_RAID or tEmptyRaid)[anArg1];
 		if tInfo then
-			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(anArg1);
+			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(anArg1, anArg2);
 			VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
 		end
 
@@ -636,8 +636,8 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 					VUHDO_setHealth("focus", 1); -- VUHDO_UPDATE_ALL
 				else
 					VUHDO_removeHots("focus");
-					VUHDO_resetDebuffsFor("focus");
 					VUHDO_removeAllDebuffIcons("focus");
+					VUHDO_resetDebuffsFor("focus");
 
 					if VUHDO_RAID["focus"] then
 						table.wipe(VUHDO_RAID["focus"]);
