@@ -590,7 +590,7 @@ local function VUHDO_determineBuffPredicate(anAuraInstanceId, aName, anIcon, aSt
 		end
 	end
 
-	tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(tSpellId)] or sEmpty;
+	tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[aName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(aSpellId)] or sEmpty;
 
 	if not anIsUpdate and tDebuffConfig[1] and ((tDebuffConfig[3] and aUnitCaster == "player") or (tDebuffConfig[4] and aUnitCaster ~= "player")) then -- Color?
 		VUHDO_addCurChosen(sUnit, anAuraInstanceId, 6, aName, aSpellId, false); -- VUHDO_DEBUFF_TYPE_CUSTOM
