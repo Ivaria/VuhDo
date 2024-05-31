@@ -384,6 +384,7 @@ end
 --
 local tLevel = 0;
 local function VUHDO_init()
+
 	if tLevel == 0 or VUHDO_VARIABLES_LOADED then
 		tLevel = 1;
 		return;
@@ -438,6 +439,10 @@ local function VUHDO_init()
 		VUHDO_loadDefaultProfile();
 		VUHDO_loadDefaultLayout();
 	end
+
+	-- FIXME: Cata Classic is now exhibitly the same bug as Classic Era where spells are not initialized by VuhDo init time
+	C_Timer.After(1, VUHDO_initBuffs);
+
 end
 
 
