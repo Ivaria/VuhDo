@@ -1,4 +1,4 @@
-local GetSpellInfo = GetSpellInfo;
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 
 --
 local tSpellName;

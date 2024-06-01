@@ -4,6 +4,7 @@ local tostring = tostring;
 local tonumber = tonumber;
 local tinsert = table.insert;
 local twipe = table.wipe;
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
 	-- [<unit GUID>] = {

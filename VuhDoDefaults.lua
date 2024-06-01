@@ -1,3 +1,4 @@
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 local pairs = pairs;
 local _;
 

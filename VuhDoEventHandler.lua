@@ -69,6 +69,7 @@ local UnitName = UnitName;
 local UnitIsEnemy = UnitIsEnemy;
 local UnitIsTrivial = UnitIsTrivial;
 local GetSpellCooldown = GetSpellCooldown;
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 local HasFullControl = HasFullControl;
 local pairs = pairs;
 local UnitThreatSituation = UnitThreatSituation;

@@ -3,6 +3,7 @@ local select = select;
 local type = type;
 
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 
 local VUHDO_SHIELDS = {
 	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD -- ok
@@ -141,7 +142,6 @@ local ceil = ceil;
 local floor = floor;
 local GetTime = GetTime;
 local select = select;
-local GetSpellInfo = GetSpellInfo;
 
 
 

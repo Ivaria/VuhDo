@@ -1,4 +1,5 @@
 --
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 local UnitPower = UnitPower;
 local UnitGetIncomingHeals = UnitGetIncomingHeals;
 local pairs = pairs;

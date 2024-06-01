@@ -4,7 +4,7 @@ VUHDO_GLOBAL_ICONS = { };
 local GI_SCAN_MAX = 200001;
 VUHDO_GI_SCAN_IDX = GI_SCAN_MAX;
 
-local GetSpellInfo = GetSpellInfo;
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 local pairs = pairs;
 
 

@@ -1,4 +1,5 @@
 local huge = math.huge;
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 
 
 
@@ -61,6 +62,7 @@ local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
 local UnpackAuraData = AuraUtil.UnpackAuraData or VUHDO_unpackAuraData;
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID;
+
 
 local sIsNotRemovableOnly;
 local sIsNotRemovableOnlyIcons;

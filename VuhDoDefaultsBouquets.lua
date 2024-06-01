@@ -1,3 +1,5 @@
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
+
 --
 function VUHDO_makeFullColor(...)
 	return {

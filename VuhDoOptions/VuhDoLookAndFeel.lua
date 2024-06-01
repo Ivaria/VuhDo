@@ -8,6 +8,7 @@ local type = type;
 local tonumber = tonumber;
 local pairs = pairs;
 local ipairs = ipairs;
+local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
 
 
 
