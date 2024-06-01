@@ -682,7 +682,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
 		end
 
-	elseif "LEARNED_SPELL_IN_TAB" == anEvent or "TRAIT_CONFIG_UPDATED" == anEvent then
+	elseif "LEARNED_SPELL_IN_TAB" == anEvent or "TRAIT_CONFIG_UPDATED" == anEvent or "SPELLS_CHANGED" == anEvent then
 		if VUHDO_VARIABLES_LOADED then
 			VUHDO_initFromSpellbook();
 			VUHDO_registerAllBouquets(false);
@@ -1638,7 +1638,7 @@ end
 
 
 local VUHDO_ALL_EVENTS = {
-	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD",
+	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD", "SPELLS_CHANGED",
 	"UNIT_MAXHEALTH", "UNIT_HEALTH", "UNIT_HEALTH_FREQUENT", 
 	"UNIT_AURA",
 	"UNIT_TARGET",
