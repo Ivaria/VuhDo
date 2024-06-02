@@ -66,6 +66,7 @@
 						</Scripts>
 					</CheckButton>
 
+<!--
 					<CheckButton name="$parentFireRadioButton" text="VUHDO_I18N_MISC" inherits="VuhDoTabRadioButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -99,6 +100,7 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
+-->
 
 				</Frames>
 			</Frame>

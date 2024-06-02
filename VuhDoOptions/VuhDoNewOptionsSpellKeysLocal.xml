@@ -47,6 +47,7 @@
 				</Scripts>
 			</EditBox>
 
+<!--
 			<Button name="$parentEditButton" text="VUHDO_I18N_EDIT_BUTTON" inherits="VuhDoButtonTemplate">
 				<Size>
 					<AbsDimension x="60" y="32" />
@@ -64,6 +65,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+-->
 
 			<Button name="$parentAssignment1Button" text="" inherits="VuhDoAssignButtonTemplate">
 				<Size>

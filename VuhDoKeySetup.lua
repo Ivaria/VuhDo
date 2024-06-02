@@ -84,24 +84,31 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 	tActionLow = strlower(anAction);
 
 	if "assist" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildAssistMacroText(tUnit));
+		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "assist");
+		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildAssistMacroText(tUnit));
 
 	elseif "focus" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildFocusMacroText(tUnit));
+		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "focus");
+		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildFocusMacroText(tUnit));
 
 	elseif "target" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildTargetMacroText(tUnit));
+		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "target");
+		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildTargetMacroText(tUnit));
 
 	elseif "extraactionbutton" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildExtraActionButtonMacroText(tUnit));
+		VUHDO_Msg(format(VUHDO_I18N_NO_MACROTEXT, anAction), 1, 0.3, 0.3);
+
+		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildExtraActionButtonMacroText(tUnit));
 
 	elseif "mouselook" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMouseLookMacroText());
+		VUHDO_Msg(format(VUHDO_I18N_NO_MACROTEXT, anAction), 1, 0.3, 0.3);
+
+		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMouseLookMacroText());
 
 	elseif "menu" == tActionLow or "tell" == tActionLow then
 		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, nil);
@@ -158,34 +165,38 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 			aButton:SetAttribute(aModiKey .. "spell" .. aButtonId, anAction);
 
 		elseif VUHDO_isSpellKnown(anAction) or VUHDO_IN_COMBAT_RELOG then -- Spells may not be initialized yet
+			-- FIXME: how to handle rez and cleansing charmed players?
 			-- Dead players do not trigger "help/noharm" conditionals
-			if VUHDO_REZ_SPELLS_NAMES[anAction] then
+			if false and VUHDO_REZ_SPELLS_NAMES[anAction] then
 
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
 				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
 				VUHDO_buildRezMacroText(anAction, tUnit));
 				return;
 			-- Cleansing charmed players is an offensive thing to do
-			elseif VUHDO_BUFF_REMOVAL_SPELLS[anAction] then
+			elseif false and VUHDO_BUFF_REMOVAL_SPELLS[anAction] then
 
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
 				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
 				VUHDO_buildPurgeMacroText(anAction, tUnit));
 				return;
 			else
+				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "spell");
+				aButton:SetAttribute(aModiKey .. "spell" .. aButtonId, anAction);
 				-- build a spell macro
-				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildMacroText(anAction, false, tUnit));
+				--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+				--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit));
 			end
 		else
 			tMacroId = GetMacroIndexByName(anAction);
 			if tMacroId ~= 0 then -- Macro?
-
-				_, _, tMacroText = GetMacroInfo(tMacroId);
-				tMacroText = VUHDO_replaceMacroTemplates(tMacroText, tUnit);
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, tMacroText);
+				aButton:SetAttribute(aModiKey .. "macro" .. aButtonId, tMacroId);
+
+				--_, _, tMacroText = GetMacroInfo(tMacroId);
+				--tMacroText = VUHDO_replaceMacroTemplates(tMacroText, tUnit);
+				--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+				--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, tMacroText);
 			elseif IsUsableItem(anAction) then -- Item?
 
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "item");
@@ -211,22 +222,23 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 	tUnit = aButton["raidid"];
 	tActionLow = strlower(anAction);
 
-	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= tActionLow) or VUHDO_isBossUnit(tUnit) then
-		if not anIndex then
-			tSpellInfo = VUHDO_HOSTILE_SPELL_ASSIGNMENTS[VUHDO_KEYS_MODIFIER[aModiKey] .. aButtonId];
-			tHostSpell = tSpellInfo ~= nil and tSpellInfo[3] or "";
-		else
-			tHostSpell = VUHDO_SPELLS_KEYBOARD["HOSTILE_WHEEL"][anIndex][3];
-		end
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		if (tHostSpell or "") ~= "" or (tActionLow or "") ~= "" then
-			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell));
-		else
-			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, nil);
-		end
-		return;
-	end
+	-- FIXME: how to handle hostile binds now?
+--	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= tActionLow) or VUHDO_isBossUnit(tUnit) then
+--		if not anIndex then
+--			tSpellInfo = VUHDO_HOSTILE_SPELL_ASSIGNMENTS[VUHDO_KEYS_MODIFIER[aModiKey] .. aButtonId];
+--			tHostSpell = tSpellInfo ~= nil and tSpellInfo[3] or "";
+--		else
+--			tHostSpell = VUHDO_SPELLS_KEYBOARD["HOSTILE_WHEEL"][anIndex][3];
+--		end
+--		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
+--		if (tHostSpell or "") ~= "" or (tActionLow or "") ~= "" then
+--			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
+--				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell));
+--		else
+--			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, nil);
+--		end
+--		return;
+--	end
 
 	if (tActionLow or "") == "" then
 		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, nil);
@@ -324,8 +336,9 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		if VUHDO_isActionValid(tEntries[1], false) then
 			_VUHDO_setupHealButtonAttributes("",  "-ik" .. tIndex, tEntries[1], aButton, anIsTgButton, tIndex);
 		else
-			aButton:SetAttribute("type-ik" .. tIndex, "macro");
-			aButton:SetAttribute("macrotext-ik" .. tIndex, VUHDO_replaceMacroTemplates(tEntries[3] or "", aUnit));
+			-- FIXME: macro builder is dead as on 11.x
+			--aButton:SetAttribute("type-ik" .. tIndex, "macro");
+			--aButton:SetAttribute("macrotext-ik" .. tIndex, VUHDO_replaceMacroTemplates(tEntries[3] or "", aUnit));
 		end
 	end
 
