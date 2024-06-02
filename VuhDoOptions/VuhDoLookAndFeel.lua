@@ -8,7 +8,8 @@ local type = type;
 local tonumber = tonumber;
 local pairs = pairs;
 local ipairs = ipairs;
-local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
+local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
+local GetMouseFocus = GetMouseFocus or VUHDO_getMouseFocus;
 
 
 

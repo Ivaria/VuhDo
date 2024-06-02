@@ -19,12 +19,12 @@ local VUHDO_isSpellKnown;
 
 local GetMacroIndexByName = GetMacroIndexByName;
 local GetMacroInfo = GetMacroInfo;
-local GetSpellBookItemTexture = GetSpellBookItemTexture;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local gsub = gsub;
 local GetCursorInfo = GetCursorInfo;
 local GetShapeshiftForm = GetShapeshiftForm;
 local InCombatLockdown = InCombatLockdown;
+local IsUsableItem = IsUsableItem or C_Item.IsUsableItem;
 local pairs = pairs;
 local strlower = strlower;
 local format = format;

@@ -1,4 +1,4 @@
-local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
+local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 
 --
 VUHDO_DEBUFF_TYPE_NONE = 0;

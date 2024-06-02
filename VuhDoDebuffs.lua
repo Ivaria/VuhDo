@@ -1,5 +1,5 @@
 local huge = math.huge;
-local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
+local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 
 
 

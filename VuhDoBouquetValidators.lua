@@ -14,6 +14,7 @@ VUHDO_FORCE_RESET = false;
 local floor = floor;
 local select = select;
 local twipe = table.wipe;
+local GetTexCoordsForRole = GetTexCoordsForRole or VUHDO_getTexCoordsForRole;
 local _;
 
 local VUHDO_RAID = { };

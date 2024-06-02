@@ -3,7 +3,7 @@ local _;
 local smatch = string.match;
 
 local InCombatLockdown = InCombatLockdown;
-local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
+local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 
 local VUHDO_initGcd;
 local VUHDO_strempty;
