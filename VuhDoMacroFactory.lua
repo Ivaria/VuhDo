@@ -246,6 +246,7 @@ end
 
 
 --
+-- FIXME: deadwood?
 local tIndex;
 function VUHDO_buildTargetButtonMacroText(aTarget, aFriendlyAction, aHostileAction)
 	tIndex = aFriendlyAction .. "*" .. aHostileAction;

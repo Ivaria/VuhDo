@@ -72,142 +72,121 @@ local VUHDO_REZ_SPELLS_NAMES = {
 
 
 
+--
 local tUnit, tInfo, tIdent;
-local tButtonName;
+local tButtonName, tSuffix;
 local tMacroId, tMacroText;
-local tActionLow;
+local tActionLow, tHostileActionLow;
 local tInvalidGroup = { ["group"] = -1 };
 
-local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex)
+local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex, anIsHarm, aPrefix)
 
 	tUnit = aButton["raidid"];
+
+	if not anAction then
+		return;
+	end
+
+	if anIsHarm and not aPrefix then
+		return;
+	elseif not anIsHarm and not aPrefix then
+		aPrefix = "";
+	end
+
 	tActionLow = strlower(anAction);
 
-	if "assist" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "assist");
-		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildAssistMacroText(tUnit));
+	if tActionLow then
+		if not VUHDO_strempty(aPrefix) then
+			aButton:SetAttribute(aModiKey .. aPrefix .. "button" .. aButtonId, aPrefix .. aButtonId);
 
-	elseif "focus" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "focus");
-		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildFocusMacroText(tUnit));
-
-	elseif "target" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "target");
-		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildTargetMacroText(tUnit));
-
-	elseif "extraactionbutton" == tActionLow then
-		VUHDO_Msg(format(VUHDO_I18N_NO_MACROTEXT, anAction), 1, 0.3, 0.3);
-
-		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildExtraActionButtonMacroText(tUnit));
-
-	elseif "mouselook" == tActionLow then
-		VUHDO_Msg(format(VUHDO_I18N_NO_MACROTEXT, anAction), 1, 0.3, 0.3);
-
-		--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-		--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMouseLookMacroText());
-
-	elseif "menu" == tActionLow or "tell" == tActionLow then
-		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, nil);
-
-	elseif "dropdown" == tActionLow then
-		aButton:SetAttribute(aModiKey .."type" .. aButtonId, "VUHDO_contextMenu");
-
-		VUHDO_contextMenu = function()
-			tUnit = aButton["raidid"];
-			local tName, tNumber, tMenu;
-
-			if UnitIsUnit(tUnit, "player") then 
-				tMenu = "SELF"; 
-			elseif UnitIsUnit(tUnit, "vehicle") then 
-				tMenu = "VEHICLE";
-			elseif UnitIsUnit(tUnit, "pet") then 
-				tMenu = "PET"; 
-			elseif UnitIsPlayer(tUnit) then
-				tInfo = VUHDO_RAID[tUnit];
-				
-				tName = tInfo["name"];
-				tNumber = tInfo["number"];
-
-				if UnitInRaid(tUnit) then
-					tMenu = "RAID_PLAYER";
-				elseif UnitInParty(tUnit) then
-					tMenu = "PARTY";
-				else
-					tMenu = "PLAYER";
-				end
-			else
-				tMenu = "TARGET";
-				tName = RAID_TARGET_ICON;
-			end
-
-			UIDropDownMenu_SetInitializeFunction(VuhDoUnitButtonDropDown, 
-				function(self) 
-					if tMenu then
-						UnitPopup_ShowMenu(self, tMenu, tUnit, tName, tNumber);
-					end
-				end
-			);
-			UIDropDownMenu_SetDisplayMode(VuhDoUnitButtonDropDown, "MENU");
-			
-			ToggleDropDownMenu(1, nil, VuhDoUnitButtonDropDown, "cursor", 0, 0);
+			tSuffix = "-" .. aPrefix .. aButtonId;
+		else
+			tSuffix = aButtonId;
 		end
 
-		aButton["VUHDO_contextMenu"] = VUHDO_contextMenu;
-	else
-		anAction = VUHDO_REPLACE_SPELL_NAME[anAction] or anAction;
+		if "assist" == tActionLow then
+			aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "assist");
+		elseif "focus" == tActionLow then
+			aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "focus");
+		elseif "target" == tActionLow then
+			aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "target");
+		elseif "extraactionbutton" == tActionLow then
+			VUHDO_Msg(format(VUHDO_I18N_NO_MACROTEXT, anAction), 1, 0.3, 0.3);
+		elseif "mouselook" == tActionLow then
+			VUHDO_Msg(format(VUHDO_I18N_NO_MACROTEXT, anAction), 1, 0.3, 0.3);
+		elseif "menu" == tActionLow or "tell" == tActionLow then
+			aButton:SetAttribute(aModiKey .. "type" .. tSuffix, nil);
+		elseif "dropdown" == tActionLow then
+			aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "VUHDO_contextMenu");
 
-		if VUHDO_NATIVE_ASSIGN_SPELLS[anAction] then
-			aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "spell");
-			aButton:SetAttribute(aModiKey .. "spell" .. aButtonId, anAction);
+			VUHDO_contextMenu = function()
+				tUnit = aButton["raidid"];
+				local tName, tNumber, tMenu;
 
-		elseif VUHDO_isSpellKnown(anAction) or VUHDO_IN_COMBAT_RELOG then -- Spells may not be initialized yet
-			-- FIXME: how to handle rez and cleansing charmed players?
-			-- Dead players do not trigger "help/noharm" conditionals
-			if false and VUHDO_REZ_SPELLS_NAMES[anAction] then
+				if UnitIsUnit(tUnit, "player") then
+					tMenu = "SELF";
+				elseif UnitIsUnit(tUnit, "vehicle") then
+					tMenu = "VEHICLE";
+				elseif UnitIsUnit(tUnit, "pet") then
+					tMenu = "PET";
+				elseif UnitIsPlayer(tUnit) then
+					tInfo = VUHDO_RAID[tUnit];
+				
+					tName = tInfo["name"];
+					tNumber = tInfo["number"];
 
-				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildRezMacroText(anAction, tUnit));
-				return;
-			-- Cleansing charmed players is an offensive thing to do
-			elseif false and VUHDO_BUFF_REMOVAL_SPELLS[anAction] then
+					if UnitInRaid(tUnit) then
+						tMenu = "RAID_PLAYER";
+					elseif UnitInParty(tUnit) then
+						tMenu = "PARTY";
+					else
+						tMenu = "PLAYER";
+					end
+				else
+					tMenu = "TARGET";
+					tName = RAID_TARGET_ICON;
+				end
 
-				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-				aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildPurgeMacroText(anAction, tUnit));
-				return;
-			else
-				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "spell");
-				aButton:SetAttribute(aModiKey .. "spell" .. aButtonId, anAction);
-				-- build a spell macro
-				--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-				--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit));
+				UIDropDownMenu_SetInitializeFunction(VuhDoUnitButtonDropDown,
+					function(self)
+						if tMenu then
+							UnitPopup_ShowMenu(self, tMenu, tUnit, tName, tNumber);
+						end
+					end
+				);
+				UIDropDownMenu_SetDisplayMode(VuhDoUnitButtonDropDown, "MENU");
+
+				ToggleDropDownMenu(1, nil, VuhDoUnitButtonDropDown, "cursor", 0, 0);
 			end
+
+			aButton["VUHDO_contextMenu"] = VUHDO_contextMenu;
 		else
-			tMacroId = GetMacroIndexByName(anAction);
-			if tMacroId ~= 0 then -- Macro?
-				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-				aButton:SetAttribute(aModiKey .. "macro" .. aButtonId, tMacroId);
+			anAction = VUHDO_REPLACE_SPELL_NAME[anAction] or anAction;
 
-				--_, _, tMacroText = GetMacroInfo(tMacroId);
-				--tMacroText = VUHDO_replaceMacroTemplates(tMacroText, tUnit);
-				--aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
-				--aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, tMacroText);
-			elseif IsUsableItem(anAction) then -- Item?
+			if VUHDO_NATIVE_ASSIGN_SPELLS[anAction] then
+				aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "spell");
+				aButton:SetAttribute(aModiKey .. "spell" .. tSuffix, anAction);
 
-				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "item");
-				aButton:SetAttribute(aModiKey .. "item" .. aButtonId, anAction);
-			else -- we don't know, assume it's a spell
+			elseif VUHDO_isSpellKnown(anAction) or VUHDO_IN_COMBAT_RELOG then -- Spells may not be initialized yet
+				aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "spell");
+				aButton:SetAttribute(aModiKey .. "spell" .. tSuffix, anAction);
+			else
+				tMacroId = GetMacroIndexByName(anAction);
 
-				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "spell");
-				aButton:SetAttribute(aModiKey .. "spell" .. aButtonId, anAction);
+				if tMacroId ~= 0 then -- Macro?
+					aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "macro");
+					aButton:SetAttribute(aModiKey .. "macro" .. tSuffix, tMacroId);
+				elseif IsUsableItem(anAction) then -- Item?
+					aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "item");
+					aButton:SetAttribute(aModiKey .. "item" .. tSuffix, anAction);
+				else -- we don't know, assume it's a spell
+					aButton:SetAttribute(aModiKey .. "type" .. tSuffix, "spell");
+					aButton:SetAttribute(aModiKey .. "spell" .. tSuffix, anAction);
+				end
 			end
 		end
 	end
+
 end
 
 
@@ -223,29 +202,40 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 	tActionLow = strlower(anAction);
 
 	-- FIXME: how to handle hostile binds now?
---	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= tActionLow) or VUHDO_isBossUnit(tUnit) then
---		if not anIndex then
---			tSpellInfo = VUHDO_HOSTILE_SPELL_ASSIGNMENTS[VUHDO_KEYS_MODIFIER[aModiKey] .. aButtonId];
---			tHostSpell = tSpellInfo ~= nil and tSpellInfo[3] or "";
---		else
---			tHostSpell = VUHDO_SPELLS_KEYBOARD["HOSTILE_WHEEL"][anIndex][3];
---		end
---		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
---		if (tHostSpell or "") ~= "" or (tActionLow or "") ~= "" then
---			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId,
---				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell));
---		else
---			aButton:SetAttribute(aModiKey .. "macrotext" .. aButtonId, nil);
---		end
---		return;
---	end
+	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= tActionLow) or VUHDO_isBossUnit(tUnit) then
+		if not anIndex then
+			tSpellInfo = VUHDO_HOSTILE_SPELL_ASSIGNMENTS[VUHDO_KEYS_MODIFIER[aModiKey] .. aButtonId];
+			tHostSpell = tSpellInfo ~= nil and tSpellInfo[3] or "";
+		else
+			tHostSpell = VUHDO_SPELLS_KEYBOARD["HOSTILE_WHEEL"][anIndex][3];
+		end
+
+		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, nil);
+
+		if (tHostSpell or "") ~= "" then
+			_VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, tHostSpell, aButton, anIsTgButton, anIndex, true, "harm");
+
+			if (tActionLow or "") ~= "" then
+				_VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex, false, "help");
+			else
+				aButton:SetAttribute(aModiKey .. "type-help" .. aButtonId, nil);
+			end
+
+			return;
+		else
+			aButton:SetAttribute(aModiKey .. "type-harm" .. aButtonId, nil);
+			aButton:SetAttribute(aModiKey .. "type-help" .. aButtonId, nil);
+		end
+	end
 
 	if (tActionLow or "") == "" then
 		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, nil);
-		return;
+		aButton:SetAttribute(aModiKey .. "type-harm" .. aButtonId, nil);
+		aButton:SetAttribute(aModiKey .. "type-help" .. aButtonId, nil);
 	else
 		_VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex);
 	end
+
 end
 
 
