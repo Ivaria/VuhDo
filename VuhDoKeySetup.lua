@@ -121,7 +121,7 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 
 			VUHDO_contextMenu = function()
 				tUnit = aButton["raidid"];
-				local tName, tNumber, tMenu;
+				local tName, tMenu;
 
 				if UnitIsUnit(tUnit, "player") then
 					tMenu = "SELF";
@@ -133,7 +133,6 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 					tInfo = VUHDO_RAID[tUnit];
 				
 					tName = tInfo["name"];
-					tNumber = tInfo["number"];
 
 					if UnitInRaid(tUnit) then
 						tMenu = "RAID_PLAYER";
@@ -150,7 +149,12 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 				UIDropDownMenu_SetInitializeFunction(VuhDoUnitButtonDropDown,
 					function(self)
 						if tMenu then
-							UnitPopup_ShowMenu(self, tMenu, tUnit, tName, tNumber);
+							local tContextData = {
+								unit = tUnit,
+								name = tName,
+							};
+
+							UnitPopup_OpenMenu(tMenu, tContextData);
 						end
 					end
 				);
