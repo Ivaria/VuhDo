@@ -688,6 +688,11 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 				VUHDO_initKeyboardMacros();
 				VUHDO_timeReloadUI(1);
 			end
+
+			if "SPELLS_CHANGED" == anEvent then
+				-- workaround slow clients where partial spellbook is available on SPELLS_CHANGED
+				C_Timer.After(3, VUHDO_initBuffs);
+			end
 		end
 
 	elseif "VARIABLES_LOADED" == anEvent then
