@@ -440,9 +440,6 @@ local function VUHDO_init()
 		VUHDO_loadDefaultLayout();
 	end
 
-	-- FIXME: Cata Classic is now exhibitly the same bug as Classic Era where spells are not initialized by VuhDo init time
-	C_Timer.After(1, VUHDO_initBuffs);
-
 end
 
 
