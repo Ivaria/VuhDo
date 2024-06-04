@@ -218,6 +218,7 @@
 				</Frames>
 			</Frame>
 
+<!--
 			<Frame name="$parentAnnouncePanel" inherits="VuhDoPanelTemplate">
 				<Size>
 					<AbsDimension x="445" y="105" />
@@ -317,6 +318,7 @@
 
 				</Frames>
 			</Frame>
+-->
 
 			<Frame name="$parentCustomAddonsPanel" inherits="VuhDoPanelTemplate">
 				<Size>

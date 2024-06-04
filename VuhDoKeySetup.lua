@@ -205,7 +205,6 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 	tUnit = aButton["raidid"];
 	tActionLow = strlower(anAction);
 
-	-- FIXME: how to handle hostile binds now?
 	if anIsTgButton or tUnit == "focus" or (tUnit == "target" and "dropdown" ~= tActionLow) or VUHDO_isBossUnit(tUnit) then
 		if not anIndex then
 			tSpellInfo = VUHDO_HOSTILE_SPELL_ASSIGNMENTS[VUHDO_KEYS_MODIFIER[aModiKey] .. aButtonId];
@@ -330,9 +329,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		if VUHDO_isActionValid(tEntries[1], false) then
 			_VUHDO_setupHealButtonAttributes("",  "-ik" .. tIndex, tEntries[1], aButton, anIsTgButton, tIndex);
 		else
-			-- FIXME: macro builder is dead as on 11.x
-			--aButton:SetAttribute("type-ik" .. tIndex, "macro");
-			--aButton:SetAttribute("macrotext-ik" .. tIndex, VUHDO_replaceMacroTemplates(tEntries[3] or "", aUnit));
+			aButton:SetAttribute("type-ik" .. tIndex, nil);
 		end
 	end
 
