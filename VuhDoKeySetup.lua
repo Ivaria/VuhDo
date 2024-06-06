@@ -101,6 +101,9 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 
 			tSuffix = "-" .. aPrefix .. aButtonId;
 		else
+			aButton:SetAttribute(aModiKey .. "harmbutton" .. aButtonId, nil);
+			aButton:SetAttribute(aModiKey .. "helpbutton" .. aButtonId, nil);
+
 			tSuffix = aButtonId;
 		end
 
@@ -222,19 +225,27 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 				_VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex, false, "help");
 			else
 				aButton:SetAttribute(aModiKey .. "type-help" .. aButtonId, nil);
+				aButton:SetAttribute(aModiKey .. "helpbutton" .. aButtonId, nil);
 			end
 
 			return;
 		else
 			aButton:SetAttribute(aModiKey .. "type-harm" .. aButtonId, nil);
+			aButton:SetAttribute(aModiKey .. "harmbutton" .. aButtonId, nil);
+
 			aButton:SetAttribute(aModiKey .. "type-help" .. aButtonId, nil);
+			aButton:SetAttribute(aModiKey .. "helpbutton" .. aButtonId, nil);
 		end
 	end
 
 	if (tActionLow or "") == "" then
 		aButton:SetAttribute(aModiKey .. "type" .. aButtonId, nil);
+
 		aButton:SetAttribute(aModiKey .. "type-harm" .. aButtonId, nil);
+		aButton:SetAttribute(aModiKey .. "harmbutton" .. aButtonId, nil);
+
 		aButton:SetAttribute(aModiKey .. "type-help" .. aButtonId, nil);
+		aButton:SetAttribute(aModiKey .. "helpbutton" .. aButtonId, nil);
 	else
 		_VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex);
 	end
