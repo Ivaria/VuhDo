@@ -230,6 +230,188 @@ setmetatable(VUHDO_UNIT_DEBUFF_INFOS, {
 	end
 });
 
+-- aura icon, aura time remaining, aura stacks, aura duration
+local VUHDO_UNIT_DEBUFF_INFO_DEFAULT = { nil, nil, 0, 0 };
+
+
+
+--
+local tUnitDebuffInfoAuras;
+local tUnitDebuffInfoListPrev;
+local function VUHDO_addUnitDebuffInfo(aUnit, aType, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration)
+
+	if not aUnit or not anAuraInstanceId or not aType then
+		return;
+	end
+
+	if aType == "CHOSEN" then
+		tUnitDebuffInfoAuras = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["chosenAuras"];
+	else
+		tUnitDebuffInfoAuras = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["typeAuras"];
+	end
+
+	if tUnitDebuffInfoAuras[anAuraInstanceId] then
+		if anIcon ~= nil then
+			tUnitDebuffInfoAuras[anAuraInstanceId][1] = anIcon;
+			VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][1] = anIcon;
+		end
+
+		if anExpiry ~= nil then
+			tUnitDebuffInfoAuras[anAuraInstanceId][2] = anExpiry;
+			VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][2] = anExpiry;
+		end
+
+		if aStacks ~= nil then
+			tUnitDebuffInfoAuras[anAuraInstanceId][3] = aStacks;
+			VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][3] = aStacks;
+		end
+
+		if aDuration ~= nil then
+			tUnitDebuffInfoAuras[anAuraInstanceId][4] = aDuration;
+			VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][4] = aDuration;
+		end
+
+		tUnitDebuffInfoAuras[anAuraInstanceId][5] = aType;
+	else
+		tUnitDebuffInfoAuras[anAuraInstanceId] = {
+			anIcon or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[1],
+			anExpiry or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[2],
+			aStacks or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[3],
+			aDuration or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[4],
+			aType
+		};
+
+		tUnitDebuffInfoListPrev = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType];
+
+		VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType] = { ["auraInstanceId"] = anAuraInstanceId };
+
+		if tUnitDebuffInfoListPrev then
+			VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType]["prev"] = tUnitDebuffInfoListPrev;
+			tUnitDebuffInfoListPrev["next"] = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType];
+		end
+
+		VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][1], VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][2],
+		VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][3], VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][4] =
+			anIcon or VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][1] or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[1],
+			anExpiry or VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][2] or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[2],
+			aStacks or VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][3] or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[3],
+			aDuration or VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][4] or VUHDO_UNIT_DEBUFF_INFO_DEFAULT[4];
+	end
+
+end
+
+
+
+--
+local tUnitDebuffInfoAuras;
+local tUnitDebuffInfo;
+local tUnitDebuffInfoPrev;
+local tUnitDebuffInfoNext;
+local function VUHDO_removeUnitDebuffInfo(aUnit, aType, anAuraInstanceId)
+
+	if not aUnit or not anAuraInstanceId or not aType then
+		return;
+	end
+
+	if aType == "CHOSEN" then
+		tUnitDebuffInfoAuras = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["chosenAuras"];
+	else
+		tUnitDebuffInfoAuras = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["typeAuras"];
+	end
+
+	if not tUnitDebuffInfoAuras[anAuraInstanceId] then
+		return;
+	end
+
+	tUnitDebuffInfo = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType];
+
+	while tUnitDebuffInfo and tUnitDebuffInfo["auraInstanceId"] do
+		if tUnitDebuffInfo["auraInstanceId"] == anAuraInstanceId then
+			tUnitDebuffInfoPrev = tUnitDebuffInfo["prev"];
+			tUnitDebuffInfoNext = tUnitDebuffInfo["next"];
+
+			if tUnitDebuffInfoPrev and not tUnitDebuffInfoNext then
+				-- remove head
+				tUnitDebuffInfoPrev["next"] = nil;
+
+				sCurChosenListHead[aUnit] = tUnitDebuffInfoPrev;
+			elseif tUnitDebuffInfoPrev and tUnitDebuffInfoNext then
+				-- remove link
+				tUnitDebuffInfoNext["prev"] = tUnitDebuffInfoPrev;
+				tUnitDebuffInfoPrev["next"] = tUnitDebuffInfoNext;
+			elseif not tUnitDebuffInfoPrev and tUnitDebuffInfoNext then
+				-- remove tail
+				tUnitDebuffInfoNext["prev"] = nil;
+			else
+				VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType] = nil;
+			end
+
+			tUnitDebuffInfoAuras[anAuraInstanceId] = nil;
+
+			tUnitDebuffInfo = nil;
+		else
+			tUnitDebuffInfo = tUnitDebuffInfo["prev"];
+		end
+	end
+
+end
+
+
+
+--
+local tUnitDebuffInfoAuras;
+local tAuraInstanceId;
+local function VUHDO_getUnitDebuffInfo(aUnit, aType)
+
+	if not aUnit or not aType then
+		return;
+	end
+
+	if aType == "CHOSEN" then
+		tUnitDebuffInfoAuras = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["chosenAuras"];
+	else
+		tUnitDebuffInfoAuras = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["typeAuras"];
+	end
+
+	if not VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType] or not tUnitDebuffInfoAuras then
+		return;
+	end
+
+	tAuraInstanceId = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType]["auraInstanceId"];
+
+	if not tAuraInstanceId then
+		return;
+	end
+
+	return tUnitDebuffInfoAuras[tAuraInstanceId];
+
+end
+
+
+
+--
+local tUnitDebuffInfo;
+local function VUHDO_updateUnitDebuffInfo(aUnit, aType)
+
+	if not aUnit or not aType then
+		return;
+	end
+
+	tUnitDebuffInfo = VUHDO_getUnitDebuffInfo(aUnit, aType);
+
+	if tUnitDebuffInfo then
+		VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][1], VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][2],
+		VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][3], VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][4] =
+			tUnitDebuffInfo[1], tUnitDebuffInfo[2], tUnitDebuffInfo[3], tUnitDebuffInfo[4];
+	else
+		VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][1], VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][2],
+		VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][3], VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][4] =
+			VUHDO_UNIT_DEBUFF_INFO_DEFAULT[1], VUHDO_UNIT_DEBUFF_INFO_DEFAULT[2],
+			VUHDO_UNIT_DEBUFF_INFO_DEFAULT[3], VUHDO_UNIT_DEBUFF_INFO_DEFAULT[4];
+	end
+
+end
+
 
 
 -- debuff type, aura name, aura spell Id, isStandard: true|false
@@ -413,10 +595,38 @@ local tUnitDebuffInfo;
 local function VUHDO_initDebuffInfos(aUnit)
 
 	tUnitDebuffInfo = VUHDO_UNIT_DEBUFF_INFOS[aUnit];
+
+	tUnitDebuffInfo["CHOSEN"][1], tUnitDebuffInfo["CHOSEN"][2] = nil, 0;
 	tUnitDebuffInfo[1][2] = nil; -- VUHDO_DEBUFF_TYPE_POISON
 	tUnitDebuffInfo[2][2] = nil; -- VUHDO_DEBUFF_TYPE_DISEASE
 	tUnitDebuffInfo[3][2] = nil; -- VUHDO_DEBUFF_TYPE_MAGIC
 	tUnitDebuffInfo[4][2] = nil; -- VUHDO_DEBUFF_TYPE_CURSE
+
+	if not tUnitDebuffInfo["listHeads"] then
+		tUnitDebuffInfo["listHeads"] = { };
+	end
+
+	tUnitDebuffInfo["listHeads"]["CHOSEN"] = nil;
+	tUnitDebuffInfo["listHeads"][1] = nil; -- VUHDO_DEBUFF_TYPE_POISON
+	tUnitDebuffInfo["listHeads"][2] = nil; -- VUHDO_DEBUFF_TYPE_DISEASE
+	tUnitDebuffInfo["listHeads"][3] = nil; -- VUHDO_DEBUFF_TYPE_MAGIC
+	tUnitDebuffInfo["listHeads"][4] = nil; -- VUHDO_DEBUFF_TYPE_CURSE
+
+	if not tUnitDebuffInfo["typeAuras"] then
+		tUnitDebuffInfo["typeAuras"] = { };
+	else
+		for tAuraInstanceId, _ in pairs(tUnitDebuffInfo["typeAuras"]) do
+			tUnitDebuffInfo["typeAuras"][tAuraInstanceId] = nil;
+		end
+	end
+
+	if not tUnitDebuffInfo["chosenAuras"] then
+		tUnitDebuffInfo["chosenAuras"] = { };
+	else
+		for tAuraInstanceId, _ in pairs(tUnitDebuffInfo["chosenAuras"]) do
+			tUnitDebuffInfo["chosenAuras"][tAuraInstanceId] = nil;
+		end
+	end
 
 	if not sCurChosenInfo[aUnit] then
 		sCurChosenInfo[aUnit] = { };
@@ -495,7 +705,6 @@ local tType;
 local tAbility;
 local tIsRelevant;
 local tSchool;
-local tRemaining;
 local tNewDuration, tNewExpiry;
 local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, aStacks, aTypeString, aDuration, anExpiry, aUnitCaster, aSpellId, anIsBossDebuff, anIsUpdate)
 
@@ -541,12 +750,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 		and not (VUHDO_IGNORE_DEBUFFS_BY_CLASS[tInfo["class"] or ""] or sEmpty)[aName];
 
 	if tType and tIsRelevant then
-		tSchool = sUnitDebuffInfo[tType];
-		tRemaining = floor(anExpiry - sNow);
-
-		if (tSchool[2] or 0) < tRemaining then
-			tSchool[1], tSchool[2], tSchool[3], tSchool[4] = anIcon, tRemaining, aStacks, aDuration;
-		end
+		VUHDO_addUnitDebuffInfo(sUnit, tType, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration);
 	end
 
 	if not tIsShown and not VUHDO_DEBUFF_BLACKLIST[aName] and not VUHDO_DEBUFF_BLACKLIST[tostring(aSpellId)] and tIsRelevant then
@@ -566,7 +770,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 				VUHDO_addCurChosen(sUnit, anAuraInstanceId, tType, nil, nil, nil);
 			end
 
-			sUnitDebuffInfo["CHOSEN"][1], sUnitDebuffInfo["CHOSEN"][2] = anIcon, aStacks;
+			VUHDO_addUnitDebuffInfo(sUnit, "CHOSEN", anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration);
 		end
 	end
 
@@ -663,7 +867,9 @@ end
 
 --
 local tAura;
-local tDoUpdate;
+local tDoUpdate
+local tDoUpdateUnitDebuffInfo = { };
+local tType;
 local tName;
 local tDebuffSettings;
 local tCurChosenInfo;
@@ -709,20 +915,41 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 			if aUpdateInfo.removedAuraInstanceIDs then
 				tDoUpdate = false;
 
+				tDoUpdateUnitDebuffInfo["CHOSEN"], tDoUpdateUnitDebuffInfo[1], tDoUpdateUnitDebuffInfo[2],
+				tDoUpdateUnitDebuffInfo[3], tDoUpdateUnitDebuffInfo[4] =
+					false, false, false, false, false;
+
 				for _, tAuraInstanceId in pairs(aUpdateInfo.removedAuraInstanceIDs) do
 					if sCurIcons[aUnit] and sCurIcons[aUnit][tAuraInstanceId] then
 						sCurIcons[aUnit][tAuraInstanceId] = nil;
 
 						if sCurChosenInfo[aUnit] and sCurChosenInfo[aUnit][tAuraInstanceId] then
 							VUHDO_removeCurChosen(aUnit, tAuraInstanceId);
-
 							tDoUpdate = true;
+						end
+
+						if sUnitDebuffInfo["typeAuras"] and sUnitDebuffInfo["typeAuras"][tAuraInstanceId] then
+							tType = sUnitDebuffInfo["typeAuras"][tAuraInstanceId][5];
+
+							VUHDO_removeUnitDebuffInfo(aUnit, tType, tAuraInstanceId);
+							tDoUpdateUnitDebuffInfo[tType] = true;
+						end
+
+						if sUnitDebuffInfo["chosenAuras"] and sUnitDebuffInfo["chosenAuras"][tAuraInstanceId] then
+							VUHDO_removeUnitDebuffInfo(aUnit, "CHOSEN", tAuraInstanceId);
+							tDoUpdateUnitDebuffInfo["CHOSEN"] = true;
 						end
 					end
 				end
 
 				if tDoUpdate then
 					VUHDO_updateCurChosen(aUnit);
+				end
+
+				for tUpdateType, tDoUpdateType in pairs(tDoUpdateUnitDebuffInfo) do
+					if tDoUpdateType then
+						VUHDO_updateUnitDebuffInfo(aUnit, tUpdateType);
+					end
 				end
 			end
 		end
@@ -925,9 +1152,19 @@ function VUHDO_getUnitDebuffSchoolInfos(aUnit, aDebuffSchool)
 end
 
 
+
 --
 function VUHDO_getChosenDebuffInfo(aUnit)
 	return VUHDO_UNIT_DEBUFF_INFOS[aUnit]["CHOSEN"];
+end
+
+
+
+--
+function VUHDO_getUnitDebuffInfos(aUnit)
+
+	return VUHDO_UNIT_DEBUFF_INFOS[aUnit];
+
 end
 
 
