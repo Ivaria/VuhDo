@@ -48,7 +48,7 @@ local VUHDO_HOT_CFGS = { "HOT1", "HOT2", "HOT3", "HOT4", "HOT5", "HOT6", "HOT7",
 
 local floor = floor;
 local table = table;
-local GetSpellCooldown = GetSpellCooldown;
+local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 local GetTime = GetTime;
 local strfind = strfind;
