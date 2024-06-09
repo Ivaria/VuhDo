@@ -217,12 +217,35 @@ end
 local VUHDO_UNIT_DEBUFF_INFOS = { };
 setmetatable(VUHDO_UNIT_DEBUFF_INFOS, {
 	__index = function(aTable, aKey)
-	  local tValue = {
-			["CHOSEN"] = { [1] = nil, [2] = 0 },
+		local tValue = {
+			["CHOSEN"] = { [1] = nil, [2] = nil, [3] = 0, [4] = 0 },
 			[VUHDO_DEBUFF_TYPE_POISON] = { },
 			[VUHDO_DEBUFF_TYPE_DISEASE] = { },
 			[VUHDO_DEBUFF_TYPE_MAGIC] = { },
 			[VUHDO_DEBUFF_TYPE_CURSE] = { },
+--			["listHeads"] = {
+--				[<CHOSEN|VUHDO_DEBUFF_TYPE>] = {
+--					["auraInstanceId"] = <aura instance ID>,
+--					["next"] = <next aura>,
+--					["prev"] = <prev aura>,
+--				},
+--			},
+--			["typeAuras"] = {
+--				[<aura instance ID] = {
+--					<aura icon>,
+--					<aura time remaining>,
+--					<aura stacks>,
+--					<aura duration>,
+--				},
+--			},
+--			["chosenAuras"] = {
+--				[<aura instance ID] = {
+--					<aura icon>,
+--					<aura time remaining>,
+--					<aura stacks>,
+--					<aura duration>,
+--				},
+--			},
 		};
 
 		rawset(aTable, aKey, tValue);
@@ -596,7 +619,7 @@ local function VUHDO_initDebuffInfos(aUnit)
 
 	tUnitDebuffInfo = VUHDO_UNIT_DEBUFF_INFOS[aUnit];
 
-	tUnitDebuffInfo["CHOSEN"][1], tUnitDebuffInfo["CHOSEN"][2] = nil, 0;
+	tUnitDebuffInfo["CHOSEN"][1], tUnitDebuffInfo["CHOSEN"][2], tUnitDebuffInfo["CHOSEN"][3], tUnitDebuffInfo["CHOSEN"][4] = nil, nil, 0, 0;
 	tUnitDebuffInfo[1][2] = nil; -- VUHDO_DEBUFF_TYPE_POISON
 	tUnitDebuffInfo[2][2] = nil; -- VUHDO_DEBUFF_TYPE_DISEASE
 	tUnitDebuffInfo[3][2] = nil; -- VUHDO_DEBUFF_TYPE_MAGIC
