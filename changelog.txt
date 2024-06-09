@@ -13,6 +13,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Shaman 'Stoneskin Totem' in Buff Watch  
   
   
 Improvements:  
