@@ -359,7 +359,7 @@ local function VUHDO_removeUnitDebuffInfo(aUnit, aType, anAuraInstanceId)
 				-- remove head
 				tUnitDebuffInfoPrev["next"] = nil;
 
-				sCurChosenListHead[aUnit] = tUnitDebuffInfoPrev;
+				VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType] = tUnitDebuffInfoPrev;
 			elseif tUnitDebuffInfoPrev and tUnitDebuffInfoNext then
 				-- remove link
 				tUnitDebuffInfoNext["prev"] = tUnitDebuffInfoPrev;
