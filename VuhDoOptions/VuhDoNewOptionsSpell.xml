@@ -66,7 +66,6 @@
 						</Scripts>
 					</CheckButton>
 
-<!--
 					<CheckButton name="$parentFireRadioButton" text="VUHDO_I18N_MISC" inherits="VuhDoTabRadioButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -83,14 +82,12 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
--->
 
 					<CheckButton name="$parentHostileRadioButton" text="VUHDO_I18N_HOSTILE" inherits="VuhDoTabRadioButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="3" y="-117" />
-									<!--<AbsDimension x="3" y="-155" />-->
+									<AbsDimension x="3" y="-155" />
 								</Offset>
 							</Anchor>
 						</Anchors>

@@ -1,6 +1,8 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<Frame name="VuhDoNewOptionsSpellFireTemplate" virtual="true">
 		<Frames>
+
+			<!--
 			<Frame name="$parentTriggerWhatPanel" inherits="VuhDoPanelTemplate">
 				<Size>
 					<AbsDimension x="365" y="202" />
@@ -366,6 +368,7 @@
 
 				</Frames>
 			</Frame>
+			-->
 
 			<Frame name="$parentSmartCastPanel" inherits="VuhDoPanelTemplate">
 				<Size>
@@ -374,7 +377,8 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="160" y="-250" />
+							<!--<AbsDimension x="160" y="-250" />-->
+							<AbsDimension x="20" y="-30" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -427,6 +431,7 @@
 						</Scripts>
 					</CheckButton>
 
+					<!--
 					<CheckButton name="$parentBattleRezCheckButton" text="VUHDO_I18N_BATTLE_REZ" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -442,6 +447,7 @@
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
+					-->
 
 					<Frame name="$parentSmartCastLabel" inherits="VuhDoLabelFrameTemplate">
 						<Layers>
