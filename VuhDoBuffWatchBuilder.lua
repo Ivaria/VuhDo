@@ -251,7 +251,7 @@ function VUHDO_reloadBuffPanel()
 		return;
 	end
 
-	if (VUHDO_BUFF_SETTINGS["CONFIG"]["HIDE_OUT_OF_COMBAT"] and sIsOutOfCombat) or not VUHDO_BUFF_SETTINGS["CONFIG"] then
+	if not VUHDO_BUFF_SETTINGS["CONFIG"] or (VUHDO_BUFF_SETTINGS["CONFIG"]["HIDE_OUT_OF_COMBAT"] and sIsOutOfCombat) then
 		if VuhDoBuffWatchMainFrame then
 			VuhDoBuffWatchMainFrame:Hide();
 		end
