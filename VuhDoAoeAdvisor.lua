@@ -1,5 +1,6 @@
 --
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
+local GetSpellTexture = GetSpellTexture or C_Spell.GetSpellTexture;
 local UnitPower = UnitPower;
 local UnitGetIncomingHeals = UnitGetIncomingHeals;
 local pairs = pairs;

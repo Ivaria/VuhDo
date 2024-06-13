@@ -72,7 +72,7 @@ local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 local InCombatLockdown = InCombatLockdown;
 local GetWeaponEnchantInfo = GetWeaponEnchantInfo;
 local UnitOnTaxi = UnitOnTaxi;
-local IsSpellInRange = IsSpellInRange;
+local IsSpellInRange = IsSpellInRange or C_Spell.IsSpellInRange;
 local GetShapeshiftFormInfo = GetShapeshiftFormInfo;
 
 local tonumber = tonumber;

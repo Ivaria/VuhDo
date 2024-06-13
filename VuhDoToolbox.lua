@@ -17,7 +17,6 @@ local IsInGroup = IsInGroup;
 local UnitInRange = UnitInRange;
 local GetRaidRosterInfo = GetRaidRosterInfo;
 local IsInInstance = IsInInstance;
-local IsSpellInRange = IsSpellInRange;
 local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
 local SetMapToCurrentZone = SetMapToCurrentZone;
@@ -27,7 +26,7 @@ local WorldMapFrame = WorldMapFrame;
 local GetPlayerFacing = GetPlayerFacing;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
-local IsSpellInRange = IsSpellInRange;
+local IsSpellInRange = IsSpellInRange or C_Spell.IsSpellInRange;
 local UnitInRange = UnitInRange;
 local IsAltKeyDown = IsAltKeyDown;
 local IsControlKeyDown = IsControlKeyDown;
@@ -45,6 +44,7 @@ local UnpackAuraData = AuraUtil.UnpackAuraData or VUHDO_unpackAuraData;
 local FindAura = AuraUtil.FindAura;
 local FindAuraByName = AuraUtil.FindAuraByName;
 local IsUsableItem = IsUsableItem or C_Item.IsUsableItem;
+local IsUsableSpell = IsUsableSpell or C_Spell.IsSpellUsable;
 
 -- talent cache maps for new large Dragonflight talent trees
 local VUHDO_TALENT_CACHE_SPELL_ID = {

@@ -61,7 +61,7 @@ local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
 local GetTime = GetTime;
 local UnitInRange = UnitInRange;
-local IsSpellInRange = IsSpellInRange;
+local IsSpellInRange = IsSpellInRange or C_Spell.IsSpellInRange;
 local UnitDetailedThreatSituation = UnitDetailedThreatSituation;
 local UnitIsCharmed = UnitIsCharmed;
 local UnitCanAttack = UnitCanAttack;
