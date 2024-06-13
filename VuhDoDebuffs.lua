@@ -762,7 +762,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 	tIsRelevant = not VUHDO_IGNORE_DEBUFF_NAMES[aName]
 		and not (VUHDO_IGNORE_DEBUFFS_BY_CLASS[tInfo["class"] or ""] or sEmpty)[aName];
 
-	if tType and tIsRelevant then
+	if not anIsUpdate and tType and tIsRelevant then
 		VUHDO_addUnitDebuffInfo(sUnit, tType, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration);
 	end
 
@@ -778,11 +778,8 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 
 		-- Entweder Fähigkeit vorhanden ODER noch keiner gewählt UND auch nicht entfernbare
 		-- Either ability available OR none selected AND not removable (DETECT_DEBUFFS_REMOVABLE_ONLY)
-		if tType and (tAbility or (sCurChosen[sUnit][1] == 0 and sIsNotRemovableOnly)) then -- VUHDO_DEBUFF_TYPE_NONE
-			if not anIsUpdate then
-				VUHDO_addCurChosen(sUnit, anAuraInstanceId, tType, nil, nil, nil);
-			end
-
+		if not anIsUpdate and tType and (tAbility or (sCurChosen[sUnit][1] == 0 and sIsNotRemovableOnly)) then -- VUHDO_DEBUFF_TYPE_NONE
+			VUHDO_addCurChosen(sUnit, anAuraInstanceId, tType, nil, nil, nil);
 			VUHDO_addUnitDebuffInfo(sUnit, "CHOSEN", anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration);
 		end
 	end
