@@ -925,23 +925,23 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 				for _, tAuraInstanceId in pairs(aUpdateInfo.removedAuraInstanceIDs) do
 					if sCurIcons[aUnit] and sCurIcons[aUnit][tAuraInstanceId] then
 						sCurIcons[aUnit][tAuraInstanceId] = nil;
+					end
 
-						if sCurChosenInfo[aUnit] and sCurChosenInfo[aUnit][tAuraInstanceId] then
-							VUHDO_removeCurChosen(aUnit, tAuraInstanceId);
-							tDoUpdate = true;
-						end
+					if sCurChosenInfo[aUnit] and sCurChosenInfo[aUnit][tAuraInstanceId] then
+						VUHDO_removeCurChosen(aUnit, tAuraInstanceId);
+						tDoUpdate = true;
+					end
 
-						if sUnitDebuffInfo["typeAuras"] and sUnitDebuffInfo["typeAuras"][tAuraInstanceId] then
-							tType = sUnitDebuffInfo["typeAuras"][tAuraInstanceId][5];
+					if sUnitDebuffInfo["typeAuras"] and sUnitDebuffInfo["typeAuras"][tAuraInstanceId] then
+						tType = sUnitDebuffInfo["typeAuras"][tAuraInstanceId][5];
 
-							VUHDO_removeUnitDebuffInfo(aUnit, tType, tAuraInstanceId);
-							tDoUpdateUnitDebuffInfo[tType] = true;
-						end
+						VUHDO_removeUnitDebuffInfo(aUnit, tType, tAuraInstanceId);
+						tDoUpdateUnitDebuffInfo[tType] = true;
+					end
 
-						if sUnitDebuffInfo["chosenAuras"] and sUnitDebuffInfo["chosenAuras"][tAuraInstanceId] then
-							VUHDO_removeUnitDebuffInfo(aUnit, "CHOSEN", tAuraInstanceId);
-							tDoUpdateUnitDebuffInfo["CHOSEN"] = true;
-						end
+					if sUnitDebuffInfo["chosenAuras"] and sUnitDebuffInfo["chosenAuras"][tAuraInstanceId] then
+						VUHDO_removeUnitDebuffInfo(aUnit, "CHOSEN", tAuraInstanceId);
+						tDoUpdateUnitDebuffInfo["CHOSEN"] = true;
 					end
 				end
 
