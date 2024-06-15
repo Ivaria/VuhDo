@@ -26,7 +26,6 @@ local WorldMapFrame = WorldMapFrame;
 local GetPlayerFacing = GetPlayerFacing;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
-local IsSpellInRange = IsSpellInRange or C_Spell.IsSpellInRange;
 local UnitInRange = UnitInRange;
 local IsAltKeyDown = IsAltKeyDown;
 local IsControlKeyDown = IsControlKeyDown;
@@ -135,6 +134,26 @@ function VUHDO_getSpellBookItemTexture(aSpellId)
 	_, _, tIconId = VUHDO_getSpellInfo(aSpellId);
 
 	return tIconId;
+
+end
+
+
+
+--
+local tIsSpellInRange;
+function VUHDO_isSpellInRange(aSpell, aUnit)
+
+	if not aSpell or not aUnit then
+		return nil;
+	end
+
+	if IsSpellInRange then
+		return IsSpellInRange(aSpell, aUnit);
+	end
+
+	tIsSpellInRange = C_Spell.IsSpellInRange(aSpell, aUnit);
+
+	return tIsSpellInRange and 1 or 0;
 
 end
 
@@ -399,9 +418,9 @@ function VUHDO_checkInteractDistance(aUnit, aDistIndex)
 		return CheckInteractDistance(aUnit, aDistIndex);
 	else
 		if not sIsHarmfulGuessRange and UnitCanAttack("player", aUnit) then
-			return (IsSpellInRange(sRangeSpell["HARMFUL"], aUnit) == 1) and true or false;
+			return (VUHDO_isSpellInRange(sRangeSpell["HARMFUL"], aUnit) == 1) and true or false;
 		elseif not sIsHelpfulGuessRange then
-			return (IsSpellInRange(sRangeSpell["HELPFUL"], aUnit) == 1) and true or false;
+			return (VUHDO_isSpellInRange(sRangeSpell["HELPFUL"], aUnit) == 1) and true or false;
 		else
 			-- default to showing in-range when we don't know any better
 			return true;
@@ -467,7 +486,7 @@ function VUHDO_isInRange(aUnit)
 			return UnitInRange(aUnit);
 		end
 
-		local tIsSpellInRange = IsSpellInRange(tRangeSpell, aUnit);
+		local tIsSpellInRange = VUHDO_isSpellInRange(tRangeSpell, aUnit);
 
 		if tIsSpellInRange ~= nil then
 			return (tIsSpellInRange == 1) and true or false;
