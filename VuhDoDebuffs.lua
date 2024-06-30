@@ -695,19 +695,19 @@ end
 
 --
 local tIconArray;
-local function VUHDO_getOrCreateIconArray(aUnit, anIcon, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aName)
+local function VUHDO_getOrCreateIconArray(aUnit, anIcon, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aName, aCnt)
 
 	if not sCurIcons[aUnit] then
 		sCurIcons[aUnit] = { };
 	end
 
 	if not sCurIcons[aUnit][anAuraInstanceId] then
-		tIconArray = { anIcon, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aName };
+		tIconArray = { anIcon, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aName, aCnt };
 	else
 		tIconArray = sCurIcons[aUnit][anAuraInstanceId];
 
-		tIconArray[1], tIconArray[2], tIconArray[3], tIconArray[4], tIconArray[5], tIconArray[6], tIconArray[7], tIconArray[8]
-			= anIcon, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aName;
+		tIconArray[1], tIconArray[2], tIconArray[3], tIconArray[4], tIconArray[5], tIconArray[6], tIconArray[7], tIconArray[8], tIconArray[9]
+			= anIcon, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aName, aCnt;
 	end
 
 	return tIconArray;
@@ -720,6 +720,7 @@ end
 local sUnit;
 local sNow;
 local sUnitDebuffInfo;
+local sCnt;
 
 local tDebuffConfig;
 local tIsShown;
@@ -729,7 +730,7 @@ local tAbility;
 local tIsRelevant;
 local tSchool;
 local tNewDuration, tNewExpiry;
-local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, aStacks, aTypeString, aDuration, anExpiry, aUnitCaster, aSpellId, anIsBossDebuff, anIsUpdate)
+local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, aStacks, aTypeString, aDuration, anExpiry, aUnitCaster, aSpellId, anIsBossDebuff, anIsUpdate, aCnt)
 
 	if not anIcon then
 		return;
@@ -762,7 +763,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 	aStacks = aStacks or 0;
 
 	if tDebuffConfig[2] and ((tDebuffConfig[3] and aUnitCaster == "player") or (tDebuffConfig[4] and aUnitCaster ~= "player")) then -- Icon?
-		sCurIcons[sUnit][anAuraInstanceId] = VUHDO_getOrCreateIconArray(sUnit, anIcon, anExpiry, aStacks, aDuration, false, aSpellId, anAuraInstanceId, aName);
+		sCurIcons[sUnit][anAuraInstanceId] = VUHDO_getOrCreateIconArray(sUnit, anIcon, anExpiry, aStacks, aDuration, false, aSpellId, anAuraInstanceId, aName, aCnt);
 
 		tIsShown = true;
 	end
@@ -779,7 +780,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 	if not tIsShown and not VUHDO_DEBUFF_BLACKLIST[aName] and not VUHDO_DEBUFF_BLACKLIST[tostring(aSpellId)] and tIsRelevant then
 		if sIsUseDebuffIcon and (anIsBossDebuff or not sIsUseDebuffIconBossOnly)
 			and (sIsNotRemovableOnlyIcons or tAbility ~= nil) then
-			sCurIcons[sUnit][anAuraInstanceId] = VUHDO_getOrCreateIconArray(sUnit, anIcon, anExpiry, aStacks, aDuration, false, aSpellId, anAuraInstanceId, aName);
+			sCurIcons[sUnit][anAuraInstanceId] = VUHDO_getOrCreateIconArray(sUnit, anIcon, anExpiry, aStacks, aDuration, false, aSpellId, anAuraInstanceId, aName, aCnt);
 
 			if not anIsUpdate then
 				VUHDO_addCurChosen(sUnit, anAuraInstanceId, nil, nil, nil, true);
@@ -799,7 +800,7 @@ end
 
 
 --
-local function VUHDO_determineBuffPredicate(anAuraInstanceId, aName, anIcon, aStacks, aDuration, anExpiry, aUnitCaster, aSpellId, anIsUpdate)
+local function VUHDO_determineBuffPredicate(anAuraInstanceId, aName, anIcon, aStacks, aDuration, anExpiry, aUnitCaster, aSpellId, anIsUpdate, aCnt)
 
 	if not anIcon then
 		return;
@@ -821,7 +822,7 @@ local function VUHDO_determineBuffPredicate(anAuraInstanceId, aName, anIcon, aSt
 	end
 
 	if tDebuffConfig[2] and ((tDebuffConfig[3] and aUnitCaster == "player") or (tDebuffConfig[4] and aUnitCaster ~= "player")) then -- Icon?
-		sCurIcons[sUnit][anAuraInstanceId] = VUHDO_getOrCreateIconArray(sUnit, anIcon, anExpiry, aStacks or 0, aDuration, true, aSpellId, anAuraInstanceId, aName);
+		sCurIcons[sUnit][anAuraInstanceId] = VUHDO_getOrCreateIconArray(sUnit, anIcon, anExpiry, aStacks or 0, aDuration, true, aSpellId, anAuraInstanceId, aName, aCnt);
 	end
 
 end
@@ -843,7 +844,8 @@ function VUHDO_determineAuraPredicate(anAuraData, anIsUpdate)
 			anAuraData.sourceUnit,
 			anAuraData.spellId,
 			anAuraData.isBossAura,
-			anIsUpdate
+			anIsUpdate,
+			sCnt
 		);
 	elseif anAuraData and anAuraData.isHelpful then
 		VUHDO_determineBuffPredicate(
@@ -855,9 +857,12 @@ function VUHDO_determineAuraPredicate(anAuraData, anIsUpdate)
 			anAuraData.expirationTime,
 			anAuraData.sourceUnit,
 			anAuraData.spellId,
-			anIsUpdate
+			anIsUpdate,
+			sCnt
 		);
 	end
+
+	sCnt = sCnt + 1;
 
 end
 
@@ -911,7 +916,10 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 		if not aUpdateInfo or (aUpdateInfo and aUpdateInfo.isFullUpdate) then
 			sUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
 
+			sCnt = 1;
 			ForEachAura(aUnit, "HARMFUL", nil, VUHDO_determineAuraPredicate, true);
+
+			sCnt = 1;
 			ForEachAura(aUnit, "HELPFUL", nil, VUHDO_determineAuraPredicate, true);
 		elseif aUpdateInfo then
 			sUnitDebuffInfo = (sCurIcons[aUnit] and sCurChosen[aUnit]) and VUHDO_UNIT_DEBUFF_INFOS[aUnit] or VUHDO_initDebuffInfos(aUnit);
@@ -986,10 +994,10 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					if not sIsShowOnlyForFriendly or UnitIsFriend("player", aUnit) then
 						-- tExpiry, tStacks, tIcon, tAuraInstanceId, tName
 						VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId] = {
-							tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7], tName
+							tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7], tName, tDebuffInfo[9]
 						};
 
-						VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7]);
+						VUHDO_addDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7], tDebuffInfo[9]);
 
 						if not VUHDO_IS_CONFIG and VUHDO_MAY_DEBUFF_ANIM then
 							-- the key used to store the debuff settings is either the debuff name or spell ID
@@ -1022,13 +1030,14 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][2] ~= tDebuffInfo[3]
 					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][3] ~= tDebuffInfo[1]
 					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][4] ~= tDebuffInfo[7]
-					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][5] ~= tName) then
+					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][5] ~= tName
+					or VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][6] ~= tDebuffInfo[9]) then
 					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][1], VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][2],
 					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][3], VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][4],
-					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][5] =
-						tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7], tName;
+					VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][5], VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId][6] =
+						tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[1], tDebuffInfo[7], tName, tDebuffInfo[9];
 
-					VUHDO_updateDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7]);
+					VUHDO_updateDebuffIcon(aUnit, tDebuffInfo[1], tName, tDebuffInfo[2], tDebuffInfo[3], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6], tDebuffInfo[7], tDebuffInfo[9]);
 
 					VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
 				end
