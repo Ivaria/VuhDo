@@ -1,27 +1,9 @@
-local GetSpellInfo = C_Spell.GetSpellInfo or GetSpellInfo;
-
---
-local tSpellInfo;
-local function VUHDO_getSpellInfo(aSpellId)
-
-	if not aSpellId then
-		return;
-	end
-
-	tSpellInfo = GetSpellInfo(aSpellId);
-
-	if not tSpellInfo then
-		return;
-	end
-
-	return tSpellInfo.name, nil, tSpellInfo.iconID, tSpellInfo.castTime, tSpellInfo.minRange, tSpellInfo.maxRange, tSpellInfo.spellID, tSpellInfo.originalIconID;
-
-end
+local GetSpellName = C_Spell.GetSpellName;
 
 --
 local tSpellName;
 local function VUHDO_getSpellInfoSafe(aSpellID)
-	tSpellName = VUHDO_getSpellInfo(aSpellID);
+	tSpellName = GetSpellName(aSpellID);
 
 	return tSpellName or "!";
 end

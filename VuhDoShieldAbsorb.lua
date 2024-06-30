@@ -3,7 +3,6 @@ local select = select;
 local type = type;
 
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
-local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 
 local VUHDO_SHIELDS = {
 	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD -- ok

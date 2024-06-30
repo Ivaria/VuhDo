@@ -5,6 +5,7 @@ local GI_SCAN_MAX = 200001;
 VUHDO_GI_SCAN_IDX = GI_SCAN_MAX;
 
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
+local GetSpellName = C_Spell.GetSpellName;
 local GetSpellBookItemTexture = GetSpellBookItemTexture or VUHDO_getSpellBookItemTexture;
 local pairs = pairs;
 
@@ -108,7 +109,7 @@ end
 local tSpellNameById;
 function VUHDO_resolveSpellId(aSpellName)
 	if tonumber(aSpellName or "x") then
-		tSpellNameById = GetSpellInfo(tonumber(aSpellName));
+		tSpellNameById = GetSpellName(tonumber(aSpellName));
 		if tSpellNameById then
 			return tSpellNameById;
 		end

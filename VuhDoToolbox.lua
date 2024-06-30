@@ -24,6 +24,7 @@ local UnitPowerBarID = UnitPowerBarID;
 local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID;
 local WorldMapFrame = WorldMapFrame;
 local GetPlayerFacing = GetPlayerFacing;
+local GetSpellName = C_Spell.GetSpellName;
 local CheckInteractDistance = CheckInteractDistance;
 local UnitIsUnit = UnitIsUnit;
 local UnitInRange = UnitInRange;
@@ -309,8 +310,8 @@ function VUHDO_toolboxInitLocalOverrides()
 	-- FIXME: why can't model sanity be run prior to burst cache initialization?
 	if type(VUHDO_CONFIG["RANGE_SPELL"]) == "table" and type(VUHDO_CONFIG["RANGE_PESSIMISTIC"]) == "table" then
 		sRangeSpell = VUHDO_CONFIG["RANGE_SPELL"];
-		sIsHelpfulGuessRange = VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HELPFUL"] or VUHDO_getSpellInfo(sRangeSpell["HELPFUL"]) == nil;
-		sIsHarmfulGuessRange = VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HARMFUL"] or VUHDO_getSpellInfo(sRangeSpell["HARMFUL"]) == nil;
+		sIsHelpfulGuessRange = VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HELPFUL"] or GetSpellName(sRangeSpell["HELPFUL"]) == nil;
+		sIsHarmfulGuessRange = VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HARMFUL"] or GetSpellName(sRangeSpell["HARMFUL"]) == nil;
 	end
 
 	sZeroRange = "0.0 " .. VUHDO_I18N_YARDS;
@@ -758,7 +759,7 @@ function VUHDO_initTalentSpellCaches()
 						local tDefinitionInfo = C_Traits.GetDefinitionInfo(tEntryInfo.definitionID);
 
 						if tDefinitionInfo and tDefinitionInfo.spellID then
-							local tSpellName = VUHDO_getSpellInfo(tDefinitionInfo.spellID);
+							local tSpellName = GetSpellName(tDefinitionInfo.spellID);
 
 							VUHDO_TALENT_CACHE_SPELL_ID[tDefinitionInfo.spellID] = tSpellName;
 							VUHDO_TALENT_CACHE_SPELL_NAME[tSpellName] = tDefinitionInfo.spellID;

@@ -69,7 +69,7 @@ local UnitName = UnitName;
 local UnitIsEnemy = UnitIsEnemy;
 local UnitIsTrivial = UnitIsTrivial;
 local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
-local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
+local GetSpellName = C_Spell.GetSpellName;
 local HasFullControl = HasFullControl;
 local pairs = pairs;
 local UnitThreatSituation = UnitThreatSituation;
@@ -127,8 +127,8 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	-- FIXME: why can't model sanity be run prior to burst cache initialization?
 	if type(VUHDO_CONFIG["RANGE_SPELL"]) == "table" and type(VUHDO_CONFIG["RANGE_PESSIMISTIC"]) == "table" then
 		sRangeSpell = VUHDO_CONFIG["RANGE_SPELL"];
-		sIsHelpfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HELPFUL"] and GetSpellInfo(sRangeSpell["HELPFUL"]) ~= nil;
-		sIsHarmfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HARMFUL"] and GetSpellInfo(sRangeSpell["HARMFUL"]) ~= nil;
+		sIsHelpfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HELPFUL"] and GetSpellName(sRangeSpell["HELPFUL"]) ~= nil;
+		sIsHarmfulRangeKnown = not VUHDO_CONFIG["RANGE_PESSIMISTIC"]["HARMFUL"] and GetSpellName(sRangeSpell["HARMFUL"]) ~= nil;
 	end
 
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
