@@ -226,7 +226,7 @@ local tSlot;
 local tOldest;
 local tTimestamp;
 local tFrame, tIconInfo;
-function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
+function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aCnt)
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
 		VUHDO_DEBUFF_ICONS[aUnit] = { };
 	end
@@ -251,7 +251,7 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 		VUHDO_animateDebuffIcon(tButton, tIconInfo, GetTime(), tSlot + 39, true, aUnit);
 
 		tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
-		tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"] = aName, aSpellId, anIsBuff, anAuraInstanceId;
+		tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"], tFrame["debuffCnt"] = aName, aSpellId, anIsBuff, anAuraInstanceId, aCnt;
 	end
 	tIconInfo[2] = GetTime();
 
@@ -263,7 +263,7 @@ end
 --
 local tIconInfo;
 local tFound;
-function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
+function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aCnt)
 
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
 		VUHDO_DEBUFF_ICONS[aUnit] = { };
@@ -281,13 +281,13 @@ function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDurati
 
 			for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 				tFrame = VUHDO_getBarIconFrame(tButton, tCnt + 39);
-				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"] = aName, aSpellId, anIsBuff, anAuraInstanceId;
+				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"], tFrame["debuffCnt"] = aName, aSpellId, anIsBuff, anAuraInstanceId, aCnt;
 			end
 		end
 	end
 
 	if not tFound and (not sIsShowOnlyForFriendly or UnitIsFriend("player", aUnit)) then
-		VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId);
+		VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aCnt);
 	end
 
 end

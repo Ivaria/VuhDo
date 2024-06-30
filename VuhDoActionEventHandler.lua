@@ -415,12 +415,12 @@ function VUHDO_showDebuffTooltip(aDebuffIcon)
 		GameTooltip:SetOwner(aDebuffIcon, "ANCHOR_RIGHT", 0, 0);
 	end
 
-	if aDebuffIcon["debuffInstanceId"] then
+	if aDebuffIcon["debuffInstanceId"] and aDebuffIcon["debuffCnt"] then
 		if not GameTooltip:IsForbidden() then
 			if aDebuffIcon["isBuff"] then 
-				GameTooltip:SetUnitBuffByAuraInstanceID(tButton["raidid"], aDebuffIcon["debuffInstanceId"]);
+				GameTooltip:SetUnitBuff(tButton["raidid"], aDebuffIcon["debuffCnt"]);
 			else 
-				GameTooltip:SetUnitDebuffByAuraInstanceID(tButton["raidid"], aDebuffIcon["debuffInstanceId"]); 
+				GameTooltip:SetUnitDebuff(tButton["raidid"], aDebuffIcon["debuffCnt"]);
 			end
 		end
 	end

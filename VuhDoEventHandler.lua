@@ -484,7 +484,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "UNIT_AURA" == anEvent then
 		tInfo = (VUHDO_RAID or tEmptyRaid)[anArg1];
 		if tInfo then
-			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(anArg1, anArg2);
+			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(anArg1);
 			VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
 		end
 
