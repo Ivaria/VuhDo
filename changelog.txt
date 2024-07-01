@@ -35,6 +35,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Buff Watch 'Missing' color during combat  
   
   
 Improvements:  

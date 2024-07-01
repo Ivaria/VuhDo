@@ -851,10 +851,18 @@ end
 
 --
 local tCurChosenStoredName;
-function VUHDO_getDeterminedDebuffInfo(aUnit)
+function VUHDO_getDeterminedDebuffInfo(aUnit, aDoUpdate)
 
-	if not sAllDebuffSettings or not sCurChosen or not sCurChosen[aUnit] then
+	if not sAllDebuffSettings or not sCurChosen or not sCurChosen[aUnit] or not VUHDO_RAID or not VUHDO_RAID[aUnit] then
 		return;
+	end
+
+	if aDoUpdate then
+		VUHDO_updateCurChosen(aUnit);
+	end
+
+	if sCurChosen[aUnit][1] == VUHDO_DEBUFF_TYPE_NONE and VUHDO_RAID[aUnit]["missbuff"] and (sIsMiBuColorsInFight or not InCombatLockdown()) then
+		sCurChosen[aUnit][1] = VUHDO_DEBUFF_TYPE_MISSING_BUFF;
 	end
 
 	-- we need to return the actual key that the debuff settings are stored under
@@ -1039,10 +1047,6 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 
 			VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
 		end
-	end
-
-	if sCurChosen[aUnit][1] == VUHDO_DEBUFF_TYPE_NONE and tInfo["missbuff"] and (sIsMiBuColorsInFight or not InCombatLockdown()) then
-		sCurChosen[aUnit][1] = VUHDO_DEBUFF_TYPE_MISSING_BUFF;
 	end
 
 	return VUHDO_getDeterminedDebuffInfo(aUnit);
