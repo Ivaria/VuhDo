@@ -906,12 +906,7 @@ function VUHDO_updateBuffPanel()
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if tOldMissBuffs[tUnit] ~= tInfo["missbuff"] then
-			-- disable polling of auras during combat
-			if InCombatLockdown() then
-				tInfo["debuff"], tInfo["debuffName"] = VUHDO_getDeterminedDebuffInfo(tUnit);
-			else
-				tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(tUnit);
-			end
+			tInfo["debuff"], tInfo["debuffName"] = VUHDO_getDeterminedDebuffInfo(tUnit, true);
 
 			VUHDO_updateHealthBarsFor(tUnit, VUHDO_UPDATE_DEBUFF);
 		end
