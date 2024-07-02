@@ -61,6 +61,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed Buff Watch 'Missing' color during combat  
+-- Fixed dispellable debuff bar color fallback for custom debuffs  
   
   
 Improvements:  

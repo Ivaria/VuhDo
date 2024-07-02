@@ -724,6 +724,7 @@ local sCnt;
 
 local tDebuffConfig;
 local tIsShown;
+local tIsCustomColorShown;
 local tInfo;
 local tType;
 local tAbility;
@@ -751,13 +752,13 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 
 	-- Custom Debuff?
 	tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[aName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(aSpellId)] or sEmpty;
-	tIsShown = false;
+	tIsShown, tIsCustomColorShown = false, false;
 
 	-- Color?
 	if not anIsUpdate and tDebuffConfig[1] and ((tDebuffConfig[3] and aUnitCaster == "player") or (tDebuffConfig[4] and aUnitCaster ~= "player")) then
 		VUHDO_addCurChosen(sUnit, anAuraInstanceId, 6, aName, aSpellId, false); -- VUHDO_DEBUFF_TYPE_CUSTOM
 
-		tIsShown = true;
+		tIsShown, tIsCustomColorShown = true, true;
 	end
 
 	aStacks = aStacks or 0;
@@ -777,8 +778,8 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 		VUHDO_addUnitDebuffInfo(sUnit, tType, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration);
 	end
 
-	if not tIsShown and not VUHDO_DEBUFF_BLACKLIST[aName] and not VUHDO_DEBUFF_BLACKLIST[tostring(aSpellId)] and tIsRelevant then
-		if sIsUseDebuffIcon and (anIsBossDebuff or not sIsUseDebuffIconBossOnly)
+	if not tIsCustomColorShown and not VUHDO_DEBUFF_BLACKLIST[aName] and not VUHDO_DEBUFF_BLACKLIST[tostring(aSpellId)] and tIsRelevant then
+		if not tIsShown and sIsUseDebuffIcon and (anIsBossDebuff or not sIsUseDebuffIconBossOnly)
 			and (sIsNotRemovableOnlyIcons or tAbility ~= nil) then
 			sCurIcons[sUnit][anAuraInstanceId] = VUHDO_getOrCreateIconArray(sUnit, anIcon, anExpiry, aStacks, aDuration, false, aSpellId, anAuraInstanceId, aName, aCnt);
 
