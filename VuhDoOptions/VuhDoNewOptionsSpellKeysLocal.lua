@@ -18,12 +18,11 @@ function VUHDO_updateEditButton(aFrame)
 	local tEditButton = _G[aFrame:GetName() .. "EditButton"];
 	local _, _, _, _, tType = VUHDO_isActionValid(tEditBox:GetText(), true);
 
-	-- FIXME: 11.0.0 removes the ability to create arbitrary macrotext
---	if ("CUS" == tType) then
---		tEditButton:Show();
---	else
---		tEditButton:Hide();
---	end
+	if ("CUS" == tType) then
+		tEditButton:Show();
+	else
+		tEditButton:Hide();
+	end
 end
 
 

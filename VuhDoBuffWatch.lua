@@ -155,14 +155,13 @@ end
 --
 local function VUHDO_setupBuffButtonAttributes(aModifierKey, aButtonId, anActionName, aButton, aTargetType)
 	if not VUHDO_strempty(anActionName) then
-		-- FIXME: how to handle weapon enchant toggle in 11.x?
---		if VUHDO_BUFF_TARGET_ENCHANT == aTargetType or VUHDO_BUFF_TARGET_ENCHANT_OFF == aTargetType then
---			aButton:SetAttribute(aModifierKey .. "type" .. aButtonId, "macro");
---			aButton:SetAttribute(aModifierKey .. "macrotext" .. aButtonId, VUHDO_getWeaponEnchantMacroText(anActionName, aTargetType));
---		else
+		if VUHDO_BUFF_TARGET_ENCHANT == aTargetType or VUHDO_BUFF_TARGET_ENCHANT_OFF == aTargetType then
+			aButton:SetAttribute(aModifierKey .. "type" .. aButtonId, "macro");
+			aButton:SetAttribute(aModifierKey .. "macrotext" .. aButtonId, VUHDO_getWeaponEnchantMacroText(anActionName, aTargetType));
+		else
 			aButton:SetAttribute(aModifierKey .. "type" .. aButtonId, "spell");
 			aButton:SetAttribute(aModifierKey .. "spell" .. aButtonId, anActionName);
---		end
+		end
 	else
 		aButton:SetAttribute(aModifierKey .. "type" .. aButtonId, "");
 	end
