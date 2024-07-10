@@ -679,13 +679,14 @@ local function VUHDO_initDebuffInfos(aUnit)
 
 	if not VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit] then
 		VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit] = { };
-	else
-		for tAuraInstanceId, _ in pairs(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]) do
-			VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId] = nil;
-		end
+-- FIXME: Classic flavors still require full debuff icon refresh
+--	else
+--		for tAuraInstanceId, _ in pairs(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]) do
+--			VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId] = nil;
+--		end
 	end
 
-	VUHDO_removeAllDebuffIcons(aUnit);
+--	VUHDO_removeAllDebuffIcons(aUnit);
 
 	return tUnitDebuffInfo;
 
@@ -1066,6 +1067,9 @@ function VUHDO_updateAllCustomDebuffs(anIsEnableAnim)
 	VUHDO_MAY_DEBUFF_ANIM = false;
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
+		-- FIXME: Classic flavors still require full debuff icon refresh
+		VUHDO_removeAllDebuffIcons(tUnit);
+
 		tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(tUnit);
 	end
 
@@ -1210,6 +1214,9 @@ end
 --
 function VUHDO_resetDebuffsFor(aUnit)
 	VUHDO_initDebuffInfos(aUnit);
+
+	-- FIXME: Classic flavors still require full debuff icon refresh
+	twipe(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]);
 end
 
 
