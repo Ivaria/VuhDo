@@ -40,6 +40,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed Shaman weapon enchantments in Buff Watch  
+-- Fixed duplicate debuff icon animations  
   
   
 Improvements:  
