@@ -537,6 +537,7 @@ VUHDO_I18N_TEXT_PROVIDER_MANA = "Mana: <#n>";
 VUHDO_I18N_TEXT_PROVIDER_MANA_KILO = "Mana: <#nk>";
 VUHDO_I18N_BOUQUET_STATUS_HEALTH_IF_ACTIVE = "Statusbar: Health % if active";
 
+VUHDO_I18N_DEF_COUNTER_ACTIVE_AURAS = "Counter: Active Bouquet Auras #k";
 
 -- Cata Classic
 

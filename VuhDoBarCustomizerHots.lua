@@ -640,17 +640,7 @@ end
 
 
 --
-function VUHDO_updateHots(aUnit, anInfo)
-
-	if anInfo["isVehicle"] then
-		VUHDO_removeHots(aUnit);
-
-		aUnit = anInfo["petUnit"];
-
-		if not aUnit then
-			return;
-		end -- bei z.B. focus/target
-	end
+function VUHDO_initHotInfos(aUnit)
 
 	if not VUHDO_MY_HOTS[aUnit] then
 		VUHDO_MY_HOTS[aUnit] = { };
@@ -685,6 +675,25 @@ function VUHDO_updateHots(aUnit, anInfo)
 	else
 		sOthersHotsInfo[aUnit][1], sOthersHotsInfo[aUnit][2] = nil, 0;
 	end
+
+end
+
+
+
+--
+function VUHDO_updateHots(aUnit, anInfo)
+
+	if anInfo["isVehicle"] then
+		VUHDO_removeHots(aUnit);
+
+		aUnit = anInfo["petUnit"];
+
+		if not aUnit then
+			return;
+		end -- bei z.B. focus/target
+	end
+
+	VUHDO_initHotInfos(aUnit);
 
 	if VUHDO_shouldScanUnit(aUnit) then
 		tUnit = aUnit;
