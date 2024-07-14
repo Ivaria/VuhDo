@@ -612,4 +612,3 @@ VUHDO_I18N_TEXT_PROVIDER_MANA_KILO_OF = "Мана: <#nk>/<#nk>";
 VUHDO_I18N_TEXT_PROVIDER_MANA = "Мана: <#n>";
 VUHDO_I18N_TEXT_PROVIDER_MANA_KILO = "Мана: <#nk>";
 VUHDO_I18N_BOUQUET_STATUS_HEALTH_IF_ACTIVE = "Панель статуса: Здоровье % если активно";
-VUHDO_I18N_NO_MACROTEXT = "WARNING: Blizzard restrictions in The War Within 11.x restrict add-ons from creating a macro for |cffffffff\"%s\"|r.  Please create an equivalent macro on your own and bind that in VuhDo.";
