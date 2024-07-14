@@ -1000,6 +1000,7 @@ local function VUHDO_updateDebuffs(aUnit)
 end
 
 
+
 --
 local tInfo;
 local tAura;
