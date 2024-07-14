@@ -62,6 +62,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added new bouquet validator 'Counter: Active Bouquet Auras #k'  
   
   
 --------------------------------------------------------------  
