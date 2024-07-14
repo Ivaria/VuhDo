@@ -1403,6 +1403,17 @@ end
 
 
 --
+local tActiveAuras;
+local function VUHDO_activeAurasCountValidator(anInfo, _)
+
+	tActiveAuras = VUHDO_getCurrentBouquetActiveAuras(anInfo["unit"]) or 0;
+	return tActiveAuras > 0, nil, -1, tActiveAuras, -1;
+
+end
+
+
+
+--
 local tShieldLeft, tHealthMax;
 local function VUHDO_statusShieldFromHealthValidator(anInfo, _)
 	tHealthMax = anInfo["healthmax"];
@@ -2080,6 +2091,13 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["displayName"] = VUHDO_I18N_DEF_COUNTER_SHIELD_ABSORB,
 		["validator"] = VUHDO_shieldCountValidator,
 		["interests"] = { VUHDO_UPDATE_SHIELD },
+	},
+
+	["ACTIVE_AURAS_COUNTER"] = {
+		["displayName"] = VUHDO_I18N_DEF_COUNTER_ACTIVE_AURAS,
+		["validator"] = VUHDO_activeAurasCountValidator,
+		["updateCyclic"] = true,
+		["interests"] = { },
 	},
 
 	["SHIELD_STATUS"] = {
