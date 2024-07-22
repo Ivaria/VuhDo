@@ -833,8 +833,36 @@ function VUHDO_determineAuraPredicate(anAuraData, anIsUpdate)
 			anAuraData.isBossAura,
 			anIsUpdate
 		);
+
+		VUHDO_updateHotPredicate(
+			sUnit,
+			sNow,
+			anAuraData.auraInstanceID,
+			anAuraData.name,
+			anAuraData.icon,
+			anAuraData.applications,
+			anAuraData.duration,
+			anAuraData.expirationTime,
+			anAuraData.sourceUnit,
+			anAuraData.spellId,
+			anIsUpdate
+		);
 	elseif anAuraData and anAuraData.isHelpful then
 		VUHDO_determineBuffPredicate(
+			anAuraData.auraInstanceID,
+			anAuraData.name,
+			anAuraData.icon,
+			anAuraData.applications,
+			anAuraData.duration,
+			anAuraData.expirationTime,
+			anAuraData.sourceUnit,
+			anAuraData.spellId,
+			anIsUpdate
+		);
+
+		VUHDO_updateHotPredicate(
+			sUnit,
+			sNow,
 			anAuraData.auraInstanceID,
 			anAuraData.name,
 			anAuraData.icon,
@@ -1020,6 +1048,8 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 		sNow = GetTime();
 
 		if not aUpdateInfo or (aUpdateInfo and aUpdateInfo.isFullUpdate) then
+			VUHDO_initHots(aUnit);
+
 			sUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
 
 			ForEachAura(aUnit, "HARMFUL", nil, VUHDO_determineAuraPredicate, true);
@@ -1056,6 +1086,8 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					if tDoUpdateDebuffType then
 						tDoUpdateUnitDebuffInfo[tDoUpdateDebuffType] = true;
 					end
+
+					VUHDO_removeHot(aUnit, tAuraInstanceId);
 				end
 
 				if tDoUpdate then
@@ -1071,6 +1103,8 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 		end
 
 		VUHDO_updateDebuffs(aUnit);
+
+		VUHDO_updateHots(aUnit, tInfo);
 	end -- shouldScanUnit
 
 	-- Lost old custom debuff?

@@ -217,7 +217,6 @@ end
 function VUHDO_initBuffs()
 	VUHDO_initBuffsFromSpellBook();
 	VUHDO_reloadBuffPanel();
-	VUHDO_resetHotBuffCache();
 end
 
 
