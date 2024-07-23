@@ -16,6 +16,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Bump TOC interface for 11.0.0 The War Within pre-patch  
 -- Added new bouquet validator 'Counter: Active Bouquet Auras #k'  
   
   
