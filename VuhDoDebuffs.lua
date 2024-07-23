@@ -1,4 +1,5 @@
 local huge = math.huge;
+local GetSpellName = C_Spell.GetSpellName;
 
 
 
@@ -27,11 +28,11 @@ local VUHDO_DEBUFF_TYPES = {
 
 
 VUHDO_DEBUFF_BLACKLIST = {
-	[GetSpellInfo(69127)] = true, -- Chill of the Throne
-	[GetSpellInfo(57724)] = true, -- Sated (Bloodlust)
-	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
-	[GetSpellInfo(57723)] = true, -- Exhaustion (Heroism)
-	[GetSpellInfo(80354)] = true, -- Temporal Displacement (Time Warp)
+	[GetSpellName(69127)] = true, -- Chill of the Throne
+	[GetSpellName(57724)] = true, -- Sated (Bloodlust)
+	[GetSpellName(71328)] = true, -- Dungeon Cooldown
+	[GetSpellName(57723)] = true, -- Exhaustion (Heroism)
+	[GetSpellName(80354)] = true, -- Temporal Displacement (Time Warp)
 	[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true -- Fatigued (Primal Fury)
 };
 
@@ -61,6 +62,7 @@ local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
 local UnpackAuraData = AuraUtil.UnpackAuraData or VUHDO_unpackAuraData;
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID;
+
 
 local sIsNotRemovableOnly;
 local sIsNotRemovableOnlyIcons;
@@ -1124,7 +1126,7 @@ function VUHDO_initDebuffs()
 				if VUHDO_SPEC_TO_DEBUFF_ABIL[tAbility] then
 					tAbility = VUHDO_SPEC_TO_DEBUFF_ABIL[tAbility];
 				elseif type(tAbility) == "number" then
-					tAbility = GetSpellInfo(tAbility);
+					tAbility = GetSpellName(tAbility);
 				end
 
 				VUHDO_PLAYER_ABILITIES[tDebuffType] = tAbility;
