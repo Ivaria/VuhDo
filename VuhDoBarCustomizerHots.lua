@@ -205,12 +205,23 @@ end
 --
 local tHotBar;
 local function VUHDO_customizeHotBar(aButton, aRest, anIndex, aDuration, aColor)
+
 	tHotBar = VUHDO_getHealthBar(aButton, anIndex + 3);
 
-	if aColor then tHotBar:SetVuhDoColor(aColor); end
+	if not tHotBar then
+		return;
+	end
 
-	if (aDuration or 0) == 0 or not aRest then tHotBar:SetValue(0);
-	else tHotBar:SetValue(aRest / aDuration); end
+	if aColor then
+		tHotBar:SetVuhDoColor(aColor);
+	end
+
+	if (aDuration or 0) == 0 or not aRest then
+		tHotBar:SetValue(0);
+	else
+		tHotBar:SetValue(aRest / aDuration);
+	end
+
 end
 
 
