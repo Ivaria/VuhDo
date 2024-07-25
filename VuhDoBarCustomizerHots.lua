@@ -669,6 +669,7 @@ end
 
 --
 local tUnitHotListPrev;
+local tUnitHotPrevInfo;
 local function VUHDO_addUnitHot(aUnit, aSpellName, aSourceType, anAuraInstanceId, anIsMine)
 
 	if not aUnit or not aSpellName or not aSourceType or not anAuraInstanceId then
@@ -690,13 +691,25 @@ local function VUHDO_addUnitHot(aUnit, aSpellName, aSourceType, anAuraInstanceId
 
 	tUnitHotListPrev = VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1];
 
-	if tUnitHotListPrev and aSourceType == VUHDO_UNIT_HOT_TYPE_BOTH and not anIsMine then
+	if tUnitHotListPrev and tUnitHotListPrev["auraInstanceId"] and
+		aSourceType == VUHDO_UNIT_HOT_TYPE_BOTH and not anIsMine then
+		tUnitHotPrevInfo = VUHDO_getUnitHotInfo(aUnit, tUnitHotListPrev["auraInstanceId"]);
+
 		-- player auras take precendent over others auras
-		VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1]["prev"] = {
-			["auraInstanceId"] = anAuraInstanceId,
-			["prev"] = tUnitHotListPrev["prev"],
-			["next"] = VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1],
-		};
+		if tUnitHotPrevInfo and tUnitHotPrevInfo[5] then
+			VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1]["prev"] = {
+				["auraInstanceId"] = anAuraInstanceId,
+				["prev"] = tUnitHotListPrev["prev"],
+				["next"] = VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1],
+			};
+		else
+			VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1] = {
+				["auraInstanceId"] = anAuraInstanceId,
+				["prev"] = tUnitHotListPrev,
+			};
+
+			tUnitHotListPrev["next"] = VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1];
+		end
 	else
 		VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1] = { ["auraInstanceId"] = anAuraInstanceId };
 
