@@ -695,7 +695,7 @@ local function VUHDO_addUnitHot(aUnit, aSpellName, aSourceType, anAuraInstanceId
 		aSourceType == VUHDO_UNIT_HOT_TYPE_BOTH and not anIsMine then
 		tUnitHotPrevInfo = VUHDO_getUnitHotInfo(aUnit, tUnitHotListPrev["auraInstanceId"]);
 
-		-- player auras take precendent over others auras
+		-- player auras take precedent over others auras
 		if tUnitHotPrevInfo and tUnitHotPrevInfo[5] then
 			VUHDO_UNIT_HOT_LISTS[aUnit][aSpellName][aSourceType][1]["prev"] = {
 				["auraInstanceId"] = anAuraInstanceId,
