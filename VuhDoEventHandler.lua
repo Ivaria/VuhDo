@@ -1667,10 +1667,14 @@ local VUHDO_ALL_EVENTS = {
 
 --
 function VUHDO_OnLoad(anInstance)
+
 	local _, _, _, tTocVersion = GetBuildInfo();
 
 	if tonumber(tTocVersion or 999999) < VUHDO_MIN_TOC_VERSION then
-		VUHDO_Msg(format(VUHDO_I18N_DISABLE_BY_VERSION, VUHDO_MIN_TOC_VERSION));
+		VUHDO_Msg(format(VUHDO_I18N_DISABLE_BY_MIN_VERSION, VUHDO_VERSION, VUHDO_MIN_TOC_VERSION));
+		return;
+	elseif tonumber(tTocVersion or 0) > VUHDO_MAX_TOC_VERSION then
+		VUHDO_Msg(format(VUHDO_I18N_DISABLE_BY_MAX_VERSION, VUHDO_VERSION, VUHDO_MAX_TOC_VERSION));
 		return;
 	end
 
@@ -1695,6 +1699,7 @@ function VUHDO_OnLoad(anInstance)
 	anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
 
 	VUHDO_printAbout();
+
 end
 
 
