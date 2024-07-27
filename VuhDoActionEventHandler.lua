@@ -3,6 +3,7 @@ local _;
 local VUHDO_IS_SMART_CAST = false;
 
 local SecureButton_GetButtonSuffix = SecureButton_GetButtonSuffix;
+local GetTexCoordsForRole = GetTexCoordsForRole or VUHDO_getTexCoordsForRole;
 local InCombatLockdown = InCombatLockdown;
 local strlower = strlower;
 local strfind = strfind;

@@ -142,7 +142,6 @@ local ceil = ceil;
 local floor = floor;
 local GetTime = GetTime;
 local select = select;
-local GetSpellInfo = GetSpellInfo;
 
 
 
