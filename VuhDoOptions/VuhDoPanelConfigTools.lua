@@ -5,7 +5,7 @@ local GI_SCAN_MAX = 200001;
 VUHDO_GI_SCAN_IDX = GI_SCAN_MAX;
 
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
-local GetSpellName = C_Spell.GetSpellName;
+local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
 local GetSpellBookItemTexture = GetSpellBookItemTexture or VUHDO_getSpellBookItemTexture;
 local pairs = pairs;
 

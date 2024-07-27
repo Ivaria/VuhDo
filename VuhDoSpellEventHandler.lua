@@ -4,7 +4,7 @@ local smatch = string.match;
 
 local InCombatLockdown = InCombatLockdown;
 local HasLFGRestrictions = VUHDO_hasLFGRestrictions;
-local GetSpellName = C_Spell.GetSpellName;
+local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
 
 local VUHDO_initGcd;
 local VUHDO_strempty;

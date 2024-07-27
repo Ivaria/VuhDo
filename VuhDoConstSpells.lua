@@ -1,4 +1,4 @@
-local GetSpellName = C_Spell.GetSpellName;
+local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
 
 --
 local tSpellName;
