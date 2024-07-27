@@ -9,7 +9,7 @@ local VUHDO_SPELL_CONFIG;
 
 local GetMacroIndexByName = GetMacroIndexByName;
 local GetMacroInfo = GetMacroInfo;
-local GetSpellName = C_Spell.GetSpellName;
+local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
 local VUHDO_replaceMacroTemplates;
 local gsub = gsub;
 local twipe = table.wipe;
