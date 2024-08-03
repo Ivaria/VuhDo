@@ -101,6 +101,7 @@ local VUHDO_shouldDisplayArrow = VUHDO_shouldDisplayArrow;
 
 --
 local tUnit;
+local tDirection;
 local tCell;
 local sLastCell = nil;
 local tButton = nil;

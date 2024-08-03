@@ -1342,7 +1342,7 @@ end
 
 --
 local function VUHDO_AddSpellBouquetItem(aBouquetName, ...)
-	local tId, tNewItem;
+	local tId, tNewItem, tName;
 	for tCnt = 1, select("#", ...) do
 		tId = select(tCnt, ...);
 		tNewItem = VUHDO_deepCopyTable(VUHDO_SANE_BOUQUET_ITEM);
