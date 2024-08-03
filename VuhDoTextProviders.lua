@@ -2,6 +2,7 @@ local floor = floor;
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
 local UnitPower = UnitPower;
 local UnitPowerMax = UnitPowerMax;
+local _;
 
 local VUHDO_getIncHealOnUnit;
 local VUHDO_getUnitOverallShieldRemain;

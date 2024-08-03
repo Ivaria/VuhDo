@@ -5,6 +5,7 @@ local tonumber = tonumber;
 local tinsert = table.insert;
 local twipe = table.wipe;
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
+local _;
 
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
 	-- [<unit GUID>] = {
