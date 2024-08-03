@@ -39,7 +39,7 @@ local function VUHDO_addUnitHealth(aUnit, aDelta, aSrcGUID)
 
 			-- 11502 - Ragnaros
 			-- 11583 - Nefarian
-			if tNpcId and (tNpcId == "11502" or tNpcId == "11583") then
+			if tNpcId and (tNpcId == "11583") then
 				return;
 			end
 
