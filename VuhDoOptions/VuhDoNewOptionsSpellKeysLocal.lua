@@ -132,6 +132,7 @@ end
 
 
 --
+local tIndex;
 function VUHDO_checkTypeChange(aFrame)
 	local _, _, _, _, tOrigType = VUHDO_isActionValid(aFrame["originalName"], true);
 	tIndex = aFrame:GetAttribute("list_index");
