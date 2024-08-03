@@ -1070,6 +1070,15 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					end
 				end
 
+				VUHDO_updateCurChosen(aUnit);
+				VUHDO_updateUnitDebuffInfo(aUnit, "CHOSEN");
+				VUHDO_updateUnitDebuffInfo(aUnit, 1);
+				VUHDO_updateUnitDebuffInfo(aUnit, 2);
+				VUHDO_updateUnitDebuffInfo(aUnit, 3);
+				VUHDO_updateUnitDebuffInfo(aUnit, 4);
+
+				-- FIXME:
+				--[[
 				if tDoUpdate then
 					VUHDO_updateCurChosen(aUnit);
 				end
@@ -1078,7 +1087,7 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					if tDoUpdateType then
 						VUHDO_updateUnitDebuffInfo(aUnit, tUpdateType);
 					end
-				end
+				end]]
 			end
 		end
 
