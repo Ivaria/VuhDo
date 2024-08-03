@@ -238,6 +238,7 @@ local tClock;
 local tDuration;
 local tHotCfg;
 local tIsChargeAlpha;
+local tChargeColor;
 local tStarted;
 local tClockDuration;
 local tOpacity, tTextOpacity;

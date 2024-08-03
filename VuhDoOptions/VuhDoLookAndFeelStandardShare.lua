@@ -23,6 +23,8 @@ end
 
 
 --
+local tNamel
+local tIsOnline;
 function VUHDO_initBuddyNameModel()
 	table.wipe(VUHDO_BUDDY_NAME_MODEL);
 

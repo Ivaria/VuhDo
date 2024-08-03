@@ -89,6 +89,7 @@ end
 
 --
 local tColor, tMode;
+local tFactor;
 local tModi, tInvModi;
 local tR1, tG1, tB1;
 local tR2, tG2, tB2;
