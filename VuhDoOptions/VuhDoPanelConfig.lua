@@ -301,6 +301,7 @@ end
 
 
 --
+local tModelType;
 function VUHDO_getGuessedModel(aPanelNum)
 
 	local tTypeCount = {

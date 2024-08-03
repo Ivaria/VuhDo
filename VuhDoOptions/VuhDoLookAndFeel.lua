@@ -500,7 +500,7 @@ do
 			end
 
 			if not InCombatLockdown() then
-				if VUHDO_RESET_SIZES then resetSizeCalcCaches(); end
+				if VUHDO_RESET_SIZES then VUHDO_resetSizeCalcCaches(); end
 
 				if strfind(aModel, "VUHDO_OPTIONS_SETTINGS.", 1, true)
 					or strfind(aModel, "INTERNAL_MODEL_", 1, true) then

@@ -59,6 +59,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed incorrect display of icons in some VuhDo Options menus  
   
   
 Improvements:  

@@ -165,7 +165,7 @@ function VUHDO_getSpellBookItemTexture(aSpellId)
 		return;
 	end
 
-	_, _, tIconId = VUHDO_getSpellInfo(aSpellId);
+	_, tIconId = VUHDO_getSpellInfo(aSpellId);
 
 	return tIconId;
 
