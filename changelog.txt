@@ -34,6 +34,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed health bar status color persisting after aura removal  
 -- Fixed incorrect display of icons in some VuhDo Options menus  
   
   
