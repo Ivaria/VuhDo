@@ -885,7 +885,7 @@ local tDebuffType;
 local tDoUpdateChosen;
 local function VUHDO_removeDebuff(aUnit, anAuraInstanceId)
 
-	tDoUpdateChosen, tDoUpdateInfo, tDebuffType = false, false, nil;
+	tDoUpdateInfo, tDebuffType, tDoUpdateChosen = false, nil, false;
 
 	if sCurIcons[aUnit] and sCurIcons[aUnit][anAuraInstanceId] then
 		sCurIcons[aUnit][anAuraInstanceId] = nil;
