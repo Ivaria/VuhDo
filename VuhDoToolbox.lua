@@ -19,7 +19,6 @@ local GetRaidRosterInfo = GetRaidRosterInfo;
 local IsInInstance = IsInInstance;
 local GetTime = GetTime;
 local GetRealZoneText = GetRealZoneText;
-local SetMapToCurrentZone = SetMapToCurrentZone;
 local UnitPowerBarID = UnitPowerBarID;
 local GetUnitPowerBarInfoByID = GetUnitPowerBarInfoByID;
 local WorldMapFrame = WorldMapFrame;
@@ -216,7 +215,7 @@ end
 local tMouseFoci;
 function VUHDO_getMouseFocus()
 
-	local tMouseFoci = GetMouseFoci();
+	tMouseFoci = GetMouseFoci();
 
 	if tMouseFoci and tMouseFoci[1] then
 		return tMouseFoci[1];
@@ -425,7 +424,6 @@ end
 
 
 -- Extracts unit number from a Unit's name
-local tUnitNo;
 function VUHDO_getUnitNo(aUnit)
 	if not aUnit or VUHDO_isSpecialUnit(aUnit) then return 0; end
 	if "player" == aUnit then aUnit = VUHDO_PLAYER_RAID_ID or "player"; end

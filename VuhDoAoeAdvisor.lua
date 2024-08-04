@@ -284,7 +284,7 @@ end
 
 
 --
-local function VUHDO_getAverageExpectedHeals(aCluster, aMaxHealAmount, aDegression, aCastTime, aMaxTargets, tTargetPlayer)
+local function VUHDO_getAverageExpectedHeals(aCluster, aMaxHealAmount, aDegression, aCastTime, aMaxTargets, aTargetPlayer)
 	local tHealingTotal = 0;
 	local tNumPlayersHealed = 0;
 
