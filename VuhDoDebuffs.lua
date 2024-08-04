@@ -1000,8 +1000,8 @@ end
 --
 local tInfo;
 local tAura;
-local tDoUpdate;
-local tDoUpdateDebuffType;
+local tDoUpdate, tDoUpdateIter;
+local tDoUpdateDebuffType, tDoUpdateDebuffChosen;
 local tDoUpdateUnitDebuffInfo = { };
 function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 
@@ -1048,23 +1048,24 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 				tDoUpdateUnitDebuffInfo[3], tDoUpdateUnitDebuffInfo[4] =
 					false, false, false, false, false;
 
+				tDoUpdateIter, tDoUpdateDebuffType, tDoUpdateDebuffChosen = false, nil, false;
+
 				for _, tAuraInstanceId in pairs(aUpdateInfo.removedAuraInstanceIDs) do
-					tDoUpdate, tDoUpdateDebuffType, tDoUpdateUnitDebuffInfo["CHOSEN"] = VUHDO_removeDebuff(aUnit, tAuraInstanceId);
+					tDoUpdateIter, tDoUpdateDebuffType, tDoUpdateDebuffChosen = VUHDO_removeDebuff(aUnit, tAuraInstanceId);
+
+					if tDoUpdateIter then
+						tDoUpdate = true;
+					end
 
 					if tDoUpdateDebuffType then
 						tDoUpdateUnitDebuffInfo[tDoUpdateDebuffType] = true;
 					end
+
+					if tDoUpdateDebuffChosen then
+						tDoUpdateUnitDebuffInfo["CHOSEN"] = true;
+					end
 				end
 
-				VUHDO_updateCurChosen(aUnit);
-				VUHDO_updateUnitDebuffInfo(aUnit, "CHOSEN");
-				VUHDO_updateUnitDebuffInfo(aUnit, 1);
-				VUHDO_updateUnitDebuffInfo(aUnit, 2);
-				VUHDO_updateUnitDebuffInfo(aUnit, 3);
-				VUHDO_updateUnitDebuffInfo(aUnit, 4);
-
-				-- FIXME:
-				--[[
 				if tDoUpdate then
 					VUHDO_updateCurChosen(aUnit);
 				end
@@ -1073,7 +1074,7 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					if tDoUpdateType then
 						VUHDO_updateUnitDebuffInfo(aUnit, tUpdateType);
 					end
-				end]]
+				end
 			end
 		end
 
