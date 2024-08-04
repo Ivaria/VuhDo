@@ -381,7 +381,6 @@ end
 function VUHDO_updateSpellTrace()
 
 	for tUnitGuid, tActiveTrace in pairs(VUHDO_ACTIVE_TRACE_SPELLS) do
-		local i = 0;
 		local tActiveTraceSpells = tActiveTrace["spells"];
 		local tCurrentTime = GetTime();
 
