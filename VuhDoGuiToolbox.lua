@@ -3,7 +3,6 @@ local _;
 VUHDO_COMBO_MAX_ENTRIES = 10000;
 
 local floor = floor;
-local mod = mod;
 local tonumber = tonumber;
 local strsub = strsub;
 local pairs = pairs;

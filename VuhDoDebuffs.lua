@@ -1,4 +1,3 @@
-local huge = math.huge;
 local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
 
 
@@ -53,14 +52,12 @@ local VUHDO_DEBUFF_BLACKLIST = { };
 local UnitIsFriend = UnitIsFriend;
 local table = table;
 local GetTime = GetTime;
-local PlaySoundFile = PlaySoundFile;
 local InCombatLockdown = InCombatLockdown;
 local twipe = table.wipe;
 local pairs = pairs;
 local _;
 local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
-local UnpackAuraData = AuraUtil.UnpackAuraData or VUHDO_unpackAuraData;
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID;
 
 
@@ -732,7 +729,6 @@ local tInfo;
 local tType;
 local tAbility;
 local tIsRelevant;
-local tSchool;
 local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, aStacks, aTypeString, aDuration, anExpiry, aUnitCaster, aSpellId, anIsBossDebuff, anIsUpdate, aCnt)
 
 	if not anIcon then

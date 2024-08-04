@@ -678,7 +678,6 @@ do
 		tModel = aSlider:GetParent():GetAttribute("model");
 
 		if tModel and strfind(tModel, "barTexture", 1, true) then
-			local tIndex, tInfo;
 			for tIndex, tInfo in pairs(VUHDO_STATUS_BARS) do
 				if tInfo[1] == tValue then
 					tValue = tIndex;

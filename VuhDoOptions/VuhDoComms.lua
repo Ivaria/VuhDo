@@ -566,7 +566,7 @@ end
 --
 function VUHDO_updateRequestsInProgress()
 	for tReceiverName, tSomeUnitRequests in pairs(sRequestsInProgress) do
-		for tReplyType, tSomeReplyInfos in pairs(tSomeUnitRequests) do
+		for _, tSomeReplyInfos in pairs(tSomeUnitRequests) do
 			if (GetTime() > tSomeReplyInfos[1]) then
 				VUHDO_sendMessage(tReceiverName, sCmdAbortComms, nil);
 				VUHDO_removeCommsData(tReceiverName);
