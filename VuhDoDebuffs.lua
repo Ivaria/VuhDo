@@ -834,6 +834,20 @@ function VUHDO_determineAuraPredicate(anAuraData, anIsUpdate)
 			anIsUpdate,
 			sCnt
 		);
+
+		VUHDO_updateHotPredicate(
+			sUnit,
+			sNow,
+			anAuraData.auraInstanceID,
+			anAuraData.name,
+			anAuraData.icon,
+			anAuraData.applications,
+			anAuraData.duration,
+			anAuraData.expirationTime,
+			anAuraData.sourceUnit,
+			anAuraData.spellId,
+			anIsUpdate
+		);
 	elseif anAuraData and anAuraData.isHelpful then
 		VUHDO_determineBuffPredicate(
 			anAuraData.auraInstanceID,
@@ -846,6 +860,20 @@ function VUHDO_determineAuraPredicate(anAuraData, anIsUpdate)
 			anAuraData.spellId,
 			anIsUpdate,
 			sCnt
+		);
+
+		VUHDO_updateHotPredicate(
+			sUnit,
+			sNow,
+			anAuraData.auraInstanceID,
+			anAuraData.name,
+			anAuraData.icon,
+			anAuraData.applications,
+			anAuraData.duration,
+			anAuraData.expirationTime,
+			anAuraData.sourceUnit,
+			anAuraData.spellId,
+			anIsUpdate
 		);
 	end
 
@@ -1025,6 +1053,8 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 		sNow = GetTime();
 
 		if not aUpdateInfo or (aUpdateInfo and aUpdateInfo.isFullUpdate) then
+			VUHDO_initHots(aUnit);
+
 			sUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
 
 			sCnt = 1;
@@ -1074,6 +1104,8 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 					if tDoUpdateDebuffChosen then
 						tDoUpdateUnitDebuffInfo["CHOSEN"] = true;
 					end
+
+					VUHDO_removeHot(aUnit, tAuraInstanceId);
 				end
 
 				if tDoUpdate then
@@ -1089,6 +1121,8 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 		end
 
 		VUHDO_updateDebuffs(aUnit);
+
+		VUHDO_updateHots(aUnit, tInfo);
 	end -- shouldScanUnit
 
 	-- Lost old custom debuff?
