@@ -215,6 +215,10 @@ end
 local tMouseFoci;
 function VUHDO_getMouseFocus()
 
+	if GetMouseFocus then
+		return GetMouseFocus();
+	end
+
 	tMouseFoci = GetMouseFoci();
 
 	if tMouseFoci and tMouseFoci[1] then
