@@ -453,7 +453,7 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 		tInfo = VUHDO_RAID[tUnit];
 
 		if tInfo then
-			VUHDO_updateHots(tUnit, tInfo);
+			VUHDO_updateHots(tUnit, tInfo, aShieldName, aSpellId);
 
 			-- FIXME: why all?
 			VUHDO_updateAllCyclicBouquets(true);
