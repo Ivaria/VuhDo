@@ -17,7 +17,6 @@ Known issues:
   
   
 Bugfixes:  
--- Fixed combat log based health updates on Ragnaros encounter  
   
   
 Improvements:  
