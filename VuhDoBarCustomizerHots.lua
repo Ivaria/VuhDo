@@ -158,15 +158,15 @@ function VUHDO_customHotsInitLocalOverrides()
 	sIsOthersHots = VUHDO_ACTIVE_HOTS["OTHER"];
 
 	sHotSlotCfgs = { };
-	for tCnt = 1, 10 do
-		sHotSlotCfgs[tCnt] = VUHDO_PANEL_SETUP["HOTS"]["SLOTCFG"][tostring(tCnt)];
-	end
-
 	sHotSlotBouquets = { };
 
-	for tIndex, tHotName in pairs(sHotSlots) do
-		if not VUHDO_strempty(tHotName) and strfind(tHotName, "BOUQUET_") then
-			sHotSlotBouquets[tIndex] = true;
+	for tCnt = 1, 10 do
+		sHotSlotCfgs[tCnt] = VUHDO_PANEL_SETUP["HOTS"]["SLOTCFG"][tostring(tCnt)];
+
+		local tHotName = sHotSlots[tCnt];
+
+		if tHotName and not VUHDO_strempty(tHotName) and strfind(tHotName, "BOUQUET_") then
+			sHotSlotBouquets[tCnt] = true;
 		end
 	end
 
