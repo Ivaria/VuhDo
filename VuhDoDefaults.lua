@@ -633,7 +633,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["DETECT_DEBUFFS_IGNORE_DURATION"] = true,
 
 	["SMARTCAST_RESURRECT"] = true,
-	["SMARTCAST_CLEANSE"] = true,
+	["SMARTCAST_CLEANSE"] = false,
 	["SMARTCAST_BUFF"] = false,
 
 	["SHOW_PLAYER_TAGS"] = true,
@@ -733,7 +733,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	},
 
 	["CLUSTER"] = {
-		["REFRESH"] = 180,
+		["REFRESH"] = 500,
 		["RANGE"] = 30,
 		["RANGE_JUMP"] = 11,
 		["BELOW_HEALTH_PERC"] = 85,
@@ -746,7 +746,7 @@ local VUHDO_DEFAULT_CONFIG = {
 		["CHAIN_MAX_JUMP"] = 3,
 		["COOLDOWN_SPELL"] = "",
 		["CONE_DEGREES"] = 360,
-        ["ARE_TARGETS_RANDOM"] = true,
+		["ARE_TARGETS_RANDOM"] = true,
 
 		["TEXT"] = {
 			["ANCHOR"] = "BOTTOMRIGHT",
@@ -1687,7 +1687,7 @@ local VUHDO_DEFAULT_BUFF_CONFIG = {
 	["BAR_COLORS_BACKGROUND"] = true,
 	["BAR_COLORS_IN_FIGHT"] = false,
 	["HIDE_CHARGES"] = false,
-	["REFRESH_SECS"] = 1,
+	["REFRESH_SECS"] = 2,
 	["POSITION"] = {
 		["x"] = 130,
 		["y"] = -130,
