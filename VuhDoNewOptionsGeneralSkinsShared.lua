@@ -377,7 +377,7 @@ local VUHDO_DEFAULT_PROFILES = {
 			},
 			["HOTS"] = {
 				["SLOTS"] = {
-					[10] = "BOUQUET_" .. VUHDO_I18N_DEF_AOE_ADVICE,
+					["firstFlood"] = true,
 				},
 				["BARS"] = {
 					["radioValue"] = 1,
@@ -1625,7 +1625,7 @@ local VUHDO_DEFAULT_PROFILES = {
 			},
 			["HOTS"] = {
 				["SLOTS"] = {
-					[10] = "BOUQUET_" .. VUHDO_I18N_DEF_AOE_ADVICE,
+					["firstFlood"] = true,
 				},
 				["BARS"] = {
 					["radioValue"] = 1,
