@@ -607,7 +607,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["LOCK_PANELS"] = false,
 	["LOCK_CLICKS_THROUGH"] = false,
 	["LOCK_IN_FIGHT"] = true,
-	["PARSE_COMBAT_LOG"] = true,
+	["PARSE_COMBAT_LOG"] = false,
 	["HIDE_EMPTY_BUTTONS"] = false,
 
 	["MODE"] = VUHDO_MODE_NEUTRAL,
