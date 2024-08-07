@@ -38,8 +38,9 @@ local function VUHDO_addUnitHealth(aUnit, aDelta, aSrcGUID)
 			local tSrc, _, _, _, _, tNpcId = strsplit("-", aSrcGUID);
 
 			-- 11502 - Ragnaros
+			-- 228438 - Ragnaros (SoD)
 			-- 11583 - Nefarian
-			if tNpcId and (tNpcId == "11583") then
+			if tNpcId and (tNpcId == "11502" or tNpcId == "228438" or tNpcId == "11583") then
 				return;
 			end
 
