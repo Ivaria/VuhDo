@@ -46,7 +46,6 @@ local VUHDO_RAID;
 local VUHDO_PANEL_SETUP;
 local VUHDO_DEBUFF_COLORS = { };
 
-local VUHDO_shouldScanUnit;
 local VUHDO_DEBUFF_BLACKLIST = { };
 
 local UnitIsFriend = UnitIsFriend;
@@ -77,8 +76,6 @@ function VUHDO_debuffsInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_DEBUFF_BLACKLIST = _G["VUHDO_DEBUFF_BLACKLIST"];
-
-	VUHDO_shouldScanUnit = _G["VUHDO_shouldScanUnit"];
 
 	sIsNotRemovableOnly = not VUHDO_CONFIG["DETECT_DEBUFFS_REMOVABLE_ONLY"];
 	sIsNotRemovableOnlyIcons = not VUHDO_CONFIG["DETECT_DEBUFFS_REMOVABLE_ONLY_ICONS"];
