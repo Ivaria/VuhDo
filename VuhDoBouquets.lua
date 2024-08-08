@@ -632,9 +632,11 @@ local function VUHDO_updateEventBouquet(aUnit, aBouquetName)
 		tHasChanged, tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB
 		= VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
 
-	if not tHasChanged then return; end
+	if not tHasChanged then
+		return;
+	end
 
-	if tIsActive then
+	if tHasChanged or tIsActive then
 		for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
 			tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
 				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB);
