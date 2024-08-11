@@ -58,6 +58,7 @@ local _;
 local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID;
+local VUHDO_shouldScanUnit;
 
 
 local sIsNotRemovableOnly;
@@ -72,6 +73,9 @@ local sEmpty = { };
 --local sColorArray = nil;
 
 function VUHDO_debuffsInitLocalOverrides()
+
+	VUHDO_shouldScanUnit = _G["VUHDO_shouldScanUnit"];
+
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -100,6 +104,7 @@ function VUHDO_debuffsInitLocalOverrides()
 			sColorArray[tCnt] = { };
 		end
 	end]]
+
 end
 
 ----------------------------------------------------
@@ -1041,7 +1046,7 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 	sUnit = aUnit;
 	sNow = GetTime();
 
-	if not aUpdateInfo or (aUpdateInfo and aUpdateInfo.isFullUpdate) then
+	if (not aUpdateInfo and VUHDO_shouldScanUnit(aUnit)) or (aUpdateInfo and aUpdateInfo.isFullUpdate) then
 		VUHDO_initHots(aUnit);
 
 		sUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
