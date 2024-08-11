@@ -687,6 +687,8 @@ local function VUHDO_initDebuffInfos(aUnit)
 --		end
 	end
 
+--	VUHDO_LAST_UNIT_DEBUFFS[aUnit] = nil;
+
 --	VUHDO_removeAllDebuffIcons(aUnit);
 
 	return tUnitDebuffInfo;
@@ -987,7 +989,7 @@ local function VUHDO_updateDebuffs(aUnit)
 						if tDebuffSettings then -- particular custom debuff sound?
 							VUHDO_playDebuffSound(tDebuffSettings["SOUND"], tName);
 						elseif VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"] then -- default custom debuff sound?
-								VUHDO_playDebuffSound(VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"], tName);
+							VUHDO_playDebuffSound(VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"], tName);
 						end
 					end
 
