@@ -104,6 +104,27 @@ end
 
 
 --
+local function VUHDO_updateSpellTraceBouquets(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	VUHDO_updateBouquetsForEvent(aUnit, VUHDO_UPDATE_SPELL_TRACE);
+
+	if UnitIsUnit("target", aUnit) then
+		VUHDO_updateBouquetsForEvent("target", VUHDO_UPDATE_SPELL_TRACE);
+	end
+
+	if UnitIsUnit("focus", aUnit) then
+		VUHDO_updateBouquetsForEvent("focus", VUHDO_UPDATE_SPELL_TRACE);
+	end
+
+end
+
+
+
+--
 local function VUHDO_addSpellTrace(aSrcGuid, aDstGuid, aSpellId)
 
 	-- ensure table keys are always strings
@@ -259,7 +280,7 @@ function VUHDO_parseCombatLogSpellTrace(aMessage, aSrcGuid, aDstGuid, aSpellName
 
 	VUHDO_ACTIVE_TRACE_SPELLS[aDstGuid]["latestHeal"] = tSpellId;
 
-	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[aDstGuid], VUHDO_UPDATE_SPELL_TRACE);
+	VUHDO_updateSpellTraceBouquets(VUHDO_RAID_GUIDS[aDstGuid]);
 
 end
 
@@ -336,7 +357,7 @@ function VUHDO_addIncomingSpellTrace(aSrcUnit, aCastGuid, aSpellId)
 	
 	VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid]["latestIncoming"] = tSpellId;
 
-	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[tDstGuid], VUHDO_UPDATE_SPELL_TRACE);
+	VUHDO_updateSpellTraceBouquets(VUHDO_RAID_GUIDS[tDstGuid]);
 
 end
 
@@ -372,7 +393,7 @@ function VUHDO_removeIncomingSpellTrace(aSrcUnit, aCastGuid, aSpellId)
 
 	VUHDO_removeSpellTrace(tSrcGuid, tDstGuid, tSpellId);
 	
-	VUHDO_updateBouquetsForEvent(VUHDO_RAID_GUIDS[tDstGuid], VUHDO_UPDATE_SPELL_TRACE);
+	VUHDO_updateSpellTraceBouquets(VUHDO_RAID_GUIDS[tDstGuid]);
 
 end
 
@@ -401,11 +422,7 @@ function VUHDO_updateSpellTrace()
 				if tRemaining <= 0 then
 					VUHDO_removeSpellTrace(tActiveTraceSpell["srcGuid"], tUnitGuid, tSpellId);
 
-					local tUnit = VUHDO_RAID_GUIDS[tUnitGuid];
-
-					if tUnit then
-						VUHDO_updateBouquetsForEvent(tUnit, VUHDO_UPDATE_SPELL_TRACE);
-					end
+					VUHDO_updateSpellTraceBouquets(VUHDO_RAID_GUIDS[tUnitGuid]);
 				end
 			end
 		end
