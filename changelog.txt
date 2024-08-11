@@ -59,6 +59,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Buff Watch self targeted buffs during combat  
   
   
 Improvements:  
