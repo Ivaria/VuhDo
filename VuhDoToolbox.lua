@@ -1544,7 +1544,7 @@ function VUHDO_getSpecializationInfo(aSpecNum, ...)
 	if not GetSpecializationInfo then
 		local tSpecNum = aSpecNum or VUHDO_getSpecialization();
 
-		return tSpecNum, tSpecNum == 1 and "Primary" or (tSpecNum == 2 and "Secondary" or "Unkown"), _, _, _, GetTalentGroupRole(tSpecNum) or "NONE";
+		return tSpecNum, tSpecNum == 1 and "Primary" or (tSpecNum == 2 and "Secondary" or "Unknown"), _, _, GetTalentGroupRole(tSpecNum) or "NONE";
 	else
 		return GetSpecializationInfo(aSpecNum, ...);
 	end
