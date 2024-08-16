@@ -1590,7 +1590,7 @@ end
 function VUHDO_getSpecialization()
 
 	if not GetSpecialization then
-		return 1;
+		return GetActiveTalentGroup();
 	else
 		return GetSpecialization();
 	end
@@ -1599,12 +1599,14 @@ end
 
 
 
-function VUHDO_getSpecializationInfo(...)
+function VUHDO_getSpecializationInfo(aSpecNum, ...)
 
-	if not GetSpecializationInfo then 
-		return 1, "Unknown", _, _, _, "NONE";
+	if not GetSpecializationInfo then
+		local tSpecNum = aSpecNum or VUHDO_getSpecialization();
+
+		return tSpecNum, tSpecNum == 1 and "Primary" or (tSpecNum == 2 and "Secondary" or "Unknown"), _, _, GetTalentGroupRole(tSpecNum) or "NONE";
 	else
-		return GetSpecializationInfo(...);
+		return GetSpecializationInfo(aSpecNum, ...);
 	end
 
 end
