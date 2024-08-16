@@ -62,6 +62,8 @@ Bugfixes:
 -- Fixed Spell Trace bouquet updates on target and focus units  
 -- Fixed Buff Watch self targeted buffs during combat  
 -- Fixed Buff Watch when previously enabled abilities are untalented  
+-- Fixed player specialization based role detection  
+-- Fixed fallback role detection for Evoker damage specializations  
   
   
 Improvements:  
