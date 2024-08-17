@@ -890,9 +890,7 @@ function VUHDO_removeHot(aUnit, anAuraInstanceId)
 		VUHDO_removeUnitHot(aUnit, "OTHER", VUHDO_UNIT_HOT_TYPE_OTHERSHOTS, anAuraInstanceId);
 	end
 
-	if sIsPlayerKnowsSwiftmend and tIsCastByPlayer and
-		(VUHDO_SPELL_ID.REGROWTH == tSpellName or (VUHDO_SPELL_ID.WILD_GROWTH == tSpellName and 422382 ~= tSpellId) or
-		VUHDO_SPELL_ID.REJUVENATION == tSpellName or VUHDO_SPELL_ID.GERMINATION == tSpellName) then
+	if sIsPlayerKnowsSwiftmend and (VUHDO_SPELL_ID.REGROWTH == tSpellName or VUHDO_SPELL_ID.REJUVENATION == tSpellName) then
 		sSwiftmendUnits[aUnit] = (sSwiftmendUnits[aUnit] or 1) - 1;
 	end
 
@@ -981,9 +979,7 @@ function VUHDO_updateHotPredicate(aUnit, aNow, anAuraInstanceId, aName, anIcon, 
 	tIsHotInfoAdded = false;
 	tIsCastByPlayer = aUnitCaster == "player" or aUnitCaster == VUHDO_PLAYER_RAID_ID;
 
-	if not anIsUpdate and sIsPlayerKnowsSwiftmend and tIsCastByPlayer and
-		(VUHDO_SPELL_ID.REGROWTH == aName or (VUHDO_SPELL_ID.WILD_GROWTH == aName and 422382 ~= aSpellId) or
-		VUHDO_SPELL_ID.REJUVENATION == aName or VUHDO_SPELL_ID.GERMINATION == aName) then
+	if not anIsUpdate and sIsPlayerKnowsSwiftmend and (VUHDO_SPELL_ID.REGROWTH == aName or VUHDO_SPELL_ID.REJUVENATION == aName) then
 		VUHDO_addUnitHotInfo(aUnit, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration, tIsCastByPlayer, aName, aSpellId);
 		tIsHotInfoAdded = true;
 
