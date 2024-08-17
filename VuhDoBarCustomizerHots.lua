@@ -1364,6 +1364,8 @@ function VUHDO_updateAllHoTs(aClustersOnly)
 		return;
 	end
 
+	VUHDO_updateSwiftmendCooldown();
+
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if not aClustersOnly then
 			VUHDO_updateHots(tUnit, tInfo);
@@ -1376,7 +1378,5 @@ function VUHDO_updateAllHoTs(aClustersOnly)
 			end
 		end
 	end
-
-	VUHDO_updateSwiftmendCooldown();
 
 end
