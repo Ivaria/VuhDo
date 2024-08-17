@@ -890,6 +890,10 @@ function VUHDO_removeHot(aUnit, anAuraInstanceId)
 		VUHDO_removeUnitHot(aUnit, "OTHER", VUHDO_UNIT_HOT_TYPE_OTHERSHOTS, anAuraInstanceId);
 	end
 
+	if sIsPlayerKnowsSwiftmend and (VUHDO_SPELL_ID.REGROWTH == tSpellName or VUHDO_SPELL_ID.REJUVENATION == tSpellName) then
+		sSwiftmendUnits[aUnit] = (sSwiftmendUnits[aUnit] or 1) - 1;
+	end
+
 	VUHDO_removeUnitHotInfo(aUnit, anAuraInstanceId);
 
 end
@@ -955,7 +959,7 @@ function VUHDO_initHots(aUnit)
 		end
 	end
 
-	sSwiftmendUnits[aUnit] = nil;
+	sSwiftmendUnits[aUnit] = 0;
 
 end
 
@@ -964,9 +968,7 @@ end
 --
 local tNewDuration, tNewExpiry;
 local tIsCastByPlayer;
-local tStart;
-local tSmDuration;
-local tEnabled;
+local tIsHotInfoAdded;
 local tSpellIdStr;
 local tRest;
 function VUHDO_updateHotPredicate(aUnit, aNow, anAuraInstanceId, aName, anIcon, aStacks, aDuration, anExpiry, aUnitCaster, aSpellId, anIsUpdate)
@@ -984,18 +986,15 @@ function VUHDO_updateHotPredicate(aUnit, aNow, anAuraInstanceId, aName, anIcon, 
 		end
 	end
 
+
+	tIsHotInfoAdded = false;
 	tIsCastByPlayer = aUnitCaster == "player" or aUnitCaster == VUHDO_PLAYER_RAID_ID;
 
-	if sIsPlayerKnowsSwiftmend and not sSwiftmendUnits[aUnit] and
-		(VUHDO_SPELL_ID.REGROWTH == aName or
-		VUHDO_SPELL_ID.REJUVENATION == aName or VUHDO_SPELL_ID.GERMINATION == aName) then
-		tStart, tSmDuration, tEnabled = GetSpellCooldown(VUHDO_SPELL_ID.SWIFTMEND);
+	if not anIsUpdate and sIsPlayerKnowsSwiftmend and (VUHDO_SPELL_ID.REGROWTH == aName or VUHDO_SPELL_ID.REJUVENATION == aName) then
+		VUHDO_addUnitHotInfo(aUnit, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration, tIsCastByPlayer, aName, aSpellId);
+		tIsHotInfoAdded = true;
 
-		if tEnabled ~= 0 and (tStart == nil or tSmDuration == nil or tStart <= 0 or tSmDuration <= 1.6) then
-			sSwiftmendUnits[aUnit] = true;
-		else
-			sSwiftmendUnits[aUnit] = nil;
-		end
+		sSwiftmendUnits[aUnit] = (sSwiftmendUnits[aUnit] or 0) + 1;
 	end
 
 	if (anExpiry or 0) == 0 then
@@ -1009,7 +1008,9 @@ function VUHDO_updateHotPredicate(aUnit, aNow, anAuraInstanceId, aName, anIcon, 
 			tRest = anExpiry - aNow;
 
 			if tRest > 0 then
-				VUHDO_addUnitHotInfo(aUnit, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration, tIsCastByPlayer, aName, aSpellId);
+				if not tIsHotInfoAdded then
+					VUHDO_addUnitHotInfo(aUnit, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration, tIsCastByPlayer, aName, aSpellId);
+				end
 
 				if not anIsUpdate then
 					if VUHDO_ACTIVE_HOTS[tSpellIdStr] then
@@ -1038,7 +1039,9 @@ function VUHDO_updateHotPredicate(aUnit, aNow, anAuraInstanceId, aName, anIcon, 
 
 	if not tIsCastByPlayer and VUHDO_HEALING_HOTS[aName] and
 		not VUHDO_ACTIVE_HOTS_OTHERS[aName] and not VUHDO_ACTIVE_HOTS_OTHERS[tSpellIdStr] then
-		VUHDO_addUnitHotInfo(aUnit, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration, tIsCastByPlayer, aName, aSpellId);
+		if not tIsHotInfoAdded then
+			VUHDO_addUnitHotInfo(aUnit, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration, tIsCastByPlayer, aName, aSpellId);
+		end
 
 		if not anIsUpdate then
 			VUHDO_addUnitHot(aUnit, "OTHER", VUHDO_UNIT_HOT_TYPE_OTHERSHOTS, anAuraInstanceId, tIsCastByPlayer);
@@ -1282,30 +1285,6 @@ end
 
 
 --
-function VUHDO_updateAllHoTs(aClustersOnly)
-
-	if sIsSuspended then
-		return;
-	end
-
-	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if not aClustersOnly then
-			VUHDO_updateHots(tUnit, tInfo);
-		end
-
-		if VUHDO_shouldScanUnit(tUnit) then
-			-- Clusters
-			if sIsClusterIcons then
-				VUHDO_updateAllClusterIcons(tUnit, tInfo);
-			end
-		end
-	end
-
-end
-
-
-
---
 function VUHDO_removeAllHots()
 	local tButton;
 	local tCnt2;
@@ -1332,6 +1311,79 @@ end
 
 
 
+--
+local sIsPlayerCanCastSwiftmend;
+local sSwiftmendCooldown = {
+	-- <cooldown start time>,
+	-- <cooldown duration>,
+};
+
+
+
+--
+local tStart;
+local tDuration;
+local function VUHDO_updateSwiftmendCooldown()
+
+	if not sIsPlayerKnowsSwiftmend then
+		return;
+	end
+
+	if not sSwiftmendCooldown[0] or not sSwiftmendCooldown[1] then
+		tStart, tDuration = GetSpellCooldown(VUHDO_SPELL_ID.SWIFTMEND);
+
+		if tStart > 0 and tDuration > 1.5 then
+			sSwiftmendCooldown[0], sSwiftmendCooldown[1] = tStart, tDuration;
+
+			sIsPlayerCanCastSwiftmend = false;
+		else
+			sIsPlayerCanCastSwiftmend = true;
+		end
+	elseif (sSwiftmendCooldown[0] + sSwiftmendCooldown[1] - GetTime()) <= 0 then
+		sSwiftmendCooldown[0], sSwiftmendCooldown[1] = nil, nil;
+
+		sIsPlayerCanCastSwiftmend = true;
+	else
+		sIsPlayerCanCastSwiftmend = false;
+	end
+
+end
+
+
+
+--
 function VUHDO_isUnitSwiftmendable(aUnit)
-	return sSwiftmendUnits[aUnit];
+
+	if sIsPlayerKnowsSwiftmend and sIsPlayerCanCastSwiftmend and ((sSwiftmendUnits[aUnit] or 0) > 0) then
+		return true;
+	else
+		return false;
+	end
+
+end
+
+
+
+--
+function VUHDO_updateAllHoTs(aClustersOnly)
+
+	if sIsSuspended then
+		return;
+	end
+
+	for tUnit, tInfo in pairs(VUHDO_RAID) do
+		if not aClustersOnly then
+			VUHDO_updateHots(tUnit, tInfo);
+		end
+
+		if VUHDO_shouldScanUnit(tUnit) then
+			-- Clusters
+			if sIsClusterIcons then
+				VUHDO_updateAllClusterIcons(tUnit, tInfo);
+			end
+		end
+	end
+
+	VUHDO_updateSwiftmendCooldown();
+
 end
