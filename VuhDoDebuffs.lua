@@ -1067,8 +1067,6 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 
 	if not tInfo then
 		return 0, ""; -- VUHDO_DEBUFF_TYPE_NONE
-	elseif VUHDO_CONFIG_SHOW_RAID then
-		return tInfo["debuff"], tInfo["debuffName"];
 	end
 
 	sUnit = aUnit;
