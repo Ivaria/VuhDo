@@ -161,7 +161,7 @@ end
 --
 local function VUHDO_addAllBuffPanels()
 
-	local tBuffPanel, tNewBufPanel;
+	local tBuffPanel, tNewBuffPanel;
 	local tColPanels;
 
 	VUHDO_PANEL_OFFSET_Y = VUHDO_BUFF_PANEL_GAP_TOP;
