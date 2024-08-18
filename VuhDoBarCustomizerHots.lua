@@ -17,6 +17,11 @@ local sClipL, sClipR, sClipT, sClipB = 0, 1, 0, 1;
 
 local sIsPlayerKnowsSwiftmend = false;
 local sSwiftmendUnits = { };
+local sIsPlayerCanCastSwiftmend;
+local sSwiftmendCooldown = {
+	-- <cooldown start time>,
+	-- <cooldown duration>,
+};
 
 VUHDO_UNIT_HOT_TYPE_MINE = 1;
 VUHDO_UNIT_HOT_TYPE_OTHERS = 2;
@@ -1199,6 +1204,7 @@ function VUHDO_updateHots(aUnit, anInfo, aSpellName, aSpellId)
 end
 
 
+
 --
 local tIcon;
 local tPanelNum;
@@ -1308,15 +1314,6 @@ function VUHDO_removeAllHots()
 
 	VUHDO_updatePlayerTarget();
 end
-
-
-
---
-local sIsPlayerCanCastSwiftmend;
-local sSwiftmendCooldown = {
-	-- <cooldown start time>,
-	-- <cooldown duration>,
-};
 
 
 
