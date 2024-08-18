@@ -40,6 +40,7 @@ Bugfixes:
 -- Fixed player specialization based role detection  
 -- Fixed fallback role detection for Evoker damage specializations  
 -- Fixed dragging of spellbook items in 'VuhDo Options > Spells'  
+-- Fixed profile loading of tooltip spell info setting  
   
   
 Improvements:  
