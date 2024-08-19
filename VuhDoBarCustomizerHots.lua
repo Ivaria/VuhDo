@@ -1103,7 +1103,7 @@ local function VUHDO_updateHot(aUnit, anIndex, aSpellName, aSourceType, aNow)
 				tRest = tUnitHotInfo[2] - aNow;
 				tDuration = tUnitHotInfo[4];
 
-				if aSourceType == VUHDO_UNIT_HOT_TYPE_OTHERS or aSourceType == VUHDO_UNIT_HOT_TYPE_BOTH then
+				if tUnitHotCount > 1 and (aSourceType == VUHDO_UNIT_HOT_TYPE_OTHERS or aSourceType == VUHDO_UNIT_HOT_TYPE_BOTH) then
 					tStacks = tUnitHotCount;
 				else
 					tStacks = tUnitHotInfo[3];
