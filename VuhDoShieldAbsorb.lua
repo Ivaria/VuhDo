@@ -35,6 +35,7 @@ local VUHDO_PUMP_SHIELDS = {
 -- Note: if adding by spell ID table key must be a string e.g. ["17"] not [17]
 local VUHDO_IMMEDIATE_HOTS = {
 	[VUHDO_SPELL_ID.ATONEMENT] = true,
+	["194384"] = true, -- VUHDO_SPELL_ID.ATONEMENT
 }
 
 
