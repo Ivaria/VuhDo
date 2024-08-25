@@ -168,8 +168,10 @@ function VUHDO_isSpellInRange(aSpell, aUnit, aUnitReaction)
 		for _, tRangeSpell in pairs(VUHDO_RANGE_SPELLS_REMAP[aUnitReaction][aSpell]) do
 			tIsSpellInRange = C_Spell.IsSpellInRange(tRangeSpell, aUnit);
 
-			if tIsSpellInRange then
+			if tIsSpellInRange == true then
 				return 1;
+			elseif tIsSpellInRange == false then
+				return 0;
 			end
 		end
 	end
