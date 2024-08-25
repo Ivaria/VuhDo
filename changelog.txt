@@ -13,7 +13,8 @@ Known issues:
   
   
 Bugfixes:  
--- Fixed range check when using spells that change based on Hero Talents  
+-- Fixed range check when using spells that change based on hero talents  
+-- Fixed Druid 'Swiftmend' cooldown tracking when untalented  
   
   
 Improvements:  
