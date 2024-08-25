@@ -152,7 +152,7 @@ local VUHDO_DEFAULT_RANGE_SPELLS = {
 	},
 	["PRIEST"] = {
 		["HELPFUL"] = { VUHDO_SPELL_ID.FLASH_HEAL },
-		["HARMFUL"] = { VUHDO_SPELL_ID.SMITE },
+		["HARMFUL"] = { VUHDO_SPELL_ID.MIND_BLAST, VUHDO_SPELL_ID.HOLY_FIRE, VUHDO_SPELL_ID.SMITE },
 	},
 	["DEATHKNIGHT"] = {
 		["HELPFUL"] = { 47541 }, -- VUHDO_SPELL_ID.DEATH_COIL
@@ -167,8 +167,8 @@ local VUHDO_DEFAULT_RANGE_SPELLS = {
 		["HARMFUL"] = { VUHDO_SPELL_ID.THROW_GLAIVE },
 	},
 	["EVOKER"] = {
-		["HELPFUL"] = { VUHDO_SPELL_ID.LIVING_FLAME },
-		["HARMFUL"] = { VUHDO_SPELL_ID.LIVING_FLAME },
+		["HELPFUL"] = { VUHDO_SPELL_ID.LIVING_FLAME, VUHDO_SPELL_ID.CHRONO_FLAME },
+		["HARMFUL"] = { VUHDO_SPELL_ID.LIVING_FLAME, VUHDO_SPELL_ID.CHRONO_FLAME },
 	},
 };
 
@@ -948,6 +948,8 @@ function VUHDO_loadDefaultConfig()
 					if tRangeSpell ~= "!" then
 						VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction] = tRangeSpell;
 						tIsGuessRange = false;
+
+						break;
 					end
 				end
 
