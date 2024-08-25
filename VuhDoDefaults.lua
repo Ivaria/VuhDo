@@ -167,8 +167,8 @@ local VUHDO_DEFAULT_RANGE_SPELLS = {
 		["HARMFUL"] = { VUHDO_SPELL_ID.THROW_GLAIVE },
 	},
 	["EVOKER"] = {
-		["HELPFUL"] = { VUHDO_SPELL_ID.LIVING_FLAME },
-		["HARMFUL"] = { VUHDO_SPELL_ID.LIVING_FLAME },
+		["HELPFUL"] = { VUHDO_SPELL_ID.EMERALD_BLOSSOM },
+		["HARMFUL"] = { VUHDO_SPELL_ID.AZURE_STRIKE },
 	},
 };
 
@@ -949,6 +949,8 @@ function VUHDO_loadDefaultConfig()
 					if tRangeSpell ~= "!" then
 						VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction] = tRangeSpell;
 						tIsGuessRange = false;
+
+						break;
 					end
 				end
 
