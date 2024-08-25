@@ -141,12 +141,17 @@ end
 
 --
 local VUHDO_RANGE_SPELLS_REMAP = {
-	[VUHDO_SPELL_ID.SMITE] = { VUHDO_SPELL_ID.MIND_BLAST, VUHDO_SPELL_ID.HOLY_FIRE },
-	[VUHDO_SPELL_ID.LIVING_FLAME] = { VUHDO_SPELL_ID.CHRONO_FLAME },
+	["HELPFUL"] = {
+		[VUHDO_SPELL_ID.LIVING_FLAME] = { VUHDO_SPELL_ID.EMERALD_BLOSSOM },
+	},
+	["HARMFUL"] = {
+		[VUHDO_SPELL_ID.SMITE] = { VUHDO_SPELL_ID.MIND_BLAST, VUHDO_SPELL_ID.HOLY_FIRE },
+		[VUHDO_SPELL_ID.LIVING_FLAME] = { VUHDO_SPELL_ID.AZURE_STRIKE },
+	},
 };
 
 local tIsSpellInRange;
-function VUHDO_isSpellInRange(aSpell, aUnit)
+function VUHDO_isSpellInRange(aSpell, aUnit, aUnitReaction)
 
 	if not aSpell or not aUnit then
 		return;
@@ -158,8 +163,9 @@ function VUHDO_isSpellInRange(aSpell, aUnit)
 
 	tIsSpellInRange = C_Spell.IsSpellInRange(aSpell, aUnit);
 
-	if not tIsSpellInRange and VUHDO_RANGE_SPELLS_REMAP[aSpell] then
-		for _, tRangeSpell in pairs(VUHDO_RANGE_SPELLS_REMAP[aSpell]) do
+	if not tIsSpellInRange and aUnitReaction and
+		VUHDO_RANGE_SPELLS_REMAP[aUnitReaction] and VUHDO_RANGE_SPELLS_REMAP[aUnitReaction][aSpell] then
+		for _, tRangeSpell in pairs(VUHDO_RANGE_SPELLS_REMAP[aUnitReaction][aSpell]) do
 			tIsSpellInRange = C_Spell.IsSpellInRange(tRangeSpell, aUnit);
 
 			if tIsSpellInRange then
@@ -432,9 +438,9 @@ function VUHDO_checkInteractDistance(aUnit, aDistIndex)
 		return CheckInteractDistance(aUnit, aDistIndex);
 	else
 		if not sIsHarmfulGuessRange and UnitCanAttack("player", aUnit) then
-			return (VUHDO_isSpellInRange(sRangeSpell["HARMFUL"], aUnit) == 1) and true or false;
+			return (VUHDO_isSpellInRange(sRangeSpell["HARMFUL"], aUnit, "HARMFUL") == 1) and true or false;
 		elseif not sIsHelpfulGuessRange then
-			return (VUHDO_isSpellInRange(sRangeSpell["HELPFUL"], aUnit) == 1) and true or false;
+			return (VUHDO_isSpellInRange(sRangeSpell["HELPFUL"], aUnit, "HELPFUL") == 1) and true or false;
 		else
 			-- default to showing in-range when we don't know any better
 			return true;
@@ -502,7 +508,7 @@ function VUHDO_isInRange(aUnit)
 			return UnitInRange(aUnit);
 		end
 
-		local tIsSpellInRange = VUHDO_isSpellInRange(tRangeSpell, aUnit);
+		local tIsSpellInRange = VUHDO_isSpellInRange(tRangeSpell, aUnit, tUnitReaction);
 
 		if tIsSpellInRange ~= nil then
 			return (tIsSpellInRange == 1) and true or false;
