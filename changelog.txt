@@ -39,6 +39,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default bouquets to track both echo and non-echo Evoker HoTs  
   
   
 --------------------------------------------------------------  
