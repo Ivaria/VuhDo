@@ -152,7 +152,7 @@ local VUHDO_DEFAULT_RANGE_SPELLS = {
 	},
 	["PRIEST"] = {
 		["HELPFUL"] = { VUHDO_SPELL_ID.FLASH_HEAL },
-		["HARMFUL"] = { VUHDO_SPELL_ID.SMITE },
+		["HARMFUL"] = { VUHDO_SPELL_ID.SHADOW_WORD_PAIN, VUHDO_SPELL_ID.SMITE },
 	},
 	["DEATHKNIGHT"] = {
 		["HELPFUL"] = { 47541 }, -- VUHDO_SPELL_ID.DEATH_COIL
@@ -167,8 +167,8 @@ local VUHDO_DEFAULT_RANGE_SPELLS = {
 		["HARMFUL"] = { VUHDO_SPELL_ID.THROW_GLAIVE },
 	},
 	["EVOKER"] = {
-		["HELPFUL"] = { VUHDO_SPELL_ID.EMERALD_BLOSSOM },
-		["HARMFUL"] = { VUHDO_SPELL_ID.AZURE_STRIKE },
+		["HELPFUL"] = { VUHDO_SPELL_ID.EMERALD_BLOSSOM, VUHDO_SPELL_ID.LIVING_FLAME },
+		["HARMFUL"] = { VUHDO_SPELL_ID.AZURE_STRIKE, VUHDO_SPELL_ID.LIVING_FLAME },
 	},
 };
 
@@ -913,8 +913,7 @@ end
 
 --
 function VUHDO_loadDefaultConfig()
-	local tClass;
-	_, tClass = UnitClass("player");
+	local _, tClass = UnitClass("player");
 
 	if (VUHDO_CONFIG == nil) then
 		VUHDO_CONFIG = VUHDO_decompressOrCopy(VUHDO_DEFAULT_CONFIG);
