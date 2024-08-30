@@ -16,6 +16,8 @@ Bugfixes:
   
   
 Improvements:  
+-- Added new bouquet validator 'Flag: Trail of Light (Next)'  
+-- Added new default bouquet 'Trail of Light (Next)'  
   
   
 --------------------------------------------------------------  
