@@ -798,9 +798,13 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 		
 --[[	elseif "RUNE_POWER_UPDATE" == anEvent then
 		VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
-	
-	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent then
+
+	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent or "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
 		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
+			if "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
+				anArg1 = "player";
+			end
+
 			if "player" == anArg1 then
 				local tSpecNum = tostring(GetSpecialization()) or "1";
 				local tBestProfile = VUHDO_getBestProfileAfterSpecChange();
