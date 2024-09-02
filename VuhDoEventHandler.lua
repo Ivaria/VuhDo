@@ -783,8 +783,12 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 	elseif "RUNE_POWER_UPDATE" == anEvent then
 		VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
 
-	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent then
+	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent or "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
 		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
+			if "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
+				anArg1 = "player";
+			end
+
 			if "player" == anArg1 then
 				local tSpecNum = tostring(GetSpecialization()) or "1";
 				local tBestProfile = VUHDO_getBestProfileAfterSpecChange();
@@ -1653,7 +1657,7 @@ local VUHDO_ALL_EVENTS = {
 	"UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_HEAL_ABSORB_AMOUNT_CHANGED",
 	"INCOMING_SUMMON_CHANGED",
 	"UNIT_PHASE",
-	"PLAYER_SPECIALIZATION_CHANGED",
+	"PLAYER_SPECIALIZATION_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",
 };

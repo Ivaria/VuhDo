@@ -13,6 +13,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed profile and key layout auto-load on LFG forced spec change  
   
   
 Improvements:  
