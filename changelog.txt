@@ -66,6 +66,7 @@ Improvements:
 -- Added new bouquet validator 'Flag: Trail of Light (Next)'  
 -- Added new default bouquet 'Trail of Light (Next)'  
 -- Added Shaman supportive imbuements to Buff Watch  
+-- Added option to display debuff state color as debuff icon border  
   
   
 --------------------------------------------------------------  
