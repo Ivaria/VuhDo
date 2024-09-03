@@ -549,6 +549,7 @@ VUHDO_I18N_BOUQUET_EVOKER_ALL_ECHO = "Evoker All HoT Echoes";
 
 VUHDO_I18N_TRAIL_OF_LIGHT_NEXT = "Flag: Trail of Light (Next)";
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT_NEXT = "Trail of Light (Next)";
+VUHDO_I18N_BOUQUET_DEBUFF_BLEED = "Flag: Debuff Bleed";
 
 -- Cata Classic
 

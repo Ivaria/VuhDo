@@ -42,6 +42,7 @@ Improvements:
 -- Added new default bouquet 'Trail of Light (Next)'  
 -- Added Shaman supportive imbuements to Buff Watch  
 -- Added option to display debuff state color as debuff icon border  
+-- Added new debuff type for 'Bleed' effects  
   
   
 --------------------------------------------------------------  
