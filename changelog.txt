@@ -43,6 +43,9 @@ Improvements:
 -- Added Shaman supportive imbuements to Buff Watch  
 -- Added option to display debuff state color as debuff icon border  
 -- Added new debuff type for 'Bleed' effects  
+-- Added Evoker 'Cauterizing Flame' debuff ability  
+-- Added Paladin 'Blessing of Protection' debuff ability  
+-- Added Shaman 'Poison Cleansing Totem' debuff ability  
   
   
 --------------------------------------------------------------  
