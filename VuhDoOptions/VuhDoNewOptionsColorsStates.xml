@@ -196,7 +196,7 @@
 
 			<Frame name="$parentDebuffsPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="268" y="330" />
+					<AbsDimension x="268" y="368" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -453,6 +453,52 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentBleedBorderCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="223" y="-240" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8.useBorder");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentBleedTextCheckBox" inherits="VuhDoCheckBoxTemplate">:
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="177" y="-240" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8.useText");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentBleedBackCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="131" y="-240" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8.useBackground");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+
 					<CheckButton name="$parentPoisonBorderCheckBox" inherits="VuhDoCheckBoxTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -587,7 +633,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-240" />
+									<AbsDimension x="13" y="-278" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -604,7 +650,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-278" />
+									<AbsDimension x="13" y="-316" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -613,6 +659,23 @@
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF_ICON_GLOW");
 								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_ICON_GLOW_COLOR, VUHDO_I18N_ICON_GLOW_COLOR);
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K578);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentBleedTexture" inherits="VuhDoContextColorSwatchTexture">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-240" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8");
+								VUHDO_lnfInitColorSwatch(self, VUHDO_I18N_BLEED, VUHDO_I18N_BLEED);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K596);
 							</OnLoad>
 						</Scripts>
 					</Frame>

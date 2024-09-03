@@ -75,6 +75,7 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		[3] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF3"],
 		[4] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF4"],
 		[6] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF6"],
+		[8] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF8"],
 	};
 
 end

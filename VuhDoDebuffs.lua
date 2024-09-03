@@ -96,6 +96,7 @@ function VUHDO_debuffsInitLocalOverrides()
 		[3] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF3"],
 		[4] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF4"],
 		[6] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF6"],
+		[8] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF8"],
 	};
 
 	--[[if not sColorArray then
@@ -224,6 +225,7 @@ setmetatable(VUHDO_UNIT_DEBUFF_INFOS, {
 			[VUHDO_DEBUFF_TYPE_DISEASE] = { },
 			[VUHDO_DEBUFF_TYPE_MAGIC] = { },
 			[VUHDO_DEBUFF_TYPE_CURSE] = { },
+			[VUHDO_DEBUFF_TYPE_BLEED] = { },
 --			["listHeads"] = {
 --				[<CHOSEN|VUHDO_DEBUFF_TYPE>] = {
 --					["auraInstanceId"] = <aura instance ID>,
@@ -444,7 +446,7 @@ local VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT = { VUHDO_DEBUFF_TYPE_NONE, "", nil, false
 local sCurChosenInfo = {
 	-- [<unit ID>] = {
 	--	[<aura instance ID>] = {
-	--		VUHDO_DEBUFF_TYPE_<NONE|POISON|DISEASE|MAGIC|CURSE|CUSTOM|MISSING_BUFF>,
+	--		VUHDO_DEBUFF_TYPE_<NONE|POISON|DISEASE|MAGIC|CURSE|CUSTOM|MISSING_BUFF|BLEED>,
 	--		<aura spell Id>,
 	--		<aura name>,
 	--		<isStandard: true|false>,
@@ -625,6 +627,7 @@ local function VUHDO_initDebuffInfos(aUnit)
 	tUnitDebuffInfo[2][2] = nil; -- VUHDO_DEBUFF_TYPE_DISEASE
 	tUnitDebuffInfo[3][2] = nil; -- VUHDO_DEBUFF_TYPE_MAGIC
 	tUnitDebuffInfo[4][2] = nil; -- VUHDO_DEBUFF_TYPE_CURSE
+	tUnitDebuffInfo[8][2] = nil; -- VUHDO_DEBUFF_TYPE_BLEED
 
 	if not tUnitDebuffInfo["listHeads"] then
 		tUnitDebuffInfo["listHeads"] = { };
@@ -635,6 +638,7 @@ local function VUHDO_initDebuffInfos(aUnit)
 	tUnitDebuffInfo["listHeads"][2] = nil; -- VUHDO_DEBUFF_TYPE_DISEASE
 	tUnitDebuffInfo["listHeads"][3] = nil; -- VUHDO_DEBUFF_TYPE_MAGIC
 	tUnitDebuffInfo["listHeads"][4] = nil; -- VUHDO_DEBUFF_TYPE_CURSE
+	tUnitDebuffInfo["listHeads"][8] = nil; -- VUHDO_DEBUFF_TYPE_BLEED
 
 	if not tUnitDebuffInfo["typeAuras"] then
 		tUnitDebuffInfo["typeAuras"] = { };
@@ -766,7 +770,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 		tIsShown = true;
 	end
 
-	tType = VUHDO_DEBUFF_TYPES[aTypeString];
+	tType = VUHDO_DEBUFF_BLEED_SPELLS[aSpellId] and VUHDO_DEBUFF_TYPE_BLEED or VUHDO_DEBUFF_TYPES[aTypeString];
 	tAbility = VUHDO_PLAYER_ABILITIES[tType] and UnitIsFriend("player", sUnit);
 	tIsRelevant = not VUHDO_IGNORE_DEBUFF_NAMES[aName]
 		and not (VUHDO_IGNORE_DEBUFFS_BY_CLASS[tInfo["class"] or ""] or sEmpty)[aName];

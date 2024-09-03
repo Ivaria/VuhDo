@@ -346,6 +346,23 @@ local function VUHDO_debuffCurseValidator(anInfo, _)
 end
 
 
+
+--
+local tDebuffInfo;
+local function VUHDO_debuffBleedValidator(anInfo, _)
+
+	tDebuffInfo = VUHDO_getUnitDebuffSchoolInfos(anInfo["unit"], VUHDO_DEBUFF_TYPE_BLEED);
+
+	if tDebuffInfo[2] then
+		return true, tDebuffInfo[1], floor(tDebuffInfo[2] - GetTime()), tDebuffInfo[3], tDebuffInfo[4];
+	else
+		return false, nil, -1, -1, -1;
+	end
+
+end
+
+
+
 -- return tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tTimer2, clipLeft, clipRight, clipTop, clipBottom
 local tDebuffInfo;
 local function VUHDO_debuffBarColorValidator(anInfo, _)
@@ -1557,6 +1574,13 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 	["DEBUFF_CURSE"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_DEBUFF_CURSE,
 		["validator"] = VUHDO_debuffCurseValidator,
+		["updateCyclic"] = true,
+		["interests"] = { VUHDO_UPDATE_DEBUFF },
+	},
+
+	["DEBUFF_BLEED"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_DEBUFF_BLEED,
+		["validator"] = VUHDO_debuffBleedValidator,
 		["updateCyclic"] = true,
 		["interests"] = { VUHDO_UPDATE_DEBUFF },
 	},
