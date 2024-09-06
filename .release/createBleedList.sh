@@ -8,7 +8,10 @@ curl https://wago.tools/db2/SpellEffect/csv -o wow_db2_spelleffect_$DATE.csv
 
 cat wow_db2_spelleffect_$DATE.csv | cut -d, -f13,36 | grep "15,.*" | cut -d, -f2 | sort -n | uniq > wow_bleed_list_$DATE.txt
 
-echo "VUHDO_DEBUFF_BLEED_SPELLS = {" > VuhDoDebuffConstBleed.lua.$DATE
+cat << EOF > VuhDoDebuffConstBleed.lua.$DATE
+-- VuhDoDebuffConstBleed.lua.$DATE
+VUHDO_DEBUFF_BLEED_SPELLS = {
+EOF
 
 IFS="
 "
