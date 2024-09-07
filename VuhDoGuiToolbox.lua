@@ -16,6 +16,7 @@ local sIsSideBarLeft = { };
 local sIsSideBarRight = { };
 local sShowPanels;
 local sIsHideEmptyAndClickThrough;
+local sIsPartyFrameHooked;
 local sEmpty = { };
 
 local tEmptyColor = { };
@@ -549,18 +550,35 @@ end
 
 
 --
+local function VUHDO_updateBlizzPartyFrames()
+
+	if InCombatLockdown() then
+		return;
+	end
+
+	if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 then
+		for tCnt = 1, 4 do
+			VUHDO_hideFrame(_G["PartyMemberFrame" .. tCnt]);
+		end
+	elseif VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 1 then
+		for tCnt = 1, 4 do
+			VUHDO_showFrame(_G["PartyMemberFrame" .. tCnt]);
+		end
+	end
+
+end
+
+
+
+--
 local function VUHDO_hideBlizzParty()
 	HIDE_PARTY_INTERFACE = "1";
 
-	hooksecurefunc("ShowPartyFrame",
-		function()
-			if not InCombatLockdown() then
-				for tCnt = 1, 4 do
-					VUHDO_hideFrame(_G["PartyMemberFrame" .. tCnt]);
-				end
-			end
-		end
-	);
+	if not sIsPartyFrameHooked then
+		hooksecurefunc("ShowPartyFrame", VUHDO_updateBlizzPartyFrames);
+
+		sIsPartyFrameHooked = true;
+	end
 
 	local tPartyFrame;
 	for tCnt = 1, 4 do
@@ -587,15 +605,11 @@ local function VUHDO_showBlizzParty()
 	if tonumber(GetCVar("useCompactPartyFrames")) == 0 then
 		HIDE_PARTY_INTERFACE = "0";
 
-		hooksecurefunc("ShowPartyFrame",
-			function()
-				if not InCombatLockdown() then
-					for tCnt = 1, 4 do
-						VUHDO_showFrame(_G["PartyMemberFrame" .. tCnt]);
-					end
-				end
-			end
-		);
+		if not sIsPartyFrameHooked then
+			hooksecurefunc("ShowPartyFrame", VUHDO_updateBlizzPartyFrames);
+
+			sIsPartyFrameHooked = true;
+		end
 
 		local tPartyFrame;
 		for tCnt = 1, 4 do
