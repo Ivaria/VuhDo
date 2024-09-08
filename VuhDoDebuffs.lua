@@ -229,7 +229,6 @@ setmetatable(VUHDO_UNIT_DEBUFF_INFOS, {
 --			["listHeads"] = {
 --				[<CHOSEN|VUHDO_DEBUFF_TYPE>] = {
 --					["auraInstanceId"] = <aura instance ID>,
---					["next"] = <next aura>,
 --					["prev"] = <prev aura>,
 --				},
 --			},
@@ -313,7 +312,6 @@ local function VUHDO_addUnitDebuffInfo(aUnit, aType, anAuraInstanceId, anIcon, a
 
 		if tUnitDebuffInfoListPrev then
 			VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType]["prev"] = tUnitDebuffInfoListPrev;
-			tUnitDebuffInfoListPrev["next"] = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType];
 		end
 
 		VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][1], VUHDO_UNIT_DEBUFF_INFOS[aUnit][aType][2],
@@ -349,22 +347,19 @@ local function VUHDO_removeUnitDebuffInfo(aUnit, aType, anAuraInstanceId)
 		return;
 	end
 
+	tUnitDebuffInfoNext = false;
 	tUnitDebuffInfo = VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType];
 
 	while tUnitDebuffInfo and tUnitDebuffInfo["auraInstanceId"] do
 		if tUnitDebuffInfo["auraInstanceId"] == anAuraInstanceId then
 			tUnitDebuffInfoPrev = tUnitDebuffInfo["prev"];
-			tUnitDebuffInfoNext = tUnitDebuffInfo["next"];
 
 			if tUnitDebuffInfoPrev and not tUnitDebuffInfoNext then
 				-- remove head
-				tUnitDebuffInfoPrev["next"] = nil;
-
 				VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"][aType] = tUnitDebuffInfoPrev;
 			elseif tUnitDebuffInfoPrev and tUnitDebuffInfoNext then
 				-- remove link
 				tUnitDebuffInfoNext["prev"] = tUnitDebuffInfoPrev;
-				tUnitDebuffInfoPrev["next"] = tUnitDebuffInfoNext;
 			elseif not tUnitDebuffInfoPrev and tUnitDebuffInfoNext then
 				-- remove tail
 				tUnitDebuffInfoNext["prev"] = nil;
@@ -374,8 +369,9 @@ local function VUHDO_removeUnitDebuffInfo(aUnit, aType, anAuraInstanceId)
 
 			tUnitDebuffInfoAuras[anAuraInstanceId] = nil;
 
-			tUnitDebuffInfo = nil;
+			break;
 		else
+			tUnitDebuffInfoNext = tUnitDebuffInfo;
 			tUnitDebuffInfo = tUnitDebuffInfo["prev"];
 		end
 	end
@@ -498,7 +494,6 @@ local function VUHDO_addCurChosen(aUnit, anAuraInstanceId, aType, aName, aSpellI
 
 		if tCurChosenPrev then
 			sCurChosenListHead[aUnit]["prev"] = tCurChosenPrev;
-			tCurChosenPrev["next"] = sCurChosenListHead[aUnit];
 		end
 
 		sCurChosen[aUnit][1], sCurChosen[aUnit][2], sCurChosen[aUnit][3], sCurChosen[aUnit][4] =
@@ -522,22 +517,19 @@ local function VUHDO_removeCurChosen(aUnit, anAuraInstanceId)
 		return;
 	end
 
+	tCurChosenNext = false;
 	tCurChosen = sCurChosenListHead[aUnit];
 
 	while tCurChosen and tCurChosen["auraInstanceId"] do
 		if tCurChosen["auraInstanceId"] == anAuraInstanceId then
 			tCurChosenPrev = tCurChosen["prev"];
-			tCurChosenNext = tCurChosen["next"];
 
 			if tCurChosenPrev and not tCurChosenNext then
 				-- remove head
-				tCurChosenPrev["next"] = nil;
-
 				sCurChosenListHead[aUnit] = tCurChosenPrev;
 			elseif tCurChosenPrev and tCurChosenNext then
 				-- remove link
 				tCurChosenNext["prev"] = tCurChosenPrev;
-				tCurChosenPrev["next"] = tCurChosenNext;
 			elseif not tCurChosenPrev and tCurChosenNext then
 				-- remove tail
 				tCurChosenNext["prev"] = nil;
@@ -547,8 +539,9 @@ local function VUHDO_removeCurChosen(aUnit, anAuraInstanceId)
 
 			sCurChosenInfo[aUnit][anAuraInstanceId] = nil;
 
-			tCurChosen = nil;
+			break;
 		else
+			tCurChosenNext = tCurChosen;
 			tCurChosen = tCurChosen["prev"];
 		end
 	end
