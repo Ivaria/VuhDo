@@ -10,6 +10,8 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed debuff icon border color display on multiple icons of the same type  
+-- Fixed debuff icon tracking of multiple icons with the same spell name  
   
   
 Improvements:  
