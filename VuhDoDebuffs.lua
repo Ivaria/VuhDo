@@ -786,7 +786,7 @@ local function VUHDO_determineDebuffPredicate(anAuraInstanceId, aName, anIcon, a
 
 		-- Entweder Fähigkeit vorhanden ODER noch keiner gewählt UND auch nicht entfernbare
 		-- Either ability available OR none selected AND not removable (DETECT_DEBUFFS_REMOVABLE_ONLY)
-		if not anIsUpdate and tType and (tAbility or (sCurChosen[sUnit][1] == 0 and sIsNotRemovableOnly)) then -- VUHDO_DEBUFF_TYPE_NONE
+		if not anIsUpdate and tType and (tAbility or sIsNotRemovableOnly) then -- VUHDO_DEBUFF_TYPE_NONE
 			VUHDO_addCurChosen(sUnit, anAuraInstanceId, tType, nil, nil, nil);
 			VUHDO_addUnitDebuffInfo(sUnit, "CHOSEN", anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration);
 		end
@@ -1125,7 +1125,7 @@ function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 	-- Lost old custom debuff?
 	for tAuraInstanceId, tUnitCustomDebuff in pairs(VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit]) do
 		if tUnitCustomDebuff and (not sCurIcons[aUnit] or not sCurIcons[aUnit][tAuraInstanceId]) then
-			VUHDO_removeDebuffIcon(aUnit, tUnitCustomDebuff[5]);
+			VUHDO_removeDebuffIcon(aUnit, tAuraInstanceId);
 			VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit][tAuraInstanceId] = nil;
 
 			VUHDO_updateBouquetsForEvent(aUnit, 29); -- VUHDO_UPDATE_CUSTOM_DEBUFF
