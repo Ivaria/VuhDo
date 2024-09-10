@@ -70,6 +70,7 @@ local sStdDebuffSound;
 local sAllDebuffSettings;
 local sIsShowOnlyForFriendly;
 local sEmpty = { };
+local sCurChosenColor = { };
 --local sColorArray = nil;
 
 function VUHDO_debuffsInitLocalOverrides()
@@ -141,34 +142,13 @@ function _VUHDO_getDebuffColor(anInfo)
 		return tEmpty;
 	end
 
-	if (tDebuff or 6) ~= 6 and VUHDO_DEBUFF_COLORS[tDebuff] then -- VUHDO_DEBUFF_TYPE_CUSTOM
-		return VUHDO_DEBUFF_COLORS[tDebuff];
+	if tDebuff and tDebuff > 0 then
+		return sCurChosenColor[anInfo["unit"]];
 	end
 
-	tDebuffSettings = sAllDebuffSettings[anInfo["debuffName"]];
-
-	if tDebuff == 6 and tDebuffSettings ~= nil -- VUHDO_DEBUFF_TYPE_CUSTOM
-		and tDebuffSettings["isColor"] then
-		if tDebuffSettings["color"] ~= nil then
-			tSourceColor = tDebuffSettings["color"];
-		else
-			tSourceColor = VUHDO_DEBUFF_COLORS[6];
-		end
-
-		twipe(tColor);
-
-		if VUHDO_DEBUFF_COLORS[6]["useBackground"] then
-			tColor["R"], tColor["G"], tColor["B"], tColor["O"], tColor["useBackground"] = tSourceColor["R"], tSourceColor["G"], tSourceColor["B"], tSourceColor["O"], true;
-		end
-
-		if VUHDO_DEBUFF_COLORS[6]["useText"] then
-			tColor["TR"], tColor["TG"], tColor["TB"], tColor["TO"], tColor["useText"] = tSourceColor["TR"], tSourceColor["TG"], tSourceColor["TB"], tSourceColor["TO"], true;
-		end
-
-		return tColor;
+	if not anInfo["mibucateg"] or not VUHDO_BUFF_SETTINGS[anInfo["mibucateg"]] then
+		return tEmpty;
 	end
-
-	if not anInfo["mibucateg"] or not VUHDO_BUFF_SETTINGS[anInfo["mibucateg"]] then	return tEmpty; end
 
 	tSourceColor = VUHDO_BUFF_SETTINGS[anInfo["mibucateg"]]["missingColor"];
 	twipe(tColor);
@@ -181,6 +161,7 @@ function _VUHDO_getDebuffColor(anInfo)
 	end
 
 	return tColor;
+
 end
 
 
@@ -457,6 +438,51 @@ local sCurIcons = { };
 
 
 --
+local tSourceColor;
+local tDebuffSettings;
+local function VUHDO_updateCurChosenColor(aUnit, aType)
+
+	if (aType or 0) == 0 then -- VUHDO_DEBUFF_TYPE_NONE
+		return;
+	end
+
+	if (aType or 6) ~= 6 and VUHDO_DEBUFF_COLORS[aType] then -- VUHDO_DEBUFF_TYPE_<POISON|DISEASE|MAGIC|CURSE|BLEED>
+		tSourceColor = VUHDO_DEBUFF_COLORS[aType];
+
+		if tSourceColor["useBackground"] then
+			sCurChosenColor[aUnit]["R"], sCurChosenColor[aUnit]["G"], sCurChosenColor[aUnit]["B"], sCurChosenColor[aUnit]["O"], sCurChosenColor[aUnit]["useBackground"] = tSourceColor["R"], tSourceColor["G"], tSourceColor["B"], tSourceColor["O"], true;
+		end
+
+		if tSourceColor["useText"] then
+			sCurChosenColor[aUnit]["TR"], sCurChosenColor[aUnit]["TG"], sCurChosenColor[aUnit]["TB"], sCurChosenColor[aUnit]["TO"], sCurChosenColor[aUnit]["useText"] = tSourceColor["TR"], tSourceColor["TG"], tSourceColor["TB"], tSourceColor["TO"], true;
+		end
+
+		return;
+	end
+
+	tDebuffSettings = sAllDebuffSettings[sCurChosen[aUnit][2]] or sAllDebuffSettings[tostring(sCurChosen[aUnit][3])];
+
+	if aType == 6 and tDebuffSettings ~= nil and tDebuffSettings["isColor"] then -- VUHDO_DEBUFF_TYPE_CUSTOM
+		if tDebuffSettings["color"] ~= nil then
+			tSourceColor = tDebuffSettings["color"];
+		else
+			tSourceColor = VUHDO_DEBUFF_COLORS[6];
+		end
+
+		if VUHDO_DEBUFF_COLORS[6]["useBackground"] then
+			sCurChosenColor[aUnit]["R"], sCurChosenColor[aUnit]["G"], sCurChosenColor[aUnit]["B"], sCurChosenColor[aUnit]["O"], sCurChosenColor[aUnit]["useBackground"] = tSourceColor["R"], tSourceColor["G"], tSourceColor["B"], tSourceColor["O"], true;
+		end
+
+		if VUHDO_DEBUFF_COLORS[6]["useText"] then
+			sCurChosenColor[aUnit]["TR"], sCurChosenColor[aUnit]["TG"], sCurChosenColor[aUnit]["TB"], sCurChosenColor[aUnit]["TO"], sCurChosenColor[aUnit]["useText"] = tSourceColor["TR"], tSourceColor["TG"], tSourceColor["TB"], tSourceColor["TO"], true;
+		end
+	end
+
+end
+
+
+
+--
 local tCurChosenPrev;
 local function VUHDO_addCurChosen(aUnit, anAuraInstanceId, aType, aName, aSpellId, anIsStandard)
 
@@ -502,6 +528,8 @@ local function VUHDO_addCurChosen(aUnit, anAuraInstanceId, aType, aName, aSpellI
 			aSpellId or sCurChosen[aUnit][3] or VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[3],
 			(anIsStandard ~= nil) and anIsStandard or (sCurChosen[aUnit][4] or VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[4]);
 	end
+
+	VUHDO_updateCurChosenColor(aUnit, aType or VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[1]);
 
 end
 
@@ -579,6 +607,8 @@ local function VUHDO_updateCurChosen(aUnit)
 		VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[1], VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[2],
 		VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[3], VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[4];
 
+	sCurChosenColor[aUnit] = { };
+
 	tCurChosen = sCurChosenListHead[aUnit];
 
 	while tCurChosen and tCurChosen["auraInstanceId"] do
@@ -599,6 +629,10 @@ local function VUHDO_updateCurChosen(aUnit)
 
 			if tCurChosenInfo[4] and sCurChosen[aUnit][4] == VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[4] then
 				sCurChosen[aUnit][4] = tCurChosenInfo[4];
+			end
+
+			if not sCurChosenColor[aUnit]["useBackground"] or not sCurChosenColor[aUnit]["useText"] then
+				VUHDO_updateCurChosenColor(aUnit, tCurChosenInfo[1]);
 			end
 		end
 
@@ -666,6 +700,8 @@ local function VUHDO_initDebuffInfos(aUnit)
 	sCurChosen[aUnit][1], sCurChosen[aUnit][2], sCurChosen[aUnit][3], sCurChosen[aUnit][4] =
 		VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[1], VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[2],
 		VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[3], VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT[4];
+
+	sCurChosenColor[aUnit] = { };
 
 	if not sCurIcons[aUnit] then
 		sCurIcons[aUnit] = { };
@@ -1337,5 +1373,14 @@ end
 function VUHDO_getDebuffCurChosen()
 
 	return sCurChosen;
+
+end
+
+
+
+--
+function VUHDO_getDebuffCurChosenColor()
+
+	return sCurChosenColor;
 
 end
