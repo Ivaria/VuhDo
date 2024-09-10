@@ -97,7 +97,6 @@ local tIsBarGlow;
 local tIsIconGlow;
 local tAuraInstanceId;
 local tCurChosenInfo;
-local tUnitDebuffInfo;
 local tType;
 local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, anIsInit, aUnit)
 
@@ -209,14 +208,8 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 
 	tAuraInstanceId = VUHDO_getBarIconFrame(aButton, anIconIndex)["debuffInstanceId"];
 
-	tUnitDebuffInfo = VUHDO_getUnitDebuffInfos(aUnit)["typeAuras"] and VUHDO_getUnitDebuffInfos(aUnit)["typeAuras"][tAuraInstanceId];
-	tType = tUnitDebuffInfo and tUnitDebuffInfo[5];
-
-	if not tType then
-		tCurChosenInfo = VUHDO_getDebuffCurChosenInfo()[aUnit] and VUHDO_getDebuffCurChosenInfo()[aUnit][tAuraInstanceId];
-
-		tType = tCurChosenInfo and tCurChosenInfo[1];
-	end
+	tCurChosenInfo = VUHDO_getDebuffCurChosenInfo()[aUnit] and VUHDO_getDebuffCurChosenInfo()[aUnit][tAuraInstanceId];
+	tType = tCurChosenInfo and tCurChosenInfo[1];
 
 	if tType and tType > 0 and VUHDO_DEBUFF_COLORS[tType] and VUHDO_DEBUFF_COLORS[tType]["useBorder"] then
 		-- offset for backdrop border
