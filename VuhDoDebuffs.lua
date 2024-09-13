@@ -142,22 +142,31 @@ function _VUHDO_getDebuffColor(anInfo)
 		return tEmpty;
 	end
 
-	if tDebuff and tDebuff > 0 and anInfo["unit"] and sCurChosenColor[anInfo["unit"]] then
-		return sCurChosenColor[anInfo["unit"]];
+	twipe(tColor);
+
+	if tDebuff and tDebuff > 0 and tDebuff ~= 7 and anInfo["unit"] and sCurChosenColor[anInfo["unit"]] then
+		tSourceColor = sCurChosenColor[anInfo["unit"]];
+
+		if tSourceColor["useText"] then
+			tColor["useText"], tColor["TR"], tColor["TG"], tColor["TB"], tColor["TO"] = true, tSourceColor["TR"], tSourceColor["TG"], tSourceColor["TB"], tSourceColor["TO"];
+		end
+
+		if tSourceColor["useBackground"] then
+			tColor["useBackground"], tColor["R"], tColor["G"], tColor["B"], tColor["O"] = true, tSourceColor["R"], tSourceColor["G"], tSourceColor["B"], tSourceColor["O"];
+		end
 	end
 
 	if not anInfo["mibucateg"] or not VUHDO_BUFF_SETTINGS[anInfo["mibucateg"]] then
-		return tEmpty;
+		return tColor;
 	end
 
 	tSourceColor = VUHDO_BUFF_SETTINGS[anInfo["mibucateg"]]["missingColor"];
-	twipe(tColor);
 
-	if VUHDO_BUFF_SETTINGS["CONFIG"]["BAR_COLORS_TEXT"] then
+	if not tColor["useText"] and VUHDO_BUFF_SETTINGS["CONFIG"]["BAR_COLORS_TEXT"] then
 		tColor["useText"], tColor["TR"], tColor["TG"], tColor["TB"], tColor["TO"] = true, tSourceColor["TR"], tSourceColor["TG"], tSourceColor["TB"], tSourceColor["TO"];
 	end
 
-	if VUHDO_BUFF_SETTINGS["CONFIG"]["BAR_COLORS_BACKGROUND"] then
+	if not tColor["useBackground"] and VUHDO_BUFF_SETTINGS["CONFIG"]["BAR_COLORS_BACKGROUND"] then
 		tColor["useBackground"], tColor["R"], tColor["G"], tColor["B"], tColor["O"] = true, tSourceColor["R"], tSourceColor["G"], tSourceColor["B"], tSourceColor["O"];
 	end
 
