@@ -142,7 +142,7 @@ function _VUHDO_getDebuffColor(anInfo)
 		return tEmpty;
 	end
 
-	if tDebuff and tDebuff > 0 then
+	if tDebuff and tDebuff > 0 and anInfo["unit"] and sCurChosenColor[anInfo["unit"]] then
 		return sCurChosenColor[anInfo["unit"]];
 	end
 
@@ -152,6 +152,7 @@ function _VUHDO_getDebuffColor(anInfo)
 
 	tSourceColor = VUHDO_BUFF_SETTINGS[anInfo["mibucateg"]]["missingColor"];
 	twipe(tColor);
+
 	if VUHDO_BUFF_SETTINGS["CONFIG"]["BAR_COLORS_TEXT"] then
 		tColor["useText"], tColor["TR"], tColor["TG"], tColor["TB"], tColor["TO"] = true, tSourceColor["TR"], tSourceColor["TG"], tSourceColor["TB"], tSourceColor["TO"];
 	end
