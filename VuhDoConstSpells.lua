@@ -178,7 +178,7 @@ VUHDO_SPELL_ID.DETOX = VUHDO_getSpellInfoSafe(115450); -- Poison/Disease <= Tale
 VUHDO_SPELL_ID.ENVELOPING_MIST = VUHDO_getSpellInfoSafe(124682); -- (Serpent Stance only)
 VUHDO_SPELL_ID.SURGING_MIST = VUHDO_getSpellInfoSafe(116694);
 VUHDO_SPELL_ID.RENEWING_MIST = VUHDO_getSpellInfoSafe(115151);
-VUHDO_SPELL_ID.UPLIFT = VUHDO_getSpellInfoSafe(116670);
+VUHDO_SPELL_ID.VIVIFY = VUHDO_getSpellInfoSafe(116670);
 VUHDO_SPELL_ID.REVIVAL = VUHDO_getSpellInfoSafe(115310);  -- Instant-Gruppenheilung all within vision + Alle 3 Detox
 VUHDO_SPELL_ID.ZEN_SPHERE = VUHDO_getSpellInfoSafe(124081);
 VUHDO_SPELL_ID.CHI_WAVE = VUHDO_getSpellInfoSafe(115098);
