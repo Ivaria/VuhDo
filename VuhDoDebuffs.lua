@@ -1210,7 +1210,6 @@ local VUHDO_determineDebuff = VUHDO_determineDebuff;
 function VUHDO_updateAllCustomDebuffs(anIsEnableAnim)
 
 	twipe(VUHDO_UNIT_CUSTOM_DEBUFFS);
-	twipe(VUHDO_UNIT_CUSTOM_DEBUFF_SPELLS);
 
 	VUHDO_MAY_DEBUFF_ANIM = false;
 
