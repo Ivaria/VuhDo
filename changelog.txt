@@ -37,6 +37,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Paladin 'Rite of Sanctification' to Buff Watch  
   
   
 --------------------------------------------------------------  
