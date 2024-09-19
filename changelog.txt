@@ -63,6 +63,7 @@ Bugfixes:
   
 Improvements:  
 -- Added Paladin 'Rite of Sanctification' to Buff Watch  
+-- Added Evoker 'Sense Power' to Buff Watch  
   
   
 --------------------------------------------------------------  
