@@ -20,6 +20,8 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Mage 'Amplify Magic' to Buff Watch  
+-- Added Mage 'Dampen Magic' to Buff Watch  
   
   
 --------------------------------------------------------------  
