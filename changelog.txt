@@ -67,6 +67,7 @@ Improvements:
 -- Added Paladin 'Rite of Sanctification' to Buff Watch  
 -- Added Evoker 'Sense Power' to Buff Watch  
 -- Added trinket ability 'Golden Glow' absorb tracking  
+-- VuhDo Options now automatically hides during combat  
   
   
 --------------------------------------------------------------  
