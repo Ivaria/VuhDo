@@ -56,6 +56,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Smart Cast cleanse ignores Paladin 'Blessing of Protection' on tanks  
   
   
 Improvements:  
