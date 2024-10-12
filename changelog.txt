@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Smart Cast of normal resurrection spell for Druids  
   
   
 Improvements:  
