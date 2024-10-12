@@ -60,6 +60,7 @@ Known issues:
   
 Bugfixes:  
 -- Smart Cast cleanse ignores Paladin 'Blessing of Protection' on tanks  
+-- Fixed HoT Icon opacity when aura duration is less than expiry warning  
   
   
 Improvements:  
