@@ -22,6 +22,7 @@ Bugfixes:
   
 Improvements:  
 -- Bump TOC interface for 1.15.4  
+-- Added Mage 'Remove Greater Curse' as dispel for Magic and Curse  
   
   
 --------------------------------------------------------------  
