@@ -59,6 +59,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added new bindable command 'Ping' (friendly and hostile)  
   
   
 --------------------------------------------------------------  
