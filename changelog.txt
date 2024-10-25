@@ -10,6 +10,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed health bar color when mode opacity overrides class color opacity  
   
   
 Improvements:  
