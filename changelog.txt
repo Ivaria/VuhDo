@@ -38,6 +38,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed unit dropdown menu  
   
   
 Improvements:  
