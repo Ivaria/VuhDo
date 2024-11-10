@@ -59,6 +59,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to play sound for removable standard debuffs  
   
   
 --------------------------------------------------------------  
