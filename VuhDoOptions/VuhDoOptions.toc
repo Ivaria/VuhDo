@@ -1,4 +1,4 @@
-## Interface: 11504
+## Interface: 11505
 
 ## Title: VuhDo ['vu:du:] - Options
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
