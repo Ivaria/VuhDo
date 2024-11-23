@@ -38,6 +38,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Druid 'Swiftmend' cooldown tracking  
   
   
 Improvements:  
