@@ -13,6 +13,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added per panel HoT Icon and HoT Bar settings  
   
   
 --------------------------------------------------------------  

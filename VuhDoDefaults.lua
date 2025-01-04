@@ -10,17 +10,21 @@ VUHDO_GLOBAL_CONFIG = {
 --
 local tHotCfg, tHotSlots;
 function VUHDO_fixHotSettings()
-	tHotSlots = VUHDO_PANEL_SETUP["HOTS"]["SLOTS"];
-	tHotCfg = VUHDO_PANEL_SETUP["HOTS"]["SLOTCFG"];
 
-	for tCnt2 = 1, 10 do
-		if not tHotCfg["" .. tCnt2]["mine"] and not tHotCfg["" .. tCnt2]["others"] then
-			if tHotSlots[tCnt2] then
-				tHotCfg["" .. tCnt2]["mine"] = true;
-				tHotCfg["" .. tCnt2]["others"] = VUHDO_EXCLUSIVE_HOTS[tHotSlots[tCnt2]];
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		tHotSlots = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTS"];
+		tHotCfg = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTCFG"];
+
+		for tCnt2 = 1, 10 do
+			if not tHotCfg["" .. tCnt2]["mine"] and not tHotCfg["" .. tCnt2]["others"] then
+				if tHotSlots[tCnt2] then
+					tHotCfg["" .. tCnt2]["mine"] = true;
+					tHotCfg["" .. tCnt2]["others"] = VUHDO_EXCLUSIVE_HOTS[tHotSlots[tCnt2]];
+				end
 			end
 		end
 	end
+
 end
 
 
@@ -2468,54 +2472,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 	},
 
 	["HOTS"] = {
-		["radioValue"] = 13,
-		["iconRadioValue"] = 1,
-		["stacksRadioValue"] = 2,
-
-		["TIMER_TEXT"] = {
-			["ANCHOR"] = "BOTTOMRIGHT",
-			["X_ADJUST"] = 25,
-			["Y_ADJUST"] = 0,
-			["SCALE"] = 60,
-			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-			["USE_SHADOW"] = false,
-			["USE_OUTLINE"] = true,
-			["USE_MONO"] = false,
-		},
-
-		["COUNTER_TEXT"] = {
-			["ANCHOR"] = "TOP",
-			["X_ADJUST"] = -25,
-			["Y_ADJUST"] = 0,
-			["SCALE"] = 66,
-			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-			["USE_SHADOW"] = false,
-			["USE_OUTLINE"] = true,
-			["USE_MONO"] = false,
-		},
-
-		["SLOTS"] = {
-			["firstFlood"] = true,
-		},
-
-		["SLOTCFG"] = {
-			["firstFlood"] = true,
-			["1"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["2"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["3"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["4"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["5"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["6"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["7"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["8"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["9"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["10"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1.5 },
-		},
-
-		["BARS"] = {
-			["radioValue"] = 1,
-			["width"] = 25,
-		},
+		["VERSION"] = 2,
 	},
 
 	["PANEL_COLOR"] = {
@@ -2717,6 +2674,54 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 	["HOTS"] = {
 		["size"] = 40,
+		["radioValue"] = 13,
+		["iconRadioValue"] = 1,
+		["stacksRadioValue"] = 2,
+
+		["TIMER_TEXT"] = {
+			["ANCHOR"] = "BOTTOMRIGHT",
+			["X_ADJUST"] = 25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 60,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+
+		["COUNTER_TEXT"] = {
+			["ANCHOR"] = "TOP",
+			["X_ADJUST"] = -25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 66,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+
+		["SLOTS"] = {
+			["firstFlood"] = true,
+		},
+
+		["SLOTCFG"] = {
+			["firstFlood"] = true,
+			["1"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["2"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["3"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["4"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["5"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["6"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["7"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["8"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["9"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["10"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1.5 },
+		},
+
+		["BARS"] = {
+			["radioValue"] = 1,
+			["width"] = 25,
+		},
 	},
 	["MODEL"] = {
 		["ordering"] = VUHDO_ORDERING_STRICT,
@@ -2956,9 +2961,29 @@ function VUHDO_loadDefaultPanelSetup()
 			};
 		end
 
+		if VUHDO_PANEL_SETUP["HOTS"] and not VUHDO_PANEL_SETUP["HOTS"]["VERSION"] then
+			local tHotSize;
+
+			tAktPanel = VUHDO_PANEL_SETUP[tPanelNum];
+
+			if tAktPanel["HOTS"] and tAktPanel["HOTS"]["size"] then
+				tHotSize = tAktPanel["HOTS"]["size"];
+			end
+
+			tAktPanel["HOTS"] = VUHDO_decompressOrCopy(VUHDO_PANEL_SETUP["HOTS"]);
+
+			if tHotSize then
+				tAktPanel["HOTS"]["size"] = tHotSize;
+			end
+		end
+
 		VUHDO_PANEL_SETUP[tPanelNum] = VUHDO_ensureSanity("VUHDO_PANEL_SETUP[" .. tPanelNum .. "]", VUHDO_PANEL_SETUP[tPanelNum], VUHDO_DEFAULT_PER_PANEL_SETUP);
 	end
-	
+
+	if VUHDO_PANEL_SETUP["HOTS"] and not VUHDO_PANEL_SETUP["HOTS"]["VERSION"] then
+		VUHDO_PANEL_SETUP["HOTS"] = nil;
+	end
+
 	VUHDO_PANEL_SETUP = VUHDO_ensureSanity("VUHDO_PANEL_SETUP", VUHDO_PANEL_SETUP, VUHDO_DEFAULT_PANEL_SETUP);
 	VUHDO_DEFAULT_PANEL_SETUP = VUHDO_compressAndPackTable(VUHDO_DEFAULT_PANEL_SETUP);
 	VUHDO_DEFAULT_PER_PANEL_SETUP = VUHDO_compressAndPackTable(VUHDO_DEFAULT_PER_PANEL_SETUP);
