@@ -1203,7 +1203,6 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 
 	-- Direction arrow
 	VuhDoDirectionFrameArrow:SetVertexColor(VUHDO_backColor(VUHDO_PANEL_SETUP["BAR_COLORS"]["DIRECTION"]));
-	VuhDoDirectionFrameText:SetFont(VUHDO_getFont(VUHDO_PANEL_SETUP["HOTS"]["TIMER_TEXT"]["FONT"]), 6, "OUTLINE");
 	VuhDoDirectionFrameText:SetPoint("TOP", "VuhDoDirectionFrameArrow", "CENTER", 5,  -2);
 	VuhDoDirectionFrameText:SetText("");
 	VuhDoDirectionFrame:SetFrameStrata("TOOLTIP");
