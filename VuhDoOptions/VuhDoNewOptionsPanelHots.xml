@@ -175,7 +175,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="13" y="-13" />
+							<AbsDimension x="13" y="-10" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -728,6 +728,24 @@
 									</Anchor>
 								</Anchors>
 							</Frame>
+							<Frame name="$parentTexture8" inherits="VuhDoSquareDemoTexture">
+								<Anchors>
+									<Anchor point="CENTER">
+										<Offset>
+											<AbsDimension x="-14" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+							</Frame>
+							<Frame name="$parentTexture9" inherits="VuhDoSquareDemoTexture">
+								<Anchors>
+									<Anchor point="CENTER">
+										<Offset>
+											<AbsDimension x="14" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+							</Frame>
 
 						</Frames>
 						<Scripts>
@@ -826,6 +844,25 @@
 									</Anchor>
 								</Anchors>
 							</Frame>
+							<Frame name="$parentTexture8" inherits="VuhDoSquareDemoTexture">
+								<Anchors>
+									<Anchor point="CENTER">
+										<Offset>
+											<AbsDimension x="-14" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+							</Frame>
+							<Frame name="$parentTexture9" inherits="VuhDoSquareDemoTexture">
+								<Anchors>
+									<Anchor point="CENTER">
+										<Offset>
+											<AbsDimension x="14" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+							</Frame>
+
 
 						</Frames>
 						<Scripts>
@@ -870,7 +907,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="260" y="-13" />
+							<AbsDimension x="260" y="-10" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -925,7 +962,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="400" y="-13" />
+							<AbsDimension x="400" y="-10" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -985,12 +1022,12 @@
 
 			<Frame name="$parentHotOrderPanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="270" y="266" />
+					<AbsDimension x="270" y="312" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="260" y="-140" />
+							<AbsDimension x="260" y="-130" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -1009,7 +1046,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-39" />
+									<AbsDimension x="13" y="-28" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1019,7 +1056,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-73" />
+									<AbsDimension x="13" y="-59" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1029,7 +1066,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-104" />
+									<AbsDimension x="13" y="-90" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1039,7 +1076,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-135" />
+									<AbsDimension x="13" y="-121" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1049,7 +1086,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-166" />
+									<AbsDimension x="13" y="-152" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1059,7 +1096,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-197" />
+									<AbsDimension x="13" y="-183" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1069,7 +1106,27 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-228" />
+									<AbsDimension x="13" y="-214" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+
+					<Frame name="$parentSlot11Container" inherits="VuhDoHotSlotContainer">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-245" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+
+					<Frame name="$parentSlot12Container" inherits="VuhDoHotSlotContainer">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-276" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1082,7 +1139,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="180" y="-20" />
+									<AbsDimension x="190" y="-12" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1101,7 +1158,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="225" y="-20" />
+									<AbsDimension x="225" y="-12" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1118,12 +1175,12 @@
 
 			<Frame name="$parentMoreHotOrderPanel" hidden="true" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="270" y="266" />
+					<AbsDimension x="270" y="312" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="260" y="-140" />
+							<AbsDimension x="260" y="-130" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -1142,7 +1199,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-39" />
+									<AbsDimension x="13" y="-30" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1152,7 +1209,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-73" />
+									<AbsDimension x="13" y="-61" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1162,7 +1219,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-104" />
+									<AbsDimension x="13" y="-92" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1172,7 +1229,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-135" />
+									<AbsDimension x="13" y="-123" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1182,7 +1239,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-166" />
+									<AbsDimension x="13" y="-154" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1192,7 +1249,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-197" />
+									<AbsDimension x="13" y="-185" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -1202,7 +1259,27 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-228" />
+									<AbsDimension x="13" y="-216" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+
+					<Frame name="$parentSlot11Container" inherits="VuhDoMoreHotSlotContainer">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-247" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+
+					<Frame name="$parentSlot12Container" inherits="VuhDoMoreHotSlotContainer">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-278" />
 								</Offset>
 							</Anchor>
 						</Anchors>
