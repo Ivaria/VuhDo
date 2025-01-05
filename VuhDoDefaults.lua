@@ -15,7 +15,7 @@ function VUHDO_fixHotSettings()
 		tHotSlots = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTS"];
 		tHotCfg = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTCFG"];
 
-		for tCnt2 = 1, 10 do
+		for tCnt2 = 1, 12 do -- VUHDO_MAX_HOTS
 			if not tHotCfg["" .. tCnt2]["mine"] and not tHotCfg["" .. tCnt2]["others"] then
 				if tHotSlots[tCnt2] then
 					tHotCfg["" .. tCnt2]["mine"] = true;
@@ -1288,6 +1288,8 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 
 		["HOT9"] = VUHDO_makeHotColor(0.3, 1, 1, 1,   0.6, 1, 1, 1),
 		["HOT10"] = VUHDO_makeHotColor(0.3, 1, 0.3, 1,   0.6, 1, 0.3, 1),
+		["HOT11"] = VUHDO_makeHotColor(0.890, 0.408, 0.133, 1,   0.992, 0.443, 0.063, 1),
+		["HOT12"] = VUHDO_makeHotColor(0.2, 0.576, 0.498, 1,   0.3, 0.676, 0.598, 1),
 
 		["HOT_CHARGE_2"] = VUHDO_makeFullColorWoOpacity(1, 1, 0.3, 1,   1, 1, 0.6, 1),
 		["HOT_CHARGE_3"] = VUHDO_makeFullColorWoOpacity(0.3, 1, 0.3, 1,   0.6, 1, 0.6, 1),
@@ -1393,7 +1395,9 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 			["7"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
 			["8"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
 			["9"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
-			["10"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1.5 },
+			["10"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["11"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
+			["12"] = { ["mine"] = true, ["others"] = false, ["scale"] = 1 },
 		},
 
 		["BARS"] = {

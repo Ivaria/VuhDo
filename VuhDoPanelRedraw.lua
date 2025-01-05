@@ -321,7 +321,7 @@ local function VUHDO_initButtonButtonFacade(aButton)
 	for tCnt = 1, 5 do
 		VUHDO_registerFacadeIcon(aButton, tCnt, VUHDO_I18N_HOTS);
 	end
-	for tCnt = 9, 10 do
+	for tCnt = 9, 12 do -- VUHDO_MAX_HOTS
 		VUHDO_registerFacadeIcon(aButton, tCnt, VUHDO_I18N_HOTS);
 	end
 	tIcon = VUHDO_getBarIcon(aButton, 1);
@@ -1184,8 +1184,8 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 
 	tBackdrop = nil;
 	tBackdropCluster = nil;
-	for tCnt  = 1, 10 do -- VUHDO_MAX_PANELS
-		VUHDO_redrawPanel(tCnt, anIsFixAllFrameLevels);
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		VUHDO_redrawPanel(tPanelNum, anIsFixAllFrameLevels);
 	end
 
 	VUHDO_setupAllButtonsUnitWatch(VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers());

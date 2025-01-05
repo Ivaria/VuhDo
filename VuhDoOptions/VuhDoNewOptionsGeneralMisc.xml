@@ -14,7 +14,7 @@
 				</Anchors>
 				<Frames>
 
-					<CheckButton name="$parentHideStandardFocusCheckButton" text="VUHDO_I18N_FOCUS" inherits="VuhDoTriStateCheckButtonTemplate">
+					<CheckButton name="$parentHideStandardFocusCheckButton" text="VUHDO_I18N_FOCUS_UNIT" inherits="VuhDoTriStateCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>

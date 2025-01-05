@@ -655,7 +655,7 @@ VUHDO_I18N_TT.K595 = "Show effective HP (health including shields) of player.";
 VUHDO_I18N_TT.K596 = "Click to change color to indicate players afflicted by bleed debuffs.";
 VUHDO_I18N_TT.K597 = "Only play a sound if the debuff is removable by yourself.";
 
--- TBCC game version specific strings (tooltip IDs begin at K900)
+-- Classic Era game version specific strings (tooltip IDs begin at K900)
 
 VUHDO_I18N_TT.K900 = "Check to show incoming heal using LibHealComm-4.0.";
 
@@ -790,6 +790,7 @@ VUHDO_I18N_TARGET_NAME = "目標名字";
 VUHDO_I18N_BORDER = "邊界";
 VUHDO_I18N_ANOUNCE_RESURRECTION = "復活通知";
 VUHDO_I18N_FILTER = "過濾";
+VUHDO_I18N_FOCUS = "Focus";
 VUHDO_I18N_BUFF = "增益";
 VUHDO_I18N_OTHERS = "其他";
 VUHDO_I18N_1 = " 1";
@@ -1175,7 +1176,7 @@ VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
 VUHDO_I18N_PLAYER = "Player unit";
 VUHDO_I18N_TARGET = "Target unit"
 VUHDO_I18N_TARGET_TARGET = "Target's target unit"
-VUHDO_I18N_FOCUS = "Focus unit";
+VUHDO_I18N_FOCUS_UNIT = "Focus unit";
 VUHDO_I18N_MOUSEOVER = "Mouseover unit";
 VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target unit";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Mouseover's target's target unit";
@@ -1207,6 +1208,9 @@ VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "Debuff ignore list successfully imported.";
 
 VUHDO_I18N_BLEED = "Bleed";
 
--- TBCC game version specific strings
+VUHDO_I18N_SQUARE_8 = "Square 8";
+VUHDO_I18N_SQUARE_9 = "Square 9";
+
+-- Classic Era game version specific strings
 
 VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";

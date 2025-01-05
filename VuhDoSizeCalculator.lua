@@ -122,7 +122,11 @@ end
 --
 function VUHDO_getNumHotSlots(aPanelNum)
 
-	if not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][10]) then
+	if not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][12]) then
+		return 9;
+	elseif not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][11]) then
+		return 8;
+	elseif not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][10]) then
 		return 7;
 	elseif not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][9]) then
 		return 6;

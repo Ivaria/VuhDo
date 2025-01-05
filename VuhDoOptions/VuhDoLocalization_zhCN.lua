@@ -655,7 +655,7 @@ VUHDO_I18N_TT.K595 = "Show effective HP (health including shields) of player.";
 VUHDO_I18N_TT.K596 = "Click to change color to indicate players afflicted by bleed debuffs.";
 VUHDO_I18N_TT.K597 = "Only play a sound if the debuff is removable by yourself.";
 
--- TBCC game version specific strings (tooltip IDs begin at K900)
+-- Classic Era game version specific strings (tooltip IDs begin at K900)
 
 VUHDO_I18N_TT.K900 = "使用LibHealComm-4.0显示治疗预估";
 
@@ -1175,7 +1175,7 @@ VUHDO_I18N_HEAL_ABSORB_BAR = "治疗吸收条";
 VUHDO_I18N_PLAYER = "自己";
 VUHDO_I18N_TARGET = "目标单位"
 VUHDO_I18N_TARGET_TARGET = "目标的目标单位"
-VUHDO_I18N_FOCUS = "焦点单位";
+VUHDO_I18N_FOCUS_UNIT = "焦点单位";
 VUHDO_I18N_MOUSEOVER = "鼠标指向单位";
 VUHDO_I18N_MOUSEOVER_TARGET = "鼠标指向的目标单位";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "鼠标指向目标的目标单位";
@@ -1207,6 +1207,9 @@ VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "Debuff ignore list successfully imported.";
 
 VUHDO_I18N_BLEED = "Bleed";
 
--- TBCC game version specific strings
+VUHDO_I18N_SQUARE_8 = "Square 8";
+VUHDO_I18N_SQUARE_9 = "Square 9";
+
+-- Classic Era game version specific strings
 
 VUHDO_I18N_LIBHEALCOMM = "使用 Lib\nHealComm";
