@@ -1346,7 +1346,7 @@ VUHDO_I18N_HEAL_ABSORB_BAR = "Абсорб хила";
 VUHDO_I18N_PLAYER = "Игрок";
 VUHDO_I18N_TARGET = "Цель"
 VUHDO_I18N_TARGET_TARGET = "Цель цели"
-VUHDO_I18N_FOCUS = "Фокус";
+VUHDO_I18N_FOCUS_UNIT = "Фокус";
 VUHDO_I18N_MOUSEOVER = "Юнит под мышкой";
 VUHDO_I18N_MOUSEOVER_TARGET = "Цель юнита под мышкой";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Цель цели юнита под мышкой";
@@ -1377,3 +1377,6 @@ VUHDO_I18N_SHOW_EFFECTIVE = "Показать\nЭффективное";
 VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "Список игнорируемых дебаффов успешно импортирован.";
 
 VUHDO_I18N_BLEED = "Bleed";
+
+VUHDO_I18N_SQUARE_8 = "Square 8";
+VUHDO_I18N_SQUARE_9 = "Square 9";
