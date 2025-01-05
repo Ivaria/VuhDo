@@ -121,7 +121,7 @@ function VUHDO_initFromSpellbook()
 				if not (VUHDO_SPELLS[VUHDO_PLAYER_HOTS[tCnt]] or { })["nodefault"] then
 					tinsert(tHotSlots, VUHDO_PLAYER_HOTS[tCnt]);
 
-					if #tHotSlots == 10 then
+					if #tHotSlots == 12 then -- VUHDO_MAX_HOTS
 						break;
 					end
 				end
@@ -136,6 +136,10 @@ function VUHDO_initFromSpellbook()
 			end
 
 			tHotCfg["firstFlood"] = nil;
+		end
+
+		for tCnt = #tHotSlots + 1, 12 do -- VUHDO_MAX_HOTS
+			tinsert(tHotSlots, "");
 		end
 
 		for tCnt, tHotName in pairs(tHotSlots) do

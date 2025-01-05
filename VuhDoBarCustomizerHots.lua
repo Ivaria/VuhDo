@@ -78,7 +78,7 @@ local VUHDO_SHIELD_TEXTURES = {
 
 local VUHDO_CHARGE_COLORS = { "HOT_CHARGE_1", "HOT_CHARGE_2", "HOT_CHARGE_3", "HOT_CHARGE_4" };
 
-local VUHDO_HOT_CFGS = { "HOT1", "HOT2", "HOT3", "HOT4", "HOT5", "HOT6", "HOT7", "HOT8", "HOT9", "HOT10", };
+local VUHDO_HOT_CFGS = { "HOT1", "HOT2", "HOT3", "HOT4", "HOT5", "HOT6", "HOT7", "HOT8", "HOT9", "HOT10", "HOT11", "HOT12" };
 
 
 -- BURST CACHE -------------------------------------------------
@@ -168,7 +168,7 @@ function VUHDO_customHotsInitLocalOverrides()
 		sHotSlotCfgs[tPanelNum] = { };
 		sHotSlotBouquets[tPanelNum] = { };
 
-		for tCnt = 1, 10 do
+		for tCnt = 1, 12 do -- VUHDO_MAX_HOTS
 			sHotSlotCfgs[tPanelNum][tCnt] = sHotSetup[tPanelNum]["SLOTCFG"][tostring(tCnt)];
 
 			local tHotName = sHotSlots[tPanelNum][tCnt];
@@ -570,7 +570,7 @@ local function VUHDO_removeButtonHots(aButton)
 		if tHotIconFrame then tHotIconFrame:Hide(); end
 	end
 
-	for tCnt = 9, 10 do
+	for tCnt = 9, 12 do -- VUHDO_MAX_HOTS
 		VUHDO_UIFrameFlashStop(VUHDO_getBarIcon(aButton, tCnt));
 		tHotIconFrame = VUHDO_getBarIconFrame(aButton, tCnt);
 		if tHotIconFrame then tHotIconFrame:Hide(); end
@@ -1344,7 +1344,7 @@ end
 function VUHDO_removeAllHots()
 	local tButton;
 	local tCnt2;
-	for tCnt = 1, 10 do
+	for tCnt = 1, 10 do -- VUHDO_MAX_PANELS
 		if VUHDO_getActionPanel(tCnt) then
 			if VUHDO_isPanelVisible(tCnt) then
 

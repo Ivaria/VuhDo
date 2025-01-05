@@ -256,7 +256,7 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentFilterFocusCheckButton" text="VUHDO_I18N_FOCUS" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentFilterFocusCheckButton" text="VUHDO_I18N_FOCUS_UNIT" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>

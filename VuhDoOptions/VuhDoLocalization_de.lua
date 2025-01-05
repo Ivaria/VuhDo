@@ -1169,7 +1169,7 @@ VUHDO_I18N_HEAL_ABSORB_BAR = "Heal Absorb Bar";
 VUHDO_I18N_PLAYER = "Player unit";
 VUHDO_I18N_TARGET = "Target unit"
 VUHDO_I18N_TARGET_TARGET = "Target's target unit"
-VUHDO_I18N_FOCUS = "Focus unit";
+VUHDO_I18N_FOCUS_UNIT = "Focus unit";
 VUHDO_I18N_MOUSEOVER = "Mouseover unit";
 VUHDO_I18N_MOUSEOVER_TARGET = "Mouseover's target unit";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Mouseover's target's target unit";
@@ -1200,3 +1200,6 @@ VUHDO_I18N_SHOW_EFFECTIVE = "Show\nEffective";
 VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "Debuff ignore list successfully imported.";
 
 VUHDO_I18N_BLEED = "Bleed";
+
+VUHDO_I18N_SQUARE_8 = "Square 8";
+VUHDO_I18N_SQUARE_9 = "Square 9";
