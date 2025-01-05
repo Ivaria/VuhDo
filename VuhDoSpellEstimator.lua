@@ -108,31 +108,41 @@ function VUHDO_initFromSpellbook()
 	twipe(VUHDO_ACTIVE_HOTS);
 	twipe(VUHDO_ACTIVE_HOTS_OTHERS);
 
-	local tHotSlots = VUHDO_PANEL_SETUP["HOTS"]["SLOTS"];
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		local tHotSlots = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTS"];
 
-	if tHotSlots["firstFlood"] then
-		tHotSlots["firstFlood"] = nil;
+		if tHotSlots["firstFlood"] then
+			tHotSlots["firstFlood"] = nil;
 
-		for tCnt = 1, #VUHDO_PLAYER_HOTS do
-			if not (VUHDO_SPELLS[VUHDO_PLAYER_HOTS[tCnt]] or { })["nodefault"] then
-				tinsert(tHotSlots, VUHDO_PLAYER_HOTS[tCnt]);
-				if #tHotSlots == 10 then break; end
+			for tCnt = 1, #VUHDO_PLAYER_HOTS do
+				if not (VUHDO_SPELLS[VUHDO_PLAYER_HOTS[tCnt]] or { })["nodefault"] then
+					tinsert(tHotSlots, VUHDO_PLAYER_HOTS[tCnt]);
+
+					if #tHotSlots == 10 then
+						break;
+					end
+				end
 			end
 		end
-	end
 
-	local tHotCfg = VUHDO_PANEL_SETUP["HOTS"]["SLOTCFG"];
-	if tHotCfg["firstFlood"] then
-		for tCnt = 1, #tHotSlots do
-			tHotCfg["" .. tCnt]["others"] = VUHDO_EXCLUSIVE_HOTS[tHotSlots[tCnt]];
+		local tHotCfg = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTCFG"];
+
+		if tHotCfg["firstFlood"] then
+			for tCnt = 1, #tHotSlots do
+				tHotCfg["" .. tCnt]["others"] = VUHDO_EXCLUSIVE_HOTS[tHotSlots[tCnt]];
+			end
+
+			tHotCfg["firstFlood"] = nil;
 		end
-		tHotCfg["firstFlood"] = nil;
-	end
 
-	for tCnt, tHotName in pairs(tHotSlots) do
-		if not VUHDO_strempty(tHotName) then
-			VUHDO_ACTIVE_HOTS[tHotName] = true;
-			if tHotCfg["" .. tCnt]["others"] then VUHDO_ACTIVE_HOTS_OTHERS[tHotName] = true; end
+		for tCnt, tHotName in pairs(tHotSlots) do
+			if not VUHDO_strempty(tHotName) then
+				VUHDO_ACTIVE_HOTS[tHotName] = true;
+
+				if tHotCfg["" .. tCnt]["others"] then
+					VUHDO_ACTIVE_HOTS_OTHERS[tHotName] = true;
+				end
+			end
 		end
 	end
 
