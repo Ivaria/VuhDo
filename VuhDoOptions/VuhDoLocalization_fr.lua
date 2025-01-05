@@ -662,6 +662,8 @@ VUHDO_I18N_TT.K594 = "Check to sort pet units last.";
 VUHDO_I18N_TT.K595 = "Show effective HP (health including shields) of player.";
 VUHDO_I18N_TT.K596 = "Click to change color to indicate players afflicted by bleed debuffs.";
 VUHDO_I18N_TT.K597 = "Only play a sound if the debuff is removable by yourself.";
+VUHDO_I18N_TT.K598 = "Select a color for HoT Square 8";
+VUHDO_I18N_TT.K599 = "Select a color for HoT Square 9";
 
 -- Classic Era game version specific strings (tooltip IDs begin at K900)
 
