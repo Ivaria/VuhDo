@@ -1483,7 +1483,7 @@ local tTankCdsExtended = {
 	194679, --Rune Tap
 	48707, --Anti-Magic Shell
 	50461, --Anti-Magic Zone
-	49222, --Bone Shield
+	195181, --Bone Shield
 	49039, --Lichborne
 	81164, --Will of the Necropolis
 
@@ -1511,7 +1511,8 @@ local tTankCdsExtended = {
 
 	115203, --Fortifying Brew
 	122278, --Dampen Harm
-	115176  --Zen meditation
+	115176, --Zen meditation
+	215479  --Shuffle
 };
 
 
@@ -1557,7 +1558,7 @@ local tRaidCds = {
 	194679, --Rune Tap
 	48707, --Anti-Magic Shell
 	50461, --Anti-Magic Zone
-	49222, --Bone Shield
+	195181, --Bone Shield
 	49039, --Lichborne
 	81164, --Will of the Necropolis
 
