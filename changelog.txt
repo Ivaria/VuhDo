@@ -36,6 +36,7 @@ Bugfixes:
 Improvements:  
 -- Added per panel HoT Icon and HoT Bar settings  
 -- Added two more HoT Icon slots 8 and 9  
+-- Added more defensives to default bouquet 'Raid Cooldowns'  
   
   
 --------------------------------------------------------------  

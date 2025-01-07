@@ -1483,7 +1483,7 @@ local tTankCdsExtended = {
 	194679, --Rune Tap
 	48707, --Anti-Magic Shell
 	50461, --Anti-Magic Zone
-	49222, --Bone Shield
+	195181, --Bone Shield
 	49039, --Lichborne
 	81164, --Will of the Necropolis
 
@@ -1511,7 +1511,8 @@ local tTankCdsExtended = {
 
 	115203, --Fortifying Brew
 	122278, --Dampen Harm
-	115176  --Zen meditation
+	115176, --Zen meditation
+	215479  --Shuffle
 };
 
 
@@ -1538,7 +1539,7 @@ local tRaidCds = {
 	3411, --Intervene
 	114028, --Mass Spell Reflect
 	118038, --Die by the Sword
-	55694, --Enraged Regeneration
+	184364, --Enraged Regeneration
 
 	-- Druid
 	102558, --Incarnation: Guardian of Ursoc
@@ -1557,7 +1558,7 @@ local tRaidCds = {
 	194679, --Rune Tap
 	48707, --Anti-Magic Shell
 	50461, --Anti-Magic Zone
-	49222, --Bone Shield
+	195181, --Bone Shield
 	49039, --Lichborne
 	81164, --Will of the Necropolis
 
@@ -1573,6 +1574,7 @@ local tRaidCds = {
 	33206, --Pain Suppression
 	62618, --Power Word: Barrier
 	19236, --Desperate Prayer
+	586, --Fade
 
 	-- Shaman
 	98008, --Spirit Link Totem
@@ -1580,6 +1582,7 @@ local tRaidCds = {
 	108280, --Healing Tide Totem
 	118337, --Harden Skin
 	108271, --Astral Shift
+	114893, --Stone Bulwark
 
 	-- Rogue
 	5277, --Evasion
@@ -1594,6 +1597,9 @@ local tRaidCds = {
 	45438, --Ice Block
 	86949, --Cauterize
 	110959, --Greater Invisibility
+	342246, --Alter Time
+	414658, --Ice Cold
+	55342, --Mirror Image
 
 	-- Hunter
 	186265, --Aspect of the Turtle
@@ -1613,7 +1619,13 @@ local tRaidCds = {
 	203720, --Demon Spikes
 	198589, --Blur
 	196555, --Netherwalk
-	196718 --Darkness
+	196718, --Darkness
+
+	-- Evoker
+	370960, --Emerald Communion
+	374348, --Renewing Blaze
+	363916  --Obsidian Scales
+
 };
 
 
