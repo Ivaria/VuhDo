@@ -946,8 +946,11 @@ function VUHDO_loadDefaultConfig()
 			end
 		end
 
-		if VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"] then
-			VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowHostile"] = false;
+		if VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"] ~= nil then
+			if VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"] then
+				VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowHostile"] = false;
+			end
+
 			VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"] = nil;
 		end
 	end
