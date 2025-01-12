@@ -50,6 +50,7 @@ local VUHDO_DEBUFF_COLORS = { };
 local VUHDO_DEBUFF_BLACKLIST = { };
 
 local UnitIsFriend = UnitIsFriend;
+local UnitIsEnemy = UnitIsEnemy;
 local table = table;
 local GetTime = GetTime;
 local InCombatLockdown = InCombatLockdown;
