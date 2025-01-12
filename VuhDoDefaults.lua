@@ -682,7 +682,10 @@ local VUHDO_DEFAULT_CONFIG = {
 		["isColor"] = false,
 		["isStacks"] = false,
 		["isName"] = false, 
-		["isShowOnlyForFriendly"] = false, 
+		["isShowFriendly"] = true,
+		["isShowHostile"] = true,
+		["isHostileMine"] = true,
+		["isHostileOthers"] = true,
 		["blacklistModi"] = "ALT-CTRL-SHIFT",
 		["SELECTED"] = "",
 		["point"] = "TOPRIGHT",
@@ -932,6 +935,22 @@ function VUHDO_loadDefaultConfig()
 	VUHDO_CONFIG["BLIZZ_UI_HIDE_RAID_MGR"] = VUHDO_convertToTristate(VUHDO_CONFIG["BLIZZ_UI_HIDE_RAID_MGR"], 3, 2);
 
 	VUHDO_CONFIG = VUHDO_ensureSanity("VUHDO_CONFIG", VUHDO_CONFIG, VUHDO_DEFAULT_CONFIG);
+
+	-- deprecate "show only for friendly" option in favor of distinct show on friendly and hostile options
+	if VUHDO_CONFIG["CUSTOM_DEBUFF"] and VUHDO_DEFAULT_CONFIG["CUSTOM_DEBUFF"] then
+		-- FIXME: VUHDO_ensureSanity() skips creating booleans but fixing this breaks some models
+		for tKey, tValue in pairs(VUHDO_DEFAULT_CONFIG["CUSTOM_DEBUFF"]) do
+			if type(tValue) == "boolean" and VUHDO_CONFIG["CUSTOM_DEBUFF"][tKey] == nil then
+				VUHDO_CONFIG["CUSTOM_DEBUFF"][tKey] = tValue;
+			end
+		end
+
+		if VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"] then
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowHostile"] = false;
+			VUHDO_CONFIG["CUSTOM_DEBUFF"]["isShowOnlyForFriendly"] = nil;
+		end
+	end
+
 	VUHDO_DEFAULT_CONFIG = VUHDO_compressAndPackTable(VUHDO_DEFAULT_CONFIG);
 
 	if ((VUHDO_CONFIG["VERSION"] or 1) < 4) then
