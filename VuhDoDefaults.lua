@@ -934,6 +934,7 @@ function VUHDO_loadDefaultConfig()
 	VUHDO_CONFIG["BLIZZ_UI_HIDE_RAID"] = VUHDO_convertToTristate(VUHDO_CONFIG["BLIZZ_UI_HIDE_RAID"], 3, 2);
 	VUHDO_CONFIG["BLIZZ_UI_HIDE_RAID_MGR"] = VUHDO_convertToTristate(VUHDO_CONFIG["BLIZZ_UI_HIDE_RAID_MGR"], 3, 2);
 
+	VUHDO_DEFAULT_CONFIG = VUHDO_decompressIfCompressed(VUHDO_DEFAULT_CONFIG);
 	VUHDO_CONFIG = VUHDO_ensureSanity("VUHDO_CONFIG", VUHDO_CONFIG, VUHDO_DEFAULT_CONFIG);
 
 	-- deprecate "show only for friendly" option in favor of distinct show on friendly and hostile options
