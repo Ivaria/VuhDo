@@ -658,6 +658,10 @@ VUHDO_I18N_TT.K596 = "Click to change color to indicate players afflicted by ble
 VUHDO_I18N_TT.K597 = "Only play a sound if the debuff is removable by yourself.";
 VUHDO_I18N_TT.K598 = "Select a color for HoT Square 8";
 VUHDO_I18N_TT.K599 = "Select a color for HoT Square 9";
+VUHDO_I18N_TT.K600 = "Show debuff icons on friendly units.";
+VUHDO_I18N_TT.K601 = "Show debuff icons on hostile units.";
+VUHDO_I18N_TT.K602 = "Show debuffs cast by you on hostile units.";
+VUHDO_I18N_TT.K603 = "Show debuffs cast by others on hostile units.";
 
 -- Classic Era game version specific strings (tooltip IDs begin at K900)
 
@@ -1215,6 +1219,9 @@ VUHDO_I18N_BLEED = "Bleed";
 
 VUHDO_I18N_SQUARE_8 = "Square 8";
 VUHDO_I18N_SQUARE_9 = "Square 9";
+VUHDO_I18N_SHOW_ON_FRIENDLY = "Show on\nfriendly";
+VUHDO_I18N_SHOW_ON_HOSTILE = "Show on\nhostile";
+VUHDO_I18N_HOSTILE_SPELL_SOURCE = "Hostile Unit Spell Source";
 
 -- Classic Era game version specific strings
 
