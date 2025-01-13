@@ -10,12 +10,14 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed incorrectly showing non-friendly units as dispelable  
   
   
 Improvements:  
 -- Added per panel HoT Icon and HoT Bar settings  
 -- Added two more HoT Icon slots 8 and 9  
 -- Added more defensives to default bouquet 'Raid Cooldowns'  
+-- Added standard debuff filters for source and destination  
   
   
 --------------------------------------------------------------  
