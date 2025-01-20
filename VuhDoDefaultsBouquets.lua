@@ -702,6 +702,18 @@ VUHDO_DEFAULT_SPELL_TRACE_BOUQUET = {
 };
 
 
+VUHDO_DEFAULT_SPELL_TRACE_INCOMING_BOUQUET = {
+	[VUHDO_I18N_DEF_SPELL_TRACE_INCOMING] = {
+		{
+			["name"] = "SPELL_TRACE_INCOMING",
+			["mine"] = true, ["icon"] = 1,
+			["color"] = VUHDO_makeFullColorForBouquet(1, 1, 1, 1,   1, 1, 1, 1),
+			["custom"] = { [1] = 3, ["radio"] = 2, ["bright"] = 1 },
+		},
+	},
+};
+
+
 VUHDO_DEFAULT_TRAIL_OF_LIGHT_BOUQUET = {
 	[VUHDO_I18N_DEF_TRAIL_OF_LIGHT] = {
 		{
@@ -1874,6 +1886,11 @@ function VUHDO_loadDefaultBouquets()
 	end
 	VUHDO_DEFAULT_TRAIL_OF_LIGHT_NEXT_BOUQUET = nil;
 
+	if VUHDO_BOUQUETS["VERSION"] < 33 then
+		VUHDO_BOUQUETS["VERSION"] = 33;
+		VUHDO_addDefaultBouquet(VUHDO_DEFAULT_SPELL_TRACE_INCOMING_BOUQUET);
+	end
+	VUHDO_DEFAULT_SPELL_TRACE_INCOMING_BOUQUET = nil;
 
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();
