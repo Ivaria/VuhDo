@@ -64,6 +64,7 @@ Improvements:
 -- Added two more HoT Icon slots 8 and 9  
 -- Added more defensives to default bouquet 'Raid Cooldowns'  
 -- Added standard debuff filters for source and destination  
+-- Added new default bouquet 'Spell Trace (Incoming)'  
   
   
 --------------------------------------------------------------  
