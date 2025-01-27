@@ -242,3 +242,175 @@ function VUHDO_getGlobalIcon(aDeBuffName)
 	if not aDeBuffName then return nil; end
 	return GetSpellBookItemTexture(aDeBuffName) or VUHDO_GLOBAL_ICONS[aDeBuffName];
 end
+
+
+
+--
+local tCnt;
+local tStringChar;
+local tPrefixChar;
+local tSubstring;
+local tPrefixSuffix;
+local tStringSuffix;
+local function VUHDO_radixTreePrefixSubstring(aPrefix, aString)
+
+	if not aPrefix or not aString then
+		return;
+	end
+
+	tCnt = 1;
+
+	while tCnt <= strlen(aString) do
+		tStringChar = string.sub(aString, tCnt, tCnt);
+		tPrefixChar = string.sub(aPrefix, tCnt, tCnt);
+
+		if tStringChar ~= tPrefixChar then
+			break;
+		end
+
+		tCnt = tCnt + 1;
+	end
+
+	if tCnt > 1 then
+		tSubstring = string.sub(aPrefix, 1, tCnt - 1);
+
+		tPrefixSuffix = string.sub(aPrefix, tCnt, strlen(aPrefix));
+		tStringSuffix = string.sub(aString, tCnt, strlen(aString));
+
+		return tSubstring, tPrefixSuffix, tStringSuffix;
+	else
+		return nil, nil, nil;
+	end
+
+end
+
+
+
+--
+function VUHDO_radixTreeCreate()
+
+	local tRootNode = {
+		["prefix"] = "",
+		["isLeaf"] = true,
+		["children"] = { },
+	};
+
+	return tRootNode;
+
+end
+
+
+
+--
+local tChar;
+local tFound;
+local tNode;
+local tSubstringChar;
+local tNodeTemp;
+function VUHDO_radixTreeAdd(aTree, aString)
+
+	if not aTree or not aString then
+		return;
+	end
+
+	if aTree["prefix"] == aString and not aTree["isLeaf"] then
+		aTree["isLeaf"] = true;
+	else
+		tChar = string.sub(aString, 1, 1);
+
+		tFound = false;
+		for tChildChar, tChild in pairs(aTree["children"]) do
+			if tChildChar == tChar then
+				tFound = true;
+			end
+		end
+
+		if tChar and not tFound then
+			aTree["children"][tChar] = {
+				["prefix"] = aString,
+				["isLeaf"] = true,
+				["children"] = { },
+			};
+		elseif tChar then
+			tNode = aTree["children"][tChar];
+
+			tSubstring, tPrefixSuffix, tStringSuffix = VUHDO_radixTreePrefixSubstring(tNode["prefix"], aString);
+			tSubstringChar = string.sub(tSubstring, 1, 1);
+
+			if tSubstringChar and VUHDO_strempty(tPrefixSuffix) then
+				VUHDO_radixTreeAdd(aTree["children"][tSubstringChar], tStringSuffix);
+			elseif tSubstringChar then
+				tNode["prefix"] = tPrefixSuffix;
+
+				tNodeTemp = aTree["children"][tSubstringChar];
+
+				aTree["children"][tSubstringChar] = {
+					["prefix"] = tSubstring,
+					["isLeaf"] = false,
+					["children"] = {
+						[tPrefixSuffix] = {
+							["prefix"] = tNodeTemp["prefix"],
+							["isLeaf"] = tNodeTemp["isLeaf"],
+							["children"] = tNodeTemp["children"],
+						},
+					},
+				};
+
+				if VUHDO_strempty(tStringSuffix) then
+					aTree["children"][tSubstringChar]["isLeaf"] = true;
+				else
+					VUHDO_radixTreeAdd(aTree["children"][tSubstringChar], tStringSuffix);
+				end
+			end
+		end
+	end
+
+end
+
+
+
+--
+function VUHDO_radixTreeAddAll(aTree, ...)
+
+	if not aTree then
+		return;
+	end
+
+	for _, tString in pairs({ ... }) do
+		VUHDO_radixTreeAdd(aTree, tString);
+	end
+
+end
+
+
+
+--
+function VUHDO_radixTreeContains(aTree, aString)
+
+	if not aTree or not aString then
+		return;
+	end
+
+	tChar = string.sub(aString, 1, 1);
+
+	if tChar then
+		tNode = aTree["children"][tChar];
+
+		if not tNode then
+			return false;
+		else
+			tSubstring, tPrefixSuffix, tStringSuffix = VUHDO_radixTreePrefixSubstring(tNode["prefix"], aString);
+
+			if not VUHDO_strempty(tPrefixSuffix) then
+				return false;
+			elseif VUHDO_strempty(tStringSuffix) then
+				return tNode["isLeaf"];
+			else
+				return VUHDO_radixTreeContains(tNode, tStringSuffix);
+			end
+		end
+	else
+		return false;
+	end
+
+end

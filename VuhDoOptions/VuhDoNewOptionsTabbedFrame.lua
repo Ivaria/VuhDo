@@ -153,11 +153,19 @@ local tAllPanels = {
 
 --
 function VUHDO_newOptionsTabbedClickedClicked(aTabRadio)
+
 	local tName = aTabRadio:GetName();
 
 	for _, tPanelInfo in pairs(tAllPanels) do
-		_G[tPanelInfo[1]]:SetShown(strfind(tName, tPanelInfo[2]));
+		if strfind(tName, tPanelInfo[2]) then
+			_G[tPanelInfo[1]]:SetShown(true);
+
+			_G["VuhDoNewOptionsTabbedFrame"]["selectedTab"] = tPanelInfo[1];
+		else
+			_G[tPanelInfo[1]]:SetShown(false);
+		end
 	end
+
 end
 
 
