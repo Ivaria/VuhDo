@@ -1366,8 +1366,12 @@ do
 			VUHDO_SEARCH_VISIBILITY_PANEL[tPanelName] = true;
 		end
 
-		if tSubPanelName then
-			VUHDO_SEARCH_VISIBILITY_SUBPANEL[tSubPanelName] = true;
+		if tPanelName and tSubPanelName then
+			if not VUHDO_SEARCH_VISIBILITY_SUBPANEL[tPanelName] then
+				VUHDO_SEARCH_VISIBILITY_SUBPANEL[tPanelName] = { };
+			end
+
+			VUHDO_SEARCH_VISIBILITY_SUBPANEL[tPanelName][tSubPanelName] = true;
 		end
 
 	end
@@ -1378,7 +1382,7 @@ do
 			tPanelName, tSubPanelName = VUHDO_lnfGetPanelSubPanelNames(aTabPanel);
 
 			if tPanelName and VUHDO_SEARCH_VISIBILITY_PANEL[tPanelName] and
-				(not tSubPanelName or (tSubPanelName and VUHDO_SEARCH_VISIBILITY_SUBPANEL[tSubPanelName])) then
+				(not tSubPanelName or (tSubPanelName and VUHDO_SEARCH_VISIBILITY_SUBPANEL[tPanelName][tSubPanelName])) then
 				return false;
 			else
 				return true;
@@ -1392,7 +1396,7 @@ do
 	local tSearchPattern;
 	local tIsMatch;
 	local tChild;
-	function VUHDO_lnfIsVisibleBySearch(aComponent, aIsRecursive)
+	function VUHDO_lnfIsVisibleBySearch(aComponent, anIsRecursive, anIsMatchAll)
 
 		if not VUHDO_strempty(VUHDO_COMPONENT_SEARCH) then
 			tIsMatch = false;
@@ -1415,14 +1419,16 @@ do
 				VUHDO_lnfSetSearchConstraint(aComponent:GetName());
 			end
 
-			if aIsRecursive and aComponent.GetChildren then
+			if anIsRecursive and aComponent.GetChildren then
 				for tCnt = 1, select("#", aComponent:GetChildren()) do
 					tChild = select(tCnt, aComponent:GetChildren());
 
-					if VUHDO_lnfIsVisibleBySearch(tChild, true) then
+					if VUHDO_lnfIsVisibleBySearch(tChild, true, anIsMatchAll) then
 						tIsMatch = true;
 
-						break;
+						if tIsMatch and not anIsMatchAll then
+							break;
+						end
 					end
 				end
 			end
@@ -1451,7 +1457,7 @@ do
 		table.wipe(VUHDO_SEARCH_VISIBILITY_SUBPANEL);
 
 		for tContentPanel, _ in pairs(tContentPanels) do
-			VUHDO_lnfIsVisibleBySearch(_G[tContentPanel], true);
+			VUHDO_lnfIsVisibleBySearch(_G[tContentPanel], true, true);
 		end
 
 		_G["VuhDoNewOptionsTabbedFrameTabsPanel"]:Hide();
@@ -1478,7 +1484,7 @@ do
 	local tConstraintsModel;
 	function VUHDO_lnfUpdateComponentsByConstraints(aChangedComponent)
 
-		if not VUHDO_lnfIsVisibleBySearch(aChangedComponent, false) then
+		if not VUHDO_lnfIsVisibleBySearch(aChangedComponent) then
 			aChangedComponent["isSearchAlpha"] = true;
 
 			aChangedComponent:SetAlpha(0.5);
