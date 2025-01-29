@@ -1354,6 +1354,8 @@ do
 
 	end
 
+	local tPanelName;
+	local tSubPanelName;
 	local function VUHDO_lnfSetSearchConstraint(aComponentName)
 
 		if VUHDO_strempty(aComponentName) then
@@ -1376,6 +1378,8 @@ do
 
 	end
 
+	local tPanelName;
+	local tSubPanelName;
 	function VUHDO_lnfIsTabPanelDisabledBySearch(aTabPanel)
 
 		if not VUHDO_strempty(VUHDO_COMPONENT_SEARCH) then
