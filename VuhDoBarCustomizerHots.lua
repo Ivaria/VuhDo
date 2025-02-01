@@ -838,7 +838,7 @@ end
 
 
 --
-local tUnitHotCnt;
+local tUnitHotCount;
 function VUHDO_hasUnitHot(aUnit, aSpellName, aSourceType)
 
 	if not aUnit or not aSpellName then
