@@ -6,7 +6,7 @@ function VUHDO_activateLayout(aName)
 	if VUHDO_SPELL_LAYOUTS[aName]["HOTS"] and VUHDO_SPELL_CONFIG["IS_LOAD_HOTS"] then
 		for tPanelNum = 1, VUHDO_MAX_PANELS do
 			-- support for pre per-panel HoTs
-			if type(VUHDO_SPELL_LAYOUTS["HOTS"]) == "table" then
+			if type(VUHDO_SPELL_LAYOUTS[aName]["HOTS"]) == "table" then
 				VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[aName]["HOTS"][tPanelNum]);
 			else
 				VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[aName]["HOTS"]);
