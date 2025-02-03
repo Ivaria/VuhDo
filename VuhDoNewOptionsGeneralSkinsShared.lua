@@ -2337,6 +2337,7 @@ end
 
 --
 function VUHDO_createNewLayoutName(aName, aUnitName)
+
 	local tIdx = 1;
 	local tLayout = { };
 	local tPrefix = aUnitName .. ": ";
@@ -2350,7 +2351,12 @@ function VUHDO_createNewLayoutName(aName, aUnitName)
 		tPrefix = aUnitName .. "(" .. tIdx .. "): ";
 	end
 
+	if VUHDO_strempty(aName) then
+		tNewName = strtrim(tNewName);
+	end
+
 	return tNewName;
+
 end
 
 
