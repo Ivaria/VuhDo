@@ -33,6 +33,7 @@ Known issues:
 Bugfixes:  
 -- Fixed loading of HoTs from legacy key layouts  
 -- Fixed key layout naming when copying imported profiles on a fresh character  
+-- Fixed loading of currently selected key layout on login  
   
   
 Improvements:  
