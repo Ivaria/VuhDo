@@ -17,6 +17,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added settings search to VuhDo Options  
   
   
 --------------------------------------------------------------  
@@ -41,7 +42,6 @@ Improvements:
 -- Added more defensives to default bouquet 'Raid Cooldowns'  
 -- Added standard debuff filters for source and destination  
 -- Added new default bouquet 'Spell Trace (Incoming)'  
--- Added settings search to VuhDo Options  
   
   
 --------------------------------------------------------------  
