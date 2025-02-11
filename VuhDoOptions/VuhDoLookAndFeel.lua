@@ -1385,6 +1385,8 @@ do
 			end
 		end
 
+		VUHDO_SEARCH_CACHE[aComponentName] = { tPanelName, tSubPanelName };
+
 		return tPanelName, tSubPanelName;
 
 	end
@@ -1567,8 +1569,7 @@ do
 	local tName;
 	local tIndexString;
 	local tIndex;
-	local tPanelName;
-	local tSubPanelName;
+	local tText;
 	local tChild;
 	function VUHDO_lnfCreateSearchIndex(aParentFrame)
 
@@ -1591,8 +1592,7 @@ do
 					VUHDO_SEARCH_INDEX["name"][tGram][tName] = true;
 				end
 
-				tPanelName, tSubPanelName = VUHDO_lnfGetPanelSubPanelNames(tName);
-				VUHDO_SEARCH_CACHE[tName] = { tPanelName, tSubPanelName };
+				VUHDO_lnfGetPanelSubPanelNames(tName);
 			end
 
 			if aParentFrame.GetText then
@@ -1600,9 +1600,9 @@ do
 
 				if not VUHDO_strempty(tText) then
 					tIndexString = strlower(tText);
-					tTriGramIndex = VUHDO_createTriGramIndex(tIndexString);
+					tIndex = VUHDO_createTriGramIndex(tIndexString);
 
-					for tGram, _ in pairs(tTriGramIndex) do
+					for tGram, _ in pairs(tIndex) do
 						if not VUHDO_SEARCH_INDEX["text"][tGram] then
 							VUHDO_SEARCH_INDEX["text"][tGram] = { };
 						end
