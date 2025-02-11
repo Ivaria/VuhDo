@@ -1280,6 +1280,37 @@ local VUHDO_MODEL_CONSTRAINTS = { };
 local VUHDO_COMPONENT_CONSTRAINTS = { };
 local VUHDO_SEARCH_VISIBILITY_PANEL = { };
 local VUHDO_SEARCH_VISIBILITY_SUBPANEL = { };
+local VUHDO_SEARCH_CACHE = {
+	-- [<frame name>] = {
+	--	<panel name>,
+	--	<subpanel name>,
+	-- },
+};
+local VUHDO_SEARCH_INDEX = {
+	["name"] = {
+	--	[<n-gram>] = {
+	--		[<frame name>] = true,
+	--		...
+	--	},
+	},
+	["text"] = {
+	--	[<n-gram>] = {
+	--		[<frame name>] = true,
+	--		...
+	--	},
+	},
+};
+local VUHDO_SEARCH_INDEX_STATUS = false;
+local sMatchedComponents = {
+	["name"] = {
+	--	[<frame name>] = true,
+	--	...
+	},
+	["text"] = {
+	--	["frame name>] = true,
+	--	...
+	},
+};
 VUHDO_COMPONENT_SEARCH = nil;
 
 
@@ -1326,6 +1357,10 @@ do
 	local tPanelName;
 	local tSubPanelName;
 	local function VUHDO_lnfGetPanelSubPanelNames(aComponentName)
+
+		if VUHDO_SEARCH_CACHE[aComponentName] then
+			return VUHDO_SEARCH_CACHE[aComponentName][1], VUHDO_SEARCH_CACHE[aComponentName][2];
+		end
 
 		-- a VUhDo Options component name *should* follow this schema:
 		--	VuhDoNewOptions<panel name><subpanel name><sub-subpanel name>[Panel]<component name><component type>
@@ -1398,43 +1433,29 @@ do
 	end
 
 	local tSearchPattern;
+	local tComponentString;
 	local tIsMatch;
+	local tName;
 	local tChild;
-	function VUHDO_lnfIsVisibleBySearch(aComponent, anIsRecursive, anIsMatchAll)
+	function VUHDO_lnfIsVisibleBySearch(aComponent)
 
 		if not VUHDO_strempty(VUHDO_COMPONENT_SEARCH) then
 			tIsMatch = false;
 
-			for tWord in string.gmatch(VUHDO_COMPONENT_SEARCH, "%S+") do
-				tSearchPattern = strlower(tWord) .. "%a*";
+			if VUHDO_SEARCH_INDEX_STATUS then
+				if aComponent.GetName then
+					tName = aComponent:GetName() or "";
 
-				if aComponent.GetText and strfind(strlower(aComponent:GetText() or ""), tSearchPattern) then
-					tIsMatch = true;
-				elseif aComponent.GetName and strfind(strlower(aComponent:GetName() or ""), tSearchPattern) then
-					tIsMatch = true;
-				else
-					tIsMatch = false;
+					tIsMatch = sMatchedComponents["name"][tName] and true or false;
 
-					break;
+					if not tIsMatch then
+						tIsMatch = sMatchedComponents["text"][tName] and true or false;
+					end
 				end
 			end
 
 			if tIsMatch and aComponent.GetName then
 				VUHDO_lnfSetSearchConstraint(aComponent:GetName());
-			end
-
-			if anIsRecursive and aComponent.GetChildren then
-				for tCnt = 1, select("#", aComponent:GetChildren()) do
-					tChild = select(tCnt, aComponent:GetChildren());
-
-					if VUHDO_lnfIsVisibleBySearch(tChild, true, anIsMatchAll) then
-						tIsMatch = true;
-
-						if tIsMatch and not anIsMatchAll then
-							break;
-						end
-					end
-				end
 			end
 
 			return tIsMatch;
@@ -1454,14 +1475,73 @@ do
 		["VuhDoNewOptionsDebuffs"] = "VuhDoNewOptionsDebuffsStandard",
 		["VuhDoNewOptionsTools"] = "VuhDoNewOptionsToolsSkins",
 	};
+	local tSearchPattern;
+	local tIndex;
+	local tMaxGrams;
+	local tNameCnt;
+	local tTextCnt;
+	local tCnt;
 	local tTabFrame;
 	function VUHDO_lnfUpdateTabSearchVisibility()
 
 		table.wipe(VUHDO_SEARCH_VISIBILITY_PANEL);
 		table.wipe(VUHDO_SEARCH_VISIBILITY_SUBPANEL);
 
-		for tContentPanel, _ in pairs(tContentPanels) do
-			VUHDO_lnfIsVisibleBySearch(_G[tContentPanel], true, true);
+		table.wipe(sMatchedComponents["name"]);
+		table.wipe(sMatchedComponents["text"]);
+
+		tSearchPattern = strlower(VUHDO_COMPONENT_SEARCH or "");
+		tIndex, tMaxGrams = VUHDO_createTriGramIndex(tSearchPattern);
+
+		tNameCnt = 1;
+		tTextCnt = 1;
+		tCnt = 1;
+		for tGram, _ in pairs(tIndex) do
+			if VUHDO_SEARCH_INDEX["name"][tGram] then
+				if tNameCnt == 1 then
+					for tName, _ in pairs(VUHDO_SEARCH_INDEX["name"][tGram]) do
+						sMatchedComponents["name"][tName] = true;
+
+						if tCnt == tMaxGrams then
+							VUHDO_lnfSetSearchConstraint(tName);
+						end
+					end
+				else
+					for tName, _ in pairs(sMatchedComponents["name"]) do
+						if not VUHDO_SEARCH_INDEX["name"][tGram][tName] then
+							sMatchedComponents["name"][tName] = nil;
+						elseif tCnt == tMaxGrams then
+							VUHDO_lnfSetSearchConstraint(tName);
+						end
+					end
+				end
+
+				tNameCnt = tNameCnt + 1;
+			end
+
+			if VUHDO_SEARCH_INDEX["text"][tGram] then
+				if tTextCnt == 1 then
+					for tName, _ in pairs(VUHDO_SEARCH_INDEX["text"][tGram]) do
+						sMatchedComponents["text"][tName] = true;
+
+						if tCnt == tMaxGrams then
+							VUHDO_lnfSetSearchConstraint(tName);
+						end
+					end
+				else
+					for tName, _ in pairs(sMatchedComponents["text"]) do
+						if not VUHDO_SEARCH_INDEX["text"][tGram][tName] then
+							sMatchedComponents["text"][tName] = nil;
+						elseif tCnt == tMaxGrams then
+							VUHDO_lnfSetSearchConstraint(tName);
+						end
+					end
+				end
+
+				tTextCnt = tTextCnt + 1;
+			end
+
+			tCnt = tCnt + 1;
 		end
 
 		_G["VuhDoNewOptionsTabbedFrameTabsPanel"]:Hide();
@@ -1481,6 +1561,83 @@ do
 			_G[tTabFrame]:Hide();
 			_G[tTabFrame]:Show();
 		end
+
+	end
+
+	local tName;
+	local tIndexString;
+	local tIndex;
+	local tPanelName;
+	local tSubPanelName;
+	local tChild;
+	function VUHDO_lnfCreateSearchIndex(aParentFrame)
+
+		if not aParentFrame then
+			return;
+		end
+
+		if aParentFrame.GetName then
+			tName = aParentFrame:GetName() or "";
+
+			if not VUHDO_strempty(tName) then
+				tIndexString = strlower(tName);
+				tIndex = VUHDO_createTriGramIndex(tIndexString);
+
+				for tGram, _ in pairs(tIndex) do
+					if not VUHDO_SEARCH_INDEX["name"][tGram] then
+						VUHDO_SEARCH_INDEX["name"][tGram] = { };
+					end
+
+					VUHDO_SEARCH_INDEX["name"][tGram][tName] = true;
+				end
+
+				tPanelName, tSubPanelName = VUHDO_lnfGetPanelSubPanelNames(tName);
+				VUHDO_SEARCH_CACHE[tName] = { tPanelName, tSubPanelName };
+			end
+
+			if aParentFrame.GetText then
+				tText = aParentFrame:GetText() or "";
+
+				if not VUHDO_strempty(tText) then
+					tIndexString = strlower(tText);
+					tTriGramIndex = VUHDO_createTriGramIndex(tIndexString);
+
+					for tGram, _ in pairs(tTriGramIndex) do
+						if not VUHDO_SEARCH_INDEX["text"][tGram] then
+							VUHDO_SEARCH_INDEX["text"][tGram] = { };
+						end
+
+						VUHDO_SEARCH_INDEX["text"][tGram][tName] = true;
+					end
+				end
+			end
+		end
+
+		if aParentFrame.GetChildren then
+			for tCnt = 1, select("#", aParentFrame:GetChildren()) do
+				tChild = select(tCnt, aParentFrame:GetChildren());
+
+				VUHDO_lnfCreateSearchIndex(tChild);
+			end
+		end
+
+	end
+
+	function VUHDO_lnfInitSearchIndex()
+
+		if VUHDO_SEARCH_INDEX_STATUS then
+			return;
+		end
+
+		VUHDO_Msg("Started rebuilding options search index. This may temporarily impact performance.");
+
+		for tContentPanel, _ in pairs(tContentPanels) do
+			VUHDO_lnfCreateSearchIndex(_G[tContentPanel]);
+		end
+
+		VUHDO_SEARCH_INDEX_STATUS = true;
+
+		VUHDO_Msg("Finished rebuilding options search index.");
 
 	end
 

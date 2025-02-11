@@ -242,10 +242,14 @@ end
 
 --
 function VUHDO_initOptionsSettings()
+
 	if (VUHDO_OPTIONS_SETTINGS == nil) then
 		VUHDO_OPTIONS_SETTINGS = {
 			["scale"] = 1;
 		};
 	end
+
+	VUHDO_lnfInitSearchIndex();
+
 end
 

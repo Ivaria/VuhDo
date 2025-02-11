@@ -74,6 +74,10 @@
 					<OnTextChanged>
 						VUHDO_lnfEditBoxUpdateModel(self);
 						VUHDO_lnfUpdateTabSearchVisibility();
+
+						if not VUHDO_strempty(VUHDO_COMPONENT_SEARCH) then
+							self:SetAlpha(0.95);
+						end
 					</OnTextChanged>
 					<OnShow>
 						VUHDO_lnfPatchFont(self, "Hint");
@@ -324,7 +328,8 @@
 					VuhDoNewOptionsTabbedFrameTabsPanelSpellsRadioButton:Hide();
 				end
 				VUHDO_commsSetReceiveModeEnabled(true);
-				collectgarbage('collect');
+
+				collectgarbage("collect");
 			</OnShow>
 			<OnHide>
 				VuhDoNewOptionsScaleSlider:Hide();
@@ -332,7 +337,8 @@
 				VUHDO_IS_PANEL_CONFIG = false;
 				VUHDO_CONFIG_SHOW_RAID = false;
 				VUHDO_reloadUI(false);
-				collectgarbage('collect');
+
+				collectgarbage("collect");
 			</OnHide>
 			<OnUpdate>
 				VUHDO_optionsOnUpdate();
