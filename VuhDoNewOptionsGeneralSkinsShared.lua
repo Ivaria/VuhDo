@@ -2697,6 +2697,7 @@ end
 
 --
 function VUHDO_loadProfile(aName)
+
 	VUHDO_loadProfileNoInit(aName);
 	VUHDO_initAllBurstCaches();
 	VUHDO_loadVariables();
@@ -2724,7 +2725,8 @@ function VUHDO_loadProfile(aName)
 		VUHDO_spellTraceUpdateEditBox(VuhDoNewOptionsGeneralSpellTraceStorePanelEditBox);
 	end
 
-	collectgarbage('collect');
+	collectgarbage("collect");
+
 end
 
 
