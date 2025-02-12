@@ -38,6 +38,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added settings search to VuhDo Options  
   
   
 --------------------------------------------------------------  
