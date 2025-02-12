@@ -1620,8 +1620,6 @@ do
 					VUHDO_SEARCH_INDEX["name"][tGram][tName] = true;
 				end
 
-				VUHDO_lnfGetPanelSubPanelNames(tName);
-
 				if aParentFrame.GetText then
 					tText = aParentFrame:GetText() or "";
 
@@ -1638,6 +1636,8 @@ do
 						end
 					end
 				end
+
+				VUHDO_lnfGetPanelSubPanelNames(tName);
 			end
 		end
 
@@ -1657,15 +1657,11 @@ do
 			return;
 		end
 
-		VUHDO_Msg("Started rebuilding options search index. This may temporarily impact performance.");
-
 		for tContentPanel, _ in pairs(tContentPanels) do
 			VUHDO_lnfCreateSearchIndex(_G[tContentPanel]);
 		end
 
 		VUHDO_SEARCH_INDEX_STATUS = true;
-
-		VUHDO_Msg("Finished rebuilding options search index.");
 
 	end
 
