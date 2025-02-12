@@ -1596,21 +1596,21 @@ do
 				end
 
 				VUHDO_lnfGetPanelSubPanelNames(tName);
-			end
 
-			if aParentFrame.GetText then
-				tText = aParentFrame:GetText() or "";
+				if aParentFrame.GetText then
+					tText = aParentFrame:GetText() or "";
 
-				if not VUHDO_strempty(tText) then
-					tIndexString = strlower(tText);
-					tIndex = VUHDO_createTriGramIndex(tIndexString);
+					if not VUHDO_strempty(tText) then
+						tIndexString = strlower(tText);
+						tIndex = VUHDO_createTriGramIndex(tIndexString);
 
-					for tGram, _ in pairs(tIndex) do
-						if not VUHDO_SEARCH_INDEX["text"][tGram] then
-							VUHDO_SEARCH_INDEX["text"][tGram] = { };
+						for tGram, _ in pairs(tIndex) do
+							if not VUHDO_SEARCH_INDEX["text"][tGram] then
+								VUHDO_SEARCH_INDEX["text"][tGram] = { };
+							end
+
+							VUHDO_SEARCH_INDEX["text"][tGram][tName] = true;
 						end
-
-						VUHDO_SEARCH_INDEX["text"][tGram][tName] = true;
 					end
 				end
 			end
