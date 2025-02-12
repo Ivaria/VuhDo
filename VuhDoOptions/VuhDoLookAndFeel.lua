@@ -1353,6 +1353,8 @@ do
 		return tIsDisabled;
 	end
 
+	local tFrameNamePrefix = "VuhDoNewOptions";
+	local tPrefixPattern = "^" .. tFrameNamePrefix .. "(.*)";
 	local tComponentNameNoSuffix;
 	local tPanelName;
 	local tSubPanelName;
@@ -1366,7 +1368,7 @@ do
 		--	VuhDoNewOptions<panel name><subpanel name><sub-subpanel name>[Panel]<component name><component type>
 
 		-- first chop off the prefix
-		aComponentName = string.sub(aComponentName, strlen("VuhDoNewOptions") + 1);
+		aComponentName = string.match(aComponentName, tPrefixPattern);
 
 		-- next chop off everything after and including the sub-subpanel name
 		tComponentNameNoSuffix = string.match(aComponentName, "(.*)Panel");
@@ -1480,6 +1482,8 @@ do
 	local tSearchPattern;
 	local tIndex;
 	local tMaxGrams;
+	local tIsNameMatch;
+	local tIsTextMatch;
 	local tNameCnt;
 	local tTextCnt;
 	local tCnt;
@@ -1495,6 +1499,9 @@ do
 		tSearchPattern = strlower(VUHDO_COMPONENT_SEARCH or "");
 		tIndex, tMaxGrams = VUHDO_createTriGramIndex(tSearchPattern);
 
+		tIsNameMatch = false;
+		tIsTextMatch = false;
+
 		tNameCnt = 1;
 		tTextCnt = 1;
 		tCnt = 1;
@@ -1502,45 +1509,65 @@ do
 			if VUHDO_SEARCH_INDEX["name"][tGram] then
 				if tNameCnt == 1 then
 					for tName, _ in pairs(VUHDO_SEARCH_INDEX["name"][tGram]) do
+						tIsNameMatch = true;
+
 						sMatchedComponents["name"][tName] = true;
 
 						if tCnt == tMaxGrams then
 							VUHDO_lnfSetSearchConstraint(tName);
 						end
 					end
-				else
+				elseif tIsNameMatch then
+					tIsNameMatch = false;
+
 					for tName, _ in pairs(sMatchedComponents["name"]) do
 						if not VUHDO_SEARCH_INDEX["name"][tGram][tName] then
 							sMatchedComponents["name"][tName] = nil;
 						elseif tCnt == tMaxGrams then
 							VUHDO_lnfSetSearchConstraint(tName);
+						else
+							tIsNameMatch = true;
 						end
 					end
 				end
 
 				tNameCnt = tNameCnt + 1;
+			else
+				tIsNameMatch = false;
 			end
 
 			if VUHDO_SEARCH_INDEX["text"][tGram] then
 				if tTextCnt == 1 then
 					for tName, _ in pairs(VUHDO_SEARCH_INDEX["text"][tGram]) do
+						tIsTextMatch = true;
+
 						sMatchedComponents["text"][tName] = true;
 
 						if tCnt == tMaxGrams then
 							VUHDO_lnfSetSearchConstraint(tName);
 						end
 					end
-				else
+				elseif tIsTextMatch then
+					tIsTextMatch = false;
+
 					for tName, _ in pairs(sMatchedComponents["text"]) do
 						if not VUHDO_SEARCH_INDEX["text"][tGram][tName] then
 							sMatchedComponents["text"][tName] = nil;
 						elseif tCnt == tMaxGrams then
 							VUHDO_lnfSetSearchConstraint(tName);
+						else
+							tIsTextMatch = true;
 						end
 					end
 				end
 
 				tTextCnt = tTextCnt + 1;
+			else
+				tIsTextMatch = false;
+			end
+
+			if not tIsNameMatch and not tIsTextMatch then
+				break;
 			end
 
 			tCnt = tCnt + 1;
@@ -1566,8 +1593,6 @@ do
 
 	end
 
-	local tFrameNamePrefix = "VuhDoNewOptions";
-	local tPrefixPattern = "^" .. tFrameNamePrefix .. "(.*)";
 	local tName;
 	local tIndexString;
 	local tIndex;
