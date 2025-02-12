@@ -1566,6 +1566,8 @@ do
 
 	end
 
+	local tFrameNamePrefix = "VuhDoNewOptions";
+	local tPrefixPattern = "^" .. tFrameNamePrefix .. "(.*)";
 	local tName;
 	local tIndexString;
 	local tIndex;
@@ -1581,7 +1583,8 @@ do
 			tName = aParentFrame:GetName() or "";
 
 			if not VUHDO_strempty(tName) then
-				tIndexString = strlower(tName);
+				-- remove the common prefix to avoid index entries matching the entire frame set
+				tIndexString = strlower(string.match(tName, tPrefixPattern) or tName);
 				tIndex = VUHDO_createTriGramIndex(tIndexString);
 
 				for tGram, _ in pairs(tIndex) do
