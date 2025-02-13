@@ -14,6 +14,7 @@ Bugfixes:
 -- Fixed key layout naming when copying imported profiles on a fresh character  
 -- Fixed loading of currently selected key layout on login  
 -- Fixed DC shield for characters over the legacy macro limit  
+-- Fixed default bouquet 'PvP Flag Carriers' in Temple of Kotmogu  
   
   
 Improvements:  
