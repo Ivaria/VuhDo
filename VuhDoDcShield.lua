@@ -132,7 +132,7 @@ function VUHDO_mirrorToMacro()
 
 	if (tIndexGroups or 0) == 0 then
 		_, tNumMacros = GetNumMacros();
-		if (tNumMacros or 0) >= VUHDO_MAX_PER_CHAR_MACROS then
+		if (tNumMacros or 0) > (VUHDO_MAX_PER_CHAR_MACROS - 1) then
 			VUHDO_Msg(VUHDO_I18N_DC_SHIELD_NO_MACROS);
 			VUHDO_IS_DC_TEMP_DISABLE = true;
 		else
@@ -144,7 +144,7 @@ function VUHDO_mirrorToMacro()
 
 	if (tIndexNames or 0) == 0 then
 		_, tNumMacros = GetNumMacros();
-		if (tNumMacros or 0) >= VUHDO_MAX_PER_CHAR_MACROS then
+		if (tNumMacros or 0) > (VUHDO_MAX_PER_CHAR_MACROS - 1) then
 			VUHDO_Msg(VUHDO_I18N_DC_SHIELD_NO_MACROS);
 			VUHDO_IS_DC_TEMP_DISABLE = true;
 		else
