@@ -62,6 +62,7 @@ Bugfixes:
 -- Fixed loading of currently selected key layout on login  
 -- Fixed DC shield for characters over the legacy macro limit  
 -- Fixed default bouquet 'PvP Flag Carriers' in Temple of Kotmogu  
+-- Fixed maximum brightness for class color text and status bars  
   
   
 Improvements:  
