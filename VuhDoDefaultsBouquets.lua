@@ -1269,6 +1269,10 @@ local function _VUHDO_buildGenericHealthBarBouquet(aType, aName)
 		elseif aType == 1 then
 			tItem = VUHDO_createBouquetItem("STATUS_HEALTH", VUHDO_PANEL_SETUP["PANEL_COLOR"]["BARS"]);
 			tItem["custom"]["radio"] = 2; -- class color
+
+			if VUHDO_USER_CLASS_GRADIENT_COLORS and VUHDO_USER_CLASS_GRADIENT_COLORS["gradientClassColor"] then
+				tItem["custom"]["isGradient"] = true;
+			end
 		else -- Solid == 2, Chimaeron == 3
 			tItem = VUHDO_createBouquetItem("STATUS_HEALTH", VUHDO_PANEL_SETUP["PANEL_COLOR"]["BARS"]);
 			tItem["custom"]["radio"] = 1; -- solid
