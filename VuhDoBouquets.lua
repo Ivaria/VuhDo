@@ -114,19 +114,25 @@ local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue
 			tColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["min"] or anEntry["color"];
 			tMaxColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["max"] or anEntry["custom"]["maxColor"];
 
+			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
+				= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
+
 			if tMaxColor then
 				tDestMaxColor["R"], tDestMaxColor["G"], tDestMaxColor["B"], tDestMaxColor["O"]
 					= tMaxColor["R"] * tFactor, tMaxColor["G"] * tFactor, tMaxColor["B"] * tFactor, tMaxColor["O"];
+
+				return tDestColor, tDestMaxColor;
+			else
+				return tDestColor, nil;
 			end
 		else
 			tColor = VUHDO_USER_CLASS_COLORS[tClassId] or anEntry["color"];
-			tDestMaxColor = nil;
+
+			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
+				= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
+
+			return tDestColor, nil;
 		end
-
-		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
-			= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
-
-		return tDestColor, tDestMaxColor;
 	elseif aMaxValue ~= 0 then -- 3 == gradient
 
 		tModi = ((aValue / aMaxValue) ^ 1.7) * 2;
