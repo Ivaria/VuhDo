@@ -1473,29 +1473,42 @@ end
 
 
 --
-local tUnitHotList;
-local tUnitHotCount;
-local tUnitHotInfo;
-local tTimer;
-local function VUHDO_chiHarmonyIconValidator(anInfo, aSourceType)
+local VUHDO_chiHarmonyIconValidator;
+do
+	local tUnitHotList;
+	local tUnitHotCount;
+	local tUnitHotInfo;
+	local tTimer;
+	local tDuration;
+	VUHDO_chiHarmonyIconValidator = function(anInfo, aSourceType)
 
-	tUnitHotList, tUnitHotCount = VUHDO_getUnitHot(anInfo["unit"], "Renewing Mist", aSourceType);
+		tUnitHotList, tUnitHotCount = VUHDO_getUnitHot(anInfo["unit"], "Renewing Mist", aSourceType);
 
-	if tUnitHotList and tUnitHotCount and tUnitHotCount > 0 then
-		-- tUnitHotInfo: aura icon, expiration, stacks, duration, isMine, name, spell ID
-		tUnitHotInfo = VUHDO_getUnitHotInfo(anInfo["unit"], tUnitHotList["auraInstanceId"]);
+		if tUnitHotList and tUnitHotCount and tUnitHotCount > 0 then
+			-- tUnitHotInfo: aura icon, expiration, stacks, duration, isMine, name, spell ID
+			tUnitHotInfo = VUHDO_getUnitHotInfo(anInfo["unit"], tUnitHotList["auraInstanceId"]);
 
-		if tUnitHotInfo and tUnitHotInfo[1] == 5901829 then
-			tTimer = floor((GetTime() - tUnitHotInfo[2] + (tUnitHotInfo[4] or 0)) * 10) * 0.1;
+			-- Renewing Mist icon when empowered with Chi Harmony is 5901829
+			if tUnitHotInfo and tUnitHotInfo[1] == 5901829 then
+				tTimer = floor((GetTime() - tUnitHotInfo[2] + tUnitHotInfo[4]) * 10) * 0.1;
 
-			if tTimer <= 8 then
-				return true, 1381294, 8 - tTimer, 1, 8;
+				-- 6 sec duration Renewing Mist from Rapid Diffusion extended up to 8 sec via Rising Mist   
+				if tUnitHotInfo[4] >= 8 then
+					tDuration = 8;
+				else
+					tDuration = tUnitHotInfo[4];
+				end
+
+				if tTimer <= tDuration then
+					-- Chi Harmony icon is 1381294
+					return true, 1381294, tDuration - tTimer, 1, tDuration;
+				end
 			end
 		end
+
+		return false, nil, -1, -1, -1;
+
 	end
-
-	return false, nil, -1, -1, -1;
-
 end
 
 
