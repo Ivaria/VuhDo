@@ -1958,6 +1958,11 @@ end
 
 
 
+local tTargetGUID;
+local tCasterGUID;
+local tDefaultDirectIncAmount;
+local tHealCommDirectIncAmount;
+local tTotalIncAmount;
 function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
 
 	if not aUnit then
@@ -1965,16 +1970,28 @@ function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
 	end
 
 	if VUHDO_LibHealComm and VUHDO_CONFIG["SHOW_LIBHEALCOMM_INCOMING"] then
-		local tTargetGUID = UnitGUID(aUnit);
+		tTargetGUID = UnitGUID(aUnit);
+
+		tDefaultDirectIncAmount = UnitGetIncomingHeals and UnitGetIncomingHeals(aUnit, aCasterUnit) or 0;
 
 		if aCasterUnit then
-			local tCasterGUID = UnitGUID(aCasterUnit);
+			tCasterGUID = UnitGUID(aCasterUnit);
 
+			tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+			tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 
-			return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 		else
-			return (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.ALL_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+			tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+			tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
 		end
+
+		if tDefaultDirectIncAmount > tHealCommDirectIncAmount then
+			tTotalIncAmount = tTotalIncAmount + tDefaultDirectIncAmount;
+		else
+			tTotalIncAmount = tTotalIncAmount + tHealCommDirectIncAmount;
+		end
+
+		return tTotalIncAmount;
 	elseif UnitGetIncomingHeals then
 		return UnitGetIncomingHeals(aUnit, aCasterUnit);
 	else
