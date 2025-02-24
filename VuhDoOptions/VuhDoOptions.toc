@@ -5,7 +5,6 @@
 ## Version: 3.184
 ## Notes: VuhDo Options
 ## IconTexture: Interface\AddOns\VuhDo\Images\TemporaryPortrait-Female-BloodElf-VuhDo
-## Group: VuhDo
 
 ## Category-enUS: Unit Frames
 ## Category-deDE: Einheitenfenster

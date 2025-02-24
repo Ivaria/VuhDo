@@ -5,7 +5,6 @@
 ## Version: 3.184
 ## Notes: Raid Frames providing click-heal functionality, buff and debuff control, main tank management and much more
 ## IconTexture: Interface\AddOns\VuhDo\Images\TemporaryPortrait-Female-BloodElf-VuhDo
-## Group: VuhDo
 
 ## Category-enUS: Unit Frames
 ## Category-deDE: Einheitenfenster
