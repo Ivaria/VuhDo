@@ -272,7 +272,6 @@ end
 --
 local tEditBox;
 local tSelectedKeyLayout;
-local tKeyLayout;
 function VUHDO_exportKeyLayoutOnClick(aButton)
 	tEditBox = _G[aButton:GetParent():GetName() .. "SaveAsEditBox"];
 	tSelectedKeyLayout = VUHDO_getKeyLayoutNameSafe(tEditBox:GetText());
