@@ -471,7 +471,7 @@ end
 
 
 --
-local tTexture, tStart, tRest, tDuration;
+local tTexture, tStart, tRest;
 local tMissGroup = { };
 local tLowGroup = { };
 local tOkayGroup = { };
