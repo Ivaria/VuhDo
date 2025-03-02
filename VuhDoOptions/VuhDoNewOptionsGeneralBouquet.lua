@@ -443,7 +443,6 @@ function VUHDO_rebuildBouquetContextEditors(anIndex)
 				end
 
 				tCurrentItem["custom"]["maxColor"]["useBackground"] = true;
-				tCurrentItem["custom"]["maxColor"]["useText"] = true;
 				tCurrentItem["custom"]["maxColor"]["useOpacity"] = true;
 			end
 
