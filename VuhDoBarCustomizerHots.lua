@@ -83,7 +83,6 @@ local VUHDO_HOT_CFGS = { "HOT1", "HOT2", "HOT3", "HOT4", "HOT5", "HOT6", "HOT7",
 
 
 local floor = floor;
-local table = table;
 local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
 local GetSpellCharges = C_Spell.GetSpellCharges;
 local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;

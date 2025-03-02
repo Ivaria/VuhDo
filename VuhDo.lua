@@ -877,7 +877,6 @@ local tUnitType = "foo";
 local tPetUnitType;
 local tInfo;
 local tIsDcChange;
-local tName;
 local tPet;
 function VUHDO_refreshRaidMembers()
 	VUHDO_PLAYER_RAID_ID = VUHDO_getPlayerRaidUnit();
