@@ -22,7 +22,6 @@ local VUHDO_getOverhealPanel;
 local VUHDO_getOverhealText;
 local VUHDO_getUnitButtons;
 local VUHDO_getUnitButtonsSafe;
-local VUHDO_getUnitButtonsPanel;
 local VUHDO_getBarRoleIcon;
 local VUHDO_getBarIconFrame;
 local VUHDO_updateClusterHighlights;
@@ -69,7 +68,6 @@ function VUHDO_customHealthInitLocalOverrides()
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 
 	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
-	VUHDO_getUnitButtonsPanel = _G["VUHDO_getUnitButtonsPanel"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
 	VUHDO_getIncHealOnUnit = _G["VUHDO_getIncHealOnUnit"];
@@ -514,7 +512,6 @@ local tAmountInc;
 local tInfo;
 local tOpacity;
 local tHealthBar;
-local tIncBar;
 local function VUHDO_updateIncHeal(aUnit)
 	tInfo = VUHDO_RAID[aUnit];
 	tAllButtons = VUHDO_getUnitButtons(VUHDO_resolveVehicleUnit(aUnit));
@@ -893,7 +890,7 @@ end
 
 
 --
-local tAllButtons, tHealthBar, tQuota, tInfo;
+local tAllButtons, tQuota, tInfo;
 local tHealth, tHealthQuota;
 function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2)
 

@@ -343,11 +343,9 @@ end
 
 
 ----------------------------------------------------
-local VUHDO_RAID_NAMES;
 local VUHDO_RAID;
 local VUHDO_UNIT_BUTTONS;
 local VUHDO_CONFIG;
-local VUHDO_GROUPS_BUFFS;
 local VUHDO_BOSS_UNITS;
 local sRangeSpell;
 local sIsHelpfulGuessRange = true;
@@ -357,15 +355,11 @@ local sZeroRange = "";
 
 
 --
-local VUHDO_updateBouquetsForEvent;
 function VUHDO_toolboxInitLocalOverrides()
-	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_UNIT_BUTTONS = _G["VUHDO_UNIT_BUTTONS"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
-	VUHDO_GROUPS_BUFFS = _G["VUHDO_GROUPS_BUFFS"];
 	VUHDO_BOSS_UNITS = _G["VUHDO_BOSS_UNITS"];
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	sScanRange = tonumber(VUHDO_CONFIG["SCAN_RANGE"]);
 
 	-- FIXME: why can't model sanity be run prior to burst cache initialization?
@@ -688,7 +682,6 @@ function VUHDO_getPlayerRaidUnit()
 	end
 	return "player";
 end
-local VUHDO_getPlayerRaidUnit = VUHDO_getPlayerRaidUnit;
 
 
 
@@ -1687,7 +1680,7 @@ function VUHDO_radixTreeAdd(aTree, aString)
 		tChar = string.sub(aString, 1, 1);
 
 		tFound = false;
-		for tChildChar, tChild in pairs(aTree["children"]) do
+		for tChildChar, _ in pairs(aTree["children"]) do
 			if tChildChar == tChar then
 				tFound = true;
 			end

@@ -5,7 +5,6 @@ local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
 local UnitPower = UnitPower;
 local UnitGetIncomingHeals = VUHDO_unitGetIncomingHeals;
 local pairs = pairs;
-local ipairs = ipairs;
 local floor = floor;
 local twipe = table.wipe;
 local select = select;

@@ -1,6 +1,5 @@
 local _;
 
-local VUHDO_RAID_NAMES;
 local VUHDO_RAID;
 local VUHDO_BUFF_REMOVAL_SPELLS;
 local VUHDO_SPELL_ASSIGNMENTS;
@@ -21,7 +20,6 @@ local VUHDO_isSpellKnown;
 local GetMacroIndexByName = GetMacroIndexByName;
 local GetMacroInfo = GetMacroInfo;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
-local gsub = gsub;
 local GetCursorInfo = GetCursorInfo;
 local GetShapeshiftForm = GetShapeshiftForm;
 local InCombatLockdown = InCombatLockdown;
@@ -33,7 +31,6 @@ local format = format;
 local sIsCliqueCompat;
 
 function VUHDO_keySetupInitLocalOverrides()
-	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_BUFF_REMOVAL_SPELLS = _G["VUHDO_BUFF_REMOVAL_SPELLS"];
 	VUHDO_SPELL_ASSIGNMENTS = _G["VUHDO_SPELL_ASSIGNMENTS"];
@@ -75,12 +72,9 @@ local VUHDO_REZ_SPELLS_NAMES = {
 
 
 --
-local tUnit, tInfo, tIdent;
-local tButtonName, tSuffix;
+local tUnit, tInfo;
 local tMacroId, tMacroText;
-local tActionLow, tHostileActionLow;
-local tInvalidGroup = { ["group"] = -1 };
-
+local tActionLow;
 local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex)
 
 	tUnit = aButton["raidid"];
@@ -283,11 +277,9 @@ end
 
 -- Parse and interpret action-type
 local tPreAction;
-local tTarget;
 local tIsWheel;
 local tHostSpell;
 local tWheelDefString;
-local tFrame;
 local tBinding;
 function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceTarget, anIsTgButton, anIsIcButton)
 
