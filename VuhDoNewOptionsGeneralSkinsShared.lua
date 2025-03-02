@@ -2153,8 +2153,6 @@ end
 --
 VUHDO_DEBUG_AUTO_PROFILE = nil;
 VUHDO_IS_SHOWN_BY_GROUP = true;
-local tIndex;
-local VUHDO_PROFILE_CFG;
 
 
 
@@ -2421,7 +2419,7 @@ end
 
 --
 function VUHDO_saveProfile(aName)
-	local tExistingIndex, tExistingProfile = VUHDO_getProfileNamedCompressed(aName);
+	local _, tExistingProfile = VUHDO_getProfileNamedCompressed(aName);
 	if tExistingProfile then
 		VUHDO_TARGET_PROFILE_NAME = aName;
 

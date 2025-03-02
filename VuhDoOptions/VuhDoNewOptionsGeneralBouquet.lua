@@ -267,11 +267,11 @@ end
 
 
 --
-local tCombo, tEditBox, tModel, tIsTempModel, tSwatch, tCheckBox, tCustomPanel, tBuffName;
+local tCombo, tEditBox, tModel, tIsTempModel, tSwatch, tCheckBox, tBuffName;
 local tPanel, tSubPanel, tSlider;
 local tIndex, tSpecialName;
 local tBouquetName, tBouquet, tInfo, tCurrentItem;
-local tInnerPanel, tRadioButton, tSlider;
+local tInnerPanel, tRadioButton;
 function VUHDO_rebuildBouquetContextEditors(anIndex)
 
 	if (anIndex ~= nil) then

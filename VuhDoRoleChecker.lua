@@ -202,10 +202,7 @@ end
 
 --
 local tActiveTree;
-local tIsInspect;
 local tInfo;
-local tClassId;
-local tRole;
 local tTreeId;
 function VUHDO_inspectLockRole()
 	tInfo = VUHDO_RAID[VUHDO_NEXT_INSPECT_UNIT];
@@ -224,10 +221,9 @@ function VUHDO_inspectLockRole()
 			return;
 		end
 
-		tTreeId, _, _, _, tRole = GetSpecializationInfo(tActiveTree, false, false);
+		tTreeId = GetSpecializationInfo(tActiveTree, false, false);
 	else
 		tTreeId = GetInspectSpecialization(VUHDO_NEXT_INSPECT_UNIT);
-		tRole = GetSpecializationRoleByID(tTreeId);
 	end
 
 	if (tTreeId or 0) == 0 then
@@ -303,15 +299,12 @@ end
 
 
 --
-local tName;
 local tInfo;
-local tDefense;
 local tPowerType;
 local tBuffExist;
 local tFixRole;
 local tIntellect, tStrength, tAgility;
 local tClassId, tClassRole, tName;
-local tLevel;
 local tRole;
 function VUHDO_determineRole(aUnit)
 	tInfo = VUHDO_RAID[aUnit];

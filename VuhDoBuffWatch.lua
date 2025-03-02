@@ -75,7 +75,6 @@ local UnitOnTaxi = UnitOnTaxi;
 local IsSpellInRange = IsSpellInRange or VUHDO_isSpellInRange;
 local GetShapeshiftFormInfo = GetShapeshiftFormInfo;
 
-local tonumber = tonumber;
 local pairs = pairs;
 local ipairs = ipairs;
 local twipe = table.wipe;
@@ -480,7 +479,6 @@ local tOorGroup = { };
 local tGoodTarget;
 local tLowestRest;
 local tLowestUnit;
-local tTotemFound, tStart;
 local tNow;
 local tInRange;
 local tCount;
@@ -640,14 +638,13 @@ end
 
 --
 local tDestGroup;
-local tPlayerGroup;
 local tTargetType;
 local tEnchantDuration;
 local tHasEnchant;
 local tCategName;
 local tNameGroup = { };
 local tIsActive;
-local tRest, tName, tTotemNum, tTexture;
+local tStart, tDuration, tRest, tName, tTexture;
 local function VUHDO_getMissingBuffsForCode(aTargetCode, aBuffInfo, aCategSpec)
 
 	if "N" == strsub(aTargetCode, 1, 1) then
@@ -935,8 +932,8 @@ function VUHDO_execSmartBuffPre(self)
 	local tMaxLowTarget = nil;
 	local tCategSpec;
 	local tMissGroup, tLowGroup, tGoodTarget, tLowestUnit, tOorGroup;
-	local tNumLow, tCooldown, tTotalCd;
-	local tCooldown, tTotalCd;
+	local tNumLow;
+	local tCooldown;
 
 	for _, tCheckSwatch in ipairs(tAllSwatches) do
 		if tCheckSwatch:IsShown() then
@@ -950,9 +947,9 @@ function VUHDO_execSmartBuffPre(self)
 
 			tNumLow = #tMissGroup + #tLowGroup;
 			if not VUHDO_BUFFS[tRefSpell] or not VUHDO_BUFFS[tRefSpell]["id"] then
-				tCooldown, tTotalCd = 0, 0;
+				tCooldown = 0;
 			else
-				tCooldown, tTotalCd = VUHDO_getSpellCooldown(tRefSpell);
+				tCooldown = VUHDO_getSpellCooldown(tRefSpell);
 			end
 
 			if tNumLow > tMaxLow and tCooldown <= 1.5 and VUHDO_BUFF_TARGET_HOSTILE ~= tVariants[2] then
@@ -975,9 +972,9 @@ function VUHDO_execSmartBuffPre(self)
 	end
 
 	if not VUHDO_BUFFS[tMaxLowSpell] or not VUHDO_BUFFS[tMaxLowSpell]["id"] then
-		tCooldown, tTotalCd = 0, 0;
+		tCooldown = 0;
 	else
-		tCooldown, tTotalCd = VUHDO_getSpellCooldown(tMaxLowSpell);
+		tCooldown = VUHDO_getSpellCooldown(tMaxLowSpell);
 	end
 
 	if tCooldown > 0 then return; end
