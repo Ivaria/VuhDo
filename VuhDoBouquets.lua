@@ -97,17 +97,33 @@ local tMaxColor;
 local tDestMaxColor = { ["useBackground"] = true, ["useOpacity"] = true };
 local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue)
 	tRadio = anEntry["custom"]["radio"];
-	tIsGradient = anEntry["custom"]["isGradient"];
 
 	if 1 == tRadio then -- solid
 		tColor = anEntry["color"];
+		tIsGradient = anEntry["custom"]["isSolidGradient"];
 
-		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+		if tIsGradient then
+			tMaxColor = anEntry["custom"]["maxColor"];
 
-		return tDestColor, nil;
+			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+
+			if tMaxColor then
+				tDestMaxColor["R"], tDestMaxColor["G"], tDestMaxColor["B"], tDestMaxColor["O"]
+					= tMaxColor["R"], tMaxColor["G"], tMaxColor["B"], tMaxColor["O"];
+
+				return tDestColor, tDestMaxColor;
+			else
+				return tDestColor, nil;
+			end
+		else
+			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+
+			return tDestColor, nil;
+		end
 	elseif 2 == tRadio then -- class color
 		tClassId = anInfo["classId"];
 		tFactor = anEntry["custom"]["bright"];
+		tIsGradient = anEntry["custom"]["isClassGradient"];
 
 		if tIsGradient then
 			tColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["min"] or anEntry["color"];

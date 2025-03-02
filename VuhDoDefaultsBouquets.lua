@@ -1306,12 +1306,19 @@ local function _VUHDO_buildGenericHealthBarBouquet(aType, aName)
 			tItem = VUHDO_createBouquetItem("STATUS_HEALTH", VUHDO_PANEL_SETUP["PANEL_COLOR"]["BARS"]);
 			tItem["custom"]["radio"] = 2; -- class color
 
-			if VUHDO_USER_CLASS_GRADIENT_COLORS and VUHDO_USER_CLASS_GRADIENT_COLORS["gradientClassColor"] then
-				tItem["custom"]["isGradient"] = true;
+			if VUHDO_USER_CLASS_GRADIENT_COLORS and VUHDO_USER_CLASS_GRADIENT_COLORS["isClassGradient"] then
+				tItem["custom"]["isClassGradient"] = true;
 			end
 		else -- Solid == 2, Chimaeron == 3
 			tItem = VUHDO_createBouquetItem("STATUS_HEALTH", VUHDO_PANEL_SETUP["PANEL_COLOR"]["BARS"]);
 			tItem["custom"]["radio"] = 1; -- solid
+
+			if VUHDO_PANEL_SETUP["PANEL_COLOR"]["isSolidGradient"] then
+				tItem["custom"]["isSolidGradient"] = true;
+
+				tItem["custom"]["maxColor"] = VUHDO_deepCopyColor(VUHDO_PANEL_SETUP["PANEL_COLOR"]["solidMaxColor"]);
+				tItem["custom"]["maxColor"]["useOpacity"] = true;
+			end
 		end
 
 		tItem["color"]["mode"] = nil;

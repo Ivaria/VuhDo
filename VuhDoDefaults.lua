@@ -2512,6 +2512,11 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 			["useBackground"] = true, ["useOpacity"] = true,
 		},
 		["classColorsName"] = false,
+		["isSolidGradient"] = false,
+		["solidMaxColor"] = {
+			["R"] = 1, ["G"] = 1, ["B"] = 1, ["O"] = 1,
+			["useBackground"] = true, ["useOpacity"] = true,
+		},
 	},
 
 	["BAR_COLORS"] = {
@@ -3174,7 +3179,7 @@ VUHDO_DEFAULT_USER_CLASS_GRADIENT_COLORS = {
 		["min"] = VUHDO_makeFullColor(0.4,  0.6,  0.4,  1,   0.5,  0.9,  0.5,  1),
 		["max"] = VUHDO_makeFullColor(0.4,  0.6,  0.4,  1,   0.5,  0.9,  0.5,  1),
 	},
-	["gradientClassColor"] = false,
+	["isClassGradient"] = false,
 };
 
 

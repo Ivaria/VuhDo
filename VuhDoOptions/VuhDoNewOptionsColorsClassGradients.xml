@@ -16,7 +16,7 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<CheckButton name="$parentGradientClassCheckButton" text="VUHDO_I18N_ENABLE" inherits="VuhDoCheckButtonTemplate">
+					<CheckButton name="$parentClassGradientCheckButton" text="VUHDO_I18N_ENABLE" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -26,7 +26,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_USER_CLASS_GRADIENT_COLORS.gradientClassColor");
+								VUHDO_lnfSetModel(self, "VUHDO_USER_CLASS_GRADIENT_COLORS.isClassGradient");
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K605);
 							</OnLoad>
 						</Scripts>
