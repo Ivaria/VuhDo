@@ -6,7 +6,6 @@ local VUHDO_CONFIG;
 local VUHDO_INDICATOR_CONFIG;
 
 
-local tonumber = tonumber;
 local ipairs = ipairs;
 local pairs = pairs;
 local strfind = strfind;
@@ -192,7 +191,7 @@ end
 
 
 --
-local tBackdrop, tBorderCol;
+local tBackdrop;
 local tWidth, tGap;
 local tPanelNum;
 local function VUHDO_initPlayerTargetBorder(aButton, aBorderFrame, anIsNoIndicator)
@@ -274,7 +273,6 @@ end
 
 
 --
-local tIncBar;
 function VUHDO_positionHealButton(aButton, aBarScaling)
 	aButton:SetWidth((aBarScaling or sBarScaling)["barWidth"]);
 	aButton:SetHeight((aBarScaling or sBarScaling)["barHeight"]);
@@ -334,12 +332,10 @@ end
 
 
 --
-local tBorderCol;
 local tXPos,  tYPos;
 local tHealButton;
 local tGroupArray;
-local tGroupIndex, tColIdx, tBtnIdx;
-local tBorderCol;
+local tColIdx, tBtnIdx;
 local tModelArray;
 local tPanelName;
 local tDebuffFrame;
@@ -350,15 +346,13 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 	tColIdx = 1;
 	tBtnIdx = 1;
 
-	tBorderCol  = nil;
-
 	for tModelIndex,  tModelId  in ipairs(tModelArray)  do
 		tGroupArray = VUHDO_getGroupMembersSorted(tModelId, sSortCriterion, aPanelNum, tModelIndex);
-		tGroupIndex = 1;
+
 		for tGroupIndex, tUnit  in ipairs(tGroupArray)  do
 			tHealButton = VUHDO_getHealButton(tBtnIdx, aPanelNum);
 
-			tBtnIdx  = tBtnIdx  + 1;
+			tBtnIdx = tBtnIdx  + 1;
 			VUHDO_positionHealButton(tHealButton);
 
 			VUHDO_setupAllHealButtonAttributes(tHealButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES

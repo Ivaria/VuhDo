@@ -23,7 +23,6 @@ local gsub = gsub;
 local GetRaidTargetIndex = GetRaidTargetIndex;
 local tonumber = tonumber;
 local pairs = pairs;
-local tostring = tostring;
 local twipe = table.wipe;
 local _;
 
@@ -42,14 +41,12 @@ local VUHDO_PANEL_SETUP;
 local VUHDO_getTargetBarRoleIcon;
 local VUHDO_POWER_TYPE_COLORS;
 local VUHDO_BUTTON_CACHE;
-local VUHDO_getUnitZoneName;
 local VUHDO_getDisplayUnit;
 local VUHDO_textColor;
 local VUHDO_isTargetInRange;
 
-local sOOROpacity;
-
 function VUHDO_customTargetInitLocalOverrides()
+
 	VUHDO_CUSTOM_INFO = _G["VUHDO_CUSTOM_INFO"];
 	VUHDO_CLASS_IDS = _G["VUHDO_CLASS_IDS"];
 
@@ -64,16 +61,10 @@ function VUHDO_customTargetInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_getTargetBarRoleIcon = _G["VUHDO_getTargetBarRoleIcon"];
 	VUHDO_POWER_TYPE_COLORS =  _G["VUHDO_POWER_TYPE_COLORS"];
-	VUHDO_getUnitZoneName = _G["VUHDO_getUnitZoneName"];
 	VUHDO_getDisplayUnit = _G["VUHDO_getDisplayUnit"];
 	VUHDO_textColor = _G["VUHDO_textColor"];
 	VUHDO_isTargetInRange = _G["VUHDO_isTargetInRange"];
 
-	if VUHDO_PANEL_SETUP["BAR_COLORS"]["OUTRANGED"]["useOpacity"] then
-		sOOROpacity = VUHDO_PANEL_SETUP["BAR_COLORS"]["OUTRANGED"]["O"];
-	else
-		sOOROpacity = 1;
-	end
 end
 ------------------------------------------------------------------
 
