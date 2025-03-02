@@ -660,7 +660,7 @@ VUHDO_I18N_TT.K602 = "Show debuffs cast by you on hostile units.";
 VUHDO_I18N_TT.K603 = "Show debuffs cast by others on hostile units.";
 VUHDO_I18N_TT.K604 = "Check this to use gradient class colors.";
 VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
-VUHDO_I18N_TT.K606 = "Select the maximum gradient color."
+VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
