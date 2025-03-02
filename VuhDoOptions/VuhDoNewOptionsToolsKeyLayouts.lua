@@ -326,8 +326,8 @@ end
 --
 local tImportString;
 local tImportTable;
+local tKeyLayout;
 local tName;
-local tProfile;
 local tPos;
 function VUHDO_keyLayoutImport(aEditBoxName)
 	tImportString = _G[aEditBoxName]:GetText();

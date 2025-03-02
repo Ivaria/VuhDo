@@ -3,7 +3,6 @@ local _;
 local table = table;
 local floor = floor;
 local select = select;
-local strfind = strfind;
 local twipe = table.wipe;
 local pairs = pairs;
 local sPlayerArray = { };
@@ -243,7 +242,6 @@ local tTimer2
 local tClipL, tClipR, tClipT, tClipB;
 local tAnzInfos;
 local tColor;
-local sEmpty = { };
 local txIcon;
 local txDuration;
 local txName;
