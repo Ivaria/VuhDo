@@ -1023,3 +1023,28 @@ function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aText, aValu
 	end
 
 end
+
+
+
+--
+local VUHDO_COLOR_CACHE = { };
+local tColorCacheKey;
+local tColor;
+function VUHDO_getOrCreateCachedColor(aR, aG, aB, aO)
+
+	if not aR or not aG or not aB then
+		return;
+	end
+
+	tColorCacheKey = aR .. "|" .. aG .. "|" .. aB ..  "|" .. (aO or "");
+
+	if VUHDO_COLOR_CACHE[tColorCacheKey] then
+		return VUHDO_COLOR_CACHE[tColorCacheKey];
+	else
+		tColor = CreateColor(aR, aG, aB, aO);
+		VUHDO_COLOR_CACHE[tColorCacheKey] = tColor;
+
+		return tColor;
+	end
+
+end
