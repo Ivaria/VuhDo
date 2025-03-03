@@ -59,6 +59,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added gradient color options for status (health) bars  
   
   
 --------------------------------------------------------------  
