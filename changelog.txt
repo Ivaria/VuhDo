@@ -31,6 +31,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed binding of spells and abilities to the '\' key  
   
   
 Improvements:  
