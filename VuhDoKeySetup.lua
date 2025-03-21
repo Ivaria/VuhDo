@@ -31,6 +31,7 @@ local format = format;
 local sIsCliqueCompat;
 
 function VUHDO_keySetupInitLocalOverrides()
+
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_BUFF_REMOVAL_SPELLS = _G["VUHDO_BUFF_REMOVAL_SPELLS"];
 	VUHDO_SPELL_ASSIGNMENTS = _G["VUHDO_SPELL_ASSIGNMENTS"];
@@ -47,7 +48,9 @@ function VUHDO_keySetupInitLocalOverrides()
 	VUHDO_replaceMacroTemplates = _G["VUHDO_replaceMacroTemplates"];
 	VUHDO_isActionValid = _G["VUHDO_isActionValid"];
 	VUHDO_isSpellKnown = _G["VUHDO_isSpellKnown"];
+
 	sIsCliqueCompat = VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"];
+
 end
 
 
@@ -281,6 +284,17 @@ local tIsWheel;
 local tHostSpell;
 local tWheelDefString;
 local tBinding;
+local tHeaderFrame;
+local tOnEnterSnippet = [[
+	if sHealButton then
+		sHealButton:ClearBindings();
+	end
+	sHealButton = self;
+]]
+local tOnLeaveSnippet = [[
+	sHealButton = nil;
+]]
+local tClearBindsSnippet = "self:ClearBindings();";
 function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceTarget, anIsTgButton, anIsIcButton)
 
 	if aUnit then
@@ -334,7 +348,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 	end
 
 	if VUHDO_BUTTON_CACHE[aButton] or VUHDO_BUTTON_CACHE[aButton:GetParent():GetParent():GetParent():GetParent()] then
-		tWheelDefString = "self:ClearBindings();";
+		tWheelDefString = tClearBindsSnippet;
 
 		if tIsWheel then
 			tWheelDefString = tWheelDefString .. VUHDO_getWheelDefString();
@@ -343,13 +357,21 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		tWheelDefString = tWheelDefString .. VUHDO_getInternalKeyString();
 
 		aButton:SetAttribute("_onenter", tWheelDefString);
-		aButton:SetAttribute("_onleave", "self:ClearBindings();");
-		aButton:SetAttribute("_onshow", "self:ClearBindings();");
-		aButton:SetAttribute("_onhide", "self:ClearBindings();");
-		aButton:SetAttribute(
-			"_onmousedown", 
-			"if not self:IsUnderMouse(false) then self:ClearBindings(); end"
-		);
+
+		aButton:SetAttribute("_onleave", tClearBindsSnippet);
+		aButton:SetAttribute("_onshow", tClearBindsSnippet);
+		aButton:SetAttribute("_onhide", tClearBindsSnippet);
+
+		if not aButton:GetAttribute("vuhdo_secureheader_wrap") then
+			tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
+
+			if tHeaderFrame then
+				tHeaderFrame:WrapScript(aButton, "OnEnter", tOnEnterSnippet);
+				tHeaderFrame:WrapScript(aButton, "OnLeave", tOnLeaveSnippet);
+
+				aButton:SetAttribute("vuhdo_secureheader_wrap", true);
+			end
+		end
 	end
 
 end
