@@ -31,6 +31,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed mouse and key binding of trinkets  
   
   
 Improvements:  
