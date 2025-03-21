@@ -163,7 +163,7 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 			if VUHDO_NATIVE_ASSIGN_SPELLS[anAction] then
 				aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "spell");
 				aButton:SetAttribute(aModiKey .. "spell" .. aButtonId, anAction);
-			elseif VUHDO_isSpellKnown(anAction) or VUHDO_IN_COMBAT_RELOG then -- Spells may not be initialized yet
+			elseif VUHDO_isSpellKnown(anAction) or VUHDO_IN_COMBAT_RELOG or anAction == "13" or anAction == "14" then -- Spells may not be initialized yet
 				-- Dead players do not trigger "help/noharm" conditionals
 				if VUHDO_REZ_SPELLS_NAMES[anAction] then
 					aButton:SetAttribute(aModiKey .. "type" .. aButtonId, "macro");
