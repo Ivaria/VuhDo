@@ -32,6 +32,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed mouse and key binding of trinkets  
+-- Fixed loading of HoT settings on profile application  
   
   
 Improvements:  
