@@ -2671,21 +2671,23 @@ function VUHDO_loadProfileNoInit(aName)
 
 	tPanelPositions = tProfile["PANEL_POSITIONS"];
 
+	local tLayoutName;
+
+	if VUHDO_SPEC_LAYOUTS then
+		tLayoutName = VUHDO_SPEC_LAYOUTS["selected"];
+	end
+
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
 		if tPanelPositions and tPanelPositions[tPanelNum] then
 			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = VUHDO_deepCopyTable(tPanelPositions[tPanelNum]);
 		end
 
-		if VUHDO_SPELL_CONFIG["IS_LOAD_HOTS"] and VUHDO_SPEC_LAYOUTS then
-			local tLayoutName = VUHDO_SPEC_LAYOUTS["selected"];
-
-			if tLayoutName and VUHDO_SPELL_LAYOUTS and VUHDO_SPELL_LAYOUTS[tLayoutName] then
-				-- support for pre per-panel HoTs
-				if type(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"]) == "table" then
-					VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"][tPanelNum]);
-				else
-					VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"]);
-				end
+		if VUHDO_SPELL_CONFIG["IS_LOAD_HOTS"] and tLayoutName and VUHDO_SPELL_LAYOUTS and VUHDO_SPELL_LAYOUTS[tLayoutName] then
+			-- support for pre per-panel HoTs
+			if type(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"]) == "table" then
+				VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"][tPanelNum]);
+			else
+				VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"]);
 			end
 		end
 	end
