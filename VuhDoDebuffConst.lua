@@ -13,7 +13,36 @@ VUHDO_DEBUFF_TYPE_BLEED = 8;
 
 
 --
-VUHDO_INIT_DEBUFF_ABILITIES = {
+VUHDO_INIT_PURGE_ABILITIES = {
+	["WARRIOR"] = { },
+	["ROGUE"] = { },
+	["HUNTER"] = { },
+	["MAGE"] = {
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 30449 }, -- VUHDO_SPELL_ID.SPELLSTEAL
+	},
+	["DRUID"] = { },
+	["PALADIN"] = { },
+	["PRIEST"] = {
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 528 }, -- VUHDO_SPELL_ID.DISPEL_MAGIC
+	},
+	["SHAMAN"] = {
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 370, 378773 }, -- VUHDO_SPELL_ID.PURGE, VUHDO_SPELL_ID.GREATER_PURGE
+	},
+	["WARLOCK"] = {
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { "*" }, -- VUHDO_SPELL_ID.DEVOUR_MAGIC 19505
+	},
+	["DEATHKNIGHT"] = { },
+	["MONK"] = { },
+	["DEMONHUNTER"] = {
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 278326 }, -- VUHDO_SPELL_ID.CONSUME_MAGIC
+	},
+	["EVOKER"] = { },
+};
+
+
+
+--
+VUHDO_INIT_DISPEL_ABILITIES = {
 	["WARRIOR"] = { },
 	["ROGUE"] = { },
 	["HUNTER"] = { },
@@ -71,6 +100,7 @@ VUHDO_SPEC_TO_DEBUFF_ABIL = {
 	[218164] = GetSpellName(218164), -- WW/BM Monk "Detox"
 	[360823] = GetSpellName(360823), -- Preservation Evoker "Naturalize" (morphed "Expunge")
 	[390632] = GetSpellName(527), -- Priest 'Improved Purify' must be mapped to 'Purify'
+	[378773] = GetSpellName(370), -- Shaman 'Greater Purge' must be mapped to 'Purge'
 };
 
 
