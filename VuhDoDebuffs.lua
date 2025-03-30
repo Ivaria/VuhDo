@@ -791,7 +791,6 @@ local tIsCustomColorShown;
 local tInfo;
 local tType;
 local tFriend;
-local tEnemy;
 local tHostile;
 local tAbility;
 local tIsRelevant;
@@ -872,6 +871,7 @@ end
 --
 local tType;
 local tFriend;
+local tHostile;
 local tAbility;
 local tDebuffConfig;
 local tIsShown;
@@ -1110,9 +1110,10 @@ local function VUHDO_updateDebuffs(aUnit)
 
 					if sIsDebuffSoundRemovableOnly then
 						tFriend = UnitIsFriend("player", aUnit);
+						tHostile = UnitIsEnemy("player", aUnit);
 
-						tAbility = (VUHDO_PLAYER_DISPEL_ABILITIES[tType] and tFriend) or
-							(VUHDO_PLAYER_PURGE_ABILITIES[tType] and not tFriend);
+						tAbility = (VUHDO_PLAYER_DISPEL_ABILITIES[tType] and tFriend and not tHostile) or
+							(VUHDO_PLAYER_PURGE_ABILITIES[tType] and (not tFriend or tHostile));
 
 						if tAbility then
 							tDoStdSound = true;
