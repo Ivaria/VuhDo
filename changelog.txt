@@ -36,6 +36,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added display of purgeable debuffs on enemy units  
   
   
 --------------------------------------------------------------  
