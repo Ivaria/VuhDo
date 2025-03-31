@@ -534,23 +534,23 @@ end
 
 
 --
-local function VUHDO_addCustomSpellIds(aVersion, ...)
-	if ((VUHDO_CONFIG["CUSTOM_DEBUFF"].version or 0) < aVersion) then
+local tName;
+local function VUHDO_addCustomSpellIds(aVersion, aDebuffs)
+
+	if (VUHDO_CONFIG["CUSTOM_DEBUFF"].version or 0) < aVersion then
 		VUHDO_CONFIG["CUSTOM_DEBUFF"].version = aVersion;
 
-		local tArg;
-		for tCnt = 1, select("#", ...) do
-			tArg = select(tCnt, ...);
-
-			if (type(tArg) == "number") then
-				-- make sure the spell ID is still added as a string
-				-- otherwise getKeyFromValue look-ups w/ spell ID string fail later
-				tArg = tostring(tArg);
+		for tSpellId, tIsAddBySpellId in pairs(aDebuffs) do
+			if tIsAddBySpellId then
+				tName = tostring(tSpellId);
+			else
+				tName = GetSpellName(tSpellId);
 			end
 
-			VUHDO_tableUniqueAdd(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"], tArg);
+			VUHDO_tableUniqueAdd(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"], tName);
 		end
 	end
+
 end
 
 
@@ -986,160 +986,160 @@ function VUHDO_loadDefaultConfig()
 	end
 
 	-- 3.4.0 - Wrath of the Lich King Classic - phase 1
-	VUHDO_addCustomSpellIds(54, 
+	VUHDO_addCustomSpellIds(54, {
 		-- [[ Obsidian Sanctum ]]
-		60708,  -- Fade Armor
-		57491,  -- Flame Tsunami
+		[60708] = true,  -- Fade Armor
+		[57491] = true,  -- Flame Tsunami
 		-- 58766,  -- Gift of Twilight
 		-- 60430,  -- Molten Fury
 		-- 58105,  -- Power of Shadron
 		-- 61248,  -- Power of Tenebron
 		-- 61251,  -- Power of Vesperon
-		56910,  -- Tail Lash
-		58957,  -- Tail Lash
+		[56910] = true,  -- Tail Lash
+		[58957] = true,  -- Tail Lash
 		-- 61885,  -- Twilight Residue
 		-- 60639,  -- Twilight Revenge
 		-- 61254,  -- Will of Sartharion
-		57634,  -- Magma
+		[57634] = true,  -- Magma
 		-- [[ Eye of Eternity ]]
-		56272,  -- Arcane Breath
-		60072,  -- Arcane Breath
+		[56272] = true,  -- Arcane Breath
+		[60072] = true,  -- Arcane Breath
 		-- 56438,  -- Arcane Overload
 		-- 57060,  -- Haste
 		-- 55849,  -- Power Spark
 		-- 56152,  -- Power Spark
-		57428,  -- Static Field
-		55849,  -- Surge of Power
+		[57428] = true,  -- Static Field
+		[55849] = true,  -- Surge of Power
 		-- 61071,  -- Vortex
 		-- 61072,  -- Vortex
 		-- 61073,  -- Vortex
 		-- 61074,  -- Vortex
 		-- 61075,  -- Vortex
-		60936,  -- Surge of Power
+		[60936] = true,  -- Surge of Power
 		-- [[ Naxxramas ]]
 		-- Trash
-		28467,  -- Mortal Wound
-		55334,  -- Strangulate
-		55314,  -- Strangulate
-		54714,  -- Acid Volley
-		29325,  -- Acid Volley
-		54331,  -- Acidic Sludge
-		27891,  -- Acidic Sludge
-		55322,  -- Blood Plague
-		55264,  -- Blood Plague
-		28440,  -- Veil of Shadow
-		53803,  -- Veil of Shadow
-		54708,  -- Rend
-		54703,  -- Rend
-		59899,  -- Poison Charge
-		56674,  -- Poison Charge
-		54326,  -- Bile Vomit
-		27807,  -- Bile Vomit
-		54709,  -- Flesh Rot
-		56674,  -- Flesh Rot
-		56624,  -- Virulent Poison
-		56605,  -- Virulent Poison
-		54772,  -- Putrid Bite
-		30113,  -- Putrid Bite
-		33661,  -- Crush Armor
-		54769,  -- Slime Burst
-		30109,  -- Slime Burst
-		54805,  -- Mind Flay
-		28310,  -- Mind Flay
-		29407,  -- Mind Flay
-		16856,  -- Mortal Strike
-		56427,  -- War Stomp
-		27758,  -- War Stomp
-		30091,  -- Flamestrike
-		56538,  -- Plague Splash
-		54780,  -- Plague Splash
-		55318,  -- Pierce Armor
-		29848,  -- Polymorph
-		6713,   -- Disarm
-		28169,  -- Mutating Injection
-		30080,  -- Retching Plague
-		30081,  -- Retching Plague
-		56444,  -- Retching Plague
+		[28467] = true,  -- Mortal Wound
+		[55334] = true,  -- Strangulate
+		[55314] = true,  -- Strangulate
+		[54714] = true,  -- Acid Volley
+		[29325] = true,  -- Acid Volley
+		[54331] = true,  -- Acidic Sludge
+		[27891] = true,  -- Acidic Sludge
+		[55322] = true,  -- Blood Plague
+		[55264] = true,  -- Blood Plague
+		[28440] = true,  -- Veil of Shadow
+		[53803] = true,  -- Veil of Shadow
+		[54708] = true,  -- Rend
+		[54703] = true,  -- Rend
+		[59899] = true,  -- Poison Charge
+		[56674] = true,  -- Poison Charge
+		[54326] = true,  -- Bile Vomit
+		[27807] = true,  -- Bile Vomit
+		[54709] = true,  -- Flesh Rot
+		[56674] = true,  -- Flesh Rot
+		[56624] = true,  -- Virulent Poison
+		[56605] = true,  -- Virulent Poison
+		[54772] = true,  -- Putrid Bite
+		[30113] = true,  -- Putrid Bite
+		[33661] = true,  -- Crush Armor
+		[54769] = true,  -- Slime Burst
+		[30109] = true,  -- Slime Burst
+		[54805] = true,  -- Mind Flay
+		[28310] = true,  -- Mind Flay
+		[29407] = true,  -- Mind Flay
+		[16856] = true,  -- Mortal Strike
+		[56427] = true,  -- War Stomp
+		[27758] = true,  -- War Stomp
+		[30091] = true,  -- Flamestrike
+		[56538] = true,  -- Plague Splash
+		[54780] = true,  -- Plague Splash
+		[55318] = true,  -- Pierce Armor
+		[29848] = true,  -- Polymorph
+		[6713] = true,   -- Disarm
+		[28169] = true,  -- Mutating Injection
+		[30080] = true,  -- Retching Plague
+		[30081] = true,  -- Retching Plague
+		[56444] = true,  -- Retching Plague
 		-- Anub'Rekhan
-		56098,  -- Acid Spit
-		28969,  -- Acid Spit
+		[56098] = true,  -- Acid Spit
+		[28969] = true,  -- Acid Spit
 		-- 28783,  -- Impale
-		54022,  -- Locust Swarm
-		28786,  -- Locust Swarm
+		[54022] = true,  -- Locust Swarm
+		[28786] = true,  -- Locust Swarm
 		-- 28991,  -- Web
 		-- Grand Widow Faerlina
 		-- 22886,  -- Berserker Charge
-		28796,  -- Poison Bolt Volley
-		54098,  -- Poison Bolt Volley
+		[28796] = true,  -- Poison Bolt Volley
+		[54098] = true,  -- Poison Bolt Volley
 		-- 28794,  -- Rain of Fire
 		-- 30225,  -- Silence
 		-- Maexxna
-		54121,  -- Necrotic Poison
-		28776,  -- Necrotic Poison
+		[54121] = true,  -- Necrotic Poison
+		[28776] = true,  -- Necrotic Poison
 		-- 29484,  -- Web Spray
-		28622,  -- Web Wrap
+		[28622] = true,  -- Web Wrap
 		-- Noth the Plaguebringer
-		54814,  -- Cripple
-		29212,  -- Cripple
-		32736,  -- Mortal Strike
-		29213,  -- Curse of the Plaguebringer
-		54835,  -- Curse of the Plaguebringer
-		29214,  -- Wrath of the Plaguebringer
-		54836,  -- Wrath of the Plaguebringer
+		[54814] = true,  -- Cripple
+		[29212] = true,  -- Cripple
+		[32736] = true,  -- Mortal Strike
+		[29213] = true,  -- Curse of the Plaguebringer
+		[54835] = true,  -- Curse of the Plaguebringer
+		[29214] = true,  -- Wrath of the Plaguebringer
+		[54836] = true,  -- Wrath of the Plaguebringer
 		-- Heigan the Unclean
-		29998,  -- Decrepit Fever
-		55011,  -- Decrepit Fever
-		29310,  -- Spell Disruption
+		[29998] = true,  -- Decrepit Fever
+		[55011] = true,  -- Decrepit Fever
+		[29310] = true,  -- Spell Disruption
 		-- 29371,  -- Eruption
-		54772,  -- Putrid Bite
-		54769,  -- Slime Burst
-		56538,  -- Plague Splash
+		[54772] = true,  -- Putrid Bite
+		[54769] = true,  -- Slime Burst
+		[56538] = true,  -- Plague Splash
 		-- Loatheb
-		29204,  -- Inevitable Doom
-		55052,  -- Inevitable Doom
-		55593,  -- Necrotic Aura
+		[29204] = true,  -- Inevitable Doom
+		[55052] = true,  -- Inevitable Doom
+		[55593] = true,  -- Necrotic Aura
 		-- 29865,  -- Deathbloom
 		-- 55053,  -- Deathbloom
 		-- Instructor Razuvious
-		55470,  -- Unbalancing Strike
-		55550,  -- Jagged Knife
+		[55470] = true,  -- Unbalancing Strike
+		[55550] = true,  -- Jagged Knife
 		-- Gothik the Harvester
-		27994,  -- Drain Life
-		55646,  -- Drain Life
-		27825,  -- Shadow Mark
-		27993,  -- Stomp
+		[27994] = true,  -- Drain Life
+		[55646] = true,  -- Drain Life
+		[27825] = true,  -- Shadow Mark
+		[27993] = true,  -- Stomp
 		-- The Four Horsemen
-		28882,  -- Unholy Shadow
-		57369,  -- Unholy Shadow
+		[28882] = true,  -- Unholy Shadow
+		[57369] = true,  -- Unholy Shadow
 		-- Patchwerk
 		-- Grobbulus
 		-- 28153,  -- Disease Cloud
 		-- 28206,  -- Mutagen Explosion
-		28169,  -- Mutating Injection
+		[28169] = true,  -- Mutating Injection
 		-- Gluth
-		54378,	-- Mortal Wound
-		29306,  -- Infected Wound
+		[54378] = true,	-- Mortal Wound
+		[29306] = true,  -- Infected Wound
 		-- Thaddius
 		-- 28059,  -- Positive Charge
 		-- 28084,	-- Negative Charge
 		-- Sapphiron
-		28542,  -- Life Drain
-		55665,  -- Life Drain
-		15847,  -- Tail Sweep
-		28547,  -- Chill
-		55699,  -- Chill
-		28522,  -- Icebolt
+		[28542] = true,  -- Life Drain
+		[55665] = true,  -- Life Drain
+		[15847] = true,  -- Tail Sweep
+		[28547] = true,  -- Chill
+		[55699] = true,  -- Chill
+		[28522] = true,  -- Icebolt
 		-- Kel'Thuzad
 		-- 29879,  -- Frost Blast
 		-- 10187,  -- Blizzard
 		-- 28479,  -- Frostbolt
 		-- 28478,  -- Frostbolt
-		27819,  -- Detonate Mana
-		27808,  -- Frost Blast
+		[27819] = true,  -- Detonate Mana
+		[27808] = true,  -- Frost Blast
 		-- 28408,  -- Chains of Kel'Thuzad
 		-- 28409,  -- Chains of Kel'Thuzad
-		28410   -- Chains of Kel'Thuzad
-	);
+		[28410] = true,  -- Chains of Kel'Thuzad
+	} );
 
 	local debuffRemovalList = {};
 
