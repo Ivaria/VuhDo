@@ -534,23 +534,23 @@ end
 
 
 --
-local function VUHDO_addCustomSpellIds(aVersion, ...)
-	if ((VUHDO_CONFIG["CUSTOM_DEBUFF"].version or 0) < aVersion) then
+local tName;
+local function VUHDO_addCustomSpellIds(aVersion, aDebuffs)
+
+	if (VUHDO_CONFIG["CUSTOM_DEBUFF"].version or 0) < aVersion then
 		VUHDO_CONFIG["CUSTOM_DEBUFF"].version = aVersion;
 
-		local tArg;
-		for tCnt = 1, select("#", ...) do
-			tArg = select(tCnt, ...);
-
-			if (type(tArg) == "number") then
-				-- make sure the spell ID is still added as a string
-				-- otherwise getKeyFromValue look-ups w/ spell ID string fail later
-				tArg = tostring(tArg);
+		for tSpellId, tIsAddBySpellId in pairs(aDebuffs) do
+			if tIsAddBySpellId then
+				tName = tostring(tSpellId);
+			else
+				tName = GetSpellName(tSpellId);
 			end
 
-			VUHDO_tableUniqueAdd(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"], tArg);
+			VUHDO_tableUniqueAdd(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"], tName);
 		end
 	end
+
 end
 
 
@@ -988,123 +988,123 @@ function VUHDO_loadDefaultConfig()
 
 	-- add relevant custom debuffs for raid bosses
 	-- 1.13.2 - Classic
-	VUHDO_addCustomSpellIds(45, 
-		-- [[ MolTon Core ]]
+	VUHDO_addCustomSpellIds(45, {
+		-- [[ Molton Core ]]
 		-- Baron Geddon
-		20475   -- Living Bomb
-	);
+		[20475] = true,  -- Living Bomb
+	} );
 
 	-- 1.13.5 - Classic - part 5
-	VUHDO_addCustomSpellIds(46, 
+	VUHDO_addCustomSpellIds(46, {
 		-- [[ TAQ ]]
-		26143,  -- Mind Flay
-		26476,  -- Digestive Acid
-		26079,  -- Cause Insanity
-		25991,  -- Poison Bolt Volley
-		26077,  -- Itch
-		26044,  -- Mind Flay
-		25989,  -- Toxin
-		26078,  -- Vekniss Catalyst
-		9907,   -- Faerie Fire
-		27648,  -- Thunderfury
-		21992,  -- Thunderfury
-		18327,  -- Silence
-		25812,  -- Toxic Volley
-		12721,  -- Deep Wound
-		25174,  -- Sundering Cleave
-		26613,  -- Unbalancing Strike
-		26053,  -- Noxious Poison
-		26050,  -- Acid Spit
-		26025,  -- Impale
-		25646,  -- Mortal Wound
-		19134,  -- Intimidating Shout
-		26072,  -- Dust Cloud
-		25051,  -- Sunder Armor
-		-- 26049,  -- Mana Burn
-		26180,  -- Wyvern Sting
-		-- 26211,  -- Hamstring
-		26070,  -- Fear
-		26102,  -- Sand Blast
-		24573,  -- Mortal Strike
-		26552,  -- Nullify
-		26580,  -- Fear
-		25810,  -- Mind-numbing Poison
-		26601,  -- Poison Bolt
-		22412,  -- Virulent Poison
-		25809,  -- Crippling Poison
-		19128,  -- Knockdown
-		785,    -- True Fulfillment
-		1906   -- Debilitating Charge
-	);
+		[26143] = true,  -- Mind Flay
+		[26476] = true,  -- Digestive Acid
+		[26079] = true,  -- Cause Insanity
+		[25991] = true,  -- Poison Bolt Volley
+		[26077] = true,  -- Itch
+		[26044] = true,  -- Mind Flay
+		[25989] = true,  -- Toxin
+		[26078] = true,  -- Vekniss Catalyst
+		[9907] = true,   -- Faerie Fire
+		[27648] = true,  -- Thunderfury
+		[21992] = true,  -- Thunderfury
+		[18327] = true,  -- Silence
+		[25812] = true,  -- Toxic Volley
+		[12721] = true,  -- Deep Wound
+		[25174] = true,  -- Sundering Cleave
+		[26613] = true,  -- Unbalancing Strike
+		[26053] = true,  -- Noxious Poison
+		[26050] = true,  -- Acid Spit
+		[26025] = true,  -- Impale
+		[25646] = true,  -- Mortal Wound
+		[19134] = true,  -- Intimidating Shout
+		[26072] = true,  -- Dust Cloud
+		[25051] = true,  -- Sunder Armor
+		-- [26049] = true,  -- Mana Burn
+		[26180] = true,  -- Wyvern Sting
+		-- [26211] = true,  -- Hamstring
+		[26070] = true,  -- Fear
+		[26102] = true,  -- Sand Blast
+		[24573] = true,  -- Mortal Strike
+		[26552] = true,  -- Nullify
+		[26580] = true,  -- Fear
+		[25810] = true,  -- Mind-numbing Poison
+		[26601] = true,  -- Poison Bolt
+		[22412] = true,  -- Virulent Poison
+		[25809] = true,  -- Crippling Poison
+		[19128] = true,  -- Knockdown
+		[785] = true,    -- True Fulfillment
+		[1906] = true,   -- Debilitating Charge
+	} );
 
 	-- 1.13.5 - Classic - part 6
-	VUHDO_addCustomSpellIds(47, 
+	VUHDO_addCustomSpellIds(47, {
 		-- [[ Naxxramas ]]
 		-- Anub'Rekhan
-		28969,  -- Acid Spit
-		-- 28783,  -- Impale
-		28786,  -- Locust Swarm
-		-- 28991,  -- Web
+		[28969] = true,  -- Acid Spit
+		-- [28783] = true,  -- Impale
+		[28786] = true,  -- Locust Swarm
+		-- [28991] = true,  -- Web
 		-- Anub'Rekhan
-		22886,  -- Berserker Charge
-		28796,  -- Poison Bolt Volley
-		28794,  -- Rain of Fire
+		[22886] = true,  -- Berserker Charge
+		[28796] = true,  -- Poison Bolt Volley
+		[28794] = true,  -- Rain of Fire
 		-- Maexxna
-		28741,  -- Poison Shock
-		29484,  -- Web Spray
-		28622,  -- Web Wrap
+		[28741] = true,  -- Poison Shock
+		[29484] = true,  -- Web Spray
+		[28622] = true,  -- Web Wrap
 		-- Noth the Plaguebringer
-		29212,  -- Cripple
-		13737,  -- Mortal Strike
-		30138,  -- Shadow Shock
-		29214,  -- Wrath of the Plaguebringer
+		[29212] = true,  -- Cripple
+		[13737] = true,  -- Mortal Strike
+		[30138] = true,  -- Shadow Shock
+		[29214] = true,  -- Wrath of the Plaguebringer
 		-- Heigan the Unclean
-		29998,  -- Decrepit Fever
-		-- 29371,  -- Eruption
-		30113,  -- Putrid Bite
-		30109,  -- Slime Burst
+		[29998] = true,  -- Decrepit Fever
+		-- [29371] = true,  -- Eruption
+		[30113] = true,  -- Putrid Bite
+		[30109] = true,  -- Slime Burst
 		-- Loatheb
-		29204,  -- Inevitable Doom
-		29184,  -- Corrupted Mind
-		11196,  -- Recently Bandaged
+		[29204] = true,  -- Inevitable Doom
+		[29184] = true,  -- Corrupted Mind
+		[11196] = true,  -- Recently Bandaged
 		-- Instructor Razuvious
-		26613,  -- Unbalancing Strike
+		[26613] = true,  -- Unbalancing Strike
 		-- Gothik the Harvester
-		27994,  -- Drain Life
+		[27994] = true,  -- Drain Life
 		-- The Four Horsemen
-		28884,  -- Meteor
-		28882,  -- Righteous Fire
+		[28884] = true,  -- Meteor
+		[28882] = true,  -- Righteous Fire
 		-- Patchwerk
-		-- 28308,  -- Hateful Strike
+		-- [28308] = true,  -- Hateful Strike
 		-- Grobbulus
-		28153,  -- Disease Cloud
-		28206,  -- Mutagen Explosion
-		28169,  -- Mutating Injection
+		[28153] = true,  -- Disease Cloud
+		[28206] = true,  -- Mutagen Explosion
+		[28169] = true,  -- Mutating Injection
 		-- Gluth
-		29685,  -- Terrifying Roar
-		25646,	-- Mortal Wound
-		29306,  -- Infected Wound
+		[29685] = true,  -- Terrifying Roar
+		[25646] = true,	-- Mortal Wound
+		[29306] = true,  -- Infected Wound
 		-- Thaddius
-		28125,  -- War Stomp
-		28167,  -- Chain Lightning
-		-- 28059,  -- Positive Charge
-		-- 28084,	-- Negative Charge
+		[28125] = true,  -- War Stomp
+		[28167] = true,  -- Chain Lightning
+		-- [28059] = true,  -- Positive Charge
+		-- [28084] = true,	-- Negative Charge
 		-- Sapphiron
-		28542,  -- Life Drain
-		15847,  -- Tail Sweep
-		28547,  -- Chill
-		28522,  -- Icebolt
+		[28542] = true,  -- Life Drain
+		[15847] = true,  -- Tail Sweep
+		[28547] = true,  -- Chill
+		[28522] = true,  -- Icebolt
 		-- Kel'Thuzad
-		-- 29879,  -- Frost Blast
-		-- 10187,  -- Blizzard
-		-- 28479,  -- Frostbolt
-		-- 28478,  -- Frostbolt
-		27819,  -- Detonate Mana
-		27808,  -- Frost Blast
-		28408,  -- Chains of Kel'Thuzad
-		28409,  -- Chains of Kel'Thuzad
-		28410   -- Chains of Kel'Thuzad
-	);
+		-- [29879] = true,  -- Frost Blast
+		-- [10187] = true,  -- Blizzard
+		-- [28479] = true,  -- Frostbolt
+		-- [28478] = true,  -- Frostbolt
+		[27819] = true,  -- Detonate Mana
+		[27808] = true,  -- Frost Blast
+		[28408] = true,  -- Chains of Kel'Thuzad
+		[28409] = true,  -- Chains of Kel'Thuzad
+		[28410] = true,  -- Chains of Kel'Thuzad
+	} );
 
 	local debuffRemovalList = {};
 
