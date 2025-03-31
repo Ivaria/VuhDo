@@ -33,6 +33,7 @@ Known issues:
 Bugfixes:  
 -- Fixed mouse and key binding of trinkets  
 -- Fixed loading of HoT settings on profile application  
+-- Fixed icon detection by spell name in VuhDo Options  
   
   
 Improvements:  
