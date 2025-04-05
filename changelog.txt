@@ -40,6 +40,8 @@ Improvements:
 -- Added display of purgeable debuffs on enemy units  
 -- Added default custom debuffs for TWW S2 dungeon encounters  
 -- Added default custom debuffs for Undermine raid encounters  
+-- Added new debuff type for 'Enrage' effects  
+-- Added new bouquet validator 'Flag: Debuff Enrage'  
   
   
 --------------------------------------------------------------  
