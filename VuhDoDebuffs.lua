@@ -22,7 +22,8 @@ local VUHDO_DEBUFF_TYPES = {
 	["Magic"] = VUHDO_DEBUFF_TYPE_MAGIC,
 	["Disease"] = VUHDO_DEBUFF_TYPE_DISEASE,
 	["Poison"] = VUHDO_DEBUFF_TYPE_POISON,
-	["Curse"] = VUHDO_DEBUFF_TYPE_CURSE
+	["Curse"] = VUHDO_DEBUFF_TYPE_CURSE,
+	[""] = VUHDO_DEBUFF_TYPE_ENRAGE,
 };
 
 
@@ -109,6 +110,7 @@ function VUHDO_debuffsInitLocalOverrides()
 		[4] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF4"],
 		[6] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF6"],
 		[8] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF8"],
+		[9] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF9"],
 	};
 
 	--[[if not sColorArray then
@@ -227,6 +229,7 @@ setmetatable(VUHDO_UNIT_DEBUFF_INFOS, {
 			[VUHDO_DEBUFF_TYPE_MAGIC] = { },
 			[VUHDO_DEBUFF_TYPE_CURSE] = { },
 			[VUHDO_DEBUFF_TYPE_BLEED] = { },
+			[VUHDO_DEBUFF_TYPE_ENRAGE] = { },
 --			["listHeads"] = {
 --				[<CHOSEN|VUHDO_DEBUFF_TYPE>] = {
 --					["auraInstanceId"] = <aura instance ID>,
@@ -443,7 +446,7 @@ local VUHDO_DEBUFF_CUR_CHOSEN_DEFAULT = { VUHDO_DEBUFF_TYPE_NONE, "", nil, false
 local sCurChosenInfo = {
 	-- [<unit ID>] = {
 	--	[<aura instance ID>] = {
-	--		VUHDO_DEBUFF_TYPE_<NONE|POISON|DISEASE|MAGIC|CURSE|CUSTOM|MISSING_BUFF|BLEED>,
+	--		VUHDO_DEBUFF_TYPE_<NONE|POISON|DISEASE|MAGIC|CURSE|CUSTOM|MISSING_BUFF|BLEED|ENRAGE>,
 	--		<aura spell Id>,
 	--		<aura name>,
 	--		<isStandard: true|false>,
@@ -466,7 +469,7 @@ local function VUHDO_updateCurChosenColor(aUnit, aType)
 		return;
 	end
 
-	if (aType or 6) ~= 6 and VUHDO_DEBUFF_COLORS[aType] then -- VUHDO_DEBUFF_TYPE_<POISON|DISEASE|MAGIC|CURSE|BLEED>
+	if (aType or 6) ~= 6 and VUHDO_DEBUFF_COLORS[aType] then -- VUHDO_DEBUFF_TYPE_<POISON|DISEASE|MAGIC|CURSE|BLEED|ENRAGE>
 		tSourceColor = VUHDO_DEBUFF_COLORS[aType];
 
 		if tSourceColor["useBackground"] then
@@ -675,6 +678,7 @@ local function VUHDO_initDebuffInfos(aUnit)
 	tUnitDebuffInfo[3][2] = nil; -- VUHDO_DEBUFF_TYPE_MAGIC
 	tUnitDebuffInfo[4][2] = nil; -- VUHDO_DEBUFF_TYPE_CURSE
 	tUnitDebuffInfo[8][2] = nil; -- VUHDO_DEBUFF_TYPE_BLEED
+	tUnitDebuffInfo[9][2] = nil; -- VUHDO_DEBUFF_TYPE_ENRAGE
 
 	if not tUnitDebuffInfo["listHeads"] then
 		tUnitDebuffInfo["listHeads"] = { };
@@ -686,6 +690,7 @@ local function VUHDO_initDebuffInfos(aUnit)
 	tUnitDebuffInfo["listHeads"][3] = nil; -- VUHDO_DEBUFF_TYPE_MAGIC
 	tUnitDebuffInfo["listHeads"][4] = nil; -- VUHDO_DEBUFF_TYPE_CURSE
 	tUnitDebuffInfo["listHeads"][8] = nil; -- VUHDO_DEBUFF_TYPE_BLEED
+	tUnitDebuffInfo["listHeads"][9] = nil; -- VUHDO_DEBUFF_TYPE_ENRAGE
 
 	if not tUnitDebuffInfo["typeAuras"] then
 		tUnitDebuffInfo["typeAuras"] = { };
