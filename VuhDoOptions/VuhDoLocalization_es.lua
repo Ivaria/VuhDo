@@ -1244,6 +1244,7 @@ VUHDO_I18N_LIFE_GRADIENT = "Life\nGradient";
 VUHDO_I18N_MAX_COLOR = "Max Color";
 
 VUHDO_I18N_ENRAGE = "Enrage";
+VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
 -- Classic Era game version specific strings
 

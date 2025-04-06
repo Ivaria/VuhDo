@@ -77,6 +77,7 @@ local sIsShowOnHostile;
 local sIsShowHostileMine;
 local sIsShowHostileOthers;
 local sIsDebuffSoundRemovableOnly;
+local sIsShowPurgeableBuffs;
 local sEmpty = { };
 local sCurChosenColor = { };
 --local sColorArray = nil;
@@ -102,6 +103,7 @@ function VUHDO_debuffsInitLocalOverrides()
 	sIsShowHostileMine = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isHostileMine"];
 	sIsShowHostileOthers = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isHostileOthers"];
 	sIsDebuffSoundRemovableOnly = VUHDO_CONFIG["SOUND_DEBUFF_REMOVABLE_ONLY"];
+	sIsShowPurgeableBuffs = not VUHDO_CONFIG["DETECT_DEBUFFS_IGNORE_PURGEABLE_BUFFS"];
 
 	VUHDO_DEBUFF_COLORS = {
 		[1] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF1"],
@@ -913,7 +915,7 @@ local function VUHDO_determineBuffPredicate(anAuraInstanceId, aName, anIcon, aSt
 	tFriend = UnitIsFriend("player", sUnit);
 	tHostile = not tFriend or UnitIsEnemy("player", sUnit);
 
-	tAbility = VUHDO_PLAYER_PURGE_ABILITIES[tType] and tHostile;
+	tAbility = sIsShowPurgeableBuffs and VUHDO_PLAYER_PURGE_ABILITIES[tType] and tHostile;
 
 	tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[aName] or VUHDO_CUSTOM_DEBUFF_CONFIG[tostring(aSpellId)] or sEmpty;
 	tIsShown, tIsCustomColorShown = false, false;
