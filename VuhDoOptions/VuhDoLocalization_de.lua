@@ -663,6 +663,7 @@ VUHDO_I18N_TT.K604 = "Check this to use gradient class colors.";
 VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
+VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
