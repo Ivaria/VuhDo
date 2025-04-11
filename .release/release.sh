@@ -712,8 +712,8 @@ set_info_file() {
 		# Populate filter vars from the last commit the file was included in.
 		si_file_author=$( git -C "$_si_file_dir" log --max-count=1 --format="%an" -- "$_si_file" 2>/dev/null )
 		si_file_timestamp=$( git -C "$_si_file_dir" log --max-count=1 --format="%at" -- "$_si_file" 2>/dev/null )
-		si_file_revision=$( git -C "$_si_file_dir" rev-list --count "$si_file_hash" 2>/dev/null ) # XXX checkout depth affects rev-list, see set_info_git
 		si_file_hash=$( git -C "$_si_file_dir" log --max-count=1 --format="%H" -- "$_si_file" 2>/dev/null )
+		si_file_revision=$( git -C "$_si_file_dir" rev-list --count "$si_file_hash" 2>/dev/null ) # XXX checkout depth affects rev-list, see set_info_git
 		si_file_abbreviated_hash=$( git -C "$_si_file_dir" log --max-count=1 --abbrev=7 --format="%h" -- "$_si_file" 2>/dev/null )
 
 	elif [[ $si_repo_type == "svn" ]]; then
@@ -2018,7 +2018,7 @@ checkout_external() {
 
 		if [ -z "$_external_tag" ]; then
 			echo "Fetching latest version of external $_external_uri"
-			retry svn checkout -q "$_external_uri" "$_cqe_checkout_dir" || return 1
+			retry svn checkout -q "$_external_uri" "$_cqe_checkout_dir" --force || return 1
 		else
 			_cqe_svn_tag_url="${_cqe_svn_trunk_url%/trunk}/tags"
 			if [ "$_external_tag" = "latest" ]; then
@@ -2030,14 +2030,14 @@ checkout_external() {
 			if [ "$_external_tag" = "latest" ]; then
 				echo "No tags found in $_cqe_svn_tag_url"
 				echo "Fetching latest version of external $_external_uri"
-				retry svn checkout -q "$_external_uri" "$_cqe_checkout_dir" || return 1
+				retry svn checkout -q "$_external_uri" "$_cqe_checkout_dir" --force || return 1
 			else
 				_cqe_external_uri="${_cqe_svn_tag_url}/$_external_tag"
 				if [ -n "$_cqe_svn_subdir" ]; then
 					_cqe_external_uri="${_cqe_external_uri}/$_cqe_svn_subdir"
 				fi
 				echo "Fetching tag \"$_external_tag\" from external $_cqe_external_uri"
-				retry svn checkout -q "$_cqe_external_uri" "$_cqe_checkout_dir" || return 1
+				retry svn checkout -q "$_cqe_external_uri" "$_cqe_checkout_dir" --force || return 1
 			fi
 		fi
 		set_info_svn "$_cqe_checkout_dir" || return 1
