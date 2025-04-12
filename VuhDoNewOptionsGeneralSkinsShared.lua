@@ -2695,6 +2695,25 @@ function VUHDO_loadProfileNoInit(aName)
 		VUHDO_CONFIG["SPELL_TRACE"] = VUHDO_deepCopyTable(tProfile["CONFIG"]["SPELL_TRACE"]);
 	end
 
+	-- if old profile hasn't been migrated then force migration
+	if tProfile["INDICATOR_CONFIG"] and not tProfile["INDICATOR_CONFIG"]["VERSION"] and tProfile["INDICATOR_CONFIG"]["BOUQUETS"]
+		and tProfile["INDICATOR_CONFIG"]["CUSTOM"] and tProfile["INDICATOR_CONFIG"]["TEXT_INDICATORS"] then
+		-- migrated destination config model won't contain the keys need from the old profile
+		VUHDO_INDICATOR_CONFIG["BOUQUETS"] = VUHDO_deepCopyTable(tProfile["INDICATOR_CONFIG"]["BOUQUETS"]);
+		VUHDO_INDICATOR_CONFIG["CUSTOM"] = VUHDO_deepCopyTable(tProfile["INDICATOR_CONFIG"]["CUSTOM"]);
+		VUHDO_INDICATOR_CONFIG["TEXT_INDICATORS"] = VUHDO_deepCopyTable(tProfile["INDICATOR_CONFIG"]["TEXT_INDICATORS"]);
+
+		VUHDO_INDICATOR_CONFIG["VERSION"] = nil;
+	end
+
+	-- if old profile hasn't been migrated then force migration
+	if tProfile["PANEL_SETUP"] and tProfile["PANEL_SETUP"]["HOTS"] and not tProfile["PANEL_SETUP"]["HOTS"]["VERSION"] then
+		-- migrated destination config model won't contain the keys needed from old profile
+		VUHDO_PANEL_SETUP["HOTS"] = VUHDO_deepCopyTable(tProfile["PANEL_SETUP"]["HOTS"]);
+
+		VUHDO_PANEL_SETUP["HOTS"]["VERSION"] = nil;
+	end
+
 	VUHDO_fixDominantProfileSettings(tProfile);
 	VUHDO_CONFIG["CURRENT_PROFILE"] = aName;
 	VUHDO_Msg(VUHDO_I18N_PROFILE_LOADED .. aName);
