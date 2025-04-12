@@ -10,6 +10,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed import of indicator and HoT icon settings from old profiles  
   
   
 Improvements:  
