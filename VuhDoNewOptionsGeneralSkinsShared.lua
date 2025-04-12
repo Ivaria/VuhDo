@@ -2683,14 +2683,7 @@ function VUHDO_loadProfileNoInit(aName)
 			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = VUHDO_deepCopyTable(tPanelPositions[tPanelNum]);
 		end
 
-		if VUHDO_SPELL_CONFIG["IS_LOAD_HOTS"] and tLayoutName and VUHDO_SPELL_LAYOUTS and VUHDO_SPELL_LAYOUTS[tLayoutName] then
-			-- support for pre per-panel HoTs
-			if type(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"]) == "table" then
-				VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"][tPanelNum]);
-			else
-				VUHDO_PANEL_SETUP[tPanelNum]["HOTS"] = VUHDO_decompressOrCopy(VUHDO_SPELL_LAYOUTS[tLayoutName]["HOTS"]);
-			end
-		end
+		VUHDO_activateLayoutLoadHotsForPanel(tLayoutName, tPanelNum);
 	end
 
 	-- @TODO: Warum werden die nicht direkt geladen (ipairs-Problem?)

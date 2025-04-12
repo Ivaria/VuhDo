@@ -59,6 +59,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to load only HoT slot settings on key layout activation  
   
   
 --------------------------------------------------------------  

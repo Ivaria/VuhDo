@@ -671,6 +671,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
+VUHDO_I18N_TT.K609 = "Check to only apply HoT slot setup (Panels => HoTs => Order) when spell layout is being loaded.";
 
 -- Classic Era game version specific strings (tooltip IDs begin at K900)
 
@@ -1246,6 +1247,8 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
+
+VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
 
 -- Classic Era game version specific strings
 
