@@ -2490,6 +2490,18 @@ end
 
 local VUHDO_PER_PANEL_PROFILE_MODEL = {
 	["-root-"] = VUHDO_PROFILE_MODEL_MATCH_ALL,
+
+	["HOTS"] = {
+		["-root-"] = VUHDO_PROFILE_MODEL_MATCH_ALL,
+
+		["SLOTS"] = {
+			["-root-"] = VUHDO_PROFILE_MODEL_MATCH_CLASS,
+		},
+
+		["SLOTCFG"] = {
+			["-root-"] = VUHDO_PROFILE_MODEL_MATCH_CLASS,
+		},
+	},
 }
 
 
