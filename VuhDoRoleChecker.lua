@@ -293,29 +293,18 @@ local function VUHDO_determineDfToolRole(anInfo)
 			or anInfo["classId"] == VUHDO_ID_DEATH_KNIGHT
 			or anInfo["classId"] == VUHDO_ID_MONKS 
 			or anInfo["classId"] == VUHDO_ID_DEMON_HUNTERS 
-			or anInfo["classId"] == VUHDO_ID_ROGUES 
-			or (anInfo["classId"] == VUHDO_ID_DRUIDS
-				and not UnitPowerType(anInfo["unit"]) == VUHDO_UNIT_POWER_LUNAR_POWER) then
+			or anInfo["classId"] == VUHDO_ID_ROGUES then
 			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_MELEE_DAMAGE;
 			tReturnRole = VUHDO_ID_MELEE_DAMAGE;
 		elseif anInfo["classId"] == VUHDO_ID_PRIESTS 
 			or anInfo["classId"] == VUHDO_ID_WARLOCKS 
 			or anInfo["classId"] == VUHDO_ID_MAGES 
 			or anInfo["classId"] == VUHDO_ID_EVOKERS
-			or (anInfo["classId"] == VUHDO_ID_DRUIDS
-				and UnitPowerType(anInfo["unit"]) == VUHDO_UNIT_POWER_LUNAR_POWER) then
+			or anInfo["classId"] == VUHDO_ID_HUNTERS then
 			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_RANGED_DAMAGE;
 			tReturnRole = VUHDO_ID_RANGED_DAMAGE;
-		elseif anInfo["classId"] == VUHDO_ID_DRUIDS then
-			-- Feral since neither Restoration or Moonkin has previously matched
-			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_MELEE_DAMAGE;
-			tReturnRole = VUHDO_ID_MELEE_DAMAGE;
-		elseif anInfo["classId"] == VUHDO_ID_HUNTERS then
-			-- Hunters default to ranged but require inspect to determine spec ID so no return
-			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_RANGED_DAMAGE;
-			tReturnRole = nil;
 		else
-			-- Shaman default to melee but require inspect to determine spec ID so no return
+			-- Druid and Shaman default to melee but require inspect to determine spec ID so no return
 			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_MELEE_DAMAGE;
 			tReturnRole = nil;
 		end
