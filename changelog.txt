@@ -37,6 +37,7 @@ Bugfixes:
   
 Improvements:  
 -- Added option to load only HoT slot settings on key layout activation  
+-- Bump TOC interface for 11.1.5  
   
   
 --------------------------------------------------------------  
