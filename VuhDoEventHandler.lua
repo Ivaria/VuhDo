@@ -1000,6 +1000,18 @@ function VUHDO_slashCmd(aCommand)
 
 		VUHDO_xMsg(#tProfile, #tCompressed, #tUnCompressed);]]
 
+	elseif tCommandWord == "pool" then
+		if tParsedTexts[2] == "on" then
+			VUHDO_TABLE_POOL_PROFILE = true;
+
+			VUHDO_Msg("Table pool profiling enabled.");
+		elseif tParsedTexts[2] == "off" then
+			VUHDO_TABLE_POOL_PROFILE = false;
+
+			VUHDO_Msg("Table pool profiling disabled.");
+		else
+			VUHDO_printPoolStats();
+		end
 
 	elseif tCommandWord == "ab" or tCommandWord == "about" then
 		VUHDO_printAbout();
