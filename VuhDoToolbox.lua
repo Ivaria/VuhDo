@@ -1980,21 +1980,29 @@ end
 
 
 --
+local tPools = { };
+local function VUHDO_getTablePools()
+
+	tPools["DebuffAura"] = VUHDO_getDebuffAuraPool();
+	tPools["DebuffInfo"] = VUHDO_getDebuffInfoPool();
+	tPools["HotInfo"] = VUHDO_getHotInfoPool();
+	tPools["IconArray"] = VUHDO_getIconArrayPool();
+	tPools["ListNode"] = VUHDO_getListNodePool();
+
+	return tPools;
+
+end
+
+
+
+--
 local tMetrics;
 function VUHDO_printPoolStats()
 
-	local tPools = {
-		["DebuffAura"] = VUHDO_getDebuffAuraPool(),
-		["DebuffInfo"] = VUHDO_getDebuffInfoPool(),
-		["HotInfo"] = VUHDO_getHotInfoPool(),
-		["IconArray"] = VUHDO_getIconArrayPool(),
-		["ListNode"] = VUHDO_getListNodePool(),
-	};
-
 	print("|cffFFD100VuhDo Table Pool Stats:|r");
 
-	for tName, tPool in pairs(tPools) do
-		if tPool and tPool.getMetrics then -- Check if pool object exists and has method
+	for tName, tPool in pairs(VUHDO_getTablePools()) do
+		if tPool and tPool.getMetrics then
 			tMetrics = tPool:getMetrics();
 
 			print(format("  Pool[%s] (Max:%d CurIdle:%d PeakIdle:%d): Hits=%d Misses=%d Rejected=%d",
@@ -2002,6 +2010,19 @@ function VUHDO_printPoolStats()
 				tMetrics["hits"], tMetrics["misses"], tMetrics["rejectedReleases"]));
 		else
 			print(format("  Pool[%s]: Not available or invalid.", tName))
+		end
+	end
+
+end
+
+
+
+--
+function VUHDO_resetPoolStats()
+
+	for tName, tPool in pairs(VUHDO_getTablePools()) do
+		if tPool and tPool.resetMetrics then
+			tPool:resetMetrics();
 		end
 	end
 
