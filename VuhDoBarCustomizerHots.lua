@@ -188,7 +188,7 @@ end
 
 
 --
-sHotInfoPool = VUHDO_createTablePool(150);
+local sHotInfoPool = VUHDO_createTablePool(150);
 
 
 
@@ -205,6 +205,15 @@ end
 local function VUHDO_releasePooledHotInfo(aHotInfo)
 
 	sHotInfoPool:release(aHotInfo);
+
+end
+
+
+
+--
+function VUHDO_getHotInfoPool()
+
+	return sHotInfoPool;
 
 end
 

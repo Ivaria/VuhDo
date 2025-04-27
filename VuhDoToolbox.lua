@@ -1984,11 +1984,11 @@ local tMetrics;
 function VUHDO_printPoolStats()
 
 	local tPools = {
-		["DebuffAura"] = sDebuffAuraPool,
-		["DebuffInfo"] = sCustomDebuffInfoPool,
-		["HotInfo"] = sHotInfoPool,
-		["IconArray"] = sIconArrayPool,
-		["ListNode"] = sListNodePool,
+		["DebuffAura"] = VUHDO_getDebuffAuraPool(),
+		["DebuffInfo"] = VUHDO_getDebuffInfoPool(),
+		["HotInfo"] = VUHDO_getHotInfoPool(),
+		["IconArray"] = VUHDO_getIconArrayPool(),
+		["ListNode"] = VUHDO_getListNodePool(),
 	};
 
 	print("|cffFFD100VuhDo Table Pool Stats:|r");

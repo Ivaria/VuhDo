@@ -133,10 +133,10 @@ end
 
 
 --
-sDebuffAuraPool = VUHDO_createTablePool(450);
-sListNodePool = VUHDO_createTablePool(500, VUHDO_createListNodeDelegate, VUHDO_cleanupListNodeDelegate);
-sIconArrayPool = VUHDO_createTablePool(400);
-sCustomDebuffInfoPool = VUHDO_createTablePool(650);
+local sDebuffAuraPool = VUHDO_createTablePool(450);
+local sListNodePool = VUHDO_createTablePool(500, VUHDO_createListNodeDelegate, VUHDO_cleanupListNodeDelegate);
+local sIconArrayPool = VUHDO_createTablePool(400);
+local sCustomDebuffInfoPool = VUHDO_createTablePool(650);
 
 
 
@@ -153,6 +153,15 @@ end
 local function VUHDO_releasePooledAuraData(anAuraData)
 
 	sDebuffAuraPool:release(anAuraData);
+
+end
+
+
+
+--
+function VUHDO_getDebuffAuraPool()
+
+	return sDebuffAuraPool;
 
 end
 
@@ -177,6 +186,15 @@ end
 
 
 --
+function VUHDO_getListNodePool()
+
+	return sListNodePool;
+
+end
+
+
+
+--
 function VUHDO_getPooledIconArray()
 
 	return sIconArrayPool:get();
@@ -195,6 +213,15 @@ end
 
 
 --
+function VUHDO_getIconArrayPool()
+
+	return sIconArrayPool;
+
+end
+
+
+
+--
 local function VUHDO_getPooledCustomDebuffInfo()
 
 	return sCustomDebuffInfoPool:get();
@@ -207,6 +234,15 @@ end
 local function VUHDO_releasePooledCustomDebuffInfo(aCustomDebuffInfo)
 
 	sCustomDebuffInfoPool:release(aCustomDebuffInfo);
+
+end
+
+
+
+--
+function VUHDO_getDebuffInfoPool()
+
+	return sCustomDebuffInfoPool;
 
 end
 
