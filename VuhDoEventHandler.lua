@@ -1014,6 +1014,8 @@ function VUHDO_slashCmd(aCommand)
 				VUHDO_resetPoolStats();
 
 				VUHDO_Msg("Table pool statistics reset.");
+			else
+				VUHDO_printPoolStats();
 			end
 		else
 			VUHDO_printPoolStats();
