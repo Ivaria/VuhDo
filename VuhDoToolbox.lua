@@ -774,6 +774,12 @@ end
 --
 function VUHDO_initTalentSpellCaches()
 
+	if InCombatLockdown() then
+		-- avoid expensive malloc on talent re-scan during combat
+		-- SPELLS_CHANGED handler calls this on spell morph e.g. Priest 'Premonition'
+		return;
+	end
+
 	local tActiveConfigId = C_ClassTalents.GetActiveConfigID();
 
 	-- on initial PLAYER_ENTER_WORLD talents are not yet available
