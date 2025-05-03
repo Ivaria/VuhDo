@@ -188,7 +188,7 @@ end
 
 
 --
-local sHotInfoPool = VUHDO_createTablePool(150);
+local sHotInfoPool = VUHDO_createTablePool(300);
 
 
 

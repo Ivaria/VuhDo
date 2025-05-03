@@ -133,10 +133,10 @@ end
 
 
 --
-local sDebuffAuraPool = VUHDO_createTablePool(450);
-local sListNodePool = VUHDO_createTablePool(500, VUHDO_createListNodeDelegate, VUHDO_cleanupListNodeDelegate);
-local sIconArrayPool = VUHDO_createTablePool(400);
-local sCustomDebuffInfoPool = VUHDO_createTablePool(650);
+local sDebuffAuraPool = VUHDO_createTablePool(1500);
+local sListNodePool = VUHDO_createTablePool(2000, VUHDO_createListNodeDelegate, VUHDO_cleanupListNodeDelegate);
+local sIconArrayPool = VUHDO_createTablePool(1000);
+local sCustomDebuffInfoPool = VUHDO_createTablePool(2000);
 
 
 
