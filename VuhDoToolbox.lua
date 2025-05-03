@@ -646,7 +646,7 @@ function VUHDO_splitStringQuoted(aText)
 			tToken = string.gsub(tToken, [[^(['"])]], "");
 			tToken = string.gsub(tToken, [[(['"])$]], "");
 
-			table.insert(tSplit, tToken); 
+			tinsert(tSplit, tToken);
 		end
 	end
 
@@ -1335,12 +1335,12 @@ end
 function VUHDO_tableToString(tbl)
   local result, done = {}, {}
   for k, v in ipairs( tbl ) do
-    table.insert( result, VUHDO_tableValueToString( v ) )
+    tinsert( result, VUHDO_tableValueToString( v ) )
     done[ k ] = true
   end
   for k, v in pairs( tbl ) do
     if not done[ k ] then
-      table.insert( result,
+      tinsert( result,
         VUHDO_tableKeyToString( k ) .. "=" .. VUHDO_tableValueToString( v ) )
     end
   end
@@ -1819,13 +1819,13 @@ local function VUHDO_tokenizeByWord(aString)
 
 	-- first try to split on camel case
 	for tWord in string.gmatch(aString, "%u%U*") do
-		table.insert(tTokens, tWord);
+		tinsert(tTokens, tWord);
 	end
 
 	-- fallback to split on whitespace
 	if #tTokens < 1 then
 		for tWord in string.gmatch(aString, "%S+") do
-			table.insert(tTokens, tWord);
+			tinsert(tTokens, tWord);
 		end
 	end
 
@@ -1846,13 +1846,13 @@ local function VUHDO_tokenizeByNGram(aString, aLength)
 	tNGrams = { };
 
 	if aLength > #aString then
-		table.insert(tNGrams, aString);
+		tinsert(tNGrams, aString);
 
 		return tNGrams;
 	end
 
 	for tCnt = 1, strlen(aString) - aLength + 1 do
-		table.insert(tNGrams, string.sub(aString, tCnt, tCnt + aLength - 1));
+		tinsert(tNGrams, string.sub(aString, tCnt, tCnt + aLength - 1));
 	end
 
 	return tNGrams;
@@ -1927,6 +1927,197 @@ end
 
 
 
+function VUHDO_cleanupListNodeDelegate(aNode)
+
+	aNode["auraInstanceId"] = nil;
+	aNode["prev"] = nil;
+
+end
+
+
+
+--
+function VUHDO_createListNodeDelegate()
+
+    return { ["auraInstanceId"] = nil, ["prev"] = nil };
+
+end
+
+
+
+--
+VUHDO_TABLE_POOL_PROFILE = false;
+local VUHDO_DEFAULT_MAX_POOL_SIZE = 200;
+function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
+
+	local tPool = {
+		["poolData"] = {},
+		["maxSize"] = aMaxPoolSize or VUHDO_DEFAULT_MAX_POOL_SIZE,
+		["createDelegate"] = aCreateDelegate or function() return { } end,
+		["cleanupDelegate"] = aCleanupDelegate,
+		["_twipe"] = _G.twipe or table.wipe,
+		["metrics"] = {
+			["hits"] = 0,
+			["misses"] = 0,
+			["peakIdleCount"] = 0,
+			["rejectedReleases"] = 0,
+		}
+	};
+
+	local tIsProfile;
+	local tMetrics;
+	local tNumInPool;
+	local tObject;
+	function tPool:get()
+
+		tIsProfile = VUHDO_TABLE_POOL_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+		end
+
+		tNumInPool = #self["poolData"];
+
+		if tNumInPool > 0 then
+			tObject = self["poolData"][tNumInPool];
+
+			self["poolData"][tNumInPool] = nil;
+
+			if tIsProfile then
+				tMetrics["hits"] = tMetrics["hits"] + 1;
+			end
+
+			return tObject;
+		else
+			if tIsProfile then
+				tMetrics["misses"] = tMetrics["misses"] + 1;
+			end
+
+			return self["createDelegate"]();
+		end
+
+	end
+
+	local tIsProfile;
+	local tMetrics;
+	local tCurSize;
+	function tPool:release(aObject)
+
+		tIsProfile = VUHDO_TABLE_POOL_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+		end
+
+		tCurSize = #self["poolData"];
+
+		if aObject and tCurSize < self["maxSize"] then
+			if self["cleanupDelegate"] then
+				self["cleanupDelegate"](aObject);
+			else
+				self["_twipe"](aObject);
+			end
+
+			tinsert(self["poolData"], aObject);
+
+			if tIsProfile then
+				tMetrics["peakIdleCount"] = max(tMetrics["peakIdleCount"], tCurSize + 1);
+			end
+		elseif aObject and tIsProfile then
+			tMetrics["rejectedReleases"] = tMetrics["rejectedReleases"] + 1;
+		end
+
+	end
+
+	local tMetrics;
+	local tCurSize;
+	function tPool:getMetrics()
+
+		tMetrics = self["metrics"];
+
+	        tCurSize = #self["poolData"];
+
+		return {
+			hits = tMetrics.hits,
+			misses = tMetrics.misses,
+			peakIdleCount = tMetrics.peakIdleCount,
+			rejectedReleases = tMetrics.rejectedReleases,
+			currentIdle = tCurSize,
+			maxSize = self["maxSize"],
+		};
+
+	end
+
+	local tMetrics;
+	function tPool:resetMetrics()
+
+		tMetrics = self["metrics"];
+
+		tMetrics.hits = 0;
+		tMetrics.misses = 0;
+		tMetrics.peakIdleCount = #self["poolData"];
+		tMetrics.rejectedReleases = 0;
+
+	end
+
+	return tPool;
+
+end
+
+
+
+--
+local tPools = { };
+local function VUHDO_getTablePools()
+
+	tPools["DebuffAura"] = VUHDO_getDebuffAuraPool();
+	tPools["DebuffInfo"] = VUHDO_getDebuffInfoPool();
+	tPools["HotInfo"] = VUHDO_getHotInfoPool();
+	tPools["IconArray"] = VUHDO_getIconArrayPool();
+	tPools["ListNode"] = VUHDO_getListNodePool();
+
+	return tPools;
+
+end
+
+
+
+--
+local tMetrics;
+function VUHDO_printPoolStats()
+
+	print("|cffFFD100VuhDo Table Pool Stats:|r");
+
+	for tName, tPool in pairs(VUHDO_getTablePools()) do
+		if tPool and tPool.getMetrics then
+			tMetrics = tPool:getMetrics();
+
+			print(format("  Pool[%s] (Max:%d CurIdle:%d PeakIdle:%d): Hits=%d Misses=%d Rejected=%d",
+				tName, tMetrics["maxSize"], tMetrics["currentIdle"], tMetrics["peakIdleCount"],
+				tMetrics["hits"], tMetrics["misses"], tMetrics["rejectedReleases"]));
+		else
+			print(format("  Pool[%s]: Not available or invalid.", tName))
+		end
+
+	end
+
+end
+
+
+
+--
+function VUHDO_resetPoolStats()
+
+	for tName, tPool in pairs(VUHDO_getTablePools()) do
+		if tPool and tPool.resetMetrics then
+			tPool:resetMetrics();
+		end
+	end
+
+end
+
+
+
 ---------------------------------
 -- CLASSIC COMPATIBILITY LAYER --
 ---------------------------------
@@ -1979,45 +2170,48 @@ function VUHDO_getSpecializationRoleByID(...)
 end
 
 
+do
+	
+	local tTargetGUID;
+	local tCasterGUID;
+	local tDefaultDirectIncAmount;
+	local tHealCommDirectIncAmount;
+	local tTotalIncAmount;
+	function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
 
-local tTargetGUID;
-local tCasterGUID;
-local tDefaultDirectIncAmount;
-local tHealCommDirectIncAmount;
-local tTotalIncAmount;
-function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
-
-	if not aUnit then
-		return 0;
-	end
-
-	if VUHDO_LibHealComm and VUHDO_CONFIG["SHOW_LIBHEALCOMM_INCOMING"] then
-		tTargetGUID = UnitGUID(aUnit);
-
-		tDefaultDirectIncAmount = UnitGetIncomingHeals and UnitGetIncomingHeals(aUnit, aCasterUnit) or 0;
-
-		if aCasterUnit then
-			tCasterGUID = UnitGUID(aCasterUnit);
-
-			tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-			tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-
-		else
-			tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
-			tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+		if not aUnit then
+			return 0;
 		end
 
-		if tDefaultDirectIncAmount > tHealCommDirectIncAmount then
-			tTotalIncAmount = tTotalIncAmount + tDefaultDirectIncAmount;
+		if VUHDO_LibHealComm and VUHDO_CONFIG["SHOW_LIBHEALCOMM_INCOMING"] then
+			tTargetGUID = UnitGUID(aUnit);
+
+			tDefaultDirectIncAmount = UnitGetIncomingHeals and UnitGetIncomingHeals(aUnit, aCasterUnit) or 0;
+
+			if aCasterUnit then
+				tCasterGUID = UnitGUID(aCasterUnit);
+
+				tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+				tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+
+			else
+				tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+				tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + VUHDO_INCOMING_HEAL_WINDOW) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+			end
+
+			if tDefaultDirectIncAmount > tHealCommDirectIncAmount then
+				tTotalIncAmount = tTotalIncAmount + tDefaultDirectIncAmount;
+			else
+				tTotalIncAmount = tTotalIncAmount + tHealCommDirectIncAmount;
+			end
+
+			return tTotalIncAmount;
+		elseif UnitGetIncomingHeals then
+			return UnitGetIncomingHeals(aUnit, aCasterUnit);
 		else
-			tTotalIncAmount = tTotalIncAmount + tHealCommDirectIncAmount;
+			return 0;
 		end
 
-		return tTotalIncAmount;
-	elseif UnitGetIncomingHeals then
-		return UnitGetIncomingHeals(aUnit, aCasterUnit);
-	else
-		return 0;
 	end
 
 end
