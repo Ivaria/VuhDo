@@ -2063,6 +2063,14 @@ end
 ---------------------------------
 -- CLASSIC COMPATIBILITY LAYER --
 ---------------------------------
+function VUHDO_isMists()
+
+	return WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC;
+
+end
+
+
+
 function VUHDO_getSpecialization()
 
 	if not GetSpecialization then
@@ -2101,7 +2109,7 @@ end
 
 function VUHDO_getSpecializationRoleByID(...)
 
-	if not GetSpecializationRoleByID then
+	if VUHDO_isMists() or not GetSpecializationRoleByID then
 		return "NONE";
 	else
 		return GetSpecializationRoleByID(...);
@@ -2202,14 +2210,6 @@ function VUHDO_hasIncomingSummon(...)
 	else
 		return C_IncomingSummon.HasIncomingSummon(...);
 	end
-end
-
-
-
-function VUHDO_hasLFGRestrictions()
-
-	return IsInGroup(LE_PARTY_CATEGORY_INSTANCE);
-
 end
 
 

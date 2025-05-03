@@ -527,17 +527,10 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			end
 		end
 
---[[	elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
+	elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
 		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
 			VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 			VUHDO_updateShieldBar(anArg1);
-
-			-- 9.0.1 added Priest 'Spirit Shell' which does not fire SPELL_AURA__REFRESH events as normal
-			-- instead use this event handler to track the 'Spirit Shell' absorb amount
-			if VUHDO_getShieldPerc(anArg1, VUHDO_SPELL_ID.SPIRIT_SHELL) > 0 then
-				-- 114908 is the spell ID of the 'Spirit Shell' absorb aura
-				VUHDO_updateShield(anArg1, 114908);
-			end
 		end
 
 	elseif "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" == anEvent then
@@ -545,7 +538,6 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 			VUHDO_updateHealAbsorbBar(anArg1);
 		end
-]];
 
 	elseif "UNIT_SPELLCAST_SENT" == anEvent then
 		if VUHDO_VARIABLES_LOADED then VUHDO_spellcastSent(anArg1, anArg2, anArg4); end
@@ -807,7 +799,7 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_PHASE); 
 		end
 		
---[[	elseif "RUNE_POWER_UPDATE" == anEvent then
+	elseif "RUNE_POWER_UPDATE" == anEvent then
 		VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
 
 	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent or "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
@@ -829,24 +821,6 @@ function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg
 
 			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 				VUHDO_resetTalentScan(anArg1);
-				VUHDO_initDebuffs(); -- Talentabhängige Debuff-Fähigkeiten neu initialisieren.
-				VUHDO_timeReloadUI(1);
-			end
-		end
-]];
-	elseif "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
-		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
-			local tSpecNum = tostring(VUHDO_getSpecialization()) or "1";
-			local tBestProfile = VUHDO_getBestProfileAfterSpecChange();
-
-			-- event sometimes fires multiple times so we must de-dupe
-			if (not VUHDO_strempty(VUHDO_SPEC_LAYOUTS[tSpecNum]) and (VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNum])) or 
-				(not VUHDO_strempty(tBestProfile) and (VUHDO_CONFIG["CURRENT_PROFILE"] ~= tBestProfile)) then
-				VUHDO_activateSpecc(tSpecNum);
-			end
-
-			if ((VUHDO_RAID or tEmptyRaid)["player"] ~= nil) then
-				VUHDO_resetTalentScan("player");
 				VUHDO_initDebuffs(); -- Talentabhängige Debuff-Fähigkeiten neu initialisieren.
 				VUHDO_timeReloadUI(1);
 			end
@@ -1671,7 +1645,7 @@ local VUHDO_ALL_EVENTS = {
 	"LEARNED_SPELL_IN_TAB", "TRAIT_CONFIG_UPDATED",
 	"PLAYER_FLAGS_CHANGED",
 	"PLAYER_LOGOUT",
-	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", --"RUNE_POWER_UPDATE", 
+	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE",
 	"UNIT_SPELLCAST_SENT",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
 	"COMBAT_LOG_EVENT_UNFILTERED",
@@ -1697,7 +1671,7 @@ local VUHDO_ALL_EVENTS = {
 --	"UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_HEAL_ABSORB_AMOUNT_CHANGED",
 --	"INCOMING_SUMMON_CHANGED",
 	"UNIT_PHASE",
---	"PLAYER_SPECIALIZATION_CHANGED",
+	"PLAYER_SPECIALIZATION_CHANGED",
 	"ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",

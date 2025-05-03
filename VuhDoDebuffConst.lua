@@ -56,35 +56,42 @@ VUHDO_INIT_DISPEL_ABILITIES = {
 		[VUHDO_DEBUFF_TYPE_CURSE] = { VUHDO_SPELL_ID.REMOVE_LESSER_CURSE },
 	},
 	["DRUID"] = {
-		[VUHDO_DEBUFF_TYPE_POISON] = { VUHDO_SPELL_ID.REMOVE_CORRUPTION },
-		[VUHDO_DEBUFF_TYPE_CURSE] = { VUHDO_SPELL_ID.REMOVE_CORRUPTION },
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.REMOVE_CORRUPTION },
+		[VUHDO_DEBUFF_TYPE_POISON] = { VUHDO_SPELL_ID.REMOVE_CORRUPTION, VUHDO_SPELL_ID.NATURES_CURE },
+		[VUHDO_DEBUFF_TYPE_CURSE] = { VUHDO_SPELL_ID.REMOVE_CORRUPTION, VUHDO_SPELL_ID.NATURES_CURE },
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.NATURES_CURE },
 	},
 	["PALADIN"] = {
 		[VUHDO_DEBUFF_TYPE_POISON] = { VUHDO_SPELL_ID.PALA_CLEANSE },
 		[VUHDO_DEBUFF_TYPE_DISEASE] = { VUHDO_SPELL_ID.PALA_CLEANSE },
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.PALA_CLEANSE },
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.SACRED_CLEANSING },
 	},
 	["PRIEST"] = {
-		[VUHDO_DEBUFF_TYPE_DISEASE] = { VUHDO_SPELL_ID.CURE_DISEASE_PRIEST },
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.DISPEL_MAGIC },
+		[VUHDO_DEBUFF_TYPE_DISEASE] = { VUHDO_SPELL_ID.PURIFY },
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.PURIFY },
 	},
 	["SHAMAN"] = {
-		[VUHDO_DEBUFF_TYPE_CURSE] = { VUHDO_SPELL_ID.CLEANSE_SPIRIT },
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.CLEANSE_SPIRIT },
+		[VUHDO_DEBUFF_TYPE_CURSE] = { VUHDO_SPELL_ID.PURIFY_SPIRIT, VUHDO_SPELL_ID.CLEANSE_SPIRIT }, -- FIXME: OG MoP beta bug?
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.PURIFY_SPIRIT, VUHDO_SPELL_ID.CLEANSE_SPIRIT },
 	},
 	["WARLOCK"] = {
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { "*" },
 	},
 	["DEATHKNIGHT"] = { },
-	["MONK"] ={ },
+	["MONK"] ={
+                [VUHDO_DEBUFF_TYPE_POISON] = { VUHDO_SPELL_ID.DETOX },
+                [VUHDO_DEBUFF_TYPE_DISEASE] = { VUHDO_SPELL_ID.DETOX },
+                [VUHDO_DEBUFF_TYPE_MAGIC] = { VUHDO_SPELL_ID.INTERNAL_MEDICINE },
+	},
 	["DEMONHUNTER"] = { },
 	["EVOKER"] = { },
 };
 
 
 
-VUHDO_SPEC_TO_DEBUFF_ABIL = { };
+VUHDO_SPEC_TO_DEBUFF_ABIL = {
+	[VUHDO_SPELL_ID.SACRED_CLEANSING] = VUHDO_SPELL_ID.PALA_CLEANSE,
+	[VUHDO_SPELL_ID.INTERNAL_MEDICINE] = VUHDO_SPELL_ID.DETOX,
+};
 
 
 
@@ -170,25 +177,25 @@ VUHDO_INIT_IGNORE_DEBUFFS_MOVEMENT = {
 	[VUHDO_SPELL_ID.DEBUFF_DAZED] = true,
 	[VUHDO_SPELL_ID.DEBUFF_FROST_SHOCK] = true,
 	[VUHDO_SPELL_ID.FROSTBOLT_VOLLEY] = true,
---	[(GetSpellName(88184))] = true, -- MOP okay Lethargic Poison
---	[(GetSpellName(87759))] = true, -- MOP okay Shockwave
---	[(GetSpellName(88075))] = true, -- MOP okay Typhoon
---	[(GetSpellName(90938))] = true, -- MOP okay Bloodbolt
---	[(GetSpellName(92007))] = true, -- MOP okay Swirling Vapor
---	[(GetSpellName(88169))] = true, -- MOP okay Frost Blossom
---	[(GetSpellName(87861))] = true, -- MOP okay Fists of Frost
---	[(GetSpellName(83776))] = true, -- MOP okay Dragon's Breath
---	[(GetSpellName(7964))] = true, --  MOP okay Smoke Bomb
---	[(GetSpellName(83785))] = true, -- MOP okay Shockwave
---	[(GetSpellName(81630))] = true, -- MOP okay Viscous Poison
---	[(GetSpellName(82764))] = true, -- MOP okay Wing Clip
---	[(GetSpellName(76825))] = true, -- MOP okay Ice Blast
---	[(GetSpellName(73963))] = true, -- MOP okay Blinding Toxin
---	[(GetSpellName(76508))] = true, -- MOP okay Frostbolt
---	[(GetSpellName(76682))] = true, -- MOP okay Frostbomb
---	[(GetSpellName(12611))] = true, -- MOP okay Cone of Cold
---	[(GetSpellName(76094))] = true, -- MOP okay Curse of Fatigue
---	[(GetSpellName(76604))] = true, -- MOP okay Void Rip
+	[(GetSpellName(88184))] = true, -- MOP okay Lethargic Poison
+	[(GetSpellName(87759))] = true, -- MOP okay Shockwave
+	[(GetSpellName(88075))] = true, -- MOP okay Typhoon
+	[(GetSpellName(90938))] = true, -- MOP okay Bloodbolt
+	[(GetSpellName(92007))] = true, -- MOP okay Swirling Vapor
+	[(GetSpellName(88169))] = true, -- MOP okay Frost Blossom
+	[(GetSpellName(87861))] = true, -- MOP okay Fists of Frost
+	[(GetSpellName(83776))] = true, -- MOP okay Dragon's Breath
+	[(GetSpellName(7964))] = true, --  MOP okay Smoke Bomb
+	[(GetSpellName(83785))] = true, -- MOP okay Shockwave
+	[(GetSpellName(81630))] = true, -- MOP okay Viscous Poison
+	[(GetSpellName(82764))] = true, -- MOP okay Wing Clip
+	[(GetSpellName(76825))] = true, -- MOP okay Ice Blast
+	[(GetSpellName(73963))] = true, -- MOP okay Blinding Toxin
+	[(GetSpellName(76508))] = true, -- MOP okay Frostbolt
+	[(GetSpellName(76682))] = true, -- MOP okay Frostbomb
+	[(GetSpellName(12611))] = true, -- MOP okay Cone of Cold
+	[(GetSpellName(76094))] = true, -- MOP okay Curse of Fatigue
+	[(GetSpellName(76604))] = true, -- MOP okay Void Rip
 };
 
 
@@ -200,17 +207,17 @@ VUHDO_INIT_IGNORE_DEBUFFS_DURATION = {
 	[VUHDO_SPELL_ID.DEBUFF_CONEOFCOLD] = true,
 	[VUHDO_SPELL_ID.DEBUFF_CONCUSSIVESHOT] = true,
 	[VUHDO_SPELL_ID.DEBUFF_FALTER] = true,
---	[(GetSpellName(87759))] = true, -- MOP okay Shockwave
---	[(GetSpellName(90938))] = true, -- MOP okay Bloodbolt
---	[(GetSpellName(92007))] = true, -- MOP pkay Swirling Vapor
---	[(GetSpellName(83776))] = true, -- MOP okay Dragon's Breath
---	[(GetSpellName(7964))] = true, -- MOP okay Smoke Bomb
---	[(GetSpellName(83785))] = true, -- MOP okay Shockwave
---	[(GetSpellName(81630))] = true, -- MOP okay Viscous Poison
---	[(GetSpellName(82670))] = true, -- MOP okay Skull Crack
---	[(GetSpellName(73963))] = true, -- MOP okay Blinding Toxin
---	[(GetSpellName(76508))] = true, -- MOP okay Frostbolt
---	[(GetSpellName(76185))] = true, -- MOP okay Stone Blow
+	[(GetSpellName(87759))] = true, -- MOP okay Shockwave
+	[(GetSpellName(90938))] = true, -- MOP okay Bloodbolt
+	[(GetSpellName(92007))] = true, -- MOP pkay Swirling Vapor
+	[(GetSpellName(83776))] = true, -- MOP okay Dragon's Breath
+	[(GetSpellName(7964))] = true, -- MOP okay Smoke Bomb
+	[(GetSpellName(83785))] = true, -- MOP okay Shockwave
+	[(GetSpellName(81630))] = true, -- MOP okay Viscous Poison
+	[(GetSpellName(82670))] = true, -- MOP okay Skull Crack
+	[(GetSpellName(73963))] = true, -- MOP okay Blinding Toxin
+	[(GetSpellName(76508))] = true, -- MOP okay Frostbolt
+	[(GetSpellName(76185))] = true, -- MOP okay Stone Blow
 };
 
 
@@ -227,15 +234,15 @@ VUHDO_INIT_IGNORE_DEBUFFS_NO_HARM = {
 	[VUHDO_SPELL_ID.DEBUFF_MUTATING_INJECTION] = true,
 	[VUHDO_SPELL_ID.DEBUFF_BANISH] = true,
 	[VUHDO_SPELL_ID.DEBUFF_PHASE_SHIFT] = true,
---	[(GetSpellName(41425))] = true, -- Hypothermia
---	[(GetSpellName(123981))] = true, -- Perdition
---	[(GetSpellName(53753))] = true, -- Nightmare Slumber
---	[(GetSpellName(78993))] = true, -- Concentration
---	[(GetSpellName(105701))] = true, -- Potion of Focus
---	[(GetSpellName(57724))] = true, -- Sated
---	[(GetSpellName(57723))] = true, -- Exhaustion
---	[(GetSpellName(80354))] = true, -- Temporal Displacement
---	[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true,
---	[(GetSpellName(95809))] = true, -- Insanity
+	[(GetSpellName(41425))] = true, -- Hypothermia
+	[(GetSpellName(123981))] = true, -- Perdition
+	[(GetSpellName(53753))] = true, -- Nightmare Slumber
+	[(GetSpellName(78993))] = true, -- Concentration
+	[(GetSpellName(105701))] = true, -- Potion of Focus
+	[(GetSpellName(57724))] = true, -- Sated
+	[(GetSpellName(57723))] = true, -- Exhaustion
+	[(GetSpellName(80354))] = true, -- Temporal Displacement
+	[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true,
+	[(GetSpellName(95809))] = true, -- Insanity
 };
 
