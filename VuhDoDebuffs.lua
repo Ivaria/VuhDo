@@ -1404,10 +1404,9 @@ do
 			sCnt
 		);
 
+		sCnt = sCnt + 1;
+
 	end
-
-	sCnt = sCnt + 1;
-
 end
 
 
