@@ -14,7 +14,6 @@ local VUHDO_SHIELDS = {
 	[1463] = 8, -- Incanter's Ward (mage talent)
 	[114893] = 10, -- Stone Bulwark Totem (shaman talent)
 	[187805] = 15, -- VUHDO_SPELL_ID.BUFF_ETHERALUS
-	[114908] = 10, -- VUHDO_SPELL_ID.SPIRIT_SHELL
 	[47753] = 17, -- VUHDO_SPELL_ID.DIVINE_AEGIS
 	[414133] = 8, -- VUHDO_SPELL_ID.OVERFLOWING_LIGHT
 	[271466] = 10, -- VUHDO_SPELL_ID.LUMINOUS_BARRIER
@@ -175,9 +174,6 @@ local function VUHDO_initShieldValue(aUnit, aShieldName, anAmount, aDuration)
 
 	if sIsPumpAegis and VUHDO_PUMP_SHIELDS[aShieldName] then
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = VUHDO_RAID["player"]["healthmax"] * VUHDO_PUMP_SHIELDS[aShieldName];
-	elseif aShieldName == VUHDO_SPELL_ID.SPIRIT_SHELL then
-		-- as of 9.0.5 Priest 'Spirit Shell' cap is 11 times the caster's current intellect
-		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = select(1, UnitStat("player", 4)) * 11;
 	else
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;
 	end

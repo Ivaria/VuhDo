@@ -31,7 +31,6 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.ATONEMENT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = { ["isHot"] = true, ["nodefault"] = true, },
 	[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = { ["isHot"] = true, ["nohelp"] = true, ["noselftarget"] = true, },
-	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.DIVINE_AEGIS] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.LUMINOUS_BARRIER] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.PREMONITION_OF_SOLACE] = { ["isHot"] = true, },
@@ -62,7 +61,7 @@ VUHDO_SPELLS = {
 
 	-- Monk
 	[VUHDO_SPELL_ID.SOOTHING_MIST] = { ["isHot"] = true, },
-	[VUHDO_SPELL_ID.ENVELOPING_MIST] = {["isHot"] = true, },
+	[VUHDO_SPELL_ID.ENVELOPING_MIST] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.RENEWING_MIST] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ZEN_SPHERE] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ENVELOPING_BREATH] = { ["isHot"] = true, },
@@ -110,7 +109,6 @@ function VUHDO_initFromSpellbook()
 
 	if "PRIEST" == VUHDO_PLAYER_CLASS then
 		VUHDO_PLAYER_HOTS[#VUHDO_PLAYER_HOTS + 1] = VUHDO_SPELL_ID.ECHO_OF_LIGHT;
-		VUHDO_PLAYER_HOTS[#VUHDO_PLAYER_HOTS + 1] = VUHDO_SPELL_ID.SPIRIT_SHELL;
 	end
 
 	if "DRUID" == VUHDO_PLAYER_CLASS then
