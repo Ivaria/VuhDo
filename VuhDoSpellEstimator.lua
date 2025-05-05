@@ -18,9 +18,11 @@ VUHDO_SPELLS = {
 	-- Priest
 	[VUHDO_SPELL_ID.RENEW] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.POWERWORD_SHIELD] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.PRAYER_OF_MENDING] = { ["isHot"] = true, },
 
 	-- Shaman
 	[VUHDO_SPELL_ID.BUFF_EARTH_SHIELD] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.RIPTIDE] = { ["isHot"] = true, },
 
 	-- Druid
 	[VUHDO_SPELL_ID.REJUVENATION] = { ["isHot"] = true, },
@@ -53,7 +55,6 @@ function VUHDO_initFromSpellbook()
 
 	if "PRIEST" == VUHDO_PLAYER_CLASS then
 		VUHDO_PLAYER_HOTS[#VUHDO_PLAYER_HOTS + 1] = VUHDO_SPELL_ID.ECHO_OF_LIGHT;
-		VUHDO_PLAYER_HOTS[#VUHDO_PLAYER_HOTS + 1] = VUHDO_SPELL_ID.SPIRIT_SHELL;
 	end
 
 	if "DRUID" == VUHDO_PLAYER_CLASS then
