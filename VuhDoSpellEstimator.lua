@@ -25,10 +25,10 @@ VUHDO_SPELLS = {
 	[VUHDO_SPELL_ID.ECHO_OF_LIGHT] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.PAIN_SUPPRESSION] = { ["isHot"] = true, ["nodefault"] = true, },
 	[VUHDO_SPELL_ID.GUARDIAN_SPIRIT] = { ["isHot"] = true, ["nohelp"] = true, ["noselftarget"] = true, },
-	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.DIVINE_AEGIS] = { ["isHot"] = true, },
         [VUHDO_SPELL_ID.GRACE] = { ["isHot"] = true, ["nodefault"] = true },
         [VUHDO_SPELL_ID.SERENDIPITY] = { ["isHot"] = true, ["nodefault"] = true },
+	[VUHDO_SPELL_ID.SPIRIT_SHELL] = { ["isHot"] = true, },
 
 	-- Shaman
 	[VUHDO_SPELL_ID.RIPTIDE] = { ["isHot"] = true, },
@@ -49,7 +49,7 @@ VUHDO_SPELLS = {
 
 	-- Monk
 	[VUHDO_SPELL_ID.SOOTHING_MIST] = { ["isHot"] = true, },
-	[VUHDO_SPELL_ID.ENVELOPING_MIST] = {["isHot"] = true, },
+	[VUHDO_SPELL_ID.ENVELOPING_MIST] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.RENEWING_MIST] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.ZEN_SPHERE] = { ["isHot"] = true, },
         [VUHDO_SPELL_ID.SERPENTS_ZEAL] = { ["isHot"] = true },
