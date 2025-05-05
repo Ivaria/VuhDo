@@ -15,6 +15,7 @@ local pairs = pairs;
 VUHDO_SPELLS = {
 	-- Paladin
 	[VUHDO_SPELL_ID.BUFF_BEACON_OF_LIGHT] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.ILLUMINATED_HEALING] = { ["isHot"] = true, },
 
 	-- Priest
 	[VUHDO_SPELL_ID.RENEW] = { ["isHot"] = true },
