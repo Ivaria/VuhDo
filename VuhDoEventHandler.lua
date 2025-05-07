@@ -323,7 +323,7 @@ end
 --
 local function VUHDO_loadCurrentKeyLayout()
 
-	if not VUHDO_CONFIG then
+	if not VUHDO_CONFIG or not VUHDO_SPEC_LAYOUTS then
 		return;
 	end
 
