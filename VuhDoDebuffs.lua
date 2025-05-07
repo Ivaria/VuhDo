@@ -1,5 +1,4 @@
 local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
-local GetSpellInfo = C_Spell.GetSpellInfo;
 
 
 
@@ -37,9 +36,9 @@ VUHDO_DEBUFF_BLACKLIST = {
 --	[GetSpellName(57723)] = true, -- Exhaustion (Heroism)
 --	[GetSpellName(80354)] = true, -- Temporal Displacement (Time Warp)
 --	[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true -- Fatigued (Primal Fury)
-        [GetSpellInfo(69127)] = true, -- MOP okay Chill of the Throne (ständiger debuff)
-        [GetSpellInfo(57724)] = true, -- MOP okay Sated
-        [GetSpellInfo(71328)] = true  -- MOP okay Dungeon Cooldown
+        [GetSpellName(69127)] = true, -- MOP okay Chill of the Throne (ständiger debuff)
+        [GetSpellName(57724)] = true, -- MOP okay Sated
+        [GetSpellName(71328)] = true  -- MOP okay Dungeon Cooldown
 };
 
 
