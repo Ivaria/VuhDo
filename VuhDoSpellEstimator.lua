@@ -27,6 +27,9 @@ VUHDO_SPELLS = {
 	-- Druid
 	[VUHDO_SPELL_ID.REJUVENATION] = { ["isHot"] = true, },
 	[VUHDO_SPELL_ID.REGROWTH] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.LIFEBLOOM] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.WILD_GROWTH] = { ["isHot"] = true, },
+	[VUHDO_SPELL_ID.EFFLORESCENCE] = { ["isHot"] = true, },
 
 	-- Hunter
 	[VUHDO_SPELL_ID.MEND_PET] = { ["isHot"] = true, },
