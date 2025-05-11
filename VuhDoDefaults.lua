@@ -689,13 +689,13 @@ local VUHDO_DEFAULT_CONFIG = {
 
 	["CUSTOM_DEBUFF"] = {
 		["scale"] = 0.8,
-		["animate"] = true,
+		["animate"] = false,
 		["timer"] = true,
 		["max_num"] = 3,
 		["isNoRangeFade"] = false,
 		["isIcon"] = true,
 		["isColor"] = false,
-		["isStacks"] = false,
+		["isStacks"] = true,
 		["isName"] = false, 
 		["isShowFriendly"] = true,
 		["isShowHostile"] = true,
@@ -819,27 +819,27 @@ local VUHDO_DEFAULT_CONFIG = {
 
 		["config"] = {
 			["coh"] = {
-				["enable"] = true,
+				["enable"] = false,
 				["thresh"] = 15000,
 			},
 			["poh"] = {
-				["enable"] = true,
+				["enable"] = false,
 				["thresh"] = 20000,
 			},
 			["ch"] = {
-				["enable"] = true,
+				["enable"] = false,
 				["thresh"] = 15000,
 			},
 			["wg"] = {
-				["enable"] = true,
+				["enable"] = false,
 				["thresh"] = 15000,
 			},
 			["tq"] = {
-				["enable"] = true,
+				["enable"] = false,
 				["thresh"] = 15000,
 			},
 			["lod"] = {
-				["enable"] = true,
+				["enable"] = false,
 				["thresh"] = 8000,
 			},
 			["hr"] = {
@@ -868,7 +868,7 @@ local VUHDO_DEFAULT_CU_DE_STORED_SETTINGS = {
 	["isIcon"] = true,
 	["isColor"] = false,
 --	["SOUND"] = "",
-	["animate"] = true,
+	["animate"] = false,
 	["timer"] = true,
 	["isStacks"] = true,
 	["isAliveTime"] = false,
