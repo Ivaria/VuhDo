@@ -30,7 +30,7 @@ local VUHDO_DEFAULT_PROFILES = {
 			["HIDE_EMPTY_BUTTONS"] = false,
 			["LOCK_CLICKS_THROUGH"] = false,
 			["CUSTOM_DEBUFF"] = {
-				["animate"] = true,
+				["animate"] = false,
 				["scale"] = 0.8,
 				["isIcon"] = true,
 				["SELECTED"] = "",
@@ -59,7 +59,7 @@ local VUHDO_DEFAULT_PROFILES = {
 				},
 				["yAdjust"] = -34,
 				["isColor"] = false,
-				["isStacks"] = false,
+				["isStacks"] = true,
 				["COUNTER_TEXT"] = {
 					["X_ADJUST"] = -10,
 					["USE_MONO"] = false,
