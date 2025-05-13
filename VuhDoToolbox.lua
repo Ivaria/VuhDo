@@ -81,6 +81,18 @@ VUHDO_META_NEW_ARRAY = {
 
 
 --
+function VUHDO_tableCreate(...)
+
+	local tTable = { };
+
+	return tTable;
+
+end
+local tcreate = table.create or VUHDO_tableCreate;
+
+
+
+--
 local tSpellInfo;
 function VUHDO_getSpellInfo(aSpellId)
 
@@ -1867,19 +1879,33 @@ end
 
 
 
+--
+local VUHDO_REGISTERED_TABLE_POOLS = {};
+
+
+
+--
 function VUHDO_cleanupListNodeDelegate(aNode)
 
 	aNode["auraInstanceId"] = nil;
 	aNode["prev"] = nil;
+
+	return;
 
 end
 
 
 
 --
+local tNode;
 function VUHDO_createListNodeDelegate()
 
-    return { ["auraInstanceId"] = nil, ["prev"] = nil };
+	tNode = tcreate(0, 2);
+
+	tNode["auraInstanceId"] = nil;
+	tNode["prev"] = nil;
+
+	return tNode;
 
 end
 
@@ -1888,14 +1914,17 @@ end
 --
 VUHDO_TABLE_POOL_PROFILE = false;
 local VUHDO_DEFAULT_MAX_POOL_SIZE = 200;
-function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
+local tMaxPoolSize;
+function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
+
+	tMaxPoolSize = aMaxPoolSize or VUHDO_DEFAULT_MAX_POOL_SIZE;
 
 	local tPool = {
-		["poolData"] = {},
-		["maxSize"] = aMaxPoolSize or VUHDO_DEFAULT_MAX_POOL_SIZE,
-		["createDelegate"] = aCreateDelegate or function() return { } end,
+		["poolData"] = tcreate(tMaxPoolSize),
+		["maxSize"] = tMaxPoolSize,
+		["createDelegate"] = aCreateDelegate or function() return { }; end,
 		["cleanupDelegate"] = aCleanupDelegate,
-		["_twipe"] = _G.twipe or table.wipe,
+		["_twipe"] = twipe,
 		["metrics"] = {
 			["hits"] = 0,
 			["misses"] = 0,
@@ -1906,7 +1935,7 @@ function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
 
 	local tIsProfile;
 	local tMetrics;
-	local tNumInPool;
+	local tPoolSize;
 	local tObject;
 	function tPool:get()
 
@@ -1916,12 +1945,11 @@ function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
 			tMetrics = self["metrics"];
 		end
 
-		tNumInPool = #self["poolData"];
+		tPoolSize = #self["poolData"];
 
-		if tNumInPool > 0 then
-			tObject = self["poolData"][tNumInPool];
-
-			self["poolData"][tNumInPool] = nil;
+		if tPoolSize > 0 then
+			tObject = self["poolData"][tPoolSize];
+			self["poolData"][tPoolSize] = nil;
 
 			if tIsProfile then
 				tMetrics["hits"] = tMetrics["hits"] + 1;
@@ -1940,7 +1968,7 @@ function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
 
 	local tIsProfile;
 	local tMetrics;
-	local tCurSize;
+	local tPoolSize;
 	function tPool:release(aObject)
 
 		tIsProfile = VUHDO_TABLE_POOL_PROFILE;
@@ -1949,9 +1977,9 @@ function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
 			tMetrics = self["metrics"];
 		end
 
-		tCurSize = #self["poolData"];
+		tPoolSize = #self["poolData"];
 
-		if aObject and tCurSize < self["maxSize"] then
+		if aObject and tPoolSize < self["maxSize"] then
 			if self["cleanupDelegate"] then
 				self["cleanupDelegate"](aObject);
 			else
@@ -1961,29 +1989,30 @@ function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
 			tinsert(self["poolData"], aObject);
 
 			if tIsProfile then
-				tMetrics["peakIdleCount"] = max(tMetrics["peakIdleCount"], tCurSize + 1);
+				tMetrics["peakIdleCount"] = max(tMetrics["peakIdleCount"], tPoolSize + 1);
 			end
 		elseif aObject and tIsProfile then
 			tMetrics["rejectedReleases"] = tMetrics["rejectedReleases"] + 1;
 		end
 
+		return;
+
 	end
 
 	local tMetrics;
-	local tCurSize;
+	local tIdleCount;
 	function tPool:getMetrics()
 
 		tMetrics = self["metrics"];
-
-	        tCurSize = #self["poolData"];
+		tIdleCount = #self["poolData"];
 
 		return {
-			hits = tMetrics.hits,
-			misses = tMetrics.misses,
-			peakIdleCount = tMetrics.peakIdleCount,
-			rejectedReleases = tMetrics.rejectedReleases,
-			currentIdle = tCurSize,
-			maxSize = self["maxSize"],
+			["hits"] = tMetrics["hits"],
+			["misses"] = tMetrics["misses"],
+			["peakIdleCount"] = tMetrics["peakIdleCount"],
+			["rejectedReleases"] = tMetrics["rejectedReleases"],
+			["currentIdle"] = tIdleCount,
+			["maxSize"] = self["maxSize"],
 		};
 
 	end
@@ -1992,12 +2021,19 @@ function VUHDO_createTablePool(aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
 	function tPool:resetMetrics()
 
 		tMetrics = self["metrics"];
+		tMetrics["hits"] = 0;
+		tMetrics["misses"] = 0;
+		tMetrics["peakIdleCount"] = #self["poolData"];
+		tMetrics["rejectedReleases"] = 0;
 
-		tMetrics.hits = 0;
-		tMetrics.misses = 0;
-		tMetrics.peakIdleCount = #self["poolData"];
-		tMetrics.rejectedReleases = 0;
+		return;
 
+	end
+
+	if type(aPoolName) == "string" and aPoolName ~= "" then
+		VUHDO_REGISTERED_TABLE_POOLS[aPoolName] = tPool;
+	else
+		VUHDO_Msg("Warning: An unnamed table pool was created.");
 	end
 
 	return tPool;
@@ -2007,39 +2043,34 @@ end
 
 
 --
-local tPools = { };
 local function VUHDO_getTablePools()
 
-	tPools["DebuffAura"] = VUHDO_getDebuffAuraPool();
-	tPools["DebuffInfo"] = VUHDO_getDebuffInfoPool();
-	tPools["HotInfo"] = VUHDO_getHotInfoPool();
-	tPools["IconArray"] = VUHDO_getIconArrayPool();
-	tPools["ListNode"] = VUHDO_getListNodePool();
-
-	return tPools;
+	return VUHDO_REGISTERED_TABLE_POOLS;
 
 end
 
 
 
 --
-local tMetrics;
+local tPoolStats;
 function VUHDO_printPoolStats()
 
-	print("|cffFFD100VuhDo Table Pool Stats:|r");
+	VUHDO_Msg("|cffFFD100Table Pool Stats:|r");
 
 	for tName, tPool in pairs(VUHDO_getTablePools()) do
 		if tPool and tPool.getMetrics then
-			tMetrics = tPool:getMetrics();
+			tPoolStats = tPool:getMetrics();
 
-			print(format("  Pool[%s] (Max:%d CurIdle:%d PeakIdle:%d): Hits=%d Misses=%d Rejected=%d",
-				tName, tMetrics["maxSize"], tMetrics["currentIdle"], tMetrics["peakIdleCount"],
-				tMetrics["hits"], tMetrics["misses"], tMetrics["rejectedReleases"]));
+			VUHDO_Msg(string.format("    Pool[%s] (Max:%d CurIdle:%d PeakIdle:%d): Hits=%d Misses=%d Rejected=%d",
+				tName, tPoolStats["maxSize"], tPoolStats["currentIdle"], tPoolStats["peakIdleCount"],
+				tPoolStats["hits"], tPoolStats["misses"], tPoolStats["rejectedReleases"]));
 		else
-			print(format("  Pool[%s]: Not available or invalid.", tName))
+			VUHDO_Msg(string.format("    Pool[%s]: Not available or invalid.", tName));
 		end
 
 	end
+
+	return;
 
 end
 
@@ -2048,11 +2079,13 @@ end
 --
 function VUHDO_resetPoolStats()
 
-	for tName, tPool in pairs(VUHDO_getTablePools()) do
+	for _, tPool in pairs(VUHDO_getTablePools()) do
 		if tPool and tPool.resetMetrics then
 			tPool:resetMetrics();
 		end
 	end
+
+	return;
 
 end
 
