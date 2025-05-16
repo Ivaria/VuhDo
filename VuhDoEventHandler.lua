@@ -64,6 +64,7 @@ local UnitIsCharmed = UnitIsCharmed;
 local UnitCanAttack = UnitCanAttack;
 local UnitName = UnitName;
 local UnitIsEnemy = UnitIsEnemy;
+local GetSpecialization = VUHDO_getSpecialization;
 local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
 local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
 local HasFullControl = HasFullControl;
