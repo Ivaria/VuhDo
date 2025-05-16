@@ -1,4 +1,6 @@
 local GetSpellName = C_Spell.GetSpellName or VUHDO_getSpellName;
+local GetSpecialization = VUHDO_getSpecialization;
+local GetSpecializationInfo = VUHDO_getSpecializationInfo;
 local pairs = pairs;
 local _;
 
