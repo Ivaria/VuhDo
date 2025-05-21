@@ -1858,7 +1858,7 @@ end
 
 
 --
-local VUHDO_REGISTERED_TABLE_POOLS = {};
+local VUHDO_REGISTERED_TABLE_POOLS = { };
 
 
 
