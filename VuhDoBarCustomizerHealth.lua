@@ -661,7 +661,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 	tUnit, tInfo = VUHDO_getDisplayUnit(aButton);
  	tHealthBar = VUHDO_getHealthBar(aButton, 1);
 
-	if not tInfo then
+	if not tInfo or not tInfo["name"] then
 		VUHDO_getBarText(tHealthBar):SetText(
 			   "focus" == tUnit and VUHDO_I18N_NO_FOCUS
 			or "target" == tUnit and VUHDO_I18N_NO_TARGET

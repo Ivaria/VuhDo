@@ -254,6 +254,7 @@ end
 --
 local tNow;
 function VUHDO_updateAllDebuffIcons(anIsFrequent)
+
 	tNow = GetTime();
 
 	for tUnit, tAllDebuffInfos in pairs(VUHDO_DEBUFF_ICONS) do
@@ -264,8 +265,54 @@ function VUHDO_updateAllDebuffIcons(anIsFrequent)
 				end
 			end
 		end
-
 	end
+
+end
+
+
+
+--
+local tNow;
+local tUnitDebuffInfos;
+function VUHDO_updateUnitDebuffIcons(aUnit, anIsFrequent)
+
+	if not aUnit or not VUHDO_DEBUFF_ICONS then
+		return;
+	end
+
+	tNow = GetTime();
+
+	tUnitDebuffInfos = VUHDO_DEBUFF_ICONS[aUnit];
+
+	if tUnitDebuffInfos then
+		for tIndex, tDebuffInfo in pairs(tUnitDebuffInfos) do
+			if not anIsFrequent or tDebuffInfo[2] + 1.21 >= tNow then
+				for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+					VUHDO_animateDebuffIcon(tButton, tDebuffInfo, tNow, tIndex + 39, false, aUnit);
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllDebuffIcons(anIsFrequent, aPriority)
+
+	if not VUHDO_DEBUFF_ICONS then
+		return;
+	end
+
+	for tUnit, _ in pairs(VUHDO_DEBUFF_ICONS) do
+		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_DEBUFF_ICONS, tUnit, anIsFrequent, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	end
+
+	return;
+
 end
 
 
@@ -481,4 +528,3 @@ function VUHDO_getDebuffIcons()
 	return VUHDO_DEBUFF_ICONS;
 
 end
-

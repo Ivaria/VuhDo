@@ -1890,7 +1890,7 @@ end
 
 
 --
-VUHDO_TABLE_POOL_PROFILE = false;
+local VUHDO_TABLE_POOL_PROFILE = false;
 local VUHDO_DEFAULT_MAX_POOL_SIZE = 200;
 local tMaxPoolSize;
 function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
@@ -1908,7 +1908,7 @@ function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanu
 			["misses"] = 0,
 			["peakIdleCount"] = 0,
 			["rejectedReleases"] = 0,
-		}
+		},
 	};
 
 	local tIsProfile;
@@ -1999,6 +1999,7 @@ function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanu
 	function tPool:resetMetrics()
 
 		tMetrics = self["metrics"];
+
 		tMetrics["hits"] = 0;
 		tMetrics["misses"] = 0;
 		tMetrics["peakIdleCount"] = #self["poolData"];
@@ -2031,7 +2032,13 @@ end
 
 --
 local tPoolStats;
-function VUHDO_printPoolStats()
+function VUHDO_printPoolMetrics()
+
+	if not VUHDO_TABLE_POOL_PROFILE then
+		VUHDO_Msg("Table pool profiling is currently disabled.");
+
+		return;
+	end
 
 	VUHDO_Msg("|cffFFD100Table Pool Stats:|r");
 
@@ -2054,12 +2061,33 @@ end
 
 
 --
-function VUHDO_resetPoolStats()
+function VUHDO_resetPoolMetrics()
 
 	for _, tPool in pairs(VUHDO_getTablePools()) do
 		if tPool and tPool.resetMetrics then
 			tPool:resetMetrics();
 		end
+	end
+
+	if VUHDO_TABLE_POOL_PROFILE then
+		VUHDO_Msg("Table pool metrics reset.");
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_setPoolProfiling(anIsEnabled)
+
+	VUHDO_TABLE_POOL_PROFILE = anIsEnabled;
+
+	if anIsEnabled then
+		VUHDO_Msg("Table pool profiling enabled.");
+	else
+		VUHDO_Msg("Table pool profiling disabled.");
 	end
 
 	return;

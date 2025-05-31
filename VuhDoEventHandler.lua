@@ -42,49 +42,88 @@ local VUHDO_RAID;
 local VUHDO_PANEL_SETUP;
 VUHDO_RELOAD_UI_IS_LNF = false;
 
-local VUHDO_DEFER_HEALTH = 1;
-local VUHDO_DEFER_BOUQUETS = 2;
-local VUHDO_DEFER_SHIELD_BAR = 3;
-local VUHDO_DEFER_HEAL_ABSORB_BAR = 4;
-local VUHDO_DEFER_HEALTH_BARS_FOR = 5;
+VUHDO_HANDLER_PROFILING_METRICS = {
+	["sessionStartTime"] = 0,
+	["OnUpdate"] = {
+		["totalTimeUs"] = 0,
+		["invocationCount"] = 0,
+	},
+	["OnEvent"] = { },
+};
+VUHDO_HANDLER_PROFILING_ENABLED = false;
+
+VUHDO_DEFERRED_TASK_PRIORITY_LOW = 1;
+VUHDO_DEFERRED_TASK_PRIORITY_NORMAL = 2;
+VUHDO_DEFERRED_TASK_PRIORITY_HIGH = 3;
+VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL = 4;
+
+VUHDO_DEFER_UPDATE_HEALTH = 1;
+VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR = 2;
+VUHDO_DEFER_SET_HEALTH = 3;
+VUHDO_DEFER_UPDATE_SHIELD_BAR = 4;
+VUHDO_DEFER_UPDATE_HEAL_ABSORB_BAR = 5;
+VUHDO_DEFER_UPDATE_MANA_BARS = 6;
+VUHDO_DEFER_UPDATE_UNIT_HOTS = 7;
+VUHDO_DEFER_INIT_ALL_EVENT_BOUQUETS = 8;
+VUHDO_DEFER_UPDATE_BOUQUETS_FOR_EVENT = 9;
+VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET = 10;
+VUHDO_DEFER_UPDATE_UNIT_DEBUFF_ICONS = 11;
+VUHDO_DEFER_UPDATE_UNIT_AGGRO = 12;
+VUHDO_DEFER_UPDATE_UNIT_RANGE = 13;
+VUHDO_DEFER_UPDATE_ALL_CLUSTERS = 14;
+VUHDO_DEFER_UPDATE_CLUSTER_HIGHLIGHTS = 15;
+VUHDO_DEFER_AOE_UPDATE_ALL = 16;
+VUHDO_DEFER_UPDATE_SPELL_TRACE = 17;
+VUHDO_DEFER_UPDATE_ALL_RAID_BARS = 18;
 
 local VUHDO_DEFERRED_TASK_TYPES = {
-	VUHDO_DEFER_HEALTH,
-	VUHDO_DEFER_BOUQUETS,
-	VUHDO_DEFER_SHIELD_BAR,
-	VUHDO_DEFER_HEAL_ABSORB_BAR,
-	VUHDO_DEFER_HEALTH_BARS_FOR,
+	VUHDO_DEFER_UPDATE_HEALTH,
+	VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR,
+	VUHDO_DEFER_SET_HEALTH,
+	VUHDO_DEFER_UPDATE_SHIELD_BAR,
+	VUHDO_DEFER_UPDATE_HEAL_ABSORB_BAR,
+	VUHDO_DEFER_UPDATE_MANA_BARS,
+	VUHDO_DEFER_UPDATE_UNIT_HOTS,
+	VUHDO_DEFER_INIT_ALL_EVENT_BOUQUETS,
+	VUHDO_DEFER_UPDATE_BOUQUETS_FOR_EVENT,
+	VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET,
+	VUHDO_DEFER_UPDATE_UNIT_DEBUFF_ICONS,
+	VUHDO_DEFER_UPDATE_UNIT_AGGRO,
+	VUHDO_DEFER_UPDATE_UNIT_RANGE,
+	VUHDO_DEFER_UPDATE_ALL_CLUSTERS,
+	VUHDO_DEFER_UPDATE_CLUSTER_HIGHLIGHTS,
+	VUHDO_DEFER_AOE_UPDATE_ALL,
+	VUHDO_DEFER_UPDATE_SPELL_TRACE,
+	VUHDO_DEFER_UPDATE_ALL_RAID_BARS,
 };
 
 local sDeferredTaskDelegates;
+local sNextTaskEnqueueOrder = 0;
 
 local VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
 
--- game caps
 local VUHDO_MAX_EXEC_TIME_COMBAT_US = 200 * 1000;
 local VUHDO_MAX_EXEC_TIME_OOC_US = 1500 * 1000;
--- safe fraction of the game's hard cap for the queue's ABS_MAX_QUEUE_TIME_US.
--- this acts as an additional sanity cap if the configured ABS_MAX_QUEUE_TIME_US is very high.
-local VUHDO_SAFER_FRACTION_OF_GAME_CAP = 0.01; -- e.g., 1% (max 2ms in combat, 15ms OOC for the queue chunk)
+local VUHDO_MAX_EXEC_TIME_FRACTION = 0.01;
 
 local VUHDO_DEFERRED_TASK_CONFIG = {
-	["TARGET_EXEC_TIME_US"] = 200,
-	["MAX_EXEC_TIME_US"] = 500, -- dynamically calculated
+	["TARGET_EXEC_TIME_US"] = 1000,
+	["MAX_EXEC_TIME_US"] = 2000,
 	["MIN_TASKS_PER_FRAME"] = 1,
-	["INITIAL_TASKS_PER_FRAME"] = 3,
+	["INITIAL_TASKS_PER_FRAME"] = 15,
 	["MAX_TASKS_PER_FRAME"] = 25,
 	["ADJUST_INTERVAL_SECS"] = 1.5,
 	["INCREASE_STEP"] = 1,
 	["DECREASE_STEP_NORMAL"] = 1,
 	["DECREASE_STEP_LARGE"] = 0.75,
-	["IDLE_TASK_INC_THRESHOLD_US"] = 50, -- dynamically calculated
+	["IDLE_TASK_INC_THRESHOLD_US"] = 50,
 	["DEFAULT_TARGET_FPS"] = 120,
 	["MIN_FPS_FOR_BUDGET_CALC"] = 30,
 	["MAX_FPS_FOR_BUDGET_CALC"] = 300,
-	["FRACTION_OF_FRAME_BUDGET_FOR_QUEUE"] = 0.0075,
-	["TARGET_TIME_RATIO_OF_MAX"] = 0.4,
-	["ABS_MAX_QUEUE_TIME_US"] = 750, -- absolute max for a queue chunk
-	["ABS_MIN_QUEUE_TIME_US"] = 75,  -- absolute min for a queue chunk
+	["FRAME_BUDGET_FRACTION"] = 0.24,
+	["TARGET_TIME_RATIO_OF_MAX"] = 0.5,
+	["ABS_MAX_QUEUE_TIME_US"] = 2500,
+	["ABS_MIN_QUEUE_TIME_US"] = 75,
 };
 
 local VUHDO_DEFERRED_TASK_STATE = {
@@ -108,38 +147,27 @@ local VUHDO_DEFERRED_TASK_STATE = {
 		["totalTasksProcessedSession"] = 0,
 		["totalProcessingTimeUsSession"] = 0,
 		["chunksExecutedSuccessfully"] = 0,
-
 		["minQueueLength"] = 999999,
 		["maxQueueLength"] = 0,
 		["sumQueueLength"] = 0,
 		["queueLengthSamples"] = 0,
-
 		["minTasksInChunk"] = 999999,
 		["maxTasksInChunk"] = 0,
-
 		["minChunkTimeUs"] = 999999999,
 		["maxChunkTimeUs"] = 0,
-
 		["hardStopsHit"] = 0,
 		["budgetExceededStops"] = 0,
-
-		["tasksEnqueuedByType"] = {},
-		["tasksProcessedByTypeSession"] = {},
+		["tasksEnqueuedByType"] = { },
+		["tasksProcessedByTypeSession"] = { },
+		["totalTimeUsByTypeSession"] = { },
 	},
 };
 
 local VUHDO_DEFERRED_TASK_POOL;
-local VUHDO_DEFERRED_TASK_POOL_MAX_SIZE = 200;
+local VUHDO_DEFERRED_TASK_POOL_MAX_SIZE = 1500;
 
-local VUHDO_TASK_QUEUE_NODE_POOL = nil;
-local VUHDO_TASK_QUEUE_NODE_POOL_MAX_SIZE = 200;
-
-local VUHDO_TASK_QUEUE_LIST = {
-	["head"] = nil,
-	["tail"] = nil,
-	["count"] = 0,
-};
-local VUHDO_TASK_QUEUE_MAP = {};
+local VUHDO_TASK_PRIORITY_QUEUE = { };
+local VUHDO_TASK_QUEUE_MAP = { };
 
 
 local VUHDO_parseAddonMessage;
@@ -149,23 +177,210 @@ local VUHDO_updateAllOutRaidTargetButtons;
 local VUHDO_updateAllRaidTargetIndices;
 local VUHDO_updateDirectionFrame;
 local VUHDO_updateHealth;
+local VUHDO_updateHealthBarsFor;
+local VUHDO_setHealth;
+local VUHDO_updateShieldBar;
+local VUHDO_updateHealAbsorbBar;
 local VUHDO_updateManaBars;
 local VUHDO_updateTargetBars;
-local VUHDO_updateAllRaidBars;
+local VUHDO_initAllEventBouquets;
+local VUHDO_updateBouquetsForEvent;
 local VUHDO_updateAllHoTs;
 local VUHDO_updateAllCyclicBouquets;
 local VUHDO_updateAllDebuffIcons;
+local VUHDO_updateAllAggro;
+local VUHDO_updateUnitAggro;
+local VUHDO_updateAllRange;
+local VUHDO_updateUnitRange;
 local VUHDO_updateAllClusters;
-local VUHDO_aoeUpdateAll;
-local VUHDO_getUnitZoneName;
 local VUHDO_updateClusterHighlights;
+local VUHDO_aoeUpdateAll;
+local VUHDO_updateSpellTrace;
+local VUHDO_updateAllRaidBars;
 local VUHDO_updateCustomDebuffTooltip;
+local VUHDO_getUnitZoneName;
 local VUHDO_getCurrentMouseOver;
+
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
-local VUHDO_updateBouquetsForEvent;
-local VUHDO_updateShieldBar;
-local VUHDO_updateHealAbsorbBar;
-local VUHDO_updateHealthBarsFor;
+
+
+
+--
+local function VUHDO_setHandlerProfiling(anIsEnabled)
+
+	VUHDO_HANDLER_PROFILING_ENABLED = anIsEnabled;
+
+	if anIsEnabled then
+		VUHDO_Msg("Handler profiling is enabled.");
+	else
+		VUHDO_Msg("Handler profiling is disabled.");
+	end
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_resetHandlerProfilingMetrics()
+
+	if not VUHDO_HANDLER_PROFILING_METRICS then
+		VUHDO_HANDLER_PROFILING_METRICS = {
+			["sessionStartTime"] = 0,
+			["OnUpdate"] = {
+				["totalTimeUs"] = 0,
+				["invocationCount"] = 0,
+			},
+			["OnEvent"] = { },
+		};
+	end
+
+	VUHDO_HANDLER_PROFILING_METRICS["sessionStartTime"] = GetTime();
+
+	if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+		VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] = { };
+	end
+
+	VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] = 0;
+	VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = 0;
+
+	if VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] then
+		twipe(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]);
+	else
+		VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] = { };
+	end
+
+	if VUHDO_HANDLER_PROFILING_ENABLED then
+		VUHDO_Msg("Handler profiling metrics reset.");
+	end
+
+	return;
+
+end
+
+
+
+--
+local tMetrics;
+local tSessionDuration;
+local tOnUpdateMetrics;
+local tAvgOnUpdateTimeUs;
+local tEventStats;
+local tTotalTime;
+local tCount;
+local tAvgTime;
+local tInitialCheckCondition;
+local tMetricsExist;
+local tHasEventData;
+local function VUHDO_printHandlerProfilingMetrics()
+
+	tMetricsExist = VUHDO_HANDLER_PROFILING_METRICS and
+					VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] and
+					VUHDO_HANDLER_PROFILING_METRICS["OnEvent"];
+
+	tInitialCheckCondition = false;
+
+	if tMetricsExist then
+		tHasEventData = false;
+
+		for _ in pairs(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]) do
+			tHasEventData = true;
+			break;
+		end
+
+		if VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] == 0 and not tHasEventData then
+			tInitialCheckCondition = true;
+		end
+	else
+		tInitialCheckCondition = true;
+	end
+
+	if not VUHDO_HANDLER_PROFILING_ENABLED and tInitialCheckCondition then
+		VUHDO_Msg("Handler profiling is currently disabled.");
+
+		return;
+	end
+
+	if not tMetricsExist then
+		VUHDO_Msg("Handler profiling metrics are missing or incomplete.");
+
+		return;
+	end
+
+	tMetrics = VUHDO_HANDLER_PROFILING_METRICS;
+	tSessionDuration = GetTime() - tMetrics["sessionStartTime"];
+
+	if tSessionDuration < 0 then
+		tSessionDuration = 0;
+	end
+
+	VUHDO_Msg("|cffFFD100--- Handler Profiling Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
+
+	tOnUpdateMetrics = tMetrics["OnUpdate"];
+	tAvgOnUpdateTimeUs = 0;
+
+	if tOnUpdateMetrics["invocationCount"] > 0 then
+		tAvgOnUpdateTimeUs = tOnUpdateMetrics["totalTimeUs"] / tOnUpdateMetrics["invocationCount"];
+	end
+
+	VUHDO_Msg(format("|cffFFA500** VUHDO_OnUpdate (excluding deferred tasks):|r Total: %.0f us (%.2f ms), Invocations: %d, Avg: %.2f us",
+		tOnUpdateMetrics["totalTimeUs"],
+		tOnUpdateMetrics["totalTimeUs"] / 1000,
+		tOnUpdateMetrics["invocationCount"],
+		tAvgOnUpdateTimeUs
+	));
+
+	VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type):**|r");
+
+	tEventStats = { };
+
+	if tMetrics["OnEvent"] then
+		for tEventName, tEventData in pairs(tMetrics["OnEvent"]) do
+			tTotalTime = tEventData["totalTimeUs"] or 0;
+			tCount = tEventData["invocationCount"] or 0;
+
+			tAvgTime = 0;
+
+			if tCount > 0 then
+				tAvgTime = tTotalTime / tCount;
+			end
+
+			tinsert(tEventStats, {
+				["name"] = tEventName,
+				["totalTime"] = tTotalTime,
+				["count"] = tCount,
+				["avgTime"] = tAvgTime,
+			});
+		end
+	end
+
+	if #tEventStats == 0 then
+		VUHDO_Msg("  No OnEvent calls recorded or metrics reset.");
+	else
+		table.sort(tEventStats, function(aEntry, bEntry) return aEntry["totalTime"] > bEntry["totalTime"]; end);
+
+		VUHDO_Msg("  Sorted by Total Time (Event: Total us, Count, Avg us/call)");
+
+		for _, tStats in ipairs(tEventStats) do
+			VUHDO_Msg(format("  %s: Total: %.2f ms, Count: %d, Avg: %.2f us",
+				tStats["name"],
+				tStats["totalTime"] / 1000,
+				tStats["count"],
+				tStats["avgTime"]
+			));
+		end
+	end
+
+	VUHDO_Msg("|cffFFD100--- End of Handler Metrics ---|r");
+
+	if not VUHDO_HANDLER_PROFILING_ENABLED then
+		VUHDO_Msg("Handler Profiling is currently DISABLED. Stats shown are from last enabled session.");
+	end
+
+	return;
+
+end
 
 
 
@@ -188,6 +403,149 @@ end
 
 
 --
+function VUHDO_deferUpdateHealth(aUnit, aMode, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEALTH, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateBouquetsForEvent(aUnit, aMode, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_BOUQUETS_FOR_EVENT, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateShieldBar(aUnit, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_SHIELD_BAR, aUnit, 1, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateHealAbsorbBar(aUnit, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEAL_ABSORB_BAR, aUnit, 1, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateHealthBarsFor(aUnit, aMode, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllClusters(aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_ALL_CLUSTERS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferAoeUpdateAll(aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_AOE_UPDATE_ALL, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateSpellTrace(aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_SPELL_TRACE, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllRaidBars(aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_ALL_RAID_BARS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferInitAllEventBouquets(aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_INIT_ALL_EVENT_BOUQUETS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateManaBars(aUnit, aMode, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_MANA_BARS, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferSetHealth(aUnit, aMode, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_SET_HEALTH, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateClusterHighlights(aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_CLUSTER_HIGHLIGHTS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+
+	return;
+
+end
+
+
+
+--
 local tNewTask;
 local function VUHDO_createDeferredTaskDelegate()
 
@@ -195,7 +553,10 @@ local function VUHDO_createDeferredTaskDelegate()
 		["unit"] = nil,
 		["mode"] = nil,
 		["delegate"] = nil,
-		["type"] = nil
+		["type"] = nil,
+		["priority"] = VUHDO_DEFERRED_TASK_PRIORITY_NORMAL,
+		["enqueueOrder"] = 0,
+		["heapIndex"] = 0
 	};
 
 	return tNewTask;
@@ -214,6 +575,9 @@ local function VUHDO_cleanupDeferredTaskDelegate(aTask)
 	tCleanupTask["mode"] = nil;
 	tCleanupTask["delegate"] = nil;
 	tCleanupTask["type"] = nil;
+	tCleanupTask["priority"] = VUHDO_DEFERRED_TASK_PRIORITY_NORMAL;
+	tCleanupTask["enqueueOrder"] = 0;
+	tCleanupTask["heapIndex"] = 0;
 
 	return;
 
@@ -221,174 +585,189 @@ end
 
 
 
---
-local tNewNode;
-local function VUHDO_createTaskQueueNodeDelegate()
-
-	tNewNode = {
-		["task"] = nil,
-		["prev"] = nil,
-		["next"] = nil
-	};
-
-	return tNewNode;
-
-end
-
-
 
 --
-local tCleanupNode;
-local function VUHDO_cleanupTaskQueueNodeDelegate(aNode)
-
-	tCleanupNode = aNode;
-
-	tCleanupNode["task"] = nil;
-	tCleanupNode["prev"] = nil;
-	tCleanupNode["next"] = nil;
-
-	return;
-
-end
-
-
-
---
-local function VUHDO_getTaskKey(aType, aUnit, aMode)
-
-	return tostring(aType) .. ":" .. aUnit .. ":" .. tostring(aMode);
-
-end
-
-
-
---
-local tNodeToRemove;
-local function VUHDO_removeTaskQueueNode(aNode)
-
-	tNodeToRemove = aNode;
-
-	if not tNodeToRemove then
-		return;
-	end
-
-	if tNodeToRemove["prev"] then
-		tNodeToRemove["prev"]["next"] = tNodeToRemove["next"];
-	else
-		VUHDO_TASK_QUEUE_LIST["head"] = tNodeToRemove["next"];
-	end
-
-	if tNodeToRemove["next"] then
-		tNodeToRemove["next"]["prev"] = tNodeToRemove["prev"];
-	else
-		VUHDO_TASK_QUEUE_LIST["tail"] = tNodeToRemove["prev"];
-	end
-
-	if not VUHDO_TASK_QUEUE_LIST["head"] then
-		VUHDO_TASK_QUEUE_LIST["tail"] = nil;
-	end
-
-	if not VUHDO_TASK_QUEUE_LIST["tail"] then
-		VUHDO_TASK_QUEUE_LIST["head"] = nil;
-	end
-
-	tNodeToRemove["prev"] = nil;
-	tNodeToRemove["next"] = nil;
-
-	VUHDO_TASK_QUEUE_LIST["count"] = VUHDO_TASK_QUEUE_LIST["count"] - 1;
-
-	return;
-
-end
-
-
-
---
-local tNodeToAdd;
-local function VUHDO_addTaskQueueNode(aNode)
-
-	tNodeToAdd = aNode;
-
-	if not tNodeToAdd then
-		return;
-	end
-
-	tNodeToAdd["prev"] = nil;
-	tNodeToAdd["next"] = VUHDO_TASK_QUEUE_LIST["head"];
-
-	if VUHDO_TASK_QUEUE_LIST["head"] then
-		VUHDO_TASK_QUEUE_LIST["head"]["prev"] = tNodeToAdd;
-	end
-
-	VUHDO_TASK_QUEUE_LIST["head"] = tNodeToAdd;
-
-	if not VUHDO_TASK_QUEUE_LIST["tail"] then
-		VUHDO_TASK_QUEUE_LIST["tail"] = tNodeToAdd;
-	end
-
-	VUHDO_TASK_QUEUE_LIST["count"] = VUHDO_TASK_QUEUE_LIST["count"] + 1;
-
-	return;
-
-end
-
-
-
---
-local tNodeToMove;
-local tOriginalPrev;
-local tOriginalNext;
-local function VUHDO_moveTaskQueueNode(aNode)
-
-	tNodeToMove = aNode;
-
-	if not tNodeToMove or tNodeToMove == VUHDO_TASK_QUEUE_LIST["head"] then
-		return;
-	end
-
-	tOriginalPrev = tNodeToMove["prev"];
-	tOriginalNext = tNodeToMove["next"];
-
-	if tOriginalPrev then
-		tOriginalPrev["next"] = tOriginalNext;
-	else
-		VUHDO_TASK_QUEUE_LIST["head"] = tOriginalNext;
-	end
-
-	if tOriginalNext then
-		tOriginalNext["prev"] = tOriginalPrev;
-	else
-		VUHDO_TASK_QUEUE_LIST["tail"] = tOriginalPrev;
-	end
-
-	if not VUHDO_TASK_QUEUE_LIST["head"] then
-		VUHDO_TASK_QUEUE_LIST["tail"] = nil;
-	end
-
-	if not VUHDO_TASK_QUEUE_LIST["tail"] then
-		VUHDO_TASK_QUEUE_LIST["head"] = nil;
-	end
-
-	tNodeToMove["prev"] = nil;
-	tNodeToMove["next"] = VUHDO_TASK_QUEUE_LIST["head"];
-
-	if VUHDO_TASK_QUEUE_LIST["head"] then
-		VUHDO_TASK_QUEUE_LIST["head"]["prev"] = tNodeToMove;
-	end
-
-	VUHDO_TASK_QUEUE_LIST["head"] = tNodeToMove;
-
-	if not VUHDO_TASK_QUEUE_LIST["tail"] then
-		VUHDO_TASK_QUEUE_LIST["tail"] = tNodeToMove;
-	end
-
-	return;
-
-end
-
-
-
 do
+	--
+	local function VUHDO_getTaskKey(aType, aUnit, aMode)
+
+		return tostring(aType) .. "|" .. (aUnit or "") .. "|" .. tostring(aMode or "");
+
+	end
+
+
+
+	--
+	local function VUHDO_heapCompare(aTaskA, aTaskB)
+
+		if aTaskA["priority"] ~= aTaskB["priority"] then
+			return aTaskA["priority"] > aTaskB["priority"];
+		end
+
+		return aTaskA["enqueueOrder"] < aTaskB["enqueueOrder"];
+
+	end
+
+
+
+	--
+	local tTaskA;
+	local tTaskB;
+	local function VUHDO_heapSwap(aHeap, anIndexA, anIndexB)
+
+		tTaskA = aHeap[anIndexA];
+		tTaskB = aHeap[anIndexB];
+
+		aHeap[anIndexA] = tTaskB;
+		aHeap[anIndexB] = tTaskA;
+
+		tTaskA["heapIndex"] = anIndexB;
+		tTaskB["heapIndex"] = anIndexA;
+
+		return;
+
+	end
+
+
+
+	--
+	local tChildIndex;
+	local tParentIndex;
+	local function VUHDO_heapSiftUp(aHeap, anIndex)
+
+		tChildIndex = anIndex;
+		tParentIndex = floor(tChildIndex / 2);
+
+		while tChildIndex > 1 and VUHDO_heapCompare(aHeap[tChildIndex], aHeap[tParentIndex]) do
+			VUHDO_heapSwap(aHeap, tChildIndex, tParentIndex);
+
+			tChildIndex = tParentIndex;
+			tParentIndex = floor(tChildIndex / 2);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tParentIndex;
+	local tLeftChildIndex;
+	local tRightChildIndex;
+	local tSwapIndex;
+	local function VUHDO_heapSiftDown(aHeap, anIndex, aNumElements)
+
+		tParentIndex = anIndex;
+
+		while true do
+			tLeftChildIndex = tParentIndex * 2;
+			tRightChildIndex = tLeftChildIndex + 1;
+
+			tSwapIndex = tParentIndex;
+
+			if tLeftChildIndex <= aNumElements and VUHDO_heapCompare(aHeap[tLeftChildIndex], aHeap[tSwapIndex]) then
+				tSwapIndex = tLeftChildIndex;
+			end
+
+			if tRightChildIndex <= aNumElements and VUHDO_heapCompare(aHeap[tRightChildIndex], aHeap[tSwapIndex]) then
+				tSwapIndex = tRightChildIndex;
+			end
+
+			if tSwapIndex == tParentIndex then
+				break;
+			end
+
+			VUHDO_heapSwap(aHeap, tParentIndex, tSwapIndex);
+
+			tParentIndex = tSwapIndex;
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tNewIndex;
+	local function VUHDO_heapInsert(aHeap, aTask, aTaskMap)
+
+		sNextTaskEnqueueOrder = sNextTaskEnqueueOrder + 1;
+		aTask["enqueueOrder"] = sNextTaskEnqueueOrder;
+
+		tNewIndex = #aHeap + 1;
+		aHeap[tNewIndex] = aTask;
+		aTask["heapIndex"] = tNewIndex;
+
+		aTaskMap[VUHDO_getTaskKey(aTask["type"], aTask["unit"], aTask["mode"])] = aTask;
+
+		VUHDO_heapSiftUp(aHeap, tNewIndex);
+
+		return;
+
+	end
+
+
+
+	--
+	local tHeapSize;
+	local tTopTask;
+	local tTopTaskKey;
+	local function VUHDO_heapExtractTop(aHeap, aTaskMap)
+
+		tHeapSize = #aHeap;
+		if tHeapSize == 0 then
+			return nil;
+		end
+
+		tTopTask = aHeap[1];
+
+		tTopTaskKey = VUHDO_getTaskKey(tTopTask["type"], tTopTask["unit"], tTopTask["mode"]);
+		aTaskMap[tTopTaskKey] = nil;
+
+		if tHeapSize == 1 then
+			aHeap[1] = nil;
+		else
+			aHeap[1] = aHeap[tHeapSize];
+			aHeap[tHeapSize] = nil;
+			aHeap[1]["heapIndex"] = 1;
+
+			VUHDO_heapSiftDown(aHeap, 1, tHeapSize - 1);
+		end
+
+		tTopTask["heapIndex"] = 0;
+
+		return tTopTask;
+
+	end
+
+
+
+	--
+	local tOldPriority;
+	local function VUHDO_heapUpdateTask(aHeap, aTask, aNewPriority)
+
+		tOldPriority = aTask["priority"];
+		aTask["priority"] = aNewPriority;
+
+		sNextTaskEnqueueOrder = sNextTaskEnqueueOrder + 1;
+		aTask["enqueueOrder"] = sNextTaskEnqueueOrder;
+
+		if aNewPriority > tOldPriority then
+			VUHDO_heapSiftUp(aHeap, aTask["heapIndex"]);
+		elseif aNewPriority < tOldPriority then
+			VUHDO_heapSiftDown(aHeap, aTask["heapIndex"], #aHeap);
+		else
+			VUHDO_heapSiftUp(aHeap, aTask["heapIndex"]);
+		end
+
+		return;
+
+	end
+
+
+
 	--
 	local tTaskConfig;
 	local tCurFps;
@@ -404,6 +783,7 @@ do
 	function VUHDO_updateDynamicDeferTargets()
 
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
+
 		tCurFps = GetFramerate();
 
 		if not tCurFps or tCurFps <= 0 then
@@ -418,11 +798,10 @@ do
 			tBaseFpsForBudget = min(tBaseFpsForBudget, tCVarMaxFps);
 		end
 
-		tEffectiveFps = max(tTaskConfig["MIN_FPS_FOR_BUDGET_CALC"],
-			min(tBaseFpsForBudget, tTaskConfig["MAX_FPS_FOR_BUDGET_CALC"]));
+		tEffectiveFps = max(tTaskConfig["MIN_FPS_FOR_BUDGET_CALC"], min(tBaseFpsForBudget, tTaskConfig["MAX_FPS_FOR_BUDGET_CALC"]));
 
 		tFrameBudgetUs = 1000000 / tEffectiveFps;
-		tTargetMaxTimeUs = tFrameBudgetUs * tTaskConfig["FRACTION_OF_FRAME_BUDGET_FOR_QUEUE"];
+		tTargetMaxTimeUs = tFrameBudgetUs * tTaskConfig["FRAME_BUDGET_FRACTION"];
 
 		if InCombatLockdown() then
 			tMaxExecTimeUs = VUHDO_MAX_EXEC_TIME_COMBAT_US;
@@ -431,7 +810,7 @@ do
 		end
 
 		tAbsMaxQueueTimeUs = tTaskConfig["ABS_MAX_QUEUE_TIME_US"];
-		tExecLimitUs = floor(tMaxExecTimeUs * VUHDO_SAFER_FRACTION_OF_GAME_CAP);
+		tExecLimitUs = floor(tMaxExecTimeUs * VUHDO_MAX_EXEC_TIME_FRACTION);
 
 		tMaxQueueTimeUs = min(tAbsMaxQueueTimeUs, tExecLimitUs);
 		tMaxQueueTimeUs = max(tMaxQueueTimeUs, tTaskConfig["ABS_MIN_QUEUE_TIME_US"]);
@@ -455,13 +834,13 @@ do
 	--
 	local tDelegate;
 	local tTaskKey;
-	local tCurNode;
+	local tTask;
 	local tNewTask;
-	local tNewNode;
 	local tMetrics;
-	local function VUHDO_enqueueDeferredTask(aType, aUnit, aMode)
+	local tCurrentPriority;
+	function VUHDO_enqueueDeferredTask(aType, aUnit, aMode, aPriority)
 
-		if not aType or not aUnit or not aMode then
+		if not aType then
 			return;
 		end
 
@@ -469,9 +848,11 @@ do
 			return;
 		end
 
-		if not VUHDO_DEFERRED_TASK_POOL or not VUHDO_TASK_QUEUE_NODE_POOL then
+		if not VUHDO_DEFERRED_TASK_POOL then
 			return;
 		end
+
+		tCurrentPriority = aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL;
 
 		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 			tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
@@ -491,10 +872,12 @@ do
 			end
 
 			tTaskKey = VUHDO_getTaskKey(aType, aUnit, aMode);
-			tCurNode = VUHDO_TASK_QUEUE_MAP[tTaskKey];
+			tTask = VUHDO_TASK_QUEUE_MAP[tTaskKey];
 
-			if tCurNode then
-				VUHDO_moveTaskQueueNode(tCurNode);
+			if tTask then
+				VUHDO_heapUpdateTask(VUHDO_TASK_PRIORITY_QUEUE, tTask, tCurrentPriority);
+
+				tTask["delegate"] = tDelegate;
 
 				if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 					tMetrics["totalTasksDeduped"] = tMetrics["totalTasksDeduped"] + 1;
@@ -506,14 +889,9 @@ do
 				tNewTask["mode"] = aMode;
 				tNewTask["delegate"] = tDelegate;
 				tNewTask["type"] = aType;
+				tNewTask["priority"] = tCurrentPriority;
 
-				tNewNode = VUHDO_TASK_QUEUE_NODE_POOL:get();
-
-				tNewNode["task"] = tNewTask;
-
-				VUHDO_addTaskQueueNode(tNewNode);
-
-				VUHDO_TASK_QUEUE_MAP[tTaskKey] = tNewNode;
+				VUHDO_heapInsert(VUHDO_TASK_PRIORITY_QUEUE, tNewTask, VUHDO_TASK_QUEUE_MAP);
 			end
 		end
 
@@ -528,13 +906,12 @@ do
 	local tTaskConfig;
 	local tMaxTasksPerFrame;
 	local tAvgTimeForInterval;
-	local tTaskType;
 	local tTotalTimeSpent;
 	local tInvocationCount;
 	local tNewAvgCost;
 	local tOldAvgCost;
 	local tSmoothingFactor;
-	local function VUHDO_adjustDynamicDeferTasks()
+	function VUHDO_adjustDynamicDeferTasks()
 
 		VUHDO_updateDynamicDeferTargets();
 
@@ -552,10 +929,8 @@ do
 				if tInvocationCount > 0 then
 					tNewAvgCost = tTotalTimeSpent / tInvocationCount;
 					tOldAvgCost = tTaskState["lastAvgCostUsByType"][tTaskType] or tNewAvgCost;
-
 					tTaskState["avgCostUsByType"][tTaskType] = (tNewAvgCost * tSmoothingFactor) + (tOldAvgCost * (1 - tSmoothingFactor));
 					tTaskState["lastAvgCostUsByType"][tTaskType] = tTaskState["avgCostUsByType"][tTaskType];
-
 					tTaskState["totalTimeSpentUsByType"][tTaskType] = 0;
 					tTaskState["invocationCountByType"][tTaskType] = 0;
 				elseif tTaskState["avgCostUsByType"][tTaskType] == nil then
@@ -581,11 +956,7 @@ do
 			end
 		end
 
-		tTaskState["maxTasksPerFrame"] = floor(
-			max(tTaskConfig["MIN_TASKS_PER_FRAME"],
-				min(tMaxTasksPerFrame, tTaskConfig["MAX_TASKS_PER_FRAME"])
-			)
-		);
+		tTaskState["maxTasksPerFrame"] = floor(max(tTaskConfig["MIN_TASKS_PER_FRAME"], min(tMaxTasksPerFrame, tTaskConfig["MAX_TASKS_PER_FRAME"])));
 
 		tTaskState["processingTimeUs"] = 0;
 		tTaskState["framesWithWork"] = 0;
@@ -600,26 +971,43 @@ do
 
 
 	--
+	local tStack;
+	local function VUHDO_deferredTaskErrorHandler(tError)
+
+		-- tError is the original error string/object
+		-- debugstack([thread,] startLevel, numLevels, levelsToSkip)
+		-- we want to skip 3 levels:
+		-- 1. this error handler function itself
+		-- 2. the C/internal call for xpcall
+		-- 3. the anonymous function wrapper around the delegate
+		-- then start capturing from the next level (the actual delegate).
+		local tStack = debugstack(1, 20, 3); -- capture up to 64 levels, after skipping 3
+
+		return tostring(tError) .. "\nStacktrace:\n" .. tStack;
+
+	end
+
+
+
+	--
 	local tTaskState;
 	local tTaskConfig;
+	local tMetrics;
 	local tTasksCompleted;
 	local tHardStopTime;
 	local tBudgetRemainingUs;
 	local tDefaultEstimatedCostPerTask;
-	local tTaskCount;
+	local tTask;
 	local tTaskType;
 	local tEstimatedCostOfNextTask;
-	local tTask;
+	local tDelegatePcallFunction;
 	local tProfilerResult;
 	local tDelegateSuccess;
 	local tDelegateResult;
 	local tTaskDurationUs;
 	local tTaskStartTime;
-	local tCurNode;
-	local tCurTaskKey;
-	local tDelegatePcallFunc;
-	local tMetrics;
-	local function VUHDO_executeDeferredTaskChunk()
+	local tCurrentQueueLen;
+	function VUHDO_executeDeferredTaskChunk()
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
@@ -629,52 +1017,53 @@ do
 		end
 
 		tTasksCompleted = 0;
+		tCurrentQueueLen = #VUHDO_TASK_PRIORITY_QUEUE;
 
-		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and VUHDO_TASK_QUEUE_LIST["count"] > 0 then
-			tMetrics["minQueueLength"] = min(tMetrics["minQueueLength"], VUHDO_TASK_QUEUE_LIST["count"]);
-			tMetrics["maxQueueLength"] = max(tMetrics["maxQueueLength"], VUHDO_TASK_QUEUE_LIST["count"]);
-			tMetrics["sumQueueLength"] = tMetrics["sumQueueLength"] + VUHDO_TASK_QUEUE_LIST["count"];
+		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tCurrentQueueLen > 0 then
+			tMetrics["minQueueLength"] = min(tMetrics["minQueueLength"], tCurrentQueueLen);
+			tMetrics["maxQueueLength"] = max(tMetrics["maxQueueLength"], tCurrentQueueLen);
+			tMetrics["sumQueueLength"] = tMetrics["sumQueueLength"] + tCurrentQueueLen;
 			tMetrics["queueLengthSamples"] = tMetrics["queueLengthSamples"] + 1;
 		end
 
-		tHardStopTime = debugprofilestop() + tTaskConfig["MAX_EXEC_TIME_US"] + 100;
+		tHardStopTime = (debugprofilestop() * 1000) + tTaskConfig["MAX_EXEC_TIME_US"] + 100;
 		tBudgetRemainingUs = tTaskConfig["TARGET_EXEC_TIME_US"];
-		tDefaultEstimatedCostPerTask = (tTaskConfig["TARGET_EXEC_TIME_US"] / max(1, tTaskConfig["INITIAL_TASKS_PER_FRAME"])) * 1.2; 
+		tDefaultEstimatedCostPerTask = (tTaskConfig["TARGET_EXEC_TIME_US"] / max(1, tTaskConfig["INITIAL_TASKS_PER_FRAME"])) * 1.2;
 
 		for tTaskCount = 1, tTaskState["maxTasksPerFrame"] do
-			if VUHDO_TASK_QUEUE_LIST["count"] == 0 then
+			if #VUHDO_TASK_PRIORITY_QUEUE == 0 then
 				break;
 			end
 
-			if debugprofilestop() > tHardStopTime and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then 
+			if (debugprofilestop() * 1000) > tHardStopTime and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
 				if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 					tMetrics["hardStopsHit"] = tMetrics["hardStopsHit"] + 1;
 				end
+
 				break;
 			end
 
-			tCurNode = VUHDO_TASK_QUEUE_LIST["head"];
-			tTask = tCurNode["task"];
-			tTaskType = tTask["type"];
+			tTask = VUHDO_TASK_PRIORITY_QUEUE[1];
 
-			tEstimatedCostOfNextTask = tTaskState["avgCostUsByType"][tTaskType] or tDefaultEstimatedCostPerTask; 
+			tTaskType = tTask["type"];
+			tEstimatedCostOfNextTask = tTaskState["avgCostUsByType"][tTaskType] or tDefaultEstimatedCostPerTask;
 
 			if (tTasksCompleted < tTaskConfig["MIN_TASKS_PER_FRAME"]) or
 			   (tEstimatedCostOfNextTask <= tBudgetRemainingUs) then
 
-				tCurTaskKey = VUHDO_getTaskKey(tTask["type"], tTask["unit"], tTask["mode"]);
-				VUHDO_removeTaskQueueNode(tCurNode);
-				VUHDO_TASK_QUEUE_MAP[tCurTaskKey] = nil;
+				tTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
 
 				if tTask["delegate"] and tTaskType then
-					tDelegatePcallFunc = function()
-						return pcall(tTask["delegate"], tTask["unit"], tTask["mode"]);
+					tDelegatePcallFunction = function()
+						return xpcall(function()
+							return tTask["delegate"](tTask["unit"], tTask["mode"]);
+						end, VUHDO_deferredTaskErrorHandler);
 					end
 
 					tTaskDurationUs = 0;
 
 					if MeasureCall then
-						tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(tDelegatePcallFunc);
+						tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(tDelegatePcallFunction);
 
 						if tProfilerResult and tProfilerResult.elapsedMilliseconds then
 							tTaskDurationUs = tProfilerResult.elapsedMilliseconds * 1000;
@@ -682,13 +1071,13 @@ do
 					else
 						tTaskStartTime = debugprofilestop();
 
-						tDelegateSuccess, tDelegateResult = tDelegatePcallFunc();
+						tDelegateSuccess, tDelegateResult = tDelegatePcallFunction();
 
-						tTaskDurationUs = debugprofilestop() - tTaskStartTime;
+						tTaskDurationUs = (debugprofilestop() - tTaskStartTime) * 1000;
 					end
 
-					tTaskState["totalTimeSpentUsByType"][tTaskType] = (tTaskState["totalTimeSpentUsByType"][tTaskType] or 0) + tTaskDurationUs; 
-					tTaskState["invocationCountByType"][tTaskType] = (tTaskState["invocationCountByType"][tTaskType] or 0) + 1; 
+					tTaskState["totalTimeSpentUsByType"][tTaskType] = (tTaskState["totalTimeSpentUsByType"][tTaskType] or 0) + tTaskDurationUs;
+					tTaskState["invocationCountByType"][tTaskType] = (tTaskState["invocationCountByType"][tTaskType] or 0) + 1;
 
 					if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 						if not tMetrics["tasksProcessedByTypeSession"][tTaskType] then
@@ -696,11 +1085,19 @@ do
 						end
 
 						tMetrics["tasksProcessedByTypeSession"][tTaskType] = tMetrics["tasksProcessedByTypeSession"][tTaskType] + 1;
+
+						if not tMetrics["totalTimeUsByTypeSession"][tTaskType] then
+							tMetrics["totalTimeUsByTypeSession"][tTaskType] = 0;
+						end
+
+						tMetrics["totalTimeUsByTypeSession"][tTaskType] = tMetrics["totalTimeUsByTypeSession"][tTaskType] + tTaskDurationUs;
 					end
 
 					if not tDelegateSuccess then
-						VUHDO_Msg(format("Error deferred: %s Unit: %s Mode: %s Type: %s",
-							tostring(tDelegateResult), tostring(tTask["unit"]), tostring(tTask["mode"]), tostring(tTaskType))); 
+						VUHDO_Msg(format("Deferred Task Failure: [ Unit: %s Mode: %s Type: %s Prio: %s ]\nError: %s",
+							tostring(tTask["unit"]), tostring(tTask["mode"]), tostring(tTaskType), tostring(tTask["priority"]),
+							tostring(tDelegateResult)
+						));
 					end
 
 					tTasksCompleted = tTasksCompleted + 1;
@@ -708,10 +1105,8 @@ do
 				end
 
 				VUHDO_DEFERRED_TASK_POOL:release(tTask);
-				VUHDO_TASK_QUEUE_NODE_POOL:release(tCurNode);
 
 				tTask = nil;
-				tCurNode = nil;
 			else
 				if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 					tMetrics["budgetExceededStops"] = tMetrics["budgetExceededStops"] + 1;
@@ -735,12 +1130,12 @@ do
 	--
 	local tTaskState;
 	local tTaskConfig;
-	local tTasksProcessed;
+	local tMetrics;
+	local tNumTasksProcessed;
 	local tChunkElapsedTime;
 	local tChunkDelegate;
 	local tProfilerResult;
 	local tChunkStartTime;
-	local tMetrics;
 	function VUHDO_processDeferredTaskQueue()
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
@@ -750,18 +1145,18 @@ do
 			tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
 		end
 
-		tTasksProcessed = 0;
+		tNumTasksProcessed = 0;
 		tChunkElapsedTime = 0;
 
-		if not VUHDO_DEFERRED_TASK_POOL or not VUHDO_TASK_QUEUE_NODE_POOL then
+		if not VUHDO_DEFERRED_TASK_POOL then
 			return;
 		end
 
-		if VUHDO_TASK_QUEUE_LIST["count"] > 0 then
+		if #VUHDO_TASK_PRIORITY_QUEUE > 0 then
 			tChunkDelegate = VUHDO_executeDeferredTaskChunk;
 
 			if MeasureCall then
-				tProfilerResult, tTasksProcessed = MeasureCall(tChunkDelegate);
+				tProfilerResult, tNumTasksProcessed = MeasureCall(tChunkDelegate);
 
 				if tProfilerResult and tProfilerResult.elapsedMilliseconds then
 					tChunkElapsedTime = tProfilerResult.elapsedMilliseconds * 1000;
@@ -769,16 +1164,15 @@ do
 			else
 				tChunkStartTime = debugprofilestop();
 
-				tTasksProcessed = tChunkDelegate();
+				tNumTasksProcessed = tChunkDelegate();
 
-				tChunkElapsedTime = debugprofilestop() - tChunkStartTime;
+				tChunkElapsedTime = (debugprofilestop() - tChunkStartTime) * 1000;
 			end
 
-			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tTasksProcessed > 0 then
+			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tNumTasksProcessed > 0 then
 				tMetrics["chunksExecutedSuccessfully"] = tMetrics["chunksExecutedSuccessfully"] + 1;
-				tMetrics["totalTasksProcessedSession"] = tMetrics["totalTasksProcessedSession"] + tTasksProcessed;
+				tMetrics["totalTasksProcessedSession"] = tMetrics["totalTasksProcessedSession"] + tNumTasksProcessed;
 				tMetrics["totalProcessingTimeUsSession"] = tMetrics["totalProcessingTimeUsSession"] + tChunkElapsedTime;
-
 				tMetrics["minChunkTimeUs"] = min(tMetrics["minChunkTimeUs"], tChunkElapsedTime);
 				tMetrics["maxChunkTimeUs"] = max(tMetrics["maxChunkTimeUs"], tChunkElapsedTime);
 			end
@@ -787,9 +1181,9 @@ do
 		tTaskState["processingTimeUs"] = tTaskState["processingTimeUs"] + tChunkElapsedTime;
 		tTaskState["totalFramesInInterval"] = tTaskState["totalFramesInInterval"] + 1;
 
-		if tTasksProcessed > 0 then
+		if tNumTasksProcessed > 0 then
 			tTaskState["framesWithWork"] = tTaskState["framesWithWork"] + 1;
-			tTaskState["tasksProcessed"] = tTaskState["tasksProcessed"] + tTasksProcessed;
+			tTaskState["tasksProcessed"] = tTaskState["tasksProcessed"] + tNumTasksProcessed;
 		end
 
 		if GetTime() - tTaskState["lastAdjustTime"] >= tTaskConfig["ADJUST_INTERVAL_SECS"] then
@@ -803,198 +1197,194 @@ do
 
 
 	--
-	function VUHDO_deferTask(aType, aUnit, aMode)
+	function VUHDO_deferTask(aType, aUnit, aMode, aPriority)
 
-		VUHDO_enqueueDeferredTask(aType, aUnit, aMode);
+		VUHDO_enqueueDeferredTask(aType, aUnit, aMode, aPriority);
 
 		return;
 
 	end
-end
 
 
 
---
-function VUHDO_setDeferredTaskProfiling(anIsEnabled)
+	--
+	function VUHDO_setDeferredTaskProfiling(anIsEnabled)
 
-	VUHDO_DEFERRED_TASK_PROFILING_ENABLED = anIsEnabled;
+		VUHDO_DEFERRED_TASK_PROFILING_ENABLED = anIsEnabled;
 
-	if anIsEnabled then
-		VUHDO_Msg("Task Profiling (Metrics Collection): ENABLED. Statistics will be reset.");
+		if anIsEnabled then
+			VUHDO_Msg("Task profiling is enabled.");
+		else
+			VUHDO_Msg("Task Profiling is disabled.");
+		end
 
-		VUHDO_resetDeferredTaskMetrics();
-	else
-		VUHDO_Msg("Task Profiling (Metrics Collection): DISABLED.");
-	end
-
-	return;
-
-end
-
-
-
---
-local tMetrics;
-function VUHDO_resetDeferredTaskMetrics()
-
-	tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
-
-	tMetrics["sessionStartTime"] = GetTime();
-	tMetrics["totalTasksEnqueued"] = 0;
-	tMetrics["totalTasksDeduped"] = 0;
-	tMetrics["totalTasksProcessedSession"] = 0;
-	tMetrics["totalProcessingTimeUsSession"] = 0;
-	tMetrics["chunksExecutedSuccessfully"] = 0;
-
-	tMetrics["minQueueLength"] = 999999;
-	tMetrics["maxQueueLength"] = 0;
-	tMetrics["sumQueueLength"] = 0;
-	tMetrics["queueLengthSamples"] = 0;
-
-	tMetrics["minTasksInChunk"] = 999999;
-	tMetrics["maxTasksInChunk"] = 0;
-
-	tMetrics["minChunkTimeUs"] = 999999999;
-	tMetrics["maxChunkTimeUs"] = 0;
-
-	tMetrics["hardStopsHit"] = 0;
-	tMetrics["budgetExceededStops"] = 0;
-
-	twipe(tMetrics["tasksEnqueuedByType"]);
-	twipe(tMetrics["tasksProcessedByTypeSession"]);
-
-	if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.resetMetrics then
-		VUHDO_DEFERRED_TASK_POOL:resetMetrics();
-	end
-	if VUHDO_TASK_QUEUE_NODE_POOL and VUHDO_TASK_QUEUE_NODE_POOL.resetMetrics then
-		VUHDO_TASK_QUEUE_NODE_POOL:resetMetrics();
-	end
-
-	if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-		VUHDO_Msg("Deferred Task Metrics statistics have been reset.");
-	end
-
-	return;
-
-end
-
-
-
---
-local tMetrics;
-local tTaskConfig;
-local tSessionDuration;
-local tTaskType;
-local tEnqueued;
-local tProcessed;
-local tAvgCost;
-local tCurrentHardCap;
-local tPoolMetrics;
-function VUHDO_printDeferredTaskMetrics(anIsReset)
-
-	if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-		VUHDO_Msg("Task Profiling (Metrics Collection) is currently DISABLED. Enable to collect and view stats.");
 		return;
+
 	end
 
-	tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
-	tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
-	tSessionDuration = GetTime() - tMetrics["sessionStartTime"];
 
-	VUHDO_Msg("|cffFFD100--- Deferred Task Queue Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
 
-	VUHDO_Msg(format("|cffFFA500** Overall Tasks:|r Enqueued: %d, Deduped: %d, Processed: %d",
-		tMetrics["totalTasksEnqueued"], tMetrics["totalTasksDeduped"], tMetrics["totalTasksProcessedSession"]));
-	VUHDO_Msg(format("|cffFFA500** Overall Time:|r Total: %.0f us (%.2f ms), Chunks Executed: %d",
-		tMetrics["totalProcessingTimeUsSession"], tMetrics["totalProcessingTimeUsSession"] / 1000, tMetrics["chunksExecutedSuccessfully"]));
+	--
+	local tMetrics;
+	function VUHDO_resetDeferredTaskMetrics()
 
-	VUHDO_Msg("|cffFFA500** Queue Length:|r Current: " .. VUHDO_TASK_QUEUE_LIST["count"]); -- Separate line for current as it's dynamic
-	if tMetrics["queueLengthSamples"] > 0 then
-		VUHDO_Msg(format("  Samples: Min: %d, Max: %d, Avg: %.2f",
-			(tMetrics["minQueueLength"] == 999999 and 0 or tMetrics["minQueueLength"]),
-			tMetrics["maxQueueLength"],
-			(tMetrics["sumQueueLength"] / tMetrics["queueLengthSamples"])));
-	else
-		VUHDO_Msg("  Samples: No queue length samples recorded (empty or reset).");
-	end
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
 
-	VUHDO_Msg("|cffFFA500** Chunk Performance (for " .. tMetrics["chunksExecutedSuccessfully"] .. " successful chunks):|r");
-	if tMetrics["chunksExecutedSuccessfully"] > 0 then
-		VUHDO_Msg(format("  Tasks/Chunk: Min: %d, Max: %d, Avg: %.2f",
-			(tMetrics["minTasksInChunk"] == 999999 and 0 or tMetrics["minTasksInChunk"]),
-			tMetrics["maxTasksInChunk"],
-			(tMetrics["totalTasksProcessedSession"] / tMetrics["chunksExecutedSuccessfully"])));
-		VUHDO_Msg(format("  Time/Chunk (us): Min: %.0f, Max: %.0f, Avg: %.0f",
-			(tMetrics["minChunkTimeUs"] == 999999999 and 0 or tMetrics["minChunkTimeUs"]),
-			tMetrics["maxChunkTimeUs"],
-			(tMetrics["totalProcessingTimeUsSession"] / tMetrics["chunksExecutedSuccessfully"])));
-	else
-		VUHDO_Msg("  No chunks processed tasks or metrics reset.");
-	end
-	VUHDO_Msg(format("  Stops: Hard (Time Limit): %d, Budget Exceeded: %d",
-		tMetrics["hardStopsHit"], tMetrics["budgetExceededStops"]));
+		tMetrics["sessionStartTime"] = GetTime();
+		tMetrics["totalTasksEnqueued"] = 0;
+		tMetrics["totalTasksDeduped"] = 0;
+		tMetrics["totalTasksProcessedSession"] = 0;
+		tMetrics["totalProcessingTimeUsSession"] = 0;
+		tMetrics["chunksExecutedSuccessfully"] = 0;
 
-	VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgCost us):**|r");
-	if VUHDO_DEFERRED_TASK_TYPES then
-		local tOutputLines = {};
-		for _, tTaskType in ipairs(VUHDO_DEFERRED_TASK_TYPES) do
-			tEnqueued = tMetrics["tasksEnqueuedByType"][tTaskType] or 0;
-			tProcessed = tMetrics["tasksProcessedByTypeSession"][tTaskType] or 0;
-			tAvgCost = VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"][tTaskType] or 0;
-			-- Accumulate lines to print fewer messages, potentially grouping two types per line if space allows
-			-- For now, one line per type for clarity, but formatted for potential future combining.
-			tinsert(tOutputLines, format("  Type[%s]: E=%d, P=%d, Cost=%.0fus",
-				tostring(tTaskType), tEnqueued, tProcessed, tAvgCost));
+		tMetrics["minQueueLength"] = 999999;
+		tMetrics["maxQueueLength"] = 0;
+		tMetrics["sumQueueLength"] = 0;
+		tMetrics["queueLengthSamples"] = 0;
+
+		tMetrics["minTasksInChunk"] = 999999;
+		tMetrics["maxTasksInChunk"] = 0;
+
+		tMetrics["minChunkTimeUs"] = 999999999;
+		tMetrics["maxChunkTimeUs"] = 0;
+
+		tMetrics["hardStopsHit"] = 0;
+		tMetrics["budgetExceededStops"] = 0;
+
+		twipe(tMetrics["tasksEnqueuedByType"]);
+		twipe(tMetrics["tasksProcessedByTypeSession"]);
+		twipe(tMetrics["totalTimeUsByTypeSession"]);
+
+		if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.resetMetrics then
+			VUHDO_DEFERRED_TASK_POOL:resetMetrics();
 		end
-		-- If many types, consider printing 2-3 per VUHDO_Msg call to save lines
-		for _, line in ipairs(tOutputLines) do
-			VUHDO_Msg(line);
+
+		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+			VUHDO_Msg("Deferred task metrics reset.");
 		end
-	else
-		VUHDO_Msg("  (VUHDO_DEFERRED_TASK_TYPES not found for detailed stats)");
+
+		return;
+
 	end
 
-	VUHDO_Msg("|cffFFA500** Dynamic Config:|r");
-	VUHDO_Msg(format("  Target Time/Chunk: %d us, Max Time/Chunk: %d us",
-		tTaskConfig["TARGET_EXEC_TIME_US"], tTaskConfig["MAX_EXEC_TIME_US"]));
-	VUHDO_Msg(format("  Max Tasks/Frame: %d, Idle Inc Threshold: %d us",
-		VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"], tTaskConfig["IDLE_TASK_INC_THRESHOLD_US"]));
 
-	tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
-	VUHDO_Msg(format("  Game Hard Cap (Combat=%s): %d us, Effective Max Queue Time: %.0f us",
-		tostring(InCombatLockdown()), tCurrentHardCap,
-		min(tTaskConfig["ABS_MAX_QUEUE_TIME_US"], floor(tCurrentHardCap * VUHDO_SAFER_FRACTION_OF_GAME_CAP))
-	));
 
-	VUHDO_Msg("|cffFFA500** Pool Stats (Size, Idle, PeakIdle, Hits, Misses, RejectedReleases):**|r");
-	if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.getMetrics then
-		tPoolMetrics = VUHDO_DEFERRED_TASK_POOL:getMetrics();
-		VUHDO_Msg(format("  Tasks Pool: %d, %d, %d, %d, %d, %d",
-			tPoolMetrics["maxSize"], tPoolMetrics["currentIdle"], tPoolMetrics["peakIdleCount"],
-			tPoolMetrics["hits"], tPoolMetrics["misses"], tPoolMetrics["rejectedReleases"]
+	--
+	local tMetrics;
+	local tTaskConfig;
+	local tSessionDuration;
+	local tEnqueued;
+	local tProcessed;
+	local tAvgCost;
+	local tTotalTimeUsForType;
+	local tCurrentHardCap;
+	local tPoolMetrics;
+	function VUHDO_printDeferredTaskMetrics(anIsReset)
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+			VUHDO_Msg("Task profiling is currently disabled.");
+
+			return;
+		end
+
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
+
+		tSessionDuration = GetTime() - tMetrics["sessionStartTime"];
+
+		VUHDO_Msg("|cffFFD100--- Deferred Task Queue Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
+
+		VUHDO_Msg(format("|cffFFA500** Overall Tasks:|r Enqueued: %d, Deduped: %d, Processed: %d",
+			tMetrics["totalTasksEnqueued"], tMetrics["totalTasksDeduped"], tMetrics["totalTasksProcessedSession"]));
+		VUHDO_Msg(format("|cffFFA500** Overall Time:|r Total: %.2f ms (%.0f us), Chunks Executed: %d",
+			tMetrics["totalProcessingTimeUsSession"] / 1000,
+			tMetrics["totalProcessingTimeUsSession"],
+			tMetrics["chunksExecutedSuccessfully"]
 		));
-	else
-		VUHDO_Msg("  Tasks Pool: Metrics unavailable.");
-	end
 
-	if VUHDO_TASK_QUEUE_NODE_POOL and VUHDO_TASK_QUEUE_NODE_POOL.getMetrics then
-		tPoolMetrics = VUHDO_TASK_QUEUE_NODE_POOL:getMetrics();
-		VUHDO_Msg(format("  Nodes Pool: %d, %d, %d, %d, %d, %d",
-			tPoolMetrics["maxSize"], tPoolMetrics["currentIdle"], tPoolMetrics["peakIdleCount"],
-			tPoolMetrics["hits"], tPoolMetrics["misses"], tPoolMetrics["rejectedReleases"]
+		VUHDO_Msg("|cffFFA500** Queue Length:|r Current: " .. #VUHDO_TASK_PRIORITY_QUEUE);
+
+		if tMetrics["queueLengthSamples"] > 0 then
+			VUHDO_Msg(format("  Samples: Min: %d, Max: %d, Avg: %.2f",
+				(tMetrics["minQueueLength"] == 999999 and 0 or tMetrics["minQueueLength"]),
+				tMetrics["maxQueueLength"],
+				(tMetrics["sumQueueLength"] / tMetrics["queueLengthSamples"])));
+		else
+			VUHDO_Msg("  Samples: No queue length samples recorded (empty or reset).");
+		end
+
+		VUHDO_Msg("|cffFFA500** Chunk Performance (for " .. tMetrics["chunksExecutedSuccessfully"] .. " successful chunks):|r");
+
+		if tMetrics["chunksExecutedSuccessfully"] > 0 then
+			VUHDO_Msg(format("  Tasks/Chunk: Min: %d, Max: %d, Avg: %.2f",
+				(tMetrics["minTasksInChunk"] == 999999 and 0 or tMetrics["minTasksInChunk"]),
+				tMetrics["maxTasksInChunk"],
+				(tMetrics["totalTasksProcessedSession"] / tMetrics["chunksExecutedSuccessfully"])));
+			VUHDO_Msg(format("  Time/Chunk (us): Min: %.0f, Max: %.0f, Avg: %.0f",
+				(tMetrics["minChunkTimeUs"] == 999999999 and 0 or tMetrics["minChunkTimeUs"]),
+				tMetrics["maxChunkTimeUs"],
+				(tMetrics["chunksExecutedSuccessfully"] > 0 and (tMetrics["totalProcessingTimeUsSession"] / tMetrics["chunksExecutedSuccessfully"]) or 0)
+			));
+		else
+			VUHDO_Msg("  No chunks processed tasks or metrics reset.");
+		end
+
+		VUHDO_Msg(format("  Stops: Hard (Time Limit): %d, Budget Exceeded: %d",
+			tMetrics["hardStopsHit"], tMetrics["budgetExceededStops"]));
+
+		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgCost us, TotalTime ms):**|r");
+
+		if VUHDO_DEFERRED_TASK_TYPES then
+			for _, tTaskType in ipairs(VUHDO_DEFERRED_TASK_TYPES) do
+				tEnqueued = tMetrics["tasksEnqueuedByType"][tTaskType] or 0;
+				tProcessed = tMetrics["tasksProcessedByTypeSession"][tTaskType] or 0;
+				tAvgCost = VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"][tTaskType] or 0;
+				tTotalTimeUsForType = (tMetrics["totalTimeUsByTypeSession"] and tMetrics["totalTimeUsByTypeSession"][tTaskType]) or 0;
+
+				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, AvgCost=%.0fus, TotalTime=%.2fms",
+					tostring(tTaskType), tEnqueued, tProcessed, tAvgCost, tTotalTimeUsForType / 1000
+				));
+			end
+		else
+			VUHDO_Msg("  (VUHDO_DEFERRED_TASK_TYPES not found for detailed stats)");
+		end
+
+		VUHDO_Msg("|cffFFA500** Dynamic Config:|r");
+
+		VUHDO_Msg(format("  Target Time/Chunk: %d us, Max Time/Chunk: %d us",
+			tTaskConfig["TARGET_EXEC_TIME_US"], tTaskConfig["MAX_EXEC_TIME_US"]));
+		VUHDO_Msg(format("  Max Tasks/Frame: %d, Idle Inc Threshold: %d us",
+			VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"], tTaskConfig["IDLE_TASK_INC_THRESHOLD_US"]));
+
+		tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
+
+		VUHDO_Msg(format("  Game Hard Cap (Combat=%s): %d us, Effective Max Queue Time: %.0f us",
+			tostring(InCombatLockdown()), tCurrentHardCap,
+			min(tTaskConfig["ABS_MAX_QUEUE_TIME_US"], floor(tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION))
 		));
-	else
-		VUHDO_Msg("  Nodes Pool: Metrics unavailable.");
+
+		VUHDO_Msg("|cffFFA500** Pool Stats (Size, Idle, PeakIdle, Hits, Misses, RejectedReleases):**|r");
+
+		if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.getMetrics then
+			tPoolMetrics = VUHDO_DEFERRED_TASK_POOL:getMetrics();
+
+			VUHDO_Msg(format("  Tasks Pool: %d, %d, %d, %d, %d, %d",
+				tPoolMetrics["maxSize"], tPoolMetrics["currentIdle"], tPoolMetrics["peakIdleCount"],
+				tPoolMetrics["hits"], tPoolMetrics["misses"], tPoolMetrics["rejectedReleases"]
+			));
+		else
+			VUHDO_Msg("  Tasks Pool: Metrics unavailable.");
+		end
+
+		VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
+
+		if anIsReset then
+			VUHDO_resetDeferredTaskMetrics();
+		end
+
+		return;
+
 	end
-
-	VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
-
-	if anIsReset then
-		VUHDO_resetDeferredTaskMetrics();
-	end
-
-	return;
-
 end
 
 
@@ -1002,7 +1392,6 @@ end
 --
 local sIsHealerMode;
 local sIsDirectionArrow = false;
-local VuhDoGcdStatusBar;
 local sHotToggleUpdateSecs = 1;
 local sAggroRefreshSecs = 1;
 local sRangeRefreshSecs = 1.1;
@@ -1010,11 +1399,11 @@ local sClusterRefreshSecs = 1.2;
 local sAoeRefreshSecs = 1.3;
 local sBuffsRefreshSecs;
 local sParseCombatLog;
+
+local VuhDoGcdStatusBar;
 local VuhDoDirectionFrame;
 
-
-
---
+local tTaskTypeCount;
 local function VUHDO_eventHandlerInitLocalOverrides()
 
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -1042,16 +1431,95 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateCustomDebuffTooltip = _G["VUHDO_updateCustomDebuffTooltip"];
 	VUHDO_getCurrentMouseOver = _G["VUHDO_getCurrentMouseOver"];
 	VUHDO_UIFrameFlash_OnUpdate = _G["VUHDO_UIFrameFlash_OnUpdate"];
+
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_updateShieldBar = _G["VUHDO_updateShieldBar"];
 	VUHDO_updateHealAbsorbBar = _G["VUHDO_updateHealAbsorbBar"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 
+	VUHDO_updateSpellTrace = _G["VUHDO_updateSpellTrace"];
+	VUHDO_setHealth = _G["VUHDO_setHealth"];
+	VUHDO_initAllEventBouquets = _G["VUHDO_initAllEventBouquets"];
+	VUHDO_updateAllAggro = _G["VUHDO_updateAllAggro"];
+	VUHDO_updateUnitAggro = _G["VUHDO_updateUnitAggro"];
+	VUHDO_updateAllRange = _G["VUHDO_updateAllRange"];
+	VUHDO_updateUnitRange = _G["VUHDO_updateUnitRange"];
+
+	if not VUHDO_DEFERRED_TASK_STATE["isInit"] then
+		sDeferredTaskDelegates = {
+			[VUHDO_DEFER_UPDATE_HEALTH] = _G["VUHDO_updateHealth"],
+			[VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR] = _G["VUHDO_updateHealthBarsFor"],
+			[VUHDO_DEFER_SET_HEALTH] = _G["VUHDO_setHealth"],
+			[VUHDO_DEFER_UPDATE_SHIELD_BAR] = _G["VUHDO_updateShieldBar"],
+			[VUHDO_DEFER_UPDATE_HEAL_ABSORB_BAR] = _G["VUHDO_updateHealAbsorbBar"],
+			[VUHDO_DEFER_UPDATE_MANA_BARS] = _G["VUHDO_updateManaBars"],
+			[VUHDO_DEFER_UPDATE_UNIT_HOTS] = _G["VUHDO_updateUnitHoTs"],
+			[VUHDO_DEFER_INIT_ALL_EVENT_BOUQUETS] = _G["VUHDO_initAllEventBouquets"],
+			[VUHDO_DEFER_UPDATE_BOUQUETS_FOR_EVENT] = _G["VUHDO_updateBouquetsForEvent"],
+			[VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET] = _G["VUHDO_updateUnitCyclicBouquet"],
+			[VUHDO_DEFER_UPDATE_UNIT_DEBUFF_ICONS] = _G["VUHDO_updateUnitDebuffIcons"],
+			[VUHDO_DEFER_UPDATE_UNIT_AGGRO] = _G["VUHDO_updateUnitAggro"],
+			[VUHDO_DEFER_UPDATE_UNIT_RANGE] = _G["VUHDO_updateUnitRange"],
+			[VUHDO_DEFER_UPDATE_ALL_CLUSTERS] = _G["VUHDO_updateAllClusters"],
+			[VUHDO_DEFER_UPDATE_CLUSTER_HIGHLIGHTS] = _G["VUHDO_updateClusterHighlights"],
+			[VUHDO_DEFER_AOE_UPDATE_ALL] = _G["VUHDO_aoeUpdateAll"],
+			[VUHDO_DEFER_UPDATE_SPELL_TRACE] = _G["VUHDO_updateSpellTrace"],
+			[VUHDO_DEFER_UPDATE_ALL_RAID_BARS] = _G["VUHDO_updateAllRaidBars"],
+		};
+
+		tTaskTypeCount = 0;
+
+		if VUHDO_DEFERRED_TASK_TYPES then
+			tTaskTypeCount = #VUHDO_DEFERRED_TASK_TYPES;
+		end
+
+		VUHDO_DEFERRED_TASK_STATE["totalTimeSpentUsByType"] = tcreate(0, tTaskTypeCount);
+		VUHDO_DEFERRED_TASK_STATE["invocationCountByType"] = tcreate(0, tTaskTypeCount);
+		VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"] = tcreate(0, tTaskTypeCount);
+		VUHDO_DEFERRED_TASK_STATE["lastAvgCostUsByType"] = tcreate(0, tTaskTypeCount);
+
+		VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
+		VUHDO_resetDeferredTaskMetrics();
+
+		VUHDO_DEFERRED_TASK_POOL = VUHDO_createTablePool(
+			"DeferredTasks",
+			VUHDO_DEFERRED_TASK_POOL_MAX_SIZE,
+			VUHDO_createDeferredTaskDelegate,
+			VUHDO_cleanupDeferredTaskDelegate
+		);
+
+		twipe(VUHDO_TASK_PRIORITY_QUEUE);
+		twipe(VUHDO_TASK_QUEUE_MAP);
+		sNextTaskEnqueueOrder = 0;
+
+		VUHDO_updateDynamicDeferTargets();
+
+		VUHDO_DEFERRED_TASK_STATE["lastAdjustTime"] = GetTime();
+		VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] = VUHDO_DEFERRED_TASK_CONFIG["INITIAL_TASKS_PER_FRAME"];
+
+		VUHDO_DEFERRED_TASK_STATE["isInit"] = true;
+	end
+
 	VUHDO_updateHealth = _G["VUHDO_deferUpdateHealth"];
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquets"];
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
 	VUHDO_updateShieldBar = _G["VUHDO_deferUpdateShieldBar"];
 	VUHDO_updateHealAbsorbBar = _G["VUHDO_deferUpdateHealAbsorbBar"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
+	VUHDO_updateAllHoTs = _G["VUHDO_deferUpdateAllHoTs"];
+	VUHDO_updateAllCyclicBouquets = _G["VUHDO_deferUpdateAllCyclicBouquets"];
+	VUHDO_updateAllDebuffIcons = _G["VUHDO_deferUpdateAllDebuffIcons"];
+	VUHDO_updateAllAggro = _G["VUHDO_deferUpdateAllAggro"];
+	VUHDO_updateUnitAggro = _G["VUHDO_deferUpdateUnitAggro"];
+	VUHDO_updateAllRange = _G["VUHDO_deferUpdateAllRange"];
+	VUHDO_updateUnitRange = _G["VUHDO_deferUpdateUnitRange"];
+	VUHDO_updateAllClusters = _G["VUHDO_deferUpdateAllClusters"];
+	VUHDO_aoeUpdateAll = _G["VUHDO_deferAoeUpdateAll"];
+	VUHDO_updateSpellTrace = _G["VUHDO_deferUpdateSpellTrace"];
+	VUHDO_updateAllRaidBars = _G["VUHDO_deferUpdateAllRaidBars"];
+	VUHDO_initAllEventBouquets = _G["VUHDO_deferInitAllEventBouquets"];
+	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
+	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
+	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
 
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
@@ -1066,55 +1534,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 
 	sParseCombatLog = VUHDO_CONFIG["PARSE_COMBAT_LOG"];
 
-	if not VUHDO_DEFERRED_TASK_STATE["isInit"] then
-		sDeferredTaskDelegates = {
-			[VUHDO_DEFER_HEALTH] = _G["VUHDO_updateHealth"],
-			[VUHDO_DEFER_BOUQUETS] = _G["VUHDO_updateBouquetsForEvent"],
-			[VUHDO_DEFER_SHIELD_BAR] = _G["VUHDO_updateShieldBar"],
-			[VUHDO_DEFER_HEAL_ABSORB_BAR] = _G["VUHDO_updateHealAbsorbBar"],
-			[VUHDO_DEFER_HEALTH_BARS_FOR] = _G["VUHDO_updateHealthBarsFor"],
-		};
-
-		if VUHDO_DEFERRED_TASK_TYPES then
-			tTaskTypeCount = #VUHDO_DEFERRED_TASK_TYPES;
-		else
-			tTaskTypeCount = 0;
-		end
-
-		VUHDO_DEFERRED_TASK_STATE["totalTimeSpentUsByType"] = tcreate(0, tTaskTypeCount);
-		VUHDO_DEFERRED_TASK_STATE["invocationCountByType"] = tcreate(0, tTaskTypeCount);
-		VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"] = tcreate(0, tTaskTypeCount);
-		VUHDO_DEFERRED_TASK_STATE["lastAvgCostUsByType"] = tcreate(0, tTaskTypeCount);
-
-		VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
-		VUHDO_resetDeferredTaskMetrics();
-
-		VUHDO_DEFERRED_TASK_POOL = VUHDO_createTablePool(
-			"VuhDoDeferredTasks",
-			VUHDO_DEFERRED_TASK_POOL_MAX_SIZE,
-			VUHDO_createDeferredTaskDelegate,
-			VUHDO_cleanupDeferredTaskDelegate
-		);
-
-		VUHDO_TASK_QUEUE_NODE_POOL = VUHDO_createTablePool(
-			"VuhDoTaskQueueNodes",
-			VUHDO_TASK_QUEUE_NODE_POOL_MAX_SIZE,
-			VUHDO_createTaskQueueNodeDelegate,
-			VUHDO_cleanupTaskQueueNodeDelegate
-		);
-
-		VUHDO_TASK_QUEUE_LIST["head"] = nil;
-		VUHDO_TASK_QUEUE_LIST["tail"] = nil;
-		VUHDO_TASK_QUEUE_LIST["count"] = 0;
-		twipe(VUHDO_TASK_QUEUE_MAP);
-
-		VUHDO_updateDynamicDeferTargets();
-
-		VUHDO_DEFERRED_TASK_STATE["lastAdjustTime"] = GetTime();
-		VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] = VUHDO_DEFERRED_TASK_CONFIG["INITIAL_TASKS_PER_FRAME"];
-
-		VUHDO_DEFERRED_TASK_STATE["isInit"] = true;
-	end
+	return;
 
 end
 
@@ -1172,56 +1592,42 @@ VUHDO_MAINTANK_NAMES = { };
 local VUHDO_FIRST_RELOAD_UI = false;
 
 
+
 --
 function VUHDO_isVariablesLoaded()
+
 	return VUHDO_VARIABLES_LOADED;
+
 end
+
 
 
 --
 function VUHDO_initBuffs()
+
 	VUHDO_initBuffsFromSpellBook();
 	VUHDO_reloadBuffPanel();
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_initTooltipTimer()
+
 	VUHDO_TIMERS["REFRESH_TOOLTIP"] = 2.3;
-end
 
+	return;
 
-
---
--- 3 = Tanking, all others less 100%
--- 2 = Tanking, others > 100%
--- 1 = Not Tanking, more than 100%
--- 0 = Not Tanking, less than 100%
-local tInfo, tIsAggroed;
-local tEmpty = {};
-local function VUHDO_updateThreat(aUnit)
-	tInfo = (VUHDO_RAID or tEmpty)[aUnit];
-	if tInfo then
-		tInfo["threat"] = UnitThreatSituation(aUnit) or 0;
-
-		if VUHDO_INTERNAL_TOGGLES[17] then -- VUHDO_UPDATE_THREAT_LEVEL
-			VUHDO_updateBouquetsForEvent(aUnit, 17); -- VUHDO_UPDATE_THREAT_LEVEL
-		end
-
-		tIsAggroed = VUHDO_INTERNAL_TOGGLES[7] and tInfo["threat"] >= 2; -- VUHDO_UPDATE_AGGRO
-
-		if tIsAggroed ~= tInfo["aggro"] then
-			tInfo["aggro"] = tIsAggroed;
-			VUHDO_updateHealthBarsFor(aUnit, 7); -- VUHDO_UPDATE_AGGRO
-		end
-	end
 end
 
 
 
 --
 function VUHDO_initAllBurstCaches()
+
 	VUHDO_tooltipInitLocalOverrides();
 	VUHDO_modelToolsInitLocalOverrides();
 	VUHDO_toolboxInitLocalOverrides();
@@ -1258,12 +1664,16 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_shieldAbsorbInitLocalOverrides();
 	VUHDO_spellTraceInitLocalOverrides();
 	VUHDO_playerTargetEventHandlerInitLocalOverrides();
+
+	return;
+
 end
 
 
 
 --
 local function VUHDO_initOptions()
+
 	if VuhDoNewOptionsTabbedFrame then
 		VUHDO_initHotComboModels();
 		VUHDO_initHotBarComboModels();
@@ -1272,24 +1682,31 @@ local function VUHDO_initOptions()
 		VUHDO_initBouquetSlotsComboModel();
 		VUHDO_bouquetsUpdateDefaultColors();
 	end
+
+	return;
+
 end
 
 
 
 --
+local tName;
+local tProfile;
 local function VUHDO_loadCurrentProfile()
-	if not VUHDO_CONFIG then 
+
+	if not VUHDO_CONFIG then
 		return;
 	end
 
-	local tName = VUHDO_CONFIG["CURRENT_PROFILE"];
+	tName = VUHDO_CONFIG["CURRENT_PROFILE"];
 
 	if (tName or "") ~= "" then
-		local _, tProfile = VUHDO_getProfileNamedCompressed(tName);
+		_, tProfile = VUHDO_getProfileNamedCompressed(tName);
 
 		if tProfile then
-			if tProfile["LOCKED"] then -- Nicht laden, Einstellungen wurden ja auch nicht automat. gespeichert
+			if tProfile["LOCKED"] then
 				VUHDO_Msg("Profile " .. tProfile["NAME"] .. " is currently locked and has NOT been loaded.");
+
 				return;
 			end
 
@@ -1298,18 +1715,22 @@ local function VUHDO_loadCurrentProfile()
 			VUHDO_Msg("Error: Currently selected profile \"" .. tName .. "\" doesn't exist.", 1, 0.4, 0.4);
 		end
 	end
+
+	return;
+
 end
 
 
 
 --
+local tName;
 local function VUHDO_loadCurrentKeyLayout()
 
 	if not VUHDO_CONFIG or not VUHDO_SPEC_LAYOUTS then
 		return;
 	end
 
-	local tName = VUHDO_SPEC_LAYOUTS["selected"];
+	tName = VUHDO_SPEC_LAYOUTS["selected"];
 
 	if (tName or "") ~= "" then
 		if VUHDO_SPELL_LAYOUTS and VUHDO_SPELL_LAYOUTS[tName] then
@@ -1319,21 +1740,27 @@ local function VUHDO_loadCurrentKeyLayout()
 		end
 	end
 
+	return;
+
 end
 
 
 
 --
+local tProfile;
 local function VUHDO_loadDefaultProfile()
-	if not VUHDO_CONFIG then 
+
+	if not VUHDO_CONFIG then
 		return;
-	elseif ((VUHDO_CONFIG["CURRENT_PROFILE"] or "") == "") and
-		((VUHDO_DEFAULT_PROFILE or "") ~= "") then
-		local _, tProfile = VUHDO_getProfileNamedCompressed(VUHDO_DEFAULT_PROFILE);
+	end
+
+	if ((VUHDO_CONFIG["CURRENT_PROFILE"] or "") == "") and ((VUHDO_DEFAULT_PROFILE or "") ~= "") then
+		_, tProfile = VUHDO_getProfileNamedCompressed(VUHDO_DEFAULT_PROFILE);
 
 		if tProfile then
-			if tProfile["LOCKED"] then -- Nicht laden, Einstellungen wurden ja auch nicht automat. gespeichert
+			if tProfile["LOCKED"] then
 				VUHDO_Msg("Profile " .. tProfile["NAME"] .. " is currently locked and has NOT been loaded.");
+
 				return;
 			end
 
@@ -1341,44 +1768,53 @@ local function VUHDO_loadDefaultProfile()
 		else
 			VUHDO_Msg("Error: Default profile \"" .. VUHDO_DEFAULT_PROFILE .. "\" doesn't exist.", 1, 0.4, 0.4);
 		end
-	else
-		return;
 	end
+
+	return;
+
 end
 
 
 
 --
 local function VUHDO_loadDefaultLayout()
-	if not VUHDO_SPEC_LAYOUTS then 
+
+	if not VUHDO_SPEC_LAYOUTS then
 		return;
-	elseif ((VUHDO_SPEC_LAYOUTS["selected"] or "") == "") and
-		((VUHDO_DEFAULT_LAYOUT or "") ~= "") then
+	end
+
+	if ((VUHDO_SPEC_LAYOUTS["selected"] or "") == "") and ((VUHDO_DEFAULT_LAYOUT or "") ~= "") then
 		if VUHDO_SPELL_LAYOUTS and VUHDO_SPELL_LAYOUTS[VUHDO_DEFAULT_LAYOUT] ~= nil then
 			VUHDO_activateLayout(VUHDO_DEFAULT_LAYOUT);
 		else
 			VUHDO_Msg(VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_1 .. VUHDO_DEFAULT_LAYOUT .. VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_2, 1, 0.4, 0.4);
 		end
-	else
-		return;
 	end
+
+	return;
+
 end
 
 
 
 --
 local tLevel = 0;
+local tHasPerCharacterConfig;
 local function VUHDO_init()
+
 	if tLevel == 0 or VUHDO_VARIABLES_LOADED then
 		tLevel = 1;
+
 		return;
 	end
 
 	VUHDO_COMBAT_LOG_TRACE = {};
 
-	if not VUHDO_RAID then VUHDO_RAID = { }; end
+	if not VUHDO_RAID then
+		VUHDO_RAID = { };
+	end
 
-	local tHasPerCharacterConfig = _G["VUHDO_CONFIG"] and true or false;
+	tHasPerCharacterConfig = _G["VUHDO_CONFIG"] and true or false;
 
 	VUHDO_loadCurrentProfile(); -- 1. Diese Reihenfolge scheint wichtig zu sein, erzeugt
 	VUHDO_loadCurrentKeyLayout();
@@ -1386,11 +1822,11 @@ local function VUHDO_init()
 	VUHDO_loadVariables(); -- 2. umgekehrt undefiniertes Verhalten (VUHDO_CONFIG ist nil etc.)
 	VUHDO_initAllBurstCaches();
 	VUHDO_initDefaultProfiles();
+
 	VUHDO_VARIABLES_LOADED = true;
 
 	VUHDO_initPanelModels();
 	VUHDO_initFromSpellbook();
-
 	VUHDO_initBuffs();
 
 	if not InCombatLockdown() then
@@ -1406,15 +1842,15 @@ local function VUHDO_init()
 
 	if VuhDoNewOptionsTabbedFrame then
 		VuhDoNewOptionsTabbedFrame:ClearAllPoints();
-		VuhDoNewOptionsTabbedFrame:SetPoint("CENTER",  "UIParent", "CENTER",  0,  0);
+		VuhDoNewOptionsTabbedFrame:SetPoint("CENTER", "UIParent", "CENTER", 0, 0);
 	end
 
 	VUHDO_initSharedMedia();
 	VUHDO_initFuBar();
 	VUHDO_initButtonFacade(VUHDO_INSTANCE);
 	VUHDO_initLibSpecialization();
-	--VUHDO_checkForTroublesomeAddons();
 	VUHDO_initHideBlizzFrames();
+
 	if not InCombatLockdown() then
 		VUHDO_initKeyboardMacros();
 	end
@@ -1426,388 +1862,466 @@ local function VUHDO_init()
 		VUHDO_loadDefaultProfile();
 		VUHDO_loadDefaultLayout();
 	end
+
+	return;
+
 end
 
 
 
 --
-local tEmptyRaid = { };
-local tInfo;
-function VUHDO_OnEvent(_, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
+do
+	--
+	local tEventTotalStartTime;
+	local tEventMetrics;
+	local tEventTotalDuration;
+	local tUnitInfo;
+	local tEmptyRaid = { };
+	local tSpecNumber;
+	local tBestProfileName;
+	function VUHDO_OnEvent(anInstance, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
 
-	--VUHDO_Msg(anEvent);
-	if "COMBAT_LOG_EVENT_UNFILTERED" == anEvent then
-		if VUHDO_VARIABLES_LOADED then
-			-- As of 8.x COMBAT_LOG_EVENT_UNFILTERED is now just an event with no arguments
-			anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19 = CombatLogGetCurrentEventInfo();
+		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
+			tEventTotalStartTime = debugprofilestop();
 
-			if sParseCombatLog then
-				-- SWING_DAMAGE - the amount of damage is the 12th arg
-				-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
-				-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
-				VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15);
+			if not VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEvent] then
+				VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEvent] = {
+					["totalTimeUs"] = 0,
+					["invocationCount"] = 0,
+				};
 			end
 
-			if VUHDO_INTERNAL_TOGGLES[36] then -- VUHDO_UPDATE_SHIELD
-				-- for SPELL events with _AURA suffixes the amount healed is the 16th arg
-				-- for SPELL_HEAL/SPELL_PERIODIC_HEAL the amount absorbed is the 17th arg
-				-- for SPELL_ABSORBED the absorb spell ID is either the 16th or 19th arg
-				VUHDO_parseCombatLogShieldAbsorb(anArg2, anArg4, anArg8, anArg13, anArg16, anArg12, anArg17, anArg19);
+			tEventMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEvent];
+		end
+
+		if "COMBAT_LOG_EVENT_UNFILTERED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				-- As of 8.x COMBAT_LOG_EVENT_UNFILTERED is now just an event with no arguments
+				anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19 = CombatLogGetCurrentEventInfo();
+
+				if sParseCombatLog then
+					-- SWING_DAMAGE - the amount of damage is the 12th arg
+					-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
+					-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
+					VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15);
+				end
+
+				if VUHDO_INTERNAL_TOGGLES[36] then -- VUHDO_UPDATE_SHIELD
+					-- for SPELL events with _AURA suffixes the amount healed is the 16th arg
+					-- for SPELL_HEAL/SPELL_PERIODIC_HEAL the amount absorbed is the 17th arg
+					-- for SPELL_ABSORBED the absorb spell ID is either the 16th or 19th arg
+					VUHDO_parseCombatLogShieldAbsorb(anArg2, anArg4, anArg8, anArg13, anArg16, anArg12, anArg17, anArg19);
+				end
+
+				if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
+					VUHDO_parseCombatLogSpellTrace(
+						anArg2,  -- message/event
+						anArg4,  -- source GUID
+						anArg8,  -- dest GUID
+						anArg13, -- spell name
+						anArg12, -- spell ID
+						anArg16  -- amount
+					);
+				end
 			end
 
-			if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
-				VUHDO_parseCombatLogSpellTrace(
-					anArg2,  -- message/event
-					anArg4,  -- source GUID
-					anArg8,  -- dest GUID
-					anArg13, -- spell name
-					anArg12, -- spell ID
-					anArg16  -- amount
-				);
-			end
-		end
+		elseif "UNIT_AURA" == anEvent then
+			tUnitInfo = (VUHDO_RAID or tEmptyRaid)[anArg1];
 
-	elseif "UNIT_AURA" == anEvent then
-		tInfo = (VUHDO_RAID or tEmptyRaid)[anArg1];
-		if tInfo then
-			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(anArg1, anArg2);
-			VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
-		end
-
-	elseif "UNIT_HEALTH" == anEvent then
-		-- as of patch 7.1 we are seeing empty units on health related events
-		if anArg1 and ((VUHDO_RAID or tEmptyRaid)[anArg1] or VUHDO_isBossUnit(anArg1)) then
- 			VUHDO_updateHealth(anArg1, 2);
- 		end
-
-	elseif "UNIT_HEAL_PREDICTION" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
-			VUHDO_updateHealth(anArg1, 9); -- VUHDO_UPDATE_INC
-			VUHDO_updateBouquetsForEvent(anArg1, 9); -- VUHDO_UPDATE_ALT_POWER
-		end
-
-	elseif "UNIT_POWER_UPDATE" == anEvent or "UNIT_POWER_FREQUENT" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
-			if "CHI" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 35); end -- VUHDO_UPDATE_CHI
-			elseif "HOLY_POWER" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 31); end -- VUHDO_UPDATE_OWN_HOLY_POWER
-			elseif "COMBO_POINTS" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 40); end -- VUHDO_UPDATE_COMBO_POINTS
-			elseif "SOUL_SHARDS" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 41); end -- VUHDO_UPDATE_SOUL_SHARDS
-			elseif "RUNES" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 42); end -- VUHDO_UPDATE_RUNES
-			elseif "ARCANE_CHARGES" == anArg2 then
-				if "player" == anArg1 then VUHDO_updateBouquetsForEvent("player", 43); end -- VUHDO_UPDATE_ARCANE_CHARGES
-			elseif "ALTERNATE" == anArg2 then
-				VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
-			else
-				VUHDO_updateManaBars(anArg1, 1);
-			end
-		end
-
-	elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
-			VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
-			VUHDO_updateShieldBar(anArg1);
-		end
-
-	elseif "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then 
-			VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
-			VUHDO_updateHealAbsorbBar(anArg1);
-		end
-
-	elseif "UNIT_SPELLCAST_SENT" == anEvent then
-		if VUHDO_VARIABLES_LOADED then VUHDO_spellcastSent(anArg1, anArg2, anArg4); end
-
-	elseif "UNIT_SPELLCAST_START" == anEvent or "UNIT_SPELLCAST_DELAYED" == anEvent or "UNIT_SPELLCAST_CHANNEL_START" == anEvent or 
-		"UNIT_SPELLCAST_CHANNEL_UPDATE" == anEvent then
-		if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] and anArg1 and 
-			((VUHDO_CONFIG["SPELL_TRACE"]["showIncomingEnemy"] and UnitIsEnemy(anArg1, "player")) or 
-				(VUHDO_CONFIG["SPELL_TRACE"]["showIncomingFriendly"] and UnitIsFriend(anArg1, "player"))) then
-			VUHDO_addIncomingSpellTrace(anArg1, anArg2, anArg3);
-		end
-
-	elseif "UNIT_SPELLCAST_STOP" == anEvent or "UNIT_SPELLCAST_INTERRUPTED" == anEvent or "UNIT_SPELLCAST_FAILED" == anEvent or 
-		"UNIT_SPELLCAST_FAILED_QUIET" == anEvent or "UNIT_SPELLCAST_CHANNEL_STOP" == anEvent then
-		if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] and anArg1 and 
-			((VUHDO_CONFIG["SPELL_TRACE"]["showIncomingEnemy"] and UnitIsEnemy(anArg1, "player")) or 
-				(VUHDO_CONFIG["SPELL_TRACE"]["showIncomingFriendly"] and UnitIsFriend(anArg1, "player"))) then
-			VUHDO_removeIncomingSpellTrace(anArg1, anArg2, anArg3);
-		end
-
-	elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then
-		if VUHDO_VARIABLES_LOADED then VUHDO_updateThreat(anArg1); end
-
-	elseif "PLAYER_REGEN_ENABLED" == anEvent then
-		if VUHDO_VARIABLES_LOADED then
-			for tUnit, _ in pairs(VUHDO_RAID) do
-				VUHDO_updateThreat(tUnit);
-			end
-		end
-
-		if VUHDO_OPTIONS_SHOW_AFTER_BATTLE and VuhDoNewOptionsTabbedFrame and not VuhDoNewOptionsTabbedFrame:IsShown() then
-			VuhDoNewOptionsTabbedFrame:SetShown(true);
-
-			VUHDO_OPTIONS_SHOW_AFTER_BATTLE = false;
-		end
-
-		VUHDO_setIsOutOfCombat(true);
-
-	elseif "PLAYER_REGEN_DISABLED" == anEvent then
-		if VuhDoNewOptionsTabbedFrame and VuhDoNewOptionsTabbedFrame:IsShown() then
-			VuhDoNewOptionsTabbedFrame:SetShown(false);
-
-			VUHDO_OPTIONS_SHOW_AFTER_BATTLE = true;
-		end
-
-		VUHDO_setIsOutOfCombat(false);
-
-	elseif "UNIT_MAXHEALTH" == anEvent then
-		-- as of patch 7.1 we are seeing empty units on health related events
-		if anArg1 and (VUHDO_RAID or tEmptyRaid)[anArg1] then 
-			VUHDO_updateHealth(anArg1, VUHDO_UPDATE_HEALTH_MAX);
-		end
-
-	elseif "UNIT_TARGET" == anEvent then
-		if VUHDO_VARIABLES_LOADED and "player" ~= anArg1 then
-			VUHDO_updateTargetBars(anArg1);
-			VUHDO_updateBouquetsForEvent(anArg1, 22); -- VUHDO_UPDATE_UNIT_TARGET
-			VUHDO_updatePanelVisibility();
-		end
-
-	elseif "UNIT_DISPLAYPOWER" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
-			VUHDO_updateManaBars(anArg1, 3);
-		end
-
-	elseif "UNIT_MAXPOWER" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
-			if "ALTERNATE" == anArg2 then VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
-			else VUHDO_updateManaBars(anArg1, 2); end
-		end
-
-	elseif "UNIT_PET" == anEvent then
-		if VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS] or not InCombatLockdown() then
-			VUHDO_REMOVE_HOTS = false;
-			if "player" == anArg1 then VUHDO_quickRaidReload();
-			else VUHDO_normalRaidReload(); end
-		end
-
-	elseif "UNIT_ENTERED_VEHICLE" == anEvent or "UNIT_EXITED_VEHICLE" == anEvent or "UNIT_EXITING_VEHICLE" == anEvent then
-		VUHDO_REMOVE_HOTS = false;
-		VUHDO_normalRaidReload();
-
-	elseif "RAID_TARGET_UPDATE" == anEvent then
-		VUHDO_TIMERS["CUSTOMIZE"] = 0.1;
-
- 	-- INSTANCE_ENCOUNTER_ENGAGE_UNIT fires when a boss unit is added to the UI
- 	-- this is essentially the equivalent of GROUP_ROSTER_UPDATE for bosses/NPCs
- 	elseif "GROUP_ROSTER_UPDATE" == anEvent or "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent or "UPDATE_ACTIVE_BATTLEFIELD" == anEvent then	
-		--VUHDO_CURR_LAYOUT = VUHDO_SPEC_LAYOUTS["selected"];
-		--VUHDO_CURRENT_PROFILE = VUHDO_CONFIG["CURRENT_PROFILE"];
-
-		if VUHDO_FIRST_RELOAD_UI then
-			VUHDO_normalRaidReload(true);
-			if VUHDO_TIMERS["RELOAD_ROSTER"] < 0.4 then VUHDO_TIMERS["RELOAD_ROSTER"] = 0.6; end
-		end
-
-	elseif "PLAYER_FOCUS_CHANGED" == anEvent then
-		if VUHDO_VARIABLES_LOADED then
-			if VUHDO_RAID["focus"] then
-				VUHDO_determineIncHeal("focus");
-				VUHDO_updateHealth("focus", 9); -- VUHDO_UPDATE_INC
+			if tUnitInfo then
+				tUnitInfo["debuff"], tUnitInfo["debuffName"] = VUHDO_determineDebuff(anArg1, anArg2);
+				VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
 			end
 
-			VUHDO_clParserSetCurrentFocus();
+		elseif "UNIT_HEALTH" == anEvent then
+			if anArg1 and ((VUHDO_RAID or tEmptyRaid)[anArg1] or VUHDO_isBossUnit(anArg1)) then
+				VUHDO_updateHealth(anArg1, 2);
+			end
 
-			if VUHDO_isModelConfigured(VUHDO_ID_FOCUS) or
-				(VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_FOCUS"]) then
-				if UnitExists("focus") then
-					VUHDO_setHealth("focus", 1); -- VUHDO_UPDATE_ALL
+		elseif "UNIT_HEAL_PREDICTION" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then -- auch target, focus
+				VUHDO_updateHealth(anArg1, 9); -- VUHDO_UPDATE_INC
+				VUHDO_updateBouquetsForEvent(anArg1, 9); -- VUHDO_UPDATE_INC
+			end
+
+		elseif "UNIT_POWER_UPDATE" == anEvent or "UNIT_POWER_FREQUENT" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				if "CHI" == anArg2 then
+					if "player" == anArg1 then
+						VUHDO_updateBouquetsForEvent("player", 35); -- VUHDO_UPDATE_CHI
+					end
+				elseif "HOLY_POWER" == anArg2 then
+					if "player" == anArg1 then
+						VUHDO_updateBouquetsForEvent("player", 31); -- VUHDO_UPDATE_OWN_HOLY_POWER
+					end
+				elseif "COMBO_POINTS" == anArg2 then
+					if "player" == anArg1 then
+						VUHDO_updateBouquetsForEvent("player", 40); -- VUHDO_UPDATE_COMBO_POINTS
+					end
+				elseif "SOUL_SHARDS" == anArg2 then
+					if "player" == anArg1 then
+						VUHDO_updateBouquetsForEvent("player", 41); -- VUHDO_UPDATE_SOUL_SHARDS
+					end
+				elseif "RUNES" == anArg2 then
+					if "player" == anArg1 then
+						VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
+					end
+				elseif "ARCANE_CHARGES" == anArg2 then
+					if "player" == anArg1 then
+						VUHDO_updateBouquetsForEvent("player", 43); -- VUHDO_UPDATE_ARCANE_CHARGES
+					end
+				elseif "ALTERNATE" == anArg2 then
+					VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
 				else
-					VUHDO_removeHots("focus");
-					VUHDO_removeAllDebuffIcons("focus");
-					VUHDO_resetDebuffsFor("focus");
+					VUHDO_updateManaBars(anArg1, 1);
+				end
+			end
 
-					if VUHDO_RAID["focus"] then
-						table.wipe(VUHDO_RAID["focus"]);
+		elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
+				VUHDO_updateShieldBar(anArg1);
+			end
+
+		elseif "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
+				VUHDO_updateHealAbsorbBar(anArg1);
+			end
+
+		elseif "UNIT_SPELLCAST_SENT" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_spellcastSent(anArg1, anArg2, anArg4);
+			end
+
+		elseif "UNIT_SPELLCAST_START" == anEvent or "UNIT_SPELLCAST_DELAYED" == anEvent or "UNIT_SPELLCAST_CHANNEL_START" == anEvent or
+			"UNIT_SPELLCAST_CHANNEL_UPDATE" == anEvent then
+			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] and anArg1 and
+				((VUHDO_CONFIG["SPELL_TRACE"]["showIncomingEnemy"] and UnitIsEnemy(anArg1, "player")) or
+					(VUHDO_CONFIG["SPELL_TRACE"]["showIncomingFriendly"] and UnitIsFriend(anArg1, "player"))) then
+				VUHDO_addIncomingSpellTrace(anArg1, anArg2, anArg3);
+			end
+
+		elseif "UNIT_SPELLCAST_STOP" == anEvent or "UNIT_SPELLCAST_INTERRUPTED" == anEvent or "UNIT_SPELLCAST_FAILED" == anEvent or
+			"UNIT_SPELLCAST_FAILED_QUIET" == anEvent or "UNIT_SPELLCAST_CHANNEL_STOP" == anEvent then
+			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] and anArg1 and
+				((VUHDO_CONFIG["SPELL_TRACE"]["showIncomingEnemy"] and UnitIsEnemy(anArg1, "player")) or
+					(VUHDO_CONFIG["SPELL_TRACE"]["showIncomingFriendly"] and UnitIsFriend(anArg1, "player"))) then
+				VUHDO_removeIncomingSpellTrace(anArg1, anArg2, anArg3);
+			end
+
+		elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_updateUnitAggro(anArg1);
+			end
+
+		elseif "PLAYER_REGEN_ENABLED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_updateAllAggro();
+			end
+
+			if VUHDO_OPTIONS_SHOW_AFTER_BATTLE and VuhDoNewOptionsTabbedFrame and not VuhDoNewOptionsTabbedFrame:IsShown() then
+				VuhDoNewOptionsTabbedFrame:SetShown(true);
+
+				VUHDO_OPTIONS_SHOW_AFTER_BATTLE = false;
+			end
+
+			VUHDO_setIsOutOfCombat(true);
+
+		elseif "PLAYER_REGEN_DISABLED" == anEvent then
+			if VuhDoNewOptionsTabbedFrame and VuhDoNewOptionsTabbedFrame:IsShown() then
+				VuhDoNewOptionsTabbedFrame:SetShown(false);
+
+				VUHDO_OPTIONS_SHOW_AFTER_BATTLE = true;
+			end
+
+			VUHDO_setIsOutOfCombat(false);
+
+		elseif "UNIT_MAXHEALTH" == anEvent then
+			if anArg1 and (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_updateHealth(anArg1, VUHDO_UPDATE_HEALTH_MAX);
+			end
+
+		elseif "UNIT_TARGET" == anEvent then
+			if VUHDO_VARIABLES_LOADED and "player" ~= anArg1 then
+				VUHDO_updateTargetBars(anArg1); -- TODO: add deferred task
+				VUHDO_updateBouquetsForEvent(anArg1, 22); -- VUHDO_UPDATE_UNIT_TARGET
+				VUHDO_updatePanelVisibility();
+			end
+
+		elseif "UNIT_DISPLAYPOWER" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_updateManaBars(anArg1, 3);
+			end
+
+		elseif "UNIT_MAXPOWER" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				if "ALTERNATE" == anArg2 then
+					VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
+				else
+					VUHDO_updateManaBars(anArg1, 2);
+				end
+			end
+
+		elseif "UNIT_PET" == anEvent then
+			if VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS] or not InCombatLockdown() then
+				VUHDO_REMOVE_HOTS = false;
+
+				if "player" == anArg1 then
+					VUHDO_quickRaidReload();
+				else
+					VUHDO_normalRaidReload();
+				end
+			end
+
+		elseif "UNIT_ENTERED_VEHICLE" == anEvent or "UNIT_EXITED_VEHICLE" == anEvent or "UNIT_EXITING_VEHICLE" == anEvent then
+			VUHDO_REMOVE_HOTS = false;
+
+			VUHDO_normalRaidReload();
+
+		elseif "RAID_TARGET_UPDATE" == anEvent then
+			VUHDO_TIMERS["CUSTOMIZE"] = 0.1;
+
+		-- INSTANCE_ENCOUNTER_ENGAGE_UNIT fires when a boss unit is added to the UI
+		-- this is essentially the equivalent of GROUP_ROSTER_UPDATE for bosses/NPCs
+		elseif "GROUP_ROSTER_UPDATE" == anEvent or "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent or "UPDATE_ACTIVE_BATTLEFIELD" == anEvent then
+			if VUHDO_FIRST_RELOAD_UI then
+				VUHDO_normalRaidReload(true);
+
+				if VUHDO_TIMERS["RELOAD_ROSTER"] < 0.4 then
+					VUHDO_TIMERS["RELOAD_ROSTER"] = 0.6;
+				end
+			end
+
+		elseif "PLAYER_FOCUS_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				if VUHDO_RAID["focus"] then
+					VUHDO_determineIncHeal("focus");
+					VUHDO_updateHealth("focus", 9); -- VUHDO_UPDATE_INC
+				end
+
+				VUHDO_clParserSetCurrentFocus();
+
+				if VUHDO_isModelConfigured(VUHDO_ID_FOCUS) or
+					(VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_FOCUS"]) then
+					if UnitExists("focus") then
+						VUHDO_setHealth("focus", 1); -- VUHDO_UPDATE_ALL
+					else
+						VUHDO_removeHots("focus");
+						VUHDO_removeAllDebuffIcons("focus");
+						VUHDO_resetDebuffsFor("focus");
+
+						if VUHDO_RAID["focus"] then
+							table.wipe(VUHDO_RAID["focus"]);
+						end
+
+						VUHDO_RAID["focus"] = nil;
 					end
 
-					VUHDO_RAID["focus"] = nil;
+					VUHDO_updateHealthBarsFor("focus", 1); -- VUHDO_UPDATE_ALL
+					VUHDO_initEventBouquetsFor("focus");
 				end
 
-				VUHDO_updateHealthBarsFor("focus", 1); -- VUHDO_UPDATE_ALL
-				VUHDO_initEventBouquetsFor("focus");
+				VUHDO_updateBouquetsForEvent("player", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
+				VUHDO_updateBouquetsForEvent("focus", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
+
+				VUHDO_updatePanelVisibility();
 			end
 
-			VUHDO_updateBouquetsForEvent("player", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
-			VUHDO_updateBouquetsForEvent("focus", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
+		elseif "PARTY_MEMBER_ENABLE" == anEvent or "PARTY_MEMBER_DISABLE" == anEvent then
+			VUHDO_TIMERS["CUSTOMIZE"] = 0.2;
 
-			VUHDO_updatePanelVisibility();
-		end
+		elseif "PLAYER_FLAGS_CHANGED" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_updateHealth(anArg1, 6); -- VUHDO_UPDATE_AFK
+				VUHDO_updateBouquetsForEvent(anArg1, 6); -- VUHDO_UPDATE_AFK
+			end
 
-	elseif "PARTY_MEMBER_ENABLE" == anEvent or "PARTY_MEMBER_DISABLE" == anEvent then
-		VUHDO_TIMERS["CUSTOMIZE"] = 0.2;
+		elseif "PLAYER_ENTERING_WORLD" == anEvent then
+			VUHDO_init();
+			VUHDO_initAddonMessages();
 
-	elseif "PLAYER_FLAGS_CHANGED" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
-			VUHDO_updateHealth(anArg1, VUHDO_UPDATE_AFK);
-			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_AFK);
-		end
+		elseif "UNIT_POWER_BAR_SHOW" == anEvent or "UNIT_POWER_BAR_HIDE" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_RAID[anArg1]["isAltPower"] = VUHDO_isAltPowerActive(anArg1);
+				VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
+			end
 
-	elseif "PLAYER_ENTERING_WORLD" == anEvent then
-		VUHDO_init();
-		VUHDO_initAddonMessages();
+		elseif "LEARNED_SPELL_IN_SKILL_LINE" == anEvent or "TRAIT_CONFIG_UPDATED" == anEvent or "SPELLS_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_initFromSpellbook();
+				VUHDO_registerAllBouquets(false);
+				VUHDO_initBuffs();
+				VUHDO_initDebuffs();
 
-	elseif"UNIT_POWER_BAR_SHOW" == anEvent
-	    or "UNIT_POWER_BAR_HIDE" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then
-			VUHDO_RAID[anArg1]["isAltPower"] = VUHDO_isAltPowerActive(anArg1);
-			VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
-		end
+				if not InCombatLockdown() then
+					VUHDO_initKeyboardMacros();
+					VUHDO_timeReloadUI(1);
+				end
 
-	elseif "LEARNED_SPELL_IN_SKILL_LINE" == anEvent or "TRAIT_CONFIG_UPDATED" == anEvent or "SPELLS_CHANGED" == anEvent then
-		if VUHDO_VARIABLES_LOADED then
-			VUHDO_initFromSpellbook();
-			VUHDO_registerAllBouquets(false);
-			VUHDO_initBuffs();
-			VUHDO_initDebuffs();
+				if "SPELLS_CHANGED" == anEvent then
+					-- workaround slow clients where partial spellbook is available on SPELLS_CHANGED
+					C_Timer.After(3, VUHDO_initBuffs);
+				end
+			end
 
-			if not InCombatLockdown() then
+		elseif "VARIABLES_LOADED" == anEvent then
+			VUHDO_init();
+
+		elseif "UPDATE_BINDINGS" == anEvent then
+			if not InCombatLockdown() and VUHDO_VARIABLES_LOADED then
 				VUHDO_initKeyboardMacros();
-				VUHDO_timeReloadUI(1);
 			end
 
-			if "SPELLS_CHANGED" == anEvent then
-				-- workaround slow clients where partial spellbook is available on SPELLS_CHANGED
-				C_Timer.After(3, VUHDO_initBuffs);
-			end
-		end
+		elseif "PLAYER_TARGET_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_updatePlayerTarget();
 
-	elseif "VARIABLES_LOADED" == anEvent then
-		VUHDO_init();
+				VUHDO_updateHealth("player", 1);
+				VUHDO_updateBouquetsForEvent("player", 22); -- VUHDO_UPDATE_UNIT_TARGET
 
-	elseif "UPDATE_BINDINGS" == anEvent then
-		if not InCombatLockdown() and VUHDO_VARIABLES_LOADED then VUHDO_initKeyboardMacros(); end
+				VUHDO_updateHealth("target", 1);
+				VUHDO_updateBouquetsForEvent("target", 22); -- VUHDO_UPDATE_UNIT_TARGET
 
-	elseif "PLAYER_TARGET_CHANGED" == anEvent then
-		if VUHDO_VARIABLES_LOADED then
-			VUHDO_updatePlayerTarget();
-			VUHDO_updateTargetBars("player");
-			VUHDO_updateBouquetsForEvent("player", 22); -- VUHDO_UPDATE_UNIT_TARGET
-			VUHDO_updateTargetBars("target");
-			VUHDO_updateBouquetsForEvent("target", 22); -- VUHDO_UPDATE_UNIT_TARGET
-			VUHDO_updatePanelVisibility();
-		end
-
-	elseif "CHAT_MSG_ADDON" == anEvent then
-		if VUHDO_VARIABLES_LOADED then VUHDO_parseAddonMessage(anArg1, anArg2, anArg4); end
-
-	elseif "READY_CHECK" == anEvent then
-		if VUHDO_RAID then VUHDO_readyStartCheck(anArg1, anArg2); end
-
-	elseif "READY_CHECK_CONFIRM" == anEvent then
-		if VUHDO_RAID then VUHDO_readyCheckConfirm(anArg1, anArg2); end
-
-	elseif "READY_CHECK_FINISHED" == anEvent then
-		if VUHDO_RAID then VUHDO_readyCheckEnds(); end
-
-	elseif "CVAR_UPDATE" == anEvent then
-		-- Patch 10.0.0 makes setting CVars freeze the game client
-		-- FIXME: also there is some issue where this event fires before bouquets have been properly decompressed
-		VUHDO_IS_SFX_ENABLED = false; --tonumber(GetCVar("Sound_EnableSFX")) == 1;
-		VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = false; --tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
-		--if VUHDO_VARIABLES_LOADED then VUHDO_reloadUI(false); end
-
-	elseif "INSPECT_READY" == anEvent then
-		VUHDO_inspectLockRole();
-
-	elseif "UNIT_CONNECTION" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_updateHealth(anArg1, VUHDO_UPDATE_DC); end
-
-	elseif "ROLE_CHANGED_INFORM" == anEvent then
-		if VUHDO_RAID_NAMES[anArg1] then VUHDO_resetTalentScan(VUHDO_RAID_NAMES[anArg1]); end
-
-	elseif "MODIFIER_STATE_CHANGED" == anEvent then
-		if VuhDoTooltip:IsShown() then VUHDO_updateTooltip(); end
-
-	elseif "PLAYER_LOGOUT" == anEvent then
-		VUHDO_compressAllBouquets();
-
-	elseif "UNIT_NAME_UPDATE" == anEvent then
-		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
-			VUHDO_resetNameTextCache();
-			VUHDO_updateHealthBarsFor(anArg1, 7); -- VUHDO_UPDATE_AGGRO
-		end
-
-	elseif "PLAYER_EQUIPMENT_CHANGED" == anEvent then
-		VUHDO_aoeUpdateSpellAverages();
-
-	elseif "LFG_PROPOSAL_SHOW" == anEvent then
-		VUHDO_buildSafeParty();
-
-	elseif "LFG_PROPOSAL_FAILED" == anEvent then
-		VUHDO_quickRaidReload();
-
-	elseif "LFG_PROPOSAL_SUCCEEDED" == anEvent then
-		VUHDO_lateRaidReload();
-	--elseif("UPDATE_MACROS" == anEvent) then
-		--VUHDO_timeReloadUI(0.1); -- @WARNING Lädt wg. shield macro alle 8 sec.
-
-	elseif "UNIT_FACTION" == anEvent then
-		if (VUHDO_RAID or tEmptyRaid)[anArg1] then VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_MINOR_FLAGS); end
-
-	elseif "INCOMING_RESURRECT_CHANGED" == anEvent then
-		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_RESURRECTION); end
-
-	elseif "PET_BATTLE_OPENING_START" == anEvent then
-		VUHDO_setPetBattle(true);
-
-	elseif "PET_BATTLE_CLOSE" == anEvent then
-		VUHDO_setPetBattle(false);
-
-	elseif "INCOMING_SUMMON_CHANGED" == anEvent then
-		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then 
-			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_SUMMON); 
-		end
-		
-	elseif "UNIT_PHASE" == anEvent then
-		if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then 
-			VUHDO_updateBouquetsForEvent(anArg1, VUHDO_UPDATE_PHASE); 
-		end
-		
-	elseif "RUNE_POWER_UPDATE" == anEvent then
-		VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
-
-	elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent or "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
-		if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
-			if "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
-				anArg1 = "player";
+				VUHDO_updatePanelVisibility();
 			end
 
-			if "player" == anArg1 then
-				local tSpecNum = tostring(GetSpecialization()) or "1";
-				local tBestProfile = VUHDO_getBestProfileAfterSpecChange();
+		elseif "CHAT_MSG_ADDON" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_parseAddonMessage(anArg1, anArg2, anArg4);
+			end
 
-				-- event sometimes fires multiple times so we must de-dupe
-				if (not VUHDO_strempty(VUHDO_SPEC_LAYOUTS[tSpecNum]) and (VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNum])) or 
-					(not VUHDO_strempty(tBestProfile) and (VUHDO_CONFIG["CURRENT_PROFILE"] ~= tBestProfile)) then
-					VUHDO_activateSpecc(tSpecNum);
+		elseif "READY_CHECK" == anEvent then
+			if VUHDO_RAID then
+				VUHDO_readyStartCheck(anArg1, anArg2);
+			end
+
+		elseif "READY_CHECK_CONFIRM" == anEvent then
+			if VUHDO_RAID then
+				VUHDO_readyCheckConfirm(anArg1, anArg2);
+			end
+
+		elseif "READY_CHECK_FINISHED" == anEvent then
+			if VUHDO_RAID then
+				VUHDO_readyCheckEnds();
+			end
+
+		elseif "CVAR_UPDATE" == anEvent then
+			-- Patch 10.0.0 makes setting CVars freeze the game client
+			-- FIXME: also there is some issue where this event fires before bouquets have been properly decompressed
+			VUHDO_IS_SFX_ENABLED = false; --tonumber(GetCVar("Sound_EnableSFX")) == 1;
+			VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = false; --tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
+			--if VUHDO_VARIABLES_LOADED then VUHDO_reloadUI(false); end
+
+		elseif "INSPECT_READY" == anEvent then
+			VUHDO_inspectLockRole();
+
+		elseif "UNIT_CONNECTION" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_updateHealth(anArg1, VUHDO_UPDATE_DC);
+			end
+
+		elseif "ROLE_CHANGED_INFORM" == anEvent then
+			if VUHDO_RAID_NAMES[anArg1] then
+				VUHDO_resetTalentScan(VUHDO_RAID_NAMES[anArg1]);
+			end
+
+		elseif "MODIFIER_STATE_CHANGED" == anEvent then
+			if VuhDoTooltip:IsShown() then
+				VUHDO_updateTooltip();
+			end
+
+		elseif "PLAYER_LOGOUT" == anEvent then
+			VUHDO_compressAllBouquets();
+
+		elseif "UNIT_NAME_UPDATE" == anEvent then
+			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
+				VUHDO_resetNameTextCache();
+
+				VUHDO_updateHealthBarsFor(anArg1, 7); -- VUHDO_UPDATE_AGGRO
+			end
+
+		elseif "PLAYER_EQUIPMENT_CHANGED" == anEvent then
+			VUHDO_aoeUpdateSpellAverages();
+
+		elseif "LFG_PROPOSAL_SHOW" == anEvent then
+			VUHDO_buildSafeParty();
+
+		elseif "LFG_PROPOSAL_FAILED" == anEvent then
+			VUHDO_quickRaidReload();
+
+		elseif "LFG_PROPOSAL_SUCCEEDED" == anEvent then
+			VUHDO_lateRaidReload();
+
+		--elseif("UPDATE_MACROS" == anEvent) then
+			--VUHDO_timeReloadUI(0.1); -- @WARNING Ldt wg. shield macro alle 8 sec.
+
+		elseif "UNIT_FACTION" == anEvent then
+			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
+				VUHDO_updateBouquetsForEvent(anArg1, 34); -- VUHDO_UPDATE_MINOR_FLAGS
+			end
+
+		elseif "INCOMING_RESURRECT_CHANGED" == anEvent then
+			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
+				VUHDO_updateBouquetsForEvent(anArg1, 25); -- VUHDO_UPDATE_RESURRECTION
+			end
+
+		elseif "PET_BATTLE_OPENING_START" == anEvent then
+			VUHDO_setPetBattle(true);
+
+		elseif "PET_BATTLE_CLOSE" == anEvent then
+			VUHDO_setPetBattle(false);
+
+		elseif "INCOMING_SUMMON_CHANGED" == anEvent then
+			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
+				VUHDO_updateBouquetsForEvent(anArg1, 38); -- VUHDO_UPDATE_SUMMON
+			end
+
+		elseif "UNIT_PHASE" == anEvent then
+			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
+				VUHDO_updateBouquetsForEvent(anArg1, 39); -- VUHDO_UPDATE_PHASE
+			end
+
+		elseif "RUNE_POWER_UPDATE" == anEvent then
+			VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
+
+		elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent or "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
+				if "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
+					anArg1 = "player";
+				end
+
+				if "player" == anArg1 then
+					tSpecNumber = tostring(GetSpecialization()) or "1";
+					tBestProfileName = VUHDO_getBestProfileAfterSpecChange();
+
+					-- event sometimes fires multiple times so we must de-dupe
+					if (not VUHDO_strempty(VUHDO_SPEC_LAYOUTS[tSpecNumber]) and (VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNumber])) or
+						(not VUHDO_strempty(tBestProfileName) and (VUHDO_CONFIG["CURRENT_PROFILE"] ~= tBestProfileName)) then
+						VUHDO_activateSpecc(tSpecNumber);
+					end
+				end
+
+				if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
+					VUHDO_resetTalentScan(anArg1);
+					VUHDO_initDebuffs(); -- Talentabhngige Debuff-Fhigkeiten neu initialisieren.
+					VUHDO_timeReloadUI(1);
 				end
 			end
 
-			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
-				VUHDO_resetTalentScan(anArg1);
-				VUHDO_initDebuffs(); -- Talentabhängige Debuff-Fähigkeiten neu initialisieren.
-				VUHDO_timeReloadUI(1);
-			end
+		else
+			VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 		end
 
-	else
-		VUHDO_Msg("Error: Unexpected event: " .. anEvent);
+		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent and tEventMetrics then
+			tEventTotalDuration = (debugprofilestop() - tEventTotalStartTime) * 1000;
+
+			tEventMetrics["totalTimeUs"] = (tEventMetrics["totalTimeUs"] or 0) + tEventTotalDuration;
+			tEventMetrics["invocationCount"] = (tEventMetrics["invocationCount"] or 0) + 1;
+		end
+
+		return;
+
 	end
 end
 
@@ -1815,14 +2329,20 @@ end
 
 --
 local function VUHDO_setPanelsVisible(anIsVisible)
+
 	if not InCombatLockdown() then
 		VUHDO_CONFIG["SHOW_PANELS"] = anIsVisible;
+
 		VUHDO_Msg(anIsVisible and VUHDO_I18N_PANELS_SHOWN or VUHDO_I18N_PANELS_HIDDEN);
+
 		VUHDO_redrawAllPanels(false);
 		VUHDO_saveCurrentProfile();
 	else
 		VUHDO_Msg("Not possible during combat!");
 	end
+
+	return;
+
 end
 
 
@@ -1832,200 +2352,244 @@ local function VUHDO_printAbout()
 
 	VUHDO_Msg("VuhDo |cffffe566['vu:du:]|r v" .. VUHDO_VERSION .. " (use /vd). Currently maintained by Ivaria@US-Hyjal in honor of Anny and our two daughters.");
 
+	return;
+
 end
 
 
 
 --
-function VUHDO_slashCmd(aCommand)
-	local tParsedTexts = VUHDO_textParse(aCommand);
-	local tCommandWord = strlower(tParsedTexts[1]);
+do
+	--
+	local tParsedTexts;
+	local tCommandWord;
+	local tTokens;
+	local tName;
+	local tUnit;
+	local tSubCommand;
+	local tLines;
+	function VUHDO_slashCmd(aCommand)
 
-	if strfind(tCommandWord, "opt") then
-		if VuhDoNewOptionsTabbedFrame then
-			if InCombatLockdown() and not VuhDoNewOptionsTabbedFrame:IsShown() then
-				VUHDO_Msg("Options not available in combat!", 1, 0.4, 0.4);
+		tParsedTexts = VUHDO_textParse(aCommand);
+		tCommandWord = strlower(tParsedTexts[1]);
+
+		if strfind(tCommandWord, "opt") then
+			if VuhDoNewOptionsTabbedFrame then
+				if InCombatLockdown() and not VuhDoNewOptionsTabbedFrame:IsShown() then
+					VUHDO_Msg("Options not available in combat!", 1, 0.4, 0.4);
+				else
+					VUHDO_CURR_LAYOUT = VUHDO_SPEC_LAYOUTS["selected"];
+					VUHDO_CURRENT_PROFILE = VUHDO_CONFIG["CURRENT_PROFILE"];
+
+					VUHDO_toggleMenu(VuhDoNewOptionsTabbedFrame);
+				end
 			else
-				VUHDO_CURR_LAYOUT = VUHDO_SPEC_LAYOUTS["selected"];
-				VUHDO_CURRENT_PROFILE = VUHDO_CONFIG["CURRENT_PROFILE"];
-				VUHDO_toggleMenu(VuhDoNewOptionsTabbedFrame);
+				VUHDO_Msg(VUHDO_I18N_OPTIONS_NOT_LOADED, 1, 0.4, 0.4);
 			end
-		else
-			VUHDO_Msg(VUHDO_I18N_OPTIONS_NOT_LOADED, 1, 0.4, 0.4);
-		end
-	elseif tCommandWord == "pt" then
-		if tParsedTexts[2] then
-			local tTokens = VUHDO_splitString(tParsedTexts[2], ",");
-			if "clear" == tTokens[1] then
-				table.wipe(VUHDO_PLAYER_TARGETS);
-				VUHDO_quickRaidReload();
+
+		elseif tCommandWord == "pt" then
+			if tParsedTexts[2] then
+				tTokens = VUHDO_splitString(tParsedTexts[2], ",");
+
+				if "clear" == tTokens[1] then
+					table.wipe(VUHDO_PLAYER_TARGETS);
+
+					VUHDO_quickRaidReload();
+				else
+					for _, tName in ipairs(tTokens) do
+						tName = strtrim(tName);
+
+						if VUHDO_RAID_NAMES[tName] ~= nil and not InCombatLockdown() then
+							VUHDO_PLAYER_TARGETS[tName] = true;
+						end
+					end
+
+					VUHDO_quickRaidReload();
+				end
 			else
-				for _, tName in ipairs(tTokens) do
-					tName = strtrim(tName);
-					if VUHDO_RAID_NAMES[tName] ~= nil and not InCombatLockdown() then
+				tUnit = VUHDO_RAID_NAMES[UnitName("target")];
+				tName = (VUHDO_RAID[tUnit] or {})["name"];
+
+				if not InCombatLockdown() and tName then
+					if VUHDO_PLAYER_TARGETS[tName] then
+						VUHDO_PLAYER_TARGETS[tName] = nil;
+					else
 						VUHDO_PLAYER_TARGETS[tName] = true;
 					end
+
+					VUHDO_quickRaidReload();
 				end
-				VUHDO_quickRaidReload();
 			end
-		else
-			local tUnit = VUHDO_RAID_NAMES[UnitName("target")];
-			local tName = (VUHDO_RAID[tUnit] or {})["name"];
-			if not InCombatLockdown() and tName then
-				if VUHDO_PLAYER_TARGETS[tName] then VUHDO_PLAYER_TARGETS[tName] = nil;
-				else VUHDO_PLAYER_TARGETS[tName] = true; end
-				VUHDO_quickRaidReload();
-			end
-		end
 
-	elseif tCommandWord == "load" and tParsedTexts[2] then
-		local tTokens = VUHDO_splitString(tParsedTexts[2] .. (tParsedTexts[3] or ""), ",");
-		if #tTokens >= 2 and not VUHDO_strempty(tTokens[2]) then
-			local tName = strtrim(tTokens[2]);
-			if (VUHDO_SPELL_LAYOUTS[tName] ~= nil) then
-				VUHDO_activateLayout(tName);
+		elseif tCommandWord == "load" and tParsedTexts[2] then
+			tTokens = VUHDO_splitString(tParsedTexts[2] .. (tParsedTexts[3] or ""), ",");
+
+			if #tTokens >= 2 and not VUHDO_strempty(tTokens[2]) then
+				tName = strtrim(tTokens[2]);
+
+				if (VUHDO_SPELL_LAYOUTS[tName] ~= nil) then
+					VUHDO_activateLayout(tName);
+				else
+					VUHDO_Msg(VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_1 .. tName .. VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_2, 1, 0.4, 0.4);
+				end
+			end
+
+			if #tTokens >= 1 and not VUHDO_strempty(tTokens[1]) then
+				VUHDO_loadProfile(strtrim(tTokens[1]));
+			end
+
+		elseif strfind(tCommandWord, "res") then
+			for tPanelNum = 1, VUHDO_MAX_PANELS do
+				VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = nil;
+			end
+
+			VUHDO_BUFF_SETTINGS["CONFIG"]["POSITION"] = {
+				["x"] = 100, ["y"] = -100, ["point"] = "TOPLEFT", ["relativePoint"] = "TOPLEFT",
+			};
+
+			VUHDO_loadDefaultPanelSetup();
+			VUHDO_reloadUI(false);
+
+			VUHDO_Msg(VUHDO_I18N_PANELS_RESET);
+
+		elseif tCommandWord == "lock" then
+			VUHDO_CONFIG["LOCK_PANELS"] = not VUHDO_CONFIG["LOCK_PANELS"];
+
+			if (VUHDO_CONFIG["LOCK_PANELS"]) then
+				VUHDO_Msg(VUHDO_I18N_LOCK_PANELS_PRE .. VUHDO_I18N_LOCK_PANELS_LOCKED);
 			else
-				VUHDO_Msg(VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_1 .. tName .. VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_2, 1, 0.4, 0.4);
+				VUHDO_Msg(VUHDO_I18N_LOCK_PANELS_PRE .. VUHDO_I18N_LOCK_PANELS_UNLOCKED);
 			end
-		end
-		if #tTokens >= 1 and not VUHDO_strempty(tTokens[1]) then
-			VUHDO_loadProfile(strtrim(tTokens[1]));
-		end
-	elseif strfind(tCommandWord, "res") then
-		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = nil;
-		end
-		VUHDO_BUFF_SETTINGS["CONFIG"]["POSITION"] = {
-			["x"] = 100, ["y"] = -100, ["point"] = "TOPLEFT", ["relativePoint"] = "TOPLEFT",
-		};
-		VUHDO_loadDefaultPanelSetup();
-		VUHDO_reloadUI(false);
-		VUHDO_Msg(VUHDO_I18N_PANELS_RESET);
 
-	elseif tCommandWord == "lock" then
-		VUHDO_CONFIG["LOCK_PANELS"] = not VUHDO_CONFIG["LOCK_PANELS"];
-		if (VUHDO_CONFIG["LOCK_PANELS"]) then
-			VUHDO_Msg(VUHDO_I18N_LOCK_PANELS_PRE .. VUHDO_I18N_LOCK_PANELS_LOCKED);
-		else
-			VUHDO_Msg(VUHDO_I18N_LOCK_PANELS_PRE .. VUHDO_I18N_LOCK_PANELS_UNLOCKED);
-		end
-		VUHDO_saveCurrentProfile();
+			VUHDO_saveCurrentProfile();
 
-	elseif tCommandWord == "show" then
-		VUHDO_setPanelsVisible(true);
+		elseif tCommandWord == "show" then
+			VUHDO_setPanelsVisible(true);
 
-	elseif tCommandWord == "hide" then
-		VUHDO_setPanelsVisible(false);
+		elseif tCommandWord == "hide" then
+			VUHDO_setPanelsVisible(false);
 
-	elseif tCommandWord == "toggle" then
-		VUHDO_setPanelsVisible(not VUHDO_CONFIG["SHOW_PANELS"]);
+		elseif tCommandWord == "toggle" then
+			VUHDO_setPanelsVisible(not VUHDO_CONFIG["SHOW_PANELS"]);
 
-	elseif strfind(tCommandWord, "cast") or tCommandWord == "mt" then
-		VUHDO_ctraBroadCastMaintanks();
-		VUHDO_Msg(VUHDO_I18N_MTS_BROADCASTED);
+		elseif strfind(tCommandWord, "cast") or tCommandWord == "mt" then
+			VUHDO_ctraBroadCastMaintanks();
 
-	elseif (tCommandWord == "pron") then
-		SetCVar("scriptProfile", "1");
-		ReloadUI();
-	elseif tCommandWord == "proff" then
-		SetCVar("scriptProfile", "0");
-		ReloadUI();
-	elseif (strfind(tCommandWord, "chkvars")) then
-		table.wipe(VUHDO_DEBUG);
-		for tFName, _ in pairs(_G) do
-			if(strsub(tFName, 1, 1) == "t" or strsub(tFName, 1, 1) == "s") then
-				VUHDO_Msg("Emerging local variable " .. tFName);
+			VUHDO_Msg(VUHDO_I18N_MTS_BROADCASTED);
+
+		elseif (tCommandWord == "pron") then
+			SetCVar("scriptProfile", "1");
+			ReloadUI();
+
+		elseif tCommandWord == "proff" then
+			SetCVar("scriptProfile", "0");
+			ReloadUI();
+
+		elseif (strfind(tCommandWord, "chkvars")) then
+			table.wipe(VUHDO_DEBUG);
+
+			for tFName, _ in pairs(_G) do
+				if(strsub(tFName, 1, 1) == "t" or strsub(tFName, 1, 1) == "s") then
+					VUHDO_Msg("Emerging local variable " .. tFName);
+				end
 			end
-		end
-	elseif strfind(tCommandWord, "mm")
-		or strfind(tCommandWord, "map") then
-		VUHDO_MM_SETTINGS["hide"] = VUHDO_forceBooleanValue(VUHDO_MM_SETTINGS["hide"]);
-		VUHDO_MM_SETTINGS["hide"] = not VUHDO_MM_SETTINGS["hide"];
 
-		VUHDO_initShowMinimap();
+		elseif strfind(tCommandWord, "mm") or strfind(tCommandWord, "map") then
+			VUHDO_MM_SETTINGS["hide"] = VUHDO_forceBooleanValue(VUHDO_MM_SETTINGS["hide"]);
+			VUHDO_MM_SETTINGS["hide"] = not VUHDO_MM_SETTINGS["hide"];
 
-		VUHDO_Msg(VUHDO_I18N_MM_ICON .. (VUHDO_MM_SETTINGS["hide"] and VUHDO_I18N_CHAT_HIDDEN or VUHDO_I18N_CHAT_SHOWN));
-	elseif strfind(tCommandWord, "compart") then
-		VUHDO_MM_SETTINGS["addon_compartment_hide"] = VUHDO_forceBooleanValue(VUHDO_MM_SETTINGS["addon_compartment_hide"]);
-		VUHDO_MM_SETTINGS["addon_compartment_hide"] = not VUHDO_MM_SETTINGS["addon_compartment_hide"];
+			VUHDO_initShowMinimap();
 
-		VUHDO_initShowAddOnCompartment();
+			VUHDO_Msg(VUHDO_I18N_MM_ICON .. (VUHDO_MM_SETTINGS["hide"] and VUHDO_I18N_CHAT_HIDDEN or VUHDO_I18N_CHAT_SHOWN));
 
-		VUHDO_Msg(VUHDO_I18N_ADDON_COMPARTMENT_ICON .. 
-			(VUHDO_MM_SETTINGS["addon_compartment_hide"] and VUHDO_I18N_CHAT_HIDDEN or VUHDO_I18N_CHAT_SHOWN));
-	elseif tCommandWord == "ui" then
-		VUHDO_reloadUI(false);
-	elseif strfind(tCommandWord, "role") then
-		VUHDO_Msg("Roles have been reset.");
-		table.wipe(VUHDO_MANUAL_ROLES);
-		VUHDO_reloadUI(false);
-	--[[elseif tCommandWord == "delcude" then
-		table.wipe(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]);
-		table.wipe(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"]);
-		collectgarbage("collect");]]
+		elseif strfind(tCommandWord, "compart") then
+			VUHDO_MM_SETTINGS["addon_compartment_hide"] = VUHDO_forceBooleanValue(VUHDO_MM_SETTINGS["addon_compartment_hide"]);
+			VUHDO_MM_SETTINGS["addon_compartment_hide"] = not VUHDO_MM_SETTINGS["addon_compartment_hide"];
 
-	elseif tCommandWord == "test" then
-		table.wipe(VUHDO_DEBUG);
-		collectgarbage("collect");
+			VUHDO_initShowAddOnCompartment();
 
-		--[[local _, tProfile = VUHDO_getProfileNamedCompressed("Buh!");
-		tProfile = VUHDO_compressTable(tProfile);
-		local tCompressed = VUHDO_compressStringHuffman(tProfile);
-		local tUnCompressed = VUHDO_decompressIfCompressed(VUHDO_decompressStringHuffman(tCompressed));
+			VUHDO_Msg(VUHDO_I18N_ADDON_COMPARTMENT_ICON ..
+				(VUHDO_MM_SETTINGS["addon_compartment_hide"] and VUHDO_I18N_CHAT_HIDDEN or VUHDO_I18N_CHAT_SHOWN));
 
-		VUHDO_xMsg(#tProfile, #tCompressed, #tUnCompressed);]]
+		elseif tCommandWord == "ui" then
+			VUHDO_reloadUI(false);
 
-	elseif tCommandWord == "pool" then
-		local tSubCommand = strlower(tParsedTexts[2] or "");
+		elseif strfind(tCommandWord, "role") then
+			VUHDO_Msg("Roles have been reset.");
 
-		if tSubCommand == "on" then
-			VUHDO_TABLE_POOL_PROFILE = true;
+			table.wipe(VUHDO_MANUAL_ROLES);
 
-			VUHDO_Msg("Table pool profiling enabled.");
-		elseif tSubCommand == "off" then
-			VUHDO_TABLE_POOL_PROFILE = false;
+			VUHDO_reloadUI(false);
 
-			VUHDO_Msg("Table pool profiling disabled.");
-		elseif strfind(tSubCommand, "res") then
-			VUHDO_resetPoolStats();
+		elseif tCommandWord == "test" then
+			table.wipe(VUHDO_DEBUG);
 
-			VUHDO_Msg("Table pool statistics reset.");
+			collectgarbage("collect");
+
+		elseif tCommandWord == "pool" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setPoolProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setPoolProfiling(false);
+			elseif strfind(tSubCommand, "res") then
+				VUHDO_resetPoolMetrics();
+			else
+				VUHDO_printPoolMetrics();
+			end
+
+		elseif tCommandWord == "task" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setDeferredTaskProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setDeferredTaskProfiling(false);
+			elseif strfind(tSubCommand, "res") then
+				VUHDO_resetDeferredTaskMetrics();
+			else
+				VUHDO_printDeferredTaskMetrics(false);
+			end
+
+		elseif strfind(tCommandWord, "hand") then -- Handler Profiling
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setHandlerProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setHandlerProfiling(false);
+			elseif strfind(tSubCommand, "res") or tSubCommand == "reset" then
+				VUHDO_resetHandlerProfilingMetrics();
+			else
+				VUHDO_printHandlerProfilingMetrics();
+			end
+
+		elseif tCommandWord == "ab" or tCommandWord == "about" then
+			VUHDO_printAbout();
+
+		elseif aCommand == "?" or strfind(tCommandWord, "help") or aCommand == "" then
+			tLines = VUHDO_splitString(VUHDO_I18N_COMMAND_LIST, "§");
+
+			for _, tCurLine in ipairs(tLines) do
+				VUHDO_MsgC(tCurLine);
+			end
+
 		else
-			VUHDO_printPoolStats();
+			VUHDO_Msg(VUHDO_I18N_BAD_COMMAND, 1, 0.4, 0.4);
 		end
 
-	elseif tCommandWord == "task" then
-		local tSubCommand = strlower(tParsedTexts[2] or "");
+		return;
 
-		if tSubCommand == "on" then
-			VUHDO_setDeferredTaskProfiling(true);
-		elseif tSubCommand == "off" then
-			VUHDO_setDeferredTaskProfiling(false);
-		elseif strfind(tSubCommand, "res") then
-			VUHDO_resetDeferredTaskMetrics();
-		else
-			VUHDO_printDeferredTaskMetrics(false);
-		end
-
-	elseif tCommandWord == "ab" or tCommandWord == "about" then
-		VUHDO_printAbout();
-
-	elseif aCommand == "?" or strfind(tCommandWord, "help")	or aCommand == "" then
-		local tLines = VUHDO_splitString(VUHDO_I18N_COMMAND_LIST, "§");
-
-		for _, tCurLine in ipairs(tLines) do 
-			VUHDO_MsgC(tCurLine);
-		end
-	else
-		VUHDO_Msg(VUHDO_I18N_BAD_COMMAND, 1, 0.4, 0.4);
 	end
 end
 
 
 
 --
+local tEvent;
 local function VUHDO_UnRegisterEvent(aCondition, ...)
-	local tEvent;
+
 	for tCnt = 1, select("#", ...) do
 		tEvent = select(tCnt, ...);
 
@@ -2039,13 +2603,19 @@ local function VUHDO_UnRegisterEvent(aCondition, ...)
 			end
 		end
 	end
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_updateGlobalToggles()
-	if not VUHDO_INSTANCE then return; end
+
+	if not VUHDO_INSTANCE then
+		return;
+	end
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_THREAT_LEVEL] = VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_THREAT_LEVEL);
 
@@ -2123,24 +2693,28 @@ function VUHDO_updateGlobalToggles()
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD] =
 		VUHDO_PANEL_SETUP["BAR_COLORS"]["HOTS"]["showShieldAbsorb"]
-			or VUHDO_CONFIG["SHOW_SHIELD_BAR"] 
+			or VUHDO_CONFIG["SHOW_SHIELD_BAR"]
 			or VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"]
 			or VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_SHIELD);
 
 	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD], "UNIT_ABSORB_AMOUNT_CHANGED");
 	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD], "UNIT_HEAL_ABSORB_AMOUNT_CHANGED");
 
-	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE] = VUHDO_CONFIG["SHOW_SPELL_TRACE"] 
+	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE] = VUHDO_CONFIG["SHOW_SPELL_TRACE"]
 		or VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_SPELL_TRACE);
 
-	VUHDO_UnRegisterEvent(sParseCombatLog or VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE], 
+	VUHDO_UnRegisterEvent(sParseCombatLog or VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE],
 		"COMBAT_LOG_EVENT_UNFILTERED");
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_loadVariables()
+
 	_, VUHDO_PLAYER_CLASS = UnitClass("player");
 	VUHDO_PLAYER_NAME = UnitName("player");
 
@@ -2153,94 +2727,8 @@ function VUHDO_loadVariables()
 	VUHDO_initTextProviderConfig();
 
 	VUHDO_lnfPatchFont(VuhDoOptionsTooltipText, "Text");
-end
 
-
-
---
-local tOldAggro = { };
-local tOldThreat = { };
-local tTarget;
-local tAggroUnit;
-local tThreatPerc;
-local function VUHDO_updateAllAggro()
-	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		tOldAggro[tUnit] = tInfo["aggro"];
-		tOldThreat[tUnit] = tInfo["threatPerc"];
-		tInfo["aggro"] = false;
-		tInfo["threatPerc"] = 0;
-	end
-
-	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if tInfo["connected"] and not tInfo["dead"] then
-			if VUHDO_INTERNAL_TOGGLES[7] and (tInfo["threat"] or 0) >= 2 then -- VUHDO_UPDATE_AGGRO
-				tInfo["aggro"] = true;
-			end
-			tTarget = tInfo["targetUnit"];
-			if UnitIsEnemy(tUnit, tTarget) then
-				if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
-					_, _, tThreatPerc = UnitDetailedThreatSituation(tUnit, tTarget);
-					tInfo["threatPerc"] = tThreatPerc or 0;
-				end
-
-				tAggroUnit = VUHDO_RAID_NAMES[UnitName(tTarget .. "target")];
-
-				if tAggroUnit then
-					if VUHDO_INTERNAL_TOGGLES[14] then -- VUHDO_UPDATE_AGGRO
-						_, _, tThreatPerc = UnitDetailedThreatSituation(tAggroUnit, tTarget);
-						VUHDO_RAID[tAggroUnit]["threatPerc"] = tThreatPerc or 0;
-					end
-
-					if sIsHealerMode and VUHDO_INTERNAL_TOGGLES[7] then -- VUHDO_UPDATE_AGGRO
-						VUHDO_RAID[tAggroUnit]["aggro"] = true;
-					end
-				end
-			end
-		else
-			tInfo["aggro"] = false;
-		end
-	end
-
-	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if tInfo["aggro"] ~= tOldAggro[tUnit] then
-			VUHDO_updateHealthBarsFor(tUnit, 7); -- VUHDO_UPDATE_AGGRO
-		end
-
-		if tInfo["threatPerc"] ~= tOldThreat[tUnit] then
-			VUHDO_updateBouquetsForEvent(tUnit, 14); -- VUHDO_UPDATE_THREAT_PERC
-		end
-	end
-end
-
-
-
---
-local tIsInRange, tIsCharmed;
-local tIsRangeKnown, tRangeSpell, tUnitReaction;
-local function VUHDO_updateAllRange()
-	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		tInfo["baseRange"] = "player" == tUnit or "pet" == tUnit or UnitInRange(tUnit);
-		tInfo["visible"] = UnitIsVisible(tUnit);
-
-		-- Check if unit is charmed
-		tIsCharmed = UnitIsCharmed(tUnit) and UnitCanAttack("player", tUnit) and not tInfo["dead"];
-		if tInfo["charmed"] ~= tIsCharmed then
-			tInfo["charmed"] = tIsCharmed;
-			VUHDO_updateHealthBarsFor(tUnit, 4); -- VUHDO_UPDATE_DEBUFF
-		end
-
-		tIsInRange = VUHDO_isInRange(tUnit);
-
-		if tInfo["range"] ~= tIsInRange then
-			tInfo["range"] = tIsInRange;
-			VUHDO_updateHealthBarsFor(tUnit, 5); -- VUHDO_UPDATE_RANGE
-			if sIsDirectionArrow and VUHDO_getCurrentMouseOver() == tUnit
-				and (VuhDoDirectionFrame["shown"] or (not tIsInRange or VUHDO_CONFIG["DIRECTION"]["isAlways"])) then
-
-				VUHDO_updateDirectionFrame();
-			end
-		end
-	end
+	return;
 
 end
 
@@ -2248,70 +2736,107 @@ end
 
 --
 function VUHDO_normalRaidReload(anIsReloadBuffs)
-	if VUHDO_isConfigPanelShowing() then return; end
+
+	if VUHDO_isConfigPanelShowing() then
+		return;
+	end
+
 	VUHDO_TIMERS["RELOAD_RAID"] = 2.3;
-	if anIsReloadBuffs then VUHDO_IS_RELOAD_BUFFS = true; end
+
+	if anIsReloadBuffs then
+		VUHDO_IS_RELOAD_BUFFS = true;
+	end
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_quickRaidReload()
+
 	VUHDO_TIMERS["RELOAD_RAID"] = 0.3;
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_lateRaidReload()
+
 	if not VUHDO_isReloadPending() then
 		VUHDO_TIMERS["RELOAD_RAID"] = 5;
 	end
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_isReloadPending()
+
 	return VUHDO_TIMERS["RELOAD_RAID"] > 0
 		or VUHDO_TIMERS["RELOAD_UI"] > 0
 		or VUHDO_IS_RELOADING;
+
 end
 
 
 
 --
-function VUHDO_timeReloadUI(someSecs, anIsLnf)
-	VUHDO_TIMERS["RELOAD_UI"] = someSecs;
+function VUHDO_timeReloadUI(aNumSecs, anIsLnf)
+
+	VUHDO_TIMERS["RELOAD_UI"] = aNumSecs;
 	VUHDO_RELOAD_UI_IS_LNF = anIsLnf;
+
+	return;
+
 end
 
 
 
 --
-function VUHDO_timeRedrawPanel(aPanelNum, someSecs)
+function VUHDO_timeRedrawPanel(aPanelNum, aNumSecs)
+
 	VUHDO_RELOAD_PANEL_NUM = aPanelNum;
-	VUHDO_TIMERS["RELOAD_PANEL"] = someSecs;
+	VUHDO_TIMERS["RELOAD_PANEL"] = aNumSecs;
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_setDebuffAnimation(aTimeSecs)
+
 	VUHDO_DEBUFF_ANIMATION = aTimeSecs;
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_initGcd()
+
 	VUHDO_GCD_UPDATE = true;
+
+	return;
+
 end
 
 
 
 --
 local function VUHDO_doReloadRoster(anIsQuick)
+
 	if not VUHDO_isConfigPanelShowing() then
 		if VUHDO_IS_RELOADING then
 			VUHDO_quickRaidReload();
@@ -2320,18 +2845,21 @@ local function VUHDO_doReloadRoster(anIsQuick)
 
 			if InCombatLockdown() then
 				VUHDO_RELOAD_AFTER_BATTLE = true;
-
 				VUHDO_IS_RELOADING = true;
+
 				VUHDO_refreshRaidMembers();
 				VUHDO_updateAllRaidBars();
 				VUHDO_initAllEventBouquets();
+
 				VUHDO_updatePanelVisibility();
+
 				VUHDO_IS_RELOADING = false;
 			else
 				VUHDO_refreshUI();
 
 				if VUHDO_IS_RELOAD_BUFFS and not anIsQuick then
 					VUHDO_reloadBuffPanel();
+
 					VUHDO_IS_RELOAD_BUFFS = false;
 				end
 
@@ -2339,8 +2867,11 @@ local function VUHDO_doReloadRoster(anIsQuick)
 			end
 		end
 
-		VUHDO_initDebuffs(); -- Verzögerung nach Taltentwechsel-Spell?
+		VUHDO_initDebuffs(); -- Verzgerung nach Taltentwechsel-Spell?
 	end
+
+	return;
+
 end
 
 
@@ -2348,287 +2879,392 @@ end
 --
 local sTimerDelta;
 local function VUHDO_setTimerDelta(aTimeDelta)
+
 	sTimerDelta = aTimeDelta;
+
+	return;
+
 end
 
 
 
 --
 local function VUHDO_checkResetTimer(aTimerName, aNextTick)
+
 	if VUHDO_TIMERS[aTimerName] > 0 then
 		VUHDO_TIMERS[aTimerName] = VUHDO_TIMERS[aTimerName] - sTimerDelta;
+
 		if VUHDO_TIMERS[aTimerName] <= 0 then
 			VUHDO_TIMERS[aTimerName] = aNextTick;
+
 			return true;
 		end
 	end
 
 	return false;
+
 end
+
 
 
 --
 local function VUHDO_checkTimer(aTimerName)
+
 	if VUHDO_TIMERS[aTimerName] > 0 then
 		VUHDO_TIMERS[aTimerName] = VUHDO_TIMERS[aTimerName] - sTimerDelta;
+
 		return VUHDO_TIMERS[aTimerName] <= 0;
 	end
 
 	return false;
+
 end
 
 
 
 --
-local tTimeDelta = 0;
-local tSlowDelta = 0;
-local tAutoProfile;
-local tTrigger;
-local tGcdStart, tGcdDuration;
-local tHotDebuffToggle = 1;
-function VUHDO_OnUpdate(_, aTimeDelta)
-	-----------------------------------------------------
-	-- These need to update very frequenly to not stutter
-	-- --------------------------------------------------
+do
+	--
+	local tTimeDelta = 0;
+	local tSlowDelta = 0;
+	local tAutoProfile;
+	local tTrigger;
+	local tGcdStart;
+	local tGcdDuration;
+	local tHotDebuffToggle = 1;
+	local tSeg1Start;
+	local tSeg2Start;
+	local tSeg1Duration;
+	local tSeg2Duration;
+	function VUHDO_OnUpdate(anInstance, aTimeDelta)
 
-	-- Update custom debuff animation
-	if VUHDO_DEBUFF_ANIMATION > 0 then
-		VUHDO_updateAllDebuffIcons(true);
-		VUHDO_DEBUFF_ANIMATION = VUHDO_DEBUFF_ANIMATION - aTimeDelta;
-	end
+		tSeg1Duration = 0;
+		tSeg2Duration = 0;
 
-	-- Update GCD-Bar
-	if VUHDO_GCD_UPDATE then
-		tGcdStart, tGcdDuration = GetSpellCooldown(VUHDO_SPELL_ID.GLOBAL_COOLDOWN);
-
-		if (tGcdDuration or 0) == 0 then
-			VuhDoGcdStatusBar:SetValue(0);
-			VUHDO_GCD_UPDATE = false;
-		else
-			VuhDoGcdStatusBar:SetValue((tGcdDuration - (GetTime() - tGcdStart)) / tGcdDuration);
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tSeg1Start = debugprofilestop();
 		end
-	end
 
-	-- Direction Arrow
-	if sIsDirectionArrow and VuhDoDirectionFrame["shown"] then
-		VUHDO_updateDirectionFrame();
-	end
+		-----------------------------------------------------
+		-- Segment 1
+		-----------------------------------------------------
 
-	-- Own frame flash routines to avoid taints
-	VUHDO_UIFrameFlash_OnUpdate(aTimeDelta);
+		-----------------------------------------------------
+		-- These need to update very frequenly to not stutter
+		-- --------------------------------------------------
 
-	-- run deferred tasks once per frame
-	VUHDO_processDeferredTaskQueue();
-
-
-	---------------------------------------------------------
-	-- From here 0.08 (80 msec) sec tick should be sufficient
-	---------------------------------------------------------
-
-	if tTimeDelta < 0.08 then
-		tTimeDelta = tTimeDelta + aTimeDelta;
-		tSlowDelta = tSlowDelta + aTimeDelta;
-		return;
-	else
-		VUHDO_setTimerDelta(aTimeDelta + tTimeDelta);
-		tTimeDelta = 0;
-	end
-
-	-- reload UI?
-	if VUHDO_checkTimer("RELOAD_UI") then
-		if VUHDO_IS_RELOADING or InCombatLockdown() then
-			VUHDO_TIMERS["RELOAD_UI"] = 0.3;
-		else
-			if VUHDO_RELOAD_UI_IS_LNF then VUHDO_lnfReloadUI();
-			else VUHDO_reloadUI(false); end
-			VUHDO_initOptions();
-			VUHDO_FIRST_RELOAD_UI = true;
+		-- Update custom debuff animation
+		if VUHDO_DEBUFF_ANIMATION > 0 then
+			VUHDO_DEBUFF_ANIMATION = VUHDO_DEBUFF_ANIMATION - aTimeDelta;
 		end
-	end
 
-	-- redraw single panel?
-	if VUHDO_checkTimer("RELOAD_PANEL") then
-		if VUHDO_IS_RELOADING or InCombatLockdown() then
-			VUHDO_TIMERS["RELOAD_PANEL"] = 0.3;
-		else
-			VUHDO_PROHIBIT_REPOS = true;
-			VUHDO_initAllBurstCaches();
-			VUHDO_redrawPanel(VUHDO_RELOAD_PANEL_NUM);
-			VUHDO_updateAllPanelBars(VUHDO_RELOAD_PANEL_NUM);
-			VUHDO_buildGenericHealthBarBouquet();
-			VUHDO_buildGenericTargetHealthBouquet();
-			VUHDO_registerAllBouquets(false);
-			VUHDO_initAllEventBouquets();
-			VUHDO_PROHIBIT_REPOS = false;
-		end
-	end
+		-- Update GCD-Bar
+		if VUHDO_GCD_UPDATE then
+			tGcdStart, tGcdDuration = GetSpellCooldown(VUHDO_SPELL_ID.GLOBAL_COOLDOWN);
 
-	---------------------------------------------------
-	------------------------- below only if vars loaded
-	---------------------------------------------------
+			if (tGcdDuration or 0) == 0 then
+				VuhDoGcdStatusBar:SetValue(0);
 
-	if not VUHDO_VARIABLES_LOADED then return; end
-
-	-- Reload raid roster?
-	if VUHDO_checkTimer("RELOAD_RAID") then VUHDO_doReloadRoster(false); end
-	-- Quick update after raid roster change?
-	if VUHDO_checkTimer("RELOAD_ROSTER") then VUHDO_doReloadRoster(true); end
-
-	-- refresh HoTs, cyclic bouquets and customs debuffs?
-	if VUHDO_checkResetTimer("UPDATE_HOTS", sHotToggleUpdateSecs) then
-		if tHotDebuffToggle == 1 then
-			VUHDO_updateAllHoTs();
-			
-			if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
-				VUHDO_updateClusterHighlights();
-			end
-
-			if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
-				VUHDO_updateSpellTrace();
-			end
-		elseif tHotDebuffToggle == 2 then
-			VUHDO_updateAllCyclicBouquets(false);
-		else
-			VUHDO_updateAllDebuffIcons(false);
-
-			-- Reload after player gained control
-			if not HasFullControl() then
-				VUHDO_LOST_CONTROL = true;
+				VUHDO_GCD_UPDATE = false;
 			else
-				if VUHDO_LOST_CONTROL then
-					if VUHDO_TIMERS["RELOAD_RAID"] <= 0 then
-						VUHDO_TIMERS["CUSTOMIZE"] = 0.3;
+				VuhDoGcdStatusBar:SetValue((tGcdDuration - (GetTime() - tGcdStart)) / tGcdDuration);
+			end
+		end
+
+		-- Direction Arrow
+		if sIsDirectionArrow and VuhDoDirectionFrame["shown"] then
+			VUHDO_updateDirectionFrame();
+		end
+
+		-- Own frame flash routines to avoid taints
+		VUHDO_UIFrameFlash_OnUpdate(aTimeDelta);
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tSeg1Duration = debugprofilestop() - tSeg1Start;
+		end
+
+		-- process deferred tasks once per frame
+		VUHDO_processDeferredTaskQueue();
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tSeg2Start = debugprofilestop();
+		end
+
+		---------------------------------------------------------
+		-- Segment 2
+		---------------------------------------------------------
+
+		---------------------------------------------------------
+		-- From here 0.08 (80 msec) sec tick should be sufficient
+		---------------------------------------------------------
+
+		if tTimeDelta < 0.08 then
+			tTimeDelta = tTimeDelta + aTimeDelta;
+			tSlowDelta = tSlowDelta + aTimeDelta;
+
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				tSeg2Duration = debugprofilestop() - tSeg2Start;
+
+				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] =
+					(VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] or 0) + tSeg1Duration + tSeg2Duration;
+				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
+			end
+
+			return;
+		else
+			VUHDO_setTimerDelta(tTimeDelta);
+
+			tTimeDelta = 0;
+		end
+
+		-- reload UI?
+		if VUHDO_checkTimer("RELOAD_UI") then
+			if VUHDO_IS_RELOADING or InCombatLockdown() then
+				VUHDO_TIMERS["RELOAD_UI"] = 0.3;
+			else
+				if VUHDO_RELOAD_UI_IS_LNF then
+					VUHDO_lnfReloadUI();
+				else
+					VUHDO_reloadUI(false);
+				end
+
+				VUHDO_initOptions();
+
+				VUHDO_FIRST_RELOAD_UI = true;
+			end
+		end
+
+		-- reset single panel?
+		if VUHDO_checkTimer("RELOAD_PANEL") then
+			if VUHDO_IS_RELOADING or InCombatLockdown() then
+				VUHDO_TIMERS["RELOAD_PANEL"] = 0.3;
+			else
+				VUHDO_PROHIBIT_REPOS = true;
+
+				VUHDO_initAllBurstCaches();
+				VUHDO_redrawPanel(VUHDO_RELOAD_PANEL_NUM);
+				VUHDO_updateAllPanelBars(VUHDO_RELOAD_PANEL_NUM);
+				VUHDO_buildGenericHealthBarBouquet();
+				VUHDO_buildGenericTargetHealthBouquet();
+				VUHDO_registerAllBouquets(false);
+				VUHDO_initAllEventBouquets();
+
+				VUHDO_PROHIBIT_REPOS = false;
+			end
+		end
+
+		---------------------------------------------------
+		------------------------- below only if vars loaded
+		---------------------------------------------------
+
+		if not VUHDO_VARIABLES_LOADED then
+			return;
+		end
+
+		-- Reload raid roster?
+		if VUHDO_checkTimer("RELOAD_RAID") then
+			VUHDO_doReloadRoster(false);
+		end
+
+		-- Quick update after raid roster change?
+		if VUHDO_checkTimer("RELOAD_ROSTER") then
+			VUHDO_doReloadRoster(true);
+		end
+
+		-- refresh HoTs, cyclic bouquets and custom debuffs?
+		if VUHDO_checkResetTimer("UPDATE_HOTS", sHotToggleUpdateSecs) then
+			if VUHDO_RAID then
+				if tHotDebuffToggle == 1 then
+					VUHDO_updateAllHoTs();
+
+					if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
+						VUHDO_updateClusterHighlights();
 					end
-					VUHDO_LOST_CONTROL = false;
+
+					if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
+						VUHDO_updateSpellTrace();
+					end
+				elseif tHotDebuffToggle == 2 then
+					VUHDO_updateAllCyclicBouquets(false);
+				else
+					VUHDO_updateAllDebuffIcons(false);
+
+					-- Reload after played gained control
+					if not HasFullControl() then
+						VUHDO_LOST_CONTROL = true;
+					else
+						if VUHDO_LOST_CONTROL then
+							if VUHDO_TIMERS["RELOAD_RAID"] <= 0 then
+								VUHDO_TIMERS["CUSTOMIZE"] = 0.3;
+							end
+
+							VUHDO_LOST_CONTROL = false;
+						end
+					end
+				end
+			end
+
+			if tHotDebuffToggle > 2 then
+				tHotDebuffToggle = 1;
+			else
+				tHotDebuffToggle = tHotDebuffToggle + 1;
+			end
+		end
+
+		-- track dragged panel coords
+		if VUHDO_DRAG_PANEL and VUHDO_checkResetTimer("REFRESH_DRAG", 0.05) then
+			VUHDO_refreshDragTarget(VUHDO_DRAG_PANEL);
+		end
+
+		-- Set Button colors without repositioning
+		if VUHDO_checkTimer("CUSTOMIZE") then
+			VUHDO_updateAllRaidTargetIndices();
+			VUHDO_updateAllRaidBars();
+			VUHDO_initAllEventBouquets();
+		end
+
+		-- Refresh Tooltip
+		if VUHDO_checkResetTimer("REFRESH_TOOLTIP", 2.3) and VuhDoTooltip:IsShown() then
+			VUHDO_updateTooltip();
+		end
+
+		-- Refresh custom debuff Tooltip
+		if VUHDO_checkResetTimer("REFRESH_CUDE_TOOLTIP", 1) then
+			VUHDO_updateCustomDebuffTooltip();
+		end
+
+		-- Refresh Buff Watch
+		if VUHDO_checkResetTimer("BUFF_WATCH", sBuffsRefreshSecs) then
+			VUHDO_updateBuffPanel();
+		end
+
+		-- Refresh Inspect, check timeout
+		if VUHDO_NEXT_INSPECT_UNIT ~= nil and GetTime() > VUHDO_NEXT_INSPECT_TIME_OUT then
+			VUHDO_setRoleUndefined(VUHDO_NEXT_INSPECT_UNIT);
+
+			VUHDO_NEXT_INSPECT_UNIT = nil;
+		end
+
+		-- Refresh targets not in raid
+		if VUHDO_checkResetTimer("REFRESH_TARGETS", 0.51) then
+			VUHDO_updateAllOutRaidTargetButtons();
+		end
+
+		-----------------------------------------------------------------------------------------
+
+		if VUHDO_CONFIG_SHOW_RAID then
+			return;
+		end
+
+		-- refresh aggro?
+		if VUHDO_checkResetTimer("UPDATE_AGGRO", sAggroRefreshSecs) then
+			VUHDO_updateAllAggro();
+		end
+
+		-- refresh range?
+		if VUHDO_checkResetTimer("UPDATE_RANGE", sRangeRefreshSecs) then
+			VUHDO_updateAllRange();
+		end
+
+		-- Refresh Cluster
+		if VUHDO_checkResetTimer("UPDATE_CLUSTERS", sClusterRefreshSecs) then
+			VUHDO_updateAllClusters();
+		end
+
+		-- AoE advice
+		if VUHDO_checkResetTimer("UPDATE_AOE", sAoeRefreshSecs) then
+			VUHDO_aoeUpdateAll();
+		end
+
+		----------------------------------------------------
+		------------------------- below only very slow tasks
+		----------------------------------------------------
+
+		if tSlowDelta < 1.2 then
+			tSlowDelta = tSlowDelta + sTimerDelta;
+
+			return;
+		else
+			VUHDO_setTimerDelta(aTimeDelta + tSlowDelta);
+
+			tSlowDelta = 0;
+		end
+
+		-- reload after battle
+		if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
+			VUHDO_RELOAD_AFTER_BATTLE = false;
+
+			if VUHDO_TIMERS["RELOAD_RAID"] <= 0 then
+				VUHDO_quickRaidReload();
+
+				if VUHDO_IS_RELOAD_BUFFS then
+					VUHDO_reloadBuffPanel();
+
+					VUHDO_IS_RELOAD_BUFFS = false;
 				end
 			end
 		end
 
-		if tHotDebuffToggle > 2 then 
-			tHotDebuffToggle = 1;
-		else 
-			tHotDebuffToggle = tHotDebuffToggle + 1;
+		-- automatic profiles, shield cleanup, hide generic blizz party
+		if VUHDO_checkResetTimer("CHECK_PROFILES", 3.1) then
+			if not InCombatLockdown() then
+				tAutoProfile, tTrigger = VUHDO_getAutoProfile();
+
+				if tAutoProfile and not VUHDO_IS_CONFIG then
+					VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. tTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. tAutoProfile .. "|r\"");
+
+					VUHDO_loadProfile(tAutoProfile);
+				end
+			end
+
+			VUHDO_hideBlizzCompactPartyFrame();
+			VUHDO_removeObsoleteShields();
 		end
-	end
 
-	-- track dragged panel coords
-	if VUHDO_DRAG_PANEL and VUHDO_checkResetTimer("REFRESH_DRAG", 0.05) then
-		VUHDO_refreshDragTarget(VUHDO_DRAG_PANEL);
-	end
+		-- Unit Zones
+		if VUHDO_checkResetTimer("RELOAD_ZONES", 3.45) then
+			if VUHDO_RAID then
+				for tUnit, tUnitInfo in pairs(VUHDO_RAID) do
+					tUnitInfo["zone"], tUnitInfo["map"] = VUHDO_getUnitZoneName(tUnit);
+				end
+			end
+		end
 
-	-- Set Button colors without repositioning
-	if VUHDO_checkTimer("CUSTOMIZE") then
-		VUHDO_updateAllRaidTargetIndices();
-		VUHDO_updateAllRaidBars();
-		VUHDO_initAllEventBouquets();
-	end
+		if not VUHDO_NEXT_INSPECT_UNIT and not InCombatLockdown() and VUHDO_checkResetTimer("REFRESH_INSPECT", 2.1) then
+			VUHDO_tryInspectNext();
+		end
 
-	-- Refresh Tooltip
-	if VUHDO_checkResetTimer("REFRESH_TOOLTIP", 2.3) and VuhDoTooltip:IsShown() then
-		VUHDO_updateTooltip();
-	end
+		-- Refresh d/c shield macros?
+		if VUHDO_checkTimer("MIRROR_TO_MACRO") then
+			if InCombatLockdown() then
+				VUHDO_TIMERS["MIRROR_TO_MACRO"] = 2;
+			else
+				VUHDO_mirrorToMacro();
+			end
+		end
 
-	-- Refresh custom debuff Tooltip
-	if VUHDO_checkResetTimer("REFRESH_CUDE_TOOLTIP", 1) then
-		VUHDO_updateCustomDebuffTooltip();
-	end
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tSeg2Duration = debugprofilestop() - tSeg2Start;
 
-	-- Refresh Buff Watch
-	if VUHDO_checkResetTimer("BUFF_WATCH", sBuffsRefreshSecs) then
-		VUHDO_updateBuffPanel();
-	end
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] =
+				(VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] or 0) + ((tSeg1Duration + tSeg2Duration) * 1000);
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
+		end
 
-	-- Refresh Inspect, check timeout
-	if VUHDO_NEXT_INSPECT_UNIT ~= nil and GetTime() > VUHDO_NEXT_INSPECT_TIME_OUT then
-		VUHDO_setRoleUndefined(VUHDO_NEXT_INSPECT_UNIT);
-		VUHDO_NEXT_INSPECT_UNIT = nil;
-	end
-
-	-- Refresh targets not in raid
-	if VUHDO_checkResetTimer("REFRESH_TARGETS", 0.51) then
-		VUHDO_updateAllOutRaidTargetButtons();
-	end
-
-	-----------------------------------------------------------------------------------------
-
-	if VUHDO_CONFIG_SHOW_RAID then return; end
-
-	-- refresh aggro?
-	if VUHDO_checkResetTimer("UPDATE_AGGRO", sAggroRefreshSecs) then VUHDO_updateAllAggro(); end
-	-- refresh range?
-	if VUHDO_checkResetTimer("UPDATE_RANGE", sRangeRefreshSecs) then VUHDO_updateAllRange(); end
-	-- Refresh Clusters
-	if VUHDO_checkResetTimer("UPDATE_CLUSTERS", sClusterRefreshSecs) then VUHDO_updateAllClusters(); end
-	-- AoE advice
-	if VUHDO_checkResetTimer("UPDATE_AOE", sAoeRefreshSecs) then VUHDO_aoeUpdateAll(); end
-
-	----------------------------------------------------
-	------------------------- below only very slow tasks
-	----------------------------------------------------
-	if tSlowDelta < 1.2 then
-		tSlowDelta = tSlowDelta + aTimeDelta;
 		return;
-	else
-		VUHDO_setTimerDelta(aTimeDelta + tSlowDelta);
-		tSlowDelta = 0;
-	end
 
-	-- reload after battle
-	if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
-		VUHDO_RELOAD_AFTER_BATTLE = false;
-
-		if VUHDO_TIMERS["RELOAD_RAID"] <= 0 then
-			VUHDO_quickRaidReload();
-			if VUHDO_IS_RELOAD_BUFFS then
-				VUHDO_reloadBuffPanel();
-				VUHDO_IS_RELOAD_BUFFS = false;
-			end
-		end
-	end
-
-	-- automatic profiles, shield cleanup, hide generic blizz party
-	if VUHDO_checkResetTimer("CHECK_PROFILES", 3.1) then
-		if not InCombatLockdown() then
-			tAutoProfile, tTrigger = VUHDO_getAutoProfile();
-			if tAutoProfile and not VUHDO_IS_CONFIG then
-				VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. tTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. tAutoProfile .. "|r\"");
-				VUHDO_loadProfile(tAutoProfile);
-			end
-		end
-
-		VUHDO_hideBlizzCompactPartyFrame();
-		VUHDO_removeObsoleteShields();
-	end
-
-	-- Unit Zones
-	if VUHDO_checkResetTimer("RELOAD_ZONES", 3.45) then
-		for tUnit, tInfo in pairs(VUHDO_RAID) do
-			tInfo["zone"], tInfo["map"] = VUHDO_getUnitZoneName(tUnit);
-		end
-	end
-
-	if not VUHDO_NEXT_INSPECT_UNIT and not InCombatLockdown() and VUHDO_checkResetTimer("REFRESH_INSPECT", 2.1) then
-		VUHDO_tryInspectNext();
-	end
-
-	-- Refresh d/c shield macros?
-	if VUHDO_checkTimer("MIRROR_TO_MACRO") then
-		if InCombatLockdown() then 
-			VUHDO_TIMERS["MIRROR_TO_MACRO"] = 2;
-		else 
-			VUHDO_mirrorToMacro();
-		end
 	end
 end
 
 
 
-local VUHDO_ALL_EVENTS = {
+--
+local VUHDO_ALL_EVENT_NAMES = {
 	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD", "SPELLS_CHANGED",
-	"UNIT_MAXHEALTH", "UNIT_HEALTH",  
+	"UNIT_MAXHEALTH", "UNIT_HEALTH",
 	"UNIT_AURA",
 	"UNIT_TARGET",
-	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",  
+	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",
 	"UNIT_PET",
 	"UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE", "UNIT_EXITING_VEHICLE",
 	"CHAT_MSG_ADDON",
@@ -2636,7 +3272,7 @@ local VUHDO_ALL_EVENTS = {
 	"LEARNED_SPELL_IN_SKILL_LINE", "TRAIT_CONFIG_UPDATED",
 	"PLAYER_FLAGS_CHANGED",
 	"PLAYER_LOGOUT",
-	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE", 
+	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE",
 	"UNIT_SPELLCAST_SENT",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
 	"COMBAT_LOG_EVENT_UNFILTERED",
@@ -2670,83 +3306,48 @@ local VUHDO_ALL_EVENTS = {
 
 
 --
-function VUHDO_OnLoad(anInstance)
+do
+	--
+	local tTocVersion;
+	function VUHDO_OnLoad(anInstance)
 
-	local _, _, _, tTocVersion = GetBuildInfo();
+		_, _, _, tTocVersion = GetBuildInfo();
 
-	if tonumber(tTocVersion or 999999) < VUHDO_MIN_TOC_VERSION then
-		VUHDO_Msg(format(VUHDO_I18N_DISABLE_BY_MIN_VERSION, VUHDO_VERSION, VUHDO_MIN_TOC_VERSION));
+		if tonumber(tTocVersion or 999999) < VUHDO_MIN_TOC_VERSION then
+			VUHDO_Msg(format(VUHDO_I18N_DISABLE_BY_MIN_VERSION, VUHDO_VERSION, VUHDO_MIN_TOC_VERSION));
+
+			return;
+		elseif tonumber(tTocVersion or 0) > VUHDO_MAX_TOC_VERSION then
+			VUHDO_Msg(format(VUHDO_I18N_DISABLE_BY_MAX_VERSION, VUHDO_VERSION, VUHDO_MAX_TOC_VERSION));
+
+			return;
+		end
+
+		VUHDO_INSTANCE = anInstance;
+
+		for _, tEvent in pairs(VUHDO_ALL_EVENT_NAMES) do
+			anInstance:RegisterEvent(tEvent);
+		end
+
+		VUHDO_ALL_EVENT_NAMES = nil;
+
+		SLASH_VUHDO1 = "/vuhdo";
+		SLASH_VUHDO2 = "/vd";
+
+		SlashCmdList["VUHDO"] = function(aMessage)
+			VUHDO_slashCmd(aMessage);
+		end
+
+		SLASH_RELOADUI1 = "/rl";
+
+		SlashCmdList["RELOADUI"] = ReloadUI;
+
+		anInstance:SetScript("OnEvent", VUHDO_OnEvent);
+		anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
+
+		VUHDO_printAbout();
+
 		return;
-	elseif tonumber(tTocVersion or 0) > VUHDO_MAX_TOC_VERSION then
-		VUHDO_Msg(format(VUHDO_I18N_DISABLE_BY_MAX_VERSION, VUHDO_VERSION, VUHDO_MAX_TOC_VERSION));
-		return;
+
 	end
-
-	VUHDO_INSTANCE = anInstance;
-
-	for _, tEvent in pairs(VUHDO_ALL_EVENTS) do
-		anInstance:RegisterEvent(tEvent);
-	end
-
-	VUHDO_ALL_EVENTS = nil;
-
-	SLASH_VUHDO1 = "/vuhdo";
-	SLASH_VUHDO2 = "/vd";
-	SlashCmdList["VUHDO"] = function(aMessage)
-		VUHDO_slashCmd(aMessage);
-	end
-
-	SLASH_RELOADUI1 = "/rl";
-	SlashCmdList["RELOADUI"] = ReloadUI;
-
-	anInstance:SetScript("OnEvent", VUHDO_OnEvent);
-	anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
-
-	VUHDO_printAbout();
-
-end
-
-
-
---
-function VUHDO_deferUpdateHealth(aUnit, aMode)
-
-	VUHDO_deferTask(VUHDO_DEFER_HEALTH, aUnit, aMode);
-
-end
-
-
-
---
-function VUHDO_deferUpdateBouquets(aUnit, aMode)
-
-	VUHDO_deferTask(VUHDO_DEFER_BOUQUETS, aUnit, aMode);
-
-end
-
-
-
---
-function VUHDO_deferUpdateShieldBar(aUnit)
-
-	VUHDO_deferTask(VUHDO_DEFER_SHIELD_BAR, aUnit, 1);
-
-end
-
-
-
---
-function VUHDO_deferUpdateHealAbsorbBar(aUnit)
-
-	VUHDO_deferTask(VUHDO_DEFER_HEAL_ABSORB_BAR, aUnit, 1);
-
-end
-
-
-
---
-function VUHDO_deferUpdateHealthBarsFor(aUnit, aMode)
-
-	VUHDO_deferTask(VUHDO_DEFER_HEALTH_BARS_FOR, aUnit, aMode);
-
 end

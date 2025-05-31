@@ -864,32 +864,84 @@ end
 
 
 --
-local tAllListeners;
-local tIsActive, tIcon, tTimer, tCounter, tDuration, tBuffName, tHasChanged, tImpact;
-local tClipL, tClipR, tClipT, tClipB;
+local tIsActive;
+local tIcon;
+local tTimer;
+local tCounter;
+local tDuration;
+local tColor;
+local tBuffName;
+local tHasChanged;
+local tImpact;
+local tTimer2;
+local tClipL;
+local tClipR;
+local tClipT;
+local tClipB;
 local tMaxColor;
+local tAllListeners;
+function VUHDO_updateUnitCyclicBouquet(aUnit, aBouquetName)
+
+	if not aUnit or not aBouquetName then
+		return;
+	end
+
+	tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tHasChanged,
+		tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor = VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
+
+	if tHasChanged and (tIsActive or VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName]) then
+		tAllListeners = VUHDO_REGISTERED_BOUQUETS[aBouquetName];
+
+		for _, tDelegate in pairs(tAllListeners) do
+			tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
+				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor);
+		end
+
+		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = tIsActive;
+	end
+
+	return;
+
+end
+
+
+
+--
 local tDestArray;
 function VUHDO_updateAllCyclicBouquets(anIsPlayerOnly)
+
 	tDestArray = anIsPlayerOnly and sPlayerArray or VUHDO_RAID;
 
 	for tBouquetName, _ in pairs(VUHDO_CYCLIC_BOUQUETS) do
-		tAllListeners = VUHDO_REGISTERED_BOUQUETS[tBouquetName];
-
 		for tUnit, _ in pairs(tDestArray) do
-			tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tHasChanged,
-				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor = VUHDO_evaluateBouquet(tUnit, tBouquetName, nil);
-
-			if tHasChanged and (tIsActive or VUHDO_ACTIVE_BOUQUETS[tUnit][tBouquetName]) then
-				for _, tDelegate in pairs(tAllListeners) do
-					tDelegate(tUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tBouquetName,
-						tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor);
-				end
-				VUHDO_ACTIVE_BOUQUETS[tUnit][tBouquetName] = tIsActive;
-			end
-
-
+			VUHDO_updateUnitCyclicBouquet(tUnit, tBouquetName);
 		end
 	end
+
+	return;
+
+end
+
+
+
+--
+local tDestArray;
+function VUHDO_deferUpdateAllCyclicBouquets(anIsPlayerOnly, aPriority)
+
+	tDestArray = anIsPlayerOnly and sPlayerArray or VUHDO_RAID;
+
+	if not tDestArray then
+		return;
+	end
+
+	for tBouquetName, _ in pairs(VUHDO_CYCLIC_BOUQUETS) do
+		for tUnit, _ in pairs(tDestArray) do
+			VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET, tUnit, tBouquetName, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+		end
+	end
+
+	return;
+
 end
 
 
