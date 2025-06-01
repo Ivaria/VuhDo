@@ -307,7 +307,7 @@ do
 		table.sort(tSnapshots, function(a, b) return a.durationUs > b.durationUs; end);
 
 		while #tSnapshots > VUHDO_HANDLER_PROFILING_EVENT_CONFIG["LIMIT"] do
-			tremove(tSnapshots);
+			tremove(tSnapshots); -- Remove the smallest/last one after sort
 		end
 
 		return;
@@ -639,7 +639,7 @@ do
 			(tTotalMetrics["maxTimeUs"] or 0)
 		));
 
-		VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type): **|r");
+		VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type):**|r");
 
 		tEventStats = { };
 
@@ -684,7 +684,7 @@ do
 		end
 
 		if #VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS > 0 then
-			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS .. " Expensive Event Invocations (Threshold: " .. (VUHDO_HANDLER_PROFILING_EVENT_CONFIG["THRESHOLD_US"] or "N/A") .. " us): **|r");
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS .. " Expensive Event Invocations (Threshold: " .. (VUHDO_HANDLER_PROFILING_EVENT_CONFIG["THRESHOLD_US"] or "N/A") .. " us):**|r");
 
 			for tCnt, tSnapshot in ipairs(VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS) do
 				tArgString = table.concat(tSnapshot["args"], ", ");
@@ -1857,7 +1857,7 @@ do
 		VUHDO_Msg(format("  Stops: Hard (Time Limit): %d, Budget Exceeded: %d",
 			(tMetrics["hardStopsHit"] or 0), (tMetrics["budgetExceededStops"] or 0)));
 
-		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime us, TotalTime ms, MinTime, MaxTime [Unit|Mode]): **|r");
+		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime us, TotalTime ms, MinTime, MaxTime [Unit|Mode]):**|r");
 
 		if VUHDO_DEFERRED_TASK_TYPES then
 			for _, tTaskType in ipairs(VUHDO_DEFERRED_TASK_TYPES) do
@@ -1909,7 +1909,7 @@ do
 			min((tTaskConfig["ABS_MAX_QUEUE_TIME_US"] or 0), floor(tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION))
 		));
 
-		VUHDO_Msg("|cffFFA500** Pool Stats (Size, Idle, PeakIdle, Hits, Misses, RejectedReleases): **|r");
+		VUHDO_Msg("|cffFFA500** Pool Stats (Size, Idle, PeakIdle, Hits, Misses, RejectedReleases):**|r");
 
 		if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.getMetrics then
 			tPoolMetrics = VUHDO_DEFERRED_TASK_POOL:getMetrics();
@@ -1923,7 +1923,7 @@ do
 		end
 
 		if #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS > 0 then
-			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or "N/A") .. " us): **|r");
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or "N/A") .. " us):**|r");
 
 			for tSnapshotCnt, tSnapshot in ipairs(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS) do
 				VUHDO_Msg(format("  #%d: ChunkTotalTime: %.2f us (%.2f ms), NumTasks: %d, Timestamp: %.2f",
@@ -1947,7 +1947,7 @@ do
 				end
 			end
 		else
-			VUHDO_Msg("|cffFFA500** No expensive deferred task chunks recorded above threshold. **|r");
+			VUHDO_Msg("|cffFFA500** No expensive deferred task chunks recorded above threshold.**|r");
 		end
 
 		VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
