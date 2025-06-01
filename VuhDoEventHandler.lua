@@ -42,7 +42,10 @@ local VUHDO_RAID;
 local VUHDO_PANEL_SETUP;
 VUHDO_RELOAD_UI_IS_LNF = false;
 
-local VUHDO_HANDLER_PROFILING_METRICS = {
+
+local VUHDO_HANDLER_PROFILING_ENABLED = false;
+
+local VUHDO_HANDLER_METRICS = {
 	["sessionStartTime"] = 0,
 	["OnUpdate"] = {
 		["invocationCount"] = 0,
@@ -65,12 +68,12 @@ local VUHDO_HANDLER_PROFILING_METRICS = {
 	["OnEvent"] = { },
 };
 
-local VUHDO_HANDLER_PROFILING_EVENT_CONFIG = {
+local VUHDO_HANDLER_EVENT_CONFIG = {
 	["LIMIT"] = 5,
 	["THRESHOLD_US"] = 2000,
 };
 
-local VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS = {
+local VUHDO_HANDLER_EVENT_SNAPSHOTS = {
 	-- {
 	--	["eventName"] = <event name>,
 	--	["durationUs"] = <microsecond duration>,
@@ -82,7 +85,6 @@ local VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS = {
 	-- },
 };
 
-VUHDO_HANDLER_PROFILING_ENABLED = false;
 
 VUHDO_DEFERRED_TASK_PRIORITY_LOW = 1;
 VUHDO_DEFERRED_TASK_PRIORITY_NORMAL = 2;
@@ -280,11 +282,11 @@ do
 	local tNewSnapshot;
 	function VUHDO_addEventSnapshot(aEventName, aDurationUs, ...)
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED or aDurationUs < VUHDO_HANDLER_PROFILING_EVENT_CONFIG["THRESHOLD_US"] then
+		if not VUHDO_HANDLER_PROFILING_ENABLED or aDurationUs < VUHDO_HANDLER_EVENT_CONFIG["THRESHOLD_US"] then
 			return;
 		end
 
-		tSnapshots = VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS;
+		tSnapshots = VUHDO_HANDLER_EVENT_SNAPSHOTS;
 
 		tNewSnapshot = {
 			["eventName"] = aEventName,
@@ -306,7 +308,7 @@ do
 
 		table.sort(tSnapshots, function(a, b) return a.durationUs > b.durationUs; end);
 
-		while #tSnapshots > VUHDO_HANDLER_PROFILING_EVENT_CONFIG["LIMIT"] do
+		while #tSnapshots > VUHDO_HANDLER_EVENT_CONFIG["LIMIT"] do
 			tremove(tSnapshots);
 		end
 
@@ -320,11 +322,11 @@ do
 	local tMetrics;
 	function VUHDO_updateHandlerOnUpdateMetrics(aDurationUs)
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnUpdate"] then
 			return;
 		end
 
-		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"];
+		tMetrics = VUHDO_HANDLER_METRICS["OnUpdate"];
 
 		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
 		tMetrics["invocationCount"] = (tMetrics["invocationCount"] or 0) + 1;
@@ -341,11 +343,11 @@ do
 	local tMetrics;
 	function VUHDO_updateHandlerOnUpdateSeg1Metrics(aDurationUs)
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnUpdate"] then
 			return;
 		end
 
-		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"];
+		tMetrics = VUHDO_HANDLER_METRICS["OnUpdate"]["segment1"];
 
 		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
 		tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
@@ -359,11 +361,11 @@ do
 	local tMetrics;
 	function VUHDO_updateHandlerOnUpdateSeg2Metrics(aDurationUs)
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnUpdate"] then
 			return;
 		end
 
-		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"];
+		tMetrics = VUHDO_HANDLER_METRICS["OnUpdate"]["segment2"];
 
 		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
 		tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
@@ -379,19 +381,19 @@ do
 	local tMetrics;
 	function VUHDO_updateHandlerOnUpdateTotalMetrics(aDurationUs)
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnUpdate"] then
 			return;
 		end
 
-		if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] then
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] = {
+		if not VUHDO_HANDLER_METRICS["OnUpdate"]["total"] then
+			VUHDO_HANDLER_METRICS["OnUpdate"]["total"] = {
 				["totalTimeUs"] = 0,
 				["minTimeUs"] = 9999999,
 				["maxTimeUs"] = 0,
 			};
 		end
 
-		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"];
+		tMetrics = VUHDO_HANDLER_METRICS["OnUpdate"]["total"];
 
 		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
 		tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
@@ -408,12 +410,12 @@ do
 	function VUHDO_updateHandlerOnEventMetrics(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5)
 
 		if not VUHDO_HANDLER_PROFILING_ENABLED or not anEventName or
-			not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] then
+			not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnEvent"] then
 			return;
 		end
 
-		if not VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEventName] then
-			VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEventName] = {
+		if not VUHDO_HANDLER_METRICS["OnEvent"][anEventName] then
+			VUHDO_HANDLER_METRICS["OnEvent"][anEventName] = {
 				["totalTimeUs"] = 0,
 				["invocationCount"] = 0,
 				["minTimeUs"] = 9999999,
@@ -421,7 +423,7 @@ do
 			};
 		end
 
-		tEventMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEventName];
+		tEventMetrics = VUHDO_HANDLER_METRICS["OnEvent"][anEventName];
 
 		tEventMetrics["totalTimeUs"] = (tEventMetrics["totalTimeUs"] or 0) + aDurationUs;
 		tEventMetrics["invocationCount"] = (tEventMetrics["invocationCount"] or 0) + 1;
@@ -435,10 +437,10 @@ do
 
 
 	--
-	function VUHDO_resetHandlerProfilingMetrics()
+	function VUHDO_resetHandlerMetrics()
 
-		if not VUHDO_HANDLER_PROFILING_METRICS then
-			VUHDO_HANDLER_PROFILING_METRICS = {
+		if not VUHDO_HANDLER_METRICS then
+			VUHDO_HANDLER_METRICS = {
 				["sessionStartTime"] = 0,
 				["OnUpdate"] = {
 					["invocationCount"] = 0,
@@ -462,10 +464,10 @@ do
 			};
 		end
 
-		VUHDO_HANDLER_PROFILING_METRICS["sessionStartTime"] = GetTime();
+		VUHDO_HANDLER_METRICS["sessionStartTime"] = GetTime();
 
-		if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] = {
+		if not VUHDO_HANDLER_METRICS["OnUpdate"] then
+			VUHDO_HANDLER_METRICS["OnUpdate"] = {
 				["invocationCount"] = 0,
 				["segment1"] = {
 					["totalTimeUs"] = 0,
@@ -484,43 +486,43 @@ do
 				},
 			};
 		else
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = 0;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] = 0;
 
 			-- segment 1
-			if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"] then
-				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"] = { };
+			if not VUHDO_HANDLER_METRICS["OnUpdate"]["segment1"] then
+				VUHDO_HANDLER_METRICS["OnUpdate"]["segment1"] = { };
 			end
 
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"]["totalTimeUs"] = 0;
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"]["minTimeUs"] = 9999999;
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"]["maxTimeUs"] = 0;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["segment1"]["totalTimeUs"] = 0;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["segment1"]["minTimeUs"] = 9999999;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["segment1"]["maxTimeUs"] = 0;
 
 			-- segment 2
-			if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"] then
-				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"] = { };
+			if not VUHDO_HANDLER_METRICS["OnUpdate"]["segment2"] then
+				VUHDO_HANDLER_METRICS["OnUpdate"]["segment2"] = { };
 			end
 
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"]["totalTimeUs"] = 0;
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"]["minTimeUs"] = 9999999;
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"]["maxTimeUs"] = 0;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["segment2"]["totalTimeUs"] = 0;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["segment2"]["minTimeUs"] = 9999999;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["segment2"]["maxTimeUs"] = 0;
 
 			-- total of both segments
-			if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] then
-				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] = { };
+			if not VUHDO_HANDLER_METRICS["OnUpdate"]["total"] then
+				VUHDO_HANDLER_METRICS["OnUpdate"]["total"] = { };
 			end
 
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"]["totalTimeUs"] = 0;
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"]["minTimeUs"] = 9999999;
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"]["maxTimeUs"] = 0;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["total"]["totalTimeUs"] = 0;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["total"]["minTimeUs"] = 9999999;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["total"]["maxTimeUs"] = 0;
 		end
 
-		if VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] then
-			twipe(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]);
+		if VUHDO_HANDLER_METRICS["OnEvent"] then
+			twipe(VUHDO_HANDLER_METRICS["OnEvent"]);
 		else
-			VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] = { };
+			VUHDO_HANDLER_METRICS["OnEvent"] = { };
 		end
 
-		twipe(VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS);
+		twipe(VUHDO_HANDLER_EVENT_SNAPSHOTS);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_Msg("Handler profiling metrics reset.");
@@ -551,27 +553,27 @@ do
 	local tCount;
 	local tAvgTime;
 	local tArgString;
-	function VUHDO_printHandlerProfilingMetrics()
+	function VUHDO_printHandlerMetrics()
 
-		tMetricsExist = VUHDO_HANDLER_PROFILING_METRICS and
-						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] and
-						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"] and
-						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"] and
-						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] and
-						VUHDO_HANDLER_PROFILING_METRICS["OnEvent"];
+		tMetricsExist = VUHDO_HANDLER_METRICS and
+						VUHDO_HANDLER_METRICS["OnUpdate"] and
+						VUHDO_HANDLER_METRICS["OnUpdate"]["segment1"] and
+						VUHDO_HANDLER_METRICS["OnUpdate"]["segment2"] and
+						VUHDO_HANDLER_METRICS["OnUpdate"]["total"] and
+						VUHDO_HANDLER_METRICS["OnEvent"];
 
 		tInitialCheckCondition = false;
 
 		if tMetricsExist then
 			tHasEventData = false;
 
-			for _ in pairs(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]) do
+			for _ in pairs(VUHDO_HANDLER_METRICS["OnEvent"]) do
 				tHasEventData = true;
 
 				break;
 			end
 
-			if (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) == 0 and not tHasEventData then
+			if (VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] or 0) == 0 and not tHasEventData then
 				tInitialCheckCondition = true;
 			end
 		else
@@ -590,7 +592,7 @@ do
 			return;
 		end
 
-		tMetrics = VUHDO_HANDLER_PROFILING_METRICS;
+		tMetrics = VUHDO_HANDLER_METRICS;
 
 		tSessionDuration = GetTime() - (tMetrics["sessionStartTime"] or GetTime());
 
@@ -683,10 +685,10 @@ do
 			end
 		end
 
-		if #VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS > 0 then
-			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS .. " Expensive Event Invocations (Threshold: " .. (VUHDO_HANDLER_PROFILING_EVENT_CONFIG["THRESHOLD_US"] or "N/A") .. " us): **|r");
+		if #VUHDO_HANDLER_EVENT_SNAPSHOTS > 0 then
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_HANDLER_EVENT_SNAPSHOTS .. " Expensive Event Invocations (Threshold: " .. (VUHDO_HANDLER_EVENT_CONFIG["THRESHOLD_US"] or "N/A") .. " us): **|r");
 
-			for tCnt, tSnapshot in ipairs(VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS) do
+			for tCnt, tSnapshot in ipairs(VUHDO_HANDLER_EVENT_SNAPSHOTS) do
 				tArgString = table.concat(tSnapshot["args"], ", ");
 
 				VUHDO_Msg(format("  #%d: %s - %.2f us (%.2f ms) at %.2f. Args: %s",
@@ -3123,9 +3125,9 @@ do
 			elseif tSubCommand == "off" then
 				VUHDO_setHandlerProfiling(false);
 			elseif strfind(tSubCommand, "res") or tSubCommand == "reset" then
-				VUHDO_resetHandlerProfilingMetrics();
+				VUHDO_resetHandlerMetrics();
 			else
-				VUHDO_printHandlerProfilingMetrics();
+				VUHDO_printHandlerMetrics();
 			end
 
 		elseif tCommandWord == "ab" or tCommandWord == "about" then
@@ -3565,9 +3567,9 @@ do
 			if VUHDO_HANDLER_PROFILING_ENABLED then
 				tProfilingSegments[2]["duration"] = debugprofilestop() - tProfilingSegments[2]["start"];
 
-				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] =
-					(VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] or 0) + tProfilingSegments[1]["duration"] + tProfilingSegments[2]["duration"];
-				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
+				VUHDO_HANDLER_METRICS["OnUpdate"]["totalTimeUs"] =
+					(VUHDO_HANDLER_METRICS["OnUpdate"]["totalTimeUs"] or 0) + tProfilingSegments[1]["duration"] + tProfilingSegments[2]["duration"];
+				VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
 			end
 
 			return;
@@ -3806,7 +3808,7 @@ do
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			tProfilingSegments[2]["duration"] = debugprofilestop() - tProfilingSegments[2]["start"];
 
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
+			VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
 
 			VUHDO_updateHandlerOnUpdateSeg1Metrics(tProfilingSegments[1]["duration"] * 1000);
 			VUHDO_updateHandlerOnUpdateSeg2Metrics(tProfilingSegments[2]["duration"] * 1000);
