@@ -42,14 +42,46 @@ local VUHDO_RAID;
 local VUHDO_PANEL_SETUP;
 VUHDO_RELOAD_UI_IS_LNF = false;
 
-VUHDO_HANDLER_PROFILING_METRICS = {
+local VUHDO_HANDLER_PROFILING_METRICS = {
 	["sessionStartTime"] = 0,
 	["OnUpdate"] = {
-		["totalTimeUs"] = 0,
 		["invocationCount"] = 0,
+		["segment1"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["total"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
 	},
 	["OnEvent"] = { },
 };
+
+local VUHDO_HANDLER_PROFILING_EVENT_CONFIG = {
+	["LIMIT"] = 5,
+	["THRESHOLD_US"] = 2000,
+};
+
+local VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS = {
+	-- {
+	--	["eventName"] = <event name>,
+	--	["durationUs"] = <microsecond duration>,
+	--	["timestamp"] = <epoch timestamp>,
+	--	["args"] = {
+	--		<arg1>,
+	--		...
+	--	},
+	-- },
+};
+
 VUHDO_HANDLER_PROFILING_ENABLED = false;
 
 VUHDO_DEFERRED_TASK_PRIORITY_LOW = 1;
@@ -163,6 +195,26 @@ local VUHDO_DEFERRED_TASK_STATE = {
 	},
 };
 
+local VUHDO_DEFERRED_TASK_CHUNK_CONFIG = {
+	["LIMIT"] = 5,
+};
+
+local VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS = {
+	-- {
+	--	["totalChunkTimeUs" = <total time>,
+	--	["numTasksInChunk"] = <total tasks>,
+	--	["tasks"] = {
+	--		{
+	--			["type"] = <task type>,
+	--			["unit"] = <unit>,
+	--			["mode"] = <mode>,
+	--			["durationUs"] = <microsecond duration>,
+	--		},
+	--		["timestamp"] = <task timestamp>,
+	--	},
+	-- },
+};
+
 local VUHDO_DEFERRED_TASK_POOL;
 local VUHDO_DEFERRED_TASK_POOL_MAX_SIZE = 1500;
 
@@ -205,181 +257,460 @@ local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
 
 
---
-local function VUHDO_setHandlerProfiling(anIsEnabled)
+do
+	--
+	function VUHDO_setHandlerProfiling(anIsEnabled)
 
-	VUHDO_HANDLER_PROFILING_ENABLED = anIsEnabled;
+		VUHDO_HANDLER_PROFILING_ENABLED = anIsEnabled;
 
-	if anIsEnabled then
-		VUHDO_Msg("Handler profiling is enabled.");
-	else
-		VUHDO_Msg("Handler profiling is disabled.");
+		if anIsEnabled then
+			VUHDO_Msg("Handler profiling is enabled.");
+		else
+			VUHDO_Msg("Handler profiling is disabled.");
+		end
+
+		return;
+
 	end
 
-	return;
-
-end
 
 
+	--
+	local tSnapshots;
+	local tNewSnapshot;
+	function VUHDO_addEventSnapshot(aEventName, aDurationUs, ...)
 
---
-local function VUHDO_resetHandlerProfilingMetrics()
+		if not VUHDO_HANDLER_PROFILING_ENABLED or aDurationUs < VUHDO_HANDLER_PROFILING_EVENT_CONFIG["THRESHOLD_US"] then
+			return;
+		end
 
-	if not VUHDO_HANDLER_PROFILING_METRICS then
-		VUHDO_HANDLER_PROFILING_METRICS = {
-			["sessionStartTime"] = 0,
-			["OnUpdate"] = {
+		tSnapshots = VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS;
+
+		tNewSnapshot = {
+			["eventName"] = aEventName,
+			["durationUs"] = aDurationUs,
+			["timestamp"] = GetTime(),
+			["args"] = { },
+		};
+
+		for tCnt = 1, select("#", ...) do
+			tinsert(tNewSnapshot["args"], tostring(select(tCnt, ...)));
+
+			-- don't capture more than 5 arguments
+			if tCnt >= 5 then
+				break;
+			end
+		end
+
+		tinsert(tSnapshots, tNewSnapshot);
+
+		table.sort(tSnapshots, function(a, b) return a.durationUs > b.durationUs; end);
+
+		while #tSnapshots > VUHDO_HANDLER_PROFILING_EVENT_CONFIG["LIMIT"] do
+			tremove(tSnapshots); -- Remove the smallest/last one after sort
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	function VUHDO_updateHandlerOnUpdateMetrics(aDurationUs)
+
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+			return;
+		end
+
+		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"];
+
+		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
+		tMetrics["invocationCount"] = (tMetrics["invocationCount"] or 0) + 1;
+		tMetrics["minTimeUs"] = min((tMetrics["minTimeUs"] or 9999999), aDurationUs);
+		tMetrics["maxTimeUs"] = max((tMetrics["maxTimeUs"] or 0), aDurationUs);
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	function VUHDO_updateHandlerOnUpdateSeg1Metrics(aDurationUs)
+
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+			return;
+		end
+
+		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"];
+
+		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
+		tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
+		tMetrics["maxTimeUs"] = max(tMetrics["maxTimeUs"], aDurationUs);
+
+	end
+
+
+
+	--
+	local tMetrics;
+	function VUHDO_updateHandlerOnUpdateSeg2Metrics(aDurationUs)
+
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+			return;
+		end
+
+		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"];
+
+		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
+		tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
+		tMetrics["maxTimeUs"] = max(tMetrics["maxTimeUs"], aDurationUs);
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	function VUHDO_updateHandlerOnUpdateTotalMetrics(aDurationUs)
+
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+			return;
+		end
+
+		if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] then
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] = {
+				["totalTimeUs"] = 0,
+				["minTimeUs"] = 9999999,
+				["maxTimeUs"] = 0,
+			};
+		end
+
+		tMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"];
+
+		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
+		tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
+		tMetrics["maxTimeUs"] = max(tMetrics["maxTimeUs"], aDurationUs);
+
+		return;
+
+	end
+
+
+
+	--
+	local tEventMetrics;
+	function VUHDO_updateHandlerOnEventMetrics(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5)
+
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not anEventName or
+			not VUHDO_HANDLER_PROFILING_METRICS or not VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] then
+			return;
+		end
+
+		if not VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEventName] then
+			VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEventName] = {
 				["totalTimeUs"] = 0,
 				["invocationCount"] = 0,
-			},
-			["OnEvent"] = { },
-		};
-	end
-
-	VUHDO_HANDLER_PROFILING_METRICS["sessionStartTime"] = GetTime();
-
-	if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
-		VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] = { };
-	end
-
-	VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] = 0;
-	VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = 0;
-
-	if VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] then
-		twipe(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]);
-	else
-		VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] = { };
-	end
-
-	if VUHDO_HANDLER_PROFILING_ENABLED then
-		VUHDO_Msg("Handler profiling metrics reset.");
-	end
-
-	return;
-
-end
-
-
-
---
-local tMetrics;
-local tSessionDuration;
-local tOnUpdateMetrics;
-local tAvgOnUpdateTimeUs;
-local tEventStats;
-local tTotalTime;
-local tCount;
-local tAvgTime;
-local tInitialCheckCondition;
-local tMetricsExist;
-local tHasEventData;
-local function VUHDO_printHandlerProfilingMetrics()
-
-	tMetricsExist = VUHDO_HANDLER_PROFILING_METRICS and
-					VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] and
-					VUHDO_HANDLER_PROFILING_METRICS["OnEvent"];
-
-	tInitialCheckCondition = false;
-
-	if tMetricsExist then
-		tHasEventData = false;
-
-		for _ in pairs(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]) do
-			tHasEventData = true;
-			break;
+				["minTimeUs"] = 9999999,
+				["maxTimeUs"] = 0,
+			};
 		end
 
-		if VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] == 0 and not tHasEventData then
-			tInitialCheckCondition = true;
+		tEventMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEventName];
+
+		tEventMetrics["totalTimeUs"] = (tEventMetrics["totalTimeUs"] or 0) + aDurationUs;
+		tEventMetrics["invocationCount"] = (tEventMetrics["invocationCount"] or 0) + 1;
+		tEventMetrics["minTimeUs"] = min(tEventMetrics["minTimeUs"], aDurationUs);
+		tEventMetrics["maxTimeUs"] = max(tEventMetrics["maxTimeUs"], aDurationUs);
+
+		VUHDO_addEventSnapshot(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5);
+
+	end
+
+
+
+	--
+	function VUHDO_resetHandlerProfilingMetrics()
+
+		if not VUHDO_HANDLER_PROFILING_METRICS then
+			VUHDO_HANDLER_PROFILING_METRICS = {
+				["sessionStartTime"] = 0,
+				["OnUpdate"] = {
+					["invocationCount"] = 0,
+					["segment1"] = {
+						["totalTimeUs"] = 0,
+						["minTimeUs"] = 9999999,
+						["maxTimeUs"] = 0,
+					},
+					["segment2"] = {
+						["totalTimeUs"] = 0,
+						["minTimeUs"] = 9999999,
+						["maxTimeUs"] = 0,
+					},
+					["total"] = {
+						["totalTimeUs"] = 0,
+						["minTimeUs"] = 9999999,
+						["maxTimeUs"] = 0,
+					},
+				},
+				["OnEvent"] = { },
+			};
 		end
-	else
-		tInitialCheckCondition = true;
-	end
 
-	if not VUHDO_HANDLER_PROFILING_ENABLED and tInitialCheckCondition then
-		VUHDO_Msg("Handler profiling is currently disabled.");
+		VUHDO_HANDLER_PROFILING_METRICS["sessionStartTime"] = GetTime();
 
-		return;
-	end
+		if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] then
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] = {
+				["invocationCount"] = 0,
+				["segment1"] = {
+					["totalTimeUs"] = 0,
+					["minTimeUs"] = 9999999,
+					["maxTimeUs"] = 0,
+				},
+				["segment2"] = {
+					["totalTimeUs"] = 0,
+					["minTimeUs"] = 9999999,
+					["maxTimeUs"] = 0,
+				},
+				["total"] = {
+					["totalTimeUs"] = 0,
+					["minTimeUs"] = 9999999,
+					["maxTimeUs"] = 0,
+				},
+			};
+		else
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = 0;
 
-	if not tMetricsExist then
-		VUHDO_Msg("Handler profiling metrics are missing or incomplete.");
-
-		return;
-	end
-
-	tMetrics = VUHDO_HANDLER_PROFILING_METRICS;
-	tSessionDuration = GetTime() - tMetrics["sessionStartTime"];
-
-	if tSessionDuration < 0 then
-		tSessionDuration = 0;
-	end
-
-	VUHDO_Msg("|cffFFD100--- Handler Profiling Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
-
-	tOnUpdateMetrics = tMetrics["OnUpdate"];
-	tAvgOnUpdateTimeUs = 0;
-
-	if tOnUpdateMetrics["invocationCount"] > 0 then
-		tAvgOnUpdateTimeUs = tOnUpdateMetrics["totalTimeUs"] / tOnUpdateMetrics["invocationCount"];
-	end
-
-	VUHDO_Msg(format("|cffFFA500** VUHDO_OnUpdate (excluding deferred tasks):|r Total: %.0f us (%.2f ms), Invocations: %d, Avg: %.2f us",
-		tOnUpdateMetrics["totalTimeUs"],
-		tOnUpdateMetrics["totalTimeUs"] / 1000,
-		tOnUpdateMetrics["invocationCount"],
-		tAvgOnUpdateTimeUs
-	));
-
-	VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type):**|r");
-
-	tEventStats = { };
-
-	if tMetrics["OnEvent"] then
-		for tEventName, tEventData in pairs(tMetrics["OnEvent"]) do
-			tTotalTime = tEventData["totalTimeUs"] or 0;
-			tCount = tEventData["invocationCount"] or 0;
-
-			tAvgTime = 0;
-
-			if tCount > 0 then
-				tAvgTime = tTotalTime / tCount;
+			-- segment 1
+			if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"] then
+				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"] = { };
 			end
 
-			tinsert(tEventStats, {
-				["name"] = tEventName,
-				["totalTime"] = tTotalTime,
-				["count"] = tCount,
-				["avgTime"] = tAvgTime,
-			});
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"]["totalTimeUs"] = 0;
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"]["minTimeUs"] = 9999999;
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"]["maxTimeUs"] = 0;
+
+			-- segment 2
+			if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"] then
+				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"] = { };
+			end
+
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"]["totalTimeUs"] = 0;
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"]["minTimeUs"] = 9999999;
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"]["maxTimeUs"] = 0;
+
+			-- total of both segments
+			if not VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] then
+				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] = { };
+			end
+
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"]["totalTimeUs"] = 0;
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"]["minTimeUs"] = 9999999;
+			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"]["maxTimeUs"] = 0;
 		end
-	end
 
-	if #tEventStats == 0 then
-		VUHDO_Msg("  No OnEvent calls recorded or metrics reset.");
-	else
-		table.sort(tEventStats, function(aEntry, bEntry) return aEntry["totalTime"] > bEntry["totalTime"]; end);
-
-		VUHDO_Msg("  Sorted by Total Time (Event: Total us, Count, Avg us/call)");
-
-		for _, tStats in ipairs(tEventStats) do
-			VUHDO_Msg(format("  %s: Total: %.2f ms, Count: %d, Avg: %.2f us",
-				tStats["name"],
-				tStats["totalTime"] / 1000,
-				tStats["count"],
-				tStats["avgTime"]
-			));
+		if VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] then
+			twipe(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]);
+		else
+			VUHDO_HANDLER_PROFILING_METRICS["OnEvent"] = { };
 		end
+
+		twipe(VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS);
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_Msg("Handler profiling metrics reset.");
+		end
+
+		return;
+
 	end
 
-	VUHDO_Msg("|cffFFD100--- End of Handler Metrics ---|r");
 
-	if not VUHDO_HANDLER_PROFILING_ENABLED then
-		VUHDO_Msg("Handler Profiling is currently DISABLED. Stats shown are from last enabled session.");
+
+	--
+	local tMetricsExist;
+	local tInitialCheckCondition;
+	local tHasEventData;
+	local tMetrics;
+	local tSessionDuration;
+	local tOnUpdateMetrics;
+	local tInvocationCount;
+	local tSeg1Metrics;
+	local tSeg2Metrics;
+	local tTotalMetrics;
+	local tAvgSeg1TimeUs;
+	local tAvgSeg2TimeUs;
+	local tAvgTotalTimeUs;
+	local tEventStats;
+	local tTotalTime;
+	local tCount;
+	local tAvgTime;
+	local tArgString;
+	function VUHDO_printHandlerProfilingMetrics()
+
+		tMetricsExist = VUHDO_HANDLER_PROFILING_METRICS and
+						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"] and
+						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment1"] and
+						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["segment2"] and
+						VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["total"] and
+						VUHDO_HANDLER_PROFILING_METRICS["OnEvent"];
+
+		tInitialCheckCondition = false;
+
+		if tMetricsExist then
+			tHasEventData = false;
+
+			for _ in pairs(VUHDO_HANDLER_PROFILING_METRICS["OnEvent"]) do
+				tHasEventData = true;
+
+				break;
+			end
+
+			if (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) == 0 and not tHasEventData then
+				tInitialCheckCondition = true;
+			end
+		else
+			tInitialCheckCondition = true;
+		end
+
+		if not VUHDO_HANDLER_PROFILING_ENABLED and tInitialCheckCondition then
+			VUHDO_Msg("Handler profiling is currently disabled.");
+
+			return;
+		end
+
+		if not tMetricsExist then
+			VUHDO_Msg("Handler profiling metrics are missing or incomplete for distinct segments and sum.");
+
+			return;
+		end
+
+		tMetrics = VUHDO_HANDLER_PROFILING_METRICS;
+
+		tSessionDuration = GetTime() - (tMetrics["sessionStartTime"] or GetTime());
+
+		if tSessionDuration < 0 then
+			tSessionDuration = 0;
+		end
+
+		VUHDO_Msg("|cffFFD100--- Handler Profiling Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
+
+		tOnUpdateMetrics = tMetrics["OnUpdate"];
+		tInvocationCount = tOnUpdateMetrics["invocationCount"] or 0;
+		tSeg1Metrics = tOnUpdateMetrics["segment1"];
+		tSeg2Metrics = tOnUpdateMetrics["segment2"];
+		tTotalMetrics = tOnUpdateMetrics["total"];
+
+		tAvgSeg1TimeUs = 0;
+		tAvgSeg2TimeUs = 0;
+		tAvgTotalTimeUs = 0;
+
+		if tInvocationCount > 0 then
+			tAvgSeg1TimeUs = (tSeg1Metrics["totalTimeUs"] or 0) / tInvocationCount;
+			tAvgSeg2TimeUs = (tSeg2Metrics["totalTimeUs"] or 0) / tInvocationCount;
+			tAvgTotalTimeUs = (tTotalMetrics["totalTimeUs"] or 0) / tInvocationCount;
+		end
+
+		VUHDO_Msg(format("|cffFFA500** VUHDO_OnUpdate Invocations:|r %d", tInvocationCount));
+		VUHDO_Msg(format("  |cffB0E0E6Segment 1:|r Total: %.0f us (%.2f ms), Avg: %.2f us, Min: %.2f us, Max: %.2f us",
+			(tSeg1Metrics["totalTimeUs"] or 0),
+			(tSeg1Metrics["totalTimeUs"] or 0) / 1000,
+			tAvgSeg1TimeUs,
+			(tSeg1Metrics["minTimeUs"] == 9999999 and 0 or (tSeg1Metrics["minTimeUs"] or 0)),
+			(tSeg1Metrics["maxTimeUs"] or 0)
+		));
+		VUHDO_Msg(format("  |cffB0E0E6Segment 2:|r Total: %.0f us (%.2f ms), Avg: %.2f us, Min: %.2f us, Max: %.2f us",
+			(tSeg2Metrics["totalTimeUs"] or 0),
+			(tSeg2Metrics["totalTimeUs"] or 0) / 1000,
+			tAvgSeg2TimeUs,
+			(tSeg2Metrics["minTimeUs"] == 9999999 and 0 or (tSeg2Metrics["minTimeUs"] or 0)),
+			(tSeg2Metrics["maxTimeUs"] or 0)
+		));
+		VUHDO_Msg(format("  |cff98FB98Sum (Seg1+Seg2):|r Total: %.0f us (%.2f ms), Avg: %.2f us, Min: %.2f us, Max: %.2f us",
+			(tTotalMetrics["totalTimeUs"] or 0),
+			(tTotalMetrics["totalTimeUs"] or 0) / 1000,
+			tAvgTotalTimeUs,
+			(tTotalMetrics["minTimeUs"] == 9999999 and 0 or (tTotalMetrics["minTimeUs"] or 0)),
+			(tTotalMetrics["maxTimeUs"] or 0)
+		));
+
+		VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type):**|r");
+
+		tEventStats = { };
+
+		if tMetrics["OnEvent"] then
+			for tEventName, tEventData in pairs(tMetrics["OnEvent"]) do
+				tTotalTime = tEventData["totalTimeUs"] or 0;
+				tCount = tEventData["invocationCount"] or 0;
+				tAvgTime = 0;
+
+				if tCount > 0 then
+					tAvgTime = tTotalTime / tCount;
+				end
+
+				tinsert(tEventStats, {
+					["name"] = tEventName,
+					["totalTime"] = tTotalTime,
+					["count"] = tCount,
+					["avgTime"] = tAvgTime,
+					["minTime"] = tEventData["minTimeUs"],
+					["maxTime"] = tEventData["maxTimeUs"],
+				});
+			end
+		end
+
+		if #tEventStats == 0 then
+			VUHDO_Msg("  No OnEvent calls recorded or metrics reset.");
+		else
+			table.sort(tEventStats, function(aEntry, bEntry) return aEntry["totalTime"] > bEntry["totalTime"]; end);
+
+			VUHDO_Msg("  Sorted by Total Time (Event: Total ms, Count, Avg us, Min us, Max us)");
+
+			for _, tStats in ipairs(tEventStats) do
+				VUHDO_Msg(format("  %s: Total: %.2f ms, Count: %d, Avg: %.2f us, Min: %.2f us, Max: %.2f us",
+					tStats["name"],
+					tStats["totalTime"] / 1000,
+					tStats["count"],
+					tStats["avgTime"],
+					(tStats["minTime"] == 9999999 and 0 or (tStats["minTime"] or 0)),
+					(tStats["maxTime"] or 0)
+				));
+			end
+		end
+
+		if #VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS > 0 then
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS .. " Expensive Event Invocations (Threshold: " .. (VUHDO_HANDLER_PROFILING_EVENT_CONFIG["THRESHOLD_US"] or "N/A") .. " us):**|r");
+
+			for tCnt, tSnapshot in ipairs(VUHDO_HANDLER_PROFILING_EVENT_SNAPSHOTS) do
+				tArgString = table.concat(tSnapshot["args"], ", ");
+
+				VUHDO_Msg(format("  #%d: %s - %.2f us (%.2f ms) at %.2f. Args: %s",
+					tCnt,
+					tSnapshot["eventName"],
+					tSnapshot["durationUs"],
+					tSnapshot["durationUs"] / 1000,
+					tSnapshot["timestamp"],
+					tArgString
+				));
+			end
+		else
+			VUHDO_Msg("|cffFFA500** No expensive event invocations recorded above threshold.**|r");
+		end
+
+		VUHDO_Msg("|cffFFD100--- End of Handler Metrics ---|r");
+
+		if not VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_Msg("Handler profiling is currently disabled. Stats shown are from last enabled session.");
+		end
+
+		return;
+
 	end
-
-	return;
-
 end
 
 
@@ -769,6 +1100,186 @@ do
 
 
 	--
+	local tTaskChunkSnapshots;
+	local tNewSnapshot;
+	local function VUHDO_addChunkSnapshot(aTotalChunkTimeUs, aNumTasksInChunk, aTasksDetailTable)
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or aTotalChunkTimeUs < (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or 2000) then
+			return;
+		end
+
+		tTaskChunkSnapshots = VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS;
+
+		tNewSnapshot = {
+			["totalChunkTimeUs"] = aTotalChunkTimeUs,
+			["numTasksInChunk"] = aNumTasksInChunk,
+			["tasks"] = { },
+			["timestamp"] = GetTime(),
+		};
+
+		if aTasksDetailTable then
+			for _, tTaskDetailSnapshot in ipairs(aTasksDetailTable) do
+				tinsert(tNewSnapshot["tasks"], {
+					type = tTaskDetailSnapshot.type,
+					unit = tostring(tTaskDetailSnapshot.unit),
+					mode = tostring(tTaskDetailSnapshot.mode),
+					durationUs = tTaskDetailSnapshot.durationUs,
+				});
+			end
+		end
+
+		tinsert(tTaskChunkSnapshots, tNewSnapshot);
+
+		table.sort(tTaskChunkSnapshots, function(a, b) return a.totalChunkTimeUs > b.totalChunkTimeUs; end);
+
+		while #tTaskChunkSnapshots > VUHDO_DEFERRED_TASK_CHUNK_CONFIG["LIMIT"] do
+			tremove(tTaskChunkSnapshots);
+		end
+
+		return;
+
+	end
+
+
+	--
+	local tMetrics;
+	local function VUHDO_sampleDeferredTaskQueueLength(aCurrentQueueLen)
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or not aCurrentQueueLen or aCurrentQueueLen <= 0 then
+			return;
+		end
+
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+
+		tMetrics["minQueueLength"] = min(tMetrics["minQueueLength"], aCurrentQueueLen);
+		tMetrics["maxQueueLength"] = max(tMetrics["maxQueueLength"], aCurrentQueueLen);
+		tMetrics["sumQueueLength"] = tMetrics["sumQueueLength"] + aCurrentQueueLen;
+		tMetrics["queueLengthSamples"] = tMetrics["queueLengthSamples"] + 1;
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	local function VUHDO_incrementDeferredTaskHardStops()
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+			return;
+		end
+
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+		tMetrics["hardStopsHit"] = (tMetrics["hardStopsHit"] or 0) + 1;
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	local function VUHDO_incrementDeferredTaskBudgetExceededStops()
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+			return;
+		end
+
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+		tMetrics["budgetExceededStops"] = (tMetrics["budgetExceededStops"] or 0) + 1;
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	local function VUHDO_updateDeferredMinMaxTasksInChunk(aTasksCompletedInChunk)
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or not aTasksCompletedInChunk or aTasksCompletedInChunk <= 0 then
+			return;
+		end
+
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+
+		tMetrics["minTasksInChunk"] = min(tMetrics["minTasksInChunk"], aTasksCompletedInChunk);
+		tMetrics["maxTasksInChunk"] = max(tMetrics["maxTasksInChunk"], aTasksCompletedInChunk);
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	local function VUHDO_updateDeferredTaskIndividualMetrics(aTaskType, aTaskDurationUs, aTaskUnit, aTaskMode)
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+			return;
+		end
+
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+
+		if not tMetrics["tasksProcessedByTypeSession"][aTaskType] then
+			tMetrics["tasksProcessedByTypeSession"][aTaskType] = 0;
+
+			if tMetrics["totalTimeUsByTypeSession"][aTaskType] == nil then
+				tMetrics["totalTimeUsByTypeSession"][aTaskType] = 0;
+			end
+
+			tMetrics["minTaskTimeUsByTypeSession"][aTaskType] = 9999999;
+			tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] = 0;
+			tMetrics["maxTaskTimeUsContextByTypeSession"][aTaskType] = nil;
+		end
+
+		tMetrics["tasksProcessedByTypeSession"][aTaskType] = tMetrics["tasksProcessedByTypeSession"][aTaskType] + 1;
+		tMetrics["totalTimeUsByTypeSession"][aTaskType] = tMetrics["totalTimeUsByTypeSession"][aTaskType] + aTaskDurationUs;
+
+		tMetrics["minTaskTimeUsByTypeSession"][aTaskType] = min(tMetrics["minTaskTimeUsByTypeSession"][aTaskType], aTaskDurationUs);
+
+		if aTaskDurationUs > (tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] or -1) then
+			tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] = aTaskDurationUs;
+
+			tMetrics["maxTaskTimeUsContextByTypeSession"][aTaskType] = {
+				["unit"] = aTaskUnit,
+				["mode"] = aTaskMode,
+			};
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tMetrics;
+	local function VUHDO_updateDeferredTaskChunkMetrics(aChunkElapsedTime, aNumTasksProcessed)
+
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or not aNumTasksProcessed or aNumTasksProcessed <= 0 then
+			return;
+		end
+
+		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+
+		tMetrics["chunksExecutedSuccessfully"] = (tMetrics["chunksExecutedSuccessfully"] or 0) + 1;
+		tMetrics["totalTasksProcessedSession"] = (tMetrics["totalTasksProcessedSession"] or 0) + aNumTasksProcessed;
+		tMetrics["totalProcessingTimeUsSession"] = (tMetrics["totalProcessingTimeUsSession"] or 0) + aChunkElapsedTime;
+		tMetrics["minChunkTimeUs"] = min(tMetrics["minChunkTimeUs"] or 999999999, aChunkElapsedTime);
+		tMetrics["maxChunkTimeUs"] = max(tMetrics["maxChunkTimeUs"] or 0, aChunkElapsedTime);
+
+		return;
+
+	end
+
+
+
+	--
 	local tTaskConfig;
 	local tCurFps;
 	local tBaseFpsForBudget;
@@ -992,7 +1503,6 @@ do
 	--
 	local tTaskState;
 	local tTaskConfig;
-	local tMetrics;
 	local tTasksCompleted;
 	local tHardStopTime;
 	local tBudgetRemainingUs;
@@ -1007,25 +1517,21 @@ do
 	local tTaskDurationUs;
 	local tTaskStartTime;
 	local tCurrentQueueLen;
+	local tTaskMetricsForSnapshot = { };
 	function VUHDO_executeDeferredTaskChunk()
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
 
 		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-			tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+			tCurrentQueueLen = #VUHDO_TASK_PRIORITY_QUEUE;
+
+			VUHDO_sampleDeferredTaskQueueLength(tCurrentQueueLen);
+
+			twipe(tTaskMetricsForSnapshot);
 		end
 
 		tTasksCompleted = 0;
-		tCurrentQueueLen = #VUHDO_TASK_PRIORITY_QUEUE;
-
-		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tCurrentQueueLen > 0 then
-			tMetrics["minQueueLength"] = min(tMetrics["minQueueLength"], tCurrentQueueLen);
-			tMetrics["maxQueueLength"] = max(tMetrics["maxQueueLength"], tCurrentQueueLen);
-			tMetrics["sumQueueLength"] = tMetrics["sumQueueLength"] + tCurrentQueueLen;
-			tMetrics["queueLengthSamples"] = tMetrics["queueLengthSamples"] + 1;
-		end
-
 		tHardStopTime = (debugprofilestop() * 1000) + tTaskConfig["MAX_EXEC_TIME_US"] + 100;
 		tBudgetRemainingUs = tTaskConfig["TARGET_EXEC_TIME_US"];
 		tDefaultEstimatedCostPerTask = (tTaskConfig["TARGET_EXEC_TIME_US"] / max(1, tTaskConfig["INITIAL_TASKS_PER_FRAME"])) * 1.2;
@@ -1036,9 +1542,7 @@ do
 			end
 
 			if (debugprofilestop() * 1000) > tHardStopTime and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
-				if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-					tMetrics["hardStopsHit"] = tMetrics["hardStopsHit"] + 1;
-				end
+				VUHDO_incrementDeferredTaskHardStops();
 
 				break;
 			end
@@ -1080,17 +1584,16 @@ do
 					tTaskState["invocationCountByType"][tTaskType] = (tTaskState["invocationCountByType"][tTaskType] or 0) + 1;
 
 					if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-						if not tMetrics["tasksProcessedByTypeSession"][tTaskType] then
-							tMetrics["tasksProcessedByTypeSession"][tTaskType] = 0;
+						VUHDO_updateDeferredTaskIndividualMetrics(tTaskType, tTaskDurationUs, tTask["unit"], tTask["mode"]);
+
+						if tTaskMetricsForSnapshot then
+							tinsert(tTaskMetricsForSnapshot, {
+								["type"] = tTaskType,
+								["unit"] = tTask["unit"],
+								["mode"] = tTask["mode"],
+								["durationUs"] = tTaskDurationUs,
+							});
 						end
-
-						tMetrics["tasksProcessedByTypeSession"][tTaskType] = tMetrics["tasksProcessedByTypeSession"][tTaskType] + 1;
-
-						if not tMetrics["totalTimeUsByTypeSession"][tTaskType] then
-							tMetrics["totalTimeUsByTypeSession"][tTaskType] = 0;
-						end
-
-						tMetrics["totalTimeUsByTypeSession"][tTaskType] = tMetrics["totalTimeUsByTypeSession"][tTaskType] + tTaskDurationUs;
 					end
 
 					if not tDelegateSuccess then
@@ -1108,20 +1611,17 @@ do
 
 				tTask = nil;
 			else
-				if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-					tMetrics["budgetExceededStops"] = tMetrics["budgetExceededStops"] + 1;
-				end
+				VUHDO_incrementDeferredTaskBudgetExceededStops();
 
 				break;
 			end
 		end
 
 		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tTasksCompleted > 0 then
-			tMetrics["minTasksInChunk"] = min(tMetrics["minTasksInChunk"], tTasksCompleted);
-			tMetrics["maxTasksInChunk"] = max(tMetrics["maxTasksInChunk"], tTasksCompleted);
+			VUHDO_updateDeferredMinMaxTasksInChunk(tTasksCompleted);
 		end
 
-		return tTasksCompleted;
+		return tTasksCompleted, tTaskMetricsForSnapshot;
 
 	end
 
@@ -1130,12 +1630,12 @@ do
 	--
 	local tTaskState;
 	local tTaskConfig;
-	local tMetrics;
 	local tNumTasksProcessed;
 	local tChunkElapsedTime;
 	local tChunkDelegate;
 	local tProfilerResult;
 	local tChunkStartTime;
+	local tChunkTaskMetrics;
 	function VUHDO_processDeferredTaskQueue()
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
@@ -1156,7 +1656,7 @@ do
 			tChunkDelegate = VUHDO_executeDeferredTaskChunk;
 
 			if MeasureCall then
-				tProfilerResult, tNumTasksProcessed = MeasureCall(tChunkDelegate);
+				tProfilerResult, tNumTasksProcessed, tChunkTaskMetrics = MeasureCall(tChunkDelegate);
 
 				if tProfilerResult and tProfilerResult.elapsedMilliseconds then
 					tChunkElapsedTime = tProfilerResult.elapsedMilliseconds * 1000;
@@ -1164,17 +1664,17 @@ do
 			else
 				tChunkStartTime = debugprofilestop();
 
-				tNumTasksProcessed = tChunkDelegate();
+				tNumTasksProcessed, tChunkTaskMetrics = tChunkDelegate();
 
 				tChunkElapsedTime = (debugprofilestop() - tChunkStartTime) * 1000;
 			end
 
-			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tNumTasksProcessed > 0 then
-				tMetrics["chunksExecutedSuccessfully"] = tMetrics["chunksExecutedSuccessfully"] + 1;
-				tMetrics["totalTasksProcessedSession"] = tMetrics["totalTasksProcessedSession"] + tNumTasksProcessed;
-				tMetrics["totalProcessingTimeUsSession"] = tMetrics["totalProcessingTimeUsSession"] + tChunkElapsedTime;
-				tMetrics["minChunkTimeUs"] = min(tMetrics["minChunkTimeUs"], tChunkElapsedTime);
-				tMetrics["maxChunkTimeUs"] = max(tMetrics["maxChunkTimeUs"], tChunkElapsedTime);
+			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tNumTasksProcessed and tNumTasksProcessed > 0 then
+				VUHDO_updateDeferredTaskChunkMetrics(tChunkElapsedTime, tNumTasksProcessed);
+
+				if tChunkTaskMetrics then
+					VUHDO_addChunkSnapshot(tChunkElapsedTime, tNumTasksProcessed, tChunkTaskMetrics);
+				end
 			end
 		end
 
@@ -1225,35 +1725,55 @@ do
 
 
 	--
-	local tMetrics;
+	local tMetricsReset;
 	function VUHDO_resetDeferredTaskMetrics()
 
-		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
+		tMetricsReset = VUHDO_DEFERRED_TASK_STATE["metrics"];
 
-		tMetrics["sessionStartTime"] = GetTime();
-		tMetrics["totalTasksEnqueued"] = 0;
-		tMetrics["totalTasksDeduped"] = 0;
-		tMetrics["totalTasksProcessedSession"] = 0;
-		tMetrics["totalProcessingTimeUsSession"] = 0;
-		tMetrics["chunksExecutedSuccessfully"] = 0;
+		tMetricsReset["sessionStartTime"] = GetTime();
+		tMetricsReset["totalTasksEnqueued"] = 0;
+		tMetricsReset["totalTasksDeduped"] = 0;
+		tMetricsReset["totalTasksProcessedSession"] = 0;
+		tMetricsReset["totalProcessingTimeUsSession"] = 0;
+		tMetricsReset["chunksExecutedSuccessfully"] = 0;
 
-		tMetrics["minQueueLength"] = 999999;
-		tMetrics["maxQueueLength"] = 0;
-		tMetrics["sumQueueLength"] = 0;
-		tMetrics["queueLengthSamples"] = 0;
+		tMetricsReset["minQueueLength"] = 999999;
+		tMetricsReset["maxQueueLength"] = 0;
+		tMetricsReset["sumQueueLength"] = 0;
+		tMetricsReset["queueLengthSamples"] = 0;
 
-		tMetrics["minTasksInChunk"] = 999999;
-		tMetrics["maxTasksInChunk"] = 0;
+		tMetricsReset["minTasksInChunk"] = 999999;
+		tMetricsReset["maxTasksInChunk"] = 0;
 
-		tMetrics["minChunkTimeUs"] = 999999999;
-		tMetrics["maxChunkTimeUs"] = 0;
+		tMetricsReset["minChunkTimeUs"] = 999999999;
+		tMetricsReset["maxChunkTimeUs"] = 0;
 
-		tMetrics["hardStopsHit"] = 0;
-		tMetrics["budgetExceededStops"] = 0;
+		tMetricsReset["hardStopsHit"] = 0;
+		tMetricsReset["budgetExceededStops"] = 0;
 
-		twipe(tMetrics["tasksEnqueuedByType"]);
-		twipe(tMetrics["tasksProcessedByTypeSession"]);
-		twipe(tMetrics["totalTimeUsByTypeSession"]);
+		twipe(tMetricsReset["tasksEnqueuedByType"]);
+		twipe(tMetricsReset["tasksProcessedByTypeSession"]);
+		twipe(tMetricsReset["totalTimeUsByTypeSession"]);
+
+		if tMetricsReset["minTaskTimeUsByTypeSession"] then
+			twipe(tMetricsReset["minTaskTimeUsByTypeSession"]);
+		else
+			tMetricsReset["minTaskTimeUsByTypeSession"] = { };
+		end
+
+		if tMetricsReset["maxTaskTimeUsByTypeSession"] then
+			twipe(tMetricsReset["maxTaskTimeUsByTypeSession"]);
+		else
+			tMetricsReset["maxTaskTimeUsByTypeSession"] = { };
+		end
+
+		if tMetricsReset["maxTaskTimeUsContextByTypeSession"] then
+			twipe(tMetricsReset["maxTaskTimeUsContextByTypeSession"]);
+		else
+			tMetricsReset["maxTaskTimeUsContextByTypeSession"] = { };
+		end
+
+		twipe(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS);
 
 		if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.resetMetrics then
 			VUHDO_DEFERRED_TASK_POOL:resetMetrics();
@@ -1279,6 +1799,10 @@ do
 	local tTotalTimeUsForType;
 	local tCurrentHardCap;
 	local tPoolMetrics;
+	local tMinTaskTime;
+	local tMaxTaskTime;
+	local tMaxTaskContextUnit;
+	local tMaxTaskContextMode;
 	function VUHDO_printDeferredTaskMetrics(anIsReset)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -1290,59 +1814,81 @@ do
 		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
 
-		tSessionDuration = GetTime() - tMetrics["sessionStartTime"];
+		tSessionDuration = GetTime() - (tMetrics["sessionStartTime"] or GetTime());
+
+		if tSessionDuration < 0 then
+			tSessionDuration = 0;
+		end
 
 		VUHDO_Msg("|cffFFD100--- Deferred Task Queue Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
 
 		VUHDO_Msg(format("|cffFFA500** Overall Tasks:|r Enqueued: %d, Deduped: %d, Processed: %d",
-			tMetrics["totalTasksEnqueued"], tMetrics["totalTasksDeduped"], tMetrics["totalTasksProcessedSession"]));
+			(tMetrics["totalTasksEnqueued"] or 0), (tMetrics["totalTasksDeduped"] or 0), (tMetrics["totalTasksProcessedSession"] or 0)));
 		VUHDO_Msg(format("|cffFFA500** Overall Time:|r Total: %.2f ms (%.0f us), Chunks Executed: %d",
-			tMetrics["totalProcessingTimeUsSession"] / 1000,
-			tMetrics["totalProcessingTimeUsSession"],
-			tMetrics["chunksExecutedSuccessfully"]
-		));
+			(tMetrics["totalProcessingTimeUsSession"] or 0) / 1000, (tMetrics["totalProcessingTimeUsSession"] or 0), (tMetrics["chunksExecutedSuccessfully"] or 0)));
 
 		VUHDO_Msg("|cffFFA500** Queue Length:|r Current: " .. #VUHDO_TASK_PRIORITY_QUEUE);
 
-		if tMetrics["queueLengthSamples"] > 0 then
+		if (tMetrics["queueLengthSamples"] or 0) > 0 then
 			VUHDO_Msg(format("  Samples: Min: %d, Max: %d, Avg: %.2f",
-				(tMetrics["minQueueLength"] == 999999 and 0 or tMetrics["minQueueLength"]),
-				tMetrics["maxQueueLength"],
-				(tMetrics["sumQueueLength"] / tMetrics["queueLengthSamples"])));
+				(tMetrics["minQueueLength"] == 999999 and 0 or (tMetrics["minQueueLength"] or 0)),
+				(tMetrics["maxQueueLength"] or 0),
+				((tMetrics["sumQueueLength"] or 0) / tMetrics["queueLengthSamples"])));
 		else
 			VUHDO_Msg("  Samples: No queue length samples recorded (empty or reset).");
 		end
 
-		VUHDO_Msg("|cffFFA500** Chunk Performance (for " .. tMetrics["chunksExecutedSuccessfully"] .. " successful chunks):|r");
+		VUHDO_Msg("|cffFFA500** Chunk Performance (for " .. (tMetrics["chunksExecutedSuccessfully"] or 0) .. " successful chunks):|r");
 
-		if tMetrics["chunksExecutedSuccessfully"] > 0 then
+		if (tMetrics["chunksExecutedSuccessfully"] or 0) > 0 then
 			VUHDO_Msg(format("  Tasks/Chunk: Min: %d, Max: %d, Avg: %.2f",
-				(tMetrics["minTasksInChunk"] == 999999 and 0 or tMetrics["minTasksInChunk"]),
-				tMetrics["maxTasksInChunk"],
-				(tMetrics["totalTasksProcessedSession"] / tMetrics["chunksExecutedSuccessfully"])));
+				(tMetrics["minTasksInChunk"] == 999999 and 0 or (tMetrics["minTasksInChunk"] or 0)),
+				(tMetrics["maxTasksInChunk"] or 0),
+				((tMetrics["totalTasksProcessedSession"] or 0) / tMetrics["chunksExecutedSuccessfully"])));
 			VUHDO_Msg(format("  Time/Chunk (us): Min: %.0f, Max: %.0f, Avg: %.0f",
-				(tMetrics["minChunkTimeUs"] == 999999999 and 0 or tMetrics["minChunkTimeUs"]),
-				tMetrics["maxChunkTimeUs"],
-				(tMetrics["chunksExecutedSuccessfully"] > 0 and (tMetrics["totalProcessingTimeUsSession"] / tMetrics["chunksExecutedSuccessfully"]) or 0)
+				(tMetrics["minChunkTimeUs"] == 999999999 and 0 or (tMetrics["minChunkTimeUs"] or 0)),
+				(tMetrics["maxChunkTimeUs"] or 0),
+				((tMetrics["totalProcessingTimeUsSession"] or 0) / tMetrics["chunksExecutedSuccessfully"])
 			));
 		else
 			VUHDO_Msg("  No chunks processed tasks or metrics reset.");
 		end
 
 		VUHDO_Msg(format("  Stops: Hard (Time Limit): %d, Budget Exceeded: %d",
-			tMetrics["hardStopsHit"], tMetrics["budgetExceededStops"]));
+			(tMetrics["hardStopsHit"] or 0), (tMetrics["budgetExceededStops"] or 0)));
 
-		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgCost us, TotalTime ms):**|r");
+		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime us, TotalTime ms, MinTime, MaxTime [Unit|Mode]):**|r");
 
 		if VUHDO_DEFERRED_TASK_TYPES then
 			for _, tTaskType in ipairs(VUHDO_DEFERRED_TASK_TYPES) do
-				tEnqueued = tMetrics["tasksEnqueuedByType"][tTaskType] or 0;
-				tProcessed = tMetrics["tasksProcessedByTypeSession"][tTaskType] or 0;
-				tAvgCost = VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"][tTaskType] or 0;
+				tEnqueued = (tMetrics["tasksEnqueuedByType"] and tMetrics["tasksEnqueuedByType"][tTaskType]) or 0;
+				tProcessed = (tMetrics["tasksProcessedByTypeSession"] and tMetrics["tasksProcessedByTypeSession"][tTaskType]) or 0;
 				tTotalTimeUsForType = (tMetrics["totalTimeUsByTypeSession"] and tMetrics["totalTimeUsByTypeSession"][tTaskType]) or 0;
 
-				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, AvgCost=%.0fus, TotalTime=%.2fms",
-					tostring(tTaskType), tEnqueued, tProcessed, tAvgCost, tTotalTimeUsForType / 1000
+				tAvgCost = 0;
+
+				if tProcessed > 0 then
+					tAvgCost = tTotalTimeUsForType / tProcessed;
+				else
+				    tAvgCost = (VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"] and VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"][tTaskType]) or 0;
+				end
+
+				tMinTaskTime = (tMetrics["minTaskTimeUsByTypeSession"] and tMetrics["minTaskTimeUsByTypeSession"][tTaskType]);
+				tMaxTaskTime = (tMetrics["maxTaskTimeUsByTypeSession"] and tMetrics["maxTaskTimeUsByTypeSession"][tTaskType]);
+				tMaxTaskContextUnit = "-";
+				tMaxTaskContextMode = "-";
+
+				if tMetrics["maxTaskTimeUsContextByTypeSession"] and tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType] then
+					tMaxTaskContextUnit = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["unit"] or "-");
+					tMaxTaskContextMode = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["mode"] or "-");
+				end
+
+				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, Avg=%.0fus, Total=%.2fms, Min=%.0fus, Max=%.0fus [%s|%s]",
+					tostring(tTaskType), tEnqueued, tProcessed, tAvgCost, tTotalTimeUsForType / 1000,
+					(tMinTaskTime == 9999999 and 0 or (tMinTaskTime or 0)),
+					(tMaxTaskTime or 0),
+					tMaxTaskContextUnit,
+					tMaxTaskContextMode
 				));
 			end
 		else
@@ -1352,15 +1898,15 @@ do
 		VUHDO_Msg("|cffFFA500** Dynamic Config:|r");
 
 		VUHDO_Msg(format("  Target Time/Chunk: %d us, Max Time/Chunk: %d us",
-			tTaskConfig["TARGET_EXEC_TIME_US"], tTaskConfig["MAX_EXEC_TIME_US"]));
+			(tTaskConfig["TARGET_EXEC_TIME_US"] or 0), (tTaskConfig["MAX_EXEC_TIME_US"] or 0)));
 		VUHDO_Msg(format("  Max Tasks/Frame: %d, Idle Inc Threshold: %d us",
-			VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"], tTaskConfig["IDLE_TASK_INC_THRESHOLD_US"]));
+			(VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] or 0), (tTaskConfig["IDLE_TASK_INC_THRESHOLD_US"] or 0)));
 
 		tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
 
 		VUHDO_Msg(format("  Game Hard Cap (Combat=%s): %d us, Effective Max Queue Time: %.0f us",
 			tostring(InCombatLockdown()), tCurrentHardCap,
-			min(tTaskConfig["ABS_MAX_QUEUE_TIME_US"], floor(tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION))
+			min((tTaskConfig["ABS_MAX_QUEUE_TIME_US"] or 0), floor(tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION))
 		));
 
 		VUHDO_Msg("|cffFFA500** Pool Stats (Size, Idle, PeakIdle, Hits, Misses, RejectedReleases):**|r");
@@ -1369,11 +1915,39 @@ do
 			tPoolMetrics = VUHDO_DEFERRED_TASK_POOL:getMetrics();
 
 			VUHDO_Msg(format("  Tasks Pool: %d, %d, %d, %d, %d, %d",
-				tPoolMetrics["maxSize"], tPoolMetrics["currentIdle"], tPoolMetrics["peakIdleCount"],
-				tPoolMetrics["hits"], tPoolMetrics["misses"], tPoolMetrics["rejectedReleases"]
+				(tPoolMetrics["maxSize"] or 0), (tPoolMetrics["currentIdle"] or 0), (tPoolMetrics["peakIdleCount"] or 0),
+				(tPoolMetrics["hits"] or 0), (tPoolMetrics["misses"] or 0), (tPoolMetrics["rejectedReleases"] or 0)
 			));
 		else
 			VUHDO_Msg("  Tasks Pool: Metrics unavailable.");
+		end
+
+		if #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS > 0 then
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or "N/A") .. " us):**|r");
+
+			for tSnapshotCnt, tSnapshot in ipairs(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS) do
+				VUHDO_Msg(format("  #%d: ChunkTotalTime: %.2f us (%.2f ms), NumTasks: %d, Timestamp: %.2f",
+					tSnapshotCnt,
+					tSnapshot["totalChunkTimeUs"],
+					tSnapshot["totalChunkTimeUs"] / 1000,
+					tSnapshot["numTasksInChunk"],
+					tSnapshot["timestamp"]
+				));
+
+				if tSnapshot["tasks"] then
+					for tCnt, tTask in ipairs(tSnapshot["tasks"]) do
+						VUHDO_Msg(format("    T%d: Type[%s] %.2fus (U:%s M:%s)",
+							tCnt,
+							tostring(tTask["type"]),
+							tTask["durationUs"],
+							tTask["unit"],
+							tTask["mode"]
+						));
+					end
+				end
+			end
+		else
+			VUHDO_Msg("|cffFFA500** No expensive deferred task chunks recorded above threshold.**|r");
 		end
 
 		VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
@@ -1873,7 +2447,6 @@ end
 do
 	--
 	local tEventTotalStartTime;
-	local tEventMetrics;
 	local tEventTotalDuration;
 	local tUnitInfo;
 	local tEmptyRaid = { };
@@ -1883,15 +2456,6 @@ do
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
 			tEventTotalStartTime = debugprofilestop();
-
-			if not VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEvent] then
-				VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEvent] = {
-					["totalTimeUs"] = 0,
-					["invocationCount"] = 0,
-				};
-			end
-
-			tEventMetrics = VUHDO_HANDLER_PROFILING_METRICS["OnEvent"][anEvent];
 		end
 
 		if "COMBAT_LOG_EVENT_UNFILTERED" == anEvent then
@@ -2313,11 +2877,10 @@ do
 			VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 		end
 
-		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent and tEventMetrics then
+		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
 			tEventTotalDuration = (debugprofilestop() - tEventTotalStartTime) * 1000;
 
-			tEventMetrics["totalTimeUs"] = (tEventMetrics["totalTimeUs"] or 0) + tEventTotalDuration;
-			tEventMetrics["invocationCount"] = (tEventMetrics["invocationCount"] or 0) + 1;
+			VUHDO_updateHandlerOnEventMetrics(anEvent, tEventTotalDuration, anArg1, anArg2, anArg3, anArg4, anArg5);
 		end
 
 		return;
@@ -2932,17 +3495,14 @@ do
 	local tGcdStart;
 	local tGcdDuration;
 	local tHotDebuffToggle = 1;
-	local tSeg1Start;
-	local tSeg2Start;
-	local tSeg1Duration;
-	local tSeg2Duration;
+	local tProfilingSegments = { { }, { }, };
 	function VUHDO_OnUpdate(anInstance, aTimeDelta)
 
-		tSeg1Duration = 0;
-		tSeg2Duration = 0;
-
 		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tSeg1Start = debugprofilestop();
+			tProfilingSegments[1]["duration"] = 0;
+			tProfilingSegments[2]["duration"] = 0;
+
+			tProfilingSegments[1]["start"] = debugprofilestop();
 		end
 
 		-----------------------------------------------------
@@ -2980,14 +3540,14 @@ do
 		VUHDO_UIFrameFlash_OnUpdate(aTimeDelta);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tSeg1Duration = debugprofilestop() - tSeg1Start;
+			tProfilingSegments[1]["duration"] = debugprofilestop() - tProfilingSegments[1]["start"];
 		end
 
 		-- process deferred tasks once per frame
 		VUHDO_processDeferredTaskQueue();
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tSeg2Start = debugprofilestop();
+			tProfilingSegments[2]["start"] = debugprofilestop();
 		end
 
 		---------------------------------------------------------
@@ -3003,10 +3563,10 @@ do
 			tSlowDelta = tSlowDelta + aTimeDelta;
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
-				tSeg2Duration = debugprofilestop() - tSeg2Start;
+				tProfilingSegments[2]["duration"] = debugprofilestop() - tProfilingSegments[2]["start"];
 
 				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] =
-					(VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] or 0) + tSeg1Duration + tSeg2Duration;
+					(VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] or 0) + tProfilingSegments[1]["duration"] + tProfilingSegments[2]["duration"];
 				VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
 			end
 
@@ -3244,11 +3804,14 @@ do
 		end
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tSeg2Duration = debugprofilestop() - tSeg2Start;
+			tProfilingSegments[2]["duration"] = debugprofilestop() - tProfilingSegments[2]["start"];
 
-			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] =
-				(VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["totalTimeUs"] or 0) + ((tSeg1Duration + tSeg2Duration) * 1000);
 			VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] = (VUHDO_HANDLER_PROFILING_METRICS["OnUpdate"]["invocationCount"] or 0) + 1;
+
+			VUHDO_updateHandlerOnUpdateSeg1Metrics(tProfilingSegments[1]["duration"] * 1000);
+			VUHDO_updateHandlerOnUpdateSeg2Metrics(tProfilingSegments[2]["duration"] * 1000);
+
+			VUHDO_updateHandlerOnUpdateTotalMetrics((tProfilingSegments[1]["duration"] + tProfilingSegments[2]["duration"]) * 1000);
 		end
 
 		return;
