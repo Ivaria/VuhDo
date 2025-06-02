@@ -2040,7 +2040,7 @@ function VUHDO_printPoolMetrics()
 		return;
 	end
 
-	VUHDO_Msg("|cffFFD100Table Pool Stats:|r");
+	VUHDO_Msg("|cffFFD100Table Pool Metrics:|r");
 
 	for tName, tPool in pairs(VUHDO_getTablePools()) do
 		if tPool and tPool.getMetrics then

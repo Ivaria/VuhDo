@@ -23,6 +23,7 @@ local VUHDO_getBarIcon;
 local VUHDO_getBarIconName;
 local VUHDO_getShieldPerc;
 local VUHDO_backColor;
+local VUHDO_updateBouquetsForEvent;
 local VUHDO_updateHealthBarsFor;
 
 local VUHDO_PANEL_SETUP;
@@ -45,8 +46,10 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 	VUHDO_getShieldPerc = _G["VUHDO_getShieldPerc"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_backColor = _G["VUHDO_backColor"];
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];

@@ -132,10 +132,12 @@ local sCurrentMode;
 
 
 function VUHDO_vuhdoInitLocalOverrides()
+
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_PET_2_OWNER = _G["VUHDO_PET_2_OWNER"];
 	VUHDO_OWNER_2_PET = _G["VUHDO_OWNER_2_PET"];
+
 	VUHDO_getUnitIds = _G["VUHDO_getUnitIds"];
 	VUHDO_getUnitNo = _G["VUHDO_getUnitNo"];
 	VUHDO_isInRange = _G["VUHDO_isInRange"];
@@ -161,6 +163,9 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_resetClusterCoordDeltas = _G["VUHDO_resetClusterCoordDeltas"];
 	VUHDO_getUnitZoneName = _G["VUHDO_getUnitZoneName"];
+
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
+
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_PANEL_UNITS = _G["VUHDO_PANEL_UNITS"];
 
@@ -169,6 +174,9 @@ function VUHDO_vuhdoInitLocalOverrides()
 
 	VUHDO_DEFAULT_PROFILE = _G["VUHDO_DEFAULT_PROFILE"];
 	VUHDO_DEFAULT_LAYOUT = _G["VUHDO_DEFAULT_LAYOUT"];
+
+	return;
+
 end
 
 ----------------------------------------------------

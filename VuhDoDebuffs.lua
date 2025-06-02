@@ -62,7 +62,9 @@ local _;
 local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID;
+
 local VUHDO_shouldScanUnit;
+local VUHDO_updateBouquetsForEvent;
 
 
 local sIsNotRemovableOnly;
@@ -86,6 +88,9 @@ local sCurChosenColor = { };
 function VUHDO_debuffsInitLocalOverrides()
 
 	VUHDO_shouldScanUnit = _G["VUHDO_shouldScanUnit"];
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
+
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
 
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -125,6 +130,8 @@ function VUHDO_debuffsInitLocalOverrides()
 			sColorArray[tCnt] = { };
 		end
 	end]]
+
+	return;
 
 end
 
