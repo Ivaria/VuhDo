@@ -44,9 +44,12 @@ local sSwiftmendIndicatorSetup;
 
 local VUHDO_getFont;
 local VUHDO_getHealthBar;
+local VUHDO_initAllEventBouquets;
+local VUHDO_updateAllRaidBars;
 
 --
 function VUHDO_panelRedrawInitLocalOverrides()
+
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_INDICATOR_CONFIG = _G["VUHDO_INDICATOR_CONFIG"];
 
@@ -56,10 +59,18 @@ function VUHDO_panelRedrawInitLocalOverrides()
 
 	VUHDO_getFont = _G["VUHDO_getFont"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
+	VUHDO_initAllEventBouquets = _G["VUHDO_initAllEventBouquets"];
+	VUHDO_updateAllRaidBars = _G["VUHDO_updateAllRaidBars"];
+
+	VUHDO_initAllEventBouquets = _G["VUHDO_deferInitAllEventBouquets"];
+	VUHDO_updateAllRaidBars = _G["VUHDO_deferUpdateAllRaidBars"];
 
 	VUHDO_panelRedrawCustomDebuffsInitLocalOverrides();
 	VUHDO_panelRedrawHeadersInitLocalOverrides();
 	VUHDO_panelRedrawHotsInitLocalOverrides();
+
+	return;
+
 end
 
 
