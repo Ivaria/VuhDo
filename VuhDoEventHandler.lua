@@ -2058,7 +2058,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 		VUHDO_resetDeferredTaskMetrics();
 
 		VUHDO_DEFERRED_TASK_POOL = VUHDO_createTablePool(
-			"DeferredTasks",
+			"DeferredTask",
 			VUHDO_DEFERRED_TASK_POOL_MAX_SIZE,
 			VUHDO_createDeferredTaskDelegate,
 			VUHDO_cleanupDeferredTaskDelegate
