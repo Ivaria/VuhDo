@@ -60,16 +60,9 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_positionHealButton = _G["VUHDO_positionHealButton"];
 	VUHDO_positionTableHeaders = _G["VUHDO_positionTableHeaders"];
 
-	VUHDO_initAllEventBouquets = _G["VUHDO_deferInitAllEventBouquets"];
-	VUHDO_updateAllRaidBars = _G["VUHDO_deferUpdateAllRaidBars"];
-
 	sLastDebuffIcon = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39;
 	sShowPanels = VUHDO_CONFIG["SHOW_PANELS"];
-
-	return;
-
 end
-
 -- BURST CACHE ---------------------------------------------------
 
 
