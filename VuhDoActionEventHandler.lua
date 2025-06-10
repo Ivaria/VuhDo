@@ -33,7 +33,6 @@ local VUHDO_CONFIG;
 local VUHDO_INTERNAL_TOGGLES;
 local VUHDO_RAID;
 function VUHDO_actionEventHandlerInitLocalOverrides()
-
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_highlightClusterFor = _G["VUHDO_highlightClusterFor"];
 	VUHDO_showTooltip = _G["VUHDO_showTooltip"];
@@ -46,16 +45,11 @@ function VUHDO_actionEventHandlerInitLocalOverrides()
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getCurrentKeyModifierString = _G["VUHDO_getCurrentKeyModifierString"];
 
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-
 	VUHDO_SPELL_CONFIG = _G["VUHDO_SPELL_CONFIG"];
 	VUHDO_SPELL_ASSIGNMENTS = _G["VUHDO_SPELL_ASSIGNMENTS"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
-
-	return;
-
 end
 
 

@@ -57,8 +57,6 @@ function VUHDO_customClustersInitLocalOverrides()
 	VUHDO_backColor = _G["VUHDO_backColor"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-
 	sClusterConfig = VUHDO_CONFIG["CLUSTER"];
 	sHealthLimit = sClusterConfig["BELOW_HEALTH_PERC"] * 0.01;
 	sIsRaid = sClusterConfig["DISPLAY_DESTINATION"] == 2;

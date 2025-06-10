@@ -34,8 +34,6 @@ function VUHDO_customManaInitLocalOverrides()
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_indicatorTextCallback = _G["VUHDO_indicatorTextCallback"];
 
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-
 	sIsInverted = { };
 	sIsHealthBarVertical = { };
 
@@ -43,8 +41,6 @@ function VUHDO_customManaInitLocalOverrides()
 		sIsInverted[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["MANA_BAR"]["invertGrowth"];
 		sIsHealthBarVertical[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["HEALTH_BAR"]["vertical"];
 	end
-
-	return;
 
 end
 

@@ -57,7 +57,6 @@ local sIsNoRangeFade;
 
 
 function VUHDO_customHealthInitLocalOverrides()
-
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -93,8 +92,6 @@ function VUHDO_customHealthInitLocalOverrides()
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getUnitOverallShieldRemain = _G["VUHDO_getUnitOverallShieldRemain"];
 
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-
 	sIsOverhealText = VUHDO_CONFIG["SHOW_TEXT_OVERHEAL"]
 	sIsAggroText = VUHDO_CONFIG["THREAT"]["AGGRO_USE_TEXT"];
 
@@ -108,9 +105,6 @@ function VUHDO_customHealthInitLocalOverrides()
 	sIsNoRangeFade = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isNoRangeFade"];
 
 	twipe(VUHDO_NAME_TEXTS);
-
-	return;
-
 end
 
 ----------------------------------------------------

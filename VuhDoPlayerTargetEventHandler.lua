@@ -19,7 +19,6 @@ local VUHDO_getPlayerTargetFrame;
 
 --
 function VUHDO_playerTargetEventHandlerInitLocalOverrides()
-
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 
@@ -32,11 +31,6 @@ function VUHDO_playerTargetEventHandlerInitLocalOverrides()
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getPlayerTargetFrame = _G["VUHDO_getPlayerTargetFrame"];
-
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-
-	return;
-
 end
 
 
