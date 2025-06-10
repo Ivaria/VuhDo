@@ -17,7 +17,7 @@ local type = type;
 local GetCVar = GetCVar;
 local tonumber = tonumber;
 local string = string;
-local pcall = pcall;
+local xpcall = xpcall;
 local debugprofilestop = debugprofilestop;
 local MeasureCall = C_AddOnProfiler and C_AddOnProfiler.MeasureCall;
 local GetFramerate = GetFramerate;
@@ -1568,6 +1568,25 @@ do
 
 
 	--
+	local sCurrentTaskForPcall;
+	local function VUHDO_pcallTaskDelegate()
+
+		return sCurrentTaskForPcall["delegate"](sCurrentTaskForPcall["unit"], sCurrentTaskForPcall["mode"]);
+
+	end
+
+
+
+	--
+	local function VUHDO_pcallWrapper()
+
+		return xpcall(VUHDO_pcallTaskDelegate, VUHDO_deferredTaskErrorHandler);
+
+	end
+
+
+
+	--
 	local tTaskState;
 	local tTaskConfig;
 	local tTasksCompleted;
@@ -1625,16 +1644,12 @@ do
 				tTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
 
 				if tTask["delegate"] and tTaskType then
-					tDelegatePcallFunction = function()
-						return xpcall(function()
-							return tTask["delegate"](tTask["unit"], tTask["mode"]);
-						end, VUHDO_deferredTaskErrorHandler);
-					end
+					sCurrentTaskForPcall = tTask;
 
 					tTaskDurationUs = 0;
 
 					if MeasureCall then
-						tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(tDelegatePcallFunction);
+						tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(VUHDO_pcallWrapper);
 
 						if tProfilerResult and tProfilerResult.elapsedMilliseconds then
 							tTaskDurationUs = tProfilerResult.elapsedMilliseconds * 1000;
@@ -1642,10 +1657,12 @@ do
 					else
 						tTaskStartTime = debugprofilestop();
 
-						tDelegateSuccess, tDelegateResult = tDelegatePcallFunction();
+						tDelegateSuccess, tDelegateResult = VUHDO_pcallWrapper();
 
 						tTaskDurationUs = (debugprofilestop() - tTaskStartTime) * 1000;
 					end
+
+					sCurrentTaskForPcall = nil;
 
 					tTaskState["totalTimeSpentUsByType"][tTaskType] = (tTaskState["totalTimeSpentUsByType"][tTaskType] or 0) + tTaskDurationUs;
 					tTaskState["invocationCountByType"][tTaskType] = (tTaskState["invocationCountByType"][tTaskType] or 0) + 1;
