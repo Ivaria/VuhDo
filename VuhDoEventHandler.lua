@@ -619,26 +619,23 @@ do
 		end
 
 		VUHDO_Msg(format("|cffFFA500** VUHDO_OnUpdate Invocations:|r %d", tInvocationCount));
-		VUHDO_Msg(format("  |cffB0E0E6Segment 1:|r Total: %.0f us (%.2f ms), Avg: %.2f us, Min: %.2f us, Max: %.2f us",
-			(tSeg1Metrics["totalTimeUs"] or 0),
-			(tSeg1Metrics["totalTimeUs"] or 0) / 1000,
-			tAvgSeg1TimeUs,
-			(tSeg1Metrics["minTimeUs"] == 9999999 and 0 or (tSeg1Metrics["minTimeUs"] or 0)),
-			(tSeg1Metrics["maxTimeUs"] or 0)
+		VUHDO_Msg(format("  |cffB0E0E6Segment 1:|r Total: %s, Avg: %s, Min: %s, Max: %s",
+			VUHDO_formatTime(tSeg1Metrics["totalTimeUs"]),
+			VUHDO_formatTime(tAvgSeg1TimeUs),
+			VUHDO_formatTime(tSeg1Metrics["minTimeUs"] == 9999999 and 0 or tSeg1Metrics["minTimeUs"]),
+			VUHDO_formatTime(tSeg1Metrics["maxTimeUs"])
 		));
-		VUHDO_Msg(format("  |cffB0E0E6Segment 2:|r Total: %.0f us (%.2f ms), Avg: %.2f us, Min: %.2f us, Max: %.2f us",
-			(tSeg2Metrics["totalTimeUs"] or 0),
-			(tSeg2Metrics["totalTimeUs"] or 0) / 1000,
-			tAvgSeg2TimeUs,
-			(tSeg2Metrics["minTimeUs"] == 9999999 and 0 or (tSeg2Metrics["minTimeUs"] or 0)),
-			(tSeg2Metrics["maxTimeUs"] or 0)
+		VUHDO_Msg(format("  |cffB0E0E6Segment 2:|r Total: %s, Avg: %s, Min: %s, Max: %s",
+			VUHDO_formatTime(tSeg2Metrics["totalTimeUs"]),
+			VUHDO_formatTime(tAvgSeg2TimeUs),
+			VUHDO_formatTime(tSeg2Metrics["minTimeUs"] == 9999999 and 0 or tSeg2Metrics["minTimeUs"]),
+			VUHDO_formatTime(tSeg2Metrics["maxTimeUs"])
 		));
-		VUHDO_Msg(format("  |cff98FB98Sum (Seg1+Seg2):|r Total: %.0f us (%.2f ms), Avg: %.2f us, Min: %.2f us, Max: %.2f us",
-			(tTotalMetrics["totalTimeUs"] or 0),
-			(tTotalMetrics["totalTimeUs"] or 0) / 1000,
-			tAvgTotalTimeUs,
-			(tTotalMetrics["minTimeUs"] == 9999999 and 0 or (tTotalMetrics["minTimeUs"] or 0)),
-			(tTotalMetrics["maxTimeUs"] or 0)
+		VUHDO_Msg(format("  |cff98FB98Sum (Seg1+Seg2):|r Total: %s, Avg: %s, Min: %s, Max: %s",
+			VUHDO_formatTime(tTotalMetrics["totalTimeUs"]),
+			VUHDO_formatTime(tAvgTotalTimeUs),
+			VUHDO_formatTime(tTotalMetrics["minTimeUs"] == 9999999 and 0 or tTotalMetrics["minTimeUs"]),
+			VUHDO_formatTime(tTotalMetrics["maxTimeUs"])
 		));
 
 		VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type): **|r");
@@ -671,16 +668,16 @@ do
 		else
 			table.sort(tEventStats, function(aEntry, bEntry) return aEntry["totalTime"] > bEntry["totalTime"]; end);
 
-			VUHDO_Msg("  Sorted by Total Time (Event: Total ms, Count, Avg us, Min us, Max us)");
+			VUHDO_Msg("  Sorted by Total Time (Event: Total, Count, Avg, Min, Max)");
 
 			for _, tStats in ipairs(tEventStats) do
-				VUHDO_Msg(format("  %s: Total: %.2f ms, Count: %d, Avg: %.2f us, Min: %.2f us, Max: %.2f us",
+				VUHDO_Msg(format("  %s: Total: %s, Count: %d, Avg: %s, Min: %s, Max: %s",
 					tStats["name"],
-					tStats["totalTime"] / 1000,
+					VUHDO_formatTime(tStats["totalTime"]),
 					tStats["count"],
-					tStats["avgTime"],
-					(tStats["minTime"] == 9999999 and 0 or (tStats["minTime"] or 0)),
-					(tStats["maxTime"] or 0)
+					VUHDO_formatTime(tStats["avgTime"]),
+					VUHDO_formatTime(tStats["minTime"] == 9999999 and 0 or tStats["minTime"]),
+					VUHDO_formatTime(tStats["maxTime"])
 				));
 			end
 		end
@@ -691,11 +688,10 @@ do
 			for tCnt, tSnapshot in ipairs(VUHDO_HANDLER_EVENT_SNAPSHOTS) do
 				tArgString = table.concat(tSnapshot["args"], ", ");
 
-				VUHDO_Msg(format("  #%d: %s - %.2f us (%.2f ms) at %.2f. Args: %s",
+				VUHDO_Msg(format("  #%d: %s - %s at %.2f. Args: %s",
 					tCnt,
 					tSnapshot["eventName"],
-					tSnapshot["durationUs"],
-					tSnapshot["durationUs"] / 1000,
+					VUHDO_formatTime(tSnapshot["durationUs"]),
 					tSnapshot["timestamp"],
 					tArgString
 				));
@@ -1909,8 +1905,8 @@ do
 
 		VUHDO_Msg(format("|cffFFA500** Overall Tasks:|r Enqueued: %d, Deduped: %d, Processed: %d",
 			(tMetrics["totalTasksEnqueued"] or 0), (tMetrics["totalTasksDeduped"] or 0), (tMetrics["totalTasksProcessedSession"] or 0)));
-		VUHDO_Msg(format("|cffFFA500** Overall Time:|r Total: %.2f ms (%.0f us), Chunks Executed: %d",
-			(tMetrics["totalProcessingTimeUsSession"] or 0) / 1000, (tMetrics["totalProcessingTimeUsSession"] or 0), (tMetrics["chunksExecutedSuccessfully"] or 0)));
+		VUHDO_Msg(format("|cffFFA500** Overall Time:|r Total: %s, Chunks Executed: %d",
+			VUHDO_formatTime(tMetrics["totalProcessingTimeUsSession"]), (tMetrics["chunksExecutedSuccessfully"] or 0)));
 
 		VUHDO_Msg("|cffFFA500** Queue Length:|r Current: " .. #VUHDO_TASK_PRIORITY_QUEUE);
 
@@ -1930,10 +1926,10 @@ do
 				(tMetrics["minTasksInChunk"] == 999999 and 0 or (tMetrics["minTasksInChunk"] or 0)),
 				(tMetrics["maxTasksInChunk"] or 0),
 				((tMetrics["totalTasksProcessedSession"] or 0) / tMetrics["chunksExecutedSuccessfully"])));
-			VUHDO_Msg(format("  Time/Chunk (us): Min: %.0f, Max: %.0f, Avg: %.0f",
-				(tMetrics["minChunkTimeUs"] == 999999999 and 0 or (tMetrics["minChunkTimeUs"] or 0)),
-				(tMetrics["maxChunkTimeUs"] or 0),
-				((tMetrics["totalProcessingTimeUsSession"] or 0) / tMetrics["chunksExecutedSuccessfully"])
+			VUHDO_Msg(format("  Time/Chunk: Min: %s, Max: %s, Avg: %s",
+				VUHDO_formatTime(tMetrics["minChunkTimeUs"] == 999999999 and 0 or tMetrics["minChunkTimeUs"]),
+				VUHDO_formatTime(tMetrics["maxChunkTimeUs"]),
+				VUHDO_formatTime((tMetrics["totalProcessingTimeUsSession"] or 0) / tMetrics["chunksExecutedSuccessfully"])
 			));
 		else
 			VUHDO_Msg("  No chunks processed tasks or metrics reset.");
@@ -1942,7 +1938,7 @@ do
 		VUHDO_Msg(format("  Stops: Hard (Time Limit): %d, Budget Exceeded: %d",
 			(tMetrics["hardStopsHit"] or 0), (tMetrics["budgetExceededStops"] or 0)));
 
-		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime us, TotalTime ms, MinTime, MaxTime [Unit|Mode]): **|r");
+		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime, TotalTime, MinTime, MaxTime [Unit|Mode]): **|r");
 
 		if VUHDO_DEFERRED_TASK_TYPES then
 			for _, tTaskType in ipairs(VUHDO_DEFERRED_TASK_TYPES) do
@@ -1968,10 +1964,10 @@ do
 					tMaxTaskContextMode = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["mode"] or "-");
 				end
 
-				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, Avg=%.0fus, Total=%.2fms, Min=%.0fus, Max=%.0fus [%s|%s]",
-					tostring(tTaskType), tEnqueued, tProcessed, tAvgCost, tTotalTimeUsForType / 1000,
-					(tMinTaskTime == 9999999 and 0 or (tMinTaskTime or 0)),
-					(tMaxTaskTime or 0),
+				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, Avg=%s, Total=%s, Min=%s, Max=%s [%s|%s]",
+					tostring(tTaskType), tEnqueued, tProcessed, VUHDO_formatTime(tAvgCost), VUHDO_formatTime(tTotalTimeUsForType),
+					VUHDO_formatTime(tMinTaskTime == 9999999 and 0 or tMinTaskTime),
+					VUHDO_formatTime(tMaxTaskTime),
 					tMaxTaskContextUnit,
 					tMaxTaskContextMode
 				));
@@ -1982,16 +1978,16 @@ do
 
 		VUHDO_Msg("|cffFFA500** Dynamic Config:|r");
 
-		VUHDO_Msg(format("  Target Time/Chunk: %d us, Max Time/Chunk: %d us",
-			(tTaskConfig["TARGET_EXEC_TIME_US"] or 0), (tTaskConfig["MAX_EXEC_TIME_US"] or 0)));
-		VUHDO_Msg(format("  Max Tasks/Frame: %d, Idle Inc Threshold: %d us",
-			(VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] or 0), (tTaskConfig["IDLE_TASK_INC_THRESHOLD_US"] or 0)));
+		VUHDO_Msg(format("  Target Time/Chunk: %s, Max Time/Chunk: %s",
+			VUHDO_formatTime(tTaskConfig["TARGET_EXEC_TIME_US"]), VUHDO_formatTime(tTaskConfig["MAX_EXEC_TIME_US"])));
+		VUHDO_Msg(format("  Max Tasks/Frame: %d, Idle Inc Threshold: %s",
+			(VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] or 0), VUHDO_formatTime(tTaskConfig["IDLE_TASK_INC_THRESHOLD_US"])));
 
 		tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
 
-		VUHDO_Msg(format("  Game Hard Cap (Combat=%s): %d us, Effective Max Queue Time: %.0f us",
-			tostring(InCombatLockdown()), tCurrentHardCap,
-			min((tTaskConfig["ABS_MAX_QUEUE_TIME_US"] or 0), floor(tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION))
+		VUHDO_Msg(format("  Game Hard Cap (Combat=%s): %s, Effective Max Queue Time: %s",
+			tostring(InCombatLockdown()), VUHDO_formatTime(tCurrentHardCap),
+			VUHDO_formatTime(min((tTaskConfig["ABS_MAX_QUEUE_TIME_US"] or 0), floor(tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION)))
 		));
 
 		VUHDO_Msg("|cffFFA500** Pool Stats (Size, Idle, PeakIdle, Hits, Misses, RejectedReleases): **|r");
@@ -2008,18 +2004,16 @@ do
 		end
 
 		if #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS > 0 then
-			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (tTaskConfig["MAX_EXEC_TIME_US"] or "N/A") .. " us): **|r");
+			tDedupedText = "";
+			if (tSnapshot["dedupedCount"] or 0) > 1 then
+				tDedupedText = format(" (de-duped %d times)", tSnapshot["dedupedCount"]);
+			end
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (VUHDO_formatTime(VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"])) .. "): **|r");
 
 			for tSnapshotCnt, tSnapshot in ipairs(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS) do
-				tDedupedText = "";
-				if (tSnapshot["dedupedCount"] or 0) > 1 then
-					tDedupedText = format(" (de-duped %d times)", tSnapshot["dedupedCount"]);
-				end
-
-				VUHDO_Msg(format("  #%d: ChunkTotalTime: %.2f us (%.2f ms), NumTasks: %d, Timestamp: %.2f%s",
+				VUHDO_Msg(format("  #%d: ChunkTotalTime: %s, NumTasks: %d, Timestamp: %.2f%s",
 					tSnapshotCnt,
-					tSnapshot["totalChunkTimeUs"],
-					tSnapshot["totalChunkTimeUs"] / 1000,
+					VUHDO_formatTime(tSnapshot["totalChunkTimeUs"]),
 					tSnapshot["numTasksInChunk"],
 					tSnapshot["timestamp"],
 					tDedupedText
@@ -2027,10 +2021,10 @@ do
 
 				if tSnapshot["tasks"] then
 					for tCnt, tTask in ipairs(tSnapshot["tasks"]) do
-						VUHDO_Msg(format("    T%d: Type[%s] %.2fus (U:%s M:%s)",
+						VUHDO_Msg(format("    T%d: Type[%s] %s (U:%s M:%s)",
 							tCnt,
 							tostring(tTask["type"]),
-							tTask["durationUs"],
+							VUHDO_formatTime(tTask["durationUs"]),
 							tTask["unit"],
 							tTask["mode"]
 						));

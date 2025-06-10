@@ -2036,23 +2036,30 @@ function VUHDO_printPoolMetrics()
 
 	if not VUHDO_TABLE_POOL_PROFILE then
 		VUHDO_Msg("Table pool profiling is currently disabled.");
-
 		return;
 	end
 
-	VUHDO_Msg("|cffFFD100Table Pool Stats:|r");
+	VUHDO_Msg("|cffFFD100--- Table Pool Metrics ---|r");
 
 	for tName, tPool in pairs(VUHDO_getTablePools()) do
 		if tPool and tPool.getMetrics then
 			tPoolStats = tPool:getMetrics();
 
-			VUHDO_Msg(string.format("    Pool[%s] (Max:%d CurIdle:%d PeakIdle:%d): Hits=%d Misses=%d Rejected=%d",
-				tName, tPoolStats["maxSize"], tPoolStats["currentIdle"], tPoolStats["peakIdleCount"],
-				tPoolStats["hits"], tPoolStats["misses"], tPoolStats["rejectedReleases"]));
+			VUHDO_Msg(string.format("|cffFFA500** Pool[%s]:|r (Max:%d CurIdle:%d PeakIdle:%d): Hits=%d Misses=%d Rejected=%d",
+				tName,
+				tPoolStats["maxSize"],
+				tPoolStats["currentIdle"],
+				tPoolStats["peakIdleCount"],
+				tPoolStats["hits"],
+				tPoolStats["misses"],
+				tPoolStats["rejectedReleases"]
+			));
 		else
-			VUHDO_Msg(string.format("    Pool[%s]: Not available or invalid.", tName));
+			VUHDO_Msg(string.format("|cffFFA500** Pool[%s]:|r Not available or invalid.", tName));
 		end
 	end
+
+	VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
 
 	return;
 
@@ -2091,5 +2098,20 @@ function VUHDO_setPoolProfiling(anIsEnabled)
 	end
 
 	return;
+
+end
+
+
+
+--
+function VUHDO_formatTime(aTimeUs)
+
+	aTimeUs = aTimeUs or 0;
+
+	if aTimeUs >= 1000 then
+		return format("%.2f ms", aTimeUs / 1000);
+	end
+
+	return format("%.0f us", aTimeUs);
 
 end
