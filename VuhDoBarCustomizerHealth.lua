@@ -94,7 +94,6 @@ function VUHDO_customHealthInitLocalOverrides()
 	VUHDO_getUnitOverallShieldRemain = _G["VUHDO_getUnitOverallShieldRemain"];
 
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 
 	sIsOverhealText = VUHDO_CONFIG["SHOW_TEXT_OVERHEAL"]
 	sIsAggroText = VUHDO_CONFIG["THREAT"]["AGGRO_USE_TEXT"];

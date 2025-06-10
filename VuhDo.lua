@@ -165,7 +165,6 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_getUnitZoneName = _G["VUHDO_getUnitZoneName"];
 
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_PANEL_UNITS = _G["VUHDO_PANEL_UNITS"];

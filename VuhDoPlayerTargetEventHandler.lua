@@ -34,8 +34,6 @@ function VUHDO_playerTargetEventHandlerInitLocalOverrides()
 	VUHDO_getPlayerTargetFrame = _G["VUHDO_getPlayerTargetFrame"];
 
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
-	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 
 	return;
 
