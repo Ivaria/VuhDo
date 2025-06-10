@@ -1104,6 +1104,10 @@ do
 	--
 	local tTaskChunkSnapshots;
 	local tNewSnapshot;
+	local tExistingSnapshot;
+	local tIsDuplicate;
+	local tCompositionKey;
+	local tTaskTypes;
 	local function VUHDO_addChunkSnapshot(aTotalChunkTimeUs, aNumTasksInChunk, aTasksDetailTable)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or aTotalChunkTimeUs < (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or 2000) then
@@ -1111,26 +1115,86 @@ do
 		end
 
 		tTaskChunkSnapshots = VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS;
+		tIsDuplicate = false;
 
-		tNewSnapshot = {
-			["totalChunkTimeUs"] = aTotalChunkTimeUs,
-			["numTasksInChunk"] = aNumTasksInChunk,
-			["tasks"] = { },
-			["timestamp"] = GetTime(),
-		};
+		if aNumTasksInChunk > 0 and aTasksDetailTable and #aTasksDetailTable > 0 then
+			tTaskTypes = { };
 
-		if aTasksDetailTable then
-			for _, tTaskDetailSnapshot in ipairs(aTasksDetailTable) do
-				tinsert(tNewSnapshot["tasks"], {
-					type = tTaskDetailSnapshot.type,
-					unit = tostring(tTaskDetailSnapshot.unit),
-					mode = tostring(tTaskDetailSnapshot.mode),
-					durationUs = tTaskDetailSnapshot.durationUs,
-				});
+			for _, tTaskDetail in ipairs(aTasksDetailTable) do
+				tinsert(tTaskTypes, tostring(tTaskDetail["type"]));
+			end
+
+			tCompositionKey = table.concat(tTaskTypes, ",");
+
+			for _, tExistingSnapshot in ipairs(tTaskChunkSnapshots) do
+				if not tExistingSnapshot["compositionKey"] then
+					tTaskTypes = { };
+
+					if tExistingSnapshot["tasks"] then
+						for _, tTaskDetail in ipairs(tExistingSnapshot["tasks"]) do
+							tinsert(tTaskTypes, tostring(tTaskDetail["type"]));
+						end
+					end
+
+					tExistingSnapshot["compositionKey"] = table.concat(tTaskTypes, ",");
+				end
+
+				if tExistingSnapshot["compositionKey"] == tCompositionKey then
+					tExistingSnapshot["dedupedCount"] = (tExistingSnapshot["dedupedCount"] or 1) + 1;
+
+					if aTotalChunkTimeUs > tExistingSnapshot["totalChunkTimeUs"] then
+						tExistingSnapshot["totalChunkTimeUs"] = aTotalChunkTimeUs;
+						tExistingSnapshot["timestamp"] = GetTime();
+
+						twipe(tExistingSnapshot["tasks"]);
+
+						for _, tTaskDetailSnapshot in ipairs(aTasksDetailTable) do
+							tinsert(tExistingSnapshot["tasks"], {
+								["type"] = tTaskDetailSnapshot["type"],
+								["unit"] = tostring(tTaskDetailSnapshot["unit"]),
+								["mode"] = tostring(tTaskDetailSnapshot["mode"]),
+								["durationUs"] = tTaskDetailSnapshot["durationUs"],
+							});
+						end
+					end
+
+					tIsDuplicate = true;
+
+					break;
+				end
 			end
 		end
 
-		tinsert(tTaskChunkSnapshots, tNewSnapshot);
+		if not tIsDuplicate then
+			tNewSnapshot = {
+				["totalChunkTimeUs"] = aTotalChunkTimeUs,
+				["numTasksInChunk"] = aNumTasksInChunk,
+				["tasks"] = { },
+				["timestamp"] = GetTime(),
+				["dedupedCount"] = 1,
+			};
+
+			if aTasksDetailTable and #aTasksDetailTable > 0 then
+				tTaskTypes = { };
+
+				for _, tTaskDetailSnapshot in ipairs(aTasksDetailTable) do
+					tinsert(tNewSnapshot["tasks"], {
+						["type"] = tTaskDetailSnapshot["type"],
+						["unit"] = tostring(tTaskDetailSnapshot["unit"]),
+						["mode"] = tostring(tTaskDetailSnapshot["mode"]),
+						["durationUs"] = tTaskDetailSnapshot["durationUs"],
+					});
+
+					tinsert(tTaskTypes, tostring(tTaskDetailSnapshot["type"]));
+				end
+
+				tNewSnapshot["compositionKey"] = table.concat(tTaskTypes, ",");
+			else
+				tNewSnapshot["compositionKey"] = "";
+			end
+
+			tinsert(tTaskChunkSnapshots, tNewSnapshot);
+		end
 
 		table.sort(tTaskChunkSnapshots, function(a, b) return a.totalChunkTimeUs > b.totalChunkTimeUs; end);
 
@@ -1141,6 +1205,7 @@ do
 		return;
 
 	end
+
 
 
 	--
@@ -1805,6 +1870,7 @@ do
 	local tMaxTaskTime;
 	local tMaxTaskContextUnit;
 	local tMaxTaskContextMode;
+	local tDedupedText;
 	function VUHDO_printDeferredTaskMetrics(anIsReset)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -1925,15 +1991,21 @@ do
 		end
 
 		if #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS > 0 then
-			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or "N/A") .. " us): **|r");
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (tTaskConfig["MAX_EXEC_TIME_US"] or "N/A") .. " us): **|r");
 
 			for tSnapshotCnt, tSnapshot in ipairs(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS) do
-				VUHDO_Msg(format("  #%d: ChunkTotalTime: %.2f us (%.2f ms), NumTasks: %d, Timestamp: %.2f",
+				tDedupedText = "";
+				if (tSnapshot["dedupedCount"] or 0) > 1 then
+					tDedupedText = format(" (de-duped %d times)", tSnapshot["dedupedCount"]);
+				end
+
+				VUHDO_Msg(format("  #%d: ChunkTotalTime: %.2f us (%.2f ms), NumTasks: %d, Timestamp: %.2f%s",
 					tSnapshotCnt,
 					tSnapshot["totalChunkTimeUs"],
 					tSnapshot["totalChunkTimeUs"] / 1000,
 					tSnapshot["numTasksInChunk"],
-					tSnapshot["timestamp"]
+					tSnapshot["timestamp"],
+					tDedupedText
 				));
 
 				if tSnapshot["tasks"] then
@@ -2064,8 +2136,13 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 			VUHDO_cleanupDeferredTaskDelegate
 		);
 
+		for _, tTask in ipairs(VUHDO_TASK_PRIORITY_QUEUE) do
+			VUHDO_DEFERRED_TASK_POOL:release(tTask);
+		end
+
 		twipe(VUHDO_TASK_PRIORITY_QUEUE);
 		twipe(VUHDO_TASK_QUEUE_MAP);
+
 		sNextTaskEnqueueOrder = 0;
 
 		VUHDO_updateDynamicDeferTargets();
