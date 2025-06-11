@@ -2004,13 +2004,15 @@ do
 		end
 
 		if #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS > 0 then
-			tDedupedText = "";
-			if (tSnapshot["dedupedCount"] or 0) > 1 then
-				tDedupedText = format(" (de-duped %d times)", tSnapshot["dedupedCount"]);
-			end
 			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (VUHDO_formatTime(VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"])) .. "): **|r");
 
 			for tSnapshotCnt, tSnapshot in ipairs(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS) do
+				tDedupedText = "";
+
+				if (tSnapshot["dedupedCount"] or 0) > 1 then
+					tDedupedText = format(" (de-duped %d times)", tSnapshot["dedupedCount"]);
+				end
+
 				VUHDO_Msg(format("  #%d: ChunkTotalTime: %s, NumTasks: %d, Timestamp: %.2f%s",
 					tSnapshotCnt,
 					VUHDO_formatTime(tSnapshot["totalChunkTimeUs"]),
