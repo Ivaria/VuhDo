@@ -830,14 +830,51 @@ local VUHDO_updateBouquetsForEvent = VUHDO_updateBouquetsForEvent;
 
 -- Bei Panel-Redraw aufzurufen
 function VUHDO_initAllEventBouquets()
+
 	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);
+
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_updateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
 	end
 
 	VUHDO_updateBouquetsForEvent("focus", 19); -- VUHDO_UPDATE_DC
 	VUHDO_updateBouquetsForEvent("target", 19); -- VUHDO_UPDATE_DC
+
 	VUHDO_registerAllTextIndicators();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferInitAllEventBouquetsDelegate()
+
+	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_deferUpdateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
+	end
+
+	VUHDO_deferUpdateBouquetsForEvent("focus", 19); -- VUHDO_UPDATE_DC
+	VUHDO_deferUpdateBouquetsForEvent("target", 19); -- VUHDO_UPDATE_DC
+
+	VUHDO_registerAllTextIndicators();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferInitAllEventBouquets(aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_INIT_ALL_EVENT_BOUQUETS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+
+	return;
+
 end
 
 

@@ -2092,9 +2092,9 @@ function VUHDO_setPoolProfiling(anIsEnabled)
 	VUHDO_TABLE_POOL_PROFILE = anIsEnabled;
 
 	if anIsEnabled then
-		VUHDO_Msg("Table pool profiling enabled.");
+		VUHDO_Msg("Table pool profiling is enabled.");
 	else
-		VUHDO_Msg("Table pool profiling disabled.");
+		VUHDO_Msg("Table pool profiling is disabled.");
 	end
 
 	return;
