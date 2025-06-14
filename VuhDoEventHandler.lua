@@ -79,6 +79,46 @@ local VUHDO_HANDLER_METRICS = {
 			["minTimeUs"] = 9999999,
 			["maxTimeUs"] = 0,
 		},
+		["segment2E"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2F"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2G"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2H"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2I"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2J"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2K"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
+		["segment2L"] = {
+			["totalTimeUs"] = 0,
+			["minTimeUs"] = 9999999,
+			["maxTimeUs"] = 0,
+		},
 		["total"] = {
 			["totalTimeUs"] = 0,
 			["minTimeUs"] = 9999999,
@@ -282,6 +322,14 @@ do
 		"segment2B",
 		"segment2C",
 		"segment2D",
+		"segment2E",
+		"segment2F",
+		"segment2G",
+		"segment2H",
+		"segment2I",
+		"segment2J",
+		"segment2K",
+		"segment2L",
 		"total",
 	};
 	function VUHDO_resetHandlerMetrics()
@@ -388,8 +436,17 @@ do
 		VUHDO_printHandlerMetricSegment("Seg 2A (Reloads)", tOnUpdateMetrics["segment2A"], tInvocationCount, "    - ");
 		VUHDO_printHandlerMetricSegment("Seg 2B (Core Upd)", tOnUpdateMetrics["segment2B"], tInvocationCount, "    - ");
 		VUHDO_printHandlerMetricSegment("Seg 2C (Combat Chk)", tOnUpdateMetrics["segment2C"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2D (Slow Tasks)", tOnUpdateMetrics["segment2D"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Sum (Seg1+Seg2)", tOnUpdateMetrics["total"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2D (Slow Thres)", tOnUpdateMetrics["segment2D"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2E (Post-Combat)", tOnUpdateMetrics["segment2E"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2F (Get Auto Prof)", tOnUpdateMetrics["segment2F"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2G (Load Profile)", tOnUpdateMetrics["segment2G"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2H (Hide Blizz)", tOnUpdateMetrics["segment2H"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2I (Shield Cleanup)", tOnUpdateMetrics["segment2I"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2J (Zones)", tOnUpdateMetrics["segment2J"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2K (Inspect)", tOnUpdateMetrics["segment2K"], tInvocationCount, "    - ");
+		VUHDO_printHandlerMetricSegment("Seg 2L (Macros)", tOnUpdateMetrics["segment2L"], tInvocationCount, "    - ");
+
+		VUHDO_printHandlerMetricSegment("Sum (Seg1+Seg2)", tOnUpdateMetrics["total"], tInvocationCount);
 
 		VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type): **|r");
 
@@ -464,6 +521,7 @@ end
 
 
 
+--
 local sIsHealerMode;
 local sIsDirectionArrow = false;
 local sHotToggleUpdateSecs = 1;
@@ -2090,7 +2148,6 @@ do
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2A", (debugprofilestop() - tStartTimes[3]) * 1000);
-
 			tStartTimes[3] = debugprofilestop();
 		end
 
@@ -2189,7 +2246,6 @@ do
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2B", (debugprofilestop() - tStartTimes[3]) * 1000);
-
 			tStartTimes[3] = debugprofilestop();
 		end
 
@@ -2227,7 +2283,6 @@ do
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2C", (debugprofilestop() - tStartTimes[3]) * 1000);
-
 			tStartTimes[3] = debugprofilestop();
 		end
 
@@ -2235,6 +2290,10 @@ do
 
 		if tSlowDelta < 1.2 then
 			tSlowDelta = tSlowDelta + sTimerDelta;
+
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				VUHDO_updateOnUpdateSubSegmentMetrics("segment2D", (debugprofilestop() - tStartTimes[3]) * 1000);
+			end
 
 			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
 
@@ -2245,6 +2304,13 @@ do
 			tSlowDelta = 0;
 		end
 
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2D", (debugprofilestop() - tStartTimes[3]) * 1000);
+			tStartTimes[3] = debugprofilestop();
+		end
+
+		-- Segment 2E: Post-Combat Reload
+
 		-- reload after battle
 		if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
 			VUHDO_RELOAD_AFTER_BATTLE = false;
@@ -2254,26 +2320,58 @@ do
 
 				if VUHDO_IS_RELOAD_BUFFS then
 					VUHDO_reloadBuffPanel();
-
 					VUHDO_IS_RELOAD_BUFFS = false;
 				end
 			end
 		end
 
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2E", (debugprofilestop() - tStartTimes[3]) * 1000);
+		end
+
 		-- automatic profiles, shield cleanup, hide generic blizz party
 		if VUHDO_checkResetTimer("CHECK_PROFILES", 3.1) then
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				tStartTimes[3] = debugprofilestop();
+			end
+
 			if not InCombatLockdown() then
 				tAutoProfile, tTrigger = VUHDO_getAutoProfile();
+			end
 
-				if tAutoProfile and not VUHDO_IS_CONFIG then
-					VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. tTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. tAutoProfile .. "|r\"");
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				VUHDO_updateOnUpdateSubSegmentMetrics("segment2F", (debugprofilestop() - tStartTimes[3]) * 1000);
+				tStartTimes[3] = debugprofilestop();
+			end
 
-					VUHDO_loadProfile(tAutoProfile);
-				end
+			if not InCombatLockdown() and tAutoProfile and not VUHDO_IS_CONFIG then
+				VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. tTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. tAutoProfile .. "|r\"");
+				VUHDO_loadProfile(tAutoProfile);
+			end
+
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				VUHDO_updateOnUpdateSubSegmentMetrics("segment2G", (debugprofilestop() - tStartTimes[3]) * 1000);
+				tStartTimes[3] = debugprofilestop();
 			end
 
 			VUHDO_hideBlizzCompactPartyFrame();
+
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				VUHDO_updateOnUpdateSubSegmentMetrics("segment2H", (debugprofilestop() - tStartTimes[3]) * 1000);
+				tStartTimes[3] = debugprofilestop();
+			end
+
 			VUHDO_removeObsoleteShields();
+
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				VUHDO_updateOnUpdateSubSegmentMetrics("segment2I", (debugprofilestop() - tStartTimes[3]) * 1000);
+			end
+		end
+
+		-- Segment 2J: Zones
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tStartTimes[3] = debugprofilestop();
 		end
 
 		-- Unit Zones
@@ -2285,9 +2383,24 @@ do
 			end
 		end
 
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2J", (debugprofilestop() - tStartTimes[3]) * 1000);
+			tStartTimes[3] = debugprofilestop();
+		end
+
+
+		-- Segment 2K: Inspect
+
 		if not VUHDO_NEXT_INSPECT_UNIT and not InCombatLockdown() and VUHDO_checkResetTimer("REFRESH_INSPECT", 2.1) then
 			VUHDO_tryInspectNext();
 		end
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2K", (debugprofilestop() - tStartTimes[3]) * 1000);
+			tStartTimes[3] = debugprofilestop();
+		end
+
+		-- Segment 2L: Macros
 
 		-- Refresh d/c shield macros?
 		if VUHDO_checkTimer("MIRROR_TO_MACRO") then
@@ -2299,7 +2412,7 @@ do
 		end
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2D", (debugprofilestop() - tStartTimes[3]) * 1000);
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2L", (debugprofilestop() - tStartTimes[3]) * 1000);
 		end
 
 		VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
