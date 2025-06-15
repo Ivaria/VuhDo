@@ -1297,8 +1297,8 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		},
 
 		["HOTS"] = {
-			["useColorText"] = true,
-			["useColorBack"] = true,
+			["useColorText"] = false,
+			["useColorBack"] = false,
 			["isFadeOut"] = false,
 			["isFlashWhenLow"] = false,
 			["showShieldAbsorb"] = true,
