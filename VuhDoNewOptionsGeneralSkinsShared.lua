@@ -549,8 +549,8 @@ local VUHDO_DEFAULT_PROFILES = {
 					["useText"] = true,
 				},
 				["HOTS"] = {
-					["useColorText"] = true,
-					["useColorBack"] = true,
+					["useColorText"] = false,
+					["useColorBack"] = false,
 					["isPumpDivineAegis"] = false,
 					["isFadeOut"] = false,
 					["isFlashWhenLow"] = false,
@@ -1850,8 +1850,8 @@ local VUHDO_DEFAULT_PROFILES = {
 					["useText"] = true,
 				},
 				["HOTS"] = {
-					["useColorText"] = true,
-					["useColorBack"] = true,
+					["useColorText"] = false,
+					["useColorBack"] = false,
 					["isPumpDivineAegis"] = false,
 					["isFadeOut"] = false,
 					["isFlashWhenLow"] = false,
