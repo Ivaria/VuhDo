@@ -18,6 +18,7 @@ local VUHDO_REGISTERED_PROVIDERS = { };
 setmetatable(VUHDO_REGISTERED_PROVIDERS, VUHDO_META_NEW_ARRAY);
 local VUHDO_INTERESTED_PROVIDERS = { };
 setmetatable(VUHDO_INTERESTED_PROVIDERS, VUHDO_META_NEW_ARRAY);
+
 local VUHDO_INDICATOR_TEXT_PROVIDERS = { };
 
 
@@ -46,24 +47,40 @@ function VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName,
 	tInfo = (VUHDO_RAID or tEmpty)[aUnit];
 
 	if tInfo then
-		tIndicators = VUHDO_getRegisteredBouquets()[aBouquetName];
+		if aBouquetName then
+			tIndicators = VUHDO_getRegisteredBouquets()[aBouquetName];
 
-		if tIndicators then
-			for tIndicatorName, _ in pairs(tIndicators) do
-				if VUHDO_INDICATOR_TEXT_PROVIDERS[tIndicatorName] then
-					for tProviderName, tFunction in pairs(VUHDO_INDICATOR_TEXT_PROVIDERS[tIndicatorName]) do
-						if VUHDO_isTextProviderInterestedInEvent(tProviderName, anEventType) then
-							-- FIXME: hardcoded bouquet name check is fragile
-							if not anIsActive or
-								(aBouquetName == VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY and tInfo["role"] ~= VUHDO_ID_RANGED_HEAL) then
-								tFunction(aUnit, tProviderName, "", 0, tIndicatorName);
-							else
-								tValue, tMaxValue = VUHDO_TEXT_PROVIDERS[tProviderName]["calculator"](tInfo);
+			if tIndicators then
+				for tIndicatorName, _ in pairs(tIndicators) do
+					if VUHDO_INDICATOR_TEXT_PROVIDERS[tIndicatorName] then
+						for tProviderName, tFunction in pairs(VUHDO_INDICATOR_TEXT_PROVIDERS[tIndicatorName]) do
+							if VUHDO_isTextProviderInterestedInEvent(tProviderName, anEventType) then
+								-- FIXME: hardcoded bouquet name check is fragile
+								if not anIsActive or
+									(aBouquetName == VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY and tInfo["role"] ~= VUHDO_ID_RANGED_HEAL) then
+									tFunction(aUnit, tProviderName, "", 0, tIndicatorName);
+								else
+									tValue, tMaxValue = VUHDO_TEXT_PROVIDERS[tProviderName]["calculator"](tInfo);
 
-								tText = VUHDO_TEXT_PROVIDERS[tProviderName]["validator"](tInfo, tValue, tMaxValue);
+									tText = VUHDO_TEXT_PROVIDERS[tProviderName]["validator"](tInfo, tValue, tMaxValue);
 
-								tFunction(aUnit, tProviderName, tText, tValue, tIndicatorName);
+									tFunction(aUnit, tProviderName, tText, tValue, tIndicatorName);
+								end
 							end
+						end
+					end
+				end
+			end
+		else
+			for tProviderName, tAllIndicators in pairs(VUHDO_REGISTERED_PROVIDERS) do
+				if VUHDO_isTextProviderInterestedInEvent(tProviderName, anEventType) then
+					for tIndicatorName, tFunction in pairs(tAllIndicators) do
+						if not VUHDO_getRegisteredBouquetIndicators(tIndicatorName) then
+							tValue, tMaxValue = VUHDO_TEXT_PROVIDERS[tProviderName]["calculator"](tInfo);
+
+							tText = VUHDO_TEXT_PROVIDERS[tProviderName]["validator"](tInfo, tValue, tMaxValue);
+
+							tFunction(aUnit, tProviderName, tText, tValue, tIndicatorName);
 						end
 					end
 				end
@@ -169,6 +186,7 @@ function VUHDO_registerAllTextIndicators()
 
 	table.wipe(VUHDO_REGISTERED_PROVIDERS);
 	table.wipe(VUHDO_INTERESTED_PROVIDERS);
+	table.wipe(VUHDO_INDICATOR_TEXT_PROVIDERS);
 
 	table.wipe(tAlreadyRegistered);
 
