@@ -39,6 +39,7 @@ setmetatable(VUHDO_REGISTERED_BOUQUETS, VUHDO_META_NEW_ARRAY);
 local VUHDO_ACTIVE_BOUQUETS = { };
 setmetatable(VUHDO_ACTIVE_BOUQUETS, VUHDO_META_NEW_ARRAY);
 
+local VUHDO_REGISTERED_BOUQUET_INDICATORS = { };
 local VUHDO_CYCLIC_BOUQUETS = { };
 
 
@@ -536,6 +537,13 @@ local function VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction)
 	VUHDO_BOUQUETS["STORED"][aBouquetName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][aBouquetName]);
 
 	VUHDO_REGISTERED_BOUQUETS[aBouquetName][anOwnerName] = aFunction;
+
+	if not VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName] then
+		VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName] = { };
+	end
+
+	VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName][aBouquetName] = aFunction;
+
 	VUHDO_activateBuffsInScanner(aBouquetName);
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
@@ -574,6 +582,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 
 	twipe(VUHDO_REGISTERED_BOUQUETS);
 	twipe(VUHDO_CYCLIC_BOUQUETS);
+	twipe(VUHDO_REGISTERED_BOUQUET_INDICATORS);
 
 	if not VUHDO_BOUQUETS["STORED"] then return; end
 	if (aDoCompress) then VUHDO_compressAllBouquets(); end
@@ -831,6 +840,8 @@ function VUHDO_updateBouquetsForEvent(aUnit, anEventType)
 		end
 	end
 
+	VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType);
+
 	return;
 
 end
@@ -1040,5 +1051,18 @@ end
 function VUHDO_getActiveBouquets()
 
 	return VUHDO_ACTIVE_BOUQUETS;
+
+end
+
+
+
+--
+function VUHDO_getRegisteredBouquetIndicators(anIndicatorName)
+
+	if anIndicatorName then
+		return VUHDO_REGISTERED_BOUQUET_INDICATORS[anIndicatorName];
+	else
+		return VUHDO_REGISTERED_BOUQUET_INDICATORS;
+	end
 
 end
