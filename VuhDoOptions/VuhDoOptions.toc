@@ -19,7 +19,7 @@
 ## Category-zhTW: 單位框架
 
 ## X-Curse-Project-ID: 7950
-## X-WoWI-ID: 26722
+## X-WoWI-ID: 26929
 ## X-Wago-ID: yQKynG71
 
 ## SavedVariables: VUHDO_OPTIONS_SETTINGS
