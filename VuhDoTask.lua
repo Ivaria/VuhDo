@@ -574,7 +574,7 @@ do
 
 					if aTotalChunkTimeUs > tExistingSnapshot["totalChunkTimeUs"] then
 						tExistingSnapshot["totalChunkTimeUs"] = aTotalChunkTimeUs;
-						tExistingSnapshot["timestamp"] = GetTime();
+						tExistingSnapshot["timestamp"] = time();
 
 						twipe(tExistingSnapshot["tasks"]);
 
@@ -600,7 +600,7 @@ do
 				["totalChunkTimeUs"] = aTotalChunkTimeUs,
 				["numTasksInChunk"] = aNumTasksInChunk,
 				["tasks"] = { },
-				["timestamp"] = GetTime(),
+				["timestamp"] = time(),
 				["dedupedCount"] = 1,
 			};
 
@@ -1447,11 +1447,11 @@ do
 					tDedupedText = format(" (deduped %d times)", tSnapshot["dedupedCount"]);
 				end
 
-				VUHDO_Msg(format("  #%d: ChunkTotalTime: %s, NumTasks: %d, Timestamp: %.2f%s",
+				VUHDO_Msg(format("  #%d: ChunkTotalTime: %s, NumTasks: %d, Timestamp: %s%s",
 					tSnapshotCnt,
 					VUHDO_formatTime(tSnapshot["totalChunkTimeUs"]),
 					tSnapshot["numTasksInChunk"],
-					tSnapshot["timestamp"],
+					date("%m/%d/%y %H:%M:%S", tSnapshot["timestamp"]),
 					tDedupedText
 				));
 
@@ -1468,7 +1468,7 @@ do
 				end
 			end
 		else
-			VUHDO_Msg("|cffFFA500** No expensive deferred task chunks recorded above threshold. **|r");
+			VUHDO_Msg("|cffFFA500** No expensive deferred task chunks captured. **|r");
 		end
 
 		VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");

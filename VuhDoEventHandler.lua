@@ -202,6 +202,10 @@ do
 	--
 	local tSnapshots;
 	local tNewSnapshot;
+	local tExistingSnapshot;
+	local tIsDuplicate;
+	local tCompositionKey;
+	local tArgs;
 	function VUHDO_addEventSnapshot(aEventName, aDurationUs, ...)
 
 		if not VUHDO_HANDLER_PROFILING_ENABLED or aDurationUs < VUHDO_HANDLER_EVENT_CONFIG["THRESHOLD_US"] then
@@ -209,16 +213,12 @@ do
 		end
 
 		tSnapshots = VUHDO_HANDLER_EVENT_SNAPSHOTS;
+		tIsDuplicate = false;
 
-		tNewSnapshot = {
-			["eventName"] = aEventName,
-			["durationUs"] = aDurationUs,
-			["timestamp"] = GetTime(),
-			["args"] = { },
-		};
+		tArgs = { };
 
 		for tCnt = 1, select("#", ...) do
-			tinsert(tNewSnapshot["args"], tostring(select(tCnt, ...)));
+			tinsert(tArgs, tostring(select(tCnt, ...)));
 
 			-- don't capture more than 5 arguments
 			if tCnt >= 5 then
@@ -226,7 +226,56 @@ do
 			end
 		end
 
-		tinsert(tSnapshots, tNewSnapshot);
+		tCompositionKey = aEventName .. ":" .. table.concat(tArgs, ",");
+
+		for _, tExistingSnapshot in ipairs(tSnapshots) do
+			if not tExistingSnapshot["compositionKey"] then
+				-- backward compatibility: create composition key for existing snapshots
+				tArgs = { };
+
+				for _, tArg in ipairs(tExistingSnapshot["args"] or { }) do
+					tinsert(tArgs, tostring(tArg));
+				end
+
+				tExistingSnapshot["compositionKey"] = tExistingSnapshot["eventName"] .. ":" .. table.concat(tArgs, ",");
+			end
+
+			if tExistingSnapshot["compositionKey"] == tCompositionKey then
+				tExistingSnapshot["dedupedCount"] = (tExistingSnapshot["dedupedCount"] or 1) + 1;
+
+				if aDurationUs > tExistingSnapshot["durationUs"] then
+					tExistingSnapshot["durationUs"] = aDurationUs;
+					tExistingSnapshot["timestamp"] = time();
+
+					twipe(tExistingSnapshot["args"]);
+
+					for _, tArg in ipairs(tArgs) do
+						tinsert(tExistingSnapshot["args"], tArg);
+					end
+				end
+
+				tIsDuplicate = true;
+
+				break;
+			end
+		end
+
+		if not tIsDuplicate then
+			tNewSnapshot = {
+				["eventName"] = aEventName,
+				["durationUs"] = aDurationUs,
+				["timestamp"] = time(),
+				["args"] = { },
+				["compositionKey"] = tCompositionKey,
+				["dedupedCount"] = 1,
+			};
+
+			for _, tArg in ipairs(tArgs) do
+				tinsert(tNewSnapshot["args"], tArg);
+			end
+
+			tinsert(tSnapshots, tNewSnapshot);
+		end
 
 		table.sort(tSnapshots, function(a, b) return a.durationUs > b.durationUs; end);
 
@@ -501,15 +550,23 @@ do
 
 			for tCnt, tSnapshot in ipairs(VUHDO_HANDLER_EVENT_SNAPSHOTS) do
 				tArgString = table.concat(tSnapshot["args"], ", ");
+				tDedupedText = "";
 
-				VUHDO_Msg(format("  #%d: %s - %s at %.2f. Args: %s",
+				if (tSnapshot["dedupedCount"] or 0) > 1 then
+					tDedupedText = format(" (deduped %d times)", tSnapshot["dedupedCount"]);
+				end
+
+				VUHDO_Msg(format("  #%d: %s - %s @ %s. Args: %s%s",
 					tCnt,
 					tSnapshot["eventName"],
 					VUHDO_formatTime(tSnapshot["durationUs"]),
-					tSnapshot["timestamp"],
-					tArgString
+					date("%m/%d/%y %H:%M:%S", tSnapshot["timestamp"]),
+					tArgString,
+					tDedupedText
 				));
 			end
+		else
+			VUHDO_Msg("|cffFFA500** No expensive event invocations captured. **|r");
 		end
 
 		VUHDO_Msg("|cffFFD100--- End of Handler Metrics ---|r");
