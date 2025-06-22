@@ -1,34 +1,21 @@
 local _;
 
 local GetTime = GetTime;
-local UnitInRange = UnitInRange;
-local UnitDetailedThreatSituation = UnitDetailedThreatSituation;
-local UnitIsCharmed = UnitIsCharmed;
-local UnitCanAttack = UnitCanAttack;
 local UnitName = UnitName;
 local UnitIsEnemy = UnitIsEnemy;
 local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
-local GetSpellName = C_Spell.GetSpellName;
 local HasFullControl = HasFullControl;
 local pairs = pairs;
-local UnitThreatSituation = UnitThreatSituation;
 local InCombatLockdown = InCombatLockdown;
-local type = type;
-local GetCVar = GetCVar;
 local tonumber = tonumber;
 local string = string;
-local xpcall = xpcall;
 local debugprofilestop = debugprofilestop;
-local MeasureCall = C_AddOnProfiler and C_AddOnProfiler.MeasureCall;
-local GetFramerate = GetFramerate;
 local format = string.format;
 local tinsert = table.insert;
-local tcreate = table.create or VUHDO_tableCreate;
 local tremove = table.remove;
 local twipe = table.wipe;
 local max = math.max;
 local min = math.min;
-local floor = math.floor;
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
@@ -445,9 +432,6 @@ do
 
 
 	--
-	local tMetricsExist;
-	local tInitialCheckCondition;
-	local tHasEventData;
 	local tMetrics;
 	local tSessionDuration;
 	local tOnUpdateMetrics;
@@ -457,6 +441,7 @@ do
 	local tCount;
 	local tAvgTime;
 	local tArgString;
+	local tDedupedText;
 	local tThresholdText;
 	function VUHDO_printHandlerMetrics()
 

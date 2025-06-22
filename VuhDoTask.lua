@@ -2,7 +2,6 @@ local _;
 
 local GetTime = GetTime;
 local pairs = pairs;
-local type = type;
 local GetCVar = GetCVar;
 local tonumber = tonumber;
 local string = string;
