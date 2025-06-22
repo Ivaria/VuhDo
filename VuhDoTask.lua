@@ -986,9 +986,9 @@ do
 		-- we want to skip 3 levels:
 		-- 1. this error handler function itself
 		-- 2. the C/internal call for xpcall
-		-- 3. the anonymous function wrapper around the delegate
+		-- 3. the function wrapper around the delegate
 		-- then start capturing from the next level (the actual delegate).
-		local tStack = debugstack(1, 20, 3); -- capture up to 64 levels, after skipping 3
+		local tStack = debugstack(1, 20, 3); -- capture up to 20 levels, after skipping 3
 
 		return tostring(tError) .. "\nStacktrace:\n" .. tStack;
 
