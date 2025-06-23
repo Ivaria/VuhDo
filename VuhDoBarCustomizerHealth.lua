@@ -1192,4 +1192,58 @@ function VUHDO_updateAllRaidBars()
 		VUHDO_REMOVE_HOTS = true;
 	end
 
+	return;
+
+end
+
+
+
+--
+function VUHDO_updatePanelButtons(aUnit, aPanelNum)
+
+	if not VUHDO_isPanelVisible(aPanelNum) then
+		return;
+	end
+
+	for _, tButton in pairs(VUHDO_getPanelButtons(aPanelNum)) do
+		if not tButton:GetAttribute("unit") then
+			break;
+		end
+
+		VUHDO_customizeHealButton(tButton);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllRaidBarsDelegate(aPriority)
+
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		if VUHDO_isPanelVisible(tPanelNum) then
+			VUHDO_deferUpdatePanelButtons(tPanelNum, aPriority);
+		end
+	end
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_updateIncHeal(tUnit);
+		VUHDO_deferUpdateManaBars(tUnit, 3, aPriority);
+		VUHDO_deferUpdateUnitAggro(tUnit, nil, aPriority);
+	end
+
+	if VUHDO_REMOVE_HOTS then
+		VUHDO_deferUpdateAllHoTs(aPriority);
+
+		if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
+			VUHDO_deferUpdateClusterHighlights(aPriority);
+		end
+	else
+		VUHDO_REMOVE_HOTS = true;
+	end
+
+	return;
+
 end
