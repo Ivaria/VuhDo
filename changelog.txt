@@ -31,6 +31,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed action block when moving panels during combat (Blizzard restriction)  
   
   
 Improvements:  
