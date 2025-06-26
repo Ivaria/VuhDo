@@ -1,4 +1,3 @@
-
 local sDebuffConfig;
 local VUHDO_getBarIcon;
 local VUHDO_getBarIconTimer;
@@ -95,25 +94,22 @@ function VUHDO_initCustomDebuffs()
 
 			tButton = VUHDO_getOrCreateCuDeButton(sButton, tIconIdx);
 			tButton:ClearAllPoints();
-			tButton:SetPoint(sPoint, sHealthBar:GetName(), sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
-			tButton:SetWidth(sHeight);
-			tButton:SetHeight(sHeight);
+			VUHDO_PixelUtil.SetPoint(tButton, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
+			VUHDO_PixelUtil.SetSize(tButton, sHeight, sHeight);
 			tButton:SetScale(1);
 
 			tFrame = VUHDO_getBarIconFrame(sButton, tIconIdx);
 			tFrame:ClearAllPoints();
-			tFrame:SetPoint(sPoint, sHealthBar:GetName(), sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
+			VUHDO_PixelUtil.SetPoint(tFrame, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
 
 			if not sIsTooltipCache[tIconIdx] then
 				sIsTooltipCache[tIconIdx] = VUHDO_isMostlyInBounds(tButton, sButton, 0.33);
 			end
 
 			if sIsTooltipCache[tIconIdx] == 1 then
-				tFrame:SetWidth(sHeight);
-				tFrame:SetHeight(sHeight);
+				VUHDO_PixelUtil.SetSize(tFrame, sHeight, sHeight);
 			else
-				tFrame:SetWidth(0.001);
-				tFrame:SetHeight(0.001);
+				VUHDO_PixelUtil.SetSize(tFrame, 0.001, 0.001);
 				--VUHDO_Msg("Removing " .. (tCnt + 1));
 			end
 			tFrame:SetAlpha(0);
@@ -124,6 +120,8 @@ function VUHDO_initCustomDebuffs()
 			tIcon:SetAllPoints();
 			tIconName = tIcon:GetName();
 
+			VUHDO_PixelUtil.ApplySettings(tIcon, true);
+
 			tTimer = VUHDO_getBarIconTimer(sButton, tIconIdx);
 			VUHDO_customizeIconText(tIcon, sHeight, tTimer, VUHDO_CONFIG["CUSTOM_DEBUFF"]["TIMER_TEXT"]);
 			tTimer:Show();
@@ -133,7 +131,7 @@ function VUHDO_initCustomDebuffs()
 			tCounter:Show();
 
 			tName = VUHDO_getBarIconName(sButton, tIconIdx);
-			tName:SetPoint("BOTTOM", tIconName, "TOP", 0, 0);
+			VUHDO_PixelUtil.SetPoint(tName, "BOTTOM", tIconName, "TOP", 0, 0);
 			tName:SetFont(GameFontNormalSmall:GetFont(), 12, "OUTLINE", "");
 			tName:SetShadowColor(0, 0, 0, 0);
 			tName:SetTextColor(1, 1, 1, 1);
