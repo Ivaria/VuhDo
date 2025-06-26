@@ -152,7 +152,7 @@ local sIsPumpAegis = false;
 local sShowAbsorb = false;
 function VUHDO_shieldAbsorbInitLocalOverrides()
 
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquets"];
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
 	VUHDO_updateShieldBar = _G["VUHDO_deferUpdateShieldBar"];
 	VUHDO_updateHealAbsorbBar = _G["VUHDO_deferUpdateHealAbsorbBar"];
 

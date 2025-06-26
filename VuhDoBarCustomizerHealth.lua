@@ -661,7 +661,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 	tUnit, tInfo = VUHDO_getDisplayUnit(aButton);
  	tHealthBar = VUHDO_getHealthBar(aButton, 1);
 
-	if not tInfo then
+	if not tInfo or not tInfo["name"] then
 		VUHDO_getBarText(tHealthBar):SetText(
 			   "focus" == tUnit and VUHDO_I18N_NO_FOCUS
 			or "target" == tUnit and VUHDO_I18N_NO_TARGET
@@ -1191,5 +1191,59 @@ function VUHDO_updateAllRaidBars()
 	else
 		VUHDO_REMOVE_HOTS = true;
 	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_updatePanelButtons(aUnit, aPanelNum)
+
+	if not VUHDO_isPanelVisible(aPanelNum) then
+		return;
+	end
+
+	for _, tButton in pairs(VUHDO_getPanelButtons(aPanelNum)) do
+		if not tButton:GetAttribute("unit") then
+			break;
+		end
+
+		VUHDO_customizeHealButton(tButton);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllRaidBarsDelegate(aPriority)
+
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		if VUHDO_isPanelVisible(tPanelNum) then
+			VUHDO_deferUpdatePanelButtons(tPanelNum, aPriority);
+		end
+	end
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_updateIncHeal(tUnit);
+		VUHDO_deferUpdateManaBars(tUnit, 3, aPriority);
+		VUHDO_deferUpdateUnitAggro(tUnit, nil, aPriority);
+	end
+
+	if VUHDO_REMOVE_HOTS then
+		VUHDO_deferUpdateAllHoTs(aPriority);
+
+		if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
+			VUHDO_deferUpdateClusterHighlights(aPriority);
+		end
+	else
+		VUHDO_REMOVE_HOTS = true;
+	end
+
+	return;
 
 end
