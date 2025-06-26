@@ -286,6 +286,11 @@ end
 
 
 --
+local tNumFrames;
+local tFrameSize;
+local tSpacing;
+local tTestFrames = { };
+local tXOffset;
 function VUHDO_testPixelPerfect()
 
 	VUHDO_Msg("|cffFFD100--- Pixel-Perfect Testing ---|r");
@@ -299,7 +304,83 @@ function VUHDO_testPixelPerfect()
 	VUHDO_refreshPixelScale();
 	VUHDO_Msg("  |cffB0E0E6New Pixel Scale:|r " .. VUHDO_getPixelScale());
 
+	VUHDO_Msg("|cffFFA500** Visual Test Frames:|r");
+	VUHDO_Msg("  Creating pixel-perfect test frames...");
+
+	tNumFrames = 5;
+	tFrameSize = 96;
+	tSpacing = 2;
+
+	for tIndex = 1, tNumFrames do
+		if not tTestFrames[tIndex] then
+			tTestFrames[tIndex] = CreateFrame("Frame", "VuhDoPixelTestFrame" .. tIndex, UIParent, "BackdropTemplate");
+
+			tTestFrames[tIndex]:SetFrameStrata("HIGH");
+			tTestFrames[tIndex]:SetMovable(true);
+			tTestFrames[tIndex]:EnableMouse(true);
+			tTestFrames[tIndex]:RegisterForDrag("LeftButton");
+
+			tTestFrames[tIndex]:SetScript("OnDragStart", tTestFrames[tIndex].StartMoving);
+			tTestFrames[tIndex]:SetScript("OnDragStop", tTestFrames[tIndex].StopMovingOrSizing);
+		end
+
+		tXOffset= (tIndex - 1) * (tFrameSize + tSpacing);
+
+		VUHDO_PixelUtil.SetPoint(tTestFrames[tIndex], "CENTER", UIParent, "CENTER", tXOffset - ((tNumFrames - 1) * (tFrameSize + tSpacing)) / 2, 0);
+		VUHDO_PixelUtil.SetSize(tTestFrames[tIndex], tFrameSize, tFrameSize);
+
+		VUHDO_PixelUtil.ApplyBackdrop(tTestFrames[tIndex], {
+			bgFile = "Interface\\Buttons\\WHITE8x8",
+			edgeFile = "Interface\\Buttons\\WHITE8x8",
+			tile = true,
+			tileSize = 8,
+			edgeSize = 1,
+			insets = { left = 0, right = 0, top = 0, bottom = 0 }
+		});
+
+		tTestFrames[tIndex]:SetBackdropColor(0, 0, 0, 1); -- black background
+		tTestFrames[tIndex]:SetBackdropBorderColor(0.5, 0.5, 0.5, 1); -- grey border
+
+		tTestFrames[tIndex]:Show();
+	end
+
+	VUHDO_Msg("  |cffB0E0E6Test Frames Created:|r " .. tNumFrames .. " black squares (" .. tFrameSize .. "x" .. tFrameSize .. ") with grey borders");
+	VUHDO_Msg("  |cffB0E0E6Position:|r Center of screen in a row (each draggable)");
+	VUHDO_Msg("  |cffB0E0E6Border Width:|r 1 pixel (pixel-perfect)");
+	VUHDO_Msg("  |cffB0E0E6Spacing:|r " .. tSpacing .. " pixels between frames");
+
 	VUHDO_Msg("|cffFFD100--- End of Pixel-Perfect Testing ---|r");
+
+	return;
+
+end
+
+
+
+--
+local tVisibleCount;
+function VUHDO_hidePixelTestFrame()
+
+	tVisibleCount = 0;
+
+	for _, tFrame in pairs(tTestFrames) do
+		if tFrame and tFrame:IsShown() then
+			tFrame:Hide();
+
+			tVisibleCount = tVisibleCount + 1;
+		end
+	end
+
+	if tVisibleCount > 0 then
+		VUHDO_Msg("|cffFFD100--- Pixel Test Frames Hidden ---|r");
+		VUHDO_Msg("  |cffB0E0E6Action:|r " .. tVisibleCount .. " test frames have been hidden");
+		VUHDO_Msg("  |cffB0E0E6Note:|r Use '/vd pixel test' to show them again");
+		VUHDO_Msg("|cffFFD100--- End of Pixel Test Frames ---|r");
+	else
+		VUHDO_Msg("|cffFFD100--- Pixel Test Frames ---|r");
+		VUHDO_Msg("  |cffB0E0E6Status:|r No test frames are currently visible");
+		VUHDO_Msg("|cffFFD100--- End of Pixel Test Frames ---|r");
+	end
 
 	return;
 
