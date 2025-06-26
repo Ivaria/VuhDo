@@ -1688,14 +1688,11 @@ do
 			elseif tSubCommand == "refresh" then
 				VUHDO_refreshPixelScale();
 				VUHDO_Msg("Pixel scale refreshed. Current scale: " .. VUHDO_getPixelScale());
-			elseif tSubCommand == "hide" then
-				VUHDO_hidePixelTestFrame();
 			else
 				VUHDO_Msg("Pixel-perfect testing commands:");
-				VUHDO_Msg("  /vd pixel test - Test pixel scale calculation and show test frames");
+				VUHDO_Msg("  /vd pixel test - Test pixel scale calculation");
 				VUHDO_Msg("  /vd pixel values - Test pixel rounding values");
 				VUHDO_Msg("  /vd pixel refresh - Refresh pixel scale");
-				VUHDO_Msg("  /vd pixel hide - Hide the test frames");
 			end
 
 		elseif aCommand == "?" or strfind(tCommandWord, "help") or aCommand == "" then
