@@ -145,9 +145,9 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 
 	if tSwatch then
 		tBuffPanel:SetPoint("TOPLEFT", "VuhDoBuffWatchMainFrame", "TOPLEFT", VUHDO_PANEL_OFFSET_X, -VUHDO_PANEL_OFFSET_Y);
-		tBuffPanel:SetWidth(tSwatch:GetWidth() + VUHDO_BUFF_PANEL_BASE_WIDTH);
-		tBuffPanel:SetHeight(VUHDO_IN_PANEL_HEIGHT);
-		_G[tBuffPanel:GetName() .. "BuffNameLabel"]:SetWidth(tBuffPanel:GetWidth() - 30);
+		VUHDO_PixelUtil.SetWidth(tBuffPanel, tSwatch:GetWidth() + VUHDO_BUFF_PANEL_BASE_WIDTH);
+		VUHDO_PixelUtil.SetHeight(tBuffPanel, VUHDO_IN_PANEL_HEIGHT);
+		VUHDO_PixelUtil.SetWidth(_G[tBuffPanel:GetName() .. "BuffNameLabel"], tBuffPanel:GetWidth() - 30);
 		tBuffPanel:Show();
 	end
 

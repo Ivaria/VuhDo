@@ -14,9 +14,9 @@ local function VUHDO_placeReadyIcon(aButton)
 		VUHDO_UIFrameFlashStop(tIcon);
 		tIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\icon_info");
 		tIcon:ClearAllPoints();
-		tIcon:SetPoint("LEFT", aButton:GetName(), "LEFT", -5, 0);
-		tIcon:SetWidth(16);
-		tIcon:SetHeight(16);
+		VUHDO_PixelUtil.SetPoint(tIcon, "LEFT", aButton:GetName(), "LEFT", -5, 0);
+		VUHDO_PixelUtil.SetWidth(tIcon, 16);
+		VUHDO_PixelUtil.SetHeight(tIcon, 16);
 		tIcon:SetAlpha(1);
 		tIcon:Show();
 	end

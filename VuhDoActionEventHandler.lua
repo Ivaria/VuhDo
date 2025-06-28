@@ -82,8 +82,8 @@ local function VUHDO_placePlayerIcon(aButton, anIconNo, anIndex)
 		anIcon:SetPoint("TOPLEFT", aButton:GetName(), "TOPLEFT", tCol * 14, -tRow * 14);
 	end
 
-	anIcon:SetWidth(16);
-	anIcon:SetHeight(16);
+	VUHDO_PixelUtil.SetWidth(anIcon, 16);
+	VUHDO_PixelUtil.SetHeight(anIcon, 16);
 	anIcon:SetAlpha(1);
 	anIcon:SetVertexColor(1, 1, 1);
 	anIcon:Show();
@@ -141,8 +141,8 @@ local function VUHDO_showPlayerIcons(aButton, aPanelNum)
 			.. ("Alliance" == (UnitFactionGroup(tUnit)) and "alliance" or "horde"));
 
 		VUHDO_placePlayerIcon(aButton, 3, 2);
-		tIcon:SetWidth(32);
-		tIcon:SetHeight(32);
+		VUHDO_PixelUtil.SetWidth(tIcon, 32);
+		VUHDO_PixelUtil.SetHeight(tIcon, 32);
 	end
 
 	if tInfo["class"] then

@@ -333,10 +333,10 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota, aAmountInc)
 				tOvershieldBarSize = tOvershieldBarSizePercent * tHealthBarWidth;
 				tOvershieldBarOffset = tOvershieldBarOffsetPercent * tHealthBarWidth;
 	
-				tOvershieldBar:SetPoint("TOPRIGHT", tHealthBar, "TOPRIGHT", tOvershieldBarOffset * -1, 0);
-				tOvershieldBar:SetPoint("BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", tOvershieldBarOffset * -1, 0);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tHealthBar, "TOPRIGHT", tOvershieldBarOffset * -1, 0);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", tOvershieldBarOffset * -1, 0);
 
-				tOvershieldBar:SetWidth(tOvershieldBarSize);
+				VUHDO_PixelUtil.SetSize(tOvershieldBar, tOvershieldBarSize, tHealthBarHeight);
 				tOvershieldBar:SetTexCoord(0, tOvershieldBarSize / tOvershieldBar.tileSize, 0, tHealthBarHeight / tOvershieldBar.tileSize);
 			elseif (not tIsInvertGrowth and tOrientationOvershield == "HORIZONTAL_INV") or
 				(tIsInvertGrowth and tOrientationOvershield == "HORIZONTAL") then
@@ -344,10 +344,10 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota, aAmountInc)
 				tOvershieldBarSize = tOvershieldBarSizePercent * tHealthBarWidth;
 				tOvershieldBarOffset = tOvershieldBarOffsetPercent * tHealthBarWidth;
 	
-				tOvershieldBar:SetPoint("TOPLEFT", tHealthBar, "TOPLEFT", tOvershieldBarOffset, 0);
-				tOvershieldBar:SetPoint("BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", tOvershieldBarOffset, 0);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tHealthBar, "TOPLEFT", tOvershieldBarOffset, 0);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", tOvershieldBarOffset, 0);
 
-				tOvershieldBar:SetWidth(tOvershieldBarSize);
+				VUHDO_PixelUtil.SetSize(tOvershieldBar, tOvershieldBarSize, tHealthBarHeight);
 				tOvershieldBar:SetTexCoord(0, tOvershieldBarSize / tOvershieldBar.tileSize, 0, tHealthBarHeight / tOvershieldBar.tileSize);
 			elseif (not tIsInvertGrowth and tOrientationOvershield == "VERTICAL") or
 				(tIsInvertGrowth and tOrientationOvershield == "VERTICAL_INV") then
@@ -355,20 +355,20 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota, aAmountInc)
 				tOvershieldBarSize = tOvershieldBarSizePercent * tHealthBarHeight;
 				tOvershieldBarOffset = tOvershieldBarOffsetPercent * tHealthBarHeight;
 	
-				tOvershieldBar:SetPoint("TOPLEFT", tHealthBar, "TOPLEFT", 0, tOvershieldBarOffset * -1);
-				tOvershieldBar:SetPoint("TOPRIGHT", tHealthBar, "TOPRIGHT", 0, tOvershieldBarOffset * -1);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPLEFT", tHealthBar, "TOPLEFT", 0, tOvershieldBarOffset * -1);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "TOPRIGHT", tHealthBar, "TOPRIGHT", 0, tOvershieldBarOffset * -1);
 
-				tOvershieldBar:SetHeight(tOvershieldBarSize);
+				VUHDO_PixelUtil.SetSize(tOvershieldBar, tHealthBarWidth, tOvershieldBarSize);
 				tOvershieldBar:SetTexCoord(0, tHealthBarWidth / tOvershieldBar.tileSize, 0, tOvershieldBarSize / tOvershieldBar.tileSize);
 			else -- (not tIsInvertGrowth and tOrientationOvershield == "VERTICAL_INV") or (tIsInvertGrowth and tOrientationOvershield == "VERTICAL")
 				-- VUHDO_STATUSBAR_TOP_TO_BOTTOM
 				tOvershieldBarSize = tOvershieldBarSizePercent * tHealthBarHeight;
 				tOvershieldBarOffset = tOvershieldBarOffsetPercent * tHealthBarHeight;
 	
-				tOvershieldBar:SetPoint("BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", 0, tOvershieldBarOffset);
-				tOvershieldBar:SetPoint("BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", 0, tOvershieldBarOffset);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", 0, tOvershieldBarOffset);
+				VUHDO_PixelUtil.SetPoint(tOvershieldBar, "BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", 0, tOvershieldBarOffset);
 
-				tOvershieldBar:SetHeight(tOvershieldBarSize);
+				VUHDO_PixelUtil.SetSize(tOvershieldBar, tHealthBarWidth, tOvershieldBarSize);
 				tOvershieldBar:SetTexCoord(0, tHealthBarWidth / tOvershieldBar.tileSize, 0, tOvershieldBarSize / tOvershieldBar.tileSize);
 			end
   	
@@ -457,10 +457,10 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 				tHealAbsorbBarSize = tHealAbsorbBarSizePercent * tHealthBarWidth;
 				tHealAbsorbBarOffset = tHealAbsorbBarOffsetPercent * tHealthBarWidth;
 	
-				tHealAbsorbBar:SetPoint("TOPRIGHT", tHealthBar, "TOPRIGHT", tHealAbsorbBarOffset * -1, 0);
-				tHealAbsorbBar:SetPoint("BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", tHealAbsorbBarOffset * -1, 0);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "TOPRIGHT", tHealthBar, "TOPRIGHT", tHealAbsorbBarOffset * -1, 0);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", tHealAbsorbBarOffset * -1, 0);
 
-				tHealAbsorbBar:SetWidth(tHealAbsorbBarSize);
+				VUHDO_PixelUtil.SetSize(tHealAbsorbBar, tHealAbsorbBarSize, tHealthBarHeight);
 				tHealAbsorbBar:SetTexCoord(0, tHealAbsorbBarSize / tHealAbsorbBar.tileSize, 0, tHealthBarHeight / tHealAbsorbBar.tileSize);
 			elseif (not tIsInvertGrowth and tOrientationHealAbsorb == "HORIZONTAL_INV") or
 				(tIsInvertGrowth and tOrientationHealAbsorb == "HORIZONTAL") then
@@ -468,10 +468,10 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 				tHealAbsorbBarSize = tHealAbsorbBarSizePercent * tHealthBarWidth;
 				tHealAbsorbBarOffset = tHealAbsorbBarOffsetPercent * tHealthBarWidth;
 	
-				tHealAbsorbBar:SetPoint("TOPLEFT", tHealthBar, "TOPLEFT", tHealAbsorbBarOffset, 0);
-				tHealAbsorbBar:SetPoint("BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", tHealAbsorbBarOffset, 0);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "TOPLEFT", tHealthBar, "TOPLEFT", tHealAbsorbBarOffset, 0);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", tHealAbsorbBarOffset, 0);
 
-				tHealAbsorbBar:SetWidth(tHealAbsorbBarSize);
+				VUHDO_PixelUtil.SetSize(tHealAbsorbBar, tHealAbsorbBarSize, tHealthBarHeight);
 				tHealAbsorbBar:SetTexCoord(0, tHealAbsorbBarSize / tHealAbsorbBar.tileSize, 0, tHealthBarHeight / tHealAbsorbBar.tileSize);
 			elseif (not tIsInvertGrowth and tOrientationHealAbsorb == "VERTICAL") or
 				(tIsInvertGrowth and tOrientationHealAbsorb == "VERTICAL_INV") then
@@ -479,20 +479,20 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 				tHealAbsorbBarSize = tHealAbsorbBarSizePercent * tHealthBarHeight;
 				tHealAbsorbBarOffset = tHealAbsorbBarOffsetPercent * tHealthBarHeight;
 	
-				tHealAbsorbBar:SetPoint("TOPLEFT", tHealthBar, "TOPLEFT", 0, tHealAbsorbBarOffset * -1);
-				tHealAbsorbBar:SetPoint("TOPRIGHT", tHealthBar, "TOPRIGHT", 0, tHealAbsorbBarOffset * -1);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "TOPLEFT", tHealthBar, "TOPLEFT", 0, tHealAbsorbBarOffset * -1);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "TOPRIGHT", tHealthBar, "TOPRIGHT", 0, tHealAbsorbBarOffset * -1);
 
-				tHealAbsorbBar:SetHeight(tHealAbsorbBarSize);
+				VUHDO_PixelUtil.SetSize(tHealAbsorbBar, tHealthBarWidth, tHealAbsorbBarSize);
 				tHealAbsorbBar:SetTexCoord(0, tHealthBarWidth / tHealAbsorbBar.tileSize, 0, tHealAbsorbBarSize / tHealAbsorbBar.tileSize);
 			else -- (not tIsInvertGrowth and tOrientationHealAbsorb == "VERTICAL_INV") or (tIsInvertGrowth and tOrientationHealAbsorb == "VERTICAL")
 				-- VUHDO_STATUSBAR_TOP_TO_BOTTOM
 				tHealAbsorbBarSize = tHealAbsorbBarSizePercent * tHealthBarHeight;
 				tHealAbsorbBarOffset = tHealAbsorbBarOffsetPercent * tHealthBarHeight;
 	
-				tHealAbsorbBar:SetPoint("BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", 0, tHealAbsorbBarOffset);
-				tHealAbsorbBar:SetPoint("BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", 0, tHealAbsorbBarOffset);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "BOTTOMLEFT", tHealthBar, "BOTTOMLEFT", 0, tHealAbsorbBarOffset);
+				VUHDO_PixelUtil.SetPoint(tHealAbsorbBar, "BOTTOMRIGHT", tHealthBar, "BOTTOMRIGHT", 0, tHealAbsorbBarOffset);
 
-				tHealAbsorbBar:SetHeight(tHealAbsorbBarSize);
+				VUHDO_PixelUtil.SetSize(tHealAbsorbBar, tHealthBarWidth, tHealAbsorbBarSize);
 				tHealAbsorbBar:SetTexCoord(0, tHealthBarWidth / tHealAbsorbBar.tileSize, 0, tHealAbsorbBarSize / tHealAbsorbBar.tileSize);
 			end
   	

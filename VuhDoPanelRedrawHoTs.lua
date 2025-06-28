@@ -117,8 +117,8 @@ function VUHDO_initHotBars()
 		if VUHDO_strempty(sHotConfig[sPanelNum]["SLOTS"][tCnt]) then
 			tHotBar:Hide();
 		else
-			tHotBar:SetWidth(sHotBarWidth);
-			tHotBar:SetHeight(sHotBarHeight);
+			VUHDO_PixelUtil.SetWidth(tHotBar, sHotBarWidth);
+			VUHDO_PixelUtil.SetHeight(tHotBar, sHotBarHeight);
 			tHotBar:SetValue(0);
 			tHotBar:SetVuhDoColor(sBarColors["HOT" .. tCnt]);
 			tHotBar:SetOrientation(tOrientation);
@@ -129,39 +129,39 @@ function VUHDO_initHotBars()
 
 	if tHotBarConfig["vertical"] then
 		if tBarsPos == 1 then -- edges
-			VUHDO_getHealthBar(sButton, 9):SetPoint("LEFT", sHealthBarName, "LEFT", 0, 0);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("CENTER", sHealthBarName, "CENTER",  0, 0);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("RIGHT", sHealthBarName, "RIGHT",  0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "LEFT", sHealthBarName, "LEFT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "CENTER", sHealthBarName, "CENTER",  0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "RIGHT", sHealthBarName, "RIGHT",  0, 0);
 		elseif tBarsPos == 2 then -- center
-			VUHDO_getHealthBar(sButton, 9):SetPoint("CENTER", sHealthBarName, "CENTER", -sHotBarWidth, 0);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("CENTER", sHealthBarName, "CENTER",  0, 0);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("CENTER", sHealthBarName, "CENTER", sHotBarWidth, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "CENTER", sHealthBarName, "CENTER", -sHotBarWidth, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "CENTER", sHealthBarName, "CENTER",  0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "CENTER", sHealthBarName, "CENTER", sHotBarWidth, 0);
 		elseif tBarsPos == 3 then -- top
-			VUHDO_getHealthBar(sButton, 9):SetPoint("LEFT", sHealthBarName, "LEFT", 0, 0);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("LEFT", sHealthBarName, "LEFT", sHotBarWidth, 0);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("LEFT", sHealthBarName, "LEFT", 2 * sHotBarWidth, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "LEFT", sHealthBarName, "LEFT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "LEFT", sHealthBarName, "LEFT", sHotBarWidth, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "LEFT", sHealthBarName, "LEFT", 2 * sHotBarWidth, 0);
 		else -- bottom
-			VUHDO_getHealthBar(sButton, 9):SetPoint("RIGHT", sHealthBarName, "RIGHT", 0, 0);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("RIGHT", sHealthBarName, "RIGHT", -sHotBarWidth, 0);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("RIGHT", sHealthBarName, "RIGHT", -2 * sHotBarWidth, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "RIGHT", sHealthBarName, "RIGHT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "RIGHT", sHealthBarName, "RIGHT", -sHotBarWidth, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "RIGHT", sHealthBarName, "RIGHT", -2 * sHotBarWidth, 0);
 		end
 	else
 		if tBarsPos == 1 then -- edges
-			VUHDO_getHealthBar(sButton, 9):SetPoint("TOP", sHealthBarName, "TOP", 0, 0);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("CENTER", sHealthBarName, "CENTER",  0, 0);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("BOTTOM", sHealthBarName, "BOTTOM",  0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "TOP", sHealthBarName, "TOP", 0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "CENTER", sHealthBarName, "CENTER",  0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "BOTTOM", sHealthBarName, "BOTTOM",  0, 0);
 		elseif tBarsPos == 2 then -- center
-			VUHDO_getHealthBar(sButton, 9):SetPoint("CENTER", sHealthBarName, "CENTER", 0, sHotBarHeight);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("CENTER", sHealthBarName, "CENTER",  0, 0);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("CENTER", sHealthBarName, "CENTER",  0, -sHotBarHeight);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "CENTER", sHealthBarName, "CENTER", 0, sHotBarHeight);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "CENTER", sHealthBarName, "CENTER",  0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "CENTER", sHealthBarName, "CENTER",  0, -sHotBarHeight);
 		elseif tBarsPos == 3 then -- top
-			VUHDO_getHealthBar(sButton, 9):SetPoint("TOP", sHealthBarName, "TOP", 0, 0);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("TOP", sHealthBarName, "TOP",  0, -sHotBarHeight);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("TOP", sHealthBarName, "TOP",  0, -2 * sHotBarHeight);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "TOP", sHealthBarName, "TOP", 0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "TOP", sHealthBarName, "TOP",  0, -sHotBarHeight);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "TOP", sHealthBarName, "TOP",  0, -2 * sHotBarHeight);
 		else -- bottom
-			VUHDO_getHealthBar(sButton, 9):SetPoint("BOTTOM", sHealthBarName, "BOTTOM", 0, 0);
-			VUHDO_getHealthBar(sButton, 10):SetPoint("BOTTOM", sHealthBarName, "BOTTOM",  0, sHotBarHeight);
-			VUHDO_getHealthBar(sButton, 11):SetPoint("BOTTOM", sHealthBarName, "BOTTOM",  0, 2 * sHotBarHeight);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 9), "BOTTOM", sHealthBarName, "BOTTOM", 0, 0);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 10), "BOTTOM", sHealthBarName, "BOTTOM",  0, sHotBarHeight);
+			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "BOTTOM", sHealthBarName, "BOTTOM",  0, 2 * sHotBarHeight);
 		end
 	end
 
@@ -201,6 +201,7 @@ local function VUHDO_initHotIcon(anIndex)
 		tTimer:Show();
 		tCounter:Hide();
 		tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\cluster2");
+		VUHDO_PixelUtil.ApplySettings(tHotIcon, true);
 	else
 		if tIconRadio == 4 then -- Text only
 			tHotIcon:Hide();

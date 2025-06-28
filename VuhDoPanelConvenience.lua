@@ -573,19 +573,19 @@ function VUHDO_refactorStatusbar(tBar)
 
 		if 1 == self["txOrient"] then -- VUHDO_STATUSBAR_LEFT_TO_RIGHT
 			self["texture"]:SetTexCoord(0, aValue, 0, 1);
-			self["texture"]:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", (aValue - 1) * self:GetWidth(), 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMRIGHT", self, "BOTTOMRIGHT", (aValue - 1) * self:GetWidth(), 0);
 
 		elseif 2 == self["txOrient"] then -- VUHDO_STATUSBAR_RIGHT_TO_LEFT
 			self["texture"]:SetTexCoord(1 - aValue, 1, 0, 1);
-			self["texture"]:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", (1 - aValue) * self:GetWidth(), 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMLEFT", self, "BOTTOMLEFT", (1 - aValue) * self:GetWidth(), 0);
 
 		elseif 3 == self["txOrient"] then -- VUHDO_STATUSBAR_BOTTOM_TO_TOP
 			self["texture"]:SetTexCoord(0, 1, 1 - aValue, 1);
-			self["texture"]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, (aValue - 1) * self:GetHeight());
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPLEFT", self, "TOPLEFT", 0, (aValue - 1) * self:GetHeight());
 
 		else --if (VUHDO_STATUSBAR_TOP_TO_BOTTOM == self["txOrient"]) then
 			self["texture"]:SetTexCoord(0, 1, 0, aValue);
-			self["texture"]:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, (1 - aValue) * self:GetHeight());
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMLEFT", self, "BOTTOMLEFT", 0, (1 - aValue) * self:GetHeight());
 		end
 	end
 
@@ -610,26 +610,26 @@ function VUHDO_refactorStatusbar(tBar)
 		if 1 == self["txOrient"] then -- VUHDO_STATUSBAR_LEFT_TO_RIGHT
 			tWidth = self:GetWidth();
 			self["texture"]:SetTexCoord(0, tValue, 0, 1);
-			self["texture"]:SetPoint("TOPLEFT", self, "TOPLEFT", aMinValue * tWidth, 0);
-			self["texture"]:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", (aMaxValue - 1) * tWidth, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPLEFT", self, "TOPLEFT", aMinValue * tWidth, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMRIGHT", self, "BOTTOMRIGHT", (aMaxValue - 1) * tWidth, 0);
 
 		elseif 2 == self["txOrient"] then -- VUHDO_STATUSBAR_RIGHT_TO_LEFT
 			tWidth = self:GetWidth();
 			self["texture"]:SetTexCoord(1 - tValue, 1, 0, 1);
-			self["texture"]:SetPoint("TOPRIGHT", self, "TOPRIGHT", -aMinValue * tWidth, 0);
-			self["texture"]:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", (1 - aMaxValue) * tWidth, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPRIGHT", self, "TOPRIGHT", -aMinValue * tWidth, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMLEFT", self, "BOTTOMLEFT", (1 - aMaxValue) * tWidth, 0);
 
 		elseif 3 == self["txOrient"] then -- VUHDO_STATUSBAR_BOTTOM_TO_TOP
 			tHeight = self:GetHeight();
 			self["texture"]:SetTexCoord(0, 1, 1 - tValue, 1);
-			self["texture"]:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, aMinValue * tHeight);
-			self["texture"]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, (aMaxValue - 1) * tHeight);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, aMinValue * tHeight);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPLEFT", self, "TOPLEFT", 0, (aMaxValue - 1) * tHeight);
 
 		else --if (VUHDO_STATUSBAR_TOP_TO_BOTTOM == self["txOrient"]) then
 			tHeight = self:GetHeight();
 			self["texture"]:SetTexCoord(0, 1, 0, tValue);
-			self["texture"]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -aMinValue * tHeight);
-			self["texture"]:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 0, (1 - aMaxValue) * tHeight);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPRIGHT", self, "TOPRIGHT", 0, -aMinValue * tHeight);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMLEFT", self, "BOTTOMLEFT", 0, (1 - aMaxValue) * tHeight);
 		end
 	end
 
@@ -645,16 +645,16 @@ function VUHDO_refactorStatusbar(tBar)
 		self["texture"]:ClearAllPoints();
 
 		if ("HORIZONTAL" == anOrientation) then
-			self["texture"]:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPLEFT", self, "TOPLEFT", 0, 0);
 			self["txOrient"] = VUHDO_STATUSBAR_LEFT_TO_RIGHT;
 		elseif ("HORIZONTAL_INV" == anOrientation) then
-			self["texture"]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPRIGHT", self, "TOPRIGHT", 0, 0);
 			self["txOrient"] = VUHDO_STATUSBAR_RIGHT_TO_LEFT;
 		elseif ("VERTICAL" == anOrientation) then
-			self["texture"]:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0);
 			self["txOrient"] = VUHDO_STATUSBAR_BOTTOM_TO_TOP;
 		else -- VERTICAL_INV
-			self["texture"]:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(self["texture"], "TOPRIGHT", self, "TOPRIGHT", 0, 0);
 			self["txOrient"] = VUHDO_STATUSBAR_TOP_TO_BOTTOM;
 		end
 		self:SetValue(0); -- Wichtig, wenn Units nicht existieren und keine bouquets gecheckt werden

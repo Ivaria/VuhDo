@@ -123,7 +123,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			tX, tY = VUHDO_getHealButtonPos(tColIdx, tGroupIdx, aPanelNum);
 			if VUHDO_isDifferentButtonPoint(tButton, tX, -tY) then
 				tButton:Hide();-- for clearing secure handler mouse wheel bindings
-				tButton:SetPoint("TOPLEFT", tPanelName, "TOPLEFT", tX, -tY);
+				VUHDO_PixelUtil.SetPoint(tButton, "TOPLEFT", tPanelName, "TOPLEFT", tX, -tY);
 			end
 
 			VUHDO_addUnitButton(tButton, aPanelNum);
@@ -151,8 +151,8 @@ end
 
 --
 local function VUHDO_refreshInitPanel(aPanel, aPanelNum)
-	aPanel:SetHeight(VUHDO_getHealPanelHeight(aPanelNum));
-	aPanel:SetWidth(VUHDO_getHealPanelWidth(aPanelNum));
+	VUHDO_PixelUtil.SetHeight(aPanel, VUHDO_getHealPanelHeight(aPanelNum));
+	VUHDO_PixelUtil.SetWidth(aPanel, VUHDO_getHealPanelWidth(aPanelNum));
 	aPanel:StopMovingOrSizing();
 	aPanel["isMoving"] = false;
 end

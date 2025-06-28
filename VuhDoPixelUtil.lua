@@ -334,7 +334,7 @@ function VUHDO_testPixelPerfect()
 			edgeFile = "Interface\\Buttons\\WHITE8x8",
 			tile = true,
 			tileSize = 8,
-			edgeSize = 1,
+			edgeSize = 2,
 			insets = { left = 0, right = 0, top = 0, bottom = 0 }
 		});
 
@@ -346,7 +346,7 @@ function VUHDO_testPixelPerfect()
 
 	VUHDO_Msg("  |cffB0E0E6Test Frames Created:|r " .. tNumFrames .. " black squares (" .. tFrameSize .. "x" .. tFrameSize .. ") with grey borders");
 	VUHDO_Msg("  |cffB0E0E6Position:|r Center of screen in a row (each draggable)");
-	VUHDO_Msg("  |cffB0E0E6Border Width:|r 1 pixel (pixel-perfect)");
+	VUHDO_Msg("  |cffB0E0E6Border Width:|r 2 pixels (pixel-perfect)");
 	VUHDO_Msg("  |cffB0E0E6Spacing:|r " .. tSpacing .. " pixels between frames");
 
 	VUHDO_Msg("|cffFFD100--- End of Pixel-Perfect Testing ---|r");

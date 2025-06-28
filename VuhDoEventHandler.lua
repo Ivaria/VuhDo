@@ -813,7 +813,7 @@ end
 --
 local tName;
 local tProfile;
-local function VUHDO_loadCurrentProfile()
+function VUHDO_loadCurrentProfile()
 
 	if not VUHDO_CONFIG then
 		return;
@@ -963,7 +963,7 @@ local function VUHDO_init()
 
 	if VuhDoNewOptionsTabbedFrame then
 		VuhDoNewOptionsTabbedFrame:ClearAllPoints();
-		VuhDoNewOptionsTabbedFrame:SetPoint("CENTER", "UIParent", "CENTER", 0, 0);
+		VUHDO_PixelUtil.SetPoint(VuhDoNewOptionsTabbedFrame, "CENTER", "UIParent", "CENTER", 0, 0);
 	end
 
 	VUHDO_initSharedMedia();
