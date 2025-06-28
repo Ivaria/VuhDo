@@ -235,11 +235,10 @@ local function VUHDO_initHotIcon(anIndex)
 
 		tTimer:SetShown(tHotColor["countdownMode"] ~= 0);
 
-		tChargeIcon:SetWidth(tHotIcon:GetWidth() + 4);
-		tChargeIcon:SetHeight(tHotIcon:GetHeight() + 4);
+		VUHDO_PixelUtil.SetSize(tChargeIcon, tHotIcon:GetWidth() + 4, tHotIcon:GetHeight() + 4);
 		tChargeIcon:SetVertexColor(tHotColor["R"] * 2, tHotColor["G"] * 2, tHotColor["B"] * 2);
 		tChargeIcon:ClearAllPoints();
-		tChargeIcon:SetPoint("TOPLEFT", tHotIcon:GetName(), "TOPLEFT", -2, 2);
+		VUHDO_PixelUtil.SetPoint(tChargeIcon, "TOPLEFT", tHotIcon:GetName(), "TOPLEFT", -2, 2);
 
 		if tHotColor["isClock"] then
 			local tCd = VUHDO_getOrCreateCooldown(VUHDO_getBarIconFrame(sButton, anIndex), sButton, anIndex);
@@ -270,37 +269,36 @@ local function VUHDO_initHotPosOffset(anIndex)
 	tHotPos = tHotConfig["radioValue"];
 
 	if tHotPos == 2 then
-		tHotIcon:SetPoint("LEFT", sHealthBarName, "LEFT", tOffset, 0); -- li
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "LEFT", sHealthBarName, "LEFT", tOffset, 0); -- li
 	elseif tHotPos == 3 then
-		tHotIcon:SetPoint("RIGHT", sHealthBarName, "RIGHT", -tOffset, 0); -- ri
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "RIGHT", sHealthBarName, "RIGHT", -tOffset, 0); -- ri
 	elseif tHotPos == 1 then
-		tHotIcon:SetPoint("RIGHT", sButton:GetName(), "LEFT", -tOffset, 0); -- lo
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "RIGHT", sButton:GetName(), "LEFT", -tOffset, 0); -- lo
 	elseif tHotPos == 4 then
-		tHotIcon:SetPoint("LEFT", sButton:GetName(), "RIGHT", tOffset, 0); -- ro
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "LEFT", sButton:GetName(), "RIGHT", tOffset, 0); -- ro
 	elseif tHotPos == 5 then
-		tHotIcon:SetPoint("TOPLEFT", sHealthBarName, "BOTTOMLEFT", tOffset, sHotIconSize * 0.5); -- lb
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPLEFT", sHealthBarName, "BOTTOMLEFT", tOffset, sHotIconSize * 0.5); -- lb
 	elseif tHotPos == 6 then
-		tHotIcon:SetPoint("TOPRIGHT", sHealthBarName, "BOTTOMRIGHT", -tOffset, sHotIconSize * 0.5); -- rb
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPRIGHT", sHealthBarName, "BOTTOMRIGHT", -tOffset, sHotIconSize * 0.5); -- rb
 	elseif tHotPos == 7 then
-		tHotIcon:SetPoint("TOPLEFT", sButton:GetName(), "BOTTOMLEFT", tOffset, 0); -- lu
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPLEFT", sButton:GetName(), "BOTTOMLEFT", tOffset, 0); -- lu
 	elseif tHotPos == 8 then
-		tHotIcon:SetPoint("TOPRIGHT", sButton:GetName(), "BOTTOMRIGHT", -tOffset, 0); -- ru
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPRIGHT", sButton:GetName(), "BOTTOMRIGHT", -tOffset, 0); -- ru
 	elseif tHotPos == 9 then
-		tHotIcon:SetPoint("TOPLEFT", sHealthBarName, "TOPLEFT", tOffset, sBarScaling["barHeight"] / 3); -- la
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPLEFT", sHealthBarName, "TOPLEFT", tOffset, sBarScaling["barHeight"] / 3); -- la
 	elseif tHotPos == 10 then
-		tHotIcon:SetPoint("TOPLEFT", sHealthBarName, "TOPLEFT", tOffset, 0); -- lu corner
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPLEFT", sHealthBarName, "TOPLEFT", tOffset, 0); -- lu corner
 	elseif tHotPos == 12 then
-		tHotIcon:SetPoint("BOTTOMLEFT", sHealthBarName, "BOTTOMLEFT", tOffset, 0); -- lb corner
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOMLEFT", sHealthBarName, "BOTTOMLEFT", tOffset, 0); -- lb corner
 	elseif tHotPos == 11 then
-		tHotIcon:SetPoint("BOTTOMRIGHT", sHealthBarName, "BOTTOMRIGHT", -tOffset, 0); -- rb corner
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOMRIGHT", sHealthBarName, "BOTTOMRIGHT", -tOffset, 0); -- rb corner
 	elseif tHotPos == 13 then
-		tHotIcon:SetPoint("BOTTOMLEFT", sButton:GetName(), "BOTTOMLEFT", tOffset, 0); -- lb
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOMLEFT", sButton:GetName(), "BOTTOMLEFT", tOffset, 0); -- lb
 	elseif tHotPos == 14 then
-		tHotIcon:SetPoint("BOTTOMRIGHT", sButton:GetName(), "BOTTOMRIGHT", -tOffset, 0); -- rb
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOMRIGHT", sButton:GetName(), "BOTTOMRIGHT", -tOffset, 0); -- rb
 	end
 
-	tHotIcon:SetWidth(sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1));
-	tHotIcon:SetHeight(sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1));
+	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1), sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1));
 	VUHDO_getBarIconFrame(sButton, anIndex):SetScale(1);
 
 end
@@ -321,31 +319,30 @@ local function VUHDO_initHotPosSides(anIndex)
 	tHotIcon:ClearAllPoints();
 
 	if anIndex == 1 then
-		tHotIcon:SetPoint("LEFT", sHealthBarName, "LEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "LEFT", sHealthBarName, "LEFT", 0, 0);
 	elseif anIndex == 2 then
-		if tIsBothTop then tHotIcon:SetPoint("TOP",  sHealthBarName, "TOP", -sBarScaling["barWidth"] * 0.2, 0);
-		else tHotIcon:SetPoint("TOP",  sHealthBarName, "TOP", 0, 0); end
+		if tIsBothTop then VUHDO_PixelUtil.SetPoint(tHotIcon, "TOP",  sHealthBarName, "TOP", -sBarScaling["barWidth"] * 0.2, 0);
+		else VUHDO_PixelUtil.SetPoint(tHotIcon, "TOP",  sHealthBarName, "TOP", 0, 0); end
 	elseif anIndex == 9 then
-		if tIsBothTop then tHotIcon:SetPoint("TOP",  sHealthBarName, "TOP", sBarScaling["barWidth"] * 0.2, 0);
-		else tHotIcon:SetPoint("TOP",  sHealthBarName, "TOP", 0, 0); end
+		if tIsBothTop then VUHDO_PixelUtil.SetPoint(tHotIcon, "TOP",  sHealthBarName, "TOP", sBarScaling["barWidth"] * 0.2, 0);
+		else VUHDO_PixelUtil.SetPoint(tHotIcon, "TOP",  sHealthBarName, "TOP", 0, 0); end
 	elseif anIndex == 3 then
-		tHotIcon:SetPoint("RIGHT",  sHealthBarName, "RIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "RIGHT",  sHealthBarName, "RIGHT", 0, 0);
 	elseif anIndex == 4 then
-		if tIsBothBottom then tHotIcon:SetPoint("BOTTOM", sHealthBarName, "BOTTOM", sBarScaling["barWidth"] * 0.2, 0);
-		else tHotIcon:SetPoint("BOTTOM", sHealthBarName, "BOTTOM", 0, 0); end
+		if tIsBothBottom then VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOM", sHealthBarName, "BOTTOM", sBarScaling["barWidth"] * 0.2, 0);
+		else VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOM", sHealthBarName, "BOTTOM", 0, 0); end
 	elseif anIndex == 5 then
-		if tIsBothBottom then tHotIcon:SetPoint("BOTTOM", sHealthBarName, "BOTTOM", -sBarScaling["barWidth"] * 0.2, 0);
-		else tHotIcon:SetPoint("BOTTOM", sHealthBarName, "BOTTOM", 0, 0); end
+		if tIsBothBottom then VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOM", sHealthBarName, "BOTTOM", -sBarScaling["barWidth"] * 0.2, 0);
+		else VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOM", sHealthBarName, "BOTTOM", 0, 0); end
 	elseif anIndex == 10 then
-		tHotIcon:SetPoint("CENTER", sHealthBarName, "CENTER", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", 0, 0);
 	elseif anIndex == 11 then
-		tHotIcon:SetPoint("CENTER", sHealthBarName, "CENTER", -sBarScaling["barWidth"] * 0.2, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", -sBarScaling["barWidth"] * 0.2, 0);
 	elseif anIndex == 12 then
-		tHotIcon:SetPoint("CENTER", sHealthBarName, "CENTER", sBarScaling["barWidth"] * 0.2, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", sBarScaling["barWidth"] * 0.2, 0);
 	end
 
-	tHotIcon:SetWidth(sHotIconSize * 0.5);
-	tHotIcon:SetHeight(sHotIconSize * 0.5);
+	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * 0.5, sHotIconSize * 0.5);
 	VUHDO_getBarIconFrame(sButton, anIndex):SetScale(tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1);
 
 end
@@ -359,27 +356,26 @@ local function VUHDO_initHotPosEdges(anIndex)
 	tHotIcon:ClearAllPoints();
 
 	if anIndex == 1 then
-		tHotIcon:SetPoint("TOPLEFT", sHealthBarName, "TOPLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPLEFT", sHealthBarName, "TOPLEFT", 0, 0);
 	elseif anIndex == 2 then
-		tHotIcon:SetPoint("TOPRIGHT", sHealthBarName, "TOPRIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOPRIGHT", sHealthBarName, "TOPRIGHT", 0, 0);
 	elseif anIndex == 3 then
-		tHotIcon:SetPoint("BOTTOMLEFT", sHealthBarName, "BOTTOMLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOMLEFT", sHealthBarName, "BOTTOMLEFT", 0, 0);
 	elseif anIndex == 4 then
-		tHotIcon:SetPoint("BOTTOMRIGHT", sHealthBarName, "BOTTOMRIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOMRIGHT", sHealthBarName, "BOTTOMRIGHT", 0, 0);
 	elseif anIndex == 5 then
-		tHotIcon:SetPoint("BOTTOM", sHealthBarName, "BOTTOM", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "BOTTOM", sHealthBarName, "BOTTOM", 0, 0);
 	elseif anIndex == 9 then
-		tHotIcon:SetPoint("TOP", sHealthBarName, "TOP", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "TOP", sHealthBarName, "TOP", 0, 0);
 	elseif anIndex == 10 then
-		tHotIcon:SetPoint("CENTER", sHealthBarName, "CENTER", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", 0, 0);
 	elseif anIndex == 11 then
-		tHotIcon:SetPoint("CENTER", sHealthBarName, "CENTER", -sBarScaling["barWidth"] * 0.2, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", -sBarScaling["barWidth"] * 0.2, 0);
 	elseif anIndex == 12 then
-		tHotIcon:SetPoint("CENTER", sHealthBarName, "CENTER", sBarScaling["barWidth"] * 0.2, 0);
+		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", sBarScaling["barWidth"] * 0.2, 0);
 	end
 
-	tHotIcon:SetWidth(sHotIconSize * 0.5);
-	tHotIcon:SetHeight(sHotIconSize * 0.5);
+	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * 0.5, sHotIconSize * 0.5);
 	VUHDO_getBarIconFrame(sButton, anIndex):SetScale(sHotConfig[sPanelNum]["SLOTCFG"]["" .. anIndex]["scale"] or 1);
 
 end
