@@ -355,11 +355,21 @@ function VUHDO_testPixelPerfectSpacing()
 			VUHDO_Msg("    Color: R=" .. (tBorder["R"] or 0) .. " G=" .. (tBorder["G"] or 0) .. " B=" .. (tBorder["B"] or 0) .. " A=" .. (tBorder["O"] or 0));
 
 			tNonIntegerValues = {};
-			if tRowSpacing ~= math.floor(tRowSpacing) then tinsert(tNonIntegerValues, "rowSpacing"); end
-			if tColumnSpacing ~= math.floor(tColumnSpacing) then tinsert(tNonIntegerValues, "columnSpacing"); end
-			if tBorderGapX ~= math.floor(tBorderGapX) then tinsert(tNonIntegerValues, "borderGapX"); end
-			if tBorderGapY ~= math.floor(tBorderGapY) then tinsert(tNonIntegerValues, "borderGapY"); end
-			if tHeaderSpacing ~= math.floor(tHeaderSpacing) then tinsert(tNonIntegerValues, "headerSpacing"); end
+			if tRowSpacing ~= math.floor(tRowSpacing) then
+				tinsert(tNonIntegerValues, "rowSpacing");
+			end
+			if tColumnSpacing ~= math.floor(tColumnSpacing) then
+				tinsert(tNonIntegerValues, "columnSpacing");
+			end
+			if tBorderGapX ~= math.floor(tBorderGapX) then
+				tinsert(tNonIntegerValues, "borderGapX");
+			end
+			if tBorderGapY ~= math.floor(tBorderGapY) then
+				tinsert(tNonIntegerValues, "borderGapY");
+			end
+			if tHeaderSpacing ~= math.floor(tHeaderSpacing) then
+				tinsert(tNonIntegerValues, "headerSpacing");
+			end
 
 			if #tNonIntegerValues > 0 then
 				VUHDO_Msg("  |cffFF4444[!] Warning:|r Non-integer values found: " .. table.concat(tNonIntegerValues, ", "));
