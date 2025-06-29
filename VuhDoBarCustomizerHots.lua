@@ -1610,3 +1610,46 @@ function VUHDO_updateAllHoTs(aClustersOnly)
 	end
 
 end
+
+
+
+--
+local tUnitInfo;
+function VUHDO_updateUnitHoTs(aUnit)
+
+	if not VUHDO_RAID then
+		return;
+	end
+
+	tUnitInfo = VUHDO_RAID[aUnit];
+
+	if tUnitInfo then
+		VUHDO_updateHots(aUnit, tUnitInfo);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllHoTs(aPriority)
+
+	if sIsSuspended then
+		return;
+	end
+
+	VUHDO_updateSwiftmendCooldown();
+
+	if not VUHDO_RAID then
+		return;
+	end
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_HOTS, tUnit, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	end
+
+	return;
+
+end

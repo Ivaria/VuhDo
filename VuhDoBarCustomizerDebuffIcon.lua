@@ -23,6 +23,7 @@ local VUHDO_getBarIcon;
 local VUHDO_getBarIconName;
 local VUHDO_getShieldPerc;
 local VUHDO_backColor;
+local VUHDO_updateHealthBarsFor;
 
 local VUHDO_PANEL_SETUP;
 local VUHDO_CONFIG;
@@ -44,6 +45,9 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 	VUHDO_getShieldPerc = _G["VUHDO_getShieldPerc"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_backColor = _G["VUHDO_backColor"];
+	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+
+	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
@@ -250,6 +254,7 @@ end
 --
 local tNow;
 function VUHDO_updateAllDebuffIcons(anIsFrequent)
+
 	tNow = GetTime();
 
 	for tUnit, tAllDebuffInfos in pairs(VUHDO_DEBUFF_ICONS) do
@@ -260,8 +265,54 @@ function VUHDO_updateAllDebuffIcons(anIsFrequent)
 				end
 			end
 		end
-
 	end
+
+end
+
+
+
+--
+local tNow;
+local tUnitDebuffInfos;
+function VUHDO_updateUnitDebuffIcons(aUnit, anIsFrequent)
+
+	if not aUnit or not VUHDO_DEBUFF_ICONS then
+		return;
+	end
+
+	tNow = GetTime();
+
+	tUnitDebuffInfos = VUHDO_DEBUFF_ICONS[aUnit];
+
+	if tUnitDebuffInfos then
+		for tIndex, tDebuffInfo in pairs(tUnitDebuffInfos) do
+			if not anIsFrequent or tDebuffInfo[2] + 1.21 >= tNow then
+				for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+					VUHDO_animateDebuffIcon(tButton, tDebuffInfo, tNow, tIndex + 39, false, aUnit);
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllDebuffIcons(anIsFrequent, aPriority)
+
+	if not VUHDO_DEBUFF_ICONS then
+		return;
+	end
+
+	for tUnit, _ in pairs(VUHDO_DEBUFF_ICONS) do
+		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_DEBUFF_ICONS, tUnit, anIsFrequent, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	end
+
+	return;
+
 end
 
 
@@ -477,4 +528,3 @@ function VUHDO_getDebuffIcons()
 	return VUHDO_DEBUFF_ICONS;
 
 end
-
