@@ -283,8 +283,8 @@ function VUHDO_reloadBuffPanel()
 	VuhDoBuffWatchMainFrame:ClearAllPoints();
 	local tPosition = VUHDO_BUFF_SETTINGS["CONFIG"]["POSITION"];
 	VUHDO_PixelUtil.SetPoint(VuhDoBuffWatchMainFrame, tPosition["point"], "UIParent", tPosition["relativePoint"], tPosition["x"], tPosition["y"]);
-	VuhDoBuffWatchMainFrame:SetWidth(VUHDO_PANEL_WIDTH + VUHDO_BUFF_PANEL_GAP_X);
-	VuhDoBuffWatchMainFrame:SetHeight(VUHDO_PANEL_HEIGHT + VUHDO_BUFF_PANEL_GAP_TOP);
+	VUHDO_PixelUtil.SetWidth(VuhDoBuffWatchMainFrame, VUHDO_PANEL_WIDTH + VUHDO_BUFF_PANEL_GAP_X);
+	VUHDO_PixelUtil.SetHeight(VuhDoBuffWatchMainFrame, VUHDO_PANEL_HEIGHT + VUHDO_BUFF_PANEL_GAP_TOP);
 	VuhDoBuffWatchMainFrame:SetBackdropColor(VUHDO_backColor(VUHDO_BUFF_SETTINGS["CONFIG"]["PANEL_BG_COLOR"]));
 	VuhDoBuffWatchMainFrame:SetBackdropBorderColor(VUHDO_backColor(VUHDO_BUFF_SETTINGS["CONFIG"]["PANEL_BORDER_COLOR"]));
 	VuhDoBuffWatchMainFrame:SetScale(VUHDO_BUFF_SETTINGS["CONFIG"]["SCALE"]);

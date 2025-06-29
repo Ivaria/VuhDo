@@ -181,7 +181,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 			if not InCombatLockdown() then
 				tManaBarHeight = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["manaBarHeight"];
-				tManaBar:SetHeight(tManaBarHeight);
+				VUHDO_PixelUtil.SetHeight(tManaBar, tManaBarHeight);
 
 				tRegularHeight = tButton["regularHeight"];
 

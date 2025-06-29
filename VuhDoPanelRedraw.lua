@@ -410,11 +410,11 @@ local function VUHDO_initManaBar(aButton, aManaBar, aWidth, anIsForceBar)
 		VUHDO_PixelUtil.SetHeight(aManaBar, tManaHeight);
 
 		if (VUHDO_getHealthBar(aButton, 1):GetHeight() == 0) then
-			VUHDO_getHealthBar(aButton, 1):SetHeight(sBarHeight);
+			VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 1), sBarHeight);
 		end
 	else
 		aManaBar:Hide();
-		VUHDO_getHealthBar(aButton, 1):SetHeight(sBarHeight + sManaBarHeight);
+		VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 1), sBarHeight + sManaBarHeight);
 	end
 
 	if not anIsForceBar then
@@ -521,7 +521,7 @@ local function VUHDO_initBarTexts(aButton, aHealthBar, aWidth)
 		tLifeText:Show();
 	end
 
-	tTextPanel:SetHeight(tNameText:GetHeight() + tAddHeight);
+	VUHDO_PixelUtil.SetHeight(tTextPanel, tNameText:GetHeight() + tAddHeight);
 	VUHDO_PixelUtil.SetWidth(tTextPanel, aWidth);
 
 	sPanelSetup["ID_TEXT"]["_spacing"] = tTextPanel:GetHeight(); -- internal marker
