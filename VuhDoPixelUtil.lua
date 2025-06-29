@@ -15,6 +15,7 @@ local sUIScale;
 local sLastKnownScale = nil;
 
 
+
 --
 function VUHDO_getPixelScale()
 
@@ -203,7 +204,10 @@ end
 
 
 --
-local tBackdrop;
+local tBackdropCache = { };
+local tInsetsCache = { };
+local tValueLeft, tValueRight, tValueTop, tValueBottom;
+local tLeftFloor, tRightFloor, tTopFloor, tBottomFloor;
 function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 
 	if not aFrame or not aFrame.SetBackdrop then
@@ -211,28 +215,44 @@ function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 	end
 
 	if aBackdropInfo then
-		tBackdrop = { };
+		for tKey in pairs(tBackdropCache) do
+			tBackdropCache[tKey] = nil;
+		end
 
 		for tKey, tValue in pairs(aBackdropInfo) do
 			if tKey == "edgeSize" then
-				if tValue == math.floor(tValue) then
-					tBackdrop[tKey] = tValue;
+				if tValue == floor(tValue) then
+					tBackdropCache[tKey] = tValue;
 				else
-					tBackdrop[tKey] = VUHDO_roundToPixel(tValue);
+					tBackdropCache[tKey] = VUHDO_roundToPixel(tValue);
 				end
 			elseif tKey == "insets" and type(tValue) == "table" then
-				tBackdrop[tKey] = {
-					left = (tValue.left or 0) == math.floor(tValue.left or 0) and (tValue.left or 0) or VUHDO_roundToPixel(tValue.left or 0),
-					right = (tValue.right or 0) == math.floor(tValue.right or 0) and (tValue.right or 0) or VUHDO_roundToPixel(tValue.right or 0),
-					top = (tValue.top or 0) == math.floor(tValue.top or 0) and (tValue.top or 0) or VUHDO_roundToPixel(tValue.top or 0),
-					bottom = (tValue.bottom or 0) == math.floor(tValue.bottom or 0) and (tValue.bottom or 0) or VUHDO_roundToPixel(tValue.bottom or 0),
-				};
+				for tKey in pairs(tInsetsCache) do
+					tInsetsCache[tKey] = nil;
+				end
+
+				tValueLeft = tValue["left"] or 0;
+				tValueRight = tValue["right"] or 0;
+				tValueTop = tValue["top"] or 0;
+				tValueBottom = tValue["bottom"] or 0;
+
+				tLeftFloor = floor(tValueLeft);
+				tRightFloor = floor(tValueRight);
+				tTopFloor = floor(tValueTop);
+				tBottomFloor = floor(tValueBottom);
+
+				tInsetsCache["left"] = tValueLeft == tLeftFloor and tValueLeft or VUHDO_roundToPixel(tValueLeft);
+				tInsetsCache["right"] = tValueRight == tRightFloor and tValueRight or VUHDO_roundToPixel(tValueRight);
+				tInsetsCache["top"] = tValueTop == tTopFloor and tValueTop or VUHDO_roundToPixel(tValueTop);
+				tInsetsCache["bottom"] = tValueBottom == tBottomFloor and tValueBottom or VUHDO_roundToPixel(tValueBottom);
+
+				tBackdropCache[tKey] = tInsetsCache;
 			else
-				tBackdrop[tKey] = tValue;
+				tBackdropCache[tKey] = tValue;
 			end
 		end
 
-		aFrame:SetBackdrop(tBackdrop);
+		aFrame:SetBackdrop(tBackdropCache);
 	end
 
 	return;
@@ -286,12 +306,12 @@ function VUHDO_testPixelPerfect()
 		VUHDO_PixelUtil.SetSize(tTestFrames[tIndex], tFrameSize, tFrameSize);
 
 		VUHDO_PixelUtil.ApplyBackdrop(tTestFrames[tIndex], {
-			bgFile = "Interface\\Buttons\\WHITE8x8",
-			edgeFile = "Interface\\Buttons\\WHITE8x8",
-			tile = true,
-			tileSize = 8,
-			edgeSize = 2,
-			insets = { left = 0, right = 0, top = 0, bottom = 0 }
+			["bgFile"] = "Interface\\Buttons\\WHITE8x8",
+			["edgeFile"] = "Interface\\Buttons\\WHITE8x8",
+			["tile"] = true,
+			["tileSize"] = 8,
+			["edgeSize"] = 2,
+			["insets"] = { ["left"] = 0, ["right"] = 0, ["top"] = 0, ["bottom"] = 0 }
 		});
 
 		tTestFrames[tIndex]:SetBackdropColor(0, 0, 0, 1); -- black background
@@ -317,13 +337,14 @@ local tColumnSpacing;
 local tBorderGapX;
 local tBorderGapY;
 local tHeaderSpacing;
-local tNonIntegerValues;
+local tNonIntegerValues = { };
 function VUHDO_testPixelPerfectSpacing()
 
 	VUHDO_Msg("|cffFFD100--- Pixel-Perfect Spacing Test ---|r");
 
 	if not VUHDO_PANEL_SETUP then
 		VUHDO_Msg("|cffFF4444Error:|r Panel setup not loaded.");
+
 		return;
 	end
 
@@ -352,20 +373,23 @@ function VUHDO_testPixelPerfectSpacing()
 			VUHDO_Msg("    Insets: " .. (tBorder["insets"] or 0) .. " (used: " .. VUHDO_getPixelPerfectBorderInsets(tPanelNum) .. ")");
 			VUHDO_Msg("    Color: R=" .. (tBorder["R"] or 0) .. " G=" .. (tBorder["G"] or 0) .. " B=" .. (tBorder["B"] or 0) .. " A=" .. (tBorder["O"] or 0));
 
-			tNonIntegerValues = {};
-			if tRowSpacing ~= math.floor(tRowSpacing) then
+			for tKey, _ in pairs(tNonIntegerValues) do
+				tNonIntegerValues[tKey] = nil;
+			end
+
+			if tRowSpacing ~= floor(tRowSpacing) then
 				tinsert(tNonIntegerValues, "rowSpacing");
 			end
-			if tColumnSpacing ~= math.floor(tColumnSpacing) then
+			if tColumnSpacing ~= floor(tColumnSpacing) then
 				tinsert(tNonIntegerValues, "columnSpacing");
 			end
-			if tBorderGapX ~= math.floor(tBorderGapX) then
+			if tBorderGapX ~= floor(tBorderGapX) then
 				tinsert(tNonIntegerValues, "borderGapX");
 			end
-			if tBorderGapY ~= math.floor(tBorderGapY) then
+			if tBorderGapY ~= floor(tBorderGapY) then
 				tinsert(tNonIntegerValues, "borderGapY");
 			end
-			if tHeaderSpacing ~= math.floor(tHeaderSpacing) then
+			if tHeaderSpacing ~= floor(tHeaderSpacing) then
 				tinsert(tNonIntegerValues, "headerSpacing");
 			end
 
@@ -454,7 +478,7 @@ function VUHDO_testScaleChangeHandling()
 
 	VUHDO_handleScaleChange();
 
-	VUHDO_Msg("[OK] Scale change task enqueued successfully");
+	VUHDO_Msg("|cff44FF44[OK]|r Scale change task enqueued successfully");
 	VUHDO_Msg("|cffFFD100--- End of Scale Change Test ---|r");
 
 	return;
