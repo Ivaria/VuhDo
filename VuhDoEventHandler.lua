@@ -1109,7 +1109,7 @@ do
 				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 				VUHDO_updateHealAbsorbBar(anArg1);
 			end
-]];
+]]
 		elseif "UNIT_SPELLCAST_SENT" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_spellcastSent(anArg1, anArg2, anArg4);
@@ -1397,7 +1397,7 @@ do
 			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 				VUHDO_updateBouquetsForEvent(anArg1, 38); -- VUHDO_UPDATE_SUMMON
 			end
-]];
+]]
 		elseif "UNIT_PHASE" == anEvent then
 			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 				VUHDO_updateBouquetsForEvent(anArg1, 39); -- VUHDO_UPDATE_PHASE
@@ -1429,7 +1429,7 @@ do
 					VUHDO_timeReloadUI(1);
 				end
 			end
-]];
+]]
 		elseif "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
 			if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
 				local tSpecNum = tostring(VUHDO_getSpecialization()) or "1";
