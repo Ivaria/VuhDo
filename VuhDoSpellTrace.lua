@@ -56,7 +56,7 @@ local sSpellTraceStoredSettings = nil;
 local sSpellTraceDefaultDuration = nil;
 function VUHDO_spellTraceInitLocalOverrides()
 
-	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquets"];
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
 
 	VUHDO_PLAYER_GUID = UnitGUID("player");
 	VUHDO_RAID_GUIDS = _G["VUHDO_RAID_GUIDS"];
