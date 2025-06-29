@@ -8,11 +8,12 @@ local format = string.format;
 local ipairs = ipairs;
 local tinsert = table.insert;
 
-
 local tPixelUtil = { };
 local sPixelScale;
 local sUIScale;
 local sLastKnownScale = nil;
+local sBackdropCache = { };
+local sInsetsCache = { };
 
 
 
@@ -204,10 +205,10 @@ end
 
 
 --
-local tBackdropCache = { };
-local tInsetsCache = { };
-local tValueLeft, tValueRight, tValueTop, tValueBottom;
-local tLeftFloor, tRightFloor, tTopFloor, tBottomFloor;
+local tCacheKey;
+local tBackdrop;
+local tInsets;
+local tInsetsKey;
 function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 
 	if not aFrame or not aFrame.SetBackdrop then
@@ -215,44 +216,50 @@ function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 	end
 
 	if aBackdropInfo then
-		for tKey in pairs(tBackdropCache) do
-			tBackdropCache[tKey] = nil;
-		end
+		tCacheKey = "";
 
 		for tKey, tValue in pairs(aBackdropInfo) do
-			if tKey == "edgeSize" then
-				if tValue == floor(tValue) then
-					tBackdropCache[tKey] = tValue;
-				else
-					tBackdropCache[tKey] = VUHDO_roundToPixel(tValue);
-				end
-			elseif tKey == "insets" and type(tValue) == "table" then
-				for tKey in pairs(tInsetsCache) do
-					tInsetsCache[tKey] = nil;
-				end
-
-				tValueLeft = tValue["left"] or 0;
-				tValueRight = tValue["right"] or 0;
-				tValueTop = tValue["top"] or 0;
-				tValueBottom = tValue["bottom"] or 0;
-
-				tLeftFloor = floor(tValueLeft);
-				tRightFloor = floor(tValueRight);
-				tTopFloor = floor(tValueTop);
-				tBottomFloor = floor(tValueBottom);
-
-				tInsetsCache["left"] = tValueLeft == tLeftFloor and tValueLeft or VUHDO_roundToPixel(tValueLeft);
-				tInsetsCache["right"] = tValueRight == tRightFloor and tValueRight or VUHDO_roundToPixel(tValueRight);
-				tInsetsCache["top"] = tValueTop == tTopFloor and tValueTop or VUHDO_roundToPixel(tValueTop);
-				tInsetsCache["bottom"] = tValueBottom == tBottomFloor and tValueBottom or VUHDO_roundToPixel(tValueBottom);
-
-				tBackdropCache[tKey] = tInsetsCache;
+			if tKey == "insets" and type(tValue) == "table" then
+				tCacheKey = tCacheKey .. tKey .. ":" .. (tValue["left"] or 0) .. "," .. (tValue["right"] or 0) .. "," .. (tValue["top"] or 0) .. "," .. (tValue["bottom"] or 0) .. ";";
 			else
-				tBackdropCache[tKey] = tValue;
+				tCacheKey = tCacheKey .. tKey .. ":" .. tostring(tValue) .. ";";
 			end
 		end
 
-		aFrame:SetBackdrop(tBackdropCache);
+		if not sBackdropCache[tCacheKey] then
+			tBackdrop = { };
+
+			for tKey, tValue in pairs(aBackdropInfo) do
+				if tKey == "edgeSize" then
+					if tValue == floor(tValue) then
+						tBackdrop["edgeSize"] = tValue;
+					else
+						tBackdrop["edgeSize"] = VUHDO_roundToPixel(tValue);
+					end
+				elseif tKey == "insets" and type(tValue) == "table" then
+					tInsetsKey = (tValue["left"] or 0) .. "," .. (tValue["right"] or 0) .. "," .. (tValue["top"] or 0) .. "," .. (tValue["bottom"] or 0);
+
+					if not sInsetsCache[tInsetsKey] then
+						tInsets = { };
+
+						tInsets["left"] = (tValue["left"] or 0) == floor(tValue["left"] or 0) and (tValue["left"] or 0) or VUHDO_roundToPixel(tValue["left"] or 0);
+						tInsets["right"] = (tValue["right"] or 0) == floor(tValue["right"] or 0) and (tValue["right"] or 0) or VUHDO_roundToPixel(tValue["right"] or 0);
+						tInsets["top"] = (tValue["top"] or 0) == floor(tValue["top"] or 0) and (tValue["top"] or 0) or VUHDO_roundToPixel(tValue["top"] or 0);
+						tInsets["bottom"] = (tValue["bottom"] or 0) == floor(tValue["bottom"] or 0) and (tValue["bottom"] or 0) or VUHDO_roundToPixel(tValue["bottom"] or 0);
+
+						sInsetsCache[tInsetsKey] = tInsets;
+					end
+
+					tBackdrop["insets"] = sInsetsCache[tInsetsKey];
+				else
+					tBackdrop[tKey] = tValue;
+				end
+			end
+
+			sBackdropCache[tCacheKey] = tBackdrop;
+		end
+
+		aFrame:SetBackdrop(sBackdropCache[tCacheKey]);
 	end
 
 	return;
@@ -480,6 +487,60 @@ function VUHDO_testScaleChangeHandling()
 
 	VUHDO_Msg("|cff44FF44[OK]|r Scale change task enqueued successfully");
 	VUHDO_Msg("|cffFFD100--- End of Scale Change Test ---|r");
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_clearBackdropCache()
+
+	table.wipe(sBackdropCache);
+	table.wipe(sInsetsCache);
+
+	return;
+
+end
+
+
+
+--
+local tBackdropCount;
+local tInsetsCount;
+local function VUHDO_getBackdropCacheStats()
+
+	tBackdropCount = 0;
+	tInsetsCount = 0;
+
+	for _ in pairs(sBackdropCache) do
+		tBackdropCount = tBackdropCount + 1;
+	end
+
+	for _ in pairs(sInsetsCache) do
+		tInsetsCount = tInsetsCount + 1;
+	end
+
+	return tBackdropCount, tInsetsCount;
+
+end
+
+
+
+--
+local tBackdropCount;
+local tInsetsCount;
+function VUHDO_printBackdropCacheStats()
+
+	tBackdropCount, tInsetsCount = VUHDO_getBackdropCacheStats();
+
+	VUHDO_Msg("|cffFFD100--- Backdrop Cache Stats ---|r");
+
+	VUHDO_Msg("Cached backdrops: " .. tBackdropCount);
+	VUHDO_Msg("Cached insets: " .. tInsetsCount);
+
+	VUHDO_Msg("|cffFFD100--- End of Cache Stats ---|r");
 
 	return;
 

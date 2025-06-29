@@ -1169,6 +1169,7 @@ local VUHDO_redrawPanel = VUHDO_redrawPanel;
 function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 	VUHDO_resetMacroCaches();
 	VUHDO_resetSizeCalcCaches();
+	VUHDO_clearBackdropCache();
 	twipe(VUHDO_UNIT_BUTTONS);
 	twipe(VUHDO_UNIT_BUTTONS_PANEL);
 
@@ -1210,6 +1211,7 @@ function VUHDO_reloadUI(anIsFixAllFrameLevels)
 
 	VUHDO_IS_RELOADING = true;
 
+	VUHDO_clearBackdropCache();
 	VUHDO_initAllBurstCaches(); -- Wichtig für INTERNAL_TOGGLES=>Clusters
 	VUHDO_reloadRaidMembers();
 	VUHDO_resetNameTextCache();
@@ -1232,6 +1234,7 @@ function VUHDO_lnfReloadUI()
 
 	VUHDO_IS_RELOADING = true;
 
+	VUHDO_clearBackdropCache();
 	VUHDO_initAllBurstCaches();
 	VUHDO_reloadRaidMembers();
 	VUHDO_updatePanelVisibility();

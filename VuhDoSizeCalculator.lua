@@ -10,6 +10,8 @@ local VUHDO_getHealButtonPosHor;
 local VUHDO_getHealButtonPosVer;
 local VUHDO_strempty;
 local VUHDO_roundToPixel;
+local VUHDO_splitString;
+local strfind = strfind;
 
 function VUHDO_sizeCalculatorInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -26,77 +28,131 @@ function VUHDO_sizeCalculatorInitLocalOverrides()
 	VUHDO_getHealButtonPosVer = _G["VUHDO_getHealButtonPosVer"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
 	VUHDO_roundToPixel = _G["VUHDO_roundToPixel"];
+	VUHDO_splitString = _G["VUHDO_splitString"];
+
+	return;
 end
 
 -- BURST CACHE ---------------------------------------------------
 
-
 local sHealButtonWidthCache = { };
 local sTopHeightCache = { };
 local sBottomHeightCache = { };
+local sHotSlotsCache = { };
+local sNamePositionCache = { };
+local sPixelPerfectCache = { };
 
 
 function VUHDO_resetSizeCalcCaches()
 	table.wipe(sHealButtonWidthCache);
 	table.wipe(sTopHeightCache);
 	table.wipe(sBottomHeightCache);
+	table.wipe(sHotSlotsCache);
+	table.wipe(sNamePositionCache);
+	table.wipe(sPixelPerfectCache);
 	VUHDO_resetSizeCalcCachesHor();
 	VUHDO_resetSizeCalcCachesVer();
+
+	return;
 end
 
 
 
 --
+local tCacheKey;
 local tBarScaling;
 local tValue;
 function VUHDO_getPixelPerfectSpacing(aPanelNum, aSpacingType)
 
-	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
-	tValue = tBarScaling[aSpacingType] or 0;
+	tCacheKey = aPanelNum .. "_" .. aSpacingType;
+	if not sPixelPerfectCache[tCacheKey] then
+		tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
+		tValue = tBarScaling[aSpacingType] or 0;
+		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+	end
 
-	return math.floor(tValue + 0.5);
+	return sPixelPerfectCache[tCacheKey];
 
 end
 
 
 
 --
+local tCacheKey;
 local tBarScaling;
 local tValue;
 function VUHDO_getPixelPerfectGap(aPanelNum, aGapType)
 
-	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
-	tValue = tBarScaling[aGapType] or 0;
+	tCacheKey = "gap_" .. aPanelNum .. "_" .. aGapType;
+	if not sPixelPerfectCache[tCacheKey] then
+		tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
+		tValue = tBarScaling[aGapType] or 0;
+		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+	end
 
-	return math.floor(tValue + 0.5);
+	return sPixelPerfectCache[tCacheKey];
 
 end
 
 
 
 --
+local tCacheKey;
 local tBorder;
 local tValue;
 function VUHDO_getPixelPerfectBorderEdgeSize(aPanelNum)
 
-	tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
-	tValue = tBorder["edgeSize"] or 0;
+	tCacheKey = "border_edge_" .. aPanelNum;
+	if not sPixelPerfectCache[tCacheKey] then
+		tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
+		tValue = tBorder["edgeSize"] or 0;
+		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+	end
 
-	return math.floor(tValue + 0.5);
+	return sPixelPerfectCache[tCacheKey];
 
 end
 
 
 
 --
+local tCacheKey;
 local tBorder;
 local tValue;
 function VUHDO_getPixelPerfectBorderInsets(aPanelNum)
 
-	tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
-	tValue = tBorder["insets"] or 0;
+	tCacheKey = "border_insets_" .. aPanelNum;
+	if not sPixelPerfectCache[tCacheKey] then
+		tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
+		tValue = tBorder["insets"] or 0;
+		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+	end
 
-	return math.floor(tValue + 0.5);
+	return sPixelPerfectCache[tCacheKey];
+
+end
+
+
+
+--
+local tNamePos;
+local tNameHeight;
+function VUHDO_parseNamePosition(aPanelNum)
+
+	if not sNamePositionCache[aPanelNum] then
+		tNamePos = VUHDO_splitString(VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["position"], "+");
+		tNameHeight = VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["_spacing"];
+
+		sNamePositionCache[aPanelNum] = {
+			["pos1"] = tNamePos[1],
+			["pos2"] = tNamePos[2],
+			["height"] = tNameHeight,
+			["isBottomTop"] = strfind(tNamePos[1], "BOTTOM", 1, true) and strfind(tNamePos[2], "TOP", 1, true),
+			["isTopBottom"] = strfind(tNamePos[1], "TOP", 1, true) and strfind(tNamePos[2], "BOTTOM", 1, true)
+		};
+	end
+
+	return sNamePositionCache[aPanelNum];
 
 end
 
@@ -115,15 +171,12 @@ function VUHDO_getAdditionalTopHeight(aPanelNum)
 			tTopSpace = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["THREAT_BAR"]["HEIGHT"];
 		end
 
-		tNamePos = VUHDO_splitString(VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["position"], "+");
+		tNamePos = VUHDO_parseNamePosition(aPanelNum);
 
-		if strfind(tNamePos[1], "BOTTOM", 1, true) and strfind(tNamePos[2], "TOP", 1, true) then
-			tNameHeight = VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["_spacing"];
-
-			if tNameHeight and tNameHeight > tTopSpace then
-				tTopSpace = tNameHeight;
-			end
+		if tNamePos["isBottomTop"] and tNamePos["height"] and tNamePos["height"] > tTopSpace then
+			tTopSpace = tNamePos["height"];
 		end
+
 		sTopHeightCache[aPanelNum] = tTopSpace;
 	end
 
@@ -149,12 +202,10 @@ function VUHDO_getAdditionalBottomHeight(aPanelNum)
 			tBottomSpace = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"] * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
 		end
 
-		tNamePos = VUHDO_splitString(VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["position"], "+");
-		if strfind(tNamePos[1], "TOP", 1, true) and strfind(tNamePos[2], "BOTTOM", 1, true) then
-			tNameHeight = VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["_spacing"];
-			if tNameHeight and tNameHeight > tBottomSpace then
-				tBottomSpace = tNameHeight;
-			end
+		tNamePos = VUHDO_parseNamePosition(aPanelNum);
+
+		if tNamePos["isTopBottom"] and tNamePos["height"] and tNamePos["height"] > tBottomSpace then
+			tBottomSpace = tNamePos["height"];
 		end
 
 		sBottomHeightCache[aPanelNum] = tBottomSpace;
@@ -174,6 +225,7 @@ local function VUHDO_getTargetBarWidth(aPanelNum)
 	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 
 	tTargetWidth = 0;
+
 	if tBarScaling["showTarget"] then
 		tTargetWidth = tTargetWidth + tBarScaling["targetSpacing"] + tBarScaling["targetWidth"];
 	end
@@ -189,29 +241,39 @@ end
 
 
 --
+local tSlots;
 local tCnt;
 function VUHDO_getNumHotSlots(aPanelNum)
 
-	if not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][12]) then
-		return 9;
-	elseif not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][11]) then
-		return 8;
-	elseif not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][10]) then
-		return 7;
-	elseif not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][9]) then
-		return 6;
-	else
-		for tCnt = 5, 1, -1 do
-			if not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][tCnt]) then
-				return tCnt;
+	if not sHotSlotsCache[aPanelNum] then
+		tSlots = VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"];
+
+		if not VUHDO_strempty(tSlots[12]) then
+			sHotSlotsCache[aPanelNum] = 9;
+		elseif not VUHDO_strempty(tSlots[11]) then
+			sHotSlotsCache[aPanelNum] = 8;
+		elseif not VUHDO_strempty(tSlots[10]) then
+			sHotSlotsCache[aPanelNum] = 7;
+		elseif not VUHDO_strempty(tSlots[9]) then
+			sHotSlotsCache[aPanelNum] = 6;
+		else
+			for tCnt = 5, 1, -1 do
+				if not VUHDO_strempty(tSlots[tCnt]) then
+					sHotSlotsCache[aPanelNum] = tCnt;
+
+					break;
+				end
+			end
+
+			if not sHotSlotsCache[aPanelNum] then
+				sHotSlotsCache[aPanelNum] = 0;
 			end
 		end
-
-		return 0;
 	end
 
+	return sHotSlotsCache[aPanelNum];
+
 end
-local VUHDO_getNumHotSlots = VUHDO_getNumHotSlots;
 
 
 
