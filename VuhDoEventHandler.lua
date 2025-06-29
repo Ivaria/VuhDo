@@ -1380,7 +1380,7 @@ do
 			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 				VUHDO_updateBouquetsForEvent(anArg1, 38); -- VUHDO_UPDATE_SUMMON
 			end
-]];
+]]
 		elseif "UNIT_PHASE" == anEvent then
 			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 				VUHDO_updateBouquetsForEvent(anArg1, 39); -- VUHDO_UPDATE_PHASE
