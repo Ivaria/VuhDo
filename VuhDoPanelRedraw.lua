@@ -44,6 +44,8 @@ local sSwiftmendIndicatorSetup;
 
 local VUHDO_getFont;
 local VUHDO_getHealthBar;
+local VUHDO_getPixelPerfectBorderEdgeSize;
+local VUHDO_getPixelPerfectBorderInsets;
 
 --
 function VUHDO_panelRedrawInitLocalOverrides()
@@ -56,6 +58,8 @@ function VUHDO_panelRedrawInitLocalOverrides()
 
 	VUHDO_getFont = _G["VUHDO_getFont"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
+	VUHDO_getPixelPerfectBorderEdgeSize = _G["VUHDO_getPixelPerfectBorderEdgeSize"];
+	VUHDO_getPixelPerfectBorderInsets = _G["VUHDO_getPixelPerfectBorderInsets"];
 
 	VUHDO_panelRedrawCustomDebuffsInitLocalOverrides();
 	VUHDO_panelRedrawHeadersInitLocalOverrides();
@@ -1057,11 +1061,11 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 
 	VUHDO_STD_BACKDROP = aPanel:GetBackdrop();
 	VUHDO_STD_BACKDROP["edgeFile"] = tPanelColor["BORDER"]["file"];
-	VUHDO_STD_BACKDROP["edgeSize"] = tPanelColor["BORDER"]["edgeSize"] or 4;
-	VUHDO_STD_BACKDROP["insets"]["left"] = tPanelColor["BORDER"]["insets"] or 0;
-	VUHDO_STD_BACKDROP["insets"]["right"] = tPanelColor["BORDER"]["insets"] or 0;
-	VUHDO_STD_BACKDROP["insets"]["top"] = tPanelColor["BORDER"]["insets"] or 0;
-	VUHDO_STD_BACKDROP["insets"]["bottom"] = tPanelColor["BORDER"]["insets"] or 0;
+	VUHDO_STD_BACKDROP["edgeSize"] = VUHDO_getPixelPerfectBorderEdgeSize(aPanelNum);
+	VUHDO_STD_BACKDROP["insets"]["left"] = VUHDO_getPixelPerfectBorderInsets(aPanelNum);
+	VUHDO_STD_BACKDROP["insets"]["right"] = VUHDO_getPixelPerfectBorderInsets(aPanelNum);
+	VUHDO_STD_BACKDROP["insets"]["top"] = VUHDO_getPixelPerfectBorderInsets(aPanelNum);
+	VUHDO_STD_BACKDROP["insets"]["bottom"] = VUHDO_getPixelPerfectBorderInsets(aPanelNum);
 
 	aPanel.backdropInfo = VUHDO_STD_BACKDROP;
 	VUHDO_PixelUtil.ApplyBackdrop(aPanel, VUHDO_STD_BACKDROP);

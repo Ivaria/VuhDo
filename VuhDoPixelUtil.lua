@@ -213,16 +213,19 @@ function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 	if aBackdropInfo then
 		tBackdrop = { };
 
-		-- Copy backdrop info
 		for tKey, tValue in pairs(aBackdropInfo) do
 			if tKey == "edgeSize" then
-				tBackdrop[tKey] = VUHDO_roundToPixel(tValue);
+				if tValue == math.floor(tValue) then
+					tBackdrop[tKey] = tValue;
+				else
+					tBackdrop[tKey] = VUHDO_roundToPixel(tValue);
+				end
 			elseif tKey == "insets" and type(tValue) == "table" then
 				tBackdrop[tKey] = {
-					left = VUHDO_roundToPixel(tValue.left or 0),
-					right = VUHDO_roundToPixel(tValue.right or 0),
-					top = VUHDO_roundToPixel(tValue.top or 0),
-					bottom = VUHDO_roundToPixel(tValue.bottom or 0),
+					left = (tValue.left or 0) == math.floor(tValue.left or 0) and (tValue.left or 0) or VUHDO_roundToPixel(tValue.left or 0),
+					right = (tValue.right or 0) == math.floor(tValue.right or 0) and (tValue.right or 0) or VUHDO_roundToPixel(tValue.right or 0),
+					top = (tValue.top or 0) == math.floor(tValue.top or 0) and (tValue.top or 0) or VUHDO_roundToPixel(tValue.top or 0),
+					bottom = (tValue.bottom or 0) == math.floor(tValue.bottom or 0) and (tValue.bottom or 0) or VUHDO_roundToPixel(tValue.bottom or 0),
 				};
 			else
 				tBackdrop[tKey] = tValue;
@@ -338,15 +341,15 @@ function VUHDO_testPixelPerfectSpacing()
 			tHeaderSpacing = tScaling["headerSpacing"] or 0;
 
 			VUHDO_Msg("  |cffB0E0E6Spacing Values:|r");
-			VUHDO_Msg("    Row Spacing: " .. tRowSpacing .. " (rounded: " .. VUHDO_roundToPixel(tRowSpacing) .. ")");
-			VUHDO_Msg("    Column Spacing: " .. tColumnSpacing .. " (rounded: " .. VUHDO_roundToPixel(tColumnSpacing) .. ")");
-			VUHDO_Msg("    Border Gap X: " .. tBorderGapX .. " (rounded: " .. VUHDO_roundToPixel(tBorderGapX) .. ")");
-			VUHDO_Msg("    Border Gap Y: " .. tBorderGapY .. " (rounded: " .. VUHDO_roundToPixel(tBorderGapY) .. ")");
-			VUHDO_Msg("    Header Spacing: " .. tHeaderSpacing .. " (rounded: " .. VUHDO_roundToPixel(tHeaderSpacing) .. ")");
+			VUHDO_Msg("    Row Spacing: " .. tRowSpacing .. " (used: " .. VUHDO_getPixelPerfectSpacing(tPanelNum, "rowSpacing") .. ")");
+			VUHDO_Msg("    Column Spacing: " .. tColumnSpacing .. " (used: " .. VUHDO_getPixelPerfectSpacing(tPanelNum, "columnSpacing") .. ")");
+			VUHDO_Msg("    Border Gap X: " .. tBorderGapX .. " (used: " .. VUHDO_getPixelPerfectGap(tPanelNum, "borderGapX") .. ")");
+			VUHDO_Msg("    Border Gap Y: " .. tBorderGapY .. " (used: " .. VUHDO_getPixelPerfectGap(tPanelNum, "borderGapY") .. ")");
+			VUHDO_Msg("    Header Spacing: " .. tHeaderSpacing .. " (used: " .. VUHDO_getPixelPerfectSpacing(tPanelNum, "headerSpacing") .. ")");
 
 			VUHDO_Msg("  |cffB0E0E6Border Values:|r");
-			VUHDO_Msg("    Edge Size: " .. (tBorder["edgeSize"] or 0) .. " (rounded: " .. VUHDO_roundToPixel(tBorder["edgeSize"] or 0) .. ")");
-			VUHDO_Msg("    Insets: " .. (tBorder["insets"] or 0) .. " (rounded: " .. VUHDO_roundToPixel(tBorder["insets"] or 0) .. ")");
+			VUHDO_Msg("    Edge Size: " .. (tBorder["edgeSize"] or 0) .. " (used: " .. VUHDO_getPixelPerfectBorderEdgeSize(tPanelNum) .. ")");
+			VUHDO_Msg("    Insets: " .. (tBorder["insets"] or 0) .. " (used: " .. VUHDO_getPixelPerfectBorderInsets(tPanelNum) .. ")");
 			VUHDO_Msg("    Color: R=" .. (tBorder["R"] or 0) .. " G=" .. (tBorder["G"] or 0) .. " B=" .. (tBorder["B"] or 0) .. " A=" .. (tBorder["O"] or 0));
 
 			tNonIntegerValues = {};
@@ -372,110 +375,6 @@ function VUHDO_testPixelPerfectSpacing()
 				VUHDO_Msg("  |cff44FF44[OK]|r All spacing values are integers.");
 			end
 		end
-	end
-
-	return;
-
-end
-
-
-
---
-local tChangedPanels;
-local tScaling;
-local tBorder;
-local tPanelChanged;
-local tOldRowSpacing;
-local tNewRowSpacing;
-local tOldColumnSpacing;
-local tNewColumnSpacing;
-local tOldBorderGapX;
-local tNewBorderGapX;
-local tOldBorderGapY;
-local tNewBorderGapY;
-local tOldHeaderSpacing;
-local tNewHeaderSpacing;
-local tOldEdgeSize;
-local tNewEdgeSize;
-local tOldInsets;
-local tNewInsets;
-function VUHDO_enforceIntegerSpacing()
-
-	VUHDO_Msg("|cffFFD100--- Enforcing Integer Spacing ---|r");
-
-	if not VUHDO_PANEL_SETUP then
-		VUHDO_Msg("|cffFF4444Error:|r Panel setup not loaded.");
-		return;
-	end
-
-	tChangedPanels = 0;
-
-	for tPanelNum = 1, VUHDO_MAX_PANELS do
-		if VUHDO_PANEL_SETUP[tPanelNum] then
-			tScaling = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"];
-			tBorder = VUHDO_PANEL_SETUP[tPanelNum]["PANEL_COLOR"]["BORDER"];
-			tPanelChanged = false;
-
-			tOldRowSpacing = tScaling["rowSpacing"];
-			tNewRowSpacing = math.floor(tOldRowSpacing + 0.5);
-			if tOldRowSpacing ~= tNewRowSpacing then
-				tScaling["rowSpacing"] = tNewRowSpacing;
-				tPanelChanged = true;
-			end
-
-			tOldColumnSpacing = tScaling["columnSpacing"];
-			tNewColumnSpacing = math.floor(tOldColumnSpacing + 0.5);
-			if tOldColumnSpacing ~= tNewColumnSpacing then
-				tScaling["columnSpacing"] = tNewColumnSpacing;
-				tPanelChanged = true;
-			end
-
-			tOldBorderGapX = tScaling["borderGapX"];
-			tNewBorderGapX = math.floor(tOldBorderGapX + 0.5);
-			if tOldBorderGapX ~= tNewBorderGapX then
-				tScaling["borderGapX"] = tNewBorderGapX;
-				tPanelChanged = true;
-			end
-
-			tOldBorderGapY = tScaling["borderGapY"];
-			tNewBorderGapY = math.floor(tOldBorderGapY + 0.5);
-			if tOldBorderGapY ~= tNewBorderGapY then
-				tScaling["borderGapY"] = tNewBorderGapY;
-				tPanelChanged = true;
-			end
-
-			tOldHeaderSpacing = tScaling["headerSpacing"];
-			tNewHeaderSpacing = math.floor(tOldHeaderSpacing + 0.5);
-			if tOldHeaderSpacing ~= tNewHeaderSpacing then
-				tScaling["headerSpacing"] = tNewHeaderSpacing;
-				tPanelChanged = true;
-			end
-
-			tOldEdgeSize = tBorder["edgeSize"];
-			tNewEdgeSize = math.floor(tOldEdgeSize + 0.5);
-			if tOldEdgeSize ~= tNewEdgeSize then
-				tBorder["edgeSize"] = tNewEdgeSize;
-				tPanelChanged = true;
-			end
-
-			tOldInsets = tBorder["insets"];
-			tNewInsets = math.floor(tOldInsets + 0.5);
-			if tOldInsets ~= tNewInsets then
-				tBorder["insets"] = tNewInsets;
-				tPanelChanged = true;
-			end
-
-			if tPanelChanged then
-				tChangedPanels = tChangedPanels + 1;
-				VUHDO_Msg("  Panel " .. tPanelNum .. " spacing values rounded to integers.");
-			end
-		end
-	end
-
-	if tChangedPanels > 0 then
-		VUHDO_Msg("|cff44FF44[OK]|r " .. tChangedPanels .. " panel(s) updated with integer spacing values.");
-	else
-		VUHDO_Msg("|cff44FF44[OK]|r All spacing values are already integers.");
 	end
 
 	return;

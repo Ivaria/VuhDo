@@ -43,7 +43,7 @@ local tBarScaling;
 local function VUHDO_getHeaderTotalWidth(aPanelNum)
 	if VUHDO_isTableHeadersShowing(aPanelNum) then
 		tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
-		return tBarScaling["headerHeight"] + tBarScaling["headerSpacing"];
+		return tBarScaling["headerHeight"] + VUHDO_getPixelPerfectSpacing(aPanelNum, "headerSpacing");
 	else
 		return 0;
 	end
@@ -56,7 +56,7 @@ local tBarScaling;
 local function VUHDO_getHeaderFooterTotalWidth(aPanelNum)
 	if VUHDO_isTableHeaderOrFooter(aPanelNum) then
 		tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
-		return tBarScaling["headerHeight"] + tBarScaling["headerSpacing"];
+		return tBarScaling["headerHeight"] + VUHDO_getPixelPerfectSpacing(aPanelNum, "headerSpacing");
 	else
 		return 0;
 	end
@@ -348,11 +348,11 @@ function VUHDO_getHealButtonPosHor(aPlaceNum, aRowNo, aPanelNum)
 		tColumnWidth = VUHDO_getColumnWidth(tGridColumn, aPanelNum);
 		tNumBars = VUHDO_determineGridColumnPlaceBars(aPlaceNum, tGridColumn, aPanelNum);
 		tCurrWidth = tNumBars * VUHDO_getHealButtonWidth(aPanelNum) ;
-		tCurrWidth = tCurrWidth + (tNumBars - 1) * tScaling["columnSpacing"] + VUHDO_getHeaderTotalWidth(aPanelNum);
+		tCurrWidth = tCurrWidth + (tNumBars - 1) * VUHDO_getPixelPerfectSpacing(aPanelNum, "columnSpacing") + VUHDO_getHeaderTotalWidth(aPanelNum);
 		tButtonX = tButtonX + (tColumnWidth - tCurrWidth);
 
 		if tGridColumn ~= VUHDO_determineLastColumn(aPanelNum) then
-			tButtonX = tButtonX - tScaling["headerSpacing"];
+			tButtonX = tButtonX - VUHDO_getPixelPerfectSpacing(aPanelNum, "headerSpacing");
 		end
 
 	end
@@ -382,18 +382,18 @@ function VUHDO_getHealPanelWidthHor(aPanelNum)
 		end
 
 		tHeight = VUHDO_getHeaderTotalWidth(aPanelNum);
-		tHeight = tHeight + tBarScaling["borderGapX"] * 2;
+		tHeight = tHeight + VUHDO_getPixelPerfectGap(aPanelNum, "borderGapX") * 2;
 		tHeight = tHeight + tRows * VUHDO_getHealButtonWidth(aPanelNum);
-		tHeight = tHeight + (tRows - 1) * tBarScaling["columnSpacing"];
+		tHeight = tHeight + (tRows - 1) * VUHDO_getPixelPerfectSpacing(aPanelNum, "columnSpacing");
 		return tHeight;
 	else
 		tLastPlace = #VUHDO_PANEL_DYN_MODELS[aPanelNum];
 		tLastHeaderX = VUHDO_getColumnPos(tLastPlace, aPanelNum);
 		tLastRowWidth =  VUHDO_getColumnWidth(VUHDO_determineGridColumn(tLastPlace, aPanelNum), aPanelNum);
-		tWidth = tLastHeaderX + tLastRowWidth + tBarScaling["borderGapX"];
+		tWidth = tLastHeaderX + tLastRowWidth + VUHDO_getPixelPerfectGap(aPanelNum, "borderGapX");
 
 		if tBarScaling["alignBottom"] then
-			tWidth = tWidth + VUHDO_getHeaderWidthHor(aPanelNum) + tBarScaling["headerSpacing"];
+			tWidth = tWidth + VUHDO_getHeaderWidthHor(aPanelNum) + VUHDO_getPixelPerfectSpacing(aPanelNum, "headerSpacing");
 		end
 
 		return tWidth;
@@ -424,9 +424,9 @@ function VUHDO_getHealPanelHeightHor(aPanelNum)
 
 	if tAnzCols < 1 then tAnzCols = 1; end
 
-	tWidth = tBarScaling["borderGapY"] * 2;
+	tWidth = VUHDO_getPixelPerfectGap(aPanelNum, "borderGapY") * 2;
 	tWidth = tWidth + tAnzCols * VUHDO_getHealButtonHeight(aPanelNum);
-	tWidth = tWidth + (tAnzCols - 1) * tBarScaling["rowSpacing"];
+	tWidth = tWidth + (tAnzCols - 1) * VUHDO_getPixelPerfectSpacing(aPanelNum, "rowSpacing");
 
 	return tWidth;
 end

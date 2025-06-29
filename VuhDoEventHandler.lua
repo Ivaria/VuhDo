@@ -1699,8 +1699,6 @@ do
 				VUHDO_testPixelPerfect();
 			elseif tSubCommand == "spacing" then
 				VUHDO_testPixelPerfectSpacing();
-			elseif tSubCommand == "enforce" then
-				VUHDO_enforceIntegerSpacing();
 			elseif tSubCommand == "values" then
 				VUHDO_testPixelPerfectValues();
 			elseif tSubCommand == "refresh" then
@@ -1723,7 +1721,6 @@ do
 				VUHDO_Msg("Pixel-perfect testing commands:");
 				VUHDO_Msg("  /vd pixel test - Test pixel scale calculation and show test frames");
 				VUHDO_Msg("  /vd pixel spacing - Test pixel-perfect spacing values");
-				VUHDO_Msg("  /vd pixel enforce - Enforce integer spacing values");
 				VUHDO_Msg("  /vd pixel hide - Hide the test frames");
 				VUHDO_Msg("  /vd pixel values - Test pixel rounding values");
 				VUHDO_Msg("  /vd pixel refresh - Refresh pixel scale");

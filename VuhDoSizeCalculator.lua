@@ -54,7 +54,7 @@ function VUHDO_getPixelPerfectSpacing(aPanelNum, aSpacingType)
 	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 	tValue = tBarScaling[aSpacingType] or 0;
 
-	return tValue;
+	return math.floor(tValue + 0.5);
 
 end
 
@@ -68,7 +68,35 @@ function VUHDO_getPixelPerfectGap(aPanelNum, aGapType)
 	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 	tValue = tBarScaling[aGapType] or 0;
 
-	return tValue;
+	return math.floor(tValue + 0.5);
+
+end
+
+
+
+--
+local tBorder;
+local tValue;
+function VUHDO_getPixelPerfectBorderEdgeSize(aPanelNum)
+
+	tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
+	tValue = tBorder["edgeSize"] or 0;
+
+	return math.floor(tValue + 0.5);
+
+end
+
+
+
+--
+local tBorder;
+local tValue;
+function VUHDO_getPixelPerfectBorderInsets(aPanelNum)
+
+	tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
+	tValue = tBorder["insets"] or 0;
+
+	return math.floor(tValue + 0.5);
 
 end
 
@@ -255,7 +283,7 @@ end
 
 --
 function VUHDO_getHealButtonPos(aPlaceNum, aRowNo, aPanelNum)
-	-- Achtung: Positionen nicht cachen, da z.T. von dynamischen Models abh„ngig
+	-- Achtung: Positionen nicht cachen, da z.T. von dynamischen Models abhï¿½ngig
 	if VUHDO_isPanelHorizontal(aPanelNum) then
 		return VUHDO_getHealButtonPosHor(aPlaceNum, aRowNo, aPanelNum);
 	else
