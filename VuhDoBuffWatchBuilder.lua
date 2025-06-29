@@ -29,7 +29,7 @@ local function VUHDO_addBuffSwatch(aBuffPanel, aGroupName, aBuffInfo, aBuffTarge
 
 	_G[tSwatch:GetName() .. "GroupLabelLabel"]:SetText(aGroupName);
 
-	tSwatch:SetPoint("TOPLEFT", aBuffPanel:GetName(), "TOPLEFT", VUHDO_BUFF_PANEL_BASE_WIDTH, -VUHDO_BUFF_PANEL_BASE_HEIGHT);
+	VUHDO_PixelUtil.SetPoint(tSwatch, "TOPLEFT", aBuffPanel:GetName(), "TOPLEFT", VUHDO_BUFF_PANEL_BASE_WIDTH, -VUHDO_BUFF_PANEL_BASE_HEIGHT);
 	tSwatch:SetBackdropBorderColor(VUHDO_backColor(VUHDO_BUFF_SETTINGS["CONFIG"]["SWATCH_BORDER_COLOR"]));
 	tSwatch:Show();
 
@@ -122,6 +122,7 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 	tIconFrame = _G[tBuffPanel:GetName() .. "IconTexture"];
 	tTexture = _G[tIconFrame:GetName() .. "Texture"];
 	tTexture:SetTexture(tIcon);
+	VUHDO_PixelUtil.ApplySettings(tTexture, true);
 
 	local tGap = VUHDO_BUFF_SETTINGS["CONFIG"]["COMPACT"] and 0 or 3
 	VUHDO_PixelUtil.SetPoint(tIconFrame, "TOPLEFT", tBuffPanel:GetName(), "TOPLEFT" , tGap, -tGap);

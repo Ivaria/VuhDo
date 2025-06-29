@@ -212,17 +212,21 @@ local function VUHDO_initHotIcon(anIndex)
 			tHotIcon:Hide();
 		elseif tIconRadio == 3 then -- Flat
 			tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\hot_flat_16_16");
+			VUHDO_PixelUtil.ApplySettings(tHotIcon, true);
 		elseif tIconRadio == 2 then -- Glossy
 			tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\icon_white_square");
+			VUHDO_PixelUtil.ApplySettings(tHotIcon, true);
 		else
 			local tHotName = tHotConfig["SLOTS"][anIndex];
 
 			if VUHDO_CAST_ICON_DIFF[tHotName] then
 				tHotIcon:SetTexture(VUHDO_CAST_ICON_DIFF[tHotName]);
+				VUHDO_PixelUtil.ApplySettings(tHotIcon, true);
 			else
 				local tTexture = GetSpellBookItemTexture(tHotName);
 				if tTexture then
 					tHotIcon:SetTexture(tTexture);
+					VUHDO_PixelUtil.ApplySettings(tHotIcon, true);
 				end
 			end
 		end

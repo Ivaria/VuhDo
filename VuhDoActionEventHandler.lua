@@ -125,11 +125,13 @@ local function VUHDO_showPlayerIcons(aButton, aPanelNum)
 	if tIsLeader or tIsAssist then
 		VUHDO_getOrCreateHotIcon(aButton, 1):SetTexture(
 			"Interface\\groupframe\\ui-group-" .. (tIsLeader and "leader" or "assistant") .. "icon");
+		VUHDO_PixelUtil.ApplySettings(VUHDO_getOrCreateHotIcon(aButton, 1), true);
 		VUHDO_placePlayerIcon(aButton, 1, 0);
 	end
 
 	if tIsMasterLooter then
 		VUHDO_getOrCreateHotIcon(aButton, 2):SetTexture("Interface\\groupframe\\ui-group-masterlooter");
+		VUHDO_PixelUtil.ApplySettings(VUHDO_getOrCreateHotIcon(aButton, 2), true);
 		VUHDO_placePlayerIcon(aButton, 2, 1);
 	end
 
@@ -139,6 +141,7 @@ local function VUHDO_showPlayerIcons(aButton, aPanelNum)
 
 		tIcon:SetTexture("Interface\\groupframe\\ui-group-pvp-"
 			.. ("Alliance" == (UnitFactionGroup(tUnit)) and "alliance" or "horde"));
+		VUHDO_PixelUtil.ApplySettings(tIcon, true);
 
 		VUHDO_placePlayerIcon(aButton, 3, 2);
 		VUHDO_PixelUtil.SetWidth(tIcon, 32);
@@ -148,6 +151,7 @@ local function VUHDO_showPlayerIcons(aButton, aPanelNum)
 	if tInfo["class"] then
 		tIcon = VUHDO_getOrCreateHotIcon(aButton, 4);
 		tIcon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles");
+		VUHDO_PixelUtil.ApplySettings(tIcon, true);
 		tIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[tInfo["class"]]));
 		VUHDO_placePlayerIcon(aButton, 4, 3);
 	end
@@ -155,6 +159,7 @@ local function VUHDO_showPlayerIcons(aButton, aPanelNum)
 	if tInfo["role"] then
 		tIcon = VUHDO_getOrCreateHotIcon(aButton, 5);
 		tIcon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-ROLES");
+		VUHDO_PixelUtil.ApplySettings(tIcon, true);
 		tIcon:SetTexCoord(GetTexCoordsForRole(
 			VUHDO_ID_MELEE_TANK == tInfo["role"] and "TANK"
 			or VUHDO_ID_RANGED_HEAL == tInfo["role"] and "HEALER"	or "DAMAGER"));

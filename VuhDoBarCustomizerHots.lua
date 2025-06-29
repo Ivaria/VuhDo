@@ -512,6 +512,7 @@ local function VUHDO_customizeHotIcons(aPanelNum, aButton, aHotName, aRest, aTim
 
 	if tIsChargeShown then
 		tChargeTexture:SetTexture(VUHDO_CHARGE_TEXTURES[tTimes]);
+		VUHDO_PixelUtil.ApplySettings(tChargeTexture, true);
 		tChargeTexture:SetVertexColor(VUHDO_backColorWithFallback(tHotColor));
 		
 		tChargeTexture:Show();
@@ -521,6 +522,7 @@ local function VUHDO_customizeHotIcons(aPanelNum, aButton, aHotName, aRest, aTim
 		end
 
 		tChargeTexture:SetTexture(VUHDO_SHIELD_TEXTURES[aShieldCharges]);
+		VUHDO_PixelUtil.ApplySettings(tChargeTexture, true);
 		
 		if tHotColor and tHotColor["R"] then
 			tChargeTexture:SetVertexColor(tHotColor["R"] + 0.15, tHotColor["G"] + 0.15, tHotColor["B"] + 0.15, tHotColor["O"]);
