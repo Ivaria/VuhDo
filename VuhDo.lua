@@ -768,6 +768,7 @@ end
 --
 -- Reload all raid members into the raid array e.g. in case of raid roster change
 function VUHDO_reloadRaidMembers()
+
 	local tPlayer;
 	local tMaxMembers;
 	local tUnit, tPetUnit;
@@ -847,11 +848,18 @@ function VUHDO_reloadRaidMembers()
 	VUHDO_updateBuffRaidGroup();
 	VUHDO_updateBuffPanel();
 
-	if sCurrentMode ~= 1 then VUHDO_sortEmergencies(); end -- VUHDO_MODE_NEUTRAL
+	if sCurrentMode ~= 1 then  -- VUHDO_MODE_NEUTRAL
+		VUHDO_sortEmergencies();
+	end
 
 	VUHDO_createClusterUnits();
 
-	if VUHDO_IS_SUSPICIOUS_ROSTER then VUHDO_normalRaidReload(); end
+	if VUHDO_IS_SUSPICIOUS_ROSTER then
+		VUHDO_normalRaidReload();
+	end
+
+	return;
+
 end
 
 
