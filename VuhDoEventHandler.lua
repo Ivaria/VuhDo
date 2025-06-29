@@ -643,7 +643,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
-	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
 
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
@@ -816,7 +815,7 @@ end
 --
 local tName;
 local tProfile;
-function VUHDO_loadCurrentProfile()
+local function VUHDO_loadCurrentProfile()
 
 	if not VUHDO_CONFIG then
 		return;
