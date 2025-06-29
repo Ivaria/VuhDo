@@ -71,10 +71,10 @@ local function VUHDO_setTooltipLine(aText, anIsLeft, aLineNum, aColor, aTextSize
 	end
 
 	if anIsLeft then
-		VUHDO_TEXT_SIZE_LEFT[aLineNum] = (aTextSize or 8) + 0.7;
+		VUHDO_TEXT_SIZE_LEFT[aLineNum] = aTextSize or 8;
 		VUHDO_PixelUtil.SetHeight(tLabel, VUHDO_TEXT_SIZE_LEFT[aLineNum]);
 	else
-		VUHDO_PixelUtil.SetHeight(tLabel, VUHDO_TEXT_SIZE_LEFT[aLineNum] or 8.7);
+		VUHDO_PixelUtil.SetHeight(tLabel, VUHDO_TEXT_SIZE_LEFT[aLineNum] or 8);
 	end
 
 	tLabel:SetJustifyH(anIsLeft and "LEFT" or "RIGHT");
@@ -145,9 +145,9 @@ local function VUHDO_initTooltip()
 
 		VuhDoTooltip:ClearAllPoints();
 		if tFixPos then
-			VuhDoTooltip:SetPoint(tFixPos[1], VUHDO_getActionPanel(VUHDO_TT_PANEL_NUM):GetName(), tFixPos[2], 0, 0);
+			VUHDO_PixelUtil.SetPoint(VuhDoTooltip, tFixPos[1], VUHDO_getActionPanel(VUHDO_TT_PANEL_NUM):GetName(), tFixPos[2], 0, 0);
 		elseif VUHDO_TOOLTIP_POS_CUSTOM == tPos then
-			VuhDoTooltip:SetPoint(tConfig["point"], "UIParent", tConfig["relativePoint"], tConfig["x"], tConfig["y"]);
+			VUHDO_PixelUtil.SetPoint(VuhDoTooltip, tConfig["point"], "UIParent", tConfig["relativePoint"], tConfig["x"], tConfig["y"]);
 		elseif VUHDO_TOOLTIP_POS_STANDARD == tPos then
 			if (not VUHDO_CONFIG["STANDARD_TOOLTIP"]) then
 				if not GameTooltip:IsForbidden() then	
@@ -155,7 +155,7 @@ local function VUHDO_initTooltip()
 				end
 			end
 
-			VuhDoTooltip:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -CONTAINER_OFFSET_X - 13, CONTAINER_OFFSET_Y);
+			VUHDO_PixelUtil.SetPoint(VuhDoTooltip, "BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -CONTAINER_OFFSET_X - 13, CONTAINER_OFFSET_Y);
 		end
 
 		VUHDO_PixelUtil.SetWidth(VuhDoTooltip, 200);
@@ -164,7 +164,7 @@ local function VUHDO_initTooltip()
 	if VUHDO_TOOLTIP_POS_MOUSE == tPos then
 		if VUHDO_TT_BUTTON then
 			VuhDoTooltip:ClearAllPoints();
-			VuhDoTooltip:SetPoint("TOPLEFT", VUHDO_TT_BUTTON:GetName(), "BOTTOMRIGHT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(VuhDoTooltip, "TOPLEFT", VUHDO_TT_BUTTON:GetName(), "BOTTOMRIGHT", 0, 0);
 		else
 			VuhDoTooltip:Hide();
 			return;

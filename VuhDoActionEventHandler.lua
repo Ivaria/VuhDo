@@ -74,12 +74,12 @@ local function VUHDO_placePlayerIcon(aButton, anIconNo, anIndex)
 	local anIcon = VUHDO_getBarIcon(aButton, anIconNo);
 	anIcon:ClearAllPoints();
 	if 2 == anIndex then
-		anIcon:SetPoint("CENTER", aButton:GetName(), "TOPRIGHT", -5, -10);
+		VUHDO_PixelUtil.SetPoint(anIcon, "CENTER", aButton:GetName(), "TOPRIGHT", -5, -10);
 	else
 		if anIndex > 2 then anIndex = anIndex - 1; end
 		local tCol = floor(anIndex * 0.5);
 		local tRow = anIndex - tCol * 2;
-		anIcon:SetPoint("TOPLEFT", aButton:GetName(), "TOPLEFT", tCol * 14, -tRow * 14);
+		VUHDO_PixelUtil.SetPoint(anIcon, "TOPLEFT", aButton:GetName(), "TOPLEFT", tCol * 14, -tRow * 14);
 	end
 
 	VUHDO_PixelUtil.SetWidth(anIcon, 16);

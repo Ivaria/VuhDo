@@ -163,6 +163,7 @@ local VUHDO_updateAllRaidBars;
 local VUHDO_updateCustomDebuffTooltip;
 local VUHDO_getUnitZoneName;
 local VUHDO_getCurrentMouseOver;
+local VUHDO_handleScaleChange;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -604,6 +605,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateCustomDebuffTooltip = _G["VUHDO_updateCustomDebuffTooltip"];
 	VUHDO_getCurrentMouseOver = _G["VUHDO_getCurrentMouseOver"];
 	VUHDO_UIFrameFlash_OnUpdate = _G["VUHDO_UIFrameFlash_OnUpdate"];
+	VUHDO_handleScaleChange = _G["VUHDO_handleScaleChange"];
 
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_updateShieldBar = _G["VUHDO_updateShieldBar"];
@@ -641,6 +643,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
+	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
 
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
@@ -971,6 +974,7 @@ local function VUHDO_init()
 	VUHDO_initButtonFacade(VUHDO_INSTANCE);
 	VUHDO_initLibSpecialization();
 	VUHDO_initHideBlizzFrames();
+	VUHDO_initScaleMonitoring();
 
 	if not InCombatLockdown() then
 		VUHDO_initKeyboardMacros();
@@ -1420,6 +1424,16 @@ do
 				end
 			end
 
+		elseif "UI_SCALE_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_handleScaleChange();
+			end
+
+		elseif "DISPLAY_SIZE_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_handleScaleChange();
+			end
+
 		else
 			VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 		end
@@ -1683,6 +1697,10 @@ do
 
 			if tSubCommand == "test" then
 				VUHDO_testPixelPerfect();
+			elseif tSubCommand == "spacing" then
+				VUHDO_testPixelPerfectSpacing();
+			elseif tSubCommand == "enforce" then
+				VUHDO_enforceIntegerSpacing();
 			elseif tSubCommand == "values" then
 				VUHDO_testPixelPerfectValues();
 			elseif tSubCommand == "refresh" then
@@ -1690,12 +1708,28 @@ do
 				VUHDO_Msg("Pixel scale refreshed. Current scale: " .. VUHDO_getPixelScale());
 			elseif tSubCommand == "hide" then
 				VUHDO_hidePixelTestFrame();
+			elseif tSubCommand == "scale" then
+				VUHDO_Msg("Current UI Scale: " .. VUHDO_getUIScale());
+				VUHDO_Msg("Current Pixel Scale: " .. VUHDO_getPixelScale());
+			elseif tSubCommand == "monitor" then
+				if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] then
+					VUHDO_CONFIG["PIXEL_PERFECT"]["logScaleChanges"] = not VUHDO_CONFIG["PIXEL_PERFECT"]["logScaleChanges"];
+
+					VUHDO_Msg("Scale change logging: " .. (VUHDO_CONFIG["PIXEL_PERFECT"]["logScaleChanges"] and "ON" or "OFF"));
+				end
+			elseif tSubCommand == "testscale" then
+				VUHDO_testScaleChangeHandling();
 			else
 				VUHDO_Msg("Pixel-perfect testing commands:");
 				VUHDO_Msg("  /vd pixel test - Test pixel scale calculation and show test frames");
+				VUHDO_Msg("  /vd pixel spacing - Test pixel-perfect spacing values");
+				VUHDO_Msg("  /vd pixel enforce - Enforce integer spacing values");
+				VUHDO_Msg("  /vd pixel hide - Hide the test frames");
 				VUHDO_Msg("  /vd pixel values - Test pixel rounding values");
 				VUHDO_Msg("  /vd pixel refresh - Refresh pixel scale");
-				VUHDO_Msg("  /vd pixel hide - Hide the test frames");
+				VUHDO_Msg("  /vd pixel scale - Show current scale values");
+				VUHDO_Msg("  /vd pixel monitor - Toggle scale change logging");
+				VUHDO_Msg("  /vd pixel testscale - Test scale change handling");
 			end
 
 		elseif aCommand == "?" or strfind(tCommandWord, "help") or aCommand == "" then
@@ -2526,6 +2560,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"PLAYER_SPECIALIZATION_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",
+	"UI_SCALE_CHANGED", "DISPLAY_SIZE_CHANGED",
 };
 
 

@@ -9,6 +9,7 @@ local VUHDO_getHeaderPosVer;
 local VUHDO_getHealButtonPosHor;
 local VUHDO_getHealButtonPosVer;
 local VUHDO_strempty;
+local VUHDO_roundToPixel;
 
 function VUHDO_sizeCalculatorInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -24,6 +25,7 @@ function VUHDO_sizeCalculatorInitLocalOverrides()
 	VUHDO_getHealButtonPosHor = _G["VUHDO_getHealButtonPosHor"];
 	VUHDO_getHealButtonPosVer = _G["VUHDO_getHealButtonPosVer"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
+	VUHDO_roundToPixel = _G["VUHDO_roundToPixel"];
 end
 
 -- BURST CACHE ---------------------------------------------------
@@ -32,6 +34,7 @@ end
 local sHealButtonWidthCache = { };
 local sTopHeightCache = { };
 local sBottomHeightCache = { };
+
 
 function VUHDO_resetSizeCalcCaches()
 	table.wipe(sHealButtonWidthCache);
@@ -43,21 +46,52 @@ end
 
 
 
+--
+local tBarScaling;
+local tValue;
+function VUHDO_getPixelPerfectSpacing(aPanelNum, aSpacingType)
+
+	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
+	tValue = tBarScaling[aSpacingType] or 0;
+
+	return tValue;
+
+end
+
+
+
+--
+local tBarScaling;
+local tValue;
+function VUHDO_getPixelPerfectGap(aPanelNum, aGapType)
+
+	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
+	tValue = tBarScaling[aGapType] or 0;
+
+	return tValue;
+
+end
+
+
 
 -- Returns the total height of optional threat bars
+local tTopSpace;
+local tNamePos;
+local tNameHeight;
 function VUHDO_getAdditionalTopHeight(aPanelNum)
+
 	if not sTopHeightCache[aPanelNum] then
-		local tTopSpace;
+		tTopSpace = 0;
 
 		if VUHDO_INDICATOR_CONFIG[aPanelNum]["BOUQUETS"]["THREAT_BAR"] ~= "" then
 			tTopSpace = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["THREAT_BAR"]["HEIGHT"];
-		else
-			tTopSpace = 0;
 		end
 
-		local tNamePos = VUHDO_splitString(VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["position"], "+");
+		tNamePos = VUHDO_splitString(VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["position"], "+");
+
 		if strfind(tNamePos[1], "BOTTOM", 1, true) and strfind(tNamePos[2], "TOP", 1, true) then
-			local tNameHeight = VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["_spacing"];
+			tNameHeight = VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["_spacing"];
+
 			if tNameHeight and tNameHeight > tTopSpace then
 				tTopSpace = tNameHeight;
 			end
@@ -66,26 +100,30 @@ function VUHDO_getAdditionalTopHeight(aPanelNum)
 	end
 
 	return sTopHeightCache[aPanelNum];
+
 end
 
 
 
 --
+local tHotCfg;
+local tBottomSpace;
+local tNamePos;
+local tNameHeight;
 function VUHDO_getAdditionalBottomHeight(aPanelNum)
+
 	if not sBottomHeightCache[aPanelNum] then
 		-- HoT icons
-		local tHotCfg = VUHDO_PANEL_SETUP[aPanelNum]["HOTS"];
-		local tBottomSpace;
+		tHotCfg = VUHDO_PANEL_SETUP[aPanelNum]["HOTS"];
+		tBottomSpace = 0;
 
 		if tHotCfg["radioValue"] == 7 or tHotCfg["radioValue"] == 8 then
 			tBottomSpace = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"] * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
-		else
-			tBottomSpace = 0;
 		end
 
-		local tNamePos = VUHDO_splitString(VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["position"], "+");
+		tNamePos = VUHDO_splitString(VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["position"], "+");
 		if strfind(tNamePos[1], "TOP", 1, true) and strfind(tNamePos[2], "BOTTOM", 1, true) then
-			local tNameHeight = VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["_spacing"];
+			tNameHeight = VUHDO_PANEL_SETUP[aPanelNum]["ID_TEXT"]["_spacing"];
 			if tNameHeight and tNameHeight > tBottomSpace then
 				tBottomSpace = tNameHeight;
 			end
@@ -95,6 +133,7 @@ function VUHDO_getAdditionalBottomHeight(aPanelNum)
 	end
 
 	return sBottomHeightCache[aPanelNum];
+
 end
 
 
@@ -103,6 +142,7 @@ end
 local tBarScaling;
 local tTargetWidth;
 local function VUHDO_getTargetBarWidth(aPanelNum)
+
 	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 
 	tTargetWidth = 0;
@@ -115,11 +155,13 @@ local function VUHDO_getTargetBarWidth(aPanelNum)
 	end
 
 	return tTargetWidth;
+
 end
 
 
 
 --
+local tCnt;
 function VUHDO_getNumHotSlots(aPanelNum)
 
 	if not VUHDO_strempty(VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["SLOTS"][12]) then

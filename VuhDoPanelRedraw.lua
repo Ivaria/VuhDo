@@ -208,17 +208,16 @@ local function VUHDO_initPlayerTargetBorder(aButton, aBorderFrame, anIsNoIndicat
 	tGap = tWidth + VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["BAR_BORDER"]["ADJUST"];
 	VUHDO_PixelUtil.SetPoint(aBorderFrame, "TOPLEFT", aButton:GetName(), "TOPLEFT", -tGap, tGap);
 	VUHDO_PixelUtil.SetPoint(aBorderFrame, "BOTTOMRIGHT", aButton:GetName(), "BOTTOMRIGHT", tGap, -tGap);
-	
-	if not tBackdrop then
-		tBackdrop = aBorderFrame:GetBackdrop();
-		tBackdrop["edgeSize"] = tWidth;
-		tBackdrop["edgeFile"] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["BAR_BORDER"]["FILE"];
-		tBackdrop["insets"]["left"] = 0;
-		tBackdrop["insets"]["right"] = 0;
-		tBackdrop["insets"]["top"] = 0;
-		tBackdrop["insets"]["bottom"] = 0;
-	end
-	
+
+	tBackdrop = aBorderFrame:GetBackdrop() or {};
+	tBackdrop["edgeSize"] = tWidth;
+	tBackdrop["edgeFile"] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["BAR_BORDER"]["FILE"];
+	tBackdrop["insets"] = tBackdrop["insets"] or {};
+	tBackdrop["insets"]["left"] = tWidth;
+	tBackdrop["insets"]["right"] = tWidth;
+	tBackdrop["insets"]["top"] = tWidth;
+	tBackdrop["insets"]["bottom"] = tWidth;
+
 	aBorderFrame.backdropInfo = tBackdrop;
 	VUHDO_PixelUtil.ApplyBackdrop(aBorderFrame, tBackdrop);
 
@@ -252,15 +251,14 @@ local function VUHDO_initClusterBorder(aButton)
 	VUHDO_PixelUtil.SetPoint(tClusterFrame, "TOPLEFT", aButton:GetName(), "TOPLEFT", 0, 0);
 	VUHDO_PixelUtil.SetPoint(tClusterFrame, "BOTTOMRIGHT", aButton:GetName(), "BOTTOMRIGHT", 0, 0);
 	
-	if not tBackdropCluster then
-		tBackdropCluster = tClusterFrame:GetBackdrop();
-		tBackdropCluster["edgeSize"] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["CLUSTER_BORDER"]["WIDTH"];
-		tBackdropCluster["edgeFile"] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["CLUSTER_BORDER"]["FILE"];
-		tBackdropCluster["insets"]["left"] = 0;
-		tBackdropCluster["insets"]["right"] = 0;
-		tBackdropCluster["insets"]["top"] = 0;
-		tBackdropCluster["insets"]["bottom"] = 0;
-	end
+	tBackdropCluster = tClusterFrame:GetBackdrop() or {};
+	tBackdropCluster["edgeSize"] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["CLUSTER_BORDER"]["WIDTH"];
+	tBackdropCluster["edgeFile"] = VUHDO_INDICATOR_CONFIG[tPanelNum]["CUSTOM"]["CLUSTER_BORDER"]["FILE"];
+	tBackdropCluster["insets"] = tBackdropCluster["insets"] or {};
+	tBackdropCluster["insets"]["left"] = 0;
+	tBackdropCluster["insets"]["right"] = 0;
+	tBackdropCluster["insets"]["top"] = 0;
+	tBackdropCluster["insets"]["bottom"] = 0;
 	
 	tClusterFrame.backdropInfo = tBackdropCluster;
 	VUHDO_PixelUtil.ApplyBackdrop(tClusterFrame, tBackdropCluster);
@@ -574,8 +572,8 @@ local function VUHDO_initOverhealText(aHealthBar, aWidth)
 	VUHDO_PixelUtil.SetSize(tOvhPanel, 1, 1);
 	tOvhPanel:SetScale(1);
 
-	tX = VUHDO_roundToPixelOffset(sOverhealTextSetup["xAdjust"] * aWidth * 0.01);
-	tY = VUHDO_roundToPixelOffset(-sOverhealTextSetup["yAdjust"] * sBarScaling["barHeight"] * 0.01);
+	tX = sOverhealTextSetup["xAdjust"] * aWidth * 0.01;
+	tY = -sOverhealTextSetup["yAdjust"] * sBarScaling["barHeight"] * 0.01;
 	tOvhPanel:ClearAllPoints();
 	VUHDO_PixelUtil.SetPoint(tOvhPanel, sOverhealTextSetup["point"], aHealthBar:GetName(), sOverhealTextSetup["point"], tX, tY);
 end
@@ -618,7 +616,7 @@ local function VUHDO_initPrivateAura(aHealthBar, aButton, anAuraIndex)
 	tPrivateAura:SetFrameStrata(aHealthBar:GetFrameStrata());
 	tPrivateAura:SetFrameLevel(aHealthBar:GetFrameLevel() + 2);
 
-	tX = VUHDO_roundToPixelOffset(sPrivateAuraXOffset + (sPrivateAuraStep * (anAuraIndex - 1)));
+	tX = sPrivateAuraXOffset + (sPrivateAuraStep * (anAuraIndex - 1));
 	VUHDO_PixelUtil.SetPoint(tPrivateAura, sPrivateAuraSetup["point"], aHealthBar:GetName(), sPrivateAuraSetup["point"], tX, sPrivateAuraYOffset);
 
 	VUHDO_PixelUtil.SetSize(tPrivateAura, sPrivateAuraHeight, sPrivateAuraHeight);
@@ -642,8 +640,8 @@ end
 --
 local tX, tY;
 local function VUHDO_initRaidIcon(aHealthBar, anIcon, aWidth)
-	tX = VUHDO_roundToPixelOffset(sRaidIconSetup["xAdjust"] * aWidth * 0.01);
-	tY = VUHDO_roundToPixelOffset(-sRaidIconSetup["yAdjust"] * sBarScaling["barHeight"] * 0.01);
+	tX = sRaidIconSetup["xAdjust"] * aWidth * 0.01;
+	tY = -sRaidIconSetup["yAdjust"] * sBarScaling["barHeight"] * 0.01;
 
 	anIcon:Hide();
 	anIcon:ClearAllPoints();
@@ -664,11 +662,11 @@ local function VUHDO_initSwiftmendIndicator()
 		return;
 	end
 
-	local tX = VUHDO_roundToPixelOffset(sSwiftmendIndicatorSetup["xAdjust"] * sBarScaling["barWidth"] * 0.01);
-	local tY = VUHDO_roundToPixelOffset(-sSwiftmendIndicatorSetup["yAdjust"] * sBarScaling["barHeight"] * 0.01);
+	local tX = sSwiftmendIndicatorSetup["xAdjust"] * sBarScaling["barWidth"] * 0.01;
+	local tY = -sSwiftmendIndicatorSetup["yAdjust"] * sBarScaling["barHeight"] * 0.01;
 	VUHDO_PixelUtil.SetPoint(tIcon, sSwiftmendIndicatorSetup["anchor"], sHealthBar:GetName(), sSwiftmendIndicatorSetup["anchor"], tX, tY);
 
-	tHeight = VUHDO_roundToPixel(sBarScaling["barHeight"] * 0.5 * sSwiftmendIndicatorSetup["SCALE"]);
+	tHeight = sBarScaling["barHeight"] * 0.5 * sSwiftmendIndicatorSetup["SCALE"];
 	VUHDO_PixelUtil.SetSize(tIcon, tHeight, tHeight);
 end
 
@@ -1059,18 +1057,20 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 
 	VUHDO_STD_BACKDROP = aPanel:GetBackdrop();
 	VUHDO_STD_BACKDROP["edgeFile"] = tPanelColor["BORDER"]["file"];
-	VUHDO_STD_BACKDROP["edgeSize"] = tPanelColor["BORDER"]["edgeSize"];
-	VUHDO_STD_BACKDROP["insets"]["left"] = tPanelColor["BORDER"]["insets"];
-	VUHDO_STD_BACKDROP["insets"]["right"] = tPanelColor["BORDER"]["insets"];
-	VUHDO_STD_BACKDROP["insets"]["top"] = tPanelColor["BORDER"]["insets"];
-	VUHDO_STD_BACKDROP["insets"]["bottom"] = tPanelColor["BORDER"]["insets"];
+	VUHDO_STD_BACKDROP["edgeSize"] = tPanelColor["BORDER"]["edgeSize"] or 4;
+	VUHDO_STD_BACKDROP["insets"]["left"] = tPanelColor["BORDER"]["insets"] or 0;
+	VUHDO_STD_BACKDROP["insets"]["right"] = tPanelColor["BORDER"]["insets"] or 0;
+	VUHDO_STD_BACKDROP["insets"]["top"] = tPanelColor["BORDER"]["insets"] or 0;
+	VUHDO_STD_BACKDROP["insets"]["bottom"] = tPanelColor["BORDER"]["insets"] or 0;
 
 	aPanel.backdropInfo = VUHDO_STD_BACKDROP;
 	VUHDO_PixelUtil.ApplyBackdrop(aPanel, VUHDO_STD_BACKDROP);
 
-	aPanel.backdropBorderColor = VUHDO_getOrCreateCachedColor(VUHDO_backColor(tPanelColor["BORDER"]));
-	aPanel.backdropBorderColorAlpha = tPanelColor["BORDER"]["O"] or 1;
-	aPanel:SetBackdropBorderColor(VUHDO_backColor(tPanelColor["BORDER"]));
+	-- Ensure proper border color with pixel-perfect alpha
+	local tBorderR, tBorderG, tBorderB, tBorderO = VUHDO_backColor(tPanelColor["BORDER"]);
+	aPanel.backdropBorderColor = VUHDO_getOrCreateCachedColor(tBorderR, tBorderG, tBorderB, tBorderO);
+	aPanel.backdropBorderColorAlpha = tBorderO or tPanelColor["BORDER"]["O"] or 0.46;
+	aPanel:SetBackdropBorderColor(tBorderR, tBorderG, tBorderB, aPanel.backdropBorderColorAlpha);
 
 	if VUHDO_IS_PANEL_CONFIG then
 		tLabel:SetText("[PANEL "  .. aPanelNum .. "]");

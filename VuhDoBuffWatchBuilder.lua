@@ -124,7 +124,7 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 	tTexture:SetTexture(tIcon);
 
 	local tGap = VUHDO_BUFF_SETTINGS["CONFIG"]["COMPACT"] and 0 or 3
-	tIconFrame:SetPoint("TOPLEFT", tBuffPanel:GetName(), "TOPLEFT" , tGap, -tGap);
+	VUHDO_PixelUtil.SetPoint(tIconFrame, "TOPLEFT", tBuffPanel:GetName(), "TOPLEFT" , tGap, -tGap);
 
 	if VUHDO_LibButtonFacade then
 		VUHDO_LibButtonFacade:Group("VuhDo", VUHDO_I18N_BUFF_WATCH):AddButton(tIconFrame, { ["Icon"] = tTexture });
@@ -144,7 +144,7 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 	end
 
 	if tSwatch then
-		tBuffPanel:SetPoint("TOPLEFT", "VuhDoBuffWatchMainFrame", "TOPLEFT", VUHDO_PANEL_OFFSET_X, -VUHDO_PANEL_OFFSET_Y);
+		VUHDO_PixelUtil.SetPoint(tBuffPanel, "TOPLEFT", "VuhDoBuffWatchMainFrame", "TOPLEFT", VUHDO_PANEL_OFFSET_X, -VUHDO_PANEL_OFFSET_Y);
 		VUHDO_PixelUtil.SetWidth(tBuffPanel, tSwatch:GetWidth() + VUHDO_BUFF_PANEL_BASE_WIDTH);
 		VUHDO_PixelUtil.SetHeight(tBuffPanel, VUHDO_IN_PANEL_HEIGHT);
 		VUHDO_PixelUtil.SetWidth(_G[tBuffPanel:GetName() .. "BuffNameLabel"], tBuffPanel:GetWidth() - 30);
@@ -281,7 +281,7 @@ function VUHDO_reloadBuffPanel()
 
 	VuhDoBuffWatchMainFrame:ClearAllPoints();
 	local tPosition = VUHDO_BUFF_SETTINGS["CONFIG"]["POSITION"];
-	VuhDoBuffWatchMainFrame:SetPoint(tPosition["point"], "UIParent", tPosition["relativePoint"], tPosition["x"], tPosition["y"]);
+	VUHDO_PixelUtil.SetPoint(VuhDoBuffWatchMainFrame, tPosition["point"], "UIParent", tPosition["relativePoint"], tPosition["x"], tPosition["y"]);
 	VuhDoBuffWatchMainFrame:SetWidth(VUHDO_PANEL_WIDTH + VUHDO_BUFF_PANEL_GAP_X);
 	VuhDoBuffWatchMainFrame:SetHeight(VUHDO_PANEL_HEIGHT + VUHDO_BUFF_PANEL_GAP_TOP);
 	VuhDoBuffWatchMainFrame:SetBackdropColor(VUHDO_backColor(VUHDO_BUFF_SETTINGS["CONFIG"]["PANEL_BG_COLOR"]));
