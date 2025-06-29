@@ -326,7 +326,7 @@ local function VUHDO_customizeHotIcons(aPanelNum, aButton, aHotName, aRest, aTim
 			tIcon:SetTexture(anIcon);
 		end
 
-		VUHDO_PixelUtil.ApplySettings(tIcon, true);
+		VUHDO_PixelUtil.ApplySettings(tIcon);
 	end
 
 	tIcon:SetTexCoord(aClipL or sClipL, aClipR or sClipR, aClipT or sClipT, aClipB or sClipB);
@@ -512,7 +512,7 @@ local function VUHDO_customizeHotIcons(aPanelNum, aButton, aHotName, aRest, aTim
 
 	if tIsChargeShown then
 		tChargeTexture:SetTexture(VUHDO_CHARGE_TEXTURES[tTimes]);
-		VUHDO_PixelUtil.ApplySettings(tChargeTexture, true);
+		VUHDO_PixelUtil.ApplySettings(tChargeTexture);
 		tChargeTexture:SetVertexColor(VUHDO_backColorWithFallback(tHotColor));
 		
 		tChargeTexture:Show();
@@ -522,7 +522,7 @@ local function VUHDO_customizeHotIcons(aPanelNum, aButton, aHotName, aRest, aTim
 		end
 
 		tChargeTexture:SetTexture(VUHDO_SHIELD_TEXTURES[aShieldCharges]);
-		VUHDO_PixelUtil.ApplySettings(tChargeTexture, true);
+		VUHDO_PixelUtil.ApplySettings(tChargeTexture);
 		
 		if tHotColor and tHotColor["R"] then
 			tChargeTexture:SetVertexColor(tHotColor["R"] + 0.15, tHotColor["G"] + 0.15, tHotColor["B"] + 0.15, tHotColor["O"]);
@@ -1436,7 +1436,7 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 					tIcon:SetTexture(anIcon);
 				end
 
-				VUHDO_PixelUtil.ApplySettings(tIcon, true);
+				VUHDO_PixelUtil.ApplySettings(tIcon);
 
 				tIcon:SetVertexColor(VUHDO_backColorWithFallback(aColor));
 

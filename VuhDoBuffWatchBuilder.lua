@@ -122,7 +122,7 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 	tIconFrame = _G[tBuffPanel:GetName() .. "IconTexture"];
 	tTexture = _G[tIconFrame:GetName() .. "Texture"];
 	tTexture:SetTexture(tIcon);
-	VUHDO_PixelUtil.ApplySettings(tTexture, true);
+	VUHDO_PixelUtil.ApplySettings(tTexture);
 
 	local tGap = VUHDO_BUFF_SETTINGS["CONFIG"]["COMPACT"] and 0 or 3
 	VUHDO_PixelUtil.SetPoint(tIconFrame, "TOPLEFT", tBuffPanel:GetName(), "TOPLEFT" , tGap, -tGap);

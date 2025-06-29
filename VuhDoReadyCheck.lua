@@ -13,7 +13,7 @@ local function VUHDO_placeReadyIcon(aButton)
 	else
 		VUHDO_UIFrameFlashStop(tIcon);
 		tIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\icon_info");
-		VUHDO_PixelUtil.ApplySettings(tIcon, true);
+		VUHDO_PixelUtil.ApplySettings(tIcon);
 		tIcon:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tIcon, "LEFT", aButton:GetName(), "LEFT", -5, 0);
 		VUHDO_PixelUtil.SetWidth(tIcon, 16);
@@ -73,7 +73,7 @@ local function VUHDO_updateReadyIcon(aUnit, anIsReady)
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		VUHDO_getBarRoleIcon(tButton, 20):SetTexture(
 			"Interface\\AddOns\\VuhDo\\Images\\" .. (anIsReady and "icon_check_2" or "icon_cancel_1"));
-		VUHDO_PixelUtil.ApplySettings(VUHDO_getBarRoleIcon(tButton, 20), true);
+		VUHDO_PixelUtil.ApplySettings(VUHDO_getBarRoleIcon(tButton, 20));
 	end
 end
 

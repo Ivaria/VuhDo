@@ -120,7 +120,7 @@ function VUHDO_initCustomDebuffs()
 			tIcon:SetAllPoints();
 			tIconName = tIcon:GetName();
 
-			VUHDO_PixelUtil.ApplySettings(tIcon, true);
+			VUHDO_PixelUtil.ApplySettings(tIcon);
 
 			tTimer = VUHDO_getBarIconTimer(sButton, tIconIdx);
 			VUHDO_customizeIconText(tIcon, sHeight, tTimer, VUHDO_CONFIG["CUSTOM_DEBUFF"]["TIMER_TEXT"]);

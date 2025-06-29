@@ -637,7 +637,7 @@ function VUHDO_refactorStatusbar(tBar)
 
 	tBar["SetStatusBarTexture"] = function(self, aTexture)
 		self["texture"]:SetTexture(aTexture);
-		VUHDO_PixelUtil.ApplySettings(self["texture"], true);
+		VUHDO_PixelUtil.ApplySettings(self["texture"]);
 	end
 
 

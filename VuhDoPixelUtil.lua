@@ -16,7 +16,6 @@ local sLastKnownScale = nil;
 
 
 --
-local tScale;
 function VUHDO_getPixelScale()
 
 	if not sPixelScale then
@@ -43,6 +42,7 @@ end
 
 
 --
+local tScale;
 function VUHDO_roundToPixel(aValue)
 
 	tScale = VUHDO_getPixelScale();
@@ -187,19 +187,14 @@ end
 
 
 --
-function tPixelUtil.ApplySettings(aTexture, anIsEnabled)
+function tPixelUtil.ApplySettings(aTexture)
 
 	if not aTexture then
 		return;
 	end
 
-	if anIsEnabled then
-		aTexture:SetTexelSnappingBias(0);
-		aTexture:SetSnapToPixelGrid(false);
-	else
-		aTexture:SetTexelSnappingBias(0);
-		aTexture:SetSnapToPixelGrid(false);
-	end
+	aTexture:SetTexelSnappingBias(0);
+	aTexture:SetSnapToPixelGrid(false);
 
 	return;
 

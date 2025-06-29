@@ -75,7 +75,7 @@ function VUHDO_positionTableHeaders(aPanel, aPanelNum)
 		tHealthBar:SetValue(1);
 		VUHDO_PixelUtil.SetHeight(tHealthBar, tHeight);
 
-		if tStatusFile then tHealthBar:SetStatusBarTexture(tStatusFile); VUHDO_PixelUtil.ApplySettings(tHealthBar:GetStatusBarTexture(), true); end
+		if tStatusFile then tHealthBar:SetStatusBarTexture(tStatusFile); VUHDO_PixelUtil.ApplySettings(tHealthBar:GetStatusBarTexture()); end
 
 		tHeaderText = VUHDO_getHeaderTextId(tHeader);
 		tHeaderText:SetFont(tFont, tTextSize, "OUTLINE");

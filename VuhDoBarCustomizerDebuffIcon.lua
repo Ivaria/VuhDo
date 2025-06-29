@@ -140,8 +140,7 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 
 	if anIsInit then
 		VUHDO_getBarIcon(aButton, anIconIndex):SetTexture(anIconInfo[1]);
-
-		VUHDO_PixelUtil.ApplySettings(VUHDO_getBarIcon(aButton, anIconIndex), true);
+		VUHDO_PixelUtil.ApplySettings(VUHDO_getBarIcon(aButton, anIconIndex));
 
 		if sIsName then
 			tNameLabel = VUHDO_getBarIconName(aButton, anIconIndex);
@@ -206,8 +205,7 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		end
 	elseif VUHDO_getBarIcon(aButton, anIconIndex):GetTexture() ~= anIconInfo[1] then
 		VUHDO_getBarIcon(aButton, anIconIndex):SetTexture(anIconInfo[1]);
-
-		VUHDO_PixelUtil.ApplySettings(VUHDO_getBarIcon(aButton, anIconIndex), true);
+		VUHDO_PixelUtil.ApplySettings(VUHDO_getBarIcon(aButton, anIconIndex));
 
 		VUHDO_getBarIconFrame(aButton, anIconIndex):SetAlpha(1);
 

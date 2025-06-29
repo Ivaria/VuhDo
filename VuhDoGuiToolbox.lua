@@ -779,7 +779,7 @@ function VUHDO_setLlcStatusBarTexture(aStatusBar, aTextureName)
 	tFile = VUHDO_LibSharedMedia:Fetch('statusbar', aTextureName);
 	if tFile then
 		aStatusBar:SetStatusBarTexture(tFile);
-		VUHDO_PixelUtil.ApplySettings(aStatusBar:GetStatusBarTexture(), true);
+		VUHDO_PixelUtil.ApplySettings(aStatusBar:GetStatusBarTexture());
 	end
 end
 

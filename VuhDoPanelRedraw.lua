@@ -766,7 +766,7 @@ end
 local function VUHDO_initFlashBar()
 	tBar = _G[sButton:GetName() .. "BgBarIcBarHlBarFlBar"];
 	tBar:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\white_square_16_16");
-	VUHDO_PixelUtil.ApplySettings(tBar:GetStatusBarTexture(), true);
+	VUHDO_PixelUtil.ApplySettings(tBar:GetStatusBarTexture());
 	tBar:SetStatusBarColor(1, 0.8, 0.8, 1);
 	tBar:SetAlpha(0);
 end
@@ -879,7 +879,7 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	if sStatusTexture then
 		for tCnt =  1, 19 do
 			VUHDO_getHealthBar(aButton, tCnt):SetStatusBarTexture(sStatusTexture);
-			VUHDO_PixelUtil.ApplySettings(VUHDO_getHealthBar(aButton, tCnt):GetStatusBarTexture(), true);
+			VUHDO_PixelUtil.ApplySettings(VUHDO_getHealthBar(aButton, tCnt):GetStatusBarTexture());
 		end
 	end
 
@@ -1182,7 +1182,7 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 		local tGcdCol = VUHDO_PANEL_SETUP["BAR_COLORS"]["GCD_BAR"];
 		VuhDoGcdStatusBar:SetVuhDoColor(tGcdCol);
 		VuhDoGcdStatusBar:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\white_square_16_16");
-		VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture(), true);
+		VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture());
 		VuhDoGcdStatusBar:SetValue(0);
 		VuhDoGcdStatusBar:SetFrameStrata("TOOLTIP");
 	end
