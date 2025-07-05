@@ -1696,40 +1696,17 @@ do
 			tSubCommand = strlower(tParsedTexts[2] or "");
 
 			if tSubCommand == "test" then
-				VUHDO_testPixelPerfect();
+				VUHDO_pixelTest();
 			elseif tSubCommand == "spacing" then
-				VUHDO_testPixelPerfectSpacing();
-			elseif tSubCommand == "values" then
-				VUHDO_testPixelPerfectValues();
-			elseif tSubCommand == "refresh" then
-				VUHDO_refreshPixelScale();
-				VUHDO_Msg("Pixel scale refreshed. Current scale: " .. VUHDO_getPixelScale());
+				VUHDO_pixelTestSpacing();
 			elseif tSubCommand == "hide" then
-				VUHDO_hidePixelTestFrame();
+				VUHDO_pixelHideTestFrame();
 			elseif tSubCommand == "scale" then
-				VUHDO_Msg("Current UI Scale: " .. VUHDO_getUIScale());
-				VUHDO_Msg("Current Pixel Scale: " .. VUHDO_getPixelScale());
-			elseif tSubCommand == "monitor" then
-				if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] then
-					VUHDO_CONFIG["PIXEL_PERFECT"]["logScaleChanges"] = not VUHDO_CONFIG["PIXEL_PERFECT"]["logScaleChanges"];
-
-					VUHDO_Msg("Scale change logging: " .. (VUHDO_CONFIG["PIXEL_PERFECT"]["logScaleChanges"] and "ON" or "OFF"));
-				end
-			elseif tSubCommand == "testscale" then
-				VUHDO_testScaleChangeHandling();
+				VUHDO_pixelShowScale();
 			elseif tSubCommand == "cache" then
-				VUHDO_printBackdropCacheStats();
+				VUHDO_pixelPrintCacheStats();
 			else
-				VUHDO_Msg("Pixel-perfect testing commands:");
-				VUHDO_Msg("  /vd pixel test - Test pixel scale calculation and show test frames");
-				VUHDO_Msg("  /vd pixel spacing - Test pixel-perfect spacing values");
-				VUHDO_Msg("  /vd pixel hide - Hide the test frames");
-				VUHDO_Msg("  /vd pixel values - Test pixel rounding values");
-				VUHDO_Msg("  /vd pixel refresh - Refresh pixel scale");
-				VUHDO_Msg("  /vd pixel scale - Show current scale values");
-				VUHDO_Msg("  /vd pixel monitor - Toggle scale change logging");
-				VUHDO_Msg("  /vd pixel testscale - Test scale change handling");
-				VUHDO_Msg("  /vd pixel cache - Print backdrop cache metrics");
+				VUHDO_pixelHelp();
 			end
 
 		elseif aCommand == "?" or strfind(tCommandWord, "help") or aCommand == "" then

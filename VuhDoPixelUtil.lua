@@ -274,7 +274,7 @@ local tFrameSize;
 local tSpacing;
 local tTestFrames = { };
 local tXOffset;
-function VUHDO_testPixelPerfect()
+function VUHDO_pixelTest()
 
 	VUHDO_Msg("|cffFFD100--- Pixel-Perfect Testing ---|r");
 
@@ -345,7 +345,7 @@ local tBorderGapX;
 local tBorderGapY;
 local tHeaderSpacing;
 local tNonIntegerValues = { };
-function VUHDO_testPixelPerfectSpacing()
+function VUHDO_pixelTestSpacing()
 
 	VUHDO_Msg("|cffFFD100--- Pixel-Perfect Spacing Test ---|r");
 
@@ -416,7 +416,7 @@ end
 
 --
 local tVisibleCount;
-function VUHDO_hidePixelTestFrame()
+function VUHDO_pixelHideTestFrame()
 
 	tVisibleCount = 0;
 
@@ -531,7 +531,7 @@ end
 --
 local tBackdropCount;
 local tInsetsCount;
-function VUHDO_printBackdropCacheStats()
+function VUHDO_pixelPrintCacheStats()
 
 	tBackdropCount, tInsetsCount = VUHDO_getBackdropCacheStats();
 
@@ -541,6 +541,34 @@ function VUHDO_printBackdropCacheStats()
 	VUHDO_Msg("Cached insets: " .. tInsetsCount);
 
 	VUHDO_Msg("|cffFFD100--- End of Cache Stats ---|r");
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_pixelShowScale()
+
+	VUHDO_Msg("|cffB0E0E6Current UI Scale:|r " .. VUHDO_getUIScale());
+	VUHDO_Msg("|cffFFD100Current Pixel Scale:|r " .. VUHDO_getPixelScale());
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_pixelHelp()
+
+	VUHDO_Msg("Pixel-perfect commands:");
+	VUHDO_Msg("  /vd pixel test - Show pixel-perfect test frames");
+	VUHDO_Msg("  /vd pixel spacing - Show pixel-perfect spacing values");
+	VUHDO_Msg("  /vd pixel hide - Hide the test frames");
+	VUHDO_Msg("  /vd pixel scale - Show current scale values");
+	VUHDO_Msg("  /vd pixel cache - Print backdrop cache metrics");
 
 	return;
 
