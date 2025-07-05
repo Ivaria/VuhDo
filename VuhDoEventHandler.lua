@@ -1717,6 +1717,8 @@ do
 				end
 			elseif tSubCommand == "testscale" then
 				VUHDO_testScaleChangeHandling();
+			elseif tSubCommand == "cache" then
+				VUHDO_printBackdropCacheStats();
 			else
 				VUHDO_Msg("Pixel-perfect testing commands:");
 				VUHDO_Msg("  /vd pixel test - Test pixel scale calculation and show test frames");
@@ -1727,6 +1729,7 @@ do
 				VUHDO_Msg("  /vd pixel scale - Show current scale values");
 				VUHDO_Msg("  /vd pixel monitor - Toggle scale change logging");
 				VUHDO_Msg("  /vd pixel testscale - Test scale change handling");
+				VUHDO_Msg("  /vd pixel cache - Print backdrop cache metrics");
 			end
 
 		elseif aCommand == "?" or strfind(tCommandWord, "help") or aCommand == "" then
