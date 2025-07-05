@@ -14,6 +14,23 @@ local sUIScale;
 local sLastKnownScale = nil;
 local sBackdropCache = { };
 local sInsetsCache = { };
+local sPixelToUIUnitFactor = nil;
+
+
+
+--
+local tPhysicalHeight;
+function VUHDO_getPixelToUIUnitFactor()
+
+	if not sPixelToUIUnitFactor then
+		_, tPhysicalHeight = GetPhysicalScreenSize();
+
+		sPixelToUIUnitFactor = 768.0 / tPhysicalHeight;
+	end
+
+	return sPixelToUIUnitFactor;
+
+end
 
 
 
@@ -45,11 +62,31 @@ end
 
 --
 local tScale;
-function VUHDO_roundToPixel(aValue)
+local tUIUnitFactor;
+local tNumPixels;
+function VUHDO_roundToPixel(aValue, aMinPixels)
+
+	if aValue == 0 and (not aMinPixels or aMinPixels == 0) then
+		return 0;
+	end
 
 	tScale = VUHDO_getPixelScale();
+	tUIUnitFactor = VUHDO_getPixelToUIUnitFactor();
+	tNumPixels = floor((aValue * tScale) / tUIUnitFactor + 0.5);
 
-	return floor(aValue * tScale + 0.5) / tScale;
+	if aMinPixels then
+		if aValue < 0.0 then
+			if tNumPixels > -aMinPixels then
+				tNumPixels = -aMinPixels;
+			end
+		else
+			if tNumPixels < aMinPixels then
+				tNumPixels = aMinPixels;
+			end
+		end
+	end
+
+	return tNumPixels * tUIUnitFactor / tScale;
 
 end
 
@@ -60,6 +97,7 @@ function VUHDO_refreshPixelScale()
 
 	sPixelScale = nil;
 	sUIScale = nil;
+	sPixelToUIUnitFactor = nil;
 
 	return;
 
@@ -201,6 +239,10 @@ function tPixelUtil.ApplySettings(aTexture)
 	return;
 
 end
+
+
+
+
 
 
 
@@ -448,22 +490,35 @@ end
 --
 local tTestValues;
 local tRounded;
+local tRoundedWithMin;
 function VUHDO_testPixelPerfectValues()
 
-	VUHDO_Msg("|cffFFD100--- Pixel-Perfect Value Test ---|r");
+	VUHDO_Msg("|cffFFD100--- Enhanced Pixel-Perfect Value Test ---|r");
+
+	VUHDO_Msg("|cffFFA500** Resolution Info:|r");
+	VUHDO_Msg("  |cffB0E0E6UI Unit Factor:|r " .. VUHDO_getPixelToUIUnitFactor());
+	VUHDO_Msg("  |cffB0E0E6Pixel Scale:|r " .. VUHDO_getPixelScale());
 
 	VUHDO_Msg("|cffFFA500** Rounding Test Values:|r");
-	VUHDO_Msg("  |cffB0E0E6Format:|r Original -> Rounded");
+	VUHDO_Msg("  |cffB0E0E6Format:|r Original -> Rounded (with min 1px)");
 
 	tTestValues = {0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0};
 
 	for _, tValue in ipairs(tTestValues) do
 		tRounded = VUHDO_roundToPixel(tValue);
+		tRoundedWithMin = VUHDO_roundToPixel(tValue, 1);
 
-		VUHDO_Msg(format("  %.2f -> %.2f", tValue, tRounded));
+		VUHDO_Msg(format("  %.2f -> %.2f (min: %.2f)", tValue, tRounded, tRoundedWithMin));
 	end
 
-	VUHDO_Msg("|cffFFD100--- End of Pixel-Perfect Value Test ---|r");
+	VUHDO_Msg("|cffFFA500** Edge Case Tests:|r");
+	VUHDO_Msg("  Zero value: " .. VUHDO_roundToPixel(0));
+	VUHDO_Msg("  Negative value: " .. VUHDO_roundToPixel(-1.5));
+	VUHDO_Msg("  Negative with min: " .. VUHDO_roundToPixel(-1.5, 1));
+	VUHDO_Msg("  Tiny value: " .. VUHDO_roundToPixel(0.1));
+	VUHDO_Msg("  Tiny with min: " .. VUHDO_roundToPixel(0.1, 1));
+
+	VUHDO_Msg("|cffFFD100--- End of Enhanced Pixel-Perfect Value Test ---|r");
 
 	return;
 
