@@ -1,3 +1,5 @@
 .release/*
 !.release/release.sh
 !.release/.env
+.vscode/settings.json
+*.swp

@@ -862,6 +862,16 @@ local VUHDO_DEFAULT_CONFIG = {
 	["IS_READY_CHECK_DISABLED"] = false,
 
 	["SHOW_SPELL_TRACE"] = false,
+
+	["PIXEL_PERFECT"] = {
+		["enabled"] = true,
+		["redrawOnScaleChange"] = true,
+		["scaleChangeDelay"] = 0.1,
+		["logScaleChanges"] = false,
+		["autoRefresh"] = true,
+		["debounceTime"] = 0.5,
+		["testMode"] = false,
+	},
 };
 
 
