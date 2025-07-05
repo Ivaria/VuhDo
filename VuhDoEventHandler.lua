@@ -164,6 +164,7 @@ local VUHDO_updateAllRaidBars;
 local VUHDO_updateCustomDebuffTooltip;
 local VUHDO_getUnitZoneName;
 local VUHDO_getCurrentMouseOver;
+local VUHDO_handleScaleChange;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -605,6 +606,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateCustomDebuffTooltip = _G["VUHDO_updateCustomDebuffTooltip"];
 	VUHDO_getCurrentMouseOver = _G["VUHDO_getCurrentMouseOver"];
 	VUHDO_UIFrameFlash_OnUpdate = _G["VUHDO_UIFrameFlash_OnUpdate"];
+	VUHDO_handleScaleChange = _G["VUHDO_handleScaleChange"];
 
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_updateShieldBar = _G["VUHDO_updateShieldBar"];
@@ -642,6 +644,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
+	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
 
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
@@ -964,7 +967,7 @@ local function VUHDO_init()
 
 	if VuhDoNewOptionsTabbedFrame then
 		VuhDoNewOptionsTabbedFrame:ClearAllPoints();
-		VuhDoNewOptionsTabbedFrame:SetPoint("CENTER", "UIParent", "CENTER", 0, 0);
+		VUHDO_PixelUtil.SetPoint(VuhDoNewOptionsTabbedFrame, "CENTER", "UIParent", "CENTER", 0, 0);
 	end
 
 	VUHDO_initSharedMedia();
@@ -972,6 +975,7 @@ local function VUHDO_init()
 	VUHDO_initButtonFacade(VUHDO_INSTANCE);
 	VUHDO_initLibSpecialization();
 	VUHDO_initHideBlizzFrames();
+	VUHDO_initScaleMonitoring();
 
 	if not InCombatLockdown() then
 		VUHDO_initKeyboardMacros();
@@ -1414,6 +1418,16 @@ do
 				end
 			end
 
+		elseif "UI_SCALE_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_handleScaleChange();
+			end
+
+		elseif "DISPLAY_SIZE_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_handleScaleChange();
+			end
+
 		else
 			VUHDO_Msg("Error: Unexpected event: " .. anEvent);
 		end
@@ -1670,6 +1684,23 @@ do
 
 		elseif tCommandWord == "ab" or tCommandWord == "about" then
 			VUHDO_printAbout();
+
+		elseif tCommandWord == "pixel" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "test" then
+				VUHDO_pixelTest();
+			elseif tSubCommand == "spacing" then
+				VUHDO_pixelTestSpacing();
+			elseif tSubCommand == "hide" then
+				VUHDO_pixelHideTestFrame();
+			elseif tSubCommand == "scale" then
+				VUHDO_pixelShowScale();
+			elseif tSubCommand == "cache" then
+				VUHDO_pixelPrintCacheStats();
+			else
+				VUHDO_pixelHelp();
+			end
 
 		elseif aCommand == "?" or strfind(tCommandWord, "help") or aCommand == "" then
 			tHelpText = (VUHDO_I18N_COMMAND_LIST or ""):gsub("\n", "|n");
@@ -2500,6 +2531,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",
+	"UI_SCALE_CHANGED", "DISPLAY_SIZE_CHANGED",
 };
 
 
@@ -2543,6 +2575,8 @@ do
 
 		anInstance:SetScript("OnEvent", VUHDO_OnEvent);
 		anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
+
+		VUHDO_refreshPixelScale();
 
 		VUHDO_printAbout();
 
