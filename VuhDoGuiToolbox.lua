@@ -664,7 +664,7 @@ local function VUHDO_showBlizzTarget()
 	VUHDO_registerOriginalEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
 	VUHDO_registerOriginalEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
 
-	ComboFrame:SetPoint("TOPRIGHT", "TargetFrame", "TOPRIGHT", -44, -9);
+	VUHDO_PixelUtil.SetPoint(ComboFrame, "TOPRIGHT", "TargetFrame", "TOPRIGHT", -44, -9);
 end
 
 
@@ -780,7 +780,10 @@ end
 local tFile;
 function VUHDO_setLlcStatusBarTexture(aStatusBar, aTextureName)
 	tFile = VUHDO_LibSharedMedia:Fetch('statusbar', aTextureName);
-	if tFile then aStatusBar:SetStatusBarTexture(tFile); end
+	if tFile then
+		aStatusBar:SetStatusBarTexture(tFile);
+		VUHDO_PixelUtil.ApplySettings(aStatusBar:GetStatusBarTexture());
+	end
 end
 
 
@@ -820,7 +823,7 @@ local tOutline, tShadowAlpha, tColor, tFactor;
 function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
 	tFactor = aHeight * 0.01;
 	aLabel:ClearAllPoints();
-	aLabel:SetPoint(aSetup["ANCHOR"], aParent:GetName(), aSetup["ANCHOR"], tFactor * aSetup["X_ADJUST"], -tFactor * aSetup["Y_ADJUST"]);
+	VUHDO_PixelUtil.SetPoint(aLabel, aSetup["ANCHOR"], aParent:GetName(), aSetup["ANCHOR"], tFactor * aSetup["X_ADJUST"], -tFactor * aSetup["Y_ADJUST"]);
 	tOutline = aSetup["USE_OUTLINE"] and "OUTLINE|" or "";
 	tOutline = tOutline .. (aSetup["USE_MONO"] and "OUTLINEMONOCHROME" or ""); -- Bugs out in MoP beta
 
