@@ -25,7 +25,11 @@ function VUHDO_getPixelToUIUnitFactor()
 	if not sPixelToUIUnitFactor then
 		_, tPhysicalHeight = GetPhysicalScreenSize();
 
-		sPixelToUIUnitFactor = 768.0 / tPhysicalHeight;
+		if tPhysicalHeight and tPhysicalHeight > 0 then
+			sPixelToUIUnitFactor = 768.0 / tPhysicalHeight;
+		else
+			sPixelToUIUnitFactor = 1.0;
+		end
 	end
 
 	return sPixelToUIUnitFactor;
@@ -251,6 +255,7 @@ local tCacheKey;
 local tBackdrop;
 local tInsets;
 local tInsetsKey;
+local tCurrentScale;
 function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 
 	if not aFrame or not aFrame.SetBackdrop then
@@ -258,7 +263,8 @@ function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 	end
 
 	if aBackdropInfo then
-		tCacheKey = "";
+		tCurrentScale = VUHDO_getPixelScale();
+		tCacheKey = "scale:" .. tCurrentScale .. ";";
 
 		for tKey, tValue in pairs(aBackdropInfo) do
 			if tKey == "insets" and type(tValue) == "table" then
@@ -279,7 +285,7 @@ function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 						tBackdrop["edgeSize"] = VUHDO_roundToPixel(tValue);
 					end
 				elseif tKey == "insets" and type(tValue) == "table" then
-					tInsetsKey = (tValue["left"] or 0) .. "," .. (tValue["right"] or 0) .. "," .. (tValue["top"] or 0) .. "," .. (tValue["bottom"] or 0);
+					tInsetsKey = tCurrentScale .. ":" .. (tValue["left"] or 0) .. "," .. (tValue["right"] or 0) .. "," .. (tValue["top"] or 0) .. "," .. (tValue["bottom"] or 0);
 
 					if not sInsetsCache[tInsetsKey] then
 						tInsets = { };
@@ -462,22 +468,39 @@ function VUHDO_pixelHideTestFrame()
 
 	tVisibleCount = 0;
 
-	for _, tFrame in pairs(tTestFrames) do
-		if tFrame and tFrame:IsShown() then
+	for tIndex, tFrame in pairs(tTestFrames) do
+		if tFrame then
+			if tFrame:IsShown() then
+				tVisibleCount = tVisibleCount + 1;
+			end
+
 			tFrame:Hide();
 
-			tVisibleCount = tVisibleCount + 1;
+			tFrame:SetScript("OnDragStart", nil);
+			tFrame:SetScript("OnDragStop", nil);
+
+			tFrame:SetMovable(false);
+			tFrame:EnableMouse(false);
+
+			tFrame:UnregisterAllEvents();
+			tFrame:SetParent(nil);
+
+			tTestFrames[tIndex] = nil;
 		end
 	end
 
 	if tVisibleCount > 0 then
 		VUHDO_Msg("|cffFFD100--- Pixel Test Frames Hidden ---|r");
-		VUHDO_Msg("  |cffB0E0E6Action:|r " .. tVisibleCount .. " test frames have been hidden");
+
+		VUHDO_Msg("  |cffB0E0E6Action:|r " .. tVisibleCount .. " test frames have been hidden and cleaned up");
 		VUHDO_Msg("  |cffB0E0E6Note:|r Use '/vd pixel test' to show them again");
+
 		VUHDO_Msg("|cffFFD100--- End of Pixel Test Frames ---|r");
 	else
 		VUHDO_Msg("|cffFFD100--- Pixel Test Frames ---|r");
-		VUHDO_Msg("  |cffB0E0E6Status:|r No test frames are currently visible");
+
+		VUHDO_Msg("  |cffB0E0E6Status:|r No test frames were found to clean up");
+
 		VUHDO_Msg("|cffFFD100--- End of Pixel Test Frames ---|r");
 	end
 
@@ -620,8 +643,8 @@ function VUHDO_pixelHelp()
 
 	VUHDO_Msg("Pixel-perfect commands:");
 	VUHDO_Msg("  /vd pixel test - Show pixel-perfect test frames");
+	VUHDO_Msg("  /vd pixel hide - Hide and clean up test frames");
 	VUHDO_Msg("  /vd pixel spacing - Show pixel-perfect spacing values");
-	VUHDO_Msg("  /vd pixel hide - Hide the test frames");
 	VUHDO_Msg("  /vd pixel scale - Show current scale values");
 	VUHDO_Msg("  /vd pixel cache - Print backdrop cache metrics");
 
