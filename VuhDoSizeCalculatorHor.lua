@@ -290,7 +290,7 @@ end
 local tX, tY, tOffset;
 local tColumnNum, tBarScaling;
 local tHeaderSpacing;
-local function VUHDO_getHeaderPosHor(aHeaderPlace, aPanelNum)
+function VUHDO_getHeaderPosHor(aHeaderPlace, aPanelNum)
 
 	tX = VUHDO_getColumnPos(aHeaderPlace, aPanelNum);
 	tY = VUHDO_getRowPos(aHeaderPlace, aPanelNum);
