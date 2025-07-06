@@ -10,6 +10,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed conditional mana bar display during combat  
   
   
 Improvements:  

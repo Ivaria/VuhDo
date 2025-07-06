@@ -101,6 +101,11 @@ local tAllButtons, tManaBar, tQuota;
 local tManaBarHeight;
 local tRegularHeight;
 local tPanelNum;
+local tIsHealer;
+local tIsHealerOnlyBouquet;
+local tHealthBar;
+local tIsDynamic;
+local tHealthQuota;
 function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName)
 
 	aMaxValue = aMaxValue or 0;
@@ -113,6 +118,15 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 	tManaBarHeight = 0;
 	tQuota = (aCurrValue == 0 and aMaxValue == 0) and 0 or aMaxValue > 1 and aCurrValue / aMaxValue or 0;
 
+	tIsHealer = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["role"] == VUHDO_ID_RANGED_HEAL;
+	tIsHealerOnlyBouquet = aBouquetName and strfind(aBouquetName, "HEALER_ONLY");
+	tIsDynamic = aUnit == "target" or aUnit == "focus";
+
+	if tIsHealerOnlyBouquet and not tIsHealer and tIsDynamic then
+		tHealthQuota = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["healthmax"] > 0
+			and VUHDO_RAID[aUnit]["health"] / VUHDO_RAID[aUnit]["healthmax"] or 0;
+	end
+
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
@@ -122,15 +136,24 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 			end
 
 			tManaBar = VUHDO_getHealthBar(tButton, 2);
+			tHealthBar = VUHDO_getHealthBar(tButton, 1);
 
 			if tQuota > 0 and tManaBarHeight > 0 then
-				if aColor then
-					tManaBar:SetVuhDoColor(aColor);
-				end
+				if tIsHealerOnlyBouquet and not tIsHealer and tIsDynamic then
+					tManaBar:SetValue(tHealthQuota);
+					tManaBar:SetVuhDoColor(VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["healthColor"] or aColor);
+					tManaBar:SetAlpha(1);
+				else
+					if aColor then
+						tManaBar:SetVuhDoColor(aColor);
+					end
 
-				tManaBar:SetValue(tQuota);
+					tManaBar:SetValue(tQuota);
+					tManaBar:SetAlpha(1);
+				end
 			else
 				tManaBar:SetValue((not anIsActive and sIsInverted[tPanelNum]) and 1 or 0);
+				tManaBar:SetAlpha(1);
 			end
 
 			if not InCombatLockdown() then
@@ -170,13 +193,21 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 			tManaBar = VUHDO_getHealthBar(tButton, 2);
 
 			if tQuota > 0 then
-				if aColor then
-					tManaBar:SetVuhDoColor(aColor);
-				end
+				if tIsHealerOnlyBouquet and not tIsHealer and tIsDynamic then
+					tManaBar:SetValue(tHealthQuota);
+					tManaBar:SetVuhDoColor(VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["healthColor"] or aColor);
+					tManaBar:SetAlpha(1);
+				else
+					if aColor then
+						tManaBar:SetVuhDoColor(aColor);
+					end
 
-				tManaBar:SetValue(tQuota);
+					tManaBar:SetValue(tQuota);
+					tManaBar:SetAlpha(1);
+				end
 			else
 				tManaBar:SetValue(0);
+				tManaBar:SetAlpha(1);
 			end
 
 			if not InCombatLockdown() then
@@ -194,8 +225,68 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 		end
 	end
 
+	return;
+
 end
 
+
+--
+local tAllButtons, tManaBar;
+local tPanelNum;
+local tIsHealer;
+local tIsHealerOnlyBouquet;
+local tIsDynamic;
+local tManaBarBouquet;
+local tHealthQuota;
+function VUHDO_updateManaBarForHealthChange(aUnit)
+
+	tIsDynamic = aUnit == "target" or aUnit == "focus";
+
+	if not tIsDynamic then
+		return;
+	end
+
+	tIsHealer = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["role"] == VUHDO_ID_RANGED_HEAL;
+	tHealthQuota = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["healthmax"] > 0
+		and VUHDO_RAID[aUnit]["health"] / VUHDO_RAID[aUnit]["healthmax"] or 0;
+
+	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
+
+		tManaBarBouquet = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"];
+		tIsHealerOnlyBouquet = tManaBarBouquet and strfind(tManaBarBouquet, "HEALER_ONLY");
+
+		if tIsHealerOnlyBouquet and not tIsHealer then
+			tManaBar = VUHDO_getHealthBar(tButton, 2);
+
+			tManaBar:SetValue(tHealthQuota);
+			tManaBar:SetVuhDoColor(VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["healthColor"]);
+			tManaBar:SetAlpha(1);
+		end
+	end
+
+	tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[VUHDO_RAID[aUnit]["name"]];
+
+	if tAllButtons then
+		for _, tButton in pairs(tAllButtons) do
+			tPanelNum = VUHDO_BUTTON_CACHE[tButton];
+
+			tManaBarBouquet = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"];
+			tIsHealerOnlyBouquet = tManaBarBouquet and strfind(tManaBarBouquet, "HEALER_ONLY");
+
+			if tIsHealerOnlyBouquet and not tIsHealer then
+				tManaBar = VUHDO_getHealthBar(tButton, 2);
+
+				tManaBar:SetValue(tHealthQuota);
+				tManaBar:SetVuhDoColor(VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["healthColor"]);
+				tManaBar:SetAlpha(1);
+			end
+		end
+	end
+
+	return;
+
+end
 
 
 --

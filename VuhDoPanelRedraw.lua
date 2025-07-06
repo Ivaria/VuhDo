@@ -1207,7 +1207,12 @@ local VUHDO_redrawAllPanels = VUHDO_redrawAllPanels;
 
 --
 function VUHDO_reloadUI(anIsFixAllFrameLevels)
-	if InCombatLockdown() then return; end
+
+	if InCombatLockdown() then
+		VUHDO_RELOAD_AFTER_BATTLE = true;
+
+		return;
+	end
 
 	VUHDO_IS_RELOADING = true;
 
@@ -1224,6 +1229,9 @@ function VUHDO_reloadUI(anIsFixAllFrameLevels)
 
 	VUHDO_reloadBuffPanel();
 	VUHDO_initDebuffs(); -- Talente scheinen recht spät zur Verfügung zu stehen...
+
+	return;
+
 end
 
 

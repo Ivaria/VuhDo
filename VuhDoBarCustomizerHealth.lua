@@ -1163,10 +1163,14 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 		end
 		VUHDO_updateIncHeal(aUnit);
 
+	elseif 4 == anUpdateMode then -- VUHDO_UPDATE_DEBUFF
+		VUHDO_updateManaBarForHealthChange(aUnit);
+
 	elseif 6 == anUpdateMode then -- VUHDO_UPDATE_AFK
 		for _, tButton in pairs(tAllButtons) do
 			VUHDO_customizeText(tButton, 1, false); -- VUHDO_UPDATE_ALL
 		end
+
 	elseif 10 == anUpdateMode then -- VUHDO_UPDATE_ALIVE
 		VUHDO_determineIncHeal(aUnit);
 		for _, tButton in pairs(tAllButtons) do
@@ -1192,6 +1196,7 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 
 		VUHDO_updateIncHeal(aUnit);
 	end
+
 end
 
 
