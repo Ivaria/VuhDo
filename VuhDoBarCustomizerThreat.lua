@@ -1,3 +1,4 @@
+local _;
 
 
 
@@ -119,7 +120,6 @@ end
 
 --
 local tUnitInfo;
-local tOldIsInRange;
 local tIsCharmed;
 local tIsInRange;
 function VUHDO_updateUnitRange(aUnit, aMode)
@@ -131,8 +131,6 @@ function VUHDO_updateUnitRange(aUnit, aMode)
 	tUnitInfo = VUHDO_RAID[aUnit];
 
 	if tUnitInfo then
-		tOldIsInRange = tUnitInfo["range"];
-
 		tIsCharmed = UnitIsCharmed(aUnit) and UnitCanAttack("player", aUnit) and not tUnitInfo["dead"];
 
 		tUnitInfo["baseRange"] = "player" == aUnit or "pet" == aUnit or UnitInRange(aUnit);
