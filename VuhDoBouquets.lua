@@ -710,7 +710,10 @@ function VUHDO_registerAllBouquets(aDoCompress)
 	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);
 
 	VUHDO_updateGlobalToggles();
+	VUHDO_buildEventInterestCache();
 	VUHDO_initAllEventBouquets();
+
+	return;
 
 end
 
@@ -719,27 +722,58 @@ end
 --
 local VUHDO_EVENT_BOUQUETS = { };
 setmetatable(VUHDO_EVENT_BOUQUETS, VUHDO_META_NEW_ARRAY);
+
+--
+local VUHDO_EVENT_INTEREST_CACHE = { };
+setmetatable(VUHDO_EVENT_INTEREST_CACHE, VUHDO_META_NEW_ARRAY);
+
+--
 local tName;
 local function VUHDO_isBouquetInterestedInEvent(aBouquetName, anEventType)
+
 	if not VUHDO_EVENT_BOUQUETS[aBouquetName][anEventType] then
 		VUHDO_EVENT_BOUQUETS[aBouquetName][anEventType] = 0;
 
 		for _, tItem in pairs(VUHDO_BOUQUETS["STORED"][aBouquetName]) do
 			tName = tItem["name"];
-			if VUHDO_BOUQUET_BUFFS_SPECIAL[tName] then
 
+			if VUHDO_BOUQUET_BUFFS_SPECIAL[tName] then
 				for _, tInterest in pairs(VUHDO_BOUQUET_BUFFS_SPECIAL[tName]["interests"]) do
 					if tInterest == anEventType then
 						VUHDO_EVENT_BOUQUETS[aBouquetName][anEventType] = 1;
+
 						break;
 					end
 				end
-
 			end
 		end
 	end
 
 	return 1 == VUHDO_EVENT_BOUQUETS[aBouquetName][anEventType] or 1 == anEventType; -- VUHDO_UPDATE_ALL
+
+end
+
+
+
+--
+function VUHDO_buildEventInterestCache()
+
+	twipe(VUHDO_EVENT_INTEREST_CACHE);
+
+	for tBouquetName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
+		for tEventType = 1, 50 do -- VUHDO_UPDATE_ALL to reasonable max
+			if VUHDO_isBouquetInterestedInEvent(tBouquetName, tEventType) then
+				if not VUHDO_EVENT_INTEREST_CACHE[tEventType] then
+					VUHDO_EVENT_INTEREST_CACHE[tEventType] = { };
+				end
+
+				VUHDO_EVENT_INTEREST_CACHE[tEventType][tBouquetName] = true;
+			end
+		end
+	end
+
+	return;
+
 end
 
 
@@ -820,20 +854,35 @@ end
 
 --
 local tInfo;
+local tInterestedBouquets;
 function VUHDO_updateBouquetsForEvent(aUnit, anEventType)
 
 	tInfo = VUHDO_RAID[aUnit];
 
-	-- FIXME: if aUnit is nil they why iterate?
-	for tName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
-		if VUHDO_isBouquetInterestedInEvent(tName, anEventType) then
+	tInterestedBouquets = VUHDO_EVENT_INTEREST_CACHE[anEventType];
+
+	if tInterestedBouquets then
+		for tName, _ in pairs(tInterestedBouquets) do
 			if tInfo then
 				VUHDO_updateEventBouquet(aUnit, tName, anEventType);
-
 			elseif aUnit then -- focus / n/a
 				for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[tName]) do
 					if VUHDO_isBouquetInterestedInEvent(tName, VUHDO_UPDATE_DC) then
 						tDelegate(aUnit, true, nil, 100, 0, 100, VUHDO_PANEL_SETUP["BAR_COLORS"]["OFFLINE"], nil, tName, 0);
+					end
+				end
+			end
+		end
+	else
+		for tName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
+			if VUHDO_isBouquetInterestedInEvent(tName, anEventType) then
+				if tInfo then
+					VUHDO_updateEventBouquet(aUnit, tName, anEventType);
+				elseif aUnit then -- focus / n/a
+					for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[tName]) do
+						if VUHDO_isBouquetInterestedInEvent(tName, VUHDO_UPDATE_DC) then
+							tDelegate(aUnit, true, nil, 100, 0, 100, VUHDO_PANEL_SETUP["BAR_COLORS"]["OFFLINE"], nil, tName, 0);
+						end
 					end
 				end
 			end
@@ -846,7 +895,6 @@ function VUHDO_updateBouquetsForEvent(aUnit, anEventType)
 
 end
 local VUHDO_updateBouquetsForEvent = VUHDO_updateBouquetsForEvent;
-
 
 
 -- Bei Panel-Redraw aufzurufen
@@ -1010,6 +1058,7 @@ end
 --
 function VUHDO_bouqetsChanged()
 	twipe(VUHDO_EVENT_BOUQUETS);
+	twipe(VUHDO_EVENT_INTEREST_CACHE);
 	VUHDO_initFromSpellbook();
 	VUHDO_registerAllBouquets(false);
 end
