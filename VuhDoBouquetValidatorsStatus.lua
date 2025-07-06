@@ -3,8 +3,8 @@ local _;
 local UnitPower = UnitPower;
 local UnitPowerMax = UnitPowerMax;
 local GetRuneCooldown = GetRuneCooldown;
-local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
-local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
+local UnitGetTotalAbsorbs = VUHDO_unitGetTotalAbsorbs;
+local UnitGetTotalHealAbsorbs = VUHDO_unitGetTotalHealAbsorbs;
 local floor = floor;
 
 local ALTERNATE_POWER_INDEX = ALTERNATE_POWER_INDEX;

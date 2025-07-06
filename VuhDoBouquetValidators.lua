@@ -1,6 +1,5 @@
 VUHDO_FORCE_RESET = false;
 
-local UnitGetTotalHealAbsorbs = VUHDO_unitGetTotalHealAbsorbs;
 local GetTexCoordsForRole = GetTexCoordsForRole or VUHDO_getTexCoordsForRole;
 local GetRaidTargetIndex = GetRaidTargetIndex;
 local UnitExists = UnitExists;
