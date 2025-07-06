@@ -37,6 +37,8 @@
 	<Script file="VuhDoReadyCheck.lua" />
 	<Script file="VuhDoEventHandler.lua" />
 	<Script file="VuhDoDebuffs.lua" />
+	<Script file="VuhDoBouquetValidatorsSpellTrace.lua" />
+	<Script file="VuhDoBouquetValidatorsStatus.lua" />
 	<Script file="VuhDoBouquetValidators.lua" />
 	<Script file="VuhDoBouquets.lua" />
 	<Script file="VuhDoEventHandler.lua" />

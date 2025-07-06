@@ -461,11 +461,32 @@ local function VUHDO_customizeHotIcons(aPanelNum, aButton, aHotName, aRest, aTim
 		tStarted = floor(10 * (GetTime() - aDuration + aRest) + 0.5) * 0.1;
 		tClockDuration = tClock:GetCooldownDuration() * 0.001;
 
-		if aDuration > 0 and 
+		local tMinDuration = max(aDuration, 0.1); -- min 0.1 sec duration for visibility
+
+		if tMinDuration > 0 and
 			(tClock:GetAlpha() == 0 or (tClock:GetAttribute("started") or tStarted) ~= tStarted or 
-			(tClock:IsVisible() and aDuration > tClockDuration)) then
+			(tClock:IsVisible() and (tMinDuration > tClockDuration or tMinDuration < 0.1))) then
 			tClock:SetAlpha(1);
-			tClock:SetCooldown(tStarted, aDuration);
+
+			-- Blizzard Cooldown frame options:
+			--  SetReverse(true/false) - controls sweep direction (true = counter-clockwise, false = clockwise)
+			--  SetHideCountdownNumbers(true/false) - controls whether countdown numbers are shown
+			--  SetDrawSwipe(true/false) - controls whether the sweep animation is drawn
+			--  SetDrawEdge(true/false) - controls whether the edge glow is drawn
+			--  SetDrawBling(true/false) - controls whether the bling effect is drawn
+			--  SetBlingTexture(texture) - sets custom bling texture
+			--  SetEdgeTexture(texture) - sets custom edge texture
+			--  SetSwipeTexture(texture) - sets custom swipe texture
+			--  SetCooldownColor(r, g, b, a) - sets the color of the cooldown sweep
+
+			-- set cooldown options before SetCooldown to ensure they take effect
+			tClock:SetHideCountdownNumbers(true); -- hide countdown numbers
+			tClock:SetReverse(false); -- clockwise sweep (standard)
+			tClock:SetDrawSwipe(true); -- always show the sweep animation
+			tClock:SetDrawEdge(true); -- show edge glow for better visibility
+			tClock:SetDrawBling(false); -- disable bling effect for cleaner look
+
+			tClock:SetCooldown(tStarted, tMinDuration);
 			tClock:SetAttribute("started", tStarted);
 		end
 
