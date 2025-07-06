@@ -59,6 +59,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Incoming spell trace icons now display cast time as time remaining  
   
   
 --------------------------------------------------------------  
