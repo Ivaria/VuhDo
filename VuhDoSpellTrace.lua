@@ -464,7 +464,13 @@ function VUHDO_getSpellTraceForUnit(aUnit, aSpell)
 	
 	if aSpell and aSpell ~= VUHDO_SPELL_TRACE_TYPE_INCOMING and aSpell ~= VUHDO_SPELL_TRACE_TYPE_HEAL then	
 		if VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"] and VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][aSpell] then
-			return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][aSpell];
+			local tSpellData = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][aSpell];
+
+			if tSpellData then
+				tSpellData["spellId"] = aSpell;
+
+				return tSpellData;
+			end
 		end
 	else
 		local tLatestTraceSpellId;
@@ -480,7 +486,13 @@ function VUHDO_getSpellTraceForUnit(aUnit, aSpell)
 		end
 
 		if tLatestTraceSpellId then
-			return VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tLatestTraceSpellId];
+			local tSpellData = VUHDO_ACTIVE_TRACE_SPELLS[tUnitGuid]["spells"][tLatestTraceSpellId];
+
+			if tSpellData then
+				tSpellData["spellId"] = tLatestTraceSpellId;
+
+				return tSpellData;
+			end
 		end
 	end
 

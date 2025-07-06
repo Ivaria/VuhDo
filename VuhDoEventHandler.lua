@@ -779,6 +779,8 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_buffWatchInitLocalOverrides();
 	VUHDO_clusterBuilderInitLocalOverrides();
 	VUHDO_aoeAdvisorInitLocalOverrides();
+	VUHDO_bouquetValidatorsSpellTraceInitLocalOverrides();
+	VUHDO_bouquetValidatorsStatusInitLocalOverrides();
 	VUHDO_bouquetValidatorsInitLocalOverrides();
 	VUHDO_bouquetsInitLocalOverrides();
 	VUHDO_textProvidersInitLocalOverrides();
@@ -1669,7 +1671,7 @@ do
 				VUHDO_printDeferredTaskMetrics(false);
 			end
 
-		elseif strfind(tCommandWord, "hand") then -- Handler Profiling
+		elseif strfind(tCommandWord, "hand") then
 			tSubCommand = strlower(tParsedTexts[2] or "");
 
 			if tSubCommand == "on" then
@@ -1680,6 +1682,23 @@ do
 				VUHDO_resetHandlerMetrics();
 			else
 				VUHDO_printHandlerMetrics();
+			end
+
+		elseif tCommandWord == "pixel" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "test" then
+				VUHDO_pixelTest();
+			elseif tSubCommand == "spacing" then
+				VUHDO_pixelTestSpacing();
+			elseif tSubCommand == "hide" then
+				VUHDO_pixelHideTestFrame();
+			elseif tSubCommand == "scale" then
+				VUHDO_pixelShowScale();
+			elseif tSubCommand == "cache" then
+				VUHDO_pixelPrintCacheStats();
+			else
+				VUHDO_pixelHelp();
 			end
 
 		elseif tCommandWord == "ab" or tCommandWord == "about" then
