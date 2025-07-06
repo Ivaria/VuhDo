@@ -778,6 +778,8 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_buffWatchInitLocalOverrides();
 	VUHDO_clusterBuilderInitLocalOverrides();
 	VUHDO_aoeAdvisorInitLocalOverrides();
+	VUHDO_bouquetValidatorsSpellTraceInitLocalOverrides();
+	VUHDO_bouquetValidatorsStatusInitLocalOverrides();
 	VUHDO_bouquetValidatorsInitLocalOverrides();
 	VUHDO_bouquetsInitLocalOverrides();
 	VUHDO_textProvidersInitLocalOverrides();
@@ -1694,7 +1696,7 @@ do
 				VUHDO_printDeferredTaskMetrics(false);
 			end
 
-		elseif strfind(tCommandWord, "hand") then -- Handler Profiling
+		elseif strfind(tCommandWord, "hand") then
 			tSubCommand = strlower(tParsedTexts[2] or "");
 
 			if tSubCommand == "on" then
@@ -1706,9 +1708,6 @@ do
 			else
 				VUHDO_printHandlerMetrics();
 			end
-
-		elseif tCommandWord == "ab" or tCommandWord == "about" then
-			VUHDO_printAbout();
 
 		elseif tCommandWord == "pixel" then
 			tSubCommand = strlower(tParsedTexts[2] or "");
@@ -1726,6 +1725,9 @@ do
 			else
 				VUHDO_pixelHelp();
 			end
+
+		elseif tCommandWord == "ab" or tCommandWord == "about" then
+			VUHDO_printAbout();
 
 		elseif aCommand == "?" or strfind(tCommandWord, "help") or aCommand == "" then
 			tHelpText = (VUHDO_I18N_COMMAND_LIST or ""):gsub("\n", "|n");
