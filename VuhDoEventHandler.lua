@@ -1274,8 +1274,6 @@ do
 				if not InCombatLockdown() then
 					VUHDO_initKeyboardMacros();
 					VUHDO_timeReloadUI(1);
-				else
-					VUHDO_RELOAD_AFTER_BATTLE = true;
 				end
 
 				if "SPELLS_CHANGED" == anEvent then

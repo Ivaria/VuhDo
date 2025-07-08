@@ -331,14 +331,8 @@ end
 
 --
 local function VUHDO_statusManaHealerOnlyValidator(anInfo, _)
-
-	if anInfo["powertype"] == 0 and anInfo["role"] == VUHDO_ID_RANGED_HEAL then
-		return true, nil, anInfo["power"], -1,
-			anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]);
-	else
-		return false, nil, -1, -1, -1;
-	end
-
+	return (anInfo["powertype"] == 0 and anInfo["role"] == VUHDO_ID_RANGED_HEAL), nil, anInfo["power"], -1,
+		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]);
 end
 
 
