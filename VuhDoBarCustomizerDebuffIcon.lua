@@ -123,12 +123,16 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		if tCuDeStoConfig["isAliveTime"] then
 			VUHDO_getBarIconTimer(aButton, anIconIndex):SetText(tAliveTime < 99.5 and floor(tAliveTime + 0.5) or ">>");
 		else
-			tRemain = (anIconInfo[4] or aNow - 1) - aNow;
-
-			if tRemain >= 0 and (tRemain < 10 or tCuDeStoConfig["isFullDuration"]) then
-				VUHDO_getBarIconTimer(aButton, anIconIndex):SetText(tRemain > 100 and ">>" or floor(tRemain));
-			else
+			if anIsInit and anIconInfo[2] == -1 then
 				VUHDO_getBarIconTimer(aButton, anIconIndex):SetText("");
+			else
+				tRemain = (anIconInfo[4] or aNow - 1) - aNow;
+
+				if tRemain >= 0 and (tRemain < 10 or tCuDeStoConfig["isFullDuration"]) then
+					VUHDO_getBarIconTimer(aButton, anIconIndex):SetText(tRemain > 100 and ">>" or floor(tRemain));
+				else
+					VUHDO_getBarIconTimer(aButton, anIconIndex):SetText("");
+				end
 			end
 		end
 	end
