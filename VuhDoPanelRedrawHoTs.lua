@@ -175,15 +175,25 @@ end
 
 
 --
+local tHotIcon;
+local tTimer;
+local tCounter;
+local tChargeIcon;
+local tHotColor;
 local tHotConfig;
 local tIconRadio;
+local tCd;
 local function VUHDO_initHotIcon(anIndex)
 
-	local tHotIcon = VUHDO_getBarIcon(sButton, anIndex);
-	local tTimer = VUHDO_getBarIconTimer(sButton, anIndex);
-	local tCounter = VUHDO_getBarIconCounter(sButton, anIndex);
-	local tChargeIcon = VUHDO_getBarIconCharge(sButton, anIndex);
-	local tHotColor = sBarColors["HOT" .. anIndex];
+	if not anIndex then
+		return;
+	end
+
+	tHotIcon = VUHDO_getBarIcon(sButton, anIndex);
+	tTimer = VUHDO_getBarIconTimer(sButton, anIndex);
+	tCounter = VUHDO_getBarIconCounter(sButton, anIndex);
+	tChargeIcon = VUHDO_getBarIconCharge(sButton, anIndex);
+	tHotColor = sBarColors["HOT" .. anIndex];
 
 	tHotIcon:SetAlpha(0);
 
@@ -203,8 +213,10 @@ local function VUHDO_initHotIcon(anIndex)
 
 	if "CLUSTER" == tHotConfig["SLOTS"][anIndex] then
 		VUHDO_customizeIconText(tHotIcon, tHotIcon:GetHeight(), tTimer, VUHDO_CONFIG["CLUSTER"]["TEXT"]);
+
 		tTimer:Show();
 		tCounter:Hide();
+
 		tHotIcon:SetTexture("Interface\\AddOns\\VuhDo\\Images\\cluster2");
 		VUHDO_PixelUtil.ApplySettings(tHotIcon);
 	else
@@ -251,14 +263,34 @@ local function VUHDO_initHotIcon(anIndex)
 		VUHDO_PixelUtil.SetPoint(tChargeIcon, "TOPLEFT", tHotIcon:GetName(), "TOPLEFT", -2, 2);
 
 		if tHotColor["isClock"] then
-			local tCd = VUHDO_getOrCreateCooldown(VUHDO_getBarIconFrame(sButton, anIndex), sButton, anIndex);
+			tCd = VUHDO_getOrCreateCooldown(VUHDO_getBarIconFrame(sButton, anIndex), sButton, anIndex);
+
 			tCd:SetAllPoints(tHotIcon);
-			tCd:SetReverse(true);
+
+			-- Blizzard Cooldown frame options:
+			--  SetReverse(true/false) - controls sweep direction (true = counter-clockwise, false = clockwise)
+			--  SetHideCountdownNumbers(true/false) - controls whether countdown numbers are shown
+			--  SetDrawSwipe(true/false) - controls whether the sweep animation is drawn
+			--  SetDrawEdge(true/false) - controls whether the edge glow is drawn
+			--  SetDrawBling(true/false) - controls whether the bling effect is drawn
+			--  SetBlingTexture(texture) - sets custom bling texture
+			--  SetEdgeTexture(texture) - sets custom edge texture
+			--  SetSwipeTexture(texture) - sets custom swipe texture
+			--  SetCooldownColor(r, g, b, a) - sets the color of the cooldown sweep
+
+			tCd:SetHideCountdownNumbers(true); -- hide countdown numbers
+			tCd:SetReverse(true); -- clockwise sweep (standard)
+			tCd:SetDrawSwipe(true); -- always show the sweep animation
+			tCd:SetDrawEdge(true); -- show edge glow for better visibility
+			tCd:SetDrawBling(false); -- disable bling effect for cleaner look
+
 			tCd:SetCooldown(GetTime(), 0);
-			tCd:SetHideCountdownNumbers(true);
+
 			tCd:SetAlpha(0);
 		end
 	end
+
+	return;
 
 end
 
