@@ -10,6 +10,7 @@ local InCombatLockdown = InCombatLockdown;
 local tonumber = tonumber;
 local string = string;
 local debugprofilestop = debugprofilestop;
+local MeasureCall = C_AddOnProfiler and C_AddOnProfiler.MeasureCall;
 local format = string.format;
 local tinsert = table.insert;
 local tremove = table.remove;
@@ -2423,6 +2424,41 @@ do
 
 
 	--
+	local tProfilerResult;
+	local tSuccess;
+	local function VUHDO_profileSegment(aSegmentName, aSegmentFunction, aTimeDelta, aStartTimes)
+
+		if MeasureCall then
+			tProfilerResult, tSuccess = MeasureCall(aSegmentFunction, aTimeDelta);
+
+			if VUHDO_HANDLER_PROFILING_ENABLED and tProfilerResult and tProfilerResult.elapsedMilliseconds then
+				VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, tProfilerResult.elapsedMilliseconds * 1000);
+			end
+
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				aStartTimes[3] = debugprofilestop();
+			end
+		else
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				aStartTimes[3] = debugprofilestop();
+			end
+
+			aSegmentFunction(aTimeDelta);
+
+			if VUHDO_HANDLER_PROFILING_ENABLED then
+				VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, (debugprofilestop() - aStartTimes[3]) * 1000);
+
+				aStartTimes[3] = debugprofilestop();
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tStartTimes = {
 		[1] = -1, -- overall
 		[2] = -1, -- segment
@@ -2443,11 +2479,7 @@ do
 		-- These need to update very frequenly to not stutter
 		-- --------------------------------------------------
 
-		VUHDO_handleSegment1(aTimeDelta);
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment1", (debugprofilestop() - tStartTimes[2]) * 1000);
-		end
+		VUHDO_profileSegment("segment1", VUHDO_handleSegment1, aTimeDelta, tStartTimes);
 
 		-- process deferred tasks once per frame
 		VUHDO_processDeferredTaskQueue();
@@ -2483,7 +2515,7 @@ do
 
 		-- Segment 2A - UI reloads
 
-		VUHDO_handleSegment2A(aTimeDelta);
+		VUHDO_profileSegment("segment2A", VUHDO_handleSegment2A, aTimeDelta, tStartTimes);
 
 		---------------------------------------------------
 		------------------------- below only if vars loaded
@@ -2495,21 +2527,9 @@ do
 			return;
 		end
 
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2A", (debugprofilestop() - tStartTimes[3]) * 1000);
-			tStartTimes[3] = debugprofilestop();
-		end
-
 		-- Segment 2B: Roster and core updates
 
-		VUHDO_handleSegment2B(aTimeDelta);
-
-		-----------------------------------------------------------------------------------------
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2B", (debugprofilestop() - tStartTimes[3]) * 1000);
-			tStartTimes[3] = debugprofilestop();
-		end
+		VUHDO_profileSegment("segment2B", VUHDO_handleSegment2B, aTimeDelta, tStartTimes);
 
 		-- Segment 2C: Combat checks
 
@@ -2519,18 +2539,13 @@ do
 			return;
 		end
 
-		VUHDO_handleSegment2C(aTimeDelta);
-
-		----------------------------------------------------
-		------------------------- below only very slow tasks
-		----------------------------------------------------
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2C", (debugprofilestop() - tStartTimes[3]) * 1000);
-			tStartTimes[3] = debugprofilestop();
-		end
+		VUHDO_profileSegment("segment2C", VUHDO_handleSegment2C, aTimeDelta, tStartTimes);
 
 		-- Segment 2D: Slow tasks
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tStartTimes[3] = debugprofilestop();
+		end
 
 		if sSlowDelta < 1.2 then
 			sSlowDelta = sSlowDelta + sTimerDelta;
@@ -2555,83 +2570,38 @@ do
 
 		-- Segment 2E: Post-Combat Reload
 
-		VUHDO_handleSegment2E(aTimeDelta);
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2E", (debugprofilestop() - tStartTimes[3]) * 1000);
-		end
+		VUHDO_profileSegment("segment2E", VUHDO_handleSegment2E, aTimeDelta, tStartTimes);
 
 		-- automatic profiles, shield cleanup, hide generic blizz party
 		if VUHDO_checkResetTimer("CHECK_PROFILES", 3.1) then
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				tStartTimes[3] = debugprofilestop();
-			end
-
 			-- Segment 2F: Auto profile detection
 
-			VUHDO_handleSegment2F(aTimeDelta);
-
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				VUHDO_updateOnUpdateSubSegmentMetrics("segment2F", (debugprofilestop() - tStartTimes[3]) * 1000);
-				tStartTimes[3] = debugprofilestop();
-			end
+			VUHDO_profileSegment("segment2F", VUHDO_handleSegment2F, aTimeDelta, tStartTimes);
 
 			-- Segment 2G: Auto profile loading
 
-			VUHDO_handleSegment2G(aTimeDelta);
-
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				VUHDO_updateOnUpdateSubSegmentMetrics("segment2G", (debugprofilestop() - tStartTimes[3]) * 1000);
-				tStartTimes[3] = debugprofilestop();
-			end
+			VUHDO_profileSegment("segment2G", VUHDO_handleSegment2G, aTimeDelta, tStartTimes);
 
 			-- Segment 2H: Hide Blizzard compact party frame
 
-			VUHDO_handleSegment2H(aTimeDelta);
-
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				VUHDO_updateOnUpdateSubSegmentMetrics("segment2H", (debugprofilestop() - tStartTimes[3]) * 1000);
-				tStartTimes[3] = debugprofilestop();
-			end
+			VUHDO_profileSegment("segment2H", VUHDO_handleSegment2H, aTimeDelta, tStartTimes);
 
 			-- Segment 2I: Remove obsolete shields
 
-			VUHDO_handleSegment2I(aTimeDelta);
-
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				VUHDO_updateOnUpdateSubSegmentMetrics("segment2I", (debugprofilestop() - tStartTimes[3]) * 1000);
-			end
+			VUHDO_profileSegment("segment2I", VUHDO_handleSegment2I, aTimeDelta, tStartTimes);
 		end
 
 		-- Segment 2J: Zones
 
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tStartTimes[3] = debugprofilestop();
-		end
-
-		VUHDO_handleSegment2J(aTimeDelta);
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2J", (debugprofilestop() - tStartTimes[3]) * 1000);
-			tStartTimes[3] = debugprofilestop();
-		end
+		VUHDO_profileSegment("segment2J", VUHDO_handleSegment2J, aTimeDelta, tStartTimes);
 
 		-- Segment 2K: Inspect
 
-		VUHDO_handleSegment2K(aTimeDelta);
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2K", (debugprofilestop() - tStartTimes[3]) * 1000);
-			tStartTimes[3] = debugprofilestop();
-		end
+		VUHDO_profileSegment("segment2K", VUHDO_handleSegment2K, aTimeDelta, tStartTimes);
 
 		-- Segment 2L: Macros
 
-		VUHDO_handleSegment2L(aTimeDelta);
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2L", (debugprofilestop() - tStartTimes[3]) * 1000);
-		end
+		VUHDO_profileSegment("segment2L", VUHDO_handleSegment2L, aTimeDelta, tStartTimes);
 
 		VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
 
