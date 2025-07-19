@@ -2424,15 +2424,38 @@ do
 
 
 	--
+	local tSegmentNameMap = {
+		[VUHDO_handleSegment1] = "segment1",
+		[VUHDO_handleSegment2A] = "segment2A",
+		[VUHDO_handleSegment2B] = "segment2B",
+		[VUHDO_handleSegment2C] = "segment2C",
+		[VUHDO_handleSegment2E] = "segment2E",
+		[VUHDO_handleSegment2F] = "segment2F",
+		[VUHDO_handleSegment2G] = "segment2G",
+		[VUHDO_handleSegment2H] = "segment2H",
+		[VUHDO_handleSegment2I] = "segment2I",
+		[VUHDO_handleSegment2J] = "segment2J",
+		[VUHDO_handleSegment2K] = "segment2K",
+		[VUHDO_handleSegment2L] = "segment2L",
+	};
+	local tSegmentName;
 	local tProfilerResult;
 	local tSuccess;
-	local function VUHDO_profileSegment(aSegmentName, aSegmentFunction, aTimeDelta, aStartTimes)
+	local function VUHDO_profileSegment(aSegmentFunction, aTimeDelta, aStartTimes)
+
+		tSegmentName = tSegmentNameMap[aSegmentFunction];
+
+		if not tSegmentName then
+			VUHDO_Msg("Warning: No segment name mapping found for function. Profiling data will be ignored. Function: " .. tostring(aSegmentFunction));
+
+			return;
+		end
 
 		if MeasureCall then
 			tProfilerResult, tSuccess = MeasureCall(aSegmentFunction, aTimeDelta);
 
 			if VUHDO_HANDLER_PROFILING_ENABLED and tProfilerResult and tProfilerResult.elapsedMilliseconds then
-				VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, tProfilerResult.elapsedMilliseconds * 1000);
+				VUHDO_updateOnUpdateSubSegmentMetrics(tSegmentName, tProfilerResult.elapsedMilliseconds * 1000);
 			end
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
@@ -2446,7 +2469,7 @@ do
 			aSegmentFunction(aTimeDelta);
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
-				VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, (debugprofilestop() - aStartTimes[3]) * 1000);
+				VUHDO_updateOnUpdateSubSegmentMetrics(tSegmentName, (debugprofilestop() - aStartTimes[3]) * 1000);
 
 				aStartTimes[3] = debugprofilestop();
 			end
@@ -2479,7 +2502,7 @@ do
 		-- These need to update very frequenly to not stutter
 		-- --------------------------------------------------
 
-		VUHDO_profileSegment("segment1", VUHDO_handleSegment1, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment1, aTimeDelta, tStartTimes);
 
 		-- process deferred tasks once per frame
 		VUHDO_processDeferredTaskQueue();
@@ -2515,7 +2538,7 @@ do
 
 		-- Segment 2A - UI reloads
 
-		VUHDO_profileSegment("segment2A", VUHDO_handleSegment2A, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment2A, aTimeDelta, tStartTimes);
 
 		---------------------------------------------------
 		------------------------- below only if vars loaded
@@ -2529,7 +2552,7 @@ do
 
 		-- Segment 2B: Roster and core updates
 
-		VUHDO_profileSegment("segment2B", VUHDO_handleSegment2B, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment2B, aTimeDelta, tStartTimes);
 
 		-- Segment 2C: Combat checks
 
@@ -2539,7 +2562,7 @@ do
 			return;
 		end
 
-		VUHDO_profileSegment("segment2C", VUHDO_handleSegment2C, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment2C, aTimeDelta, tStartTimes);
 
 		-- Segment 2D: Slow tasks
 
@@ -2570,38 +2593,38 @@ do
 
 		-- Segment 2E: Post-Combat Reload
 
-		VUHDO_profileSegment("segment2E", VUHDO_handleSegment2E, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment2E, aTimeDelta, tStartTimes);
 
 		-- automatic profiles, shield cleanup, hide generic blizz party
 		if VUHDO_checkResetTimer("CHECK_PROFILES", 3.1) then
 			-- Segment 2F: Auto profile detection
 
-			VUHDO_profileSegment("segment2F", VUHDO_handleSegment2F, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment(VUHDO_handleSegment2F, aTimeDelta, tStartTimes);
 
 			-- Segment 2G: Auto profile loading
 
-			VUHDO_profileSegment("segment2G", VUHDO_handleSegment2G, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment(VUHDO_handleSegment2G, aTimeDelta, tStartTimes);
 
 			-- Segment 2H: Hide Blizzard compact party frame
 
-			VUHDO_profileSegment("segment2H", VUHDO_handleSegment2H, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment(VUHDO_handleSegment2H, aTimeDelta, tStartTimes);
 
 			-- Segment 2I: Remove obsolete shields
 
-			VUHDO_profileSegment("segment2I", VUHDO_handleSegment2I, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment(VUHDO_handleSegment2I, aTimeDelta, tStartTimes);
 		end
 
 		-- Segment 2J: Zones
 
-		VUHDO_profileSegment("segment2J", VUHDO_handleSegment2J, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment2J, aTimeDelta, tStartTimes);
 
 		-- Segment 2K: Inspect
 
-		VUHDO_profileSegment("segment2K", VUHDO_handleSegment2K, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment2K, aTimeDelta, tStartTimes);
 
 		-- Segment 2L: Macros
 
-		VUHDO_profileSegment("segment2L", VUHDO_handleSegment2L, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment(VUHDO_handleSegment2L, aTimeDelta, tStartTimes);
 
 		VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
 
