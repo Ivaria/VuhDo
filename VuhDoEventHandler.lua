@@ -2065,6 +2065,15 @@ end
 --
 do
 	--
+	local sTimeDelta = 0;
+	local sSlowDelta = 0;
+	local sHotDebuffToggle = 1;
+	local sAutoProfile;
+	local sTrigger;
+
+
+
+	--
 	local function VUHDO_finalizeOnUpdateMetrics(anOverallStart, aSeg2Start)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
@@ -2080,33 +2089,11 @@ do
 
 
 
+
 	--
-	local tTimeDelta = 0;
-	local tSlowDelta = 0;
-	local tAutoProfile;
-	local tTrigger;
 	local tGcdStart;
 	local tGcdDuration;
-	local tHotDebuffToggle = 1;
-	local tStartTimes = {
-		[1] = -1, -- overall
-		[2] = -1, -- segment
-		[3] = -1, -- subsegment
-	};
-	function VUHDO_OnUpdate(anInstance, aTimeDelta)
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tStartTimes[1] = debugprofilestop();
-			tStartTimes[2] = tStartTimes[1];
-		end
-
-		-----------------------------------------------------
-		-- Segment 1
-		-----------------------------------------------------
-
-		-----------------------------------------------------
-		-- These need to update very frequenly to not stutter
-		-- --------------------------------------------------
+	local function VUHDO_handleSegment1(aTimeDelta, ...)
 
 		-- Update custom debuff animation
 		if VUHDO_DEBUFF_ANIMATION > 0 then
@@ -2134,43 +2121,14 @@ do
 		-- Own frame flash routines to avoid taints
 		VUHDO_UIFrameFlash_OnUpdate(aTimeDelta);
 
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment1", (debugprofilestop() - tStartTimes[2]) * 1000);
-		end
+		return;
 
-		-- process deferred tasks once per frame
-		VUHDO_processDeferredTaskQueue();
+	end
 
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tStartTimes[2] = debugprofilestop();
-		end
 
-		---------------------------------------------------------
-		-- Segment 2
-		---------------------------------------------------------
 
-		---------------------------------------------------------
-		-- From here 0.08 (80 msec) sec tick should be sufficient
-		---------------------------------------------------------
-
-		if tTimeDelta < 0.08 then
-			tTimeDelta = tTimeDelta + aTimeDelta;
-			tSlowDelta = tSlowDelta + aTimeDelta;
-
-			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
-
-			return;
-		else
-			VUHDO_setTimerDelta(tTimeDelta);
-
-			tTimeDelta = 0;
-		end
-
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			tStartTimes[3] = debugprofilestop();
-		end
-
-		-- Segment 2A - UI reloads
+	--
+	local function VUHDO_handleSegment2A(aTimeDelta, ...)
 
 		-- reload UI?
 		if VUHDO_checkTimer("RELOAD_UI") then
@@ -2208,22 +2166,14 @@ do
 			end
 		end
 
-		---------------------------------------------------
-		------------------------- below only if vars loaded
-		---------------------------------------------------
+		return;
 
-		if not VUHDO_VARIABLES_LOADED then
-			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+	end
 
-			return;
-		end
 
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2A", (debugprofilestop() - tStartTimes[3]) * 1000);
-			tStartTimes[3] = debugprofilestop();
-		end
 
-		-- Segment 2B: Roster and core updates
+	--
+	local function VUHDO_handleSegment2B(aTimeDelta, ...)
 
 		-- Reload raid roster?
 		if VUHDO_checkTimer("RELOAD_RAID") then
@@ -2238,7 +2188,7 @@ do
 		-- refresh HoTs, cyclic bouquets and custom debuffs?
 		if VUHDO_checkResetTimer("UPDATE_HOTS", sHotToggleUpdateSecs) then
 			if VUHDO_RAID then
-				if tHotDebuffToggle == 1 then
+				if sHotDebuffToggle == 1 then
 					VUHDO_updateAllHoTs();
 
 					if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
@@ -2248,7 +2198,7 @@ do
 					if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
 						VUHDO_updateSpellTrace();
 					end
-				elseif tHotDebuffToggle == 2 then
+				elseif sHotDebuffToggle == 2 then
 					VUHDO_updateAllCyclicBouquets(false);
 				else
 					VUHDO_updateAllDebuffIcons(false);
@@ -2268,10 +2218,10 @@ do
 				end
 			end
 
-			if tHotDebuffToggle > 2 then
-				tHotDebuffToggle = 1;
+			if sHotDebuffToggle > 2 then
+				sHotDebuffToggle = 1;
 			else
-				tHotDebuffToggle = tHotDebuffToggle + 1;
+				sHotDebuffToggle = sHotDebuffToggle + 1;
 			end
 		end
 
@@ -2314,20 +2264,14 @@ do
 			VUHDO_updateAllOutRaidTargetButtons();
 		end
 
-		-----------------------------------------------------------------------------------------
+		return;
 
-		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2B", (debugprofilestop() - tStartTimes[3]) * 1000);
-			tStartTimes[3] = debugprofilestop();
-		end
+	end
 
-		-- Segment 2C: Combat checks
 
-		if VUHDO_CONFIG_SHOW_RAID then
-			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
 
-			return;
-		end
+	--
+	local function VUHDO_handleSegment2C(aTimeDelta, ...)
 
 		-- refresh aggro?
 		if VUHDO_checkResetTimer("UPDATE_AGGRO", sAggroRefreshSecs) then
@@ -2349,6 +2293,234 @@ do
 			VUHDO_aoeUpdateAll();
 		end
 
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2E(aTimeDelta, ...)
+
+		-- reload after battle
+		if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
+			VUHDO_RELOAD_AFTER_BATTLE = false;
+
+			if VUHDO_TIMERS["RELOAD_RAID"] <= 0 then
+				VUHDO_quickRaidReload();
+
+				if VUHDO_IS_RELOAD_BUFFS then
+					VUHDO_reloadBuffPanel();
+
+					VUHDO_IS_RELOAD_BUFFS = false;
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2F(aTimeDelta, ...)
+
+		if not InCombatLockdown() then
+			sAutoProfile, sTrigger = VUHDO_getAutoProfile();
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2G(aTimeDelta, ...)
+
+		if not InCombatLockdown() and sAutoProfile and not VUHDO_IS_CONFIG then
+			VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. sTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. sAutoProfile .. "|r\"");
+
+			VUHDO_loadProfile(sAutoProfile);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2H(aTimeDelta, ...)
+
+		VUHDO_hideBlizzCompactPartyFrame();
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2I(aTimeDelta, ...)
+
+		VUHDO_removeObsoleteShields();
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2J(aTimeDelta, ...)
+
+		-- Unit Zones
+		if VUHDO_checkResetTimer("RELOAD_ZONES", 3.45) then
+			if VUHDO_RAID then
+				for tUnit, tUnitInfo in pairs(VUHDO_RAID) do
+					tUnitInfo["zone"], tUnitInfo["map"] = VUHDO_getUnitZoneName(tUnit);
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2K(aTimeDelta, ...)
+
+		if not VUHDO_NEXT_INSPECT_UNIT and not InCombatLockdown() and VUHDO_checkResetTimer("REFRESH_INSPECT", 2.1) then
+			VUHDO_tryInspectNext();
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment2L(aTimeDelta, ...)
+
+		-- Refresh d/c shield macros?
+		if VUHDO_checkTimer("MIRROR_TO_MACRO") then
+			if InCombatLockdown() then
+				VUHDO_TIMERS["MIRROR_TO_MACRO"] = 2;
+			else
+				VUHDO_mirrorToMacro();
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tStartTimes = {
+		[1] = -1, -- overall
+		[2] = -1, -- segment
+		[3] = -1, -- subsegment
+	};
+	function VUHDO_OnUpdate(anInstance, aTimeDelta)
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tStartTimes[1] = debugprofilestop();
+			tStartTimes[2] = tStartTimes[1];
+		end
+
+		-----------------------------------------------------
+		-- Segment 1
+		-----------------------------------------------------
+
+		-----------------------------------------------------
+		-- These need to update very frequenly to not stutter
+		-- --------------------------------------------------
+
+		VUHDO_handleSegment1(aTimeDelta);
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment1", (debugprofilestop() - tStartTimes[2]) * 1000);
+		end
+
+		-- process deferred tasks once per frame
+		VUHDO_processDeferredTaskQueue();
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tStartTimes[2] = debugprofilestop();
+		end
+
+		---------------------------------------------------------
+		-- Segment 2
+		---------------------------------------------------------
+
+		---------------------------------------------------------
+		-- From here 0.08 (80 msec) sec tick should be sufficient
+		---------------------------------------------------------
+
+		if sTimeDelta < 0.08 then
+			sTimeDelta = sTimeDelta + aTimeDelta;
+			sSlowDelta = sSlowDelta + aTimeDelta;
+
+			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+
+			return;
+		else
+			VUHDO_setTimerDelta(sTimeDelta);
+
+			sTimeDelta = 0;
+		end
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tStartTimes[3] = debugprofilestop();
+		end
+
+		-- Segment 2A - UI reloads
+
+		VUHDO_handleSegment2A(aTimeDelta);
+
+		---------------------------------------------------
+		------------------------- below only if vars loaded
+		---------------------------------------------------
+
+		if not VUHDO_VARIABLES_LOADED then
+			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+
+			return;
+		end
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2A", (debugprofilestop() - tStartTimes[3]) * 1000);
+			tStartTimes[3] = debugprofilestop();
+		end
+
+		-- Segment 2B: Roster and core updates
+
+		VUHDO_handleSegment2B(aTimeDelta);
+
+		-----------------------------------------------------------------------------------------
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2B", (debugprofilestop() - tStartTimes[3]) * 1000);
+			tStartTimes[3] = debugprofilestop();
+		end
+
+		-- Segment 2C: Combat checks
+
+		if VUHDO_CONFIG_SHOW_RAID then
+			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+
+			return;
+		end
+
+		VUHDO_handleSegment2C(aTimeDelta);
+
 		----------------------------------------------------
 		------------------------- below only very slow tasks
 		----------------------------------------------------
@@ -2360,8 +2532,8 @@ do
 
 		-- Segment 2D: Slow tasks
 
-		if tSlowDelta < 1.2 then
-			tSlowDelta = tSlowDelta + sTimerDelta;
+		if sSlowDelta < 1.2 then
+			sSlowDelta = sSlowDelta + sTimerDelta;
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
 				VUHDO_updateOnUpdateSubSegmentMetrics("segment2D", (debugprofilestop() - tStartTimes[3]) * 1000);
@@ -2371,9 +2543,9 @@ do
 
 			return;
 		else
-			VUHDO_setTimerDelta(aTimeDelta + tSlowDelta);
+			VUHDO_setTimerDelta(aTimeDelta + sSlowDelta);
 
-			tSlowDelta = 0;
+			sSlowDelta = 0;
 		end
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
@@ -2383,19 +2555,7 @@ do
 
 		-- Segment 2E: Post-Combat Reload
 
-		-- reload after battle
-		if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
-			VUHDO_RELOAD_AFTER_BATTLE = false;
-
-			if VUHDO_TIMERS["RELOAD_RAID"] <= 0 then
-				VUHDO_quickRaidReload();
-
-				if VUHDO_IS_RELOAD_BUFFS then
-					VUHDO_reloadBuffPanel();
-					VUHDO_IS_RELOAD_BUFFS = false;
-				end
-			end
-		end
+		VUHDO_handleSegment2E(aTimeDelta);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2E", (debugprofilestop() - tStartTimes[3]) * 1000);
@@ -2407,33 +2567,36 @@ do
 				tStartTimes[3] = debugprofilestop();
 			end
 
-			if not InCombatLockdown() then
-				tAutoProfile, tTrigger = VUHDO_getAutoProfile();
-			end
+			-- Segment 2F: Auto profile detection
+
+			VUHDO_handleSegment2F(aTimeDelta);
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
 				VUHDO_updateOnUpdateSubSegmentMetrics("segment2F", (debugprofilestop() - tStartTimes[3]) * 1000);
 				tStartTimes[3] = debugprofilestop();
 			end
 
-			if not InCombatLockdown() and tAutoProfile and not VUHDO_IS_CONFIG then
-				VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. tTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. tAutoProfile .. "|r\"");
-				VUHDO_loadProfile(tAutoProfile);
-			end
+			-- Segment 2G: Auto profile loading
+
+			VUHDO_handleSegment2G(aTimeDelta);
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
 				VUHDO_updateOnUpdateSubSegmentMetrics("segment2G", (debugprofilestop() - tStartTimes[3]) * 1000);
 				tStartTimes[3] = debugprofilestop();
 			end
 
-			VUHDO_hideBlizzCompactPartyFrame();
+			-- Segment 2H: Hide Blizzard compact party frame
+
+			VUHDO_handleSegment2H(aTimeDelta);
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
 				VUHDO_updateOnUpdateSubSegmentMetrics("segment2H", (debugprofilestop() - tStartTimes[3]) * 1000);
 				tStartTimes[3] = debugprofilestop();
 			end
 
-			VUHDO_removeObsoleteShields();
+			-- Segment 2I: Remove obsolete shields
+
+			VUHDO_handleSegment2I(aTimeDelta);
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
 				VUHDO_updateOnUpdateSubSegmentMetrics("segment2I", (debugprofilestop() - tStartTimes[3]) * 1000);
@@ -2446,26 +2609,16 @@ do
 			tStartTimes[3] = debugprofilestop();
 		end
 
-		-- Unit Zones
-		if VUHDO_checkResetTimer("RELOAD_ZONES", 3.45) then
-			if VUHDO_RAID then
-				for tUnit, tUnitInfo in pairs(VUHDO_RAID) do
-					tUnitInfo["zone"], tUnitInfo["map"] = VUHDO_getUnitZoneName(tUnit);
-				end
-			end
-		end
+		VUHDO_handleSegment2J(aTimeDelta);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2J", (debugprofilestop() - tStartTimes[3]) * 1000);
 			tStartTimes[3] = debugprofilestop();
 		end
 
-
 		-- Segment 2K: Inspect
 
-		if not VUHDO_NEXT_INSPECT_UNIT and not InCombatLockdown() and VUHDO_checkResetTimer("REFRESH_INSPECT", 2.1) then
-			VUHDO_tryInspectNext();
-		end
+		VUHDO_handleSegment2K(aTimeDelta);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2K", (debugprofilestop() - tStartTimes[3]) * 1000);
@@ -2474,14 +2627,7 @@ do
 
 		-- Segment 2L: Macros
 
-		-- Refresh d/c shield macros?
-		if VUHDO_checkTimer("MIRROR_TO_MACRO") then
-			if InCombatLockdown() then
-				VUHDO_TIMERS["MIRROR_TO_MACRO"] = 2;
-			else
-				VUHDO_mirrorToMacro();
-			end
-		end
+		VUHDO_handleSegment2L(aTimeDelta);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2L", (debugprofilestop() - tStartTimes[3]) * 1000);
