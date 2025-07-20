@@ -1648,7 +1648,7 @@ function VUHDO_deferUpdateAllHoTs(aPriority)
 	end
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_HOTS, tUnit, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_HOTS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit);
 	end
 
 	return;

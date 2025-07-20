@@ -315,7 +315,7 @@ function VUHDO_deferUpdateAllDebuffIcons(anIsFrequent, aPriority)
 	end
 
 	for tUnit, _ in pairs(VUHDO_DEBUFF_ICONS) do
-		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_DEBUFF_ICONS, tUnit, anIsFrequent, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_DEBUFF_ICONS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, anIsFrequent);
 	end
 
 	return;
