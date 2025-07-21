@@ -130,7 +130,9 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			if not tButton:IsShown() then tButton:Show(); end -- Wg. Secure handlers?
 
 			-- Bei Profil-Wechseln existiert der Button schon, hat aber die falsche Größe
-			VUHDO_positionHealButton(tButton, tSetup["SCALING"]);
+			VUHDO_initLocalVars(aPanelNum);
+			VUHDO_initHealButton(tButton, aPanelNum);
+			VUHDO_positionHealButton(tButton);
 		end
 
 		tColIdx = tColIdx + 1;
