@@ -30,7 +30,7 @@ externals:
     Libs/TaintLess:
         url: https://www.townlong-yak.com/addons.git/taintless
         commit: default
-    Libs/LibSpecialization: https://repos.curseforge.com/wow/libspecialization/trunk/LibSpecialization
+    Libs/LibSpecialization: https://github.com/BigWigsMods/LibSpecialization.git/LibSpecialization
 
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
 	
