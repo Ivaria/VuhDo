@@ -337,7 +337,7 @@ end
 local tXPos,  tYPos;
 local tHealButton;
 local tGroupArray;
-local tColIdx, tBtnIdx;
+local tColumnIndex, tButtonIndex;
 local tModelArray;
 local tPanelName;
 local tDebuffFrame;
@@ -345,16 +345,16 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 	tModelArray = VUHDO_getDynamicModelArray(aPanelNum);
 	tPanelName  = aPanel:GetName();
 
-	tColIdx = 1;
-	tBtnIdx = 1;
+	tColumnIndex = 1;
+	tButtonIndex = 1;
 
 	for tModelIndex,  tModelId  in ipairs(tModelArray)  do
 		tGroupArray = VUHDO_getGroupMembersSorted(tModelId, sSortCriterion, aPanelNum, tModelIndex);
 
 		for tGroupIndex, tUnit  in ipairs(tGroupArray)  do
-			tHealButton = VUHDO_getHealButton(tBtnIdx, aPanelNum);
+			tHealButton = VUHDO_getHealButton(tButtonIndex, aPanelNum);
 
-			tBtnIdx = tBtnIdx  + 1;
+			tButtonIndex = tButtonIndex  + 1;
 			VUHDO_positionHealButton(tHealButton);
 
 			VUHDO_setupAllHealButtonAttributes(tHealButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
@@ -367,7 +367,7 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 			VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton),  tUnit);
 			VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), tUnit);
 
-			tXPos, tYPos = VUHDO_getHealButtonPos(tColIdx, tGroupIndex, aPanelNum);
+			tXPos, tYPos = VUHDO_getHealButtonPos(tColumnIndex, tGroupIndex, aPanelNum);
 			tHealButton:Hide();
 			tHealButton:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanelName, "TOPLEFT", tXPos, -tYPos);
@@ -375,7 +375,7 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 			tHealButton:Show();
 		end
 
-		tColIdx = tColIdx + 1;
+		tColumnIndex = tColumnIndex + 1;
 	end
 end
 
@@ -1247,3 +1247,193 @@ function VUHDO_lnfReloadUI()
 	VUHDO_IS_RELOADING = false;
 end
 
+
+
+--
+local tNumButtons;
+function VUHDO_deferInitAllHealButtons(aPanel, aPanelNum)
+
+	VUHDO_initLocalVars(aPanelNum);
+
+	tNumButtons = VUHDO_getNumButtonsPanel(aPanelNum);
+
+	for tCnt = 1, tNumButtons do
+		VUHDO_deferTask(VUHDO_DEFER_INIT_HEAL_BUTTON, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, tCnt);
+	end
+
+	VUHDO_deferTask(VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum);
+
+	return;
+
+end
+
+
+
+--
+local tModelArray;
+local tColumnIndex;
+local tButtonIndex;
+local tGroupArray;
+function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum)
+
+	tModelArray = VUHDO_getDynamicModelArray(aPanelNum);
+
+	tColumnIndex = 1;
+	tButtonIndex = 1;
+
+	for tModelIndex, tModelId in ipairs(tModelArray) do
+		tGroupArray = VUHDO_getGroupMembersSorted(tModelId, sSortCriterion, aPanelNum, tModelIndex);
+
+		for tGroupIndex, tUnit in ipairs(tGroupArray) do
+			VUHDO_deferTask(VUHDO_DEFER_POSITION_HEAL_BUTTON, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, aPanelNum, tButtonIndex, tModelIndex, tModelId, tGroupIndex, tColumnIndex);
+
+			tButtonIndex = tButtonIndex + 1;
+		end
+
+		tColumnIndex = tColumnIndex + 1;
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferFinalizePanel(aPanelNum, anIsFixAllFrameLevels)
+
+	VUHDO_deferTask(VUHDO_DEFER_REDRAW_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels);
+
+	return;
+
+end
+
+
+
+--
+local tHealButton;
+function VUHDO_deferInitHealButtonDelegate(aPanelNum, aButtonIndex)
+
+	tHealButton = VUHDO_getOrCreateHealButton(aButtonIndex, aPanelNum);
+
+	if VUHDO_LibButtonFacade then
+		VUHDO_initButtonButtonFacade(tHealButton);
+	end
+
+	VUHDO_initHealButton(tHealButton, aPanelNum);
+
+	return;
+
+end
+
+
+
+--
+local tHealButton;
+local tXPos;
+local tYPos;
+local tDebuffFrame;
+local tPanel;
+function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, aModelIndex, aModelId, aGroupIndex, aColumnIndex)
+
+	tHealButton = VUHDO_getHealButton(aButtonIndex, aPanelNum);
+
+	VUHDO_positionHealButton(tHealButton);
+
+	VUHDO_setupAllHealButtonAttributes(tHealButton, aUnit, false, 70 == aModelId, false, false); -- VUHDO_ID_VEHICLES
+
+	for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+		tDebuffFrame = VUHDO_getBarIconFrame(tHealButton, tCnt);
+
+		if tDebuffFrame then
+			VUHDO_setupAllHealButtonAttributes(tDebuffFrame, aUnit, false, 70 == aModelId, false, true); -- VUHDO_ID_VEHICLES
+		end
+	end
+
+	VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton), aUnit);
+	VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), aUnit);
+
+	tXPos, tYPos = VUHDO_getHealButtonPos(aColumnIndex, aGroupIndex, aPanelNum);
+
+	tHealButton:Hide();
+	tHealButton:ClearAllPoints();
+
+	tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
+	VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanel:GetName(), "TOPLEFT", tXPos, -tYPos);
+
+	VUHDO_addUnitButton(tHealButton, aPanelNum);
+
+	tHealButton:Show();
+
+	return;
+
+end
+
+
+
+--
+local tPanel;
+function VUHDO_deferRedrawPanelCompleteDelegate(aPanelNum, anIsFixAllFrameLevels)
+
+	tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
+
+	VUHDO_positionTableHeaders(tPanel, aPanelNum);
+
+	VUHDO_initPanel(tPanel, aPanelNum);
+
+	if VUHDO_isPanelVisible(aPanelNum) then
+		VUHDO_fixFrameLevels(anIsFixAllFrameLevels, tPanel, 2, tPanel:GetChildren());
+
+		tPanel:Show();
+	else
+		tPanel:Hide();
+	end
+
+	return;
+
+end
+
+
+
+--
+local tCnt;
+local tHealButton;
+local tGroupPanel;
+function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
+
+	tCnt = VUHDO_getNumButtonsPanel(aPanelNum) + 1;
+
+	while true do
+		tHealButton = VUHDO_getHealButton(tCnt, aPanelNum);
+
+		if tHealButton then
+			tHealButton["raidid"] = nil;
+			tHealButton:SetAttribute("unit", nil);
+
+			tHealButton:ClearAllPoints();
+
+			tHealButton:Hide();
+		else
+			break;
+		end
+
+		tCnt = tCnt + 1;
+	end
+
+	for tCnt = 1, #VUHDO_PANEL_MODELS[aPanelNum] do
+		tGroupPanel = VUHDO_getGroupOrderPanel(aPanelNum, tCnt);
+
+		if tGroupPanel then
+			tGroupPanel:Hide();
+		end
+
+		tGroupPanel = VUHDO_getGroupSelectPanel(aPanelNum,  tCnt);
+
+		if tGroupPanel then
+			tGroupPanel:Hide();
+		end
+	end
+
+	return;
+
+end

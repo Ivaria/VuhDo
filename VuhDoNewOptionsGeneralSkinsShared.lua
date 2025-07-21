@@ -2728,6 +2728,7 @@ function VUHDO_loadProfileNoInit(aName)
 
 	VUHDO_fixDominantProfileSettings(tProfile);
 	VUHDO_CONFIG["CURRENT_PROFILE"] = aName;
+	VUHDO_clearBackdropCache();
 	VUHDO_Msg(VUHDO_I18N_PROFILE_LOADED .. aName);
 end
 
@@ -2737,6 +2738,7 @@ end
 function VUHDO_loadProfile(aName)
 
 	VUHDO_loadProfileNoInit(aName);
+	VUHDO_clearBackdropCache();
 	VUHDO_initAllBurstCaches();
 	VUHDO_loadVariables();
 	VUHDO_initPanelModels();
