@@ -45,6 +45,11 @@ VUHDO_DEFER_UPDATE_SPELL_TRACE = 17;
 VUHDO_DEFER_UPDATE_ALL_RAID_BARS = 18;
 VUHDO_DEFER_UPDATE_PANEL_BUTTONS = 19;
 VUHDO_DEFER_HANDLE_SCALE_CHANGE = 20;
+VUHDO_DEFER_INIT_HEAL_BUTTON = 21;
+VUHDO_DEFER_POSITION_HEAL_BUTTON = 22;
+VUHDO_DEFER_REDRAW_PANEL_COMPLETE = 23;
+VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE = 24;
+
 
 local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_UPDATE_HEALTH,
@@ -67,6 +72,10 @@ local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_UPDATE_ALL_RAID_BARS,
 	VUHDO_DEFER_UPDATE_PANEL_BUTTONS,
 	VUHDO_DEFER_HANDLE_SCALE_CHANGE,
+	VUHDO_DEFER_INIT_HEAL_BUTTON,
+	VUHDO_DEFER_POSITION_HEAL_BUTTON,
+	VUHDO_DEFER_REDRAW_PANEL_COMPLETE,
+	VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE,
 };
 
 local sDeferredTaskDelegates;
@@ -184,7 +193,7 @@ end
 --
 function VUHDO_deferUpdateHealth(aUnit, aMode, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEALTH, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEALTH, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL, aUnit, aMode);
 
 	return;
 
@@ -195,7 +204,7 @@ end
 --
 function VUHDO_deferUpdateBouquetsForEvent(aUnit, aMode, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_BOUQUETS_FOR_EVENT, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_BOUQUETS_FOR_EVENT, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aUnit, aMode);
 
 	return;
 
@@ -206,7 +215,7 @@ end
 --
 function VUHDO_deferUpdateShieldBar(aUnit, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_SHIELD_BAR, aUnit, 1, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_SHIELD_BAR, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aUnit, 1);
 
 	return;
 
@@ -217,7 +226,7 @@ end
 --
 function VUHDO_deferUpdateHealAbsorbBar(aUnit, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEAL_ABSORB_BAR, aUnit, 1, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEAL_ABSORB_BAR, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aUnit, 1);
 
 	return;
 
@@ -228,7 +237,7 @@ end
 --
 function VUHDO_deferUpdateHealthBarsFor(aUnit, aMode, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_HEALTH_BARS_FOR, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aUnit, aMode);
 
 	return;
 
@@ -239,7 +248,7 @@ end
 --
 function VUHDO_deferUpdateAllClusters(aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_ALL_CLUSTERS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_ALL_CLUSTERS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
 
 	return;
 
@@ -250,7 +259,7 @@ end
 --
 function VUHDO_deferAoeUpdateAll(aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_AOE_UPDATE_ALL, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_AOE_UPDATE_ALL, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
 
 	return;
 
@@ -261,7 +270,7 @@ end
 --
 function VUHDO_deferUpdateSpellTrace(aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_SPELL_TRACE, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_SPELL_TRACE, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
 
 	return;
 
@@ -272,7 +281,7 @@ end
 --
 function VUHDO_deferUpdateAllRaidBars(aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_ALL_RAID_BARS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_ALL_RAID_BARS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
 
 	return;
 
@@ -283,7 +292,7 @@ end
 --
 function VUHDO_deferUpdatePanelButtons(aPanelNum, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_PANEL_BUTTONS, nil, aPanelNum, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_PANEL_BUTTONS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum);
 
 	return;
 
@@ -294,7 +303,7 @@ end
 --
 function VUHDO_deferUpdateManaBars(aUnit, aMode, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_MANA_BARS, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_MANA_BARS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aUnit, aMode);
 
 	return;
 
@@ -305,7 +314,7 @@ end
 --
 function VUHDO_deferSetHealth(aUnit, aMode, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_SET_HEALTH, aUnit, aMode, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL);
+	VUHDO_deferTask(VUHDO_DEFER_SET_HEALTH, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL, aUnit, aMode);
 
 	return;
 
@@ -316,7 +325,7 @@ end
 --
 function VUHDO_deferUpdateClusterHighlights(aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_CLUSTER_HIGHLIGHTS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_CLUSTER_HIGHLIGHTS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
 
 	return;
 
@@ -327,7 +336,7 @@ end
 --
 function VUHDO_deferHandleScaleChange(aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_HANDLE_SCALE_CHANGE, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	VUHDO_deferTask(VUHDO_DEFER_HANDLE_SCALE_CHANGE, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
 
 	return;
 
@@ -340,8 +349,7 @@ local tNewTask;
 local function VUHDO_createDeferredTaskDelegate()
 
 	tNewTask = {
-		["unit"] = nil,
-		["mode"] = nil,
+		["args"] = { },
 		["delegate"] = nil,
 		["type"] = nil,
 		["priority"] = VUHDO_DEFERRED_TASK_PRIORITY_NORMAL,
@@ -361,8 +369,7 @@ local function VUHDO_cleanupDeferredTaskDelegate(aTask)
 
 	tCleanupTask = aTask;
 
-	tCleanupTask["unit"] = nil;
-	tCleanupTask["mode"] = nil;
+	twipe(tCleanupTask["args"]);
 	tCleanupTask["delegate"] = nil;
 	tCleanupTask["type"] = nil;
 	tCleanupTask["priority"] = VUHDO_DEFERRED_TASK_PRIORITY_NORMAL;
@@ -377,9 +384,13 @@ end
 
 do
 	--
-	local function VUHDO_getTaskKey(aType, aUnit, aMode)
+	local function VUHDO_getTaskKey(aType, aArgs)
 
-		return tostring(aType) .. "|" .. (aUnit or "") .. "|" .. tostring(aMode or "");
+		local tKey = tostring(aType);
+		for i = 1, #aArgs do
+			tKey = tKey .. "|" .. tostring(aArgs[i] or "");
+		end
+		return tKey;
 
 	end
 
@@ -488,7 +499,7 @@ do
 		aHeap[tNewIndex] = aTask;
 		aTask["heapIndex"] = tNewIndex;
 
-		aTaskMap[VUHDO_getTaskKey(aTask["type"], aTask["unit"], aTask["mode"])] = aTask;
+		aTaskMap[VUHDO_getTaskKey(aTask["type"], aTask["args"])] = aTask;
 
 		VUHDO_heapSiftUp(aHeap, tNewIndex);
 
@@ -511,7 +522,7 @@ do
 
 		tTopTask = aHeap[1];
 
-		tTopTaskKey = VUHDO_getTaskKey(tTopTask["type"], tTopTask["unit"], tTopTask["mode"]);
+		tTopTaskKey = VUHDO_getTaskKey(tTopTask["type"], tTopTask["args"]);
 		aTaskMap[tTopTaskKey] = nil;
 
 		if tHeapSize == 1 then
@@ -606,8 +617,8 @@ do
 						for _, tTaskDetailSnapshot in ipairs(aTasksDetailTable) do
 							tinsert(tExistingSnapshot["tasks"], {
 								["type"] = tTaskDetailSnapshot["type"],
-								["unit"] = tostring(tTaskDetailSnapshot["unit"]),
-								["mode"] = tostring(tTaskDetailSnapshot["mode"]),
+								["args"] = tTaskDetailSnapshot["args"],
+								["argCount"] = tTaskDetailSnapshot["argCount"],
 								["durationUs"] = tTaskDetailSnapshot["durationUs"],
 							});
 						end
@@ -635,8 +646,8 @@ do
 				for _, tTaskDetailSnapshot in ipairs(aTasksDetailTable) do
 					tinsert(tNewSnapshot["tasks"], {
 						["type"] = tTaskDetailSnapshot["type"],
-						["unit"] = tostring(tTaskDetailSnapshot["unit"]),
-						["mode"] = tostring(tTaskDetailSnapshot["mode"]),
+						["args"] = tTaskDetailSnapshot["args"],
+						["argCount"] = tTaskDetailSnapshot["argCount"],
 						["durationUs"] = tTaskDetailSnapshot["durationUs"],
 					});
 
@@ -739,7 +750,7 @@ do
 
 	--
 	local tMetrics;
-	local function VUHDO_updateDeferredTaskIndividualMetrics(aTaskType, aTaskDurationUs, aTaskUnit, aTaskMode)
+	local function VUHDO_updateDeferredTaskIndividualMetrics(aTaskType, aTaskDurationUs, aArgsSummary, aArgCount)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 			return;
@@ -768,8 +779,8 @@ do
 			tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] = aTaskDurationUs;
 
 			tMetrics["maxTaskTimeUsContextByTypeSession"][aTaskType] = {
-				["unit"] = aTaskUnit,
-				["mode"] = aTaskMode,
+				["args"] = aArgsSummary,
+				["argCount"] = aArgCount,
 			};
 		end
 
@@ -871,7 +882,7 @@ do
 	local tNewTask;
 	local tMetrics;
 	local tCurrentPriority;
-	function VUHDO_enqueueDeferredTask(aType, aUnit, aMode, aPriority)
+	function VUHDO_enqueueDeferredTask(aType, aPriority, ...)
 
 		if not aType then
 			return;
@@ -904,7 +915,16 @@ do
 				tMetrics["tasksEnqueuedByType"][aType] = tMetrics["tasksEnqueuedByType"][aType] + 1;
 			end
 
-			tTaskKey = VUHDO_getTaskKey(aType, aUnit, aMode);
+			tNewTask = VUHDO_DEFERRED_TASK_POOL:get();
+
+			for tArgCnt = 1, select("#", ...) do
+				tNewTask["args"][tArgCnt] = select(tArgCnt, ...);
+			end
+			tNewTask["delegate"] = tDelegate;
+			tNewTask["type"] = aType;
+			tNewTask["priority"] = tCurrentPriority;
+
+			tTaskKey = VUHDO_getTaskKey(aType, tNewTask["args"]);
 			tTask = VUHDO_TASK_QUEUE_MAP[tTaskKey];
 
 			if tTask then
@@ -912,18 +932,12 @@ do
 
 				tTask["delegate"] = tDelegate;
 
+				VUHDO_DEFERRED_TASK_POOL:release(tNewTask);
+
 				if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 					tMetrics["totalTasksDeduped"] = tMetrics["totalTasksDeduped"] + 1;
 				end
 			else
-				tNewTask = VUHDO_DEFERRED_TASK_POOL:get();
-
-				tNewTask["unit"] = aUnit;
-				tNewTask["mode"] = aMode;
-				tNewTask["delegate"] = tDelegate;
-				tNewTask["type"] = aType;
-				tNewTask["priority"] = tCurrentPriority;
-
 				VUHDO_heapInsert(VUHDO_TASK_PRIORITY_QUEUE, tNewTask, VUHDO_TASK_QUEUE_MAP);
 			end
 		end
@@ -1026,7 +1040,7 @@ do
 	local sCurrentTaskForPcall;
 	local function VUHDO_pcallTaskDelegate()
 
-		return sCurrentTaskForPcall["delegate"](sCurrentTaskForPcall["unit"], sCurrentTaskForPcall["mode"]);
+		return sCurrentTaskForPcall["delegate"](unpack(sCurrentTaskForPcall["args"]));
 
 	end
 
@@ -1123,21 +1137,41 @@ do
 					tTaskState["invocationCountByType"][tTaskType] = (tTaskState["invocationCountByType"][tTaskType] or 0) + 1;
 
 					if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-						VUHDO_updateDeferredTaskIndividualMetrics(tTaskType, tTaskDurationUs, tTask["unit"], tTask["mode"]);
+						local tArgsSummary = "";
+						if tTask["args"] and #tTask["args"] > 0 then
+							for tCnt = 1, #tTask["args"] do
+								if tCnt > 1 then tArgsSummary = tArgsSummary .. ","; end
+								tArgsSummary = tArgsSummary .. tostring(tTask["args"][tCnt] or "nil");
+							end
+						else
+							tArgsSummary = "none";
+						end
+
+						VUHDO_updateDeferredTaskIndividualMetrics(tTaskType, tTaskDurationUs, tArgsSummary, #tTask["args"] or 0);
 
 						if tTaskMetricsForSnapshot then
 							tinsert(tTaskMetricsForSnapshot, {
 								["type"] = tTaskType,
-								["unit"] = tTask["unit"],
-								["mode"] = tTask["mode"],
+								["args"] = tArgsSummary,
+								["argCount"] = #tTask["args"] or 0,
 								["durationUs"] = tTaskDurationUs,
 							});
 						end
 					end
 
 					if not tDelegateSuccess then
-						VUHDO_Msg(format("Deferred Task Failure: [ Unit: %s Mode: %s Type: %s Prio: %s ]\nError: %s",
-							tostring(tTask["unit"]), tostring(tTask["mode"]), tostring(tTaskType), tostring(tTask["priority"]),
+						local tArgsSummary = "";
+						if tTask["args"] and #tTask["args"] > 0 then
+							for tCnt = 1, #tTask["args"] do
+								if tCnt > 1 then tArgsSummary = tArgsSummary .. ","; end
+								tArgsSummary = tArgsSummary .. tostring(tTask["args"][tCnt] or "nil");
+							end
+						else
+							tArgsSummary = "none";
+						end
+
+						VUHDO_Msg(format("Deferred Task Failure: [ Args: %s Type: %s Prio: %s ]\nError: %s",
+							tArgsSummary, tostring(tTaskType), tostring(tTask["priority"]),
 							tostring(tDelegateResult)
 						));
 					end
@@ -1236,13 +1270,17 @@ do
 
 
 	--
-	function VUHDO_deferTask(aType, aUnit, aMode, aPriority)
+	function VUHDO_deferTask(aType, aPriority, ...)
 
-		VUHDO_enqueueDeferredTask(aType, aUnit, aMode, aPriority);
+		VUHDO_enqueueDeferredTask(aType, aPriority, ...);
 
 		return;
 
 	end
+
+
+
+
 
 
 
@@ -1397,7 +1435,7 @@ do
 		VUHDO_Msg(format("  Stops: Hard (Time Limit): %d, Budget Exceeded: %d",
 			(tMetrics["hardStopsHit"] or 0), (tMetrics["budgetExceededStops"] or 0)));
 
-		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime, TotalTime, MinTime, MaxTime [Unit|Mode]): **|r");
+		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime, TotalTime, MinTime, MaxTime [Args]): **|r");
 
 		if VUHDO_DEFERRED_TASK_TYPES then
 			for _, tTaskType in ipairs(VUHDO_DEFERRED_TASK_TYPES) do
@@ -1415,20 +1453,17 @@ do
 
 				tMinTaskTime = (tMetrics["minTaskTimeUsByTypeSession"] and tMetrics["minTaskTimeUsByTypeSession"][tTaskType]);
 				tMaxTaskTime = (tMetrics["maxTaskTimeUsByTypeSession"] and tMetrics["maxTaskTimeUsByTypeSession"][tTaskType]);
-				tMaxTaskContextUnit = "-";
-				tMaxTaskContextMode = "-";
+				tMaxTaskContextArgs = "-";
 
 				if tMetrics["maxTaskTimeUsContextByTypeSession"] and tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType] then
-					tMaxTaskContextUnit = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["unit"] or "-");
-					tMaxTaskContextMode = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["mode"] or "-");
+					tMaxTaskContextArgs = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["args"] or "-");
 				end
 
-				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, Avg=%s, Total=%s, Min=%s, Max=%s [%s|%s]",
+				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, Avg=%s, Total=%s, Min=%s, Max=%s [%s]",
 					tostring(tTaskType), tEnqueued, tProcessed, VUHDO_formatTime(tAvgCost), VUHDO_formatTime(tTotalTimeUsForType),
 					VUHDO_formatTime(tMinTaskTime == 9999999 and 0 or tMinTaskTime),
 					VUHDO_formatTime(tMaxTaskTime),
-					tMaxTaskContextUnit,
-					tMaxTaskContextMode
+					tMaxTaskContextArgs
 				));
 			end
 		else
@@ -1482,12 +1517,13 @@ do
 
 				if tSnapshot["tasks"] then
 					for tCnt, tTask in ipairs(tSnapshot["tasks"]) do
-						VUHDO_Msg(format("    T%d: Type[%s] %s (U:%s M:%s)",
+						local tArgsSummary = tTask["args"] or "none";
+
+						VUHDO_Msg(format("    T%d: Type[%s] %s (Args:%s)",
 							tCnt,
 							tostring(tTask["type"]),
 							VUHDO_formatTime(tTask["durationUs"]),
-							tTask["unit"],
-							tTask["mode"]
+							tArgsSummary
 						));
 					end
 				end
@@ -1535,6 +1571,11 @@ function VUHDO_initTaskSystem()
 			[VUHDO_DEFER_UPDATE_ALL_RAID_BARS] = _G["VUHDO_deferUpdateAllRaidBarsDelegate"],
 			[VUHDO_DEFER_UPDATE_PANEL_BUTTONS] = _G["VUHDO_updatePanelButtons"],
 			[VUHDO_DEFER_HANDLE_SCALE_CHANGE] = _G["VUHDO_handleScaleChange"],
+			[VUHDO_DEFER_INIT_HEAL_BUTTON] = _G["VUHDO_deferInitHealButtonDelegate"],
+			[VUHDO_DEFER_POSITION_HEAL_BUTTON] = _G["VUHDO_deferPositionHealButtonDelegate"],
+			[VUHDO_DEFER_REDRAW_PANEL_COMPLETE] = _G["VUHDO_deferRedrawPanelCompleteDelegate"],
+			[VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE] = _G["VUHDO_deferInitAllHealButtonsCompleteDelegate"],
+
 		};
 
 		tTaskTypeCount = 0;

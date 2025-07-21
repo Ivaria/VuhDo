@@ -1253,7 +1253,7 @@ end
 
 
 --
-function VUHDO_updatePanelButtons(aUnit, aPanelNum)
+function VUHDO_updatePanelButtons(aPanelNum)
 
 	if not VUHDO_isPanelVisible(aPanelNum) then
 		return;
