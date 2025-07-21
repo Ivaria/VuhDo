@@ -940,7 +940,7 @@ end
 --
 function VUHDO_deferInitAllEventBouquets(aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_INIT_ALL_EVENT_BOUQUETS, nil, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+	VUHDO_deferTask(VUHDO_DEFER_INIT_ALL_EVENT_BOUQUETS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
 
 	return;
 
@@ -1045,7 +1045,7 @@ function VUHDO_deferUpdateAllCyclicBouquets(anIsPlayerOnly, aPriority)
 
 	for tBouquetName, _ in pairs(VUHDO_CYCLIC_BOUQUETS) do
 		for tUnit, _ in pairs(tDestArray) do
-			VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET, tUnit, tBouquetName, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH);
+			VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, tBouquetName);
 		end
 	end
 

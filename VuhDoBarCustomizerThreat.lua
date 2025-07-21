@@ -204,7 +204,7 @@ function VUHDO_deferUpdateAllAggro(aPriority)
 	end
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_AGGRO, tUnit, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_AGGRO, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, tUnit);
 	end
 
 	return;
@@ -221,7 +221,7 @@ function VUHDO_deferUpdateAllRange(aPriority)
 	end
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_RANGE, tUnit, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+		VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_RANGE, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, tUnit);
 	end
 
 	return;
@@ -233,7 +233,7 @@ end
 --
 function VUHDO_deferUpdateUnitAggro(aUnit, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_AGGRO, aUnit, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_AGGRO, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aUnit);
 
 	return;
 
@@ -244,7 +244,7 @@ end
 --
 function VUHDO_deferUpdateUnitRange(aUnit, Priority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_RANGE, aUnit, nil, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_RANGE, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aUnit);
 
 	return;
 
