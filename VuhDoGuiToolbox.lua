@@ -845,18 +845,53 @@ end
 
 
 --
-function VUHDO_setupAllButtonsUnitWatch(anIsRegister)
-	if InCombatLockdown() then return; end
+local tTargetButton;
+local tFocusButton;
+local tUnit;
+function VUHDO_setupAllButtonsUnitWatch(anIsEnabled)
 
-	local tFunc = anIsRegister and RegisterUnitWatch or UnregisterUnitWatch;
+	if InCombatLockdown() then
+		return;
+	end
 
-	for tButton, _ in pairs(VUHDO_BUTTON_CACHE) do
-		if tButton:IsShown() then
-			tFunc(tButton);
-		else
-			UnregisterUnitWatch(tButton)
+	if anIsEnabled then
+		for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+			if VUHDO_PANEL_MODELS[tPanelNum] then
+				tTargetButton = _G["Vd" .. tPanelNum .. "H1Tg"];
+
+				if tTargetButton and not VUHDO_BUTTON_CACHE[tTargetButton] then
+					VUHDO_BUTTON_CACHE[tTargetButton] = tPanelNum;
+				end
+
+				tFocusButton = _G["Vd" .. tPanelNum .. "H1Tot"];
+
+				if tFocusButton and not VUHDO_BUTTON_CACHE[tFocusButton] then
+					VUHDO_BUTTON_CACHE[tFocusButton] = tPanelNum;
+				end
+			end
+		end
+
+		for tButton, _ in pairs(VUHDO_BUTTON_CACHE) do
+			if tButton:IsShown() then
+				-- FIXME: tUnit serves no purpose here?
+				tUnit = tButton:GetAttribute("unit");
+
+				RegisterUnitWatch(tButton);
+			else
+				UnregisterUnitWatch(tButton);
+			end
+		end
+	else
+		for tButton, _ in pairs(VUHDO_BUTTON_CACHE) do
+			-- FIXME: tUnit serves no purpose here?
+			tUnit = tButton:GetAttribute("unit");
+
+			UnregisterUnitWatch(tButton);
 		end
 	end
+
+	return;
+
 end
 
 

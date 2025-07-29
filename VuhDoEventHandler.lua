@@ -170,6 +170,8 @@ local VUHDO_updateCustomDebuffTooltip;
 local VUHDO_getUnitZoneName;
 local VUHDO_getCurrentMouseOver;
 local VUHDO_handleScaleChange;
+local VUHDO_redrawPanel;
+local VUHDO_redrawAllPanels;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -652,6 +654,14 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
 	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_redrawPanel = _G["VUHDO_deferRedrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_deferRedrawAllPanels"];
+	else
+		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
+	end
 
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
@@ -1693,10 +1703,61 @@ do
 				VUHDO_setHandlerProfiling(true);
 			elseif tSubCommand == "off" then
 				VUHDO_setHandlerProfiling(false);
-			elseif strfind(tSubCommand, "res") or tSubCommand == "reset" then
+			elseif strfind(tSubCommand, "res") then
 				VUHDO_resetHandlerMetrics();
 			else
 				VUHDO_printHandlerMetrics();
+			end
+
+		elseif strfind(tCommandWord, "sem") then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setSemaphoreProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setSemaphoreProfiling(false);
+			elseif strfind(tSubCommand, "res") then
+				VUHDO_resetSemaphoreMetrics();
+			else
+				VUHDO_printSemaphoreMetrics();
+			end
+
+		elseif tCommandWord == "defer" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setDeferredRedrawEnabled(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setDeferredRedrawEnabled(false);
+			else
+				VUHDO_printDeferredRedrawStatus();
+			end
+
+		elseif strfind(tCommandWord, "prof") then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setHandlerProfiling(true);
+				VUHDO_setDeferredTaskProfiling(true);
+				VUHDO_setPoolProfiling(true);
+				VUHDO_setSemaphoreProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setHandlerProfiling(false);
+				VUHDO_setDeferredTaskProfiling(false);
+				VUHDO_setPoolProfiling(false);
+				VUHDO_setSemaphoreProfiling(false);
+			elseif strfind(tSubCommand, "res") then
+				VUHDO_resetHandlerMetrics();
+				VUHDO_resetDeferredTaskMetrics();
+				VUHDO_resetPoolMetrics();
+				VUHDO_resetSemaphoreMetrics();
+
+				VUHDO_Msg("All profiling metrics reset.");
+			else
+				VUHDO_printHandlerMetrics();
+				VUHDO_printDeferredTaskMetrics(false);
+				VUHDO_printPoolMetrics();
+				VUHDO_printSemaphoreMetrics();
 			end
 
 		elseif tCommandWord == "pixel" then
@@ -1867,8 +1928,10 @@ function VUHDO_loadVariables()
 	VUHDO_PLAYER_NAME = UnitName("player");
 
 	VUHDO_loadDefaultConfig();
+	VUHDO_setDeferredRedrawEnabled(VUHDO_CONFIG["USE_DEFERRED_REDRAW"], true);
 	VUHDO_loadSpellArray();
 	VUHDO_loadDefaultPanelSetup();
+	VUHDO_panelRedrawInitLocalOverrides();
 	VUHDO_initBuffSettings();
 	VUHDO_loadDefaultBouquets();
 	VUHDO_initClassColors();
@@ -2755,4 +2818,46 @@ do
 		return;
 
 	end
+end
+
+
+
+--
+function VUHDO_setDeferredRedrawEnabled(anIsEnabled, anIsQuiet)
+
+	VUHDO_CONFIG["USE_DEFERRED_REDRAW"] = anIsEnabled and true or false;
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_redrawPanel = _G["VUHDO_deferRedrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_deferRedrawAllPanels"];
+	else
+		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
+	end
+
+	if not anIsQuiet then
+		if anIsEnabled then
+			VUHDO_Msg("Deferred panel redraw is enabled.");
+		else
+			VUHDO_Msg("Deferred panel redraw is disabled.");
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_printDeferredRedrawStatus()
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_Msg("Deferred panel redraw is currently |cff00ff00ENABLED|r.");
+	else
+		VUHDO_Msg("Deferred panel redraw is currently |cffff0000DISABLED|r.");
+	end
+
+	return;
+
 end

@@ -49,6 +49,9 @@ VUHDO_DEFER_INIT_HEAL_BUTTON = 21;
 VUHDO_DEFER_POSITION_HEAL_BUTTON = 22;
 VUHDO_DEFER_REDRAW_PANEL_COMPLETE = 23;
 VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE = 24;
+VUHDO_DEFER_POSITION_CONFIG_PANELS = 25;
+VUHDO_DEFER_REDRAW_PANEL = 26;
+VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE = 27;
 
 
 local VUHDO_DEFERRED_TASK_TYPES = {
@@ -76,6 +79,9 @@ local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_POSITION_HEAL_BUTTON,
 	VUHDO_DEFER_REDRAW_PANEL_COMPLETE,
 	VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE,
+	VUHDO_DEFER_POSITION_CONFIG_PANELS,
+	VUHDO_DEFER_REDRAW_PANEL,
+	VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE,
 };
 
 local sDeferredTaskDelegates;
@@ -1211,6 +1217,8 @@ do
 	local tChunkTaskMetrics;
 	function VUHDO_processDeferredTaskQueue()
 
+		VUHDO_checkAllSemaphoreTimeouts();
+
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
 
@@ -1575,6 +1583,9 @@ function VUHDO_initTaskSystem()
 			[VUHDO_DEFER_POSITION_HEAL_BUTTON] = _G["VUHDO_deferPositionHealButtonDelegate"],
 			[VUHDO_DEFER_REDRAW_PANEL_COMPLETE] = _G["VUHDO_deferRedrawPanelCompleteDelegate"],
 			[VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE] = _G["VUHDO_deferInitAllHealButtonsCompleteDelegate"],
+			[VUHDO_DEFER_POSITION_CONFIG_PANELS] = _G["VUHDO_deferPositionConfigPanelsDelegate"],
+			[VUHDO_DEFER_REDRAW_PANEL] = _G["VUHDO_deferRedrawPanelDelegate"],
+			[VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE] = _G["VUHDO_deferRedrawAllPanelsCompleteDelegate"],
 
 		};
 
@@ -1588,8 +1599,6 @@ function VUHDO_initTaskSystem()
 		VUHDO_DEFERRED_TASK_STATE["invocationCountByType"] = tcreate(0, tTaskTypeCount);
 		VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"] = tcreate(0, tTaskTypeCount);
 		VUHDO_DEFERRED_TASK_STATE["lastAvgCostUsByType"] = tcreate(0, tTaskTypeCount);
-
-		VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
 
 		VUHDO_resetDeferredTaskMetrics();
 

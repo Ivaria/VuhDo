@@ -23,6 +23,8 @@ local VUHDO_getHealthBar;
 local VUHDO_setupSmartCast;
 local VUHDO_updateDirectionFrame;
 local VUHDO_getCurrentKeyModifierString;
+local VUHDO_redrawPanel;
+local VUHDO_redrawAllPanels;
 
 
 
@@ -33,6 +35,7 @@ local VUHDO_CONFIG;
 local VUHDO_INTERNAL_TOGGLES;
 local VUHDO_RAID;
 function VUHDO_actionEventHandlerInitLocalOverrides()
+
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_highlightClusterFor = _G["VUHDO_highlightClusterFor"];
 	VUHDO_showTooltip = _G["VUHDO_showTooltip"];
@@ -50,6 +53,17 @@ function VUHDO_actionEventHandlerInitLocalOverrides()
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_redrawPanel = _G["VUHDO_deferRedrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_deferRedrawAllPanels"];
+	else
+		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
+	end
+
+	return;
+
 end
 
 

@@ -276,8 +276,17 @@ end
 
 
 --
+local tBars;
 function VUHDO_getPlayerTargetFrame(aButton)
-	return _G[VUHDO_BARS_PER_BUTTON[aButton][1]:GetName() .. "PlTg"];
+
+	tBars = VUHDO_BARS_PER_BUTTON[aButton];
+
+	if not tBars or not tBars[1] or not tBars[1].GetName then
+		return nil;
+	end
+
+	return _G[tBars[1]:GetName() .. "PlTg"];
+
 end
 
 
@@ -764,21 +773,28 @@ end
 
 
 --
+local tNewButton;
+local tFunc;
 function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
+
 	if not VUHDO_BUTTONS_PER_PANEL[aPanelNum][aButtonNum] then
-		local tNewButton = CreateFrame("Button",
-			format("Vd%dH%d", aPanelNum, aButtonNum),
-			_G[format("Vd%d", aPanelNum)], "VuhDoButtonSecureTemplate");
+		tNewButton = CreateFrame("Button", format("Vd%dH%d", aPanelNum, aButtonNum), _G[format("Vd%d", aPanelNum)], "VuhDoButtonSecureTemplate");
+
 		VUHDO_fastCacheInitButton(aPanelNum, aButtonNum);
 		VUHDO_initLocalVars(aPanelNum);
 		VUHDO_initHealButton(tNewButton, aPanelNum);
-		VUHDO_positionHealButton(tNewButton);
-		local tFunc = (VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers())
-			 and RegisterUnitWatch or UnregisterUnitWatch;
-		tFunc(tNewButton);
+		VUHDO_positionHealButton(tNewButton, aPanelNum);
+
+		if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+			tFunc = (VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers())
+				and RegisterUnitWatch or UnregisterUnitWatch;
+
+			tFunc(tNewButton);
+		end
 	end
 
 	return VUHDO_BUTTONS_PER_PANEL[aPanelNum][aButtonNum];
+
 end
 
 

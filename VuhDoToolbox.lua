@@ -1021,9 +1021,12 @@ local VUHDO_setMapToCurrentZone = VUHDO_setMapToCurrentZone;
 --
 local tInfo;
 function VUHDO_replaceMacroTemplates(aText, aUnit)
-	if aUnit then
+
+	if aUnit and type(aUnit) == "string" and aUnit ~= "" then
 		aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", aUnit);
+
 		tInfo = VUHDO_RAID[aUnit];
+
 		if tInfo then
 			aText = gsub(aText, "[Vv][Dd][Nn][Aa][Mm][Ee]", tInfo["name"]);
 
@@ -1038,6 +1041,7 @@ function VUHDO_replaceMacroTemplates(aText, aUnit)
 	end
 
 	return aText;
+
 end
 
 
@@ -2113,5 +2117,361 @@ function VUHDO_formatTime(aTimeUs)
 	end
 
 	return format("%.0f us", aTimeUs);
+
+end
+
+
+
+--
+local VUHDO_REGISTERED_SEMAPHORES = { };
+local VUHDO_SEMAPHORE_PROFILE = false;
+local VUHDO_SEMAPHORE_DEFAULT_TIMEOUT_MS = 250;
+local sSemaphoreId = 0;
+
+
+
+--
+local tSemaphore;
+function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeoutMs)
+
+	if not aSemaphoreName then
+		sSemaphoreId = sSemaphoreId + 1;
+		aSemaphoreName = "semaphore_" .. sSemaphoreId;
+	end
+
+	tSemaphore = {
+		["name"] = aSemaphoreName,
+		["count"] = aInitialCount or 0,
+		["maxCount"] = aMaxCount or 999999,
+		["timeoutMs"] = aTimeoutMs or VUHDO_SEMAPHORE_DEFAULT_TIMEOUT_MS,
+		["waitingTasks"] = { },
+		["metrics"] = {
+			["signals"] = 0,
+			["increments"] = 0,
+			["decrements"] = 0,
+			["waits"] = 0,
+			["timeouts"] = 0,
+			["peakWaitCount"] = 0,
+		},
+	};
+
+	local tIsProfile;
+	local tMetrics;
+	local tTask;
+	function tSemaphore:signal()
+
+		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+			tMetrics["signals"] = tMetrics["signals"] + 1;
+		end
+
+		if self["count"] < self["maxCount"] then
+			self["count"] = self["count"] + 1;
+
+			if #self["waitingTasks"] > 0 then
+				tTask = tremove(self["waitingTasks"], 1);
+
+				VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
+			end
+
+			if self["count"] == 0 and #self["waitingTasks"] > 0 then
+				tTask = tremove(self["waitingTasks"], 1);
+
+				VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
+			end
+
+			return true;
+		end
+
+		return false;
+
+	end
+
+	local tIsProfile;
+	local tMetrics;
+	function tSemaphore:increment()
+
+		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+			tMetrics["increments"] = tMetrics["increments"] + 1;
+		end
+
+		if self["count"] < self["maxCount"] then
+			self["count"] = self["count"] + 1;
+
+			return true;
+		end
+
+		return false;
+
+	end
+
+	local tIsProfile;
+	local tMetrics;
+	local tTask;
+	function tSemaphore:decrement()
+
+		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+			tMetrics["decrements"] = tMetrics["decrements"] + 1;
+		end
+
+		if self["count"] > 0 then
+			self["count"] = self["count"] - 1;
+
+
+
+			if self["count"] == 0 and #self["waitingTasks"] > 0 then
+				tTask = tremove(self["waitingTasks"], 1);
+
+				VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
+			end
+
+			return true;
+		end
+
+		return false;
+
+	end
+
+	local tIsProfile;
+	local tMetrics;
+	function tSemaphore:wait(aTaskType, aPriority, ...)
+
+		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+			tMetrics["waits"] = tMetrics["waits"] + 1;
+			tMetrics["peakWaitCount"] = max(tMetrics["peakWaitCount"], #self["waitingTasks"] + 1);
+		end
+
+		if self["count"] > 0 then
+			self["count"] = self["count"] - 1;
+
+			return true;
+		end
+
+		tinsert(self["waitingTasks"], {
+			["type"] = aTaskType,
+			["priority"] = aPriority,
+			["args"] = { ... },
+			["timeoutTime"] = GetTime() * 1000 + self["timeoutMs"],
+		});
+
+		return false;
+
+	end
+
+
+	local tIsProfile;
+	local tMetrics;
+	function tSemaphore:waitForZero(aTaskType, aPriority, ...)
+
+		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+			tMetrics["waits"] = tMetrics["waits"] + 1;
+			tMetrics["peakWaitCount"] = max(tMetrics["peakWaitCount"], #self["waitingTasks"] + 1);
+		end
+
+
+
+		if self["count"] == 0 then
+
+			return true;
+		end
+
+
+		tinsert(self["waitingTasks"], {
+			["type"] = aTaskType,
+			["priority"] = aPriority,
+			["args"] = { ... },
+			["timeoutTime"] = GetTime() * 1000 + self["timeoutMs"],
+		});
+
+		return false;
+
+	end
+
+	local tCurrentTime;
+	local tIsProfile;
+	local tMetrics;
+	local tTask;
+	function tSemaphore:checkTimeouts()
+
+		tCurrentTime = GetTime() * 1000;
+		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+
+		if tIsProfile then
+			tMetrics = self["metrics"];
+		end
+
+		for tIndex = #self["waitingTasks"], 1, -1 do
+			tTask = self["waitingTasks"][tIndex];
+
+			if tCurrentTime > tTask["timeoutTime"] then
+	                        if tIsProfile then
+	                                tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
+	                        end
+
+	                        tremove(self["waitingTasks"], tIndex);
+	                end
+	        end
+
+	        return;
+
+	end
+
+	local tMetrics;
+	function tSemaphore:getMetrics()
+
+		tMetrics = self["metrics"];
+
+		return {
+			["signals"] = tMetrics["signals"],
+			["increments"] = tMetrics["increments"],
+			["decrements"] = tMetrics["decrements"],
+			["waits"] = tMetrics["waits"],
+			["timeouts"] = tMetrics["timeouts"],
+			["peakWaitCount"] = tMetrics["peakWaitCount"],
+			["currentCount"] = self["count"],
+			["maxCount"] = self["maxCount"],
+			["waitingCount"] = #self["waitingTasks"],
+			["timeoutMs"] = self["timeoutMs"],
+		};
+
+	end
+
+	local tMetrics;
+	function tSemaphore:resetMetrics()
+
+		tMetrics = self["metrics"];
+		tMetrics["signals"] = 0;
+		tMetrics["increments"] = 0;
+		tMetrics["decrements"] = 0;
+		tMetrics["waits"] = 0;
+		tMetrics["timeouts"] = 0;
+		tMetrics["peakWaitCount"] = 0;
+
+		return;
+
+	end
+
+	VUHDO_REGISTERED_SEMAPHORES[aSemaphoreName] = tSemaphore;
+
+	return tSemaphore;
+
+end
+
+
+
+--
+function VUHDO_getSemaphore(aSemaphoreName)
+
+	return VUHDO_REGISTERED_SEMAPHORES[aSemaphoreName];
+
+end
+
+
+
+--
+function VUHDO_getSemaphores()
+
+	return VUHDO_REGISTERED_SEMAPHORES;
+
+end
+
+
+
+--
+function VUHDO_checkAllSemaphoreTimeouts()
+
+	for tSemaphoreName, tSemaphore in pairs(VUHDO_REGISTERED_SEMAPHORES) do
+		tSemaphore:checkTimeouts();
+	end
+
+	return;
+
+end
+
+
+
+--
+local tMetrics;
+function VUHDO_printSemaphoreMetrics()
+
+	if not VUHDO_SEMAPHORE_PROFILE then
+		VUHDO_Msg("Semaphore profiling is currently disabled.");
+
+		return;
+	end
+
+	VUHDO_Msg("|cffFFD100--- Semaphore Metrics ---|r");
+
+	for tSemaphoreName, tSemaphore in pairs(VUHDO_REGISTERED_SEMAPHORES) do
+		tMetrics = tSemaphore:getMetrics();
+
+		VUHDO_Msg(format("|cffFFA500** Semaphore[%s]:|r (Max:%d Cur:%d/%d Peak:%d): Inc=%d Dec=%d Waits=%d Timeouts=%d Waiting=%d Timeout=%d ms",
+			tSemaphoreName,
+			tMetrics["maxCount"],
+			tMetrics["currentCount"],
+			tMetrics["maxCount"],
+			tMetrics["peakWaitCount"],
+			tMetrics["increments"],
+			tMetrics["decrements"],
+			tMetrics["waits"],
+			tMetrics["timeouts"],
+			tMetrics["waitingCount"],
+			tMetrics["timeoutMs"]
+		));
+	end
+
+	VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_resetSemaphoreMetrics()
+
+	for _, tSemaphore in pairs(VUHDO_getSemaphores()) do
+		if tSemaphore and tSemaphore.resetMetrics then
+			tSemaphore:resetMetrics();
+		end
+	end
+
+	if VUHDO_SEMAPHORE_PROFILE then
+		VUHDO_Msg("Semaphore metrics reset.");
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_setSemaphoreProfiling(anIsEnabled)
+
+	VUHDO_SEMAPHORE_PROFILE = anIsEnabled;
+
+	if anIsEnabled then
+		VUHDO_Msg("Semaphore profiling is enabled.");
+	else
+		VUHDO_Msg("Semaphore profiling is disabled.");
+	end
+
+	return;
 
 end

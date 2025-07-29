@@ -132,7 +132,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			-- Bei Profil-Wechseln existiert der Button schon, hat aber die falsche Größe
 			VUHDO_initLocalVars(aPanelNum);
 			VUHDO_initHealButton(tButton, aPanelNum);
-			VUHDO_positionHealButton(tButton);
+			VUHDO_positionHealButton(tButton, aPanelNum);
 		end
 
 		tColIdx = tColIdx + 1;
