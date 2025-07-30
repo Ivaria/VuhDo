@@ -1803,6 +1803,10 @@ function VUHDO_reloadUI(anIsFixAllFrameLevels)
 	VUHDO_reloadRaidMembers();
 	VUHDO_resetNameTextCache();
 
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_IN_COMBAT_RELOG then
+		VUHDO_refreshRaidMembers();
+	end
+
 	VUHDO_redrawAllPanels(anIsFixAllFrameLevels);
 	VUHDO_updateAllCustomDebuffs(true);
 	VUHDO_rebuildTargets();
