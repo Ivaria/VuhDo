@@ -400,10 +400,10 @@ function VUHDO_getOrCreateBuffSwatch(aName, aParent)
 	if not VUHDO_BUFF_SWATCHES[aName] then
 		VUHDO_BUFF_SWATCHES[aName] = CreateFrame("Frame", aName, aParent, "VuhDoBuffSwatchPanelTemplate");
 		tButton = _G[aName .. "GlassButton"];
-		tButton:SetAttribute("_onleave", "self:ClearBindings();");
-		tButton:SetAttribute("_onshow", "self:ClearBindings();");
-		tButton:SetAttribute("_onhide", "self:ClearBindings();");
-		tButton:SetAttribute(
+		VUHDO_safeSetAttribute(tButton, "_onleave", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton, "_onshow", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton, "_onhide", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton,
 			"_onmousedown", 
 			"if not self:IsUnderMouse(false) then self:ClearBindings(); end"
 		);
@@ -412,13 +412,13 @@ function VUHDO_getOrCreateBuffSwatch(aName, aParent)
 	end
 
 	if (VUHDO_BUFF_SETTINGS["CONFIG"]["WHEEL_SMART_BUFF"]) then
-		tButton:SetAttribute("_onenter", [=[
+		VUHDO_safeSetAttribute(tButton, "_onenter", [=[
 				self:ClearBindings();
 				self:SetBindingClick(0, "MOUSEWHEELUP" , "VuhDoSmartCastGlassButton", "LeftButton");
 				self:SetBindingClick(0, "MOUSEWHEELDOWN" , "VuhDoSmartCastGlassButton", "LeftButton");
 		]=]);
 	else
-		tButton:SetAttribute("_onenter", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton, "_onenter", "self:ClearBindings();");
 	end
 
 	return VUHDO_BUFF_SWATCHES[aName];

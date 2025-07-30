@@ -82,7 +82,7 @@ local function VUHDO_placePlayerIcon(aButton, anIconNo, anIndex)
 	VUHDO_getBarIconCharge(aButton, anIconNo):Hide();
 
 	local tFrame = VUHDO_getBarIconFrame(aButton, anIconNo);
-	tFrame:SetScale(1);
+	VUHDO_PixelUtil.SetScale(tFrame, 1);
 	tFrame:Show();
 
 	local anIcon = VUHDO_getBarIcon(aButton, anIconNo);
@@ -382,7 +382,7 @@ function VUHDO_startMoving(aPanel)
 	if (IsMouseButtonDown(1) and VUHDO_mayMoveHealPanels()) then
 		if (not aPanel["isMoving"]) then
 			aPanel["isMoving"] = true;
-			if not InCombatLockdown() then aPanel:SetFrameStrata("TOOLTIP"); end
+			VUHDO_PixelUtil.SetFrameStrata(aPanel, "TOOLTIP");
 			aPanel:StartMoving();
 		end
 	elseif IsMouseButtonDown(2) and not InCombatLockdown()
@@ -400,7 +400,7 @@ function VUHDO_stopMoving(aPanel)
 	if not InCombatLockdown() then
 		aPanel:StopMovingOrSizing();
 
-		aPanel:SetFrameStrata(VUHDO_PANEL_SETUP[VUHDO_getPanelNum(aPanel)]["frameStrata"]);
+		VUHDO_PixelUtil.SetFrameStrata(aPanel, VUHDO_PANEL_SETUP[VUHDO_getPanelNum(aPanel)]["frameStrata"]);
 	end
 
 	aPanel["isMoving"] = false;

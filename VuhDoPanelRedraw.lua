@@ -394,8 +394,8 @@ local tWidth, tGap;
 local function VUHDO_initPlayerTargetBorder(aButton, aBorderFrame, anIsNoIndicator, aPanelNum)
 
 	if VUHDO_INDICATOR_CONFIG[aPanelNum]["BOUQUETS"]["BAR_BORDER"] == "" then
-		aBorderFrame:Hide();
-		aBorderFrame:ClearAllPoints();
+		VUHDO_PixelUtil.Hide(aBorderFrame);
+		VUHDO_PixelUtil.ClearAllPoints(aBorderFrame);
 
 		return;
 	end
@@ -435,7 +435,7 @@ local tClusterFrame;
 local function VUHDO_initClusterBorder(aButton, aPanelNum)
 
 	tClusterFrame = VUHDO_getClusterBorderFrame(aButton);
-	tClusterFrame:Hide();
+	VUHDO_PixelUtil.Hide(tClusterFrame);
 
 	if VUHDO_INDICATOR_CONFIG[aPanelNum]["BOUQUETS"]["CLUSTER_BORDER"] == "" then
 		tClusterFrame:ClearAllPoints();
@@ -598,7 +598,7 @@ end
 --
 local function VUHDO_initAggroTexture(aButton, aHealthBar)
 
-	VUHDO_getAggroTexture(aHealthBar):Hide();
+	VUHDO_PixelUtil.Hide(VUHDO_getAggroTexture(aHealthBar));
 
 	return;
 
@@ -658,7 +658,7 @@ local function VUHDO_initBackgroundBar(aBgBar, aPanelNum)
 	aBgBar:SetValue(1);
 	aBgBar:SetStatusBarColor(0, 0, 0, 0);
 
-	aBgBar:Show();
+	VUHDO_PixelUtil.Show(aBgBar);
 
 	return;
 
@@ -688,9 +688,9 @@ local function VUHDO_initThreatBar(aButton, aPanelNum)
 	tThreatBar = VUHDO_getHealthBar(aButton, 7);
 
 	if sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["THREAT_BAR"] == "" then
-		tThreatBar:Hide();
+		VUHDO_PixelUtil.Hide(tThreatBar);
 	else
-		tThreatBar:Show();
+		VUHDO_PixelUtil.Show(tThreatBar);
 
 		VUHDO_setLlcStatusBarTexture(tThreatBar, sPanelConfig[aPanelNum]["indicatorConfig"]["CUSTOM"]["THREAT_BAR"]["TEXTURE"]);
 
@@ -824,7 +824,7 @@ local function VUHDO_initOverhealText(aHealthBar, aWidth, aPanelNum)
 	tOvhPanel = VUHDO_getOverhealPanel(aHealthBar);
 
 	VUHDO_PixelUtil.SetSize(tOvhPanel, 1, 1);
-	tOvhPanel:SetScale(1);
+	VUHDO_PixelUtil.SetScale(tOvhPanel, 1);
 
 	tX = sPanelConfig[aPanelNum]["overhealText"]["xAdjust"] * aWidth * 0.01;
 	tY = -sPanelConfig[aPanelNum]["overhealText"]["yAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * 0.01;
@@ -844,8 +844,8 @@ local function VUHDO_initAggroBar(aButton, aHealthBar, aPanelNum)
 	tAggroBar = VUHDO_getHealthBar(aButton, 4);
 
 	if sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["AGGRO_BAR"] == "" then
-		tAggroBar:ClearAllPoints();
-		tAggroBar:Hide();
+		VUHDO_PixelUtil.ClearAllPoints(tAggroBar);
+		VUHDO_PixelUtil.Hide(tAggroBar);
 
 		return;
 	end
@@ -855,7 +855,7 @@ local function VUHDO_initAggroBar(aButton, aHealthBar, aPanelNum)
 	VUHDO_PixelUtil.SetPoint(tAggroBar, "BOTTOM", aHealthBar:GetName(), "TOP", 0, 0);
 	VUHDO_PixelUtil.SetSize(tAggroBar, sPanelConfig[aPanelNum]["barScaling"]["barWidth"], sPanelConfig[aPanelNum]["barScaling"]["rowSpacing"]);
 
-	tAggroBar:Show();
+	VUHDO_PixelUtil.Show(tAggroBar);
 
 	tAggroBar:SetValue(0);
 
@@ -876,16 +876,16 @@ local function VUHDO_initPrivateAura(aHealthBar, aButton, anAuraIndex, aPanelNum
 		return;
 	end
 
-	tPrivateAura:Hide();
-	tPrivateAura:ClearAllPoints();
-	tPrivateAura:SetFrameStrata(aHealthBar:GetFrameStrata());
+	VUHDO_PixelUtil.Hide(tPrivateAura);
+	VUHDO_PixelUtil.ClearAllPoints(tPrivateAura);
+	VUHDO_PixelUtil.SetFrameStrata(tPrivateAura, aHealthBar:GetFrameStrata());
 	tPrivateAura:SetFrameLevel(aHealthBar:GetFrameLevel() + 2);
 
 	tX = sPanelConfig[aPanelNum]["privateAuraXOffset"] + (sPanelConfig[aPanelNum]["privateAuraStep"] * (anAuraIndex - 1));
 	VUHDO_PixelUtil.SetPoint(tPrivateAura, sPanelConfig[aPanelNum]["privateAura"]["point"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["privateAura"]["point"], tX, sPanelConfig[aPanelNum]["privateAuraYOffset"]);
 
 	VUHDO_PixelUtil.SetSize(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraHeight"], sPanelConfig[aPanelNum]["privateAuraHeight"]);
-	tPrivateAura:SetScale(sPanelConfig[aPanelNum]["privateAura"]["scale"] * 0.7);
+	VUHDO_PixelUtil.SetScale(tPrivateAura, sPanelConfig[aPanelNum]["privateAura"]["scale"] * 0.7);
 
 	return;
 
@@ -913,8 +913,8 @@ local function VUHDO_initRaidIcon(aHealthBar, anIcon, aWidth, aPanelNum)
 	tX = sPanelConfig[aPanelNum]["raidIcon"]["xAdjust"] * aWidth * 0.01;
 	tY = -sPanelConfig[aPanelNum]["raidIcon"]["yAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * 0.01;
 
-	anIcon:Hide();
-	anIcon:ClearAllPoints();
+	VUHDO_PixelUtil.Hide(anIcon);
+	VUHDO_PixelUtil.ClearAllPoints(anIcon);
 
 	VUHDO_PixelUtil.SetPoint(anIcon, sPanelConfig[aPanelNum]["raidIcon"]["point"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["raidIcon"]["point"], tX, tY);
 	VUHDO_PixelUtil.SetSize(anIcon, sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * sPanelConfig[aPanelNum]["raidIcon"]["scale"] / 1.5, sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * sPanelConfig[aPanelNum]["raidIcon"]["scale"] / 1.5);
@@ -934,8 +934,8 @@ local function VUHDO_initSwiftmendIndicator(aButton, aHealthBar, aPanelNum)
 
 	tIcon = VUHDO_getBarRoleIcon(aButton, 51);
 
-	tIcon:ClearAllPoints();
-	tIcon:Hide();
+	VUHDO_PixelUtil.ClearAllPoints(tIcon);
+	VUHDO_PixelUtil.Hide(tIcon);
 
 	if sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["SWIFTMEND_INDICATOR"] == "" then
 		return;
@@ -973,7 +973,7 @@ local function VUHDO_initTargetBar(aButton, aPanelNum)
 
 		VUHDO_PixelUtil.SetSize(tTgButton, sPanelConfig[aPanelNum]["barScaling"]["targetWidth"], sPanelConfig[aPanelNum]["barScaling"]["barHeight"]);
 
-		tTgButton:Show();
+		VUHDO_PixelUtil.Show(tTgButton);
 
 		tTgHealthBar = VUHDO_getHealthBar(aButton, 5);
 		tTgHealthBar:SetValue(1);
@@ -991,7 +991,7 @@ local function VUHDO_initTargetBar(aButton, aPanelNum)
 			VUHDO_getHealthBar(tTgButton, 3):SetStatusBarColor(0, 0, 0, 0);
 		end
 	else
-		VUHDO_getTargetButton(aButton):Hide();
+		VUHDO_PixelUtil.Hide(VUHDO_getTargetButton(aButton));
 	end
 
 	return;
@@ -1029,7 +1029,7 @@ local function VUHDO_initTotBar(aButton, aHealthBar, aPanelNum)
 
 		VUHDO_PixelUtil.SetSize(tTotButton, sPanelConfig[aPanelNum]["barScaling"]["totWidth"], sPanelConfig[aPanelNum]["barScaling"]["barHeight"]);
 
-		tTotButton:Show();
+		VUHDO_PixelUtil.Show(tTotButton);
 
 		tTgHealthBar = VUHDO_getHealthBar(aButton, 14);
 		tTgHealthBar:SetValue(1);
@@ -1047,7 +1047,7 @@ local function VUHDO_initTotBar(aButton, aHealthBar, aPanelNum)
 			VUHDO_getHealthBar(tTotButton, 3):SetStatusBarColor(0, 0, 0, 0);
 		end
 	else
-		VUHDO_getTotButton(aButton):Hide();
+		VUHDO_PixelUtil.Hide(VUHDO_getTotButton(aButton));
 	end
 
 	return;
@@ -1077,7 +1077,7 @@ end
 --
 local function VUHDO_initReadyCheckIcon(aButton)
 
-	VUHDO_getBarRoleIcon(aButton, 20):Hide();
+	VUHDO_PixelUtil.Hide(VUHDO_getBarRoleIcon(aButton, 20));
 
 	return;
 
@@ -1089,14 +1089,14 @@ end
 local function VUHDO_initHighlightBar(aButton, aPanelNum)
 
 	if sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["MOUSEOVER_HIGHLIGHT"] == "" then
-		VUHDO_getHealthBar(aButton, 8):Hide();
+		VUHDO_PixelUtil.Hide(VUHDO_getHealthBar(aButton, 8));
 	else
 		tBar = VUHDO_getHealthBar(aButton, 8);
 
 		VUHDO_setLlcStatusBarTexture(tBar, sPanelConfig[aPanelNum]["indicatorConfig"]["CUSTOM"]["MOUSEOVER_HIGHLIGHT"]["TEXTURE"]);
 		tBar:SetAlpha(0);
 
-		tBar:Show();
+		VUHDO_PixelUtil.Show(tBar);
 	end
 
 	return;
@@ -1111,14 +1111,14 @@ local function VUHDO_initSideBarLeft(aButton, aHealthBar, aPanelNum)
 	tBar = VUHDO_getHealthBar(aButton, 17);
 
 	if sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["SIDE_LEFT"] == "" then
-		tBar:ClearAllPoints();
-		tBar:Hide();
+		VUHDO_PixelUtil.ClearAllPoints(tBar);
+		VUHDO_PixelUtil.Hide(tBar);
 	else
 		VUHDO_PixelUtil.SetPoint(tBar, "RIGHT", aHealthBar:GetName(), "LEFT", 0, 0);
 		VUHDO_PixelUtil.SetSize(tBar, sPanelConfig[aPanelNum]["sideBarLeftWidth"], sPanelConfig[aPanelNum]["barHeight"]);
 		VUHDO_setLlcStatusBarTexture(tBar, sPanelConfig[aPanelNum]["indicatorConfig"]["CUSTOM"]["SIDE_LEFT"]["TEXTURE"]);
 
-		tBar:Show();
+		VUHDO_PixelUtil.Show(tBar);
 	end
 
 	VUHDO_customizeIconText(tBar, 32, VUHDO_getHealthBarText(aButton, 17),
@@ -1136,14 +1136,14 @@ local function VUHDO_initSideBarRight(aButton, aHealthBar, aPanelNum)
 	tBar = VUHDO_getHealthBar(aButton, 18);
 
 	if sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["SIDE_RIGHT"] == "" then
-		tBar:ClearAllPoints();
-		tBar:Hide();
+		VUHDO_PixelUtil.ClearAllPoints(tBar);
+		VUHDO_PixelUtil.Hide(tBar);
 	else
 		VUHDO_PixelUtil.SetPoint(tBar, "LEFT", aHealthBar:GetName(), "RIGHT", 0, 0);
 		VUHDO_PixelUtil.SetSize(tBar, sPanelConfig[aPanelNum]["sideBarRightWidth"], sPanelConfig[aPanelNum]["barHeight"]);
 		VUHDO_setLlcStatusBarTexture(tBar, sPanelConfig[aPanelNum]["indicatorConfig"]["CUSTOM"]["SIDE_RIGHT"]["TEXTURE"]);
 
-		tBar:Show();
+		VUHDO_PixelUtil.Show(tBar);
 	end
 
 	VUHDO_customizeIconText(tBar, 32, VUHDO_getHealthBarText(aButton, 18),
@@ -1318,9 +1318,9 @@ local function VUHDO_initAllHealButtons(aPanel, aPanelNum)
 
 	for tCnt = 1, #VUHDO_PANEL_MODELS[aPanelNum] do
 		tGroupPanel = VUHDO_getGroupOrderPanel(aPanelNum, tCnt);
-		if tGroupPanel then tGroupPanel:Hide(); end
+		if tGroupPanel then VUHDO_PixelUtil.Hide(tGroupPanel); end
 		tGroupPanel = VUHDO_getGroupSelectPanel(aPanelNum,  tCnt);
-		if tGroupPanel then tGroupPanel:Hide(); end
+		if tGroupPanel then VUHDO_PixelUtil.Hide(tGroupPanel); end
 	end
 end
 
@@ -1351,10 +1351,10 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 	VUHDO_PixelUtil.ClearAllPoints(aPanel);
 	VUHDO_PixelUtil.SetWidth(aPanel, tPosition["width"]);
 	VUHDO_PixelUtil.SetHeight(aPanel, tPosition["height"]);
-	aPanel:SetScale(tScale);
+	VUHDO_PixelUtil.SetScale(aPanel, tScale);
 	VUHDO_PixelUtil.SetPoint(aPanel, tPosition["orientation"],  "UIParent", tPosition["relativePoint"],  tPosition["x"],  tPosition["y"]);
-	aPanel:EnableMouseWheel(1);
-	aPanel:SetFrameStrata(tSetup["frameStrata"] or "MEDIUM");
+	VUHDO_PixelUtil.EnableMouseWheel(aPanel, 1);
+	VUHDO_PixelUtil.SetFrameStrata(aPanel, tSetup["frameStrata"] or "MEDIUM");
 
 	if aPanel:IsShown() then
 		tX, tY = VUHDO_getAnchorCoords(aPanel, tGrowth, tFactor);
@@ -1396,7 +1396,7 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 	if VUHDO_IS_PANEL_CONFIG then
 		tLabel:SetText("[PANEL "  .. aPanelNum .. "]");
 		VUHDO_PixelUtil.SetPoint(tLabel:GetParent(), "BOTTOM", aPanel:GetName(), "TOP", 0, 3);
-		tLabel:GetParent():Show();
+		VUHDO_PixelUtil.Show(tLabel:GetParent());
 
 		if DESIGN_MISC_PANEL_NUM == aPanelNum and VuhDoNewOptionsPanelPanel and VuhDoNewOptionsPanelPanel:IsVisible() then
 
@@ -1424,24 +1424,24 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 
 		if DESIGN_MISC_PANEL_NUM then
 			VuhDoNewOptionsTabbedFramePanelNumLabelLabel:SetText(VUHDO_I18N_PANEL .. " #" .. DESIGN_MISC_PANEL_NUM);
-			VuhDoNewOptionsTabbedFramePanelNumLabelLabel:Show();
+			VUHDO_PixelUtil.Show(VuhDoNewOptionsTabbedFramePanelNumLabelLabel);
 		else
-			VuhDoNewOptionsTabbedFramePanelNumLabelLabel:Hide();
+			VUHDO_PixelUtil.Hide(VuhDoNewOptionsTabbedFramePanelNumLabelLabel);
 		end
 
 		_G[aPanel:GetName() .. "NewTxu"]:SetShown(not VUHDO_CONFIG_SHOW_RAID);
 		_G[aPanel:GetName() .. "ClrTxu"]:SetShown(not VUHDO_CONFIG_SHOW_RAID);
 	else
-		_G[aPanel:GetName() .. "NewTxu"]:Hide();
-		_G[aPanel:GetName() .. "ClrTxu"]:Hide();
-		tLabel:GetParent():Hide();
+		VUHDO_PixelUtil.Hide(_G[aPanel:GetName() .. "NewTxu"]);
+		VUHDO_PixelUtil.Hide(_G[aPanel:GetName() .. "ClrTxu"]);
+		VUHDO_PixelUtil.Hide(tLabel:GetParent());
 		if VuhDoNewOptionsTabbedFrame then
-			VuhDoNewOptionsTabbedFramePanelNumLabelLabel:Hide();
+			VUHDO_PixelUtil.Hide(VuhDoNewOptionsTabbedFramePanelNumLabelLabel);
 		end
 	end
 
 	aPanel:SetBackdropColor(VUHDO_backColor(tPanelColor["BACK"]));
-	aPanel:EnableMouse(not VUHDO_CONFIG["LOCK_CLICKS_THROUGH"]);
+	VUHDO_PixelUtil.EnableMouse(aPanel, not VUHDO_CONFIG["LOCK_CLICKS_THROUGH"]);
 
 	aPanel:StopMovingOrSizing();
 	aPanel["isMoving"] = false;
@@ -1657,9 +1657,9 @@ function VUHDO_deferRedrawPanelCompleteDelegate(aPanelNum, anIsFixAllFrameLevels
 	if VUHDO_isPanelVisible(aPanelNum) then
 		VUHDO_fixFrameLevels(anIsFixAllFrameLevels, tPanel, 2, tPanel:GetChildren());
 
-		tPanel:Show();
+		VUHDO_PixelUtil.Show(tPanel);
 	else
-		tPanel:Hide();
+		VUHDO_PixelUtil.Hide(tPanel);
 	end
 
 	if sPanelRedrawSemaphore then
@@ -1704,13 +1704,13 @@ function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
 		tGroupPanel = VUHDO_getGroupOrderPanel(aPanelNum, tCnt);
 
 		if tGroupPanel then
-			tGroupPanel:Hide();
+			VUHDO_PixelUtil.Hide(tGroupPanel);
 		end
 
 		tGroupPanel = VUHDO_getGroupSelectPanel(aPanelNum,  tCnt);
 
 		if tGroupPanel then
-			tGroupPanel:Hide();
+			VUHDO_PixelUtil.Hide(tGroupPanel);
 		end
 	end
 
@@ -1768,12 +1768,12 @@ function VUHDO_redrawPanel(aPanelNum, anIsFixAllFrameLevels)
 		if VUHDO_isPanelVisible(aPanelNum) then
 			VUHDO_fixFrameLevels(anIsFixAllFrameLevels, tPanel, 2, tPanel:GetChildren());
 
-			tPanel:Show();
+			VUHDO_PixelUtil.Show(tPanel);
 		else
-			tPanel:Hide();
+			VUHDO_PixelUtil.Hide(tPanel);
 		end
 	else
-		VUHDO_getActionPanelOrStub(aPanelNum):Hide();
+		VUHDO_PixelUtil.Hide(VUHDO_getActionPanelOrStub(aPanelNum));
 	end
 
 	return;
@@ -1812,16 +1812,16 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 		VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture());
 
 		VuhDoGcdStatusBar:SetValue(0);
-		VuhDoGcdStatusBar:SetFrameStrata("TOOLTIP");
+		VUHDO_PixelUtil.SetFrameStrata(VuhDoGcdStatusBar, "TOOLTIP");
 	end
 
-	VuhDoGcdStatusBar:Hide();
+	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
 
 	-- Direction arrow
 	VuhDoDirectionFrameArrow:SetVertexColor(VUHDO_backColor(VUHDO_PANEL_SETUP["BAR_COLORS"]["DIRECTION"]));
 	VUHDO_PixelUtil.SetPoint(VuhDoDirectionFrameText, "TOP", "VuhDoDirectionFrameArrow", "CENTER", 5,  -2);
 	VuhDoDirectionFrameText:SetText("");
-	VuhDoDirectionFrame:SetFrameStrata("TOOLTIP");
+	VUHDO_PixelUtil.SetFrameStrata(VuhDoDirectionFrame, "TOOLTIP");
 
 	VUHDO_initAllEventBouquets();
 
@@ -1959,7 +1959,7 @@ function VUHDO_deferRedrawPanelDelegate(aPanelNum, anIsFixAllFrameLevels)
 
 		VUHDO_deferFinalizePanel(aPanelNum, anIsFixAllFrameLevels);
 	else
-		VUHDO_getActionPanelOrStub(aPanelNum):Hide();
+		VUHDO_PixelUtil.Hide(VUHDO_getActionPanelOrStub(aPanelNum));
 		VUHDO_deferFinalizePanel(aPanelNum, anIsFixAllFrameLevels);
 	end
 
@@ -1991,15 +1991,15 @@ function VUHDO_deferRedrawAllPanelsCompleteDelegate(anIsFixAllFrameLevels)
 		VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture());
 
 		VuhDoGcdStatusBar:SetValue(0);
-		VuhDoGcdStatusBar:SetFrameStrata("TOOLTIP");
+		VUHDO_PixelUtil.SetFrameStrata(VuhDoGcdStatusBar, "TOOLTIP");
 	end
 
-	VuhDoGcdStatusBar:Hide();
+	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
 
 	VuhDoDirectionFrameArrow:SetVertexColor(VUHDO_backColor(VUHDO_PANEL_SETUP["BAR_COLORS"]["DIRECTION"]));
 	VUHDO_PixelUtil.SetPoint(VuhDoDirectionFrameText, "TOP", "VuhDoDirectionFrameArrow", "CENTER", 5,  -2);
 	VuhDoDirectionFrameText:SetText("");
-	VuhDoDirectionFrame:SetFrameStrata("TOOLTIP");
+	VUHDO_PixelUtil.SetFrameStrata(VuhDoDirectionFrame, "TOOLTIP");
 
 	VUHDO_initAllEventBouquets();
 

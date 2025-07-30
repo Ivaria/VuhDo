@@ -96,7 +96,7 @@ function VUHDO_initCustomDebuffs()
 			tButton:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tButton, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
 			VUHDO_PixelUtil.SetSize(tButton, sHeight, sHeight);
-			tButton:SetScale(1);
+			VUHDO_PixelUtil.SetScale(tButton, 1);
 
 			tFrame = VUHDO_getBarIconFrame(sButton, tIconIdx);
 			tFrame:ClearAllPoints();
@@ -113,7 +113,7 @@ function VUHDO_initCustomDebuffs()
 				--VUHDO_Msg("Removing " .. (tCnt + 1));
 			end
 			tFrame:SetAlpha(0);
-			tFrame:SetScale(VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7);
+			VUHDO_PixelUtil.SetScale(tFrame, VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7);
 			tFrame:Show();
 
 			tIcon = VUHDO_getBarIcon(sButton, tIconIdx);

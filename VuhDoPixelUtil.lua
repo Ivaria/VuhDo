@@ -7,7 +7,6 @@ local string = string;
 local format = string.format;
 local ipairs = ipairs;
 local tinsert = table.insert;
-local VUHDO_safeCombatCall = _G["VUHDO_safeCombatCall"];
 
 local tPixelUtil = { };
 local sPixelScale;
@@ -167,7 +166,9 @@ function tPixelUtil.SetPoint(aFrame, aPoint, aRelativeFrame, aRelativePoint, aXO
 	tX = aXOffset and VUHDO_roundToPixel(aXOffset) or 0;
 	tY = aYOffset and VUHDO_roundToPixel(aYOffset) or 0;
 
-	VUHDO_safeCombatCall(aFrame, "SetPoint", aPoint, aRelativeFrame, aRelativePoint, tX, tY);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetPoint(aPoint, aRelativeFrame, aRelativePoint, tX, tY);
+	end
 
 	return;
 
@@ -187,7 +188,9 @@ function tPixelUtil.SetSize(aFrame, aWidth, aHeight)
 	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
 	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
 
-	VUHDO_safeCombatCall(aFrame, "SetSize", tWidth, tHeight);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetSize(tWidth, tHeight);
+	end
 
 	return;
 
@@ -205,7 +208,9 @@ function tPixelUtil.SetWidth(aFrame, aWidth)
 
 	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
 
-	VUHDO_safeCombatCall(aFrame, "SetWidth", tWidth);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetWidth(tWidth);
+	end
 
 	return;
 
@@ -223,7 +228,9 @@ function tPixelUtil.SetHeight(aFrame, aHeight)
 
 	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
 
-	VUHDO_safeCombatCall(aFrame, "SetHeight", tHeight);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetHeight(tHeight);
+	end
 
 	return;
 
@@ -314,6 +321,129 @@ end
 
 
 --
+function tPixelUtil.ClearAllPoints(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:ClearAllPoints();
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.Show(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:Show();
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.Hide(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:Hide();
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.SetScale(aFrame, aScale)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetScale(aScale);
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.EnableMouseWheel(aFrame, aEnable)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:EnableMouseWheel(aEnable);
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.SetFrameStrata(aFrame, aStrata)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetFrameStrata(aStrata);
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.EnableMouse(aFrame, aEnable)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:EnableMouse(aEnable);
+	end
+
+	return;
+
+end
+
+
+
+VUHDO_PixelUtil = tPixelUtil;
+
+
+
+--
 local tNumFrames;
 local tFrameSize;
 local tSpacing;
@@ -343,9 +473,9 @@ function VUHDO_pixelTest()
 		if not tTestFrames[tIndex] then
 			tTestFrames[tIndex] = CreateFrame("Frame", "VuhDoPixelTestFrame" .. tIndex, UIParent, "BackdropTemplate");
 
-			tTestFrames[tIndex]:SetFrameStrata("HIGH");
+			VUHDO_PixelUtil.SetFrameStrata(tTestFrames[tIndex], "HIGH");
 			tTestFrames[tIndex]:SetMovable(true);
-			tTestFrames[tIndex]:EnableMouse(true);
+			VUHDO_PixelUtil.EnableMouse(tTestFrames[tIndex], true);
 			tTestFrames[tIndex]:RegisterForDrag("LeftButton");
 
 			tTestFrames[tIndex]:SetScript("OnDragStart", tTestFrames[tIndex].StartMoving);
@@ -477,7 +607,7 @@ function VUHDO_pixelHideTestFrame()
 			tFrame:SetScript("OnDragStop", nil);
 
 			tFrame:SetMovable(false);
-			tFrame:EnableMouse(false);
+			VUHDO_PixelUtil.EnableMouse(tFrame, false);
 
 			tFrame:UnregisterAllEvents();
 			tFrame:SetParent(nil);
@@ -648,52 +778,3 @@ function VUHDO_pixelHelp()
 	return;
 
 end
-
-
-
---
-function tPixelUtil.ClearAllPoints(aFrame)
-
-	if not aFrame then
-		return;
-	end
-
-	VUHDO_safeCombatCall(aFrame, "ClearAllPoints");
-
-	return;
-
-end
-
-
-
---
-function tPixelUtil.Show(aFrame)
-
-	if not aFrame then
-		return;
-	end
-
-	VUHDO_safeCombatCall(aFrame, "Show");
-
-	return;
-
-end
-
-
-
---
-function tPixelUtil.Hide(aFrame)
-
-	if not aFrame then
-		return;
-	end
-
-	VUHDO_safeCombatCall(aFrame, "Hide");
-
-	return;
-
-end
-
-
-
-VUHDO_PixelUtil = tPixelUtil;

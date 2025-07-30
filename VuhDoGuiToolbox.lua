@@ -798,7 +798,7 @@ function VUHDO_fixFrameLevels(anIsForceUpdateChildren, aFrame, aBaseLevel, ...)
 
 				if not tChild["vfl"] then
 					if not VUHDO_isConfigPanelShowing() then
-						tChild:SetFrameStrata(aFrame:GetFrameStrata());
+						VUHDO_PixelUtil.SetFrameStrata(tChild, aFrame:GetFrameStrata());
 					end
 					tChild:SetFrameLevel(tOurLevel);
 					tChild["vfl"] = true;

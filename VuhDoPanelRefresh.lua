@@ -143,8 +143,8 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 		if not tButton then break; end
 
 		tButton["raidid"] = nil;
-		tButton:SetAttribute("unit", nil);
-		tButton:Hide();
+		VUHDO_safeSetAttribute(tButton, "unit", nil);
+		VUHDO_PixelUtil.Hide(tButton);
 		tButtonIdx = tButtonIdx + 1;
 	end
 end
@@ -167,7 +167,7 @@ local function VUHDO_refreshPanel(aPanelNum)
 	tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
 
 	if VUHDO_hasPanelButtons(aPanelNum) then
-		tPanel:Show();
+		VUHDO_PixelUtil.Show(tPanel);
 
 		VUHDO_refreshInitPanel(tPanel, aPanelNum);
 		VUHDO_positionTableHeaders(tPanel, aPanelNum);
@@ -188,13 +188,13 @@ local function VUHDO_refreshAllPanels()
 		if VUHDO_isPanelVisible(tCnt) then
 			VUHDO_refreshPanel(tCnt);
 		else
-			VUHDO_getActionPanelOrStub(tCnt):Hide();
+			VUHDO_PixelUtil.Hide(VUHDO_getActionPanelOrStub(tCnt));
 		end
 	end
 
 	VUHDO_updateAllRaidBars();
 	VUHDO_updatePanelVisibility();
-	VuhDoGcdStatusBar:Hide();
+	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
 end
 
 

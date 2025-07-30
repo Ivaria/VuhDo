@@ -621,7 +621,7 @@ function VUHDO_overhealTextCallback(aUnit, aProviderName, aText, aValue, anIndic
 						tRatio = aValue / tInfo["healthmax"];
 						tScale = VUHDO_PANEL_SETUP[tPanelNum]["OVERHEAL_TEXT"]["scale"];
 
-						VUHDO_getOverhealPanel(tBar):SetScale(tRatio < 1 and (0.5 + tRatio) * tScale or 1.5 * tScale);
+						VUHDO_PixelUtil.SetScale(VUHDO_getOverhealPanel(tBar), tRatio < 1 and (0.5 + tRatio) * tScale or 1.5 * tScale);
 					end
 				end
 			end

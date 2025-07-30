@@ -139,7 +139,7 @@ local function VUHDO_initTooltip()
 	if VUHDO_TT_RESET or tFixPos then
 		VUHDO_TT_RESET = false;
 
-		VuhDoTooltip:SetScale(tConfig["SCALE"]);
+		VUHDO_PixelUtil.SetScale(VuhDoTooltip, tConfig["SCALE"]);
 		VuhDoTooltip:SetBackdropColor(VUHDO_backColor(tConfig["BACKGROUND"]));
 		VuhDoTooltip:SetBackdropBorderColor(VUHDO_backColor(tConfig["BORDER"]));
 

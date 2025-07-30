@@ -1028,13 +1028,15 @@ function VUHDO_replaceMacroTemplates(aText, aUnit)
 		tInfo = VUHDO_RAID[aUnit];
 
 		if tInfo then
-			aText = gsub(aText, "[Vv][Dd][Nn][Aa][Mm][Ee]", tInfo["name"]);
+			if tInfo["name"] and type(tInfo["name"]) == "string" then
+				aText = gsub(aText, "[Vv][Dd][Nn][Aa][Mm][Ee]", tInfo["name"]);
+			end
 
-			if tInfo["petUnit"] then
+			if tInfo["petUnit"] and type(tInfo["petUnit"]) == "string" then
 				aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", tInfo["petUnit"]);
 			end
 
-			if tInfo["targetUnit"] then
+			if tInfo["targetUnit"] and type(tInfo["targetUnit"]) == "string" then
 				aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", tInfo["targetUnit"]);
 			end
 		end
@@ -2479,33 +2481,16 @@ end
 
 
 --
-function VUHDO_safeCombatCall(aFrameOrFunc, aMethodOrArg1, ...)
-
-	if not InCombatLockdown() then
-		if type(aFrameOrFunc) == "table" and type(aMethodOrArg1) == "string" then
-			return aFrameOrFunc[aMethodOrArg1](aFrameOrFunc, ...);
-		else
-			return aFrameOrFunc(aMethodOrArg1, ...);
-		end
-	elseif type(aFrameOrFunc) == "table" and type(aMethodOrArg1) == "string" then
-		if aFrameOrFunc.IsProtected and not aFrameOrFunc:IsProtected() then
-			return aFrameOrFunc[aMethodOrArg1](aFrameOrFunc, ...);
-		end
-	end
-
-end
-
-
-
---
 function VUHDO_safeSetAttribute(aFrame, aAttribute, aValue)
 
 	if not aFrame then
 		return;
 	end
 
-	if not InCombatLockdown() then
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetAttribute(aAttribute, aValue);
 	end
+
+	return;
 
 end
