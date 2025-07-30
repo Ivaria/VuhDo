@@ -7,6 +7,7 @@ local string = string;
 local format = string.format;
 local ipairs = ipairs;
 local tinsert = table.insert;
+local VUHDO_safeCombatCall = _G["VUHDO_safeCombatCall"];
 
 local tPixelUtil = { };
 local sPixelScale;
@@ -166,7 +167,7 @@ function tPixelUtil.SetPoint(aFrame, aPoint, aRelativeFrame, aRelativePoint, aXO
 	tX = aXOffset and VUHDO_roundToPixel(aXOffset) or 0;
 	tY = aYOffset and VUHDO_roundToPixel(aYOffset) or 0;
 
-	aFrame:SetPoint(aPoint, aRelativeFrame, aRelativePoint, tX, tY);
+	VUHDO_safeCombatCall(aFrame, "SetPoint", aPoint, aRelativeFrame, aRelativePoint, tX, tY);
 
 	return;
 
@@ -186,7 +187,7 @@ function tPixelUtil.SetSize(aFrame, aWidth, aHeight)
 	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
 	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
 
-	aFrame:SetSize(tWidth, tHeight);
+	VUHDO_safeCombatCall(aFrame, "SetSize", tWidth, tHeight);
 
 	return;
 
@@ -204,7 +205,7 @@ function tPixelUtil.SetWidth(aFrame, aWidth)
 
 	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
 
-	aFrame:SetWidth(tWidth);
+	VUHDO_safeCombatCall(aFrame, "SetWidth", tWidth);
 
 	return;
 
@@ -222,7 +223,7 @@ function tPixelUtil.SetHeight(aFrame, aHeight)
 
 	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
 
-	aFrame:SetHeight(tHeight);
+	VUHDO_safeCombatCall(aFrame, "SetHeight", tHeight);
 
 	return;
 
@@ -243,10 +244,6 @@ function tPixelUtil.ApplySettings(aTexture)
 	return;
 
 end
-
-
-
-
 
 
 
@@ -647,6 +644,51 @@ function VUHDO_pixelHelp()
 	VUHDO_Msg("  /vd pixel spacing - Show pixel-perfect spacing values");
 	VUHDO_Msg("  /vd pixel scale - Show current scale values");
 	VUHDO_Msg("  /vd pixel cache - Print backdrop cache metrics");
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.ClearAllPoints(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	VUHDO_safeCombatCall(aFrame, "ClearAllPoints");
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.Show(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	VUHDO_safeCombatCall(aFrame, "Show");
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.Hide(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	VUHDO_safeCombatCall(aFrame, "Hide");
 
 	return;
 

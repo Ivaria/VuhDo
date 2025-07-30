@@ -22,11 +22,31 @@ local sPanelRedrawSemaphore;
 local sIsManaBouquet = { };
 
 local VUHDO_SEMAPHORE_CONFIG = {
-	["BUTTON_INIT_TIME_US"] = 139,
-	["BUTTON_POSITION_TIME_MS"] = 6.56,
-	["BUTTON_INIT_SAFETY_FACTOR"] = 5,
-	["BUTTON_POSITION_SAFETY_FACTOR"] = 2,
-	["PANEL_REDRAW_SAFETY_FACTOR"] = 1.5,
+	["BUTTON_INIT_TIME_US"] = 75,
+	["BUTTON_POSITION_TIME_MS"] = 2.2,
+	["BUTTON_INIT_SAFETY_FACTOR"] = 2.0,
+	["BUTTON_POSITION_SAFETY_FACTOR"] = 1.2,
+	["PANEL_REDRAW_SAFETY_FACTOR"] = 1.15,
+
+	["MIN_TIMEOUT_MS"] = 3,
+
+	["PARTY_THRESHOLD"] = 5,
+	["SMALL_RAID_THRESHOLD"] = 15,
+	["MEDIUM_RAID_THRESHOLD"] = 25,
+
+	["SOLO_INIT_SAFETY"] = 1.0,
+	["SOLO_POSITION_SAFETY"] = 1.0,
+	["SOLO_PANEL_SAFETY"] = 1.05,
+	["PARTY_INIT_SAFETY"] = 1.02, -- party (2-5)
+	["PARTY_POSITION_SAFETY"] = 1.02,
+	["PARTY_PANEL_SAFETY"] = 1.1,
+	["SMALL_RAID_INIT_SAFETY"] = 1.05, -- small raid (6-15)
+	["SMALL_RAID_POSITION_SAFETY"] = 1.03,
+	["SMALL_RAID_PANEL_SAFETY"] = 1.15,
+	["MEDIUM_RAID_INIT_SAFETY"] = 1.1, -- medium raid (16-25)
+	["MEDIUM_RAID_POSITION_SAFETY"] = 1.05,
+	["MEDIUM_RAID_PANEL_SAFETY"] = 1.25,
+	["LARGE_RAID_PANEL_MULTIPLIER"] = 1.3, -- large raid (26+) multiplier
 };
 local sButtonInitTimeouts = { };
 local sButtonPositionTimeouts = { };
@@ -278,15 +298,35 @@ function VUHDO_calculateSemaphoreTimeouts()
 				tTotalPositionButtons = tTotalPositionButtons + #tGroupArray;
 			end
 
-			tPanelButtons = tNumButtons + tTotalPositionButtons;
-			tInitSafetyFactor = tPanelButtons <= 3 and 1.2 or (tPanelButtons <= 8 and 1.5 or tConfig["BUTTON_INIT_SAFETY_FACTOR"]);
-			tPositionSafetyFactor = tPanelButtons <= 3 and 1.1 or (tPanelButtons <= 8 and 1.2 or tConfig["BUTTON_POSITION_SAFETY_FACTOR"]);
+			if tNumButtons <= 1 then
+				tInitSafetyFactor = tConfig["SOLO_INIT_SAFETY"];
+			elseif tNumButtons <= tConfig["PARTY_THRESHOLD"] then
+				tInitSafetyFactor = tConfig["PARTY_INIT_SAFETY"];
+			elseif tNumButtons <= tConfig["SMALL_RAID_THRESHOLD"] then
+				tInitSafetyFactor = tConfig["SMALL_RAID_INIT_SAFETY"];
+			elseif tNumButtons <= tConfig["MEDIUM_RAID_THRESHOLD"] then
+				tInitSafetyFactor = tConfig["MEDIUM_RAID_INIT_SAFETY"];
+			else
+				tInitSafetyFactor = tConfig["BUTTON_INIT_SAFETY_FACTOR"];
+			end
 
-			sButtonInitTimeouts[tPanelNum] = math.max(1, math.ceil(tNumButtons * tConfig["BUTTON_INIT_TIME_US"] * tInitSafetyFactor / 1000));
-			sButtonPositionTimeouts[tPanelNum] = math.max(1, math.ceil(tTotalPositionButtons * tConfig["BUTTON_POSITION_TIME_MS"] * tPositionSafetyFactor));
+			if tTotalPositionButtons <= 1 then
+				tPositionSafetyFactor = tConfig["SOLO_POSITION_SAFETY"];
+			elseif tTotalPositionButtons <= tConfig["PARTY_THRESHOLD"] then
+				tPositionSafetyFactor = tConfig["PARTY_POSITION_SAFETY"];
+			elseif tTotalPositionButtons <= tConfig["SMALL_RAID_THRESHOLD"] then
+				tPositionSafetyFactor = tConfig["SMALL_RAID_POSITION_SAFETY"];
+			elseif tTotalPositionButtons <= tConfig["MEDIUM_RAID_THRESHOLD"] then
+				tPositionSafetyFactor = tConfig["MEDIUM_RAID_POSITION_SAFETY"];
+			else
+				tPositionSafetyFactor = tConfig["BUTTON_POSITION_SAFETY_FACTOR"];
+			end
+
+			sButtonInitTimeouts[tPanelNum] = math.max(tConfig["MIN_TIMEOUT_MS"], math.ceil(tNumButtons * tConfig["BUTTON_INIT_TIME_US"] * tInitSafetyFactor / 1000));
+			sButtonPositionTimeouts[tPanelNum] = math.max(tConfig["MIN_TIMEOUT_MS"], math.ceil(tTotalPositionButtons * tConfig["BUTTON_POSITION_TIME_MS"] * tPositionSafetyFactor));
 		else
-			sButtonInitTimeouts[tPanelNum] = 1;
-			sButtonPositionTimeouts[tPanelNum] = 1;
+			sButtonInitTimeouts[tPanelNum] = tConfig["MIN_TIMEOUT_MS"];
+			sButtonPositionTimeouts[tPanelNum] = tConfig["MIN_TIMEOUT_MS"];
 		end
 	end
 
@@ -301,12 +341,16 @@ function VUHDO_calculateSemaphoreTimeouts()
 		end
 	end
 
-	if tTotalButtons <= 5 then
-		tPanelRedrawSafetyFactor = 2.0; -- Very small total
-	elseif tTotalButtons <= 15 then
-		tPanelRedrawSafetyFactor = 2.5; -- Small to medium total
+	if tTotalButtons <= 1 then
+		tPanelRedrawSafetyFactor = tConfig["SOLO_PANEL_SAFETY"];
+	elseif tTotalButtons <= tConfig["PARTY_THRESHOLD"] then
+		tPanelRedrawSafetyFactor = tConfig["PARTY_PANEL_SAFETY"];
+	elseif tTotalButtons <= tConfig["SMALL_RAID_THRESHOLD"] then
+		tPanelRedrawSafetyFactor = tConfig["SMALL_RAID_PANEL_SAFETY"];
+	elseif tTotalButtons <= tConfig["MEDIUM_RAID_THRESHOLD"] then
+		tPanelRedrawSafetyFactor = tConfig["MEDIUM_RAID_PANEL_SAFETY"];
 	else
-		tPanelRedrawSafetyFactor = tConfig["PANEL_REDRAW_SAFETY_FACTOR"] * 2; -- Large total
+		tPanelRedrawSafetyFactor = tConfig["PANEL_REDRAW_SAFETY_FACTOR"] * tConfig["LARGE_RAID_PANEL_MULTIPLIER"];
 	end
 
 	sPanelRedrawTimeout = math.max(1, math.ceil(tTotalExpectedTime * tPanelRedrawSafetyFactor));
@@ -527,11 +571,11 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 			VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), tUnit);
 
 			tXPos, tYPos = VUHDO_getHealButtonPos(tColumnIndex, tGroupIndex, aPanelNum);
-			tHealButton:Hide();
-			tHealButton:ClearAllPoints();
+			VUHDO_PixelUtil.Hide(tHealButton);
+			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 			VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanelName, "TOPLEFT", tXPos, -tYPos);
 			VUHDO_addUnitButton(tHealButton, aPanelNum);
-			tHealButton:Show();
+			VUHDO_PixelUtil.Show(tHealButton);
 		end
 
 		tColumnIndex = tColumnIndex + 1;
@@ -583,14 +627,14 @@ local function VUHDO_initManaBar(aButton, aManaBar, aWidth, anIsForceBar, aPanel
 	aButton["regularHeight"] = sPanelConfig[aPanelNum]["barScaling"]["barHeight"];
 
 	if tIsManaBouquet then
-		aManaBar:Show();
+		VUHDO_PixelUtil.Show(aManaBar);
 		VUHDO_PixelUtil.SetHeight(aManaBar, tManaHeight);
 
 		if (VUHDO_getHealthBar(aButton, 1):GetHeight() == 0) then
 			VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 1), sPanelConfig[aPanelNum]["barHeight"]);
 		end
 	else
-		aManaBar:Hide();
+		VUHDO_PixelUtil.Hide(aManaBar);
 		VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 1), sPanelConfig[aPanelNum]["barHeight"] + sPanelConfig[aPanelNum]["manaBarHeight"]);
 	end
 
@@ -684,7 +728,7 @@ local function VUHDO_initBarTexts(aButton, aHealthBar, aWidth, aPanelNum)
 	tLifeText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 	tLifeText:SetText("");
 
-	tNameText:ClearAllPoints();
+	VUHDO_PixelUtil.ClearAllPoints(tNameText);
 	tAddHeight = 0;
 
 	if VUHDO_LT_POS_RIGHT == sPanelConfig[aPanelNum]["lifeText"]["position"]
@@ -695,9 +739,9 @@ local function VUHDO_initBarTexts(aButton, aHealthBar, aWidth, aPanelNum)
 		VUHDO_PixelUtil.SetHeight(tLifeText, 0);
 		VUHDO_PixelUtil.SetPoint(tNameText, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
 
-		tLifeText:Hide();
+		VUHDO_PixelUtil.Hide(tLifeText);
 	else
-		tLifeText:ClearAllPoints();
+		VUHDO_PixelUtil.ClearAllPoints(tLifeText);
 
 		VUHDO_PixelUtil.SetWidth(tLifeText, aWidth);
 		VUHDO_PixelUtil.SetHeight(tLifeText, sPanelConfig[aPanelNum]["lifeFontHeight"]);
@@ -712,7 +756,7 @@ local function VUHDO_initBarTexts(aButton, aHealthBar, aWidth, aPanelNum)
 			VUHDO_PixelUtil.SetPoint(tLifeText, "BOTTOM", tNameText:GetName(), "TOP", 0, 0);
 		end
 
-		tLifeText:Show();
+		VUHDO_PixelUtil.Show(tLifeText);
 	end
 
 	VUHDO_PixelUtil.SetHeight(tTextPanel, tNameText:GetHeight() + tAddHeight);
@@ -740,7 +784,7 @@ local function VUHDO_initBarTexts(aButton, aHealthBar, aWidth, aPanelNum)
 		tAnchorObject = aHealthBar;
 	end
 
-	tTextPanel:ClearAllPoints();
+	VUHDO_PixelUtil.ClearAllPoints(tTextPanel);
 
 	VUHDO_PixelUtil.SetPoint(tTextPanel, sPanelConfig[aPanelNum]["textAnchors"][1], tAnchorObject:GetName(), sPanelConfig[aPanelNum]["textAnchors"][2], sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["xAdjust"], -sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["yAdjust"]);
 
@@ -1264,9 +1308,9 @@ local function VUHDO_initAllHealButtons(aPanel, aPanelNum)
 		tHealButton = VUHDO_getHealButton(tCnt, aPanelNum);
 		if tHealButton then
 			tHealButton["raidid"] = nil;
-			tHealButton:SetAttribute("unit", nil);
-			tHealButton:ClearAllPoints();
-			tHealButton:Hide();
+			VUHDO_safeSetAttribute(tHealButton, "unit", nil);
+			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
+			VUHDO_PixelUtil.Hide(tHealButton);
 		else break; end
 
 		tCnt = tCnt + 1;
@@ -1304,7 +1348,7 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 
 	tGrowth = tPosition["growth"];
 
-	aPanel:ClearAllPoints();
+	VUHDO_PixelUtil.ClearAllPoints(aPanel);
 	VUHDO_PixelUtil.SetWidth(aPanel, tPosition["width"]);
 	VUHDO_PixelUtil.SetHeight(aPanel, tPosition["height"]);
 	aPanel:SetScale(tScale);
@@ -1314,7 +1358,7 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 
 	if aPanel:IsShown() then
 		tX, tY = VUHDO_getAnchorCoords(aPanel, tGrowth, tFactor);
-		aPanel:ClearAllPoints();
+		VUHDO_PixelUtil.ClearAllPoints(aPanel);
 
 		if VUHDO_PROHIBIT_REPOS then
 			VUHDO_PixelUtil.SetPoint(aPanel, tGrowth,  "UIParent", "BOTTOMLEFT", tX, tY);
@@ -1562,8 +1606,8 @@ function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, a
 
 	tXPos, tYPos = VUHDO_getHealButtonPos(aColumnIndex, aGroupIndex, aPanelNum);
 
-	tHealButton:Hide();
-	tHealButton:ClearAllPoints();
+	VUHDO_PixelUtil.Hide(tHealButton);
+	VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 
 	tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
 	VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanel:GetName(), "TOPLEFT", tXPos, -tYPos);
@@ -1572,7 +1616,7 @@ function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, a
 		VUHDO_addUnitButton(tHealButton, aPanelNum);
 	end
 
-	tHealButton:Show();
+	VUHDO_PixelUtil.Show(tHealButton);
 
 	if sButtonPositionSemaphores[aPanelNum] then
 		sButtonPositionSemaphores[aPanelNum]:decrement();
@@ -1646,11 +1690,9 @@ function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
 
 		if tHealButton then
 			tHealButton["raidid"] = nil;
-			tHealButton:SetAttribute("unit", nil);
-
-			tHealButton:ClearAllPoints();
-
-			tHealButton:Hide();
+			VUHDO_safeSetAttribute(tHealButton, "unit", nil);
+			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
+			VUHDO_PixelUtil.Hide(tHealButton);
 		else
 			break;
 		end
@@ -1786,6 +1828,7 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 	return;
 
 end
+_G["VUHDO_redrawAllPanels"] = VUHDO_redrawAllPanels;
 
 
 
@@ -1805,9 +1848,13 @@ function VUHDO_reloadUI(anIsFixAllFrameLevels)
 
 	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_IN_COMBAT_RELOG then
 		VUHDO_refreshRaidMembers();
+
+		-- force synchronous redraw on combat relog
+		_G["VUHDO_redrawAllPanels"](anIsFixAllFrameLevels);
+	else
+		VUHDO_redrawAllPanels(anIsFixAllFrameLevels);
 	end
 
-	VUHDO_redrawAllPanels(anIsFixAllFrameLevels);
 	VUHDO_updateAllCustomDebuffs(true);
 	VUHDO_rebuildTargets();
 	VUHDO_updatePanelVisibility();
@@ -1836,7 +1883,10 @@ function VUHDO_lnfReloadUI()
 	VUHDO_initAllBurstCaches();
 	VUHDO_reloadRaidMembers();
 	VUHDO_updatePanelVisibility();
-	VUHDO_redrawAllPanels(false);
+
+	-- force synchronous redraw on config reload
+	_G["VUHDO_redrawAllPanels"](false);
+
 	VUHDO_buildGenericHealthBarBouquet();
 	VUHDO_buildGenericTargetHealthBouquet();
 	VUHDO_bouqetsChanged();

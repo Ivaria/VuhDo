@@ -2475,3 +2475,37 @@ function VUHDO_setSemaphoreProfiling(anIsEnabled)
 	return;
 
 end
+
+
+
+--
+function VUHDO_safeCombatCall(aFrameOrFunc, aMethodOrArg1, ...)
+
+	if not InCombatLockdown() then
+		if type(aFrameOrFunc) == "table" and type(aMethodOrArg1) == "string" then
+			return aFrameOrFunc[aMethodOrArg1](aFrameOrFunc, ...);
+		else
+			return aFrameOrFunc(aMethodOrArg1, ...);
+		end
+	elseif type(aFrameOrFunc) == "table" and type(aMethodOrArg1) == "string" then
+		if aFrameOrFunc.IsProtected and not aFrameOrFunc:IsProtected() then
+			return aFrameOrFunc[aMethodOrArg1](aFrameOrFunc, ...);
+		end
+	end
+
+end
+
+
+
+--
+function VUHDO_safeSetAttribute(aFrame, aAttribute, aValue)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() then
+		aFrame:SetAttribute(aAttribute, aValue);
+	end
+
+end
