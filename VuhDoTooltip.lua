@@ -411,7 +411,7 @@ end
 
 --
 function VuhDoTooltipOnMouseUp(aTooltip)
-	aTooltip:StopMovingOrSizing();
+	VUHDO_PixelUtil.StopMovingOrSizing(aTooltip);
 
 	local tX, tY, tRelative, tOrientation;
 	local tPosition = VUHDO_PANEL_SETUP[DESIGN_MISC_PANEL_NUM]["TOOLTIP"];

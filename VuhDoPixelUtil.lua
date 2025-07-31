@@ -439,6 +439,23 @@ end
 
 
 
+--
+function tPixelUtil.StopMovingOrSizing(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:StopMovingOrSizing();
+	end
+
+	return;
+
+end
+
+
+
 VUHDO_PixelUtil = tPixelUtil;
 
 

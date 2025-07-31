@@ -1022,21 +1022,21 @@ local VUHDO_setMapToCurrentZone = VUHDO_setMapToCurrentZone;
 local tInfo;
 function VUHDO_replaceMacroTemplates(aText, aUnit)
 
-	if aUnit and type(aUnit) == "string" and aUnit ~= "" then
+	if aUnit then
 		aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", aUnit);
 
 		tInfo = VUHDO_RAID[aUnit];
 
 		if tInfo then
-			if tInfo["name"] and type(tInfo["name"]) == "string" then
+			if tInfo["name"] then
 				aText = gsub(aText, "[Vv][Dd][Nn][Aa][Mm][Ee]", tInfo["name"]);
 			end
 
-			if tInfo["petUnit"] and type(tInfo["petUnit"]) == "string" then
+			if tInfo["petUnit"] then
 				aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", tInfo["petUnit"]);
 			end
 
-			if tInfo["targetUnit"] and type(tInfo["targetUnit"]) == "string" then
+			if tInfo["targetUnit"] then
 				aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", tInfo["targetUnit"]);
 			end
 		end

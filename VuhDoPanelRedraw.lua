@@ -1443,7 +1443,7 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 	aPanel:SetBackdropColor(VUHDO_backColor(tPanelColor["BACK"]));
 	VUHDO_PixelUtil.EnableMouse(aPanel, not VUHDO_CONFIG["LOCK_CLICKS_THROUGH"]);
 
-	aPanel:StopMovingOrSizing();
+	VUHDO_PixelUtil.StopMovingOrSizing(aPanel);
 	aPanel["isMoving"] = false;
 end
 

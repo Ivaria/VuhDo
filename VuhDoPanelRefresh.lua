@@ -155,7 +155,7 @@ end
 local function VUHDO_refreshInitPanel(aPanel, aPanelNum)
 	VUHDO_PixelUtil.SetHeight(aPanel, VUHDO_getHealPanelHeight(aPanelNum));
 	VUHDO_PixelUtil.SetWidth(aPanel, VUHDO_getHealPanelWidth(aPanelNum));
-	aPanel:StopMovingOrSizing();
+	VUHDO_PixelUtil.StopMovingOrSizing(aPanel);
 	aPanel["isMoving"] = false;
 end
 

@@ -398,7 +398,7 @@ end
 function VUHDO_stopMoving(aPanel)
 
 	if not InCombatLockdown() then
-		aPanel:StopMovingOrSizing();
+		VUHDO_PixelUtil.StopMovingOrSizing(aPanel);
 
 		VUHDO_PixelUtil.SetFrameStrata(aPanel, VUHDO_PANEL_SETUP[VUHDO_getPanelNum(aPanel)]["frameStrata"]);
 	end

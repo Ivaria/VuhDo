@@ -115,7 +115,7 @@ end
 --
 function VUHDO_buffWatchOnMouseUp(aPanel)
 	if VUHDO_mayMoveHealPanels() then
-		aPanel:StopMovingOrSizing();
+		VUHDO_PixelUtil.StopMovingOrSizing(aPanel);
 
 		local tCoords = VUHDO_BUFF_SETTINGS["CONFIG"]["POSITION"];
 		tCoords["point"], _, tCoords["relativePoint"], tCoords["x"], tCoords["y"] = aPanel:GetPoint();
