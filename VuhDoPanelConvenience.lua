@@ -116,7 +116,7 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 		VUHDO_PixelUtil.SetPoint(tBarIconFrameBackground, "TOPLEFT", tBarIconFrame, "TOPLEFT", -1, 1);
 		VUHDO_PixelUtil.SetPoint(tBarIconFrameBackground, "BOTTOMRIGHT", tBarIconFrame, "BOTTOMRIGHT", 1, -1);
 
-		tBarIconFrameBackground:SetFrameLevel(tBarIconFrame:GetFrameLevel() == 0 and 1 or tBarIconFrame:GetFrameLevel() - 1);
+		VUHDO_PixelUtil.SetFrameLevel(tBarIconFrameBackground, tBarIconFrame:GetFrameLevel() == 0 and 1 or tBarIconFrame:GetFrameLevel() - 1);
 
 		local tBackdropInfo = {
 			edgeFile = "Interface\\Buttons\\WHITE8X8",

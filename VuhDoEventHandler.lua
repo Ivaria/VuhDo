@@ -1170,6 +1170,8 @@ do
 				VUHDO_OPTIONS_SHOW_AFTER_BATTLE = true;
 			end
 
+			VUHDO_processCombatUnsafeTasksBeforeLockdown();
+
 			VUHDO_setIsOutOfCombat(false);
 
 		elseif "UNIT_MAXHEALTH" == anEvent then

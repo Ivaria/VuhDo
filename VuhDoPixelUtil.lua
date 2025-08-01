@@ -168,6 +168,8 @@ function tPixelUtil.SetPoint(aFrame, aPoint, aRelativeFrame, aRelativePoint, aXO
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetPoint(aPoint, aRelativeFrame, aRelativePoint, tX, tY);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.SetPoint blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -190,6 +192,8 @@ function tPixelUtil.SetSize(aFrame, aWidth, aHeight)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetSize(tWidth, tHeight);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.SetSize blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -210,6 +214,8 @@ function tPixelUtil.SetWidth(aFrame, aWidth)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetWidth(tWidth);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.SetWidth blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -230,6 +236,8 @@ function tPixelUtil.SetHeight(aFrame, aHeight)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetHeight(tHeight);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.SetHeight blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -329,6 +337,8 @@ function tPixelUtil.ClearAllPoints(aFrame)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:ClearAllPoints();
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.ClearAllPoints blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -346,6 +356,8 @@ function tPixelUtil.Show(aFrame)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:Show();
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.Show blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -363,6 +375,8 @@ function tPixelUtil.Hide(aFrame)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:Hide();
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.Hide blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -380,6 +394,8 @@ function tPixelUtil.SetScale(aFrame, aScale)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetScale(aScale);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.SetScale blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -397,6 +413,8 @@ function tPixelUtil.EnableMouseWheel(aFrame, aEnable)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:EnableMouseWheel(aEnable);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.EnableMouseWheel blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -414,6 +432,8 @@ function tPixelUtil.SetFrameStrata(aFrame, aStrata)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetFrameStrata(aStrata);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.SetFrameStrata blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -431,6 +451,8 @@ function tPixelUtil.EnableMouse(aFrame, aEnable)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:EnableMouse(aEnable);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.EnableMouse blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;
@@ -448,6 +470,27 @@ function tPixelUtil.StopMovingOrSizing(aFrame)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:StopMovingOrSizing();
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.StopMovingOrSizing blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.SetFrameLevel(aFrame, aLevel)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetFrameLevel(aLevel);
+	else
+		VUHDO_Msg("VUHDO_PixelUtil.SetFrameLevel blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed"));
 	end
 
 	return;

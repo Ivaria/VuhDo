@@ -879,7 +879,7 @@ local function VUHDO_initPrivateAura(aHealthBar, aButton, anAuraIndex, aPanelNum
 	VUHDO_PixelUtil.Hide(tPrivateAura);
 	VUHDO_PixelUtil.ClearAllPoints(tPrivateAura);
 	VUHDO_PixelUtil.SetFrameStrata(tPrivateAura, aHealthBar:GetFrameStrata());
-	tPrivateAura:SetFrameLevel(aHealthBar:GetFrameLevel() + 2);
+	VUHDO_PixelUtil.SetFrameLevel(tPrivateAura, aHealthBar:GetFrameLevel() + 2);
 
 	tX = sPanelConfig[aPanelNum]["privateAuraXOffset"] + (sPanelConfig[aPanelNum]["privateAuraStep"] * (anAuraIndex - 1));
 	VUHDO_PixelUtil.SetPoint(tPrivateAura, sPanelConfig[aPanelNum]["privateAura"]["point"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["privateAura"]["point"], tX, sPanelConfig[aPanelNum]["privateAuraYOffset"]);
@@ -1456,13 +1456,14 @@ function VUHDO_deferInitAllHealButtons(aPanel, aPanelNum)
 	tNumButtons = VUHDO_getNumButtonsPanel(aPanelNum);
 
 	sButtonInitSemaphores[aPanelNum] = VUHDO_createSemaphore("ButtonInitPanel" .. aPanelNum, 0, tNumButtons, sButtonInitTimeouts[aPanelNum]);
+
 	if not sButtonInitSemaphores[aPanelNum] then
-		VUHDO_Msg("ERROR: Failed to create ButtonInitPanel" .. aPanelNum .. " semaphore");
 		return;
 	end
 
 	for tCnt = 1, tNumButtons do
 		VUHDO_deferTask(VUHDO_DEFER_INIT_HEAL_BUTTON, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, tCnt);
+
 		sButtonInitSemaphores[aPanelNum]:increment();
 	end
 
@@ -1500,11 +1501,11 @@ function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum)
 		tTotalButtons = tTotalButtons + #tGroupArray;
 	end
 
-		sButtonPositionSemaphores[aPanelNum] = VUHDO_createSemaphore("ButtonPositionPanel" .. aPanelNum, 0, tTotalButtons, sButtonPositionTimeouts[aPanelNum]);
-		if not sButtonPositionSemaphores[aPanelNum] then
-			VUHDO_Msg("ERROR: Failed to create ButtonPositionPanel" .. aPanelNum .. " semaphore");
-			return;
-		end
+	sButtonPositionSemaphores[aPanelNum] = VUHDO_createSemaphore("ButtonPositionPanel" .. aPanelNum, 0, tTotalButtons, sButtonPositionTimeouts[aPanelNum]);
+
+	if not sButtonPositionSemaphores[aPanelNum] then
+		return;
+	end
 
 	tColumnIndex = 1;
 	tButtonIndex = 1;
@@ -1514,6 +1515,7 @@ function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum)
 
 		for tGroupIndex, tUnit in ipairs(tGroupArray) do
 			VUHDO_deferTask(VUHDO_DEFER_POSITION_HEAL_BUTTON, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, aPanelNum, tButtonIndex, tModelIndex, tModelId, tGroupIndex, tColumnIndex);
+
 			sButtonPositionSemaphores[aPanelNum]:increment();
 
 			tButtonIndex = tButtonIndex + 1;
@@ -1922,6 +1924,7 @@ function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 	sPanelRedrawSemaphore = VUHDO_createSemaphore("PanelRedraw", 0, 10, sPanelRedrawTimeout);
 
 	if not sPanelRedrawSemaphore then
+		VUHDO_Msg("ERROR: Failed to create PanelRedraw semaphore");
 		return;
 	end
 

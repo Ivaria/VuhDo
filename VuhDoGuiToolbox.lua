@@ -790,7 +790,7 @@ local tOurLevel;
 function VUHDO_fixFrameLevels(anIsForceUpdateChildren, aFrame, aBaseLevel, ...)
 	local tCnt = 1;
 	local tChild = select(tCnt, ...);
-	aFrame:SetFrameLevel(aBaseLevel);
+	VUHDO_PixelUtil.SetFrameLevel(aFrame, aBaseLevel);
 	while tChild do -- Layer components seem to have no name, important for HoT icons.
 		if tChild.IsForbidden and not tChild:IsForbidden() then
 			if tChild.GetName and tChild:GetName() then
@@ -800,7 +800,7 @@ function VUHDO_fixFrameLevels(anIsForceUpdateChildren, aFrame, aBaseLevel, ...)
 					if not VUHDO_isConfigPanelShowing() then
 						VUHDO_PixelUtil.SetFrameStrata(tChild, aFrame:GetFrameStrata());
 					end
-					tChild:SetFrameLevel(tOurLevel);
+					VUHDO_PixelUtil.SetFrameLevel(tChild, tOurLevel);
 					tChild["vfl"] = true;
 					VUHDO_fixFrameLevels(anIsForceUpdateChildren, tChild, tOurLevel, tChild:GetChildren());
 				elseif(anIsForceUpdateChildren) then

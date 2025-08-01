@@ -366,8 +366,8 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
 
 			if tHeaderFrame then
-				tHeaderFrame:WrapScript(aButton, "OnEnter", tOnEnterSnippet);
-				tHeaderFrame:WrapScript(aButton, "OnLeave", tOnLeaveSnippet);
+				VUHDO_safeWrapScript(tHeaderFrame, aButton, "OnEnter", tOnEnterSnippet);
+				VUHDO_safeWrapScript(tHeaderFrame, aButton, "OnLeave", tOnLeaveSnippet);
 
 				VUHDO_safeSetAttribute(aButton, "vuhdo_secureheader_wrap", true);
 			end

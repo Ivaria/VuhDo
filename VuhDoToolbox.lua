@@ -2148,48 +2148,12 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 		["timeoutMs"] = aTimeoutMs or VUHDO_SEMAPHORE_DEFAULT_TIMEOUT_MS,
 		["waitingTasks"] = { },
 		["metrics"] = {
-			["signals"] = 0,
 			["increments"] = 0,
 			["decrements"] = 0,
-			["waits"] = 0,
 			["timeouts"] = 0,
 			["peakWaitCount"] = 0,
 		},
 	};
-
-	local tIsProfile;
-	local tMetrics;
-	local tTask;
-	function tSemaphore:signal()
-
-		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-			tMetrics["signals"] = tMetrics["signals"] + 1;
-		end
-
-		if self["count"] < self["maxCount"] then
-			self["count"] = self["count"] + 1;
-
-			if #self["waitingTasks"] > 0 then
-				tTask = tremove(self["waitingTasks"], 1);
-
-				VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
-			end
-
-			if self["count"] == 0 and #self["waitingTasks"] > 0 then
-				tTask = tremove(self["waitingTasks"], 1);
-
-				VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
-			end
-
-			return true;
-		end
-
-		return false;
-
-	end
 
 	local tIsProfile;
 	local tMetrics;
@@ -2227,8 +2191,6 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 		if self["count"] > 0 then
 			self["count"] = self["count"] - 1;
 
-
-
 			if self["count"] == 0 and #self["waitingTasks"] > 0 then
 				tTask = tremove(self["waitingTasks"], 1);
 
@@ -2244,19 +2206,17 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 
 	local tIsProfile;
 	local tMetrics;
-	function tSemaphore:wait(aTaskType, aPriority, ...)
+	function tSemaphore:waitForZero(aTaskType, aPriority, ...)
 
 		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
-			tMetrics["waits"] = tMetrics["waits"] + 1;
+
 			tMetrics["peakWaitCount"] = max(tMetrics["peakWaitCount"], #self["waitingTasks"] + 1);
 		end
 
-		if self["count"] > 0 then
-			self["count"] = self["count"] - 1;
-
+		if self["count"] == 0 then
 			return true;
 		end
 
@@ -2264,6 +2224,7 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 			["type"] = aTaskType,
 			["priority"] = aPriority,
 			["args"] = { ... },
+			["startTime"] = GetTime() * 1000,
 			["timeoutTime"] = GetTime() * 1000 + self["timeoutMs"],
 		});
 
@@ -2271,35 +2232,29 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 
 	end
 
-
 	local tIsProfile;
 	local tMetrics;
-	function tSemaphore:waitForZero(aTaskType, aPriority, ...)
+	local tOrphanedIncrements;
+	function tSemaphore:validateAndRecoverState(aTimedOutCount)
 
 		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
-			tMetrics["waits"] = tMetrics["waits"] + 1;
-			tMetrics["peakWaitCount"] = max(tMetrics["peakWaitCount"], #self["waitingTasks"] + 1);
 		end
 
+		if #self["waitingTasks"] == 0 then
+			if self["count"] > 0 then
+				tOrphanedIncrements = self["count"];
+				self["count"] = 0;
 
-
-		if self["count"] == 0 then
-
-			return true;
+				if tIsProfile then
+					tMetrics["decrements"] = tMetrics["decrements"] + tOrphanedIncrements;
+				end
+			end
 		end
 
-
-		tinsert(self["waitingTasks"], {
-			["type"] = aTaskType,
-			["priority"] = aPriority,
-			["args"] = { ... },
-			["timeoutTime"] = GetTime() * 1000 + self["timeoutMs"],
-		});
-
-		return false;
+		return;
 
 	end
 
@@ -2307,10 +2262,13 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tIsProfile;
 	local tMetrics;
 	local tTask;
+	local tIsTimedOut;
+	local tTimedOutCount;
 	function tSemaphore:checkTimeouts()
 
 		tCurrentTime = GetTime() * 1000;
 		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+		tTimedOutCount = 0;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -2319,16 +2277,26 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 		for tIndex = #self["waitingTasks"], 1, -1 do
 			tTask = self["waitingTasks"][tIndex];
 
-			if tCurrentTime > tTask["timeoutTime"] then
-	                        if tIsProfile then
-	                                tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
-	                        end
+			if tCurrentTime >= tTask["timeoutTime"] then
+				tIsTimedOut = true;
+				tTimedOutCount = tTimedOutCount + 1;
 
-	                        tremove(self["waitingTasks"], tIndex);
-	                end
-	        end
+				if VUHDO_SEMAPHORE_PROFILE then
+					tMetrics = self["metrics"];
+					tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
 
-	        return;
+					VUHDO_Msg("Semaphore " .. tostring(self["name"]) .. " - task " .. tostring(tTask["type"]) .. " timed out after " .. tostring(tCurrentTime - tTask["startTime"]) .. "ms");
+				end
+
+				table.remove(self["waitingTasks"], tIndex);
+			end
+		end
+
+		if tTimedOutCount > 0 then
+			self:validateAndRecoverState(tTimedOutCount);
+		end
+
+		return;
 
 	end
 
@@ -2338,10 +2306,8 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 		tMetrics = self["metrics"];
 
 		return {
-			["signals"] = tMetrics["signals"],
 			["increments"] = tMetrics["increments"],
 			["decrements"] = tMetrics["decrements"],
-			["waits"] = tMetrics["waits"],
 			["timeouts"] = tMetrics["timeouts"],
 			["peakWaitCount"] = tMetrics["peakWaitCount"],
 			["currentCount"] = self["count"],
@@ -2356,10 +2322,9 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	function tSemaphore:resetMetrics()
 
 		tMetrics = self["metrics"];
-		tMetrics["signals"] = 0;
+
 		tMetrics["increments"] = 0;
 		tMetrics["decrements"] = 0;
-		tMetrics["waits"] = 0;
 		tMetrics["timeouts"] = 0;
 		tMetrics["peakWaitCount"] = 0;
 
@@ -2407,7 +2372,55 @@ end
 
 
 --
+local tInconsistentSemaphores = { };
+function VUHDO_validateAllSemaphoreStates()
+
+	twipe(tInconsistentSemaphores);
+
+	for _, tSemaphore in ipairs(VUHDO_REGISTERED_SEMAPHORES) do
+		if tSemaphore["count"] > 0 and #tSemaphore["waitingTasks"] == 0 then
+			table.insert(tInconsistentSemaphores, tSemaphore);
+		end
+	end
+
+	return tInconsistentSemaphores;
+
+end
+
+
+
+--
 local tMetrics;
+local tRecoveredCount;
+function VUHDO_recoverOrphanedSemaphores()
+
+	tRecoveredCount = 0;
+
+	for tSemaphoreName, tSemaphore in pairs(VUHDO_REGISTERED_SEMAPHORES) do
+		if tSemaphore and #tSemaphore["waitingTasks"] == 0 and tSemaphore["count"] > 0 then
+			if VUHDO_SEMAPHORE_PROFILE then
+				tMetrics = tSemaphore["metrics"];
+				tMetrics["decrements"] = tMetrics["decrements"] + tSemaphore["count"];
+			end
+
+			tSemaphore["count"] = 0;
+			tRecoveredCount = tRecoveredCount + 1;
+		end
+	end
+
+	if tRecoveredCount > 0 and VUHDO_SEMAPHORE_PROFILE then
+		VUHDO_Msg("Recovered " .. tostring(tRecoveredCount) .. " orphaned semaphores");
+	end
+
+	return tRecoveredCount;
+
+end
+
+
+
+--
+local tMetrics;
+local tInconsistentSemaphores;
 function VUHDO_printSemaphoreMetrics()
 
 	if not VUHDO_SEMAPHORE_PROFILE then
@@ -2421,19 +2434,22 @@ function VUHDO_printSemaphoreMetrics()
 	for tSemaphoreName, tSemaphore in pairs(VUHDO_REGISTERED_SEMAPHORES) do
 		tMetrics = tSemaphore:getMetrics();
 
-		VUHDO_Msg(format("|cffFFA500** Semaphore[%s]:|r (Max:%d Cur:%d/%d Peak:%d): Inc=%d Dec=%d Waits=%d Timeouts=%d Waiting=%d Timeout=%d ms",
+		VUHDO_Msg(format("|cffFFA500** Semaphore[%s]:|r (Cur:%d/%d Peak:%d): Inc=%d Dec=%d T=%d Wait=%d Timeout=%dms",
 			tSemaphoreName,
-			tMetrics["maxCount"],
 			tMetrics["currentCount"],
 			tMetrics["maxCount"],
 			tMetrics["peakWaitCount"],
 			tMetrics["increments"],
 			tMetrics["decrements"],
-			tMetrics["waits"],
 			tMetrics["timeouts"],
 			tMetrics["waitingCount"],
-			tMetrics["timeoutMs"]
-		));
+			tMetrics["timeoutMs"]));
+	end
+
+	tInconsistentSemaphores = VUHDO_validateAllSemaphoreStates();
+
+	if #tInconsistentSemaphores > 0 then
+		VUHDO_Msg("|cffFF0000** Inconsistent:|r " .. #tInconsistentSemaphores .. " orphaned increments");
 	end
 
 	VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
@@ -2489,6 +2505,23 @@ function VUHDO_safeSetAttribute(aFrame, aAttribute, aValue)
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetAttribute(aAttribute, aValue);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_safeWrapScript(aHeaderFrame, aButton, aScriptType, aScriptBody)
+
+	if not aHeaderFrame or not aButton then
+		return;
+	end
+
+	if not InCombatLockdown() or (aHeaderFrame.IsProtected and not aHeaderFrame:IsProtected()) then
+		aHeaderFrame:WrapScript(aButton, aScriptType, aScriptBody);
 	end
 
 	return;
