@@ -140,6 +140,7 @@ function VUHDO_handleScaleChange()
 	if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] and VUHDO_CONFIG["PIXEL_PERFECT"]["redrawOnScaleChange"] then
 		if not InCombatLockdown() then
 			tDelay = VUHDO_CONFIG["PIXEL_PERFECT"]["scaleChangeDelay"] or 0.1;
+
 			for tPanelNum = 1, 10 do
 				VUHDO_timeRedrawPanel(tPanelNum, tDelay);
 			end

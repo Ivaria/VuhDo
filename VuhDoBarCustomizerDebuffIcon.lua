@@ -1,15 +1,17 @@
 VUHDO_MAY_DEBUFF_ANIM = true;
 
 local VUHDO_DEBUFF_ICONS = { };
+local VUHDO_DEBUFF_ICONS_MAP = { };
 local sIsName;
 
 -- BURST CACHE ---------------------------------------------------
+
+local _;
 
 local floor = floor;
 local GetTime = GetTime;
 local pairs = pairs;
 local twipe = table.wipe;
-local _;
 local huge = math.huge;
 
 local _G = getfenv();
@@ -35,6 +37,7 @@ local VUHDO_DEBUFF_COLORS;
 local sEmpty = { };
 
 function VUHDO_customDebuffIconsInitLocalOverrides()
+
 	-- functions
 	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
 	VUHDO_getBarIconTimer = _G["VUHDO_getBarIconTimer"];
@@ -81,26 +84,30 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		[9] = VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF9"],
 	};
 
+	return;
+
 end
 
 ----------------------------------------------------
 
+
+
 --
-local tAliveTime;
-local tRemain;
-local tStacks;
 local tCuDeStoConfig;
-local tNameLabel;
-local tTimeStamp;
-local tShieldPerc;
-local tName;
-local tButton;
 local tIsAnim;
 local tIsBarGlow;
 local tIsIconGlow;
+local tTimeStamp;
+local tAliveTime;
+local tName;
+local tRemain;
+local tShieldPerc;
+local tStacks;
+local tNameLabel;
 local tAuraInstanceId;
 local tCurChosenInfo;
 local tType;
+local tButton;
 local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, anIsInit, aUnit)
 
 	tCuDeStoConfig = sCuDeStoredSettings[anIconInfo[3]] or sCuDeStoredSettings[tostring(anIconInfo[7])] or sStaticConfig;
@@ -254,6 +261,8 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		VUHDO_getBarIconName(aButton, anIconIndex):SetAlpha(0);
 	end
 
+	return;
+
 end
 
 
@@ -273,6 +282,8 @@ function VUHDO_updateAllDebuffIcons(anIsFrequent)
 			end
 		end
 	end
+
+	return;
 
 end
 
@@ -324,7 +335,8 @@ end
 
 
 
--- 1 = icon, 2 = timestamp, 3 = name, 4 = expiration time, 5 = stacks, 6 = duration, 7 = spell ID
+--
+local tExistingSlot;
 local tOldest;
 local tSlot;
 local tTimestamp;
@@ -337,8 +349,21 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 		VUHDO_DEBUFF_ICONS[aUnit] = { };
 	end
 
+	if not VUHDO_DEBUFF_ICONS_MAP[aUnit] then
+		VUHDO_DEBUFF_ICONS_MAP[aUnit] = { };
+	end
+
+	tExistingSlot = VUHDO_DEBUFF_ICONS_MAP[aUnit][anAuraInstanceId];
+
+	if tExistingSlot then
+		VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId);
+
+		return;
+	end
+
 	tOldest = huge;
 	tSlot = 1;
+
 	for tCnt = 1, sMaxIcons do
 		if not VUHDO_DEBUFF_ICONS[aUnit][tCnt] then
 			tSlot = tCnt;
@@ -357,17 +382,21 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 	tIconInfoOld = VUHDO_DEBUFF_ICONS[aUnit][tSlot];
 
 	if tIconInfoOld then
+		VUHDO_DEBUFF_ICONS_MAP[aUnit][tIconInfoOld[8]] = nil;
+
 		VUHDO_releasePooledIconArray(tIconInfoOld);
 	end
 
 	tIconInfoNew = VUHDO_getPooledIconArray();
 
+	-- 1 = icon, 2 = timestamp, 3 = name, 4 = expiration time, 5 = stacks, 6 = duration, 7 = spell ID, 8 = aura instance ID
 	tIconInfoNew[1], tIconInfoNew[2], tIconInfoNew[3], tIconInfoNew[4], tIconInfoNew[5],
 	tIconInfoNew[6], tIconInfoNew[7], tIconInfoNew[8] =
 		anIcon, -1, aName, anExpiry, aStacks,
 		aDuration, aSpellId, anAuraInstanceId;
 
 	VUHDO_DEBUFF_ICONS[aUnit][tSlot] = tIconInfoNew;
+	VUHDO_DEBUFF_ICONS_MAP[aUnit][anAuraInstanceId] = tSlot;
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
@@ -383,48 +412,53 @@ function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration,
 
 	VUHDO_updateHealthBarsFor(aUnit, VUHDO_UPDATE_RANGE);
 
+	return;
+
 end
 
 
 
 --
+local tSlot;
 local tIconInfo;
-local tFound;
+local tFrame;
 function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
 
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
 		VUHDO_DEBUFF_ICONS[aUnit] = { };
 	end
 
-	tFound = false;
-
-	for tCnt = 1, sMaxIcons do
-		tIconInfo = VUHDO_DEBUFF_ICONS[aUnit][tCnt];
-
-		if tIconInfo and tIconInfo[8] == anAuraInstanceId then
-			tFound = true;
-
-			tIconInfo[1], tIconInfo[3], tIconInfo[4], tIconInfo[5], tIconInfo[6], tIconInfo[7], tIconInfo[8] =
-				anIcon, aName, anExpiry, aStacks, aDuration, aSpellId, anAuraInstanceId;
-
-			for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
-				tFrame = VUHDO_getBarIconFrame(tButton, tCnt + 39);
-				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"] = aName, aSpellId, anIsBuff, anAuraInstanceId;
-			end
-		end
+	if not VUHDO_DEBUFF_ICONS_MAP[aUnit] then
+		VUHDO_DEBUFF_ICONS_MAP[aUnit] = { };
 	end
 
-	if not tFound then
+	tSlot = VUHDO_DEBUFF_ICONS_MAP[aUnit][anAuraInstanceId];
+
+	if tSlot then
+		tIconInfo = VUHDO_DEBUFF_ICONS[aUnit][tSlot];
+
+		tIconInfo[1], tIconInfo[3], tIconInfo[4], tIconInfo[5], tIconInfo[6], tIconInfo[7], tIconInfo[8] =
+			anIcon, aName, anExpiry, aStacks, aDuration, aSpellId, anAuraInstanceId;
+
+		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+			tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
+
+			tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"] = aName, aSpellId, anIsBuff, anAuraInstanceId;
+		end
+	else
 		VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId);
 	end
+
+	return;
 
 end
 
 
 
 --
-local tAllButtons2;
+local tSlot;
 local tIconArray;
+local tAllButtons2;
 local tFrame;
 function VUHDO_removeDebuffIcon(aUnit, anAuraInstanceId)
 
@@ -432,45 +466,51 @@ function VUHDO_removeDebuffIcon(aUnit, anAuraInstanceId)
 		return;
 	end
 
+	tSlot = VUHDO_DEBUFF_ICONS_MAP[aUnit] and VUHDO_DEBUFF_ICONS_MAP[aUnit][anAuraInstanceId];
+
+	if not tSlot then
+		return;
+	end
+
+	tIconArray = VUHDO_DEBUFF_ICONS[aUnit][tSlot];
+
+	if not tIconArray then
+		return;
+	end
+
 	tAllButtons2 = VUHDO_getUnitButtons(aUnit);
 
-	for tCnt2 = 1, sMaxIcons do
-		tIconArray = VUHDO_DEBUFF_ICONS[aUnit][tCnt2];
+	if tAllButtons2 then
+		for _, tButton2 in pairs(tAllButtons2) do
+			VUHDO_LibCustomGlow.PixelGlow_Stop(tButton2, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
 
-		if tIconArray and tIconArray[8] == anAuraInstanceId then
-			if tAllButtons2 then
-				for _, tButton2 in pairs(tAllButtons2) do
-					VUHDO_LibCustomGlow.PixelGlow_Stop(tButton2, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
+			tFrame = VUHDO_getBarIconFrame(tButton2, tSlot + 39);
 
-					tFrame = VUHDO_getBarIconFrame(tButton2, tCnt2 + 39);
+			if tFrame then
+				VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
 
-					if tFrame then
-						VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+				tFrame:SetAlpha(0);
 
-						tFrame:SetAlpha(0);
-
-						tFrame["debuffInfo"] = nil;
-						tFrame["debuffSpellId"] = nil;
-						tFrame["isBuff"] = nil;
-						tFrame["debuffInstanceId"] = nil;
-					end
-				end
+				tFrame["debuffInfo"] = nil;
+				tFrame["debuffSpellId"] = nil;
+				tFrame["isBuff"] = nil;
+				tFrame["debuffInstanceId"] = nil;
 			end
-
-			VUHDO_DEBUFF_ICONS[aUnit][tCnt2] = nil;
-
-			VUHDO_releasePooledIconArray(tIconArray);
-
-			break;
 		end
 	end
+
+	VUHDO_DEBUFF_ICONS[aUnit][tSlot] = nil;
+	VUHDO_DEBUFF_ICONS_MAP[aUnit][anAuraInstanceId] = nil;
+
+	VUHDO_releasePooledIconArray(tIconArray);
+
+	return;
 
 end
 
 
 
 --
-local tAllButtons3;
 local tFrame;
 function VUHDO_removeAllDebuffIcons(aUnit)
 
@@ -485,6 +525,7 @@ function VUHDO_removeAllDebuffIcons(aUnit)
 
 		for tCnt3 = 40, 39 + sMaxIcons do
 			tFrame = VUHDO_getBarIconFrame(tButton3, tCnt3);
+
 			if tFrame then
 				VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
 
@@ -506,7 +547,13 @@ function VUHDO_removeAllDebuffIcons(aUnit)
 	        end
 	end
 
+	if VUHDO_DEBUFF_ICONS_MAP[aUnit] then
+		twipe(VUHDO_DEBUFF_ICONS_MAP[aUnit]);
+	end
+
 	VUHDO_updateBouquetsForEvent(aUnit, 29);
+
+	return;
 
 end
 
@@ -516,17 +563,21 @@ end
 local tDebuffInfo;
 local tCurrInfo;
 function VUHDO_getLatestCustomDebuff(aUnit)
+
 	tDebuffInfo = sEmpty;
 
 	for tCnt = 1, sMaxIcons do
-	  tCurrInfo = (VUHDO_DEBUFF_ICONS[aUnit] or sEmpty)[tCnt];
+		tCurrInfo = (VUHDO_DEBUFF_ICONS[aUnit] or sEmpty)[tCnt];
+
 		if tCurrInfo and tCurrInfo[2] > (tDebuffInfo[2] or 0) then
 			tDebuffInfo = tCurrInfo;
 		end
 	end
 
 	return tDebuffInfo[1], tDebuffInfo[4], tDebuffInfo[5], tDebuffInfo[6];
+
 end
+
 
 
 --

@@ -84,7 +84,6 @@ local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE,
 };
 
--- Combat unsafe tasks that should be processed before combat lockdown
 local VUHDO_COMBAT_UNSAFE_TASKS = {
 	[VUHDO_DEFER_INIT_HEAL_BUTTON] = true,
 	[VUHDO_DEFER_POSITION_HEAL_BUTTON] = true,
