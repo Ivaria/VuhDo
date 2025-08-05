@@ -39,83 +39,67 @@ local VUHDO_HANDLER_METRICS = {
 		["invocationCount"] = 0,
 		["segment1"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2A"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2B"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2C"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2D"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2E"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2F"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2G"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2H"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2I"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2J"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2K"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2L"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["segment2M"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 		["total"] = {
 			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
+			["durationHistory"] = { },
 		},
 	},
 	["OnEvent"] = { },
@@ -124,6 +108,7 @@ local VUHDO_HANDLER_METRICS = {
 local VUHDO_HANDLER_EVENT_CONFIG = {
 	["LIMIT"] = 5,
 	["THRESHOLD_US"] = 2000,
+	["HISTORY_LIMIT"] = 100,
 };
 
 local VUHDO_HANDLER_EVENT_SNAPSHOTS = {
@@ -297,8 +282,6 @@ do
 
 		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
 		tMetrics["invocationCount"] = (tMetrics["invocationCount"] or 0) + 1;
-		tMetrics["minTimeUs"] = min((tMetrics["minTimeUs"] or 9999999), aDurationUs);
-		tMetrics["maxTimeUs"] = max((tMetrics["maxTimeUs"] or 0), aDurationUs);
 
 		return;
 
@@ -318,8 +301,12 @@ do
 
 		if tMetrics then
 			tMetrics["totalTimeUs"] = tMetrics["totalTimeUs"] + aDurationUs;
-			tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
-			tMetrics["maxTimeUs"] = max(tMetrics["maxTimeUs"], aDurationUs);
+
+			tinsert(tMetrics["durationHistory"], aDurationUs);
+
+			while #tMetrics["durationHistory"] > VUHDO_HANDLER_EVENT_CONFIG["HISTORY_LIMIT"] do
+				tremove(tMetrics["durationHistory"], 1);
+			end
 		end
 
 		return;
@@ -341,8 +328,7 @@ do
 			VUHDO_HANDLER_METRICS["OnEvent"][anEventName] = {
 				["totalTimeUs"] = 0,
 				["invocationCount"] = 0,
-				["minTimeUs"] = 9999999,
-				["maxTimeUs"] = 0,
+				["durationHistory"] = { },
 			};
 		end
 
@@ -350,8 +336,12 @@ do
 
 		tEventMetrics["totalTimeUs"] = (tEventMetrics["totalTimeUs"] or 0) + aDurationUs;
 		tEventMetrics["invocationCount"] = (tEventMetrics["invocationCount"] or 0) + 1;
-		tEventMetrics["minTimeUs"] = min(tEventMetrics["minTimeUs"], aDurationUs);
-		tEventMetrics["maxTimeUs"] = max(tEventMetrics["maxTimeUs"], aDurationUs);
+
+		tinsert(tEventMetrics["durationHistory"], aDurationUs);
+
+		while #tEventMetrics["durationHistory"] > VUHDO_HANDLER_EVENT_CONFIG["HISTORY_LIMIT"] do
+			tremove(tEventMetrics["durationHistory"], 1);
+		end
 
 		VUHDO_addEventSnapshot(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5);
 
@@ -386,8 +376,7 @@ do
 		for _, tSegmentName in ipairs(tOnUpdateSegments) do
 			VUHDO_HANDLER_METRICS["OnUpdate"][tSegmentName] = {
 				["totalTimeUs"] = 0,
-				["minTimeUs"] = 9999999,
-				["maxTimeUs"] = 0,
+				["durationHistory"] = { },
 			};
 		end
 
@@ -414,25 +403,23 @@ do
 
 
 	--
-	local tAvg;
+	local tTrimmedMeans;
 	local function VUHDO_printHandlerMetricSegment(aSegName, aSegData, anInvocationCount, anIndent)
 
 		if not aSegData then
 			return;
 		end
 
-		tAvg = 0;
+		tTrimmedMeans = VUHDO_calculateTrimmedMeans(aSegName, aSegData["durationHistory"]);
 
-		if anInvocationCount > 0 then
-			tAvg = (aSegData["totalTimeUs"] or 0) / anInvocationCount;
-		end
-
-		VUHDO_Msg(format("%s|cffB0E0E6%s:|r Total: %s, Avg: %s, Min: %s, Max: %s",
+		VUHDO_Msg(format("%s|cffB0E0E6%s:|r Total: %s, tm50: %s, tm80: %s, tm90: %s, tm99: %s, tm100: %s",
 			anIndent or "  ", aSegName,
 			VUHDO_formatTime(aSegData["totalTimeUs"] or 0),
-			VUHDO_formatTime(tAvg),
-			VUHDO_formatTime(aSegData["minTimeUs"] == 9999999 and 0 or aSegData["minTimeUs"]),
-			VUHDO_formatTime(aSegData["maxTimeUs"] or 0)
+			VUHDO_formatTime(tTrimmedMeans["tm50"]),
+			VUHDO_formatTime(tTrimmedMeans["tm80"]),
+			VUHDO_formatTime(tTrimmedMeans["tm90"]),
+			VUHDO_formatTime(tTrimmedMeans["tm99"]),
+			VUHDO_formatTime(tTrimmedMeans["tm100"])
 		));
 
 		return;
@@ -449,7 +436,7 @@ do
 	local tEventStats;
 	local tTotalTime;
 	local tCount;
-	local tAvgTime;
+	local tTrimmedMeans;
 	local tArgString;
 	local tDedupedText;
 	local tThresholdText;
@@ -500,19 +487,13 @@ do
 		for tEventName, tEventData in pairs(tMetrics["OnEvent"]) do
 			tTotalTime = tEventData["totalTimeUs"] or 0;
 			tCount = tEventData["invocationCount"] or 0;
-			tAvgTime = 0;
-
-			if tCount > 0 then
-				tAvgTime = tTotalTime / tCount;
-			end
+			tTrimmedMeans = VUHDO_calculateTrimmedMeans(tEventName, tEventData["durationHistory"]);
 
 			tinsert(tEventStats, {
 				["name"] = tEventName,
 				["totalTime"] = tTotalTime,
 				["count"] = tCount,
-				["avgTime"] = tAvgTime,
-				["minTime"] = tEventData["minTimeUs"],
-				["maxTime"] = tEventData["maxTimeUs"],
+				["trimmedMeans"] = tTrimmedMeans,
 			});
 		end
 
@@ -521,16 +502,18 @@ do
 		else
 			table.sort(tEventStats, VUHDO_sortEventStats);
 
-			VUHDO_Msg("  Sorted by Total Time (Event: Total, Count, Avg, Min, Max)");
+			VUHDO_Msg("  Sorted by Total Time (Event: Total, Count, tm50, tm80, tm90, tm99, tm100)");
 
 			for _, tStats in ipairs(tEventStats) do
-				VUHDO_Msg(format("  %s: Total: %s, Count: %d, Avg: %s, Min: %s, Max: %s",
+				VUHDO_Msg(format("  %s: Total: %s, Count: %d, tm50: %s, tm80: %s, tm90: %s, tm99: %s, tm100: %s",
 					tStats["name"],
 					VUHDO_formatTime(tStats["totalTime"]),
 					tStats["count"],
-					VUHDO_formatTime(tStats["avgTime"]),
-					VUHDO_formatTime(tStats["minTime"] == 9999999 and 0 or tStats["minTime"]),
-					VUHDO_formatTime(tStats["maxTime"])
+					VUHDO_formatTime(tStats["trimmedMeans"]["tm50"]),
+					VUHDO_formatTime(tStats["trimmedMeans"]["tm80"]),
+					VUHDO_formatTime(tStats["trimmedMeans"]["tm90"]),
+					VUHDO_formatTime(tStats["trimmedMeans"]["tm99"]),
+					VUHDO_formatTime(tStats["trimmedMeans"]["tm100"])
 				));
 			end
 		end
