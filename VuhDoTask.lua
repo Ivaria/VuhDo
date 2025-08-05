@@ -1465,7 +1465,7 @@ do
 	local tDuration;
 	function VUHDO_calculateTrimmedMeans(aTaskType, aHistory)
 
-		if not aHistory or #aHistory < 5 then
+		if not aHistory or #aHistory == 0 then
 			return {
 				["tm50"] = 0,
 				["tm80"] = 0,
