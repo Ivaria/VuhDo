@@ -1,4 +1,6 @@
 local _G = _G;
+local _;
+
 
 local VUHDO_STD_BACKDROP = nil;
 local VUHDO_DESIGN_BACKDROP = nil;
@@ -10,23 +12,27 @@ local ipairs = ipairs;
 local pairs = pairs;
 local strfind = strfind;
 local twipe = table.wipe;
+local tinsert = table.insert;
 local InCombatLockdown = InCombatLockdown;
-local _;
 
 
 --
 local sPanelConfig = { };
 local sButtonInitSemaphores = { };
 local sButtonPositionSemaphores = { };
-local sPanelRedrawSemaphore;
+local sRedrawAllPanelsSemaphore;
+local sRedrawPanelSemaphores = { };
+local sPanelCompletionTracker;
+local sWaitingAllPanelsRedraws = { };
+local sWaitingIndividualRedraws = { };
 local sIsManaBouquet = { };
 
 local VUHDO_SEMAPHORE_CONFIG = {
-	["BUTTON_INIT_TIME_US"] = 150,
-	["BUTTON_POSITION_TIME_MS"] = 2.2,
-	["BUTTON_INIT_SAFETY_FACTOR"] = 2.5,
-	["BUTTON_POSITION_SAFETY_FACTOR"] = 1.2,
-	["PANEL_REDRAW_SAFETY_FACTOR"] = 1.15,
+	["BUTTON_INIT_TIME_US"] = 1200,
+	["BUTTON_POSITION_TIME_MS"] = 8,
+	["BUTTON_INIT_SAFETY_FACTOR"] = 2.0,
+	["BUTTON_POSITION_SAFETY_FACTOR"] = 1.5,
+	["PANEL_REDRAW_SAFETY_FACTOR"] = 4.0,
 
 	["MIN_TIMEOUT_MS"] = 5,
 
@@ -105,7 +111,6 @@ function VUHDO_getSemaphoreConfig()
 	return VUHDO_SEMAPHORE_CONFIG;
 
 end
-local VUHDO_getSemaphoreConfig = VUHDO_getSemaphoreConfig;
 
 
 
@@ -121,7 +126,6 @@ function VUHDO_invalidateSemaphoreTimeouts()
 	return;
 
 end
-local VUHDO_invalidateSemaphoreTimeouts = VUHDO_invalidateSemaphoreTimeouts;
 
 
 
@@ -200,7 +204,6 @@ function VUHDO_initLocalVars(aPanelNum)
 	return;
 
 end
-local VUHDO_initLocalVars = VUHDO_initLocalVars;
 
 
 
@@ -235,7 +238,6 @@ function VUHDO_isPanelVisible(aPanelNum)
 	return true;
 
 end
-local VUHDO_isPanelVisible = VUHDO_isPanelVisible;
 
 
 
@@ -245,7 +247,6 @@ function VUHDO_isPanelPopulated(aPanelNum)
 	return VUHDO_CONFIG["SHOW_PANELS"] and VUHDO_PANEL_MODELS[aPanelNum] and VUHDO_IS_SHOWN_BY_GROUP;
 
 end
-local VUHDO_isPanelPopulated = VUHDO_isPanelPopulated;
 
 
 
@@ -358,7 +359,6 @@ function VUHDO_calculateSemaphoreTimeouts()
 	return;
 
 end
-local VUHDO_calculateSemaphoreTimeouts = VUHDO_calculateSemaphoreTimeouts;
 
 
 
@@ -368,7 +368,6 @@ function VUHDO_getSemaphoreConfig()
 	return VUHDO_SEMAPHORE_CONFIG;
 
 end
-local VUHDO_getSemaphoreConfig = VUHDO_getSemaphoreConfig;
 
 
 
@@ -384,7 +383,6 @@ function VUHDO_invalidateSemaphoreTimeouts()
 	return;
 
 end
-local VUHDO_invalidateSemaphoreTimeouts = VUHDO_invalidateSemaphoreTimeouts;
 
 
 
@@ -798,7 +796,8 @@ end
 local tOvhColor;
 local tOvhText;
 local tOvhPanel;
-local tX, tY;
+local tX;
+local tY;
 local function VUHDO_initOverhealText(aHealthBar, aWidth, aPanelNum)
 
 	tOvhText = VUHDO_getOverhealText(aHealthBar);
@@ -1163,7 +1162,6 @@ function VUHDO_initButtonStatics(aButton, aPanelNum)
 	sButton = aButton;
 	sHealthBar = VUHDO_getHealthBar(aButton, 1);
 end
-local VUHDO_initButtonStatics = VUHDO_initButtonStatics;
 
 
 
@@ -1187,13 +1185,18 @@ local tIsInverted;
 local tOrientation;
 local tClickPar;
 local tFrame;
+local tIcon;
 function VUHDO_initHealButton(aButton, aPanelNum)
 
 	tClickPar = VUHDO_CONFIG["ON_MOUSE_UP"] and "AnyUp" or "AnyDown";
 	aButton:RegisterForClicks(tClickPar);
+
 	for tCnt = 40, 44 do
 		tFrame = VUHDO_getBarIconFrame(aButton, tCnt);
-		if tFrame then tFrame:RegisterForClicks(tClickPar); end
+
+		if tFrame then
+			tFrame:RegisterForClicks(tClickPar);
+		end
 	end
 
 	-- Texture
@@ -1277,16 +1280,18 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 		ClickCastFrames[_G[aButton:GetName() .. "Tg"]] = true;
 		ClickCastFrames[_G[aButton:GetName() .. "Tot"]] = true;
 
-		local tIcon;
 		for tIconNum = 40, 44 do
 			tIcon = _G[format("%sBgBarIcBarHlBarIc%d", aButton:GetName(), tIconNum)];
-			if tIcon then ClickCastFrames[tIcon] = true; end
+
+			if tIcon then
+				ClickCastFrames[tIcon] = true;
+			end
 		end
 	end
 
-end
+	return;
 
-local VUHDO_initHealButton = VUHDO_initHealButton;
+end
 
 
 
@@ -1296,37 +1301,59 @@ local tGroupPanel;
 local tNumButtons;
 local tCnt;
 local function VUHDO_initAllHealButtons(aPanel, aPanelNum)
+
 	tNumButtons = VUHDO_getNumButtonsPanel(aPanelNum);
+
 	for tCnt  = 1, tNumButtons do
 		tHealButton = VUHDO_getOrCreateHealButton(tCnt, aPanelNum);
-		if VUHDO_LibButtonFacade then VUHDO_initButtonButtonFacade(tHealButton); end
+
+		if VUHDO_LibButtonFacade then
+			VUHDO_initButtonButtonFacade(tHealButton);
+		end
+
 		VUHDO_initHealButton(tHealButton, aPanelNum);
 	end
 
 	tCnt = tNumButtons + 1;
+
 	while true do
 		tHealButton = VUHDO_getHealButton(tCnt, aPanelNum);
+
 		if tHealButton then
 			tHealButton["raidid"] = nil;
 			VUHDO_safeSetAttribute(tHealButton, "unit", nil);
+
 			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 			VUHDO_PixelUtil.Hide(tHealButton);
-		else break; end
+		else
+			break;
+		end
 
 		tCnt = tCnt + 1;
 	end
 
 	for tCnt = 1, #VUHDO_PANEL_MODELS[aPanelNum] do
 		tGroupPanel = VUHDO_getGroupOrderPanel(aPanelNum, tCnt);
-		if tGroupPanel then VUHDO_PixelUtil.Hide(tGroupPanel); end
+
+		if tGroupPanel then
+			VUHDO_PixelUtil.Hide(tGroupPanel);
+		end
+
 		tGroupPanel = VUHDO_getGroupSelectPanel(aPanelNum,  tCnt);
-		if tGroupPanel then VUHDO_PixelUtil.Hide(tGroupPanel); end
+
+		if tGroupPanel then
+			VUHDO_PixelUtil.Hide(tGroupPanel);
+		end
 	end
+
+	return;
+
 end
 
 
 
 --
+VUHDO_PROHIBIT_REPOS = false;
 local tSetup;
 local tPosition;
 local tPanelColor;
@@ -1334,11 +1361,14 @@ local tLabel;
 local tGrowth;
 local tScale;
 local tFactor;
-local tX, tY;
-
-VUHDO_PROHIBIT_REPOS = false;
-
+local tX;
+local tY;
+local tBorderR;
+local tBorderG;
+local tBorderB;
+local tBorderO;
 local function VUHDO_initPanel(aPanel, aPanelNum)
+
 	tSetup  = VUHDO_PANEL_SETUP[aPanelNum];
 	tPosition = tSetup["POSITION"];
 	tPanelColor = tSetup["PANEL_COLOR"];
@@ -1388,7 +1418,7 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 	VUHDO_PixelUtil.ApplyBackdrop(aPanel, VUHDO_STD_BACKDROP);
 
 	-- Ensure proper border color with pixel-perfect alpha
-	local tBorderR, tBorderG, tBorderB, tBorderO = VUHDO_backColor(tPanelColor["BORDER"]);
+	tBorderR, tBorderG, tBorderB, tBorderO = VUHDO_backColor(tPanelColor["BORDER"]);
 	aPanel.backdropBorderColor = VUHDO_getOrCreateCachedColor(tBorderR, tBorderG, tBorderB, tBorderO);
 	aPanel.backdropBorderColorAlpha = tBorderO or tPanelColor["BORDER"]["O"] or 0.46;
 	aPanel:SetBackdropBorderColor(tBorderR, tBorderG, tBorderB, aPanel.backdropBorderColorAlpha);
@@ -1399,7 +1429,6 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 		VUHDO_PixelUtil.Show(tLabel:GetParent());
 
 		if DESIGN_MISC_PANEL_NUM == aPanelNum and VuhDoNewOptionsPanelPanel and VuhDoNewOptionsPanelPanel:IsVisible() then
-
 			VUHDO_DESIGN_BACKDROP = VUHDO_deepCopyTable(VUHDO_STD_BACKDROP);
 			tLabel:SetTextColor(1, 1, 0, 1);
 			VUHDO_UIFrameFlash(tLabel, 0.25, 0.5, 10000, true, 0.3, 0);
@@ -1435,6 +1464,7 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 		VUHDO_PixelUtil.Hide(_G[aPanel:GetName() .. "NewTxu"]);
 		VUHDO_PixelUtil.Hide(_G[aPanel:GetName() .. "ClrTxu"]);
 		VUHDO_PixelUtil.Hide(tLabel:GetParent());
+
 		if VuhDoNewOptionsTabbedFrame then
 			VUHDO_PixelUtil.Hide(VuhDoNewOptionsTabbedFramePanelNumLabelLabel);
 		end
@@ -1445,17 +1475,22 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 
 	VUHDO_PixelUtil.StopMovingOrSizing(aPanel);
 	aPanel["isMoving"] = false;
+
+	return;
+
 end
 
 
 
 --
 local tNumButtons;
-function VUHDO_deferInitAllHealButtons(aPanel, aPanelNum)
+local tCycleId;
+function VUHDO_deferInitAllHealButtons(aPanel, aPanelNum, aCycleId)
 
 	tNumButtons = VUHDO_getNumButtonsPanel(aPanelNum);
 
-	sButtonInitSemaphores[aPanelNum] = VUHDO_createSemaphore("ButtonInitPanel" .. aPanelNum, 0, tNumButtons, sButtonInitTimeouts[aPanelNum]);
+	tCycleId = VUHDO_generateCycleId(aCycleId, true);
+	sButtonInitSemaphores[aPanelNum] = VUHDO_createSemaphore("InitAllHealButtons_" .. aPanelNum .. "_" .. tCycleId, 0, tNumButtons, sButtonInitTimeouts[aPanelNum]);
 
 	if not sButtonInitSemaphores[aPanelNum] then
 		return;
@@ -1472,7 +1507,6 @@ function VUHDO_deferInitAllHealButtons(aPanel, aPanelNum)
 	return;
 
 end
-local VUHDO_deferInitAllHealButtons = VUHDO_deferInitAllHealButtons;
 
 
 
@@ -1482,7 +1516,8 @@ local tColumnIndex;
 local tButtonIndex;
 local tGroupArray;
 local tTotalButtons;
-function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum)
+local tCycleId;
+function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum, aCycleId)
 
 	if not sButtonPositionTimeouts[aPanelNum] then
 		VUHDO_calculateSemaphoreTimeouts();
@@ -1499,7 +1534,8 @@ function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum)
 		tTotalButtons = tTotalButtons + #tGroupArray;
 	end
 
-	sButtonPositionSemaphores[aPanelNum] = VUHDO_createSemaphore("ButtonPositionPanel" .. aPanelNum, 0, tTotalButtons, sButtonPositionTimeouts[aPanelNum]);
+	tCycleId = VUHDO_generateCycleId(aCycleId, true);
+	sButtonPositionSemaphores[aPanelNum] = VUHDO_createSemaphore("PositionAllHealButtons_" .. aPanelNum .. "_" .. tCycleId, 0, tTotalButtons, sButtonPositionTimeouts[aPanelNum]);
 
 	if not sButtonPositionSemaphores[aPanelNum] then
 		return;
@@ -1525,32 +1561,92 @@ function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum)
 	return;
 
 end
-local VUHDO_deferPositionAllHealButtons = VUHDO_deferPositionAllHealButtons;
 
 
 
 --
-function VUHDO_deferRedrawPanelComplete(aPanelNum, anIsFixAllFrameLevels)
+function VUHDO_deferRedrawPanelComplete(aPanelNum, anIsFixAllFrameLevels, aCycleId)
 
-	VUHDO_deferTask(VUHDO_DEFER_REDRAW_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels);
+	VUHDO_deferTask(VUHDO_DEFER_REDRAW_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels, aCycleId);
 
 	return;
 
 end
-local VUHDO_deferRedrawPanelComplete = VUHDO_deferRedrawPanelComplete;
 
 
 
 --
+local tIsFullRedrawCycle;
+local tCurrentCycleId;
+local tIsPanelActive;
+local tWaitingRequest;
+local tCycleId;
 local tPanel;
-function VUHDO_deferRedrawPanel(aPanelNum, anIsFixAllFrameLevels)
+function VUHDO_deferRedrawPanel(aPanelNum, anIsFixAllFrameLevels, aCycleId)
 
-	VUHDO_deferTask(VUHDO_DEFER_REDRAW_PANEL, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels);
+	if InCombatLockdown() then
+		VUHDO_Msg("WARNING: VUHDO_deferRedrawPanel called during combat! PanelNum=" .. tostring(aPanelNum) .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	tIsFullRedrawCycle = (aCycleId ~= nil);
+	tCurrentCycleId = aCycleId or "UNKNOWN";
+
+	tIsPanelActive = false;
+
+	if tIsFullRedrawCycle then
+		if sRedrawPanelSemaphores[aPanelNum] and sRedrawPanelSemaphores[aPanelNum]["count"] > 0 then
+			tIsPanelActive = true;
+		end
+	else
+		if sRedrawPanelSemaphores[aPanelNum] and sRedrawPanelSemaphores[aPanelNum]["count"] > 0 then
+			tIsPanelActive = true;
+		elseif sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+			tIsPanelActive = true;
+		end
+	end
+
+	if tIsPanelActive then
+		if not sWaitingIndividualRedraws[aPanelNum] then
+			sWaitingIndividualRedraws[aPanelNum] = { };
+		end
+
+		tWaitingRequest = {
+			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
+			["cycleId"] = aCycleId,
+			["timestamp"] = GetTime()
+		};
+
+		tinsert(sWaitingIndividualRedraws[aPanelNum], tWaitingRequest);
+
+		return;
+	end
+
+	if not tIsFullRedrawCycle then
+		tCycleId = VUHDO_generateCycleId();
+		tCurrentCycleId = tCycleId;
+
+		if not sRedrawPanelSemaphores[aPanelNum] then
+			VUHDO_calculateSemaphoreTimeouts();
+
+			sRedrawPanelSemaphores[aPanelNum] = VUHDO_createSemaphore("RedrawPanel_" .. aPanelNum .. "_" .. tCycleId, 0, 1, sPanelRedrawTimeout);
+
+			if sRedrawPanelSemaphores[aPanelNum] then
+				sPanelCompletionTracker = { };
+			end
+		end
+	end
+
+	if tIsFullRedrawCycle and sRedrawAllPanelsSemaphore then
+		sRedrawAllPanelsSemaphore:increment();
+	elseif not tIsFullRedrawCycle and sRedrawPanelSemaphores[aPanelNum] then
+		sRedrawPanelSemaphores[aPanelNum]:increment();
+	end
+
+	VUHDO_deferTask(VUHDO_DEFER_REDRAW_PANEL, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels, tCurrentCycleId);
 
 	return;
 
 end
-local VUHDO_deferRedrawPanel = VUHDO_deferRedrawPanel;
 
 
 
@@ -1567,6 +1663,8 @@ function VUHDO_deferInitHealButtonDelegate(aPanelNum, aButtonIndex)
 		VUHDO_initButtonButtonFacade(tHealButton);
 	end
 
+	VUHDO_initHealButton(tHealButton, aPanelNum);
+
 	if sButtonInitSemaphores[aPanelNum] then
 		sButtonInitSemaphores[aPanelNum]:decrement();
 	end
@@ -1574,7 +1672,6 @@ function VUHDO_deferInitHealButtonDelegate(aPanelNum, aButtonIndex)
 	return;
 
 end
-local VUHDO_deferInitHealButtonDelegate = VUHDO_deferInitHealButtonDelegate;
 
 
 
@@ -1626,28 +1723,84 @@ function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, a
 	return;
 
 end
-local VUHDO_deferPositionHealButtonDelegate = VUHDO_deferPositionHealButtonDelegate;
 
 
 
 --
+local tCurrentCycleId;
+local tTrackerKey;
+local tIsPopulated;
+local tSemaphoreCycleId;
+local tNextRequest;
 local tPanel;
-function VUHDO_deferRedrawPanelCompleteDelegate(aPanelNum, anIsFixAllFrameLevels)
+local tButtonSemaphores;
+function VUHDO_deferRedrawPanelCompleteDelegate(aPanelNum, anIsFixAllFrameLevels, aCycleId)
 
-	if not VUHDO_isPanelPopulated(aPanelNum) then
-		if sPanelRedrawSemaphore then
-			sPanelRedrawSemaphore:decrement();
+	if not sPanelCompletionTracker then
+		sPanelCompletionTracker = { };
+	end
+
+	tCurrentCycleId = aCycleId or "UNKNOWN";
+	tTrackerKey = tCurrentCycleId .. "_" .. aPanelNum;
+
+	if sPanelCompletionTracker[tTrackerKey] then
+		VUHDO_Msg("WARNING: [CYCLE " .. tCurrentCycleId .. "] Panel " .. aPanelNum .. " completion delegate called multiple times!\nStack:\n" .. debugstack(2, 3, 3));
+
+		return;
+	end
+
+	sPanelCompletionTracker[tTrackerKey] = true;
+
+	tIsPopulated = VUHDO_isPanelPopulated(aPanelNum);
+
+	if not tIsPopulated then
+		if aCycleId and sRedrawAllPanelsSemaphore then
+			tSemaphoreCycleId = VUHDO_extractCycleIdFromSemaphoreName(sRedrawAllPanelsSemaphore["name"]);
+
+			if tSemaphoreCycleId == aCycleId then
+				sRedrawAllPanelsSemaphore:decrement();
+			end
+		elseif sRedrawPanelSemaphores[aPanelNum] then
+			sRedrawPanelSemaphores[aPanelNum]:decrement();
+
+			if sRedrawPanelSemaphores[aPanelNum]["count"] == 0 then
+				sRedrawPanelSemaphores[aPanelNum] = nil;
+
+				if sWaitingIndividualRedraws[aPanelNum] and #sWaitingIndividualRedraws[aPanelNum] > 0 then
+					tNextRequest = tremove(sWaitingIndividualRedraws[aPanelNum], 1);
+
+					VUHDO_deferRedrawPanel(aPanelNum, tNextRequest["isFixAllFrameLevels"], tNextRequest["cycleId"]);
+				else
+					if #sWaitingAllPanelsRedraws > 0 then
+						tNextRequest = tremove(sWaitingAllPanelsRedraws, 1);
+
+						VUHDO_deferRedrawAllPanels(tNextRequest["isFixAllFrameLevels"]);
+					end
+				end
+			end
 		end
 
 		return;
 	end
 
-	if sButtonInitSemaphores[aPanelNum] and not sButtonInitSemaphores[aPanelNum]:waitForZero(VUHDO_DEFER_REDRAW_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels) then
-		return;
+	if tButtonSemaphores then
+		twipe(tButtonSemaphores);
+	else
+		tButtonSemaphores = { };
 	end
 
-	if sButtonPositionSemaphores[aPanelNum] and not sButtonPositionSemaphores[aPanelNum]:waitForZero(VUHDO_DEFER_REDRAW_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels) then
-		return;
+	if sButtonInitSemaphores[aPanelNum] then
+		tinsert(tButtonSemaphores, sButtonInitSemaphores[aPanelNum]);
+	end
+
+	if sButtonPositionSemaphores[aPanelNum] then
+		tinsert(tButtonSemaphores, sButtonPositionSemaphores[aPanelNum]);
+	end
+
+	if #tButtonSemaphores > 0 then
+		if not VUHDO_waitForSemaphores(tButtonSemaphores, VUHDO_DEFER_REDRAW_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels, aCycleId) then
+			return;
+		end
 	end
 
 	tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
@@ -1664,14 +1817,39 @@ function VUHDO_deferRedrawPanelCompleteDelegate(aPanelNum, anIsFixAllFrameLevels
 		VUHDO_PixelUtil.Hide(tPanel);
 	end
 
-	if sPanelRedrawSemaphore then
-		sPanelRedrawSemaphore:decrement();
+	if aCycleId and sRedrawAllPanelsSemaphore and VUHDO_extractCycleIdFromSemaphoreName(sRedrawAllPanelsSemaphore["name"]) == aCycleId then
+		if sRedrawAllPanelsSemaphore["count"] <= 0 then
+			return;
+		end
+
+		sRedrawAllPanelsSemaphore:decrement();
+	elseif sRedrawPanelSemaphores[aPanelNum] then
+		if sRedrawPanelSemaphores[aPanelNum]["count"] <= 0 then
+			return;
+		end
+
+		sRedrawPanelSemaphores[aPanelNum]:decrement();
+
+		if sRedrawPanelSemaphores[aPanelNum]["count"] == 0 then
+			sRedrawPanelSemaphores[aPanelNum] = nil;
+
+			if sWaitingIndividualRedraws[aPanelNum] and #sWaitingIndividualRedraws[aPanelNum] > 0 then
+				tNextRequest = tremove(sWaitingIndividualRedraws[aPanelNum], 1);
+
+				VUHDO_deferRedrawPanel(aPanelNum, tNextRequest["isFixAllFrameLevels"], tNextRequest["cycleId"]);
+			else
+				if #sWaitingAllPanelsRedraws > 0 then
+					tNextRequest = tremove(sWaitingAllPanelsRedraws, 1);
+
+					VUHDO_deferRedrawAllPanels(tNextRequest["isFixAllFrameLevels"]);
+				end
+			end
+		end
 	end
 
 	return;
 
 end
-local VUHDO_deferRedrawPanelCompleteDelegate = VUHDO_deferRedrawPanelCompleteDelegate;
 
 
 
@@ -1681,7 +1859,7 @@ local tHealButton;
 local tGroupPanel;
 function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
 
-	if sButtonInitSemaphores[aPanelNum] and not sButtonInitSemaphores[aPanelNum]:waitForZero(VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum) then
+	if sButtonInitSemaphores[aPanelNum] and not sButtonInitSemaphores[aPanelNum]:waitFor(VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum) then
 		return;
 	end
 
@@ -1720,7 +1898,6 @@ function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
 	return;
 
 end
-local VUHDO_deferInitAllHealButtonsCompleteDelegate = VUHDO_deferInitAllHealButtonsCompleteDelegate;
 
 
 
@@ -1732,7 +1909,6 @@ function VUHDO_deferPositionConfigPanels(aPanelNum)
 	return;
 
 end
-local VUHDO_deferPositionConfigPanels = VUHDO_deferPositionConfigPanels;
 
 
 
@@ -1744,7 +1920,6 @@ function VUHDO_deferPositionConfigPanelsDelegate(aPanelNum)
 	return;
 
 end
-local VUHDO_deferPositionConfigPanelsDelegate = VUHDO_deferPositionConfigPanelsDelegate;
 
 
 
@@ -1782,6 +1957,7 @@ function VUHDO_redrawPanel(aPanelNum, anIsFixAllFrameLevels)
 	return;
 
 end
+_G["VUHDO_redrawPanel"] = VUHDO_redrawPanel;
 
 
 
@@ -1799,7 +1975,7 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 	tBackdropCluster = nil;
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
-		VUHDO_redrawPanel(tPanelNum, anIsFixAllFrameLevels);
+		_G["VUHDO_redrawPanel"](tPanelNum, anIsFixAllFrameLevels);
 	end
 
 	VUHDO_setupAllButtonsUnitWatch(VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers());
@@ -1900,16 +2076,84 @@ function VUHDO_lnfReloadUI()
 	return;
 
 end
-local VUHDO_lnfReloadUI = VUHDO_lnfReloadUI;
 
 
 
 --
+function VUHDO_isDeferredRedrawActive()
+
+	if sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+		return true;
+	end
+
+	for tPanelNum = 1, 10 do
+		if sRedrawPanelSemaphores[tPanelNum] and sRedrawPanelSemaphores[tPanelNum]["count"] > 0 then
+			return true;
+		end
+
+		if sButtonInitSemaphores[tPanelNum] and sButtonInitSemaphores[tPanelNum]["count"] > 0 then
+			return true;
+		end
+
+		if sButtonPositionSemaphores[tPanelNum] and sButtonPositionSemaphores[tPanelNum]["count"] > 0 then
+			return true;
+		end
+	end
+
+	return false;
+
+end
+
+
+
+--
+local tWaitingRequest;
+local tHasIndividualRedraws;
+local tCycleId;
+local tPanelNum;
 function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 
-	if sPanelRedrawSemaphore then
+	if InCombatLockdown() then
+		VUHDO_Msg("WARNING: VUHDO_deferRedrawAllPanels called during combat! Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	if sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+		tWaitingRequest = {
+			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
+			["timestamp"] = GetTime()
+		};
+
+		tinsert(sWaitingAllPanelsRedraws, tWaitingRequest);
+
 		return;
 	end
+
+	tHasIndividualRedraws = false;
+
+	for tPanelNum = 1, 10 do
+		if sRedrawPanelSemaphores[tPanelNum] and sRedrawPanelSemaphores[tPanelNum]["count"] > 0 then
+			tHasIndividualRedraws = true;
+
+			break;
+		end
+	end
+
+	if tHasIndividualRedraws then
+		tWaitingRequest = {
+			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
+			["timestamp"] = GetTime()
+		};
+
+		tinsert(sWaitingAllPanelsRedraws, tWaitingRequest);
+
+		return;
+	end
+
+	if sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+		return;
+	end
+
+	tCycleId = VUHDO_generateCycleId();
 
 	VUHDO_resetMacroCaches();
 	VUHDO_resetSizeCalcCaches();
@@ -1922,18 +2166,41 @@ function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 
 	VUHDO_calculateSemaphoreTimeouts();
 
-	sPanelRedrawSemaphore = VUHDO_createSemaphore("PanelRedraw", 0, 10, sPanelRedrawTimeout);
+	if sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+		tWaitingRequest = {
+			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
+			["timestamp"] = GetTime()
+		};
 
-	if not sPanelRedrawSemaphore then
+		tinsert(sWaitingAllPanelsRedraws, tWaitingRequest);
+
 		return;
 	end
 
-	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
-		VUHDO_deferRedrawPanel(tPanelNum, anIsFixAllFrameLevels);
+	sRedrawAllPanelsSemaphore = VUHDO_createSemaphore("RedrawAllPanels_" .. tCycleId, 0, 10, sPanelRedrawTimeout);
 
-		if sPanelRedrawSemaphore then
-			sPanelRedrawSemaphore:increment();
+	if not sRedrawAllPanelsSemaphore then
+		return;
+	end
+
+	sPanelCompletionTracker = { };
+
+	for tPanelNum = 1, 10 do
+		if sWaitingIndividualRedraws[tPanelNum] and #sWaitingIndividualRedraws[tPanelNum] > 0 then
+			twipe(sWaitingIndividualRedraws[tPanelNum]);
 		end
+
+		if sButtonInitSemaphores[tPanelNum] then
+			sButtonInitSemaphores[tPanelNum] = nil;
+		end
+
+		if sButtonPositionSemaphores[tPanelNum] then
+			sButtonPositionSemaphores[tPanelNum] = nil;
+		end
+	end
+
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		VUHDO_deferRedrawPanel(tPanelNum, anIsFixAllFrameLevels, tCycleId);
 	end
 
 	VUHDO_deferRedrawAllPanelsComplete(anIsFixAllFrameLevels);
@@ -1946,39 +2213,49 @@ end
 
 --
 local tPanel;
-function VUHDO_deferRedrawPanelDelegate(aPanelNum, anIsFixAllFrameLevels)
+function VUHDO_deferRedrawPanelDelegate(aPanelNum, anIsFixAllFrameLevels, aCycleId)
 
 	if VUHDO_isPanelPopulated(aPanelNum) then
 		tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
 
 		VUHDO_initLocalVars(aPanelNum);
-		VUHDO_deferInitAllHealButtons(tPanel, aPanelNum);
+		VUHDO_deferInitAllHealButtons(tPanel, aPanelNum, aCycleId);
 
 		if VUHDO_isConfigPanelShowing() then
 			VUHDO_deferPositionConfigPanels(aPanelNum);
 		else
-			VUHDO_deferPositionAllHealButtons(tPanel, aPanelNum);
+			VUHDO_deferPositionAllHealButtons(tPanel, aPanelNum, aCycleId);
 		end
 
-		VUHDO_deferRedrawPanelComplete(aPanelNum, anIsFixAllFrameLevels);
+		VUHDO_deferRedrawPanelComplete(aPanelNum, anIsFixAllFrameLevels, aCycleId);
 	else
 		VUHDO_PixelUtil.Hide(VUHDO_getActionPanelOrStub(aPanelNum));
 
-		VUHDO_deferRedrawPanelComplete(aPanelNum, anIsFixAllFrameLevels);
+		if aCycleId and sRedrawAllPanelsSemaphore and VUHDO_extractCycleIdFromSemaphoreName(sRedrawAllPanelsSemaphore["name"]) == aCycleId then
+			if sRedrawAllPanelsSemaphore["count"] > 0 then
+				sRedrawAllPanelsSemaphore:decrement();
+			end
+		else
+			VUHDO_deferRedrawPanelComplete(aPanelNum, anIsFixAllFrameLevels, aCycleId);
+		end
 	end
 
 	return;
 
 end
-local VUHDO_deferRedrawPanelDelegate = VUHDO_deferRedrawPanelDelegate;
 
 
 
 --
+local tCurrentCycleId;
 local tGcdCol;
+local tNextRequest;
 function VUHDO_deferRedrawAllPanelsCompleteDelegate(anIsFixAllFrameLevels)
 
-	if sPanelRedrawSemaphore and not sPanelRedrawSemaphore:waitForZero(VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, anIsFixAllFrameLevels) then
+	tCurrentCycleId = (sRedrawAllPanelsSemaphore and VUHDO_extractCycleIdFromSemaphoreName(sRedrawAllPanelsSemaphore["name"])) or "UNKNOWN";
+
+	if sRedrawAllPanelsSemaphore and
+		not sRedrawAllPanelsSemaphore:waitFor(VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, anIsFixAllFrameLevels) then
 		return;
 	end
 
@@ -2006,9 +2283,20 @@ function VUHDO_deferRedrawAllPanelsCompleteDelegate(anIsFixAllFrameLevels)
 
 	VUHDO_initAllEventBouquets();
 
-	sPanelRedrawSemaphore = nil;
+	sRedrawAllPanelsSemaphore = nil;
+
+	for tPanelNum = 1, 10 do
+		if sRedrawPanelSemaphores[tPanelNum] then
+			sRedrawPanelSemaphores[tPanelNum] = nil;
+		end
+	end
+
+	if #sWaitingAllPanelsRedraws > 0 then
+		tNextRequest = tremove(sWaitingAllPanelsRedraws, 1);
+
+		VUHDO_deferRedrawAllPanels(tNextRequest["isFixAllFrameLevels"]);
+	end
 
 	return;
 
 end
-local VUHDO_deferRedrawAllPanelsCompleteDelegate = VUHDO_deferRedrawAllPanelsCompleteDelegate;

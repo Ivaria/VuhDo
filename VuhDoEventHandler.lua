@@ -31,7 +31,7 @@ local VUHDO_PANEL_SETUP;
 VUHDO_RELOAD_UI_IS_LNF = false;
 
 
-local VUHDO_HANDLER_PROFILING_ENABLED = false;
+local VUHDO_HANDLER_PROFILING_ENABLED = true;
 
 local VUHDO_HANDLER_METRICS = {
 	["sessionStartTime"] = 0,
@@ -2201,11 +2201,14 @@ do
 
 
 	--
+	local tIsDeferredActive;
 	local function VUHDO_handleSegment2A(aTimeDelta, ...)
 
 		-- reload UI?
 		if VUHDO_checkTimer("RELOAD_UI") then
-			if VUHDO_IS_RELOADING or InCombatLockdown() then
+			tIsDeferredActive = VUHDO_CONFIG and VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_isDeferredRedrawActive();
+
+			if VUHDO_IS_RELOADING or InCombatLockdown() or tIsDeferredActive then
 				VUHDO_TIMERS["RELOAD_UI"] = 0.3;
 			else
 				if VUHDO_RELOAD_UI_IS_LNF then
@@ -2227,11 +2230,14 @@ do
 
 
 	--
+	local tIsDeferredActive;
 	local function VUHDO_handleSegment2B(aTimeDelta, ...)
 
 		-- reset single panel?
 		if VUHDO_checkTimer("RELOAD_PANEL") then
-			if VUHDO_IS_RELOADING or InCombatLockdown() then
+			tIsDeferredActive = VUHDO_CONFIG and VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_isDeferredRedrawActive();
+
+			if VUHDO_IS_RELOADING or InCombatLockdown() or tIsDeferredActive then
 				VUHDO_TIMERS["RELOAD_PANEL"] = 0.3;
 			else
 				VUHDO_PROHIBIT_REPOS = true;

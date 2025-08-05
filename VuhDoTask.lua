@@ -92,23 +92,25 @@ local VUHDO_COMBAT_UNSAFE_TASKS = {
 	[VUHDO_DEFER_POSITION_CONFIG_PANELS] = true,
 	[VUHDO_DEFER_REDRAW_PANEL] = true,
 	[VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE] = true,
+	[VUHDO_DEFER_UPDATE_PANEL_BUTTONS] = true,
+	[VUHDO_DEFER_UPDATE_ALL_RAID_BARS] = true,
 };
 
 local sDeferredTaskDelegates;
 local sNextTaskEnqueueOrder = 0;
 
-local VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
+local VUHDO_DEFERRED_TASK_PROFILING_ENABLED = true;
 
 local VUHDO_MAX_EXEC_TIME_COMBAT_US = 200 * 1000;
 local VUHDO_MAX_EXEC_TIME_OOC_US = 1500 * 1000;
 local VUHDO_MAX_EXEC_TIME_FRACTION = 0.01;
 
 local VUHDO_DEFERRED_TASK_CONFIG = {
-	["TARGET_EXEC_TIME_US"] = 1000,
-	["MAX_EXEC_TIME_US"] = 2000,
+	["TARGET_EXEC_TIME_US"] = 500,
+	["MAX_EXEC_TIME_US"] = 1000,
 	["MIN_TASKS_PER_FRAME"] = 1,
-	["INITIAL_TASKS_PER_FRAME"] = 15,
-	["MAX_TASKS_PER_FRAME"] = 25,
+	["INITIAL_TASKS_PER_FRAME"] = 25,
+	["MAX_TASKS_PER_FRAME"] = 50,
 	["ADJUST_INTERVAL_SECS"] = 1.5,
 	["INCREASE_STEP"] = 1,
 	["DECREASE_STEP_NORMAL"] = 1,
@@ -420,7 +422,11 @@ do
 			return aTaskA["priority"] > aTaskB["priority"];
 		end
 
-		return aTaskA["enqueueOrder"] < aTaskB["enqueueOrder"];
+		if aTaskA["enqueueOrder"] ~= aTaskB["enqueueOrder"] then
+			return aTaskA["enqueueOrder"] < aTaskB["enqueueOrder"];
+		end
+
+		return aTaskA["heapIndex"] < aTaskB["heapIndex"];
 
 	end
 
@@ -767,6 +773,7 @@ do
 
 	--
 	local tMetrics;
+	local tHistory;
 	local function VUHDO_updateDeferredTaskIndividualMetrics(aTaskType, aTaskDurationUs, aArgsSummary, aArgCount)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -785,12 +792,20 @@ do
 			tMetrics["minTaskTimeUsByTypeSession"][aTaskType] = 9999999;
 			tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] = 0;
 			tMetrics["maxTaskTimeUsContextByTypeSession"][aTaskType] = nil;
+			tMetrics["taskDurationHistoryByType"][aTaskType] = { };
 		end
 
 		tMetrics["tasksProcessedByTypeSession"][aTaskType] = tMetrics["tasksProcessedByTypeSession"][aTaskType] + 1;
 		tMetrics["totalTimeUsByTypeSession"][aTaskType] = tMetrics["totalTimeUsByTypeSession"][aTaskType] + aTaskDurationUs;
 
 		tMetrics["minTaskTimeUsByTypeSession"][aTaskType] = min(tMetrics["minTaskTimeUsByTypeSession"][aTaskType], aTaskDurationUs);
+
+		tHistory = tMetrics["taskDurationHistoryByType"][aTaskType];
+		tinsert(tHistory, aTaskDurationUs);
+
+		if #tHistory > 1000 then
+			tremove(tHistory, 1);
+		end
 
 		if aTaskDurationUs > (tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] or -1) then
 			tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] = aTaskDurationUs;
@@ -937,9 +952,11 @@ do
 			for tArgCnt = 1, select("#", ...) do
 				tNewTask["args"][tArgCnt] = select(tArgCnt, ...);
 			end
+
 			tNewTask["delegate"] = tDelegate;
 			tNewTask["type"] = aType;
 			tNewTask["priority"] = tCurrentPriority;
+			tNewTask["enqueueTime"] = GetTime(); -- Track when task was enqueued
 
 			tTaskKey = VUHDO_getTaskKey(aType, tNewTask["args"]);
 			tTask = VUHDO_TASK_QUEUE_MAP[tTaskKey];
@@ -1264,6 +1281,7 @@ do
 	local tProfilerResult;
 	local tChunkStartTime;
 	local tChunkTaskMetrics;
+	local tFrameProcessStartTime;
 	function VUHDO_processDeferredTaskQueue()
 
 		VUHDO_checkAllSemaphoreTimeouts();
@@ -1341,10 +1359,6 @@ do
 
 
 
-
-
-
-
 	--
 	function VUHDO_setDeferredTaskProfiling(anIsEnabled)
 
@@ -1357,6 +1371,15 @@ do
 		end
 
 		return;
+
+	end
+
+
+
+	--
+	function VUHDO_isDeferredTaskProfilingEnabled()
+
+		return VUHDO_DEFERRED_TASK_PROFILING_ENABLED;
 
 	end
 
@@ -1412,6 +1435,12 @@ do
 			tMetricsReset["maxTaskTimeUsContextByTypeSession"] = { };
 		end
 
+		if tMetricsReset["taskDurationHistoryByType"] then
+			twipe(tMetricsReset["taskDurationHistoryByType"]);
+		else
+			tMetricsReset["taskDurationHistoryByType"] = { };
+		end
+
 		twipe(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS);
 
 		if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.resetMetrics then
@@ -1423,6 +1452,55 @@ do
 		end
 
 		return;
+
+	end
+
+
+
+	--
+	local tSortedDurations;
+	local tHistoryCount;
+	local tIndex;
+	local tResults;
+	local tDuration;
+	function VUHDO_calculateTrimmedMeans(aTaskType, aHistory)
+
+		if not aHistory or #aHistory < 5 then
+			return {
+				["tm50"] = 0,
+				["tm80"] = 0,
+				["tm90"] = 0,
+				["tm99"] = 0,
+				["tm100"] = 0,
+			};
+		end
+
+		tSortedDurations = { };
+
+		for _, tDuration in ipairs(aHistory) do
+			tinsert(tSortedDurations, tDuration);
+		end
+
+		table.sort(tSortedDurations);
+
+		tHistoryCount = #tSortedDurations;
+		tResults = { };
+
+		tIndex = max(1, floor(tHistoryCount * 0.5));
+		tResults["tm50"] = tSortedDurations[tIndex];
+
+		tIndex = max(1, floor(tHistoryCount * 0.8));
+		tResults["tm80"] = tSortedDurations[tIndex];
+
+		tIndex = max(1, floor(tHistoryCount * 0.9));
+		tResults["tm90"] = tSortedDurations[tIndex];
+
+		tIndex = max(1, floor(tHistoryCount * 0.99));
+		tResults["tm99"] = tSortedDurations[tIndex];
+
+		tResults["tm100"] = tSortedDurations[tHistoryCount];
+
+		return tResults;
 
 	end
 
@@ -1442,7 +1520,10 @@ do
 	local tMaxTaskTime;
 	local tMaxTaskContextUnit;
 	local tMaxTaskContextMode;
+	local tMaxTaskContextArgs;
 	local tDedupedText;
+	local tTrimmedMeans;
+	local tArgsSummary;
 	function VUHDO_printDeferredTaskMetrics(anIsReset)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -1497,7 +1578,7 @@ do
 		VUHDO_Msg(format("  Stops: Hard (Time Limit): %d, Budget Exceeded: %d",
 			(tMetrics["hardStopsHit"] or 0), (tMetrics["budgetExceededStops"] or 0)));
 
-		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, AvgTime, TotalTime, MinTime, MaxTime [Args]): **|r");
+		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, tm50, tm80, tm90, tm99, tm100 [Args]): **|r");
 
 		if VUHDO_DEFERRED_TASK_TYPES then
 			for _, tTaskType in ipairs(VUHDO_DEFERRED_TASK_TYPES) do
@@ -1521,10 +1602,13 @@ do
 					tMaxTaskContextArgs = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["args"] or "-");
 				end
 
-				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, Avg=%s, Total=%s, Min=%s, Max=%s [%s]",
-					tostring(tTaskType), tEnqueued, tProcessed, VUHDO_formatTime(tAvgCost), VUHDO_formatTime(tTotalTimeUsForType),
-					VUHDO_formatTime(tMinTaskTime == 9999999 and 0 or tMinTaskTime),
-					VUHDO_formatTime(tMaxTaskTime),
+				tTrimmedMeans = VUHDO_calculateTrimmedMeans(tTaskType, tMetrics["taskDurationHistoryByType"][tTaskType]);
+
+				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, tm50=%s, tm80=%s, tm90=%s, tm99=%s, tm100=%s [%s]",
+					tostring(tTaskType), tEnqueued, tProcessed,
+					VUHDO_formatTime(tTrimmedMeans["tm50"]), VUHDO_formatTime(tTrimmedMeans["tm80"]), 
+					VUHDO_formatTime(tTrimmedMeans["tm90"]), VUHDO_formatTime(tTrimmedMeans["tm99"]), 
+					VUHDO_formatTime(tTrimmedMeans["tm100"]),
 					tMaxTaskContextArgs
 				));
 			end
@@ -1579,7 +1663,7 @@ do
 
 				if tSnapshot["tasks"] then
 					for tCnt, tTask in ipairs(tSnapshot["tasks"]) do
-						local tArgsSummary = tTask["args"] or "none";
+						tArgsSummary = tTask["args"] or "none";
 
 						VUHDO_Msg(format("    T%d: Type[%s] %s (Args:%s)",
 							tCnt,
@@ -1646,39 +1730,72 @@ end
 
 
 
+--
+local tSemaphores;
+local tWaitingTasks;
+local tTask;
+local tSemaphoreTasksProcessed;
+local tTasksToReinsert;
+local tTasksProcessed;
+local tSuccess;
+local tResult;
+local tIndex;
+local tIterationCount;
+local tTotalTasksProcessed;
+local tCurrentTask;
+local tTasksProcessedThisIteration;
+local tCombatSafeTasks;
+local tCombatUnsafeTasks;
 function VUHDO_processCombatUnsafeTasksBeforeLockdown()
 
 	if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
 		return;
 	end
 
-	tTasksToReinsert = {};
-	tTasksProcessed = 0;
+	tTotalTasksProcessed = 0;
+	tIterationCount = 0;
 
-	tTasksToReinsert = VUHDO_extractAllTasksFromQueue();
+	repeat
+		tTasksProcessedThisIteration = 0;
+		tCombatSafeTasks = { };
+		tCombatUnsafeTasks = { };
 
-	for tIndex = #tTasksToReinsert, 1, -1 do
-		tTask = tTasksToReinsert[tIndex];
+		while #VUHDO_TASK_PRIORITY_QUEUE > 0 do
+			tCurrentTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
 
-		if VUHDO_COMBAT_UNSAFE_TASKS[tTask["type"]] then
+			if VUHDO_COMBAT_UNSAFE_TASKS[tCurrentTask["type"]] then
+				tinsert(tCombatUnsafeTasks, tCurrentTask);
+			else
+				tinsert(tCombatSafeTasks, tCurrentTask);
+			end
+		end
+
+		for _, tTask in ipairs(tCombatUnsafeTasks) do
 			tSuccess, tResult = VUHDO_executeSingleTask(tTask);
 
 			if tSuccess then
-				tTasksProcessed = tTasksProcessed + 1;
+				tTasksProcessedThisIteration = tTasksProcessedThisIteration + 1;
+				tTotalTasksProcessed = tTotalTasksProcessed + 1;
 			end
 
 			VUHDO_DEFERRED_TASK_POOL:release(tTask);
-
-			tremove(tTasksToReinsert, tIndex);
 		end
+
+		for _, tTask in ipairs(tCombatSafeTasks) do
+			VUHDO_heapInsert(VUHDO_TASK_PRIORITY_QUEUE, tTask, VUHDO_TASK_QUEUE_MAP);
+		end
+
+		tIterationCount = tIterationCount + 1;
+		VUHDO_checkAllSemaphoreTimeouts();
+
+	until tTasksProcessedThisIteration == 0 or tIterationCount > 10;
+
+	if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+		VUHDO_Msg("WARNING: Processed " .. tTotalTasksProcessed .. " combat-unsafe tasks in " .. tIterationCount .. " iterations before combat lockdown.");
 	end
 
-	VUHDO_reinsertTasksToQueue(tTasksToReinsert);
-
-	if tTasksProcessed > 0 then
-		VUHDO_DEFERRED_TASK_STATE["metrics"]["unsafeTasksProcessed"] = (VUHDO_DEFERRED_TASK_STATE["metrics"]["unsafeTasksProcessed"] or 0) + tTasksProcessed;
-
-		VUHDO_Msg("Processed " .. tTasksProcessed .. " combat-unsafe tasks before combat lockdown");
+	if tTotalTasksProcessed > 0 then
+		VUHDO_DEFERRED_TASK_STATE["metrics"]["unsafeTasksProcessed"] = (VUHDO_DEFERRED_TASK_STATE["metrics"]["unsafeTasksProcessed"] or 0) + tTotalTasksProcessed;
 	end
 
 	return;
