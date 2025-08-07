@@ -1896,7 +1896,7 @@ end
 
 
 --
-local VUHDO_TABLE_POOL_PROFILE = true;
+local VUHDO_TABLE_POOL_PROFILING_ENABLED = false;
 local VUHDO_DEFAULT_MAX_POOL_SIZE = 200;
 local tMaxPoolSize;
 function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
@@ -1923,7 +1923,7 @@ function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanu
 	local tObject;
 	function tPool:get()
 
-		tIsProfile = VUHDO_TABLE_POOL_PROFILE;
+		tIsProfile = VUHDO_TABLE_POOL_PROFILING_ENABLED;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -1955,7 +1955,7 @@ function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanu
 	local tPoolSize;
 	function tPool:release(aObject)
 
-		tIsProfile = VUHDO_TABLE_POOL_PROFILE;
+		tIsProfile = VUHDO_TABLE_POOL_PROFILING_ENABLED;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -2040,7 +2040,7 @@ end
 local tPoolStats;
 function VUHDO_printPoolMetrics()
 
-	if not VUHDO_TABLE_POOL_PROFILE then
+	if not VUHDO_TABLE_POOL_PROFILING_ENABLED then
 		VUHDO_Msg("Table pool profiling is currently disabled.");
 		return;
 	end
@@ -2095,7 +2095,7 @@ end
 --
 function VUHDO_setPoolProfiling(anIsEnabled)
 
-	VUHDO_TABLE_POOL_PROFILE = anIsEnabled;
+	VUHDO_TABLE_POOL_PROFILING_ENABLED = anIsEnabled;
 
 	if anIsEnabled then
 		VUHDO_Msg("Table pool profiling is enabled.");
@@ -2126,7 +2126,7 @@ end
 
 --
 local VUHDO_REGISTERED_SEMAPHORES = { };
-local VUHDO_SEMAPHORE_PROFILE = true;
+local VUHDO_SEMAPHORE_PROFILING_ENABLED = false;
 local VUHDO_SEMAPHORE_DEFAULT_TIMEOUT_MS = 250;
 local sSemaphoreId = 0;
 
@@ -2159,7 +2159,7 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tMetrics;
 	function tSemaphore:increment()
 
-		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -2190,7 +2190,7 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tWaitingTask;
 	function tSemaphore:decrement()
 
-		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -2267,7 +2267,7 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 			return true;
 		end
 
-		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -2309,7 +2309,7 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tOrphanedIncrements;
 	function tSemaphore:validateAndRecoverState(aTimedOutCount)
 
-		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -2339,7 +2339,7 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	function tSemaphore:checkTimeouts()
 
 		tCurrentTime = GetTime() * 1000;
-		tIsProfile = VUHDO_SEMAPHORE_PROFILE;
+		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
 		tTimedOutCount = 0;
 
 		if tIsProfile then
@@ -2353,7 +2353,7 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 				tIsTimedOut = true;
 				tTimedOutCount = tTimedOutCount + 1;
 
-				if VUHDO_SEMAPHORE_PROFILE then
+				if VUHDO_SEMAPHORE_PROFILING_ENABLED then
 					tMetrics = self["metrics"];
 					tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
 				end
@@ -2544,7 +2544,7 @@ function VUHDO_recoverOrphanedSemaphores()
 
 	for tSemaphoreName, tSemaphore in pairs(VUHDO_REGISTERED_SEMAPHORES) do
 		if tSemaphore and #tSemaphore["waitingTasks"] == 0 and tSemaphore["count"] > 0 then
-			if VUHDO_SEMAPHORE_PROFILE then
+			if VUHDO_SEMAPHORE_PROFILING_ENABLED then
 				tMetrics = tSemaphore["metrics"];
 				tMetrics["decrements"] = tMetrics["decrements"] + tSemaphore["count"];
 			end
@@ -2554,7 +2554,7 @@ function VUHDO_recoverOrphanedSemaphores()
 		end
 	end
 
-	if tRecoveredCount > 0 and VUHDO_SEMAPHORE_PROFILE then
+	if tRecoveredCount > 0 and VUHDO_SEMAPHORE_PROFILING_ENABLED then
 		VUHDO_Msg("Recovered " .. tostring(tRecoveredCount) .. " orphaned semaphores.");
 	end
 
@@ -2574,7 +2574,7 @@ local tSemaphoreName;
 local tSemaphore;
 function VUHDO_printSemaphoreMetrics()
 
-	if not VUHDO_SEMAPHORE_PROFILE then
+	if not VUHDO_SEMAPHORE_PROFILING_ENABLED then
 		VUHDO_Msg("Semaphore profiling is currently disabled.");
 
 		return;
@@ -2649,7 +2649,7 @@ end
 local tMetrics;
 function VUHDO_printDetailedSemaphoreMetrics()
 
-	if not VUHDO_SEMAPHORE_PROFILE then
+	if not VUHDO_SEMAPHORE_PROFILING_ENABLED then
 		VUHDO_Msg("Semaphore profiling is currently disabled.");
 
 		return;
@@ -2689,7 +2689,7 @@ function VUHDO_resetSemaphoreMetrics()
 		end
 	end
 
-	if VUHDO_SEMAPHORE_PROFILE then
+	if VUHDO_SEMAPHORE_PROFILING_ENABLED then
 		VUHDO_Msg("Semaphore metrics reset.");
 	end
 
@@ -2702,7 +2702,7 @@ end
 --
 function VUHDO_setSemaphoreProfiling(anIsEnabled)
 
-	VUHDO_SEMAPHORE_PROFILE = anIsEnabled;
+	VUHDO_SEMAPHORE_PROFILING_ENABLED = anIsEnabled;
 
 	if anIsEnabled then
 		VUHDO_Msg("Semaphore profiling is enabled.");

@@ -31,7 +31,7 @@ local VUHDO_PANEL_SETUP;
 VUHDO_RELOAD_UI_IS_LNF = false;
 
 
-local VUHDO_HANDLER_PROFILING_ENABLED = true;
+local VUHDO_HANDLER_PROFILING_ENABLED = false;
 
 local VUHDO_HANDLER_METRICS = {
 	["sessionStartTime"] = 0,
