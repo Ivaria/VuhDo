@@ -10,11 +10,6 @@ local sPoint;
 local sColSpacing;
 local sTopSpacing;
 local sBottomSpacing;
-local sIsTooltipCache = {
-	-- <panel number> = {
-	--	<icon index> = <true|false>,
-	-- },
-};
 
 
 
@@ -54,10 +49,6 @@ function VUHDO_panelRedrawCustomDebuffsInitLocalVars(aPanelNum)
 	sTopSpacing = sBarScaling["rowSpacing"] + VUHDO_getAdditionalTopHeight(aPanelNum);
 	sBottomSpacing = sBarScaling["rowSpacing"] + VUHDO_getAdditionalBottomHeight(aPanelNum);
 
-	if sIsTooltipCache[aPanelNum] then
-		table.wipe(sIsTooltipCache[aPanelNum]);
-	end
-
 	return;
 
 end
@@ -83,28 +74,6 @@ end
 
 
 --
-local tUnitFrameWidth;
-local tFinalIconSize;
-local tSpacing;
-local tMaxIconsThatFit;
-local tWillFit;
-local function VUHDO_isMostlyInBounds(aIconIndex, aTotalConfiguredIcons)
-
-	tUnitFrameWidth = sBarScaling["barWidth"];
-	tFinalIconSize = sHeight * VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7;
-	tSpacing = sColSpacing or 0;
-
-	tMaxIconsThatFit = math.ceil((tUnitFrameWidth + tSpacing) / (tFinalIconSize + tSpacing));
-
-	tWillFit = (aIconIndex - 40 + 1) <= tMaxIconsThatFit and (aIconIndex - 40 + 1) <= aTotalConfiguredIcons;
-
-	return tWillFit and 1 or 0;
-
-end
-
-
-
---
 local tFrame;
 local tIcon, tCounter, tName, tTimer;
 local tIconIdx;
@@ -116,7 +85,7 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 		VUHDO_panelRedrawCustomDebuffsInitLocalVars(aPanelNum);
 	end
 
-	-- Wir brauchen mind. 1 f�r LastCustomDebuffBouquet
+	-- Wir brauchen mind. 1 für LastCustomDebuffBouquet
 	if sMaxNum == 0 then 
 		VUHDO_getOrCreateCuDeButton(sButton, 40);
 	else
@@ -132,25 +101,7 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 			tFrame = VUHDO_getBarIconFrame(sButton, tIconIdx);
 			tFrame:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tFrame, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
-
-			-- Tooltip scripts are now set during frame creation in VUHDO_getOrCreateCuDeButton
-			-- No need to add them here since they're already configured
-
-			if not sIsTooltipCache[aPanelNum] then
-				sIsTooltipCache[aPanelNum] = { };
-			end
-
-			sIsTooltipCache[aPanelNum][tIconIdx] = VUHDO_isMostlyInBounds(tIconIdx, sMaxNum);
-
-			if sIsTooltipCache[aPanelNum][tIconIdx] == nil then
-				sIsTooltipCache[aPanelNum][tIconIdx] = 0;
-			end
-
-			if sIsTooltipCache[aPanelNum][tIconIdx] == 1 then
-				VUHDO_PixelUtil.SetSize(tFrame, sHeight, sHeight);
-			else
-				VUHDO_PixelUtil.SetSize(tFrame, 0.001, 0.001);
-			end
+			VUHDO_PixelUtil.SetSize(tFrame, sHeight, sHeight);
 
 			tFrame:SetAlpha(0);
 			tFrame:Show();
