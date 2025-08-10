@@ -88,7 +88,7 @@ function VUHDO_getOrCreateHotIcon(aButton, anIconNumber)
 	if not VUHDO_BAR_ICONS[aButton][anIconNumber] then
 		local tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
 		local tFrameName = tParentName .. "Ic" .. anIconNumber;
-		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = CreateFrame("Button", tFrameName, _G[tParentName], "VuhDoHotIconTemplate");
+		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = CreateFrame("Frame", tFrameName, _G[tParentName], "VuhDoAuraIconTemplate");
 		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "I"];
 		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "T"];
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "C"];
@@ -104,43 +104,42 @@ end
 function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 
 	if not VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] then
-		local tParentName;
-		local tFrameName;
-		local tBarIconFrame;
-		local tOldTexture;
+		local tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
+		local tFrameName = tParentName .. "Ic" .. anIconNumber;
 
-		tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
-		tFrameName = tParentName .. "Ic" .. anIconNumber;
-
-		tBarIconFrame = CreateFrame("Button", tFrameName, _G[tParentName], "VuhDoDebuffIconTemplate");
+		local tBarIconFrame = CreateFrame("Frame", tFrameName, _G[tParentName], "VuhDoDebuffIconTemplate");
 		Mixin(tBarIconFrame, BackdropTemplateMixin);
 
-		tBarIconFrame:SetScript("OnEnter", function(self)
-			VUHDO_showDebuffTooltip(self);
-		end);
-		tBarIconFrame:SetScript("OnLeave", function(self)
-			VUHDO_hideDebuffTooltip();
-		end);
-
-		tBarIconFrame:EnableMouse(false);
-		tBarIconFrame:SetMouseMotionEnabled(true);
-
-		tOldTexture = _G[tFrameName .. "BorderTexture"];
-
-		if tOldTexture then
-			tOldTexture:Hide();
-			tOldTexture:SetParent(nil);
-		end
-
 		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = tBarIconFrame;
+		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = tBarIconFrame;
 		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = tBarIconFrame;
 
-		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = tBarIconFrame;
 		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "I"];
 		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "T"];
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "C"];
 		VUHDO_BAR_ICON_CHARGES[aButton][anIconNumber] = _G[tFrameName .. "A"];
 		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "N"];
+
+--[[
+		if not tBarIconFrame:GetAttribute("vd_tt_hook") then
+			tBarIconFrame:SetScript("OnEnter", function(self)
+				VUHDO_showDebuffTooltip(self);
+				VuhDoActionOnEnter(self:GetParent():GetParent():GetParent():GetParent());
+			end);
+
+			tBarIconFrame:SetScript("OnLeave", function(self)
+				VUHDO_hideDebuffTooltip();
+				VuhDoActionOnLeave(self:GetParent():GetParent():GetParent():GetParent());
+			end);
+
+			VUHDO_safeSetAttribute(tBarIconFrame, "vd_tt_hook", true);
+		end
+
+		tBarIconFrame:EnableMouse(false);
+		tBarIconFrame:SetMouseMotionEnabled(true);
+		tBarIconFrame:EnableKeyboard(false);
+		tBarIconFrame:SetPropagateKeyboardInput(true);
+]]
 	end
 
 	return VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber];

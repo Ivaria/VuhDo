@@ -50,7 +50,7 @@
 
 	<Cooldown name="VuhDoHotCooldown" inherits="CooldownFrameTemplate" virtual="true">	</Cooldown>
 
-	<Frame name="VuhDoHotIconTemplate" virtual="true">
+	<Frame name="VuhDoAuraIconTemplate" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture name="$parentI"></Texture>
@@ -63,12 +63,21 @@
 			<Layer level="OVERLAY">
 				<FontString name="$parentT" inherits="NumberFontNormalSmall"></FontString>
 				<FontString name="$parentC" inherits="NumberFontNormalSmall"></FontString>
+				<FontString name="$parentN" inherits="GameFontNormalSmall"></FontString>
 			</Layer>
 		</Layers>
 
 		<Scripts>
 			<OnLoad>
 				self.addLevel = 8;
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="VuhDoDebuffIconTemplate" virtual="true" inherits="VuhDoAuraIconTemplate">
+		<Scripts>
+			<OnLoad inherit="append">
+				self.addLevel = 9;
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -82,23 +91,7 @@
 		</Layers>
 	</Frame>
 
-	<Frame name="VuhDoDebuffIconTemplate" virtual="true">
-		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture name="$parentI"></Texture>
-			</Layer>
-			<Layer level="OVERLAY">
-				<FontString name="$parentT" inherits="NumberFontNormalSmall"></FontString>
-				<FontString name="$parentC" inherits="NumberFontNormalSmall"></FontString>
-				<FontString name="$parentN" inherits="GameFontNormalSmall"></FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnLoad>
-				self.addLevel = 9;
-			</OnLoad>
-		</Scripts>
-	</Frame>
+
 
 	<StatusBar name="VuhDoHotBarTemplate" setAllPoints="true" hidden="false" inherits="VuhDoStatusBar" virtual="true">
 		<Scripts>

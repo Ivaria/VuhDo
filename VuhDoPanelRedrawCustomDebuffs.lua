@@ -89,7 +89,6 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 	if sMaxNum == 0 then 
 		VUHDO_getOrCreateCuDeButton(sButton, 40);
 	else
-
 		for tCnt = 0, sMaxNum - 1 do
 			tIconIdx = 40 + tCnt;
 
@@ -132,9 +131,13 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 
 	for tCnt = sMaxNum + 40, 44 do
 		tFrame = VUHDO_getBarIconFrame(sButton, tCnt);
+
 		if tFrame then
 			tFrame:ClearAllPoints();
 			tFrame:Hide();
 		end
 	end
+
+	return;
+
 end

@@ -26,6 +26,8 @@ local VUHDO_getBarIconName;
 local VUHDO_getShieldPerc;
 local VUHDO_backColor;
 local VUHDO_updateHealthBarsFor;
+local VUHDO_getBarIconFrameBackground;
+local VUHDO_getBarIconButton;
 
 local VUHDO_PANEL_SETUP;
 local VUHDO_CONFIG;
@@ -50,6 +52,8 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_backColor = _G["VUHDO_backColor"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+	VUHDO_getBarIconFrameBackground = _G["VUHDO_getBarIconFrameBackground"];
+	VUHDO_getBarIconButton = _G["VUHDO_getBarIconButton"];
 
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
@@ -183,7 +187,7 @@ local tBackdropInfo = {
 		["left"] = 0,
 		["right"] = 0,
 		["top"] = 0,
-		["bottom"] = 0.
+		["bottom"] = 0,
 	},
 };
 local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, anIsInit, aUnit)
