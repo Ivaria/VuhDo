@@ -130,7 +130,6 @@ end
 
 
 --
-local sButton;
 local sHealthBar;
 local tBar;
 
@@ -147,7 +146,7 @@ function VUHDO_initLocalVars(aPanelNum)
 
 	--VUHDO_panelRedrwawHeadersInitLocalVars(aPanelNum);
 	VUHDO_panelRedrwawHotsInitLocalVars(aPanelNum);
-	VUHDO_panelRedrwawCustomDebuffsInitLocalVars(aPanelNum);
+	VUHDO_panelRedrawCustomDebuffsInitLocalVars(aPanelNum);
 
 	tPanelSetup = VUHDO_PANEL_SETUP[aPanelNum];
 
@@ -274,7 +273,6 @@ local tNumButtons;
 local tTotalPositionButtons;
 local tModelArray;
 local tGroupArray;
-local tPanelButtons;
 local tInitSafetyFactor;
 local tPositionSafetyFactor;
 local tTotalExpectedTime;
@@ -409,7 +407,8 @@ end
 
 --
 local tBackdrop;
-local tWidth, tGap;
+local tWidth;
+local tGap;
 local function VUHDO_initPlayerTargetBorder(aButton, aBorderFrame, anIsNoIndicator, aPanelNum)
 
 	if VUHDO_INDICATOR_CONFIG[aPanelNum]["BOUQUETS"]["BAR_BORDER"] == "" then
@@ -580,14 +579,14 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 			VUHDO_positionHealButton(tHealButton, aPanelNum);
 
 			VUHDO_setupAllHealButtonAttributes(tHealButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
-			for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-				tDebuffFrame = VUHDO_getBarIconFrame(tHealButton, tCnt);
-				if tDebuffFrame then
-					VUHDO_setupAllHealButtonAttributes(tDebuffFrame, tUnit, false, 70 == tModelId, false, true); -- VUHDO_ID_VEHICLES
-				end
+
+			if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
+				VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton), tUnit);
 			end
-			VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton),  tUnit);
-			VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), tUnit);
+
+			if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
+				VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), tUnit);
+			end
 
 			tXPos, tYPos = VUHDO_getHealButtonPos(tColumnIndex, tGroupIndex, aPanelNum);
 			VUHDO_PixelUtil.Hide(tHealButton);
@@ -1177,11 +1176,14 @@ end
 
 --
 function VUHDO_initButtonStatics(aButton, aPanelNum)
+
 	VUHDO_initButtonStaticsHots(aButton, aPanelNum);
 	VUHDO_initButtonStaticsCustomDebuffs(aButton, aPanelNum);
 
-	sButton = aButton;
 	sHealthBar = VUHDO_getHealthBar(aButton, 1);
+
+	return;
+
 end
 
 
@@ -1211,14 +1213,6 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 
 	tClickPar = VUHDO_CONFIG["ON_MOUSE_UP"] and "AnyUp" or "AnyDown";
 	aButton:RegisterForClicks(tClickPar);
-
-	for tCnt = 40, 44 do
-		tFrame = VUHDO_getBarIconFrame(aButton, tCnt);
-
-		if tFrame then
-			tFrame:RegisterForClicks(tClickPar);
-		end
-	end
 
 	-- Texture
 	if sPanelConfig[aPanelNum]["statusTexture"] then
@@ -1286,9 +1280,9 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	VUHDO_initSideBarRight(aButton, sHealthBar, aPanelNum);
 
 	VUHDO_initAggroBar(aButton, sHealthBar, aPanelNum);
-	VUHDO_initHotBars();
-	VUHDO_initAllHotIcons();
-	VUHDO_initCustomDebuffs();
+	VUHDO_initHotBars(aPanelNum);
+	VUHDO_initAllHotIcons(aPanelNum);
+	VUHDO_initCustomDebuffs(aPanelNum);
 	VUHDO_initPrivateAuras(sHealthBar, aButton, aPanelNum);
 	VUHDO_initRaidIcon(sHealthBar, VUHDO_getBarRoleIcon(aButton, 50), sPanelConfig[aPanelNum]["barScaling"]["barWidth"], aPanelNum);
 	VUHDO_initSwiftmendIndicator(aButton, sHealthBar, aPanelNum);
@@ -1300,14 +1294,6 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 		ClickCastFrames[aButton] = true;
 		ClickCastFrames[_G[aButton:GetName() .. "Tg"]] = true;
 		ClickCastFrames[_G[aButton:GetName() .. "Tot"]] = true;
-
-		for tIconNum = 40, 44 do
-			tIcon = _G[format("%sBgBarIcBarHlBarIc%d", aButton:GetName(), tIconNum)];
-
-			if tIcon then
-				ClickCastFrames[tIcon] = true;
-			end
-		end
 	end
 
 	return;
@@ -1721,6 +1707,11 @@ local tXPos;
 local tYPos;
 local tDebuffFrame;
 local tPanel;
+
+
+
+
+
 function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, aModelIndex, aModelId, aGroupIndex, aColumnIndex)
 
 	tHealButton = VUHDO_getOrCreateHealButton(aButtonIndex, aPanelNum);
@@ -1731,16 +1722,13 @@ function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, a
 		VUHDO_setupAllHealButtonAttributes(tHealButton, aUnit, false, 70 == aModelId, false, false); -- VUHDO_ID_VEHICLES
 	end
 
-	for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-		tDebuffFrame = VUHDO_getBarIconFrame(tHealButton, tCnt);
-
-		if tDebuffFrame and aUnit then
-			VUHDO_setupAllHealButtonAttributes(tDebuffFrame, aUnit, false, 70 == aModelId, false, true); -- VUHDO_ID_VEHICLES
-		end
+	if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
+		VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton), aUnit);
 	end
 
-	VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton), aUnit);
-	VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), aUnit);
+	if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
+		VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), aUnit);
+	end
 
 	tXPos, tYPos = VUHDO_getHealButtonPos(aColumnIndex, aGroupIndex, aPanelNum);
 
@@ -1763,6 +1751,22 @@ function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, a
 	return;
 
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

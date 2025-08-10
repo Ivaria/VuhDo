@@ -192,7 +192,7 @@ function VUHDO_hideAllPlayerIcons()
 		for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
 			if tButton:IsShown() then
 				VUHDO_initButtonStatics(tButton, tPanelNum);
-				VUHDO_initAllHotIcons();
+				VUHDO_initAllHotIcons(tPanelNum);
 			end
 		end
 	end

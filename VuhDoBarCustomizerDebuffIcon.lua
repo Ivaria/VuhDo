@@ -29,6 +29,7 @@ local VUHDO_updateHealthBarsFor;
 
 local VUHDO_PANEL_SETUP;
 local VUHDO_CONFIG;
+local VUHDO_RAID;
 local sCuDeStoredSettings;
 local sMaxIcons;
 local sStaticConfig;
@@ -54,6 +55,7 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
+	VUHDO_RAID = _G["VUHDO_RAID"];
 	sCuDeStoredSettings = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"];
 	sMaxIcons = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"];
 	if (sMaxIcons < 1) then -- Damit das Bouquet item "Letzter Debuff" funktioniert
@@ -93,6 +95,68 @@ end
 
 
 --
+local function VUHDO_areBlacklistModifiersPressed()
+
+	if not VUHDO_CONFIG or not VUHDO_CONFIG["CUSTOM_DEBUFF"] then
+		return IsAltKeyDown() and IsControlKeyDown() and IsShiftKeyDown();
+	end
+
+	local tBlacklistModi = VUHDO_CONFIG["CUSTOM_DEBUFF"]["blacklistModi"] or "ALT-CTRL-SHIFT";
+
+	if tBlacklistModi == "OFF" then
+		return false;
+	elseif tBlacklistModi == "ALT-CTRL-SHIFT" then
+		return IsAltKeyDown() and IsControlKeyDown() and IsShiftKeyDown();
+	elseif tBlacklistModi == "ALT-SHIFT" then
+		return IsAltKeyDown() and IsShiftKeyDown() and not IsControlKeyDown();
+	elseif tBlacklistModi == "ALT-CTRL" then
+		return IsAltKeyDown() and IsControlKeyDown() and not IsShiftKeyDown();
+	elseif tBlacklistModi == "CTRL-SHIFT" then
+		return IsControlKeyDown() and IsShiftKeyDown() and not IsAltKeyDown();
+	elseif tBlacklistModi == "SHIFT" then
+		return IsShiftKeyDown() and not IsAltKeyDown() and not IsControlKeyDown();
+	elseif tBlacklistModi == "CTRL" then
+		return IsControlKeyDown() and not IsAltKeyDown() and not IsShiftKeyDown();
+	elseif tBlacklistModi == "ALT" then
+		return IsAltKeyDown() and not IsControlKeyDown() and not IsShiftKeyDown();
+	end
+
+	return false;
+
+end
+
+
+
+--
+local VUHDO_DEBUFF_GLOBAL_HANDLER_FRAME = CreateFrame("Frame");
+VUHDO_DEBUFF_GLOBAL_HANDLER_FRAME:RegisterEvent("GLOBAL_MOUSE_DOWN");
+VUHDO_DEBUFF_GLOBAL_HANDLER_FRAME:SetScript("OnEvent", function(self, anEvent, aButton)
+
+	if anEvent == "GLOBAL_MOUSE_DOWN" and aButton == "RightButton" and VUHDO_areBlacklistModifiersPressed() then
+		local tFrame;
+
+		for tUnit, _ in pairs(VUHDO_RAID) do
+			local tButtons = VUHDO_getUnitButtonsSafe(tUnit);
+
+			for _, tButton in pairs(tButtons) do
+				for tSlot = 40, 40 + sMaxIcons - 1 do
+					tFrame = VUHDO_getBarIconFrame(tButton, tSlot);
+
+					if tFrame and tFrame["debuffInfo"] and tFrame["debuffSpellId"] and tFrame["debuffInstanceId"] and tFrame:IsMouseOver() then
+						VUHDO_addDebuffToBlacklist(tFrame);
+
+						return;
+					end
+				end
+			end
+		end
+	end
+
+end);
+
+
+
+--
 local tCuDeStoConfig;
 local tIsAnim;
 local tIsBarGlow;
@@ -108,6 +172,20 @@ local tAuraInstanceId;
 local tCurChosenInfo;
 local tType;
 local tButton;
+local tBackdropFrame;
+local tBaseScale;
+local tScaleFactor;
+local tFinalScale;
+local tBackdropInfo = {
+	["edgeFile"] = "Interface\\Buttons\\WHITE8X8",
+	["edgeSize"] = 4,
+	["insets"] = {
+		["left"] = 0,
+		["right"] = 0,
+		["top"] = 0,
+		["bottom"] = 0.
+	},
+};
 local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, anIsInit, aUnit)
 
 	tCuDeStoConfig = sCuDeStoredSettings[anIconInfo[3]] or sCuDeStoredSettings[tostring(anIconInfo[7])] or sStaticConfig;
@@ -232,29 +310,48 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		-- offset for backdrop border
 		VUHDO_getBarIcon(aButton, anIconIndex):SetTexCoord(.08, .92, .08, .92);
 
-		VUHDO_getBarIconFrameBackground(aButton, anIconIndex):SetBackdropBorderColor(VUHDO_backColor(VUHDO_DEBUFF_COLORS[tType]));
-		VUHDO_getBarIconFrameBackground(aButton, anIconIndex):SetAlpha(1);
+		tBackdropFrame = VUHDO_getBarIconFrameBackground(aButton, anIconIndex);
+
+		if tBackdropFrame then
+			if not tBackdropFrame:GetBackdrop() then
+				VUHDO_PixelUtil.ApplyBackdrop(tBackdropFrame, tBackdropInfo);
+			end
+
+			tBackdropFrame:SetBackdropBorderColor(VUHDO_backColor(VUHDO_DEBUFF_COLORS[tType]));
+			tBackdropFrame:SetAlpha(1);
+			tBackdropFrame:Show();
+		end
 	else
 		-- default border no offset
 		VUHDO_getBarIcon(aButton, anIconIndex):SetTexCoord(0, 1, 0, 1);
 
-		VUHDO_getBarIconFrameBackground(aButton, anIconIndex):SetAlpha(0);
+		tBackdropFrame = VUHDO_getBarIconFrameBackground(aButton, anIconIndex);
+
+		if tBackdropFrame then
+			if tBackdropFrame:GetBackdrop() then
+				tBackdropFrame:SetBackdrop(nil);
+			end
+		end
 	end
 
 	if tIsAnim then
 		tButton = VUHDO_getBarIconButton(aButton, anIconIndex);
+		tBaseScale = VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7;
 
-		if tAliveTime <= 0.4 then
-			VUHDO_PixelUtil.SetScale(tButton, 1 + tAliveTime * 2.5);
-		elseif tAliveTime <= 0.6 then
-			-- Keep size
-		elseif tAliveTime <= 1.1 then
-			VUHDO_PixelUtil.SetScale(tButton, 3.2 - 2 * tAliveTime);
+		if tAliveTime <= 0.5 then
+			tScaleFactor = 1 + tAliveTime * 2;
+		elseif tAliveTime <= 1.0 then
+			tScaleFactor = 3 - tAliveTime * 2;
 		else
-			VUHDO_PixelUtil.SetScale(tButton, 1);
+			tScaleFactor = 1;
 		end
+
+		tFinalScale = tBaseScale * tScaleFactor;
+		VUHDO_PixelUtil.SetScale(tButton, tFinalScale);
 	else -- Falls Custom Debuff vorher Animation hatte und dieser nicht
-		VUHDO_PixelUtil.SetScale(VUHDO_getBarIconButton(aButton, anIconIndex), 1);
+		tButton = VUHDO_getBarIconButton(aButton, anIconIndex);
+		tBaseScale = VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7;
+		VUHDO_PixelUtil.SetScale(tButton, tBaseScale);
 	end
 
 	if sIsName and tAliveTime > 2 then

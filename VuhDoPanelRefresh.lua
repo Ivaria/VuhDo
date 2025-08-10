@@ -109,15 +109,13 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			if tButton["raidid"] ~= tUnit then
 				VUHDO_setupAllHealButtonAttributes(tButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
 
-				for tCnt = 40, sLastDebuffIcon do
-					tDebuffFrame = VUHDO_getBarIconFrame(tButton, tCnt);
-					if tDebuffFrame then
-						VUHDO_setupAllHealButtonAttributes(tDebuffFrame, tUnit, false, 70 == tModelId, false, true); -- VUHDO_ID_VEHICLES
-					end
+				if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
+					VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tButton), tUnit);
 				end
-				
-				VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tButton), tUnit);
-				VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tButton), tUnit);
+
+				if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
+					VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tButton), tUnit);
+				end
 			end
 
 			tX, tY = VUHDO_getHealButtonPos(tColIdx, tGroupIdx, aPanelNum);

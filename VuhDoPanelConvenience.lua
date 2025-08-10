@@ -104,36 +104,43 @@ end
 function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 
 	if not VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] then
-		local tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
-		local tFrameName = tParentName .. "Ic" .. anIconNumber;
+		local tParentName;
+		local tFrameName;
+		local tBarIconFrame;
+		local tOldTexture;
 
-		local tBarIconFrame = CreateFrame("Button", tFrameName, _G[tParentName], "VuhDoDebuffIconTemplate");
-		local tBarIconFrameBackground = CreateFrame("Frame", tFrameName .. "Background", tBarIconFrame, "BackdropTemplate");
+		tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
+		tFrameName = tParentName .. "Ic" .. anIconNumber;
 
-		tBarIconFrameBackground:SetParent(tBarIconFrame);
+		tBarIconFrame = CreateFrame("Button", tFrameName, _G[tParentName], "VuhDoDebuffIconTemplate");
+		Mixin(tBarIconFrame, BackdropTemplateMixin);
 
-		tBarIconFrameBackground:ClearAllPoints();
-		VUHDO_PixelUtil.SetPoint(tBarIconFrameBackground, "TOPLEFT", tBarIconFrame, "TOPLEFT", -1, 1);
-		VUHDO_PixelUtil.SetPoint(tBarIconFrameBackground, "BOTTOMRIGHT", tBarIconFrame, "BOTTOMRIGHT", 1, -1);
+		tBarIconFrame:SetScript("OnEnter", function(self)
+			VUHDO_showDebuffTooltip(self);
+		end);
+		tBarIconFrame:SetScript("OnLeave", function(self)
+			VUHDO_hideDebuffTooltip();
+		end);
 
-		VUHDO_PixelUtil.SetFrameLevel(tBarIconFrameBackground, tBarIconFrame:GetFrameLevel() == 0 and 1 or tBarIconFrame:GetFrameLevel() - 1);
+		tBarIconFrame:EnableMouse(false);
+		tBarIconFrame:SetMouseMotionEnabled(true);
 
-		local tBackdropInfo = {
-			edgeFile = "Interface\\Buttons\\WHITE8X8",
-			edgeSize = 4,
-		};
+		tOldTexture = _G[tFrameName .. "BorderTexture"];
 
-		VUHDO_PixelUtil.ApplyBackdrop(tBarIconFrameBackground, tBackdropInfo);
+		if tOldTexture then
+			tOldTexture:Hide();
+			tOldTexture:SetParent(nil);
+		end
 
 		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = tBarIconFrame;
-		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = tBarIconFrameBackground;
+		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = tBarIconFrame;
 
-		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = _G[tFrameName.. "B"];
-		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "BI"];
-		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "BT"];
-		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "BC"];
-		VUHDO_BAR_ICON_CHARGES[aButton][anIconNumber] = _G[tFrameName .. "BA"];
-		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "BN"];
+		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = tBarIconFrame;
+		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "I"];
+		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "T"];
+		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "C"];
+		VUHDO_BAR_ICON_CHARGES[aButton][anIconNumber] = _G[tFrameName .. "A"];
+		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "N"];
 	end
 
 	return VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber];

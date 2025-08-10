@@ -1591,10 +1591,7 @@ do
 			end
 		end
 
-
 		tTaskState["totalFramesInInterval"] = tTaskState["totalFramesInInterval"] + 1;
-
-
 
 		if GetTime() - tTaskState["lastAdjustTime"] >= tTaskConfig["ADJUST_INTERVAL_SECS"] then
 			VUHDO_adjustDynamicDeferTasks();
