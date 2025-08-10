@@ -2529,8 +2529,8 @@ do
 		if MeasureCall then
 			tProfilerResult, tSuccess = MeasureCall(aSegmentFunction, aTimeDelta);
 
-			if VUHDO_HANDLER_PROFILING_ENABLED and tProfilerResult and tProfilerResult.elapsedMilliseconds then
-				VUHDO_updateOnUpdateSubSegmentMetrics(tSegmentName, tProfilerResult.elapsedMilliseconds * 1000);
+			if VUHDO_HANDLER_PROFILING_ENABLED and tProfilerResult and tProfilerResult["elapsedMilliseconds"] then
+				VUHDO_updateOnUpdateSubSegmentMetrics(tSegmentName, tProfilerResult["elapsedMilliseconds"] * 1000);
 			end
 
 			if VUHDO_HANDLER_PROFILING_ENABLED then
