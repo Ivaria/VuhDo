@@ -21,6 +21,8 @@ local abs = math.abs;
 local InCombatLockdown = InCombatLockdown;
 
 
+
+
 VUHDO_DEFERRED_TASK_PRIORITY_LOW = 1;
 VUHDO_DEFERRED_TASK_PRIORITY_NORMAL = 2;
 VUHDO_DEFERRED_TASK_PRIORITY_HIGH = 3;
@@ -200,6 +202,8 @@ local VUHDO_DEFERRED_TASK_STATE = {
 		["maxTaskTimeUsByTypeSession"] = { },
 		["maxTaskTimeUsContextByTypeSession"] = { },
 		["taskDurationHistoryByType"] = { },
+		["taskDurationTrimmedMeansByType"] = { },
+		["queueTimeTrimmedMeansByType"] = { },
 	},
 };
 
@@ -912,6 +916,8 @@ do
 	--
 	local tMetrics;
 	local tHistory;
+	local tTaskTrimmedMeans;
+	local tQueueTrimmedMeans;
 	local function VUHDO_updateDeferredTaskIndividualMetrics(aTaskType, aTaskDurationUs, aArgsSummary, aArgCount, aQueueTimeUs)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -963,9 +969,23 @@ do
 
 			tinsert(tMetrics["queueTimeHistoryByType"][aTaskType], aQueueTimeUs);
 
-			if #tMetrics["queueTimeHistoryByType"][aTaskType] > 1000 then
-				tremove(tMetrics["queueTimeHistoryByType"][aTaskType], 1);
+			if not tMetrics["queueTimePercentileTrackerByType"] then
+				tMetrics["queueTimePercentileTrackerByType"] = { };
 			end
+
+			if not tMetrics["queueTimePercentileTrackerByType"][aTaskType] then
+				tMetrics["queueTimePercentileTrackerByType"][aTaskType] = VUHDO_createPercentileTracker();
+			end
+
+			tMetrics["queueTimePercentileTrackerByType"][aTaskType]:update(aQueueTimeUs);
+
+			tQueueTrimmedMeans = tMetrics["queueTimePercentileTrackerByType"][aTaskType]:getPercentiles();
+
+			if not tQueueTrimmedMeans then
+				tQueueTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+			end
+
+			tMetrics["queueTimeTrimmedMeansByType"][aTaskType] = tQueueTrimmedMeans;
 		end
 
 		tMetrics["minTaskTimeUsByTypeSession"][aTaskType] = min(tMetrics["minTaskTimeUsByTypeSession"][aTaskType], aTaskDurationUs);
@@ -973,9 +993,23 @@ do
 		tHistory = tMetrics["taskDurationHistoryByType"][aTaskType];
 		tinsert(tHistory, aTaskDurationUs);
 
-		if #tHistory > 1000 then
-			tremove(tHistory, 1);
+		if not tMetrics["taskDurationPercentileTrackerByType"] then
+			tMetrics["taskDurationPercentileTrackerByType"] = { };
 		end
+
+		if not tMetrics["taskDurationPercentileTrackerByType"][aTaskType] then
+			tMetrics["taskDurationPercentileTrackerByType"][aTaskType] = VUHDO_createPercentileTracker();
+		end
+
+		tMetrics["taskDurationPercentileTrackerByType"][aTaskType]:update(aTaskDurationUs);
+
+		tTaskTrimmedMeans = tMetrics["taskDurationPercentileTrackerByType"][aTaskType]:getPercentiles();
+
+		if not tTaskTrimmedMeans then
+			tTaskTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+		end
+
+		tMetrics["taskDurationTrimmedMeansByType"][aTaskType] = tTaskTrimmedMeans;
 
 		if aTaskDurationUs > (tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] or -1) then
 			tMetrics["maxTaskTimeUsByTypeSession"][aTaskType] = aTaskDurationUs;
@@ -1697,6 +1731,32 @@ do
 			tMetricsReset["taskDurationHistoryByType"] = { };
 		end
 
+		if tMetricsReset["taskDurationTrimmedMeansByType"] then
+			twipe(tMetricsReset["taskDurationTrimmedMeansByType"]);
+		else
+			tMetricsReset["taskDurationTrimmedMeansByType"] = { };
+		end
+
+		if tMetricsReset["queueTimeTrimmedMeansByType"] then
+			twipe(tMetricsReset["queueTimeTrimmedMeansByType"]);
+		else
+			tMetricsReset["queueTimeTrimmedMeansByType"] = { };
+		end
+
+		if tMetricsReset["taskDurationPercentileTrackerByType"] then
+			twipe(tMetricsReset["taskDurationPercentileTrackerByType"]);
+		else
+			tMetricsReset["taskDurationPercentileTrackerByType"] = { };
+		end
+
+		if tMetricsReset["queueTimePercentileTrackerByType"] then
+			twipe(tMetricsReset["queueTimePercentileTrackerByType"]);
+		else
+			tMetricsReset["queueTimePercentileTrackerByType"] = { };
+		end
+
+
+
 		twipe(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS);
 
 		if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.resetMetrics then
@@ -1713,51 +1773,15 @@ do
 
 
 
+
+
+
+
 	--
-	local tSortedDurations;
-	local tHistoryCount;
-	local tIndex;
-	local tResults;
-	function VUHDO_calculateTrimmedMeans(aTaskType, aHistory)
+	local tMetrics;
+	local tTaskType;
+	local tTaskHistory;
 
-		if not aHistory or #aHistory == 0 then
-			return {
-				["tm50"] = 0,
-				["tm80"] = 0,
-				["tm90"] = 0,
-				["tm99"] = 0,
-				["tm100"] = 0,
-			};
-		end
-
-		tSortedDurations = { };
-
-		for _, tDuration in ipairs(aHistory) do
-			tinsert(tSortedDurations, tDuration);
-		end
-
-		table.sort(tSortedDurations);
-
-		tHistoryCount = #tSortedDurations;
-		tResults = { };
-
-		tIndex = max(1, floor(tHistoryCount * 0.5));
-		tResults["tm50"] = tSortedDurations[tIndex];
-
-		tIndex = max(1, floor(tHistoryCount * 0.8));
-		tResults["tm80"] = tSortedDurations[tIndex];
-
-		tIndex = max(1, floor(tHistoryCount * 0.9));
-		tResults["tm90"] = tSortedDurations[tIndex];
-
-		tIndex = max(1, floor(tHistoryCount * 0.99));
-		tResults["tm99"] = tSortedDurations[tIndex];
-
-		tResults["tm100"] = tSortedDurations[tHistoryCount];
-
-		return tResults;
-
-	end
 
 
 
@@ -1860,7 +1884,11 @@ do
 					tMaxTaskContextArgs = tostring(tMetrics["maxTaskTimeUsContextByTypeSession"][tTaskType]["args"] or "-");
 				end
 
-				tTrimmedMeans = VUHDO_calculateTrimmedMeans(tTaskType, tMetrics["taskDurationHistoryByType"][tTaskType]);
+				tTrimmedMeans = tMetrics["taskDurationTrimmedMeansByType"][tTaskType];
+
+				if not tTrimmedMeans then
+					tTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+				end
 
 				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, tm50=%s, tm80=%s, tm90=%s, tm99=%s, tm100=%s [%s]",
 					tostring(tTaskType), tEnqueued, tProcessed,
@@ -1870,7 +1898,11 @@ do
 					tMaxTaskContextArgs
 				));
 
-				tQueueTimeTrimmedMeans = VUHDO_calculateTrimmedMeans(tTaskType, tMetrics["queueTimeHistoryByType"][tTaskType]);
+				tQueueTimeTrimmedMeans = tMetrics["queueTimeTrimmedMeansByType"][tTaskType];
+
+				if not tQueueTimeTrimmedMeans then
+					tQueueTimeTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+				end
 
 				VUHDO_Msg(format("    Queue: Total=%s, tm50=%s, tm80=%s, tm90=%s, tm99=%s, tm100=%s",
 					VUHDO_formatTime(tTotalQueueTimeUsForType),

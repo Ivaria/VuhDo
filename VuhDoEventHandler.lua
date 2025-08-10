@@ -18,6 +18,7 @@ local twipe = table.wipe;
 local max = math.max;
 local min = math.min;
 
+
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
 local VUHDO_DEBUFF_ANIMATION = 0;
@@ -40,66 +41,82 @@ local VUHDO_HANDLER_METRICS = {
 		["segment1"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2A"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2B"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2C"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2D"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2E"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2F"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2G"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2H"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2I"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2J"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2K"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2L"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["segment2M"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 		["total"] = {
 			["totalTimeUs"] = 0,
 			["durationHistory"] = { },
+			["trimmedMeans"] = { },
 		},
 	},
 	["OnEvent"] = { },
@@ -291,6 +308,7 @@ do
 
 	--
 	local tMetrics;
+	local tTrimmedMeans;
 	function VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, aDurationUs)
 
 		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnUpdate"] then
@@ -304,9 +322,14 @@ do
 
 			tinsert(tMetrics["durationHistory"], aDurationUs);
 
-			while #tMetrics["durationHistory"] > VUHDO_HANDLER_EVENT_CONFIG["HISTORY_LIMIT"] do
-				tremove(tMetrics["durationHistory"], 1);
+			if not tMetrics["percentileTracker"] then
+				tMetrics["percentileTracker"] = VUHDO_createPercentileTracker();
 			end
+
+			tMetrics["percentileTracker"]:update(aDurationUs);
+
+			tTrimmedMeans = tMetrics["percentileTracker"]:getPercentiles();
+			tMetrics["trimmedMeans"] = tTrimmedMeans;
 		end
 
 		return;
@@ -317,6 +340,7 @@ do
 
 	--
 	local tEventMetrics;
+	local tTrimmedMeans;
 	function VUHDO_updateHandlerOnEventMetrics(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5)
 
 		if not VUHDO_HANDLER_PROFILING_ENABLED or not anEventName or
@@ -329,6 +353,7 @@ do
 				["totalTimeUs"] = 0,
 				["invocationCount"] = 0,
 				["durationHistory"] = { },
+				["trimmedMeans"] = { },
 			};
 		end
 
@@ -339,9 +364,14 @@ do
 
 		tinsert(tEventMetrics["durationHistory"], aDurationUs);
 
-		while #tEventMetrics["durationHistory"] > VUHDO_HANDLER_EVENT_CONFIG["HISTORY_LIMIT"] do
-			tremove(tEventMetrics["durationHistory"], 1);
+		if not tEventMetrics["percentileTracker"] then
+			tEventMetrics["percentileTracker"] = VUHDO_createPercentileTracker();
 		end
+
+		tEventMetrics["percentileTracker"]:update(aDurationUs);
+
+		tTrimmedMeans = tEventMetrics["percentileTracker"]:getPercentiles();
+		tEventMetrics["trimmedMeans"] = tTrimmedMeans;
 
 		VUHDO_addEventSnapshot(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5);
 
@@ -377,6 +407,8 @@ do
 			VUHDO_HANDLER_METRICS["OnUpdate"][tSegmentName] = {
 				["totalTimeUs"] = 0,
 				["durationHistory"] = { },
+				["trimmedMeans"] = { },
+				["percentileTracker"] = nil,
 			};
 		end
 
@@ -410,7 +442,7 @@ do
 			return;
 		end
 
-		tTrimmedMeans = VUHDO_calculateTrimmedMeans(aSegName, aSegData["durationHistory"]);
+		tTrimmedMeans = aSegData["trimmedMeans"];
 
 		VUHDO_Msg(format("%s|cffB0E0E6%s:|r Total: %s, tm50: %s, tm80: %s, tm90: %s, tm99: %s, tm100: %s",
 			anIndent or "  ", aSegName,
@@ -454,6 +486,8 @@ do
 
 		VUHDO_Msg("|cffFFD100--- Handler Profiling Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
 
+
+
 		tOnUpdateMetrics = tMetrics["OnUpdate"];
 		tInvocationCount = tOnUpdateMetrics["invocationCount"] or 0;
 
@@ -487,7 +521,7 @@ do
 		for tEventName, tEventData in pairs(tMetrics["OnEvent"]) do
 			tTotalTime = tEventData["totalTimeUs"] or 0;
 			tCount = tEventData["invocationCount"] or 0;
-			tTrimmedMeans = VUHDO_calculateTrimmedMeans(tEventName, tEventData["durationHistory"]);
+			tTrimmedMeans = tEventData["trimmedMeans"];
 
 			tinsert(tEventStats, {
 				["name"] = tEventName,
