@@ -74,9 +74,24 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="VuhDoDebuffIconTemplate" virtual="true" inherits="VuhDoAuraIconTemplate">
+	<Frame name="VuhDoDebuffIconTemplate" virtual="true" inherits="SecureHandlerEnterLeaveTemplate">
+		<Frames>
+			<Frame name="$parentB" enableMouse="false" inherits="BackdropTemplate">
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentI">
+						</Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<FontString name="$parentT" inherits="NumberFontNormalSmall"></FontString>
+						<FontString name="$parentC" inherits="NumberFontNormalSmall"></FontString>
+						<FontString name="$parentN" inherits="GameFontNormalSmall"></FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
 		<Scripts>
-			<OnLoad inherit="append">
+			<OnLoad>
 				self.addLevel = 9;
 			</OnLoad>
 		</Scripts>

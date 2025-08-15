@@ -101,6 +101,28 @@ end
 
 
 --
+local tDebuffOnEnterSnippet = [[
+	tFrame = self:GetParent():GetParent():GetParent():GetParent();
+
+	if tFrame then
+		tBody = tFrame:GetAttribute("vuhdo_onenter");
+
+		if tBody then
+			owner:RunFor(tFrame, tBody);
+		end
+	end
+]]
+local tDebuffOnLeaveSnippet = [[
+	tFrame = self:GetParent():GetParent():GetParent():GetParent();
+
+	if tFrame then
+		tBody = tFrame:GetAttribute("vuhdo_onleave");
+
+		if tBody then
+			owner:RunFor(tFrame, tBody);
+		end
+	end
+]]
 function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 
 	if not VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] then
@@ -108,19 +130,16 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 		local tFrameName = tParentName .. "Ic" .. anIconNumber;
 
 		local tBarIconFrame = CreateFrame("Frame", tFrameName, _G[tParentName], "VuhDoDebuffIconTemplate");
-		Mixin(tBarIconFrame, BackdropTemplateMixin);
-
 		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = tBarIconFrame;
-		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = tBarIconFrame;
-		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = tBarIconFrame;
 
-		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "I"];
-		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "T"];
-		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "C"];
-		VUHDO_BAR_ICON_CHARGES[aButton][anIconNumber] = _G[tFrameName .. "A"];
-		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "N"];
+		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = _G[tFrameName .. "B"];
+		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = _G[tFrameName .. "B"];
 
---[[
+		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "BI"];
+		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "BT"];
+		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "BC"];
+		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "BN"];
+
 		if not tBarIconFrame:GetAttribute("vd_tt_hook") then
 			tBarIconFrame:SetScript("OnEnter", function(self)
 				VUHDO_showDebuffTooltip(self);
@@ -135,11 +154,21 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 			VUHDO_safeSetAttribute(tBarIconFrame, "vd_tt_hook", true);
 		end
 
+		if not tBarIconFrame:GetAttribute("vuhdo_secureheader_wrap") then
+			local tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
+
+			if tHeaderFrame then
+				VUHDO_safeWrapScript(tHeaderFrame, tBarIconFrame, "OnEnter", tDebuffOnEnterSnippet);
+				VUHDO_safeWrapScript(tHeaderFrame, tBarIconFrame, "OnLeave", tDebuffOnLeaveSnippet);
+
+				VUHDO_safeSetAttribute(tBarIconFrame, "vuhdo_secureheader_wrap", true);
+			end
+		end
+
 		tBarIconFrame:EnableMouse(false);
 		tBarIconFrame:SetMouseMotionEnabled(true);
 		tBarIconFrame:EnableKeyboard(false);
 		tBarIconFrame:SetPropagateKeyboardInput(true);
-]]
 	end
 
 	return VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber];
@@ -692,6 +721,7 @@ end
 
 --
 local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
+
 	local tButtonName = format("Vd%dH%d", aPanelNum, aButtonNum);
 	local tButton = _G[tButtonName];
 	local tTargetButton = _G[tButtonName .. "Tg"];
@@ -745,9 +775,9 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	-- Tot Mana
 	VUHDO_BARS_PER_BUTTON[tButton][16] = _G[tButtonName .. "TotBgBarHlBarMaBar"];
 	VUHDO_BARS_PER_BUTTON[tTotButton][2] = _G[tButtonName .. "TotBgBarHlBarMaBar"];
-  -- Left side bar
+	-- Left side bar
 	VUHDO_BARS_PER_BUTTON[tButton][17] = _G[tButtonName .. "BgBarIcBarHlBarLsBar"];
-  -- Right side bar
+	-- Right side bar
 	VUHDO_BARS_PER_BUTTON[tButton][18] = _G[tButtonName .. "BgBarIcBarHlBarRsBar"];
 	-- Shield bar
 	VUHDO_BARS_PER_BUTTON[tButton][19] = _G[tButtonName .. "BgBarShBar"];
@@ -774,6 +804,9 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BAR_ICON_CLOCKS[tButton] = { };
 	VUHDO_BAR_ICON_CHARGES[tButton] = { };
 	VUHDO_BAR_ICON_NAMES[tButton] = { };
+
+	return;
+
 end
 
 
