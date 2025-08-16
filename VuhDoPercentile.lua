@@ -4,6 +4,10 @@ local floor = math.floor;
 local max = math.max;
 local min = math.min;
 local twipe = table.wipe;
+local tinsert = table.insert;
+local tremove = table.remove;
+local tsort = table.sort;
+local random = math.random;
 
 
 
@@ -11,173 +15,118 @@ local twipe = table.wipe;
 local tPercentileTracker;
 function VUHDO_createPercentileTracker(aPercentiles)
 
-	tPercentileTracker = {
-		["percentiles"] = aPercentiles or { 0.5, 0.8, 0.9, 0.99, 1.0, },
-		["markers"] = { },
-		["counts"] = { },
-		["positions"] = { },
-		["desiredPositions"] = { },
-		["heights"] = { },
-		["totalCount"] = 0,
-		["initialized"] = false,
-	};
-
-	for tIndex = 1, #tPercentileTracker["percentiles"] do
-		tPercentileTracker["markers"][tIndex] = 0;
-		tPercentileTracker["counts"][tIndex] = 0;
-		tPercentileTracker["positions"][tIndex] = tIndex;
-		tPercentileTracker["desiredPositions"][tIndex] = 1 + (tPercentileTracker["totalCount"] - 1) * tPercentileTracker["percentiles"][tIndex];
-		tPercentileTracker["heights"][tIndex] = 0;
+	if not aPercentiles then
+		aPercentiles = { 0.5, 0.8, 0.9, 0.99, 1.0 };
 	end
 
+	tPercentileTracker = { };
 
-	local tPercentileCount;
-	local tHeight;
-	local tHeightPrev;
-	local tHeightNext;
-	local tCountDiff;
-	local tPosDiff;
-	local tPosDiffNext;
-	function tPercentileTracker:parabolicP2(anIndex, aSign)
+	tPercentileTracker["percentiles"] = aPercentiles;
+	tPercentileTracker["mainReservoir"] = { };
+	tPercentileTracker["extremeReservoir"] = { };
+	tPercentileTracker["mainReservoirSize"] = 1000;
+	tPercentileTracker["extremeReservoirSize"] = 200;
+	tPercentileTracker["threshold"] = nil;
+	tPercentileTracker["mainSorted"] = true;
+	tPercentileTracker["extremeSorted"] = true;
+	tPercentileTracker["maxValue"] = 0;
+	tPercentileTracker["totalCount"] = 0;
 
-		tPercentileCount = #self["percentiles"];
+	local tReservoir;
+	local tMaxGap;
+	local tGapThreshold;
+	local tGap;
+	local function autoDetectThreshold(self)
 
-		tHeight = self["heights"][anIndex];
-		tHeightPrev = anIndex > 1 and self["heights"][anIndex - 1] or tHeight;
-		tHeightNext = anIndex < tPercentileCount and self["heights"][anIndex + 1] or tHeight;
-		tCountDiff = (anIndex < tPercentileCount and self["counts"][anIndex + 1] or 0) - (anIndex > 1 and self["counts"][anIndex - 1] or 0);
-		tPosDiff = self["positions"][anIndex] - (anIndex > 1 and self["positions"][anIndex - 1] or self["positions"][anIndex]);
-		tPosDiffNext = (anIndex < tPercentileCount and self["positions"][anIndex + 1] or self["positions"][anIndex]) - self["positions"][anIndex];
-
-		if tCountDiff == 0 or tPosDiff == 0 or tPosDiffNext == 0 then
-			return tHeight;
+		if #self["mainReservoir"] < 20 then
+			return nil;
 		end
 
-		return tHeight + (aSign / tCountDiff) * ((tPosDiff * (tHeightNext - tHeight) / tPosDiffNext) + (tPosDiffNext * (tHeight - tHeightPrev) / tPosDiff));
+		if not self["mainSorted"] then
+			tsort(self["mainReservoir"]);
 
-	end
-
-
-	local tPercentileCount;
-	local tHeight;
-	local tHeightNext;
-	local tCountDiff;
-	local tPosDiff;
-	function tPercentileTracker:linearP2(anIndex, aSign)
-
-		tPercentileCount = #self["percentiles"];
-
-		tHeight = self["heights"][anIndex];
-		tHeightNext = (anIndex + aSign >= 1 and anIndex + aSign <= tPercentileCount) and self["heights"][anIndex + aSign] or tHeight;
-		tCountDiff = (anIndex + aSign >= 1 and anIndex + aSign <= tPercentileCount) and self["counts"][anIndex + aSign] or self["counts"][anIndex];
-		tPosDiff = (anIndex + aSign >= 1 and anIndex + aSign <= tPercentileCount) and self["positions"][anIndex + aSign] or self["positions"][anIndex];
-
-		if tPosDiff == 0 then
-			return tHeight;
+			self["mainSorted"] = true;
 		end
 
-		return tHeight + aSign * (tHeightNext - tHeight) / tPosDiff;
+		tReservoir = self["mainReservoir"];
+		tMaxGap = 0;
+		tGapThreshold = nil;
 
-	end
+		for tIndex = 1, #tReservoir - 1 do
+			tGap = tReservoir[tIndex + 1] / tReservoir[tIndex];
 
-
-	local tPercentileCount;
-	local tMarkerIndex;
-	local tSign;
-	local tNewHeight;
-	local tDiff;
-	local tHeight;
-	local tHeightPrev;
-	local tHeightNext;
-	local tLinearHeight;
-	function tPercentileTracker:update(aValue)
-
-		tPercentileCount = #self["percentiles"];
-
-		if not self["initialized"] then
-			if self["totalCount"] < tPercentileCount then
-				self["markers"][self["totalCount"] + 1] = aValue;
-				self["totalCount"] = self["totalCount"] + 1;
-
-				if self["totalCount"] == tPercentileCount then
-					table.sort(self["markers"]);
-
-					for tIndex = 1, tPercentileCount do
-						self["heights"][tIndex] = self["markers"][tIndex];
-					end
-
-					self["initialized"] = true;
-				end
+			if tGap > tMaxGap and tGap > 10 then
+				tMaxGap = tGap;
+				tGapThreshold = tReservoir[tIndex];
 			end
-
-			return;
 		end
+
+		return tGapThreshold;
+
+	end
+
+	local tProbability;
+	local tIndex;
+	function tPercentileTracker:update(aValue)
 
 		self["totalCount"] = self["totalCount"] + 1;
 
-		tMarkerIndex = 0;
-
-		for tIndex = 1, tPercentileCount - 1 do
-			if aValue < self["heights"][tIndex] then
-				tMarkerIndex = tIndex;
-				break;
-			end
+		if aValue > self["maxValue"] then
+			self["maxValue"] = aValue;
 		end
 
-		if tMarkerIndex == 0 then
-			tMarkerIndex = tPercentileCount;
+		if not self["threshold"] then
+			self["threshold"] = autoDetectThreshold(self);
 		end
 
-		for tIndex = tMarkerIndex, tPercentileCount do
-			self["counts"][tIndex] = self["counts"][tIndex] + 1;
-		end
+		if self["threshold"] and aValue > self["threshold"] then
+			if #self["extremeReservoir"] < self["extremeReservoirSize"] then
+				tinsert(self["extremeReservoir"], aValue);
+			else
+				tProbability = self["extremeReservoirSize"] / self["totalCount"];
 
-		for tIndex = 1, tPercentileCount do
-			self["desiredPositions"][tIndex] = self["desiredPositions"][tIndex] + self["percentiles"][tIndex];
-		end
-
-		for tIndex = 1, tPercentileCount - 1 do
-			tDiff = self["desiredPositions"][tIndex] - self["positions"][tIndex];
-
-			if (tDiff >= 1 and self["counts"][tIndex + 1] - self["counts"][tIndex] > 1) or
-			   (tDiff <= -1 and self["counts"][tIndex - 1] - self["counts"][tIndex] < -1) then
-				tSign = tDiff > 0 and 1 or -1;
-				tNewHeight = self:parabolicP2(tIndex, tSign);
-
-				tHeightPrev = tIndex > 1 and self["heights"][tIndex - 1] or 0;
-				tHeightNext = tIndex < tPercentileCount and self["heights"][tIndex + 1] or math.huge;
-				
-				if tNewHeight and tNewHeight == tNewHeight and tNewHeight ~= math.huge and tNewHeight ~= -math.huge and tHeightPrev < tNewHeight and tNewHeight < tHeightNext then
-					self["heights"][tIndex] = tNewHeight;
-				else
-					tLinearHeight = self:linearP2(tIndex, tSign);
-
-					if tLinearHeight and tLinearHeight == tLinearHeight and tLinearHeight ~= math.huge and tLinearHeight ~= -math.huge then
-						self["heights"][tIndex] = tLinearHeight;
-					end
+				if random() < tProbability then
+					tIndex = random(1, self["extremeReservoirSize"]);
+					self["extremeReservoir"][tIndex] = aValue;
 				end
-
-				self["positions"][tIndex] = self["positions"][tIndex] + tSign;
 			end
+
+			self["extremeSorted"] = false;
+		else
+			if #self["mainReservoir"] < self["mainReservoirSize"] then
+				tinsert(self["mainReservoir"], aValue);
+			else
+				tProbability = self["mainReservoirSize"] / self["totalCount"];
+
+				if random() < tProbability then
+					tIndex = random(1, self["mainReservoirSize"]);
+					self["mainReservoir"][tIndex] = aValue;
+				end
+			end
+
+			self["mainSorted"] = false;
 		end
 
 		return;
 
 	end
 
-
 	local tResult;
-	local tHeight;
-	local tSafeHeights;
+	local tCombined;
+	local tPercentile;
+	local tPosition;
+	local tFloorPos;
+	local tCeilPos;
+	local tValue;
+	local tWeight;
+	local tValue1;
+	local tValue2;
+	local tIndex;
 	function tPercentileTracker:getPercentiles()
 
-		if not tResult then
-			tResult = { };
-		else
-			twipe(tResult);
-		end
+		tResult = { };
 
-		if not self["initialized"] then
+		if #self["mainReservoir"] == 0 and #self["extremeReservoir"] == 0 then
 			for tIndex = 1, #self["percentiles"] do
 				tResult["tm" .. floor(self["percentiles"][tIndex] * 100)] = 0;
 			end
@@ -185,21 +134,51 @@ function VUHDO_createPercentileTracker(aPercentiles)
 			return tResult;
 		end
 
-		tSafeHeights = { };
+		if not self["mainSorted"] then
+			tsort(self["mainReservoir"]);
+			self["mainSorted"] = true;
+		end
+
+		if not self["extremeSorted"] then
+			tsort(self["extremeReservoir"]);
+			self["extremeSorted"] = true;
+		end
+
+		tCombined = { };
+
+		for tIndex = 1, #self["mainReservoir"] do
+			tinsert(tCombined, self["mainReservoir"][tIndex]);
+		end
+
+		for tIndex = 1, #self["extremeReservoir"] do
+			tinsert(tCombined, self["extremeReservoir"][tIndex]);
+		end
+
+		tsort(tCombined);
 
 		for tIndex = 1, #self["percentiles"] do
-			tHeight = self["heights"][tIndex];
+			tPercentile = self["percentiles"][tIndex];
+			tPosition = tPercentile * #tCombined;
+			tFloorPos = floor(tPosition);
+			tCeilPos = ceil(tPosition);
 
-			if tHeight and tHeight == tHeight and tHeight ~= math.huge and tHeight ~= -math.huge then
-				tSafeHeights[tIndex] = tHeight;
+			if tFloorPos <= 0 then
+				tValue = tCombined[1];
+			elseif tCeilPos > #tCombined then
+				tValue = tCombined[#tCombined];
+			elseif tFloorPos == tCeilPos then
+				tValue = tCombined[tFloorPos];
 			else
-				tSafeHeights[tIndex] = 0;
+				tValue1 = tCombined[tFloorPos];
+				tValue2 = tCombined[tCeilPos];
+				tWeight = tPosition - tFloorPos;
+				tValue = tValue1 + (tValue2 - tValue1) * tWeight;
 			end
+
+			tResult["tm" .. floor(tPercentile * 100)] = tValue;
 		end
 
-		for tIndex = 1, #self["percentiles"] do
-			tResult["tm" .. floor(self["percentiles"][tIndex] * 100)] = tSafeHeights[tIndex];
-		end
+		tResult["tm100"] = self["maxValue"];
 
 		return tResult;
 
@@ -207,30 +186,23 @@ function VUHDO_createPercentileTracker(aPercentiles)
 
 	function tPercentileTracker:reset()
 
-		self["initialized"] = false;
-		self["totalCount"] = 0;
+		twipe(self["mainReservoir"]);
+		twipe(self["extremeReservoir"]);
 
-		for tIndex = 1, #self["percentiles"] do
-			self["markers"][tIndex] = 0;
-			self["counts"][tIndex] = 0;
-			self["positions"][tIndex] = tIndex;
-			self["desiredPositions"][tIndex] = 1 + (self["totalCount"] - 1) * self["percentiles"][tIndex];
-			self["heights"][tIndex] = 0;
-		end
+		self["totalCount"] = 0;
+		self["threshold"] = nil;
+		self["mainSorted"] = true;
+		self["extremeSorted"] = true;
+		self["maxValue"] = 0;
 
 		return;
 
 	end
 
-	function tPercentileTracker:getTotalCount()
-
-		return self["totalCount"];
-
-	end
 
 	function tPercentileTracker:isInitialized()
 
-		return self["initialized"];
+		return #self["mainReservoir"] > 0 or #self["extremeReservoir"] > 0;
 
 	end
 
