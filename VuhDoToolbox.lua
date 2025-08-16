@@ -1899,11 +1899,12 @@ end
 local VUHDO_TABLE_POOL_PROFILING_ENABLED = false;
 local VUHDO_DEFAULT_MAX_POOL_SIZE = 200;
 local tMaxPoolSize;
+local tPool;
 function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
 
 	tMaxPoolSize = aMaxPoolSize or VUHDO_DEFAULT_MAX_POOL_SIZE;
 
-	local tPool = {
+	tPool = {
 		["poolData"] = tcreate(tMaxPoolSize),
 		["maxSize"] = tMaxPoolSize,
 		["createDelegate"] = aCreateDelegate or function() return { }; end,

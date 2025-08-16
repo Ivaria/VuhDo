@@ -3,6 +3,7 @@ local _;
 local floor = math.floor;
 local max = math.max;
 local min = math.min;
+local twipe = table.wipe;
 
 
 
@@ -29,27 +30,24 @@ function VUHDO_createPercentileTracker(aPercentiles)
 		tPercentileTracker["heights"][tIndex] = 0;
 	end
 
-	local tMarkerIndex;
-	local tSign;
-	local tNewHeight;
-	local tIndex;
-	local tDiff;
+
+	local tPercentileCount;
 	local tHeight;
-	local tHeightNext;
 	local tHeightPrev;
+	local tHeightNext;
 	local tCountDiff;
 	local tPosDiff;
 	local tPosDiffNext;
-	local tSafeHeights;
-	local tLinearHeight;
 	function tPercentileTracker:parabolicP2(anIndex, aSign)
+
+		tPercentileCount = #self["percentiles"];
 
 		tHeight = self["heights"][anIndex];
 		tHeightPrev = anIndex > 1 and self["heights"][anIndex - 1] or tHeight;
-		tHeightNext = anIndex < 5 and self["heights"][anIndex + 1] or tHeight;
-		tCountDiff = (anIndex < 5 and self["counts"][anIndex + 1] or 0) - (anIndex > 1 and self["counts"][anIndex - 1] or 0);
+		tHeightNext = anIndex < tPercentileCount and self["heights"][anIndex + 1] or tHeight;
+		tCountDiff = (anIndex < tPercentileCount and self["counts"][anIndex + 1] or 0) - (anIndex > 1 and self["counts"][anIndex - 1] or 0);
 		tPosDiff = self["positions"][anIndex] - (anIndex > 1 and self["positions"][anIndex - 1] or self["positions"][anIndex]);
-		tPosDiffNext = (anIndex < 5 and self["positions"][anIndex + 1] or self["positions"][anIndex]) - self["positions"][anIndex];
+		tPosDiffNext = (anIndex < tPercentileCount and self["positions"][anIndex + 1] or self["positions"][anIndex]) - self["positions"][anIndex];
 
 		if tCountDiff == 0 or tPosDiff == 0 or tPosDiffNext == 0 then
 			return tHeight;
@@ -59,12 +57,20 @@ function VUHDO_createPercentileTracker(aPercentiles)
 
 	end
 
+
+	local tPercentileCount;
+	local tHeight;
+	local tHeightNext;
+	local tCountDiff;
+	local tPosDiff;
 	function tPercentileTracker:linearP2(anIndex, aSign)
 
+		tPercentileCount = #self["percentiles"];
+
 		tHeight = self["heights"][anIndex];
-		tHeightNext = (anIndex + aSign >= 1 and anIndex + aSign <= 5) and self["heights"][anIndex + aSign] or tHeight;
-		tCountDiff = (anIndex + aSign >= 1 and anIndex + aSign <= 5) and self["counts"][anIndex + aSign] or self["counts"][anIndex];
-		tPosDiff = (anIndex + aSign >= 1 and anIndex + aSign <= 5) and self["positions"][anIndex + aSign] or self["positions"][anIndex];
+		tHeightNext = (anIndex + aSign >= 1 and anIndex + aSign <= tPercentileCount) and self["heights"][anIndex + aSign] or tHeight;
+		tCountDiff = (anIndex + aSign >= 1 and anIndex + aSign <= tPercentileCount) and self["counts"][anIndex + aSign] or self["counts"][anIndex];
+		tPosDiff = (anIndex + aSign >= 1 and anIndex + aSign <= tPercentileCount) and self["positions"][anIndex + aSign] or self["positions"][anIndex];
 
 		if tPosDiff == 0 then
 			return tHeight;
@@ -74,17 +80,29 @@ function VUHDO_createPercentileTracker(aPercentiles)
 
 	end
 
+
+	local tPercentileCount;
+	local tMarkerIndex;
+	local tSign;
+	local tNewHeight;
+	local tDiff;
+	local tHeight;
+	local tHeightPrev;
+	local tHeightNext;
+	local tLinearHeight;
 	function tPercentileTracker:update(aValue)
 
+		tPercentileCount = #self["percentiles"];
+
 		if not self["initialized"] then
-			if self["totalCount"] < 5 then
+			if self["totalCount"] < tPercentileCount then
 				self["markers"][self["totalCount"] + 1] = aValue;
 				self["totalCount"] = self["totalCount"] + 1;
 
-				if self["totalCount"] == 5 then
+				if self["totalCount"] == tPercentileCount then
 					table.sort(self["markers"]);
 
-					for tIndex = 1, 5 do
+					for tIndex = 1, tPercentileCount do
 						self["heights"][tIndex] = self["markers"][tIndex];
 					end
 
@@ -99,7 +117,7 @@ function VUHDO_createPercentileTracker(aPercentiles)
 
 		tMarkerIndex = 0;
 
-		for tIndex = 1, 4 do
+		for tIndex = 1, tPercentileCount - 1 do
 			if aValue < self["heights"][tIndex] then
 				tMarkerIndex = tIndex;
 				break;
@@ -107,18 +125,18 @@ function VUHDO_createPercentileTracker(aPercentiles)
 		end
 
 		if tMarkerIndex == 0 then
-			tMarkerIndex = 5;
+			tMarkerIndex = tPercentileCount;
 		end
 
-		for tIndex = tMarkerIndex, 5 do
+		for tIndex = tMarkerIndex, tPercentileCount do
 			self["counts"][tIndex] = self["counts"][tIndex] + 1;
 		end
 
-		for tIndex = 1, 5 do
+		for tIndex = 1, tPercentileCount do
 			self["desiredPositions"][tIndex] = self["desiredPositions"][tIndex] + self["percentiles"][tIndex];
 		end
 
-		for tIndex = 1, 4 do
+		for tIndex = 1, tPercentileCount - 1 do
 			tDiff = self["desiredPositions"][tIndex] - self["positions"][tIndex];
 
 			if (tDiff >= 1 and self["counts"][tIndex + 1] - self["counts"][tIndex] > 1) or
@@ -127,7 +145,7 @@ function VUHDO_createPercentileTracker(aPercentiles)
 				tNewHeight = self:parabolicP2(tIndex, tSign);
 
 				tHeightPrev = tIndex > 1 and self["heights"][tIndex - 1] or 0;
-				tHeightNext = tIndex < 5 and self["heights"][tIndex + 1] or math.huge;
+				tHeightNext = tIndex < tPercentileCount and self["heights"][tIndex + 1] or math.huge;
 				
 				if tNewHeight and tNewHeight == tNewHeight and tNewHeight ~= math.huge and tNewHeight ~= -math.huge and tHeightPrev < tNewHeight and tNewHeight < tHeightNext then
 					self["heights"][tIndex] = tNewHeight;
@@ -147,15 +165,29 @@ function VUHDO_createPercentileTracker(aPercentiles)
 
 	end
 
+
+	local tResult;
+	local tHeight;
+	local tSafeHeights;
 	function tPercentileTracker:getPercentiles()
 
+		if not tResult then
+			tResult = { };
+		else
+			twipe(tResult);
+		end
+
 		if not self["initialized"] then
-			return { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+			for tIndex = 1, #self["percentiles"] do
+				tResult["tm" .. floor(self["percentiles"][tIndex] * 100)] = 0;
+			end
+
+			return tResult;
 		end
 
 		tSafeHeights = { };
 
-		for tIndex = 1, 5 do
+		for tIndex = 1, #self["percentiles"] do
 			tHeight = self["heights"][tIndex];
 
 			if tHeight and tHeight == tHeight and tHeight ~= math.huge and tHeight ~= -math.huge then
@@ -165,13 +197,11 @@ function VUHDO_createPercentileTracker(aPercentiles)
 			end
 		end
 
-		return {
-			["tm50"] = tSafeHeights[1],
-			["tm80"] = tSafeHeights[2], 
-			["tm90"] = tSafeHeights[3],
-			["tm99"] = tSafeHeights[4],
-			["tm100"] = tSafeHeights[5],
-		};
+		for tIndex = 1, #self["percentiles"] do
+			tResult["tm" .. floor(self["percentiles"][tIndex] * 100)] = tSafeHeights[tIndex];
+		end
+
+		return tResult;
 
 	end
 
@@ -180,7 +210,7 @@ function VUHDO_createPercentileTracker(aPercentiles)
 		self["initialized"] = false;
 		self["totalCount"] = 0;
 
-		for tIndex = 1, 5 do
+		for tIndex = 1, #self["percentiles"] do
 			self["markers"][tIndex] = 0;
 			self["counts"][tIndex] = 0;
 			self["positions"][tIndex] = tIndex;
