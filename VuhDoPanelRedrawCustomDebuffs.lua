@@ -79,11 +79,14 @@ local tIcon, tCounter, tName, tTimer;
 local tIconIdx;
 local tIconName;
 local tButton;
+local tBaseScale;
 function VUHDO_initCustomDebuffs(aPanelNum)
 
 	if aPanelNum then
 		VUHDO_panelRedrawCustomDebuffsInitLocalVars(aPanelNum);
 	end
+
+	tBaseScale = VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7;
 
 	-- Wir brauchen mind. 1 für LastCustomDebuffBouquet
 	if sMaxNum == 0 then 
@@ -96,6 +99,7 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 			tButton:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tButton, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
 			VUHDO_PixelUtil.SetSize(tButton, sHeight, sHeight);
+			VUHDO_PixelUtil.SetScale(tButton, tBaseScale);
 
 			tFrame = VUHDO_getBarIconFrame(sButton, tIconIdx);
 			tFrame:ClearAllPoints();
