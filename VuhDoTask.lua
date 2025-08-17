@@ -185,10 +185,8 @@ local VUHDO_DEFERRED_TASK_STATE = {
 		["maxQueueLength"] = 0,
 		["sumQueueLength"] = 0,
 		["queueLengthSamples"] = 0,
-		["minTasksInChunk"] = 999999,
-		["maxTasksInChunk"] = 0,
-		["minChunkTimeUs"] = 999999999,
-		["maxChunkTimeUs"] = 0,
+		["tasksInChunkPercentileTracker"] = nil,
+		["chunkTimePercentileTracker"] = nil,
 		["hardStopsHit"] = 0,
 		["budgetExceededStops"] = 0,
 		["unsafeTasksProcessed"] = 0,
@@ -972,7 +970,7 @@ do
 
 	--
 	local tMetrics;
-	local function VUHDO_updateDeferredMinMaxTasksInChunk(aTasksCompletedInChunk)
+	local function VUHDO_updateDeferredTasksInChunkPercentiles(aTasksCompletedInChunk)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or not aTasksCompletedInChunk or aTasksCompletedInChunk <= 0 then
 			return;
@@ -980,8 +978,11 @@ do
 
 		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
 
-		tMetrics["minTasksInChunk"] = min(tMetrics["minTasksInChunk"], aTasksCompletedInChunk);
-		tMetrics["maxTasksInChunk"] = max(tMetrics["maxTasksInChunk"], aTasksCompletedInChunk);
+		if not tMetrics["tasksInChunkPercentileTracker"] then
+			tMetrics["tasksInChunkPercentileTracker"] = VUHDO_createPercentileTracker();
+		end
+
+		tMetrics["tasksInChunkPercentileTracker"]:update(aTasksCompletedInChunk);
 
 		return;
 
@@ -1115,8 +1116,12 @@ do
 		tMetrics["chunksExecutedSuccessfully"] = (tMetrics["chunksExecutedSuccessfully"] or 0) + 1;
 		tMetrics["totalTasksProcessedSession"] = (tMetrics["totalTasksProcessedSession"] or 0) + aNumTasksProcessed;
 		tMetrics["totalProcessingTimeUsSession"] = (tMetrics["totalProcessingTimeUsSession"] or 0) + aChunkElapsedTime;
-		tMetrics["minChunkTimeUs"] = min(tMetrics["minChunkTimeUs"] or 999999999, aChunkElapsedTime);
-		tMetrics["maxChunkTimeUs"] = max(tMetrics["maxChunkTimeUs"] or 0, aChunkElapsedTime);
+
+		if not tMetrics["chunkTimePercentileTracker"] then
+			tMetrics["chunkTimePercentileTracker"] = VUHDO_createPercentileTracker();
+		end
+
+		tMetrics["chunkTimePercentileTracker"]:update(aChunkElapsedTime);
 
 		return;
 
@@ -1631,7 +1636,7 @@ do
 		end
 
 		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tTasksCompleted > 0 then
-			VUHDO_updateDeferredMinMaxTasksInChunk(tTasksCompleted);
+			VUHDO_updateDeferredTasksInChunkPercentiles(tTasksCompleted);
 		end
 
 		return tTasksCompleted, tTaskMetricsForSnapshot;
@@ -1764,11 +1769,17 @@ do
 		tMetricsReset["sumQueueLength"] = 0;
 		tMetricsReset["queueLengthSamples"] = 0;
 
-		tMetricsReset["minTasksInChunk"] = 999999;
-		tMetricsReset["maxTasksInChunk"] = 0;
+		if tMetricsReset["tasksInChunkPercentileTracker"] then
+			tMetricsReset["tasksInChunkPercentileTracker"]:reset();
+		else
+			tMetricsReset["tasksInChunkPercentileTracker"] = nil;
+		end
 
-		tMetricsReset["minChunkTimeUs"] = 999999999;
-		tMetricsReset["maxChunkTimeUs"] = 0;
+		if tMetricsReset["chunkTimePercentileTracker"] then
+			tMetricsReset["chunkTimePercentileTracker"]:reset();
+		else
+			tMetricsReset["chunkTimePercentileTracker"] = nil;
+		end
 
 		tMetricsReset["hardStopsHit"] = 0;
 		tMetricsReset["budgetExceededStops"] = 0;
@@ -1867,6 +1878,8 @@ do
 	local tPercentileKeys;
 	local tPercentileValues;
 	local tQueuePercentileValues;
+	local tTasksPercentileValues;
+	local tTimePercentileValues;
 	function VUHDO_printDeferredTaskMetrics(anIsReset)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -1902,18 +1915,32 @@ do
 			VUHDO_Msg("  Samples: No queue length samples recorded (empty or reset).");
 		end
 
+		tPercentileFormatString, tPercentileValueString, tPercentileKeys = VUHDO_getPercentileFormatStrings();
+
 		VUHDO_Msg("|cffFFA500** Chunk Performance (for " .. (tMetrics["chunksExecutedSuccessfully"] or 0) .. " successful chunks):|r");
 
 		if (tMetrics["chunksExecutedSuccessfully"] or 0) > 0 then
-			VUHDO_Msg(format("  Tasks/Chunk: Min: %d, Max: %d, Avg: %.2f",
-				(tMetrics["minTasksInChunk"] == 999999 and 0 or (tMetrics["minTasksInChunk"] or 0)),
-				(tMetrics["maxTasksInChunk"] or 0),
-				((tMetrics["totalTasksProcessedSession"] or 0) / tMetrics["chunksExecutedSuccessfully"])));
-			VUHDO_Msg(format("  Time/Chunk: Min: %s, Max: %s, Avg: %s",
-				VUHDO_formatTime(tMetrics["minChunkTimeUs"] == 999999999 and 0 or tMetrics["minChunkTimeUs"]),
-				VUHDO_formatTime(tMetrics["maxChunkTimeUs"]),
-				VUHDO_formatTime((tMetrics["totalProcessingTimeUsSession"] or 0) / tMetrics["chunksExecutedSuccessfully"])
-			));
+			tTrimmedMeans = tMetrics["tasksInChunkPercentileTracker"] and tMetrics["tasksInChunkPercentileTracker"]:getPercentiles() or VUHDO_getDefaultPercentileFallback();
+			tTasksPercentileValues = { };
+
+			for tIndex = 1, #tPercentileKeys do
+				tKey = tPercentileKeys[tIndex];
+				tTasksPercentileValues[tIndex] = tostring(tTrimmedMeans[tKey] or 0);
+			end
+
+			VUHDO_Msg(format("  Tasks/Chunk: " .. tPercentileValueString,
+				unpack(tTasksPercentileValues)));
+
+			tTrimmedMeans = tMetrics["chunkTimePercentileTracker"] and tMetrics["chunkTimePercentileTracker"]:getPercentiles() or VUHDO_getDefaultPercentileFallback();
+			tTimePercentileValues = { };
+
+			for tIndex = 1, #tPercentileKeys do
+				tKey = tPercentileKeys[tIndex];
+				tTimePercentileValues[tIndex] = VUHDO_formatTime(tTrimmedMeans[tKey] or 0) or "0 us";
+			end
+
+			VUHDO_Msg(format("  Time/Chunk: " .. tPercentileValueString,
+				unpack(tTimePercentileValues)));
 		else
 			VUHDO_Msg("  No chunks processed tasks or metrics reset.");
 		end
@@ -1931,8 +1958,6 @@ do
 			VUHDO_Msg(format("|cffFFA500** Task Throughput:|r %.2f tasks/sec (%.2f tasks/100ms)",
 				tTasksPerSecond, tTasksPerCentumMs));
 		end
-
-		tPercentileFormatString, tPercentileValueString, tPercentileKeys = VUHDO_getPercentileFormatStrings();
 
 		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, " .. tPercentileFormatString .. " [Args]): **|r");
 		VUHDO_Msg("|cffFFA500** Queue Time Statistics (Total Queue Time, Avg Queue Time per Task): **|r");
