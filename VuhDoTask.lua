@@ -22,7 +22,6 @@ local InCombatLockdown = InCombatLockdown;
 
 
 
-
 VUHDO_DEFERRED_TASK_PRIORITY_LOW = 1;
 VUHDO_DEFERRED_TASK_PRIORITY_NORMAL = 2;
 VUHDO_DEFERRED_TASK_PRIORITY_HIGH = 3;
@@ -209,6 +208,7 @@ local VUHDO_DEFERRED_TASK_STATE = {
 
 local VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS = {
 	-- {
+	-- {
 	--	["totalChunkTimeUs" = <total time>,
 	--	["numTasksInChunk"] = <total tasks>,
 	--	["tasks"] = {
@@ -228,6 +228,82 @@ local VUHDO_DEFERRED_TASK_POOL_MAX_SIZE = 1500;
 
 local VUHDO_TASK_PRIORITY_QUEUE = { };
 local VUHDO_TASK_QUEUE_MAP = { };
+
+
+
+--
+local tDefaultPercentiles;
+local tDefaultPercentileKeys;
+local tDefaultFallbackTable;
+local tPercentile;
+local tKey;
+local tCopy;
+function VUHDO_getDefaultPercentileFallback()
+
+	if not tDefaultFallbackTable then
+		tDefaultPercentiles = { 0.5, 0.8, 0.9, 0.99, 1.0 };
+
+		tDefaultPercentileKeys = { };
+		tDefaultFallbackTable = { };
+
+		for tIndex = 1, #tDefaultPercentiles do
+			tPercentile = tDefaultPercentiles[tIndex];
+			tKey = "tm" .. floor(tPercentile * 100);
+
+			tDefaultPercentileKeys[tIndex] = tKey;
+			tDefaultFallbackTable[tKey] = 0;
+		end
+	end
+
+	tCopy = { };
+
+	for tKey, tValue in pairs(tDefaultFallbackTable) do
+		tCopy[tKey] = tValue;
+	end
+
+	return tCopy;
+
+end
+
+
+
+--
+local tPercentileKeys;
+local tPercentileFormatString;
+local tPercentileValueString;
+local tKey;
+function VUHDO_getPercentileFormatStrings()
+
+	if not tPercentileFormatString then
+		tPercentileKeys = { };
+
+		tDefaultFallbackTable = VUHDO_getDefaultPercentileFallback();
+
+		for tKey in pairs(tDefaultFallbackTable) do
+			tinsert(tPercentileKeys, tKey);
+		end
+
+		VUHDO_sortPercentileKeys(tPercentileKeys);
+
+		tPercentileFormatString = "";
+		tPercentileValueString = "";
+
+		for tIndex = 1, #tPercentileKeys do
+			tKey = tPercentileKeys[tIndex];
+
+			if tIndex > 1 then
+				tPercentileFormatString = tPercentileFormatString .. ", ";
+				tPercentileValueString = tPercentileValueString .. ", ";
+			end
+
+			tPercentileFormatString = tPercentileFormatString .. tKey;
+			tPercentileValueString = tPercentileValueString .. tKey .. ": %s";
+		end
+	end
+
+	return tPercentileFormatString, tPercentileValueString, tPercentileKeys;
+
+end
 
 
 
@@ -741,7 +817,7 @@ do
 	local tTaskTypes;
 	local function VUHDO_addChunkSnapshot(aTotalChunkTimeUs, aNumTasksInChunk, aTasksDetailTable)
 
-		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or aTotalChunkTimeUs < (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or 2000) then
+		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or aTotalChunkTimeUs < (VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"] or 50000) then
 			return;
 		end
 
@@ -982,7 +1058,7 @@ do
 			tQueueTrimmedMeans = tMetrics["queueTimePercentileTrackerByType"][aTaskType]:getPercentiles();
 
 			if not tQueueTrimmedMeans then
-				tQueueTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+				tQueueTrimmedMeans = VUHDO_getDefaultPercentileFallback();
 			end
 
 			tMetrics["queueTimeTrimmedMeansByType"][aTaskType] = tQueueTrimmedMeans;
@@ -1006,7 +1082,7 @@ do
 		tTaskTrimmedMeans = tMetrics["taskDurationPercentileTrackerByType"][aTaskType]:getPercentiles();
 
 		if not tTaskTrimmedMeans then
-			tTaskTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+			tTaskTrimmedMeans = VUHDO_getDefaultPercentileFallback();
 		end
 
 		tMetrics["taskDurationTrimmedMeansByType"][aTaskType] = tTaskTrimmedMeans;
@@ -1427,13 +1503,9 @@ do
 	local tTaskDurationUs;
 	local tCurrentQueueLen;
 	local tTaskMetricsForSnapshot = { };
-	local tSuccess;
-	local tResult;
 	local tArgsSummary;
 	local tQueueTimeUs;
 	local tAdjustedBudgetUs;
-	local tOldestQueueTimeUs;
-	local tBudgetMultiplier;
 	local tShouldProcessTask;
 	local tPredictionError;
 	local tPredictionAccuracy;
@@ -1454,7 +1526,7 @@ do
 		tTasksCompleted = 0;
 		tHardStopTime = (debugprofilestop() * 1000) + tTaskConfig["MAX_EXEC_TIME_US"] + 100;
 
-		tAdjustedBudgetUs, tOldestQueueTimeUs, tBudgetMultiplier = VUHDO_calculateQueueTimeAdjustedBudget(tTaskConfig["TARGET_EXEC_TIME_US"]);
+		tAdjustedBudgetUs, _, _ = VUHDO_calculateQueueTimeAdjustedBudget(tTaskConfig["TARGET_EXEC_TIME_US"]);
 		tBudgetRemainingUs = tAdjustedBudgetUs;
 
 		tDefaultEstimatedCostPerTask = (tTaskConfig["TARGET_EXEC_TIME_US"] / max(1, tTaskConfig["MAX_TASKS_PER_FRAME"])) * 1.2;
@@ -1484,7 +1556,7 @@ do
 				tTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
 
 				if tTask["delegate"] and tTaskType then
-					tSuccess, tResult, tTaskDurationUs = VUHDO_executeSingleTask(tTask);
+					_, _, tTaskDurationUs = VUHDO_executeSingleTask(tTask);
 
 					if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 						tArgsSummary = "";
@@ -1755,8 +1827,6 @@ do
 			tMetricsReset["queueTimePercentileTrackerByType"] = { };
 		end
 
-
-
 		twipe(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS);
 
 		if VUHDO_DEFERRED_TASK_POOL and VUHDO_DEFERRED_TASK_POOL.resetMetrics then
@@ -1770,18 +1840,6 @@ do
 		return;
 
 	end
-
-
-
-
-
-
-
-	--
-	local tMetrics;
-	local tTaskType;
-	local tTaskHistory;
-
 
 
 
@@ -1803,6 +1861,12 @@ do
 	local tTotalQueueTimeUsForType;
 	local tQueueTimeTrimmedMeans;
 	local tAccuracy;
+	local tKey;
+	local tPercentileFormatString;
+	local tPercentileValueString;
+	local tPercentileKeys;
+	local tPercentileValues;
+	local tQueuePercentileValues;
 	function VUHDO_printDeferredTaskMetrics(anIsReset)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -1868,7 +1932,9 @@ do
 				tTasksPerSecond, tTasksPerCentumMs));
 		end
 
-		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, tm50, tm80, tm90, tm99, tm100 [Args]): **|r");
+		tPercentileFormatString, tPercentileValueString, tPercentileKeys = VUHDO_getPercentileFormatStrings();
+
+		VUHDO_Msg("|cffFFA500** Per-Task Type (Enqueued, Processed, " .. tPercentileFormatString .. " [Args]): **|r");
 		VUHDO_Msg("|cffFFA500** Queue Time Statistics (Total Queue Time, Avg Queue Time per Task): **|r");
 		VUHDO_Msg("|cffFFA500** Cost Prediction Accuracy (Predicted vs Actual): **|r");
 
@@ -1887,34 +1953,80 @@ do
 				tTrimmedMeans = tMetrics["taskDurationTrimmedMeansByType"][tTaskType];
 
 				if not tTrimmedMeans then
-					tTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+					tTrimmedMeans = VUHDO_getDefaultPercentileFallback();
 				end
 
-				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, tm50=%s, tm80=%s, tm90=%s, tm99=%s, tm100=%s [%s]",
-					tostring(tTaskType), tEnqueued, tProcessed,
-					VUHDO_formatTime(tTrimmedMeans["tm50"]), VUHDO_formatTime(tTrimmedMeans["tm80"]), 
-					VUHDO_formatTime(tTrimmedMeans["tm90"]), VUHDO_formatTime(tTrimmedMeans["tm99"]), 
-					VUHDO_formatTime(tTrimmedMeans["tm100"]),
-					tMaxTaskContextArgs
+				tPercentileValues = { };
+
+				if tTrimmedMeans then
+					for tIndex = 1, #tPercentileKeys do
+						tKey = tPercentileKeys[tIndex];
+
+						tPercentileValues[tIndex] = VUHDO_formatTime(tTrimmedMeans[tKey] or 0) or "0 us";
+					end
+				else
+					for tIndex = 1, #tPercentileKeys do
+						tPercentileValues[tIndex] = "0 us";
+					end
+				end
+
+				local tArgs = { tostring(tTaskType), tEnqueued, tProcessed };
+
+				for tIndex = 1, #tPercentileValues do
+					tinsert(tArgs, tPercentileValues[tIndex]);
+				end
+
+				tinsert(tArgs, tMaxTaskContextArgs);
+
+				VUHDO_Msg(format("  Type[%s]: E=%d, P=%d, " .. tPercentileValueString .. " [%s]",
+					unpack(tArgs)
 				));
 
 				tQueueTimeTrimmedMeans = tMetrics["queueTimeTrimmedMeansByType"][tTaskType];
 
 				if not tQueueTimeTrimmedMeans then
-					tQueueTimeTrimmedMeans = { ["tm50"] = 0, ["tm80"] = 0, ["tm90"] = 0, ["tm99"] = 0, ["tm100"] = 0, };
+					tQueueTimeTrimmedMeans = VUHDO_getDefaultPercentileFallback();
 				end
 
-				VUHDO_Msg(format("    Queue: Total=%s, tm50=%s, tm80=%s, tm90=%s, tm99=%s, tm100=%s",
-					VUHDO_formatTime(tTotalQueueTimeUsForType),
-					VUHDO_formatTime(tQueueTimeTrimmedMeans["tm50"]), VUHDO_formatTime(tQueueTimeTrimmedMeans["tm80"]),
-					VUHDO_formatTime(tQueueTimeTrimmedMeans["tm90"]), VUHDO_formatTime(tQueueTimeTrimmedMeans["tm99"]),
-					VUHDO_formatTime(tQueueTimeTrimmedMeans["tm100"])));
+				tQueuePercentileValues = { };
+
+				for tIndex = 1, #tPercentileKeys do
+					tQueuePercentileValues[tIndex] = "0 us";
+				end
+
+				if tQueueTimeTrimmedMeans then
+					for tIndex = 1, #tPercentileKeys do
+						tKey = tPercentileKeys[tIndex];
+
+						if tQueueTimeTrimmedMeans[tKey] then
+							tQueuePercentileValues[tIndex] = VUHDO_formatTime(tQueueTimeTrimmedMeans[tKey]) or "0 us";
+						end
+					end
+				end
+
+				if not tQueuePercentileValues or #tQueuePercentileValues == 0 then
+					tQueuePercentileValues = { };
+
+					for tIndex = 1, #tPercentileKeys do
+						tQueuePercentileValues[tIndex] = "0 us";
+					end
+				end
+
+				local tQueueArgs = { VUHDO_formatTime(tTotalQueueTimeUsForType) };
+
+				for tIndex = 1, #tQueuePercentileValues do
+					tinsert(tQueueArgs, tQueuePercentileValues[tIndex]);
+				end
+
+				VUHDO_Msg(format("    Queue: Total=%s, " .. tPercentileValueString,
+					unpack(tQueueArgs)));
 
 				tAccuracy = VUHDO_DEFERRED_TASK_STATE["costPredictionAccuracy"] and VUHDO_DEFERRED_TASK_STATE["costPredictionAccuracy"][tTaskType];
 
 				if tAccuracy and tAccuracy["count"] > 0 then
 					VUHDO_Msg(format("    Cost: Accuracy=%.1f%%, Samples=%d, Avg Cost=%s",
-						tAccuracy["accuracy"] * 100, tAccuracy["count"], VUHDO_formatTime(VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"] and VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"][tTaskType] or 0)));
+						tAccuracy["accuracy"] * 100, tAccuracy["count"],
+						VUHDO_formatTime(VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"] and VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"][tTaskType] or 0)));
 				else
 					VUHDO_Msg("    Cost Prediction: No data available");
 				end
@@ -2046,7 +2158,6 @@ end
 
 --
 local tSuccess;
-local tResult;
 local tIterationCount;
 local tTotalTasksProcessed;
 local tCurrentTask;
@@ -2078,7 +2189,7 @@ function VUHDO_processCombatUnsafeTasksBeforeLockdown()
 		end
 
 		for _, tTask in ipairs(tCombatUnsafeTasks) do
-			tSuccess, tResult = VUHDO_executeSingleTask(tTask);
+			tSuccess, _ = VUHDO_executeSingleTask(tTask);
 
 			if tSuccess then
 				tTasksProcessedThisIteration = tTasksProcessedThisIteration + 1;
