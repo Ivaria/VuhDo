@@ -141,25 +141,29 @@ local VUHDO_DEFERRED_TASK_CONFIG = {
 };
 
 local VUHDO_TASK_TYPE_DEFAULT_COSTS = {
-	[1] = 159,    -- tm50=78μs, tm80=120μs → 159μs estimate
-	[2] = 99,     -- tm50=64μs, tm80=89μs → 99μs estimate
-	[6] = 20,     -- tm50=8μs, tm80=22μs → 20μs estimate
-	[7] = 46,     -- tm50=35μs, tm80=46μs → 46μs estimate
-	[8] = 3790,   -- tm50=3.79ms, tm80=4.41ms → 3790μs estimate
-	[9] = 14,     -- tm50=14μs, tm80=39μs → 14μs estimate
-	[10] = 5,     -- tm50=5μs, tm80=22μs → 5μs estimate
-	[11] = 1,     -- tm50=1μs, tm80=2μs → 1μs estimate
-	[12] = 4,     -- tm50=4μs, tm80=4μs → 4μs estimate
-	[13] = 6,     -- tm50=6μs, tm80=8μs → 6μs estimate
-	[17] = 2,     -- tm50=2μs, tm80=5μs → 2μs estimate
-	[18] = 1110,  -- tm50=1.11ms, tm80=1.23ms → 1110μs estimate
-	[19] = 108,   -- tm50=108μs, tm80=341μs → 108μs estimate
-	[21] = 622,   -- tm50=622μs, tm80=763μs → 622μs estimate
-	[22] = 6850,  -- tm50=6.85ms, tm80=7.25ms → 6850μs estimate
-	[23] = 470,   -- tm50=470μs, tm80=1.02ms → 470μs estimate
-	[24] = 13,    -- tm50=13μs, tm80=20μs → 13μs estimate
-	[26] = 400,   -- tm50=195μs, tm80=398μs → 400μs estimate
-	[27] = 10500, -- tm50=10.50ms, tm80=15.99ms → 10500μs estimate
+	[1] = 130,    -- tm50=105μs, tm80=154μs → 130μs estimate (avg of tm50+tm80)
+	[2] = 96,     -- tm50=85μs, tm80=106μs → 96μs estimate
+	[3] = 177,    -- tm50=177μs, tm80=177μs → 177μs estimate
+	[4] = 51,     -- tm50=42μs, tm80=60μs → 51μs estimate
+	[5] = 36,     -- tm50=30μs, tm80=41μs → 36μs estimate
+	[6] = 22,     -- tm50=9μs, tm80=34μs → 22μs estimate
+	[7] = 45,     -- tm50=35μs, tm80=55μs → 45μs estimate
+	[8] = 674,    -- tm50=674μs, tm80=674μs → 674μs estimate
+	[9] = 17,     -- tm50=14μs, tm80=19μs → 17μs estimate
+	[10] = 17,    -- tm50=10μs, tm80=23μs → 17μs estimate
+	[11] = 2,     -- tm50=1μs, tm80=2μs → 2μs estimate
+	[12] = 7,     -- tm50=6μs, tm80=8μs → 7μs estimate
+	[13] = 17,    -- tm50=6μs, tm80=27μs → 17μs estimate
+	[17] = 2,     -- tm50=2μs, tm80=2μs → 2μs estimate
+	[18] = 215,   -- tm50=215μs, tm80=215μs → 215μs estimate
+	[19] = 33,    -- tm50=33μs, tm80=33μs → 33μs estimate
+	[21] = 660,   -- tm50=613μs, tm80=706μs → 660μs estimate
+	[22] = 1375,  -- tm50=1.29ms, tm80=1.46ms → 1375μs estimate
+	[23] = 450,   -- tm50=366μs, tm80=533μs → 450μs estimate
+	[24] = 74,    -- tm50=47μs, tm80=100μs → 74μs estimate
+	[25] = 205,   -- tm50=180μs, tm80=230μs → 205μs estimate
+	[26] = 181,   -- tm50=136μs, tm80=225μs → 181μs estimate
+	[27] = 6200,  -- tm50=4.26ms, tm80=8.13ms → 6200μs estimate
 };
 
 local VUHDO_DEFERRED_TASK_STATE = {
