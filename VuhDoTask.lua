@@ -233,181 +233,185 @@ local VUHDO_TASK_QUEUE_MAP = { };
 
 
 
---
-local tDefaultPercentiles;
-local tDefaultPercentileKeys;
-local tDefaultFallbackTable;
-local tPercentile;
-local tKey;
-local tCopy;
-function VUHDO_getDefaultPercentileFallback()
+do
+	--
+	local tDefaultPercentiles;
+	local tDefaultPercentileKeys;
+	local tDefaultFallbackTable;
+	local tPercentile;
+	local tKey;
+	local tCopy;
+	function VUHDO_getDefaultPercentileFallback()
 
-	if not tDefaultFallbackTable then
-		tDefaultPercentiles = { 0.5, 0.8, 0.9, 0.99, 1.0 };
+		if not tDefaultFallbackTable then
+			tDefaultPercentiles = { 0.5, 0.8, 0.9, 0.99, 1.0 };
 
-		tDefaultPercentileKeys = { };
-		tDefaultFallbackTable = { };
+			tDefaultPercentileKeys = { };
+			tDefaultFallbackTable = { };
 
-		for tIndex = 1, #tDefaultPercentiles do
-			tPercentile = tDefaultPercentiles[tIndex];
-			tKey = "tm" .. floor(tPercentile * 100);
+			for tIndex = 1, #tDefaultPercentiles do
+				tPercentile = tDefaultPercentiles[tIndex];
+				tKey = "tm" .. floor(tPercentile * 100);
 
-			tDefaultPercentileKeys[tIndex] = tKey;
-			tDefaultFallbackTable[tKey] = 0;
-		end
-	end
-
-	tCopy = { };
-
-	for tKey, tValue in pairs(tDefaultFallbackTable) do
-		tCopy[tKey] = tValue;
-	end
-
-	return tCopy;
-
-end
-
-
-
---
-local tPercentileKeys;
-local tPercentileFormatString;
-local tPercentileValueString;
-local tKey;
-function VUHDO_getPercentileFormatStrings()
-
-	if not tPercentileFormatString then
-		tPercentileKeys = { };
-
-		tDefaultFallbackTable = VUHDO_getDefaultPercentileFallback();
-
-		for tKey in pairs(tDefaultFallbackTable) do
-			tinsert(tPercentileKeys, tKey);
-		end
-
-		VUHDO_sortPercentileKeys(tPercentileKeys);
-
-		tPercentileFormatString = "";
-		tPercentileValueString = "";
-
-		for tIndex = 1, #tPercentileKeys do
-			tKey = tPercentileKeys[tIndex];
-
-			if tIndex > 1 then
-				tPercentileFormatString = tPercentileFormatString .. ", ";
-				tPercentileValueString = tPercentileValueString .. ", ";
-			end
-
-			tPercentileFormatString = tPercentileFormatString .. tKey;
-			tPercentileValueString = tPercentileValueString .. tKey .. ": %s";
-		end
-	end
-
-	return tPercentileFormatString, tPercentileValueString, tPercentileKeys;
-
-end
-
-
-
---
-local tOldestQueueTimeUs;
-local tCurrentTime;
-local tTask;
-local tQueueTimeUs;
-function VUHDO_getOldestTaskQueueTime()
-
-	tOldestQueueTimeUs = 0;
-	tCurrentTime = GetTime();
-
-	for tIndex = 1, #VUHDO_TASK_PRIORITY_QUEUE do
-		tTask = VUHDO_TASK_PRIORITY_QUEUE[tIndex];
-
-		if tTask and tTask["enqueueTime"] then
-			tQueueTimeUs = (tCurrentTime - tTask["enqueueTime"]) * 1000000;
-
-			if tQueueTimeUs > tOldestQueueTimeUs then
-				tOldestQueueTimeUs = tQueueTimeUs;
+				tDefaultPercentileKeys[tIndex] = tKey;
+				tDefaultFallbackTable[tKey] = 0;
 			end
 		end
+
+		tCopy = { };
+
+		for tKey, tValue in pairs(tDefaultFallbackTable) do
+			tCopy[tKey] = tValue;
+		end
+
+		return tCopy;
+
 	end
 
-	return tOldestQueueTimeUs;
 
+
+	--
+	local tPercentileKeys;
+	local tPercentileFormatString;
+	local tPercentileValueString;
+	local tKey;
+	function VUHDO_getPercentileFormatStrings()
+
+		if not tPercentileFormatString then
+			tPercentileKeys = { };
+
+			tDefaultFallbackTable = VUHDO_getDefaultPercentileFallback();
+
+			for tKey in pairs(tDefaultFallbackTable) do
+				tinsert(tPercentileKeys, tKey);
+			end
+
+			VUHDO_sortPercentileKeys(tPercentileKeys);
+
+			tPercentileFormatString = "";
+			tPercentileValueString = "";
+
+			for tIndex = 1, #tPercentileKeys do
+				tKey = tPercentileKeys[tIndex];
+
+				if tIndex > 1 then
+					tPercentileFormatString = tPercentileFormatString .. ", ";
+					tPercentileValueString = tPercentileValueString .. ", ";
+				end
+
+				tPercentileFormatString = tPercentileFormatString .. tKey;
+				tPercentileValueString = tPercentileValueString .. tKey .. ": %s";
+			end
+		end
+
+		return tPercentileFormatString, tPercentileValueString, tPercentileKeys;
+
+	end
 end
 
 
 
---
-local tGroupSizeMultiplier;
-function VUHDO_getGroupSizeBasedMultiplier()
+do
+	--
+	local tOldestQueueTimeUs;
+	local tCurrentTime;
+	local tTask;
+	local tQueueTimeUs;
+	function VUHDO_getOldestTaskQueueTime()
 
-	tGroupSizeMultiplier = 1.0;
-	tGroupSize = GetNumGroupMembers();
+		tOldestQueueTimeUs = 0;
+		tCurrentTime = GetTime();
 
-	if tGroupSize > 20 then
-		tGroupSizeMultiplier = 2.0;  -- 40-man raids: double the budget
-	elseif tGroupSize > 10 then
-		tGroupSizeMultiplier = 1.5;  -- 20-man raids: 1.5x budget
-	elseif tGroupSize > 5 then
-		tGroupSizeMultiplier = 1.25; -- 10-man raids: 1.25x budget
-	else
-		tGroupSizeMultiplier = 1.0;  -- solo/5-man: normal budget
+		for tIndex = 1, #VUHDO_TASK_PRIORITY_QUEUE do
+			tTask = VUHDO_TASK_PRIORITY_QUEUE[tIndex];
+
+			if tTask and tTask["enqueueTime"] then
+				tQueueTimeUs = (tCurrentTime - tTask["enqueueTime"]) * 1000000;
+
+				if tQueueTimeUs > tOldestQueueTimeUs then
+					tOldestQueueTimeUs = tQueueTimeUs;
+				end
+			end
+		end
+
+		return tOldestQueueTimeUs;
+
 	end
 
-	return tGroupSizeMultiplier;
-
-end
 
 
+	--
+	local tGroupSizeMultiplier;
+	function VUHDO_getGroupSizeBasedMultiplier()
 
---
-local tOldestQueueTimeUs;
-local tBaseBudgetUs;
-local tBudgetMultiplier;
-local tAdjustedBudgetUs;
-local tQueueLengthMultiplier;
-local tCurrentQueueLength;
-local tCurrentHardCap;
-local tAvailableBudget;
-function VUHDO_calculateQueueTimeAdjustedBudget(aBaseBudgetUs)
+		tGroupSizeMultiplier = 1.0;
+		tGroupSize = GetNumGroupMembers();
 
-	tOldestQueueTimeUs = VUHDO_getOldestTaskQueueTime();
+		if tGroupSize > 20 then
+			tGroupSizeMultiplier = 2.0;  -- 40-man raids: double the budget
+		elseif tGroupSize > 10 then
+			tGroupSizeMultiplier = 1.5;  -- 20-man raids: 1.5x budget
+		elseif tGroupSize > 5 then
+			tGroupSizeMultiplier = 1.25; -- 10-man raids: 1.25x budget
+		else
+			tGroupSizeMultiplier = 1.0;  -- solo/5-man: normal budget
+		end
 
-	tBaseBudgetUs = aBaseBudgetUs;
-	tBudgetMultiplier = 1.0;
-	tQueueLengthMultiplier = 1.0;
+		return tGroupSizeMultiplier;
 
-	tGroupSizeMultiplier = VUHDO_getGroupSizeBasedMultiplier();
-
-	if tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["HIGH"] then
-		tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["HIGH"];
-	elseif tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["MEDIUM"] then
-		tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["MEDIUM"];
-	elseif tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["LOW"] then
-		tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["LOW"];
 	end
 
-	tCurrentQueueLength = #VUHDO_TASK_PRIORITY_QUEUE;
 
-	if tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["HIGH"] then
-		tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["HIGH"];
-	elseif tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["MEDIUM"] then
-		tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["MEDIUM"];
-	elseif tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["LOW"] then
-		tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["LOW"];
+
+	--
+	local tOldestQueueTimeUs;
+	local tBaseBudgetUs;
+	local tBudgetMultiplier;
+	local tAdjustedBudgetUs;
+	local tQueueLengthMultiplier;
+	local tCurrentQueueLength;
+	local tCurrentHardCap;
+	local tAvailableBudget;
+	function VUHDO_calculateQueueTimeAdjustedBudget(aBaseBudgetUs)
+
+		tOldestQueueTimeUs = VUHDO_getOldestTaskQueueTime();
+
+		tBaseBudgetUs = aBaseBudgetUs;
+		tBudgetMultiplier = 1.0;
+		tQueueLengthMultiplier = 1.0;
+
+		tGroupSizeMultiplier = VUHDO_getGroupSizeBasedMultiplier();
+
+		if tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["HIGH"] then
+			tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["HIGH"];
+		elseif tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["MEDIUM"] then
+			tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["MEDIUM"];
+		elseif tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["LOW"] then
+			tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["LOW"];
+		end
+
+		tCurrentQueueLength = #VUHDO_TASK_PRIORITY_QUEUE;
+
+		if tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["HIGH"] then
+			tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["HIGH"];
+		elseif tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["MEDIUM"] then
+			tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["MEDIUM"];
+		elseif tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["LOW"] then
+			tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["LOW"];
+		end
+
+		tAdjustedBudgetUs = tBaseBudgetUs * tBudgetMultiplier * tQueueLengthMultiplier * tGroupSizeMultiplier;
+
+		tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
+		tAvailableBudget = tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION;
+
+		if tAdjustedBudgetUs > tAvailableBudget then
+			tAdjustedBudgetUs = tAvailableBudget;
+		end
+
+		return tAdjustedBudgetUs, tOldestQueueTimeUs, tBudgetMultiplier;
+
 	end
-
-	tAdjustedBudgetUs = tBaseBudgetUs * tBudgetMultiplier * tQueueLengthMultiplier * tGroupSizeMultiplier;
-
-	tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
-	tAvailableBudget = tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION;
-
-	if tAdjustedBudgetUs > tAvailableBudget then
-		tAdjustedBudgetUs = tAvailableBudget;
-	end
-
-	return tAdjustedBudgetUs, tOldestQueueTimeUs, tBudgetMultiplier;
-
 end
 
 
