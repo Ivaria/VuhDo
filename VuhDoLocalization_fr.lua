@@ -138,6 +138,7 @@ VUHDO_I18N_BUFFC_SHOUT = "Cri";
 VUHDO_I18N_BUFFC_ASPECT = "Aspect";
 -- Monk
 VUHDO_I18N_BUFFC_STANCE = "Stance";
+
 -- Key Binding Headers/Names
 -- @EXACT = false
 BINDING_HEADER_VUHDO_TITLE = "VuhDo - Raid Frames";
@@ -354,13 +355,17 @@ VUHDO_I18N_MACRO = "Macro";
 VUHDO_I18N_ITEM = "Objet";
 -- 2.75
 VUHDO_I18N_ERR_NO_BOUQUET = "\"%s\" essaie de se lier au bouquet \"%s\" qui n'existe pas !";
+
 VUHDO_I18N_BOUQUET_HEALTH_BELOW_ABS = "Drapeau : Sant\195\169 < k";
 VUHDO_I18N_BOUQUET_HEALTH_ABOVE_ABS = "Drapeau : Sant\195\169 > k";
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST = "La disposition de sort \"%s\" n'existe pas.";
+
 --VUHDO_I18N_ADDON_WARNING = "AVERTISSEMENT : L'addon |cffffffff\"%s\"|r est activ\195\169 avec VuhDo, ce qui peut \195\170tre probl\195\169matique. Raison : %s";
 --VUHDO_I18N_MAY_CAUSE_LAGS = "Peut causer des lags s\195\169v\195\168res.";
+
 VUHDO_I18N_DISABLE_BY_MIN_VERSION = "!!! VUHDO EST D\195\137SACTIV\195\137 !!! Cette version (%s) est pour les versions de client %d et sup\195\169rieures seulement !!!"
 VUHDO_I18N_DISABLE_BY_MAX_VERSION = "!!! VUHDO EST D\195\137SACTIV\195\137 !!! Cette version (%s) est pour les versions de client %d et inf\195\169rieures seulement !!!"
+
 VUHDO_I18N_BOUQUET_STATUS_ALTERNATE_POWERS = "Barre d'\195\169tat : Puissance alternative %"
 VUHDO_I18N_BOUQUET_ALTERNATE_POWERS_ABOVE = "Drapeau : Puissance alternative > %";
 VUHDO_I18N_DEF_ALTERNATE_POWERS = "Pouvoirs alternatifs";
@@ -371,7 +376,9 @@ VUHDO_I18N_CUSTOM_ICON_ONE_THIRD = "Tiers : Un";
 VUHDO_I18N_CUSTOM_ICON_TWO_THIRDS = "Tiers : Deux";
 VUHDO_I18N_CUSTOM_ICON_THREE_THIRDS = "Tiers : Trois";
 VUHDO_I18N_DEF_ROLE_ICON = "Ic\195\180ne de r\195\180le";
+
 VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH = "Sant\195\169 (g\195\169n\195\169rique, cible)";
+
 VUHDO_I18N_TAPPED_COLOR = "Drapeau : Cible d\195\169j\195\160 engag\195\169e";
 VUHDO_I18N_ENEMY_STATE_COLOR = "Couleur : Ami/Ennemi";
 VUHDO_I18N_FRIEND_STATUS = "Drapeau : Ami";
@@ -380,40 +387,50 @@ VUHDO_I18N_BOUQUET_STATUS_ALWAYS_FULL = "Barre d'\195\169tat : toujours pleine";
 VUHDO_I18N_BOUQUET_STATUS_FULL_IF_ACTIVE = "Barre d'\195\169tat : pleine si active";
 VUHDO_I18N_AOE_ADVICE = "Ic\195\180ne : Conseil de zone";
 VUHDO_I18N_DEF_AOE_ADVICE = "Conseil de zone";
+
 VUHDO_I18N_BOUQUET_DURATION_ABOVE = "Drapeau : Dur\195\169e > sec";
 VUHDO_I18N_BOUQUET_DURATION_BELOW = "Drapeau : Dur\195\169e < sec";
 VUHDO_I18N_DEF_WRACK = "Sinestra : Tourment";
+
 VUHDO_I18N_DEF_DIRECTION_ARROW = "Fl\195\168che directionnelle";
 VUHDO_I18N_BOUQUET_DIRECTION_ARROW = "Fl\195\168che directionnelle";
 VUHDO_I18N_DEF_RAID_LEADER = "Ic\195\180ne : Chef de raid";
 VUHDO_I18N_DEF_RAID_ASSIST = "Ic\195\180ne : Assistant de raid";
 VUHDO_I18N_DEF_MASTER_LOOTER = "Ic\195\180ne : Ma\195\174tre du butin";
 VUHDO_I18N_DEF_PVP_STATUS = "Ic\195\180ne : Statut JcJ";
+
 VUHDO_I18N_GRID_MOUSEOVER_SINGLE = "Grille : Survol de souris unique";
 VUHDO_I18N_GRID_BACKGROUND_BAR = "Grille : Barre d'arri\195\168re-plan";
 VUHDO_I18N_DEF_BIT_O_GRID = "Bit'o'Grid";
 VUHDO_I18N_DEF_VUHDO_ESQUE = "Vuhdo'esque";
+
 VUHDO_I18N_DEF_ROLE_COLOR = "Couleur de r\195\180le";
 VUHDO_I18N_BOUQUET_ROLE_TANK = "Drapeau : R\195\180le Tank";
 VUHDO_I18N_BOUQUET_ROLE_DAMAGE = "Drapeau : R\195\180le D\195\169g\195\162ts";
 VUHDO_I18N_BOUQUET_ROLE_HEALER = "Drapeau : R\195\180le Soigneur";
+
 VUHDO_I18N_BOUQUET_STACKS = "Drapeau : Cumuls >";
 VUHDO_I18N_DEF_PLAYER_CHI = "\195\130nergie du joueur";
+
 VUHDO_I18N_BOUQUET_TARGET_RAID_ICON = "Ic\195\180ne : Symbole de raid de la cible";
 VUHDO_I18N_BOUQUET_OWN_CHI_EQUALS = "Drapeau : \195\130nergie personnelle ==";
 VUHDO_I18N_CUSTOM_ICON_FOUR_THIRDS = "Tiers : Quatre";
 VUHDO_I18N_CUSTOM_ICON_FIVE_THIRDS = "Tiers : Cinq";
 VUHDO_I18N_DEF_RAID_CDS = "Temps de recharge de raid";
 VUHDO_I18N_BOUQUET_STATUS_CLASS_COLOR_IF_ACTIVE = "Drapeau : Couleur de classe si actif";
+
 VUHDO_I18N_LETHAL_POISONS = "Poisons l\195\169taux";
 VUHDO_I18N_NON_LETHAL_POISONS = "Poisons non l\195\169taux";
 VUHDO_I18N_DEF_COUNTER_SHIELD_ABSORB = "Compteur : Toute absorption de bouclier #k";
 VUHDO_I18N_BUFFC_WEAPON_ENCHANT_OFF = "Enchantement d'arme (main gauche)";
+
 VUHDO_I18N_DEF_PVP_FLAGS = "Porteurs de drapeaux JcJ";
 VUHDO_I18N_DEF_STATUS_SHIELD = "Barre d'\195\169tat : Bouclier";
+
 VUHDO_I18N_TARGET = "Cible";
 VUHDO_I18N_FOCUS = "Focus";
 VUHDO_I18N_DEF_STATUS_OVERSHIELDED = "Barre d'\195\169tat : Sur-bouclier";
+
 -- 3.65
 VUHDO_I18N_BOUQUET_OUTSIDE_ZONE = "Drapeau : Zone du joueur, \195\160 l'ext\195\169rieur";
 VUHDO_I18N_BOUQUET_INSIDE_ZONE = "Drapeau : Zone du joueur, \195\160 l'int\195\169rieur";
@@ -422,44 +439,56 @@ VUHDO_I18N_BOUQUET_PALADIN_TANK = "Drapeau : R\195\180le Tank, Paladin";
 VUHDO_I18N_BOUQUET_DK_TANK = "Drapeau : R\195\180le Tank, Chevalier de la mort";
 VUHDO_I18N_BOUQUET_MONK_TANK = "Drapeau : R\195\180le Tank, Moine";
 VUHDO_I18N_BOUQUET_DRUID_TANK = "Drapeau : R\195\180le Tank, Druide";
+
 -- 3.66
 VUHDO_I18N_BOUQUET_PALADIN_BEACON = "Phare du Paladin";
 VUHDO_I18N_BOUQUET_STATUS_EXCESS_ABSORB = "Barre d'\195\169tat : Absorption exc\195\169dentaire %";
 VUHDO_I18N_BOUQUET_STATUS_TOTAL_ABSORB = "Barre d'\195\169tat : Absorption totale %";
+
 -- 3.67
 VUHDO_I18N_NO_BOSS = "[pas de PNJ]";
 VUHDO_I18N_BOSSES = "PNJs";
+
 -- 3.71
 VUHDO_I18N_BOUQUET_CUSTOM_FLAG = "Drapeau personnalis\195\169";
 VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD = "{VuhDo} Erreur : Votre validateur de drapeau personnalis\195\169 n'a pas \195\169t\195\169 charg\195\169 :";
 VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE = "{VuhDo} Erreur : Votre validateur de drapeau personnalis\195\169 n'a pas \195\169t\195\169 ex\195\169cut\195\169 :";
 VUHDO_I18N_ERROR_CUSTOM_FLAG_BLOCKED = "{VuhDo} Erreur : Un drapeau personnalis\195\169 de ce bouquet a essay\195\169 d'appeler une fonction interdite mais a \195\169t\195\169 bloqu\195\169. Souvenez-vous d'importer des cha\195\174nes uniquement \195\160 partir de sources de confiance.";
 VUHDO_I18N_ERROR_INVALID_VALIDATOR = "{VuhDo} Erreur : Validateur invalide :";
+
 -- 3.72
 VUHDO_I18N_BOUQUET_DEMON_HUNTER_TANK = "Drapeau : R\195\180le Tank, Chasseur de d\195\169mons";
 VUHDO_I18N_DEMON_HUNTERS = "Chasseurs de d\195\169mons";
+
 -- 3.77
 VUHDO_I18N_DEF_COUNTER_OVERFLOW_ABSORB = "Compteur : Absorption de d\195\169bordement mythique+ #k";
+
 -- 3.79
 VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "Lancement de la r\195\169surrection de masse !";
+
 -- 3.81
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "Affix de d\195\169bordement mythique+";
+
 -- 3.82
 VUHDO_I18N_SPELL_TRACE = "Ic\195\180ne : Trace de sort";
 VUHDO_I18N_DEF_SPELL_TRACE = "Trace de sort";
 VUHDO_I18N_TRAIL_OF_LIGHT = "Ic\195\180ne : Tra\195\174n\195\169e de lumi\195\168re";
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "Tra\195\174n\195\169e de lumi\195\168re";
+
 -- 3.83
 VUHDO_I18N_BOUQUET_STATUS_MANA_HEALER_ONLY = "Barre d'\195\169tat : Mana % (Soigneur uniquement)";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY = "Barres de mana : Mana (Soigneur uniquement)";
+
 -- 3.98
 VUHDO_I18N_BOUQUET_HAS_SUMMON_ICON = "Ic\195\180ne : A une invocation";
 VUHDO_I18N_DEF_BOUQUET_HAS_SUMMON = "Ic\195\180ne d'\195\169tat d'invocation";
 VUHDO_I18N_DEF_BOUQUET_ROLE_AND_SUMMON = "Ic\195\180ne d'\195\169tat de r\195\180le et d'invocation";
+
 -- 3.99
 VUHDO_I18N_BOUQUET_IS_PHASED = "Ic\195\180ne : Est phas\195\169";
 VUHDO_I18N_BOUQUET_IS_WAR_MODE_PHASED = "Ic\195\180ne : Est phas\195\169 en mode guerre";
 VUHDO_I18N_DEF_BOUQUET_IS_PHASED = "Ic\195\180ne Est phas\195\169";
+
 -- 3.101
 VUHDO_I18N_DEF_PLAYER_COMBO_POINTS = "Points de combo du joueur";
 VUHDO_I18N_BOUQUET_OWN_COMBO_POINTS_EQUALS = "Drapeau : Points de combo personnels ==";
@@ -470,30 +499,40 @@ VUHDO_I18N_BOUQUET_OWN_RUNES_EQUALS = "Drapeau : Runes personnelles ==";
 VUHDO_I18N_DEF_PLAYER_ARCANE_CHARGES = "Charges arcaniques du joueur";
 VUHDO_I18N_BOUQUET_OWN_ARCANE_CHARGES_EQUALS = "Drapeau : Charges arcaniques personnelles ==";
 VUHDO_I18N_DEBUFF_BLACKLIST_ADDED = "Ajout de \"[%s] %s\" \195\160 la liste noire de d\195\169buffs.";
+
 -- 3.104
 VUHDO_I18N_PLAY_SOUND_FILE_ERR = "Impossible de jouer le son \"%s\" : %s";
 VUHDO_I18N_PLAY_SOUND_FILE_DEBUFF_ERR = "Impossible de jouer le son \"%s\" pour le d\195\169buff standard. Ajustez vos param\195\168tres sous 'Options VuhDo > D\195\169buffs > Standard > Son de d\195\169buff'.";
 VUHDO_I18N_PLAY_SOUND_FILE_CUSTOM_DEBUFF_ERR = "Impossible de jouer le son \"%s\" pour le d\195\169buff personnalis\195\169 \"%s\". Ajustez vos param\195\168tres sous 'Options VuhDo > D\195\169buffs > Personnalis\195\169'.";
+
 -- 3.122
 VUHDO_I18N_BOUQUET_STATUS_POWER_TANK_ONLY = "Barre d'\195\169tat : Puissance % (Tank uniquement)";
 VUHDO_I18N_DEF_BOUQUET_BAR_MANA_TANK_ONLY = "Barres de mana : Puissance (Tank uniquement)";
+
 -- 3.131
 VUHDO_I18N_DEF_COUNTER_HEAL_ABSORB = "Compteur : Toute absorption de soin #k";
 VUHDO_I18N_DEF_STATUS_HEAL_ABSORB = "Barre d'\195\169tat : Absorption de soin";
+
 -- 3.135
 VUHDO_I18N_TRINKET_1 = "Bijou 1";
 VUHDO_I18N_TRINKET_2 = "Bijou 2";
+
 -- 3.139
 VUHDO_I18N_EVOKERS = "Evocateurs";
+
 -- 3.143
 VUHDO_I18N_BUFFC_EARTH_SHIELD = "Bouclier de terre (Soi)";
+
 -- 3.150
 VUHDO_I18N_ADDON_COMPARTMENT_ICON = "L'ic\195\180ne du compartiment d'addon est maintenant ";
+
 -- 3.152
 VUHDO_I18N_SPELL_TRACE_SINGLE = "Ic\195\180ne : Trace de sort (Unique)";
+
 -- 3.154
 VUHDO_I18N_SPELL_TRACE_INCOMING = "Ic\195\180ne : Trace de sort (Entrant)";
 VUHDO_I18N_SPELL_TRACE_HEAL = "Ic\195\180ne : Trace de sort (Soin)";
+
 -- 3.157
 VUHDO_I18N_TEXT_PROVIDER_OVERHEAL = "Sursoin : <#nk>";
 VUHDO_I18N_TEXT_PROVIDER_OVERHEAL_PLUS = "Sursoin : +<#n>k";
@@ -514,20 +553,26 @@ VUHDO_I18N_TEXT_PROVIDER_MANA_KILO_OF = "Mana : <#nk>/<#nk>";
 VUHDO_I18N_TEXT_PROVIDER_MANA = "Mana : <#n>";
 VUHDO_I18N_TEXT_PROVIDER_MANA_KILO = "Mana : <#nk>";
 VUHDO_I18N_BOUQUET_STATUS_HEALTH_IF_ACTIVE = "Barre d'\195\169tat : Sant\195\169 % si actif";
+
 VUHDO_I18N_DEF_COUNTER_ACTIVE_AURAS = "Compteur : Auras de bouquet actives #k";
+
 VUHDO_I18N_BOUQUET_EVOKER_REVERSION = "R\195\169version de l'\195\130vocateur (non-\195\169cho)";
 VUHDO_I18N_BOUQUET_EVOKER_REVERSION_ECHO = "R\195\169version de l'\195\130vocateur (\195\169cho)";
 VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH = "Souffle de r\195\170ve de l'\195\130vocateur (non-\195\169cho)";
 VUHDO_I18N_BOUQUET_EVOKER_DREAM_BREATH_ECHO = "Souffle de r\195\170ve de l'\195\130vocateur (\195\169cho)";
 VUHDO_I18N_BOUQUET_EVOKER_ALL_ECHO = "Tous les \195\169chos de soins de l'\195\130vocateur";
+
 VUHDO_I18N_TRAIL_OF_LIGHT_NEXT = "Drapeau : Tra\195\174n\195\169e de lumi\195\168re (Suivant)";
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT_NEXT = "Tra\195\174n\195\169e de lumi\195\168re (Suivant)";
 VUHDO_I18N_BOUQUET_DEBUFF_BLEED = "Drapeau : D\195\169buff Saignement";
+
 VUHDO_I18N_DEF_SPELL_TRACE_INCOMING = "Trace de sort (Entrant)";
+
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_MINE = "Ic\195\180ne : Harmonie du Chi (Mien)";
 VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_MINE = "Harmonie du Chi (Mien)";
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_OTHERS = "Ic\195\180ne : Harmonie du Chi (Autres)";
 VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_OTHERS = "Harmonie du Chi (Autres)";
 VUHDO_I18N_BOUQUET_CHI_HARMONY_ICON_BOTH = "Ic\195\180ne : Harmonie du Chi (Les deux)";
 VUHDO_I18N_DEF_BOUQUET_CHI_HARMONY_ICON_BOTH = "Harmonie du Chi (Les deux)";
+
 VUHDO_I18N_BOUQUET_DEBUFF_ENRAGE = "Drapeau : D\195\169buff Enrager";
