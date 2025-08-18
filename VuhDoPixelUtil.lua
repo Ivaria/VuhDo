@@ -140,6 +140,7 @@ function VUHDO_handleScaleChange()
 	if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] and VUHDO_CONFIG["PIXEL_PERFECT"]["redrawOnScaleChange"] then
 		if not InCombatLockdown() then
 			tDelay = VUHDO_CONFIG["PIXEL_PERFECT"]["scaleChangeDelay"] or 0.1;
+
 			for tPanelNum = 1, 10 do
 				VUHDO_timeRedrawPanel(tPanelNum, tDelay);
 			end
@@ -166,7 +167,11 @@ function tPixelUtil.SetPoint(aFrame, aPoint, aRelativeFrame, aRelativePoint, aXO
 	tX = aXOffset and VUHDO_roundToPixel(aXOffset) or 0;
 	tY = aYOffset and VUHDO_roundToPixel(aYOffset) or 0;
 
-	aFrame:SetPoint(aPoint, aRelativeFrame, aRelativePoint, tX, tY);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetPoint(aPoint, aRelativeFrame, aRelativePoint, tX, tY);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetPoint blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
 
 	return;
 
@@ -186,7 +191,11 @@ function tPixelUtil.SetSize(aFrame, aWidth, aHeight)
 	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
 	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
 
-	aFrame:SetSize(tWidth, tHeight);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetSize(tWidth, tHeight);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetSize blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
 
 	return;
 
@@ -204,7 +213,11 @@ function tPixelUtil.SetWidth(aFrame, aWidth)
 
 	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
 
-	aFrame:SetWidth(tWidth);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetWidth(tWidth);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetWidth blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
 
 	return;
 
@@ -222,7 +235,11 @@ function tPixelUtil.SetHeight(aFrame, aHeight)
 
 	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
 
-	aFrame:SetHeight(tHeight);
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetHeight(tHeight);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetHeight blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
 
 	return;
 
@@ -243,10 +260,6 @@ function tPixelUtil.ApplySettings(aTexture)
 	return;
 
 end
-
-
-
-
 
 
 
@@ -317,6 +330,181 @@ end
 
 
 --
+function tPixelUtil.ClearAllPoints(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:ClearAllPoints();
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.ClearAllPoints blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.Show(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:Show();
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.Show blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.Hide(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:Hide();
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.Hide blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.SetScale(aFrame, aScale)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetScale(aScale);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetScale blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.EnableMouseWheel(aFrame, aEnable)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:EnableMouseWheel(aEnable);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.EnableMouseWheel blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.SetFrameStrata(aFrame, aStrata)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetFrameStrata(aStrata);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetFrameStrata blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.EnableMouse(aFrame, aEnable)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:EnableMouse(aEnable);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.EnableMouse blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.StopMovingOrSizing(aFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:StopMovingOrSizing();
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.StopMovingOrSizing blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.SetFrameLevel(aFrame, aLevel)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		aFrame:SetFrameLevel(aLevel);
+	else
+		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetFrameLevel blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
+	end
+
+	return;
+
+end
+
+
+
+VUHDO_PixelUtil = tPixelUtil;
+
+
+
+--
 local tNumFrames;
 local tFrameSize;
 local tSpacing;
@@ -346,9 +534,9 @@ function VUHDO_pixelTest()
 		if not tTestFrames[tIndex] then
 			tTestFrames[tIndex] = CreateFrame("Frame", "VuhDoPixelTestFrame" .. tIndex, UIParent, "BackdropTemplate");
 
-			tTestFrames[tIndex]:SetFrameStrata("HIGH");
+			VUHDO_PixelUtil.SetFrameStrata(tTestFrames[tIndex], "HIGH");
 			tTestFrames[tIndex]:SetMovable(true);
-			tTestFrames[tIndex]:EnableMouse(true);
+			VUHDO_PixelUtil.EnableMouse(tTestFrames[tIndex], true);
 			tTestFrames[tIndex]:RegisterForDrag("LeftButton");
 
 			tTestFrames[tIndex]:SetScript("OnDragStart", tTestFrames[tIndex].StartMoving);
@@ -480,7 +668,7 @@ function VUHDO_pixelHideTestFrame()
 			tFrame:SetScript("OnDragStop", nil);
 
 			tFrame:SetMovable(false);
-			tFrame:EnableMouse(false);
+			VUHDO_PixelUtil.EnableMouse(tFrame, false);
 
 			tFrame:UnregisterAllEvents();
 			tFrame:SetParent(nil);
@@ -651,7 +839,3 @@ function VUHDO_pixelHelp()
 	return;
 
 end
-
-
-
-VUHDO_PixelUtil = tPixelUtil;

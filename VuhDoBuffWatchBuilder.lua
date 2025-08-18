@@ -287,7 +287,7 @@ function VUHDO_reloadBuffPanel()
 	VUHDO_PixelUtil.SetHeight(VuhDoBuffWatchMainFrame, VUHDO_PANEL_HEIGHT + VUHDO_BUFF_PANEL_GAP_TOP);
 	VuhDoBuffWatchMainFrame:SetBackdropColor(VUHDO_backColor(VUHDO_BUFF_SETTINGS["CONFIG"]["PANEL_BG_COLOR"]));
 	VuhDoBuffWatchMainFrame:SetBackdropBorderColor(VUHDO_backColor(VUHDO_BUFF_SETTINGS["CONFIG"]["PANEL_BORDER_COLOR"]));
-	VuhDoBuffWatchMainFrame:SetScale(VUHDO_BUFF_SETTINGS["CONFIG"]["SCALE"]);
+	VUHDO_PixelUtil.SetScale(VuhDoBuffWatchMainFrame, VUHDO_BUFF_SETTINGS["CONFIG"]["SCALE"]);
 
 	if VUHDO_BUFF_SETTINGS["CONFIG"]["SHOW"] then
 		VuhDoBuffWatchMainFrame:Show();

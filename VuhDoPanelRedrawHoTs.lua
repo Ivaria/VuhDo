@@ -107,7 +107,12 @@ end
 local tOrientation;
 local tHotBarConfig;
 local tBarsPos;
-function VUHDO_initHotBars()
+function VUHDO_initHotBars(aPanelNum)
+
+	if aPanelNum then
+		VUHDO_panelRedrwawHotsInitLocalVars(aPanelNum);
+		sPanelNum = aPanelNum;
+	end
 
 	tOrientation = sOrientation[sPanelNum];
 	tHotBarConfig = sHotBarConfig[sPanelNum];
@@ -169,6 +174,8 @@ function VUHDO_initHotBars()
 			VUHDO_PixelUtil.SetPoint(VUHDO_getHealthBar(sButton, 11), "BOTTOM", sHealthBarName, "BOTTOM",  0, 2 * sHotBarHeight);
 		end
 	end
+
+	return;
 
 end
 
@@ -445,7 +452,12 @@ end
 --
 local tHotPos;
 local tPosFunction;
-function VUHDO_initAllHotIcons()
+function VUHDO_initAllHotIcons(aPanelNum)
+
+	if aPanelNum then
+		VUHDO_panelRedrwawHotsInitLocalVars(aPanelNum);
+		sPanelNum = aPanelNum;
+	end
 
 	tHotPos = sHotConfig[sPanelNum]["radioValue"];
 
@@ -459,5 +471,7 @@ function VUHDO_initAllHotIcons()
 	for tCnt = 9, 12 do -- VUHDO_MAX_HOTS
 		VUHDO_initAndPosHotIcon(tCnt, tPosFunction);
 	end
+
+	return;
 
 end
