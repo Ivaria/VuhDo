@@ -1,4 +1,4 @@
--- VuhDoDebuffConstBleed.lua.202507182056
+-- VuhDoDebuffConstBleed.lua.202508181246
 VUHDO_DEBUFF_BLEED_SPELLS = {
 	[703] = true,
 	[1079] = true,
@@ -1220,4 +1220,6 @@ VUHDO_DEBUFF_BLEED_SPELLS = {
 	[1239906] = true,
 	[1241785] = true,
 	[1248211] = true,
+	[1253240] = true,
+	[1255245] = true,
 };
