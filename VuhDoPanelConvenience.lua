@@ -88,7 +88,7 @@ function VUHDO_getOrCreateHotIcon(aButton, anIconNumber)
 	if not VUHDO_BAR_ICONS[aButton][anIconNumber] then
 		local tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
 		local tFrameName = tParentName .. "Ic" .. anIconNumber;
-		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = CreateFrame("Button", tFrameName, _G[tParentName], "VuhDoHotIconTemplate");
+		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = CreateFrame("Frame", tFrameName, _G[tParentName], "VuhDoAuraIconTemplate");
 		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "I"];
 		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "T"];
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "C"];
@@ -101,39 +101,74 @@ end
 
 
 --
+local tDebuffOnEnterSnippet = [[
+	tFrame = self:GetParent():GetParent():GetParent():GetParent();
+
+	if tFrame then
+		tBody = tFrame:GetAttribute("vuhdo_onenter");
+
+		if tBody then
+			owner:RunFor(tFrame, tBody);
+		end
+	end
+]]
+local tDebuffOnLeaveSnippet = [[
+	tFrame = self:GetParent():GetParent():GetParent():GetParent();
+
+	if tFrame then
+		tBody = tFrame:GetAttribute("vuhdo_onleave");
+
+		if tBody then
+			owner:RunFor(tFrame, tBody);
+		end
+	end
+]]
 function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 
 	if not VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] then
 		local tParentName = aButton:GetName() .. "BgBarIcBarHlBar";
 		local tFrameName = tParentName .. "Ic" .. anIconNumber;
 
-		local tBarIconFrame = CreateFrame("Button", tFrameName, _G[tParentName], "VuhDoDebuffIconTemplate");
-		local tBarIconFrameBackground = CreateFrame("Frame", tFrameName .. "Background", tBarIconFrame, "BackdropTemplate");
-
-		tBarIconFrameBackground:SetParent(tBarIconFrame);
-
-		tBarIconFrameBackground:ClearAllPoints();
-		VUHDO_PixelUtil.SetPoint(tBarIconFrameBackground, "TOPLEFT", tBarIconFrame, "TOPLEFT", -1, 1);
-		VUHDO_PixelUtil.SetPoint(tBarIconFrameBackground, "BOTTOMRIGHT", tBarIconFrame, "BOTTOMRIGHT", 1, -1);
-
-		tBarIconFrameBackground:SetFrameLevel(tBarIconFrame:GetFrameLevel() == 0 and 1 or tBarIconFrame:GetFrameLevel() - 1);
-
-		local tBackdropInfo = {
-			edgeFile = "Interface\\Buttons\\WHITE8X8",
-			edgeSize = 4,
-		};
-
-		VUHDO_PixelUtil.ApplyBackdrop(tBarIconFrameBackground, tBackdropInfo);
-
+		local tBarIconFrame = CreateFrame("Frame", tFrameName, _G[tParentName], "VuhDoDebuffIconTemplate");
 		VUHDO_BAR_ICON_FRAMES[aButton][anIconNumber] = tBarIconFrame;
-		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = tBarIconFrameBackground;
 
-		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = _G[tFrameName.. "B"];
+		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = _G[tFrameName .. "B"];
+		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = _G[tFrameName .. "B"];
+
 		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "BI"];
 		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "BT"];
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "BC"];
-		VUHDO_BAR_ICON_CHARGES[aButton][anIconNumber] = _G[tFrameName .. "BA"];
 		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "BN"];
+
+		if not tBarIconFrame:GetAttribute("vd_tt_hook") then
+			tBarIconFrame:SetScript("OnEnter", function(self)
+				VUHDO_showDebuffTooltip(self);
+				VuhDoActionOnEnter(self:GetParent():GetParent():GetParent():GetParent());
+			end);
+
+			tBarIconFrame:SetScript("OnLeave", function(self)
+				VUHDO_hideDebuffTooltip();
+				VuhDoActionOnLeave(self:GetParent():GetParent():GetParent():GetParent());
+			end);
+
+			VUHDO_safeSetAttribute(tBarIconFrame, "vd_tt_hook", true);
+		end
+
+		if not tBarIconFrame:GetAttribute("vuhdo_secureheader_wrap") then
+			local tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
+
+			if tHeaderFrame then
+				VUHDO_safeWrapScript(tHeaderFrame, tBarIconFrame, "OnEnter", tDebuffOnEnterSnippet);
+				VUHDO_safeWrapScript(tHeaderFrame, tBarIconFrame, "OnLeave", tDebuffOnLeaveSnippet);
+
+				VUHDO_safeSetAttribute(tBarIconFrame, "vuhdo_secureheader_wrap", true);
+			end
+		end
+
+		tBarIconFrame:EnableMouse(false);
+		tBarIconFrame:SetMouseMotionEnabled(true);
+		tBarIconFrame:EnableKeyboard(false);
+		tBarIconFrame:SetPropagateKeyboardInput(true);
 	end
 
 	return VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber];
@@ -276,8 +311,17 @@ end
 
 
 --
+local tBars;
 function VUHDO_getPlayerTargetFrame(aButton)
-	return _G[VUHDO_BARS_PER_BUTTON[aButton][1]:GetName() .. "PlTg"];
+
+	tBars = VUHDO_BARS_PER_BUTTON[aButton];
+
+	if not tBars or not tBars[1] or not tBars[1].GetName then
+		return nil;
+	end
+
+	return _G[tBars[1]:GetName() .. "PlTg"];
+
 end
 
 
@@ -391,10 +435,10 @@ function VUHDO_getOrCreateBuffSwatch(aName, aParent)
 	if not VUHDO_BUFF_SWATCHES[aName] then
 		VUHDO_BUFF_SWATCHES[aName] = CreateFrame("Frame", aName, aParent, "VuhDoBuffSwatchPanelTemplate");
 		tButton = _G[aName .. "GlassButton"];
-		tButton:SetAttribute("_onleave", "self:ClearBindings();");
-		tButton:SetAttribute("_onshow", "self:ClearBindings();");
-		tButton:SetAttribute("_onhide", "self:ClearBindings();");
-		tButton:SetAttribute(
+		VUHDO_safeSetAttribute(tButton, "_onleave", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton, "_onshow", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton, "_onhide", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton,
 			"_onmousedown", 
 			"if not self:IsUnderMouse(false) then self:ClearBindings(); end"
 		);
@@ -403,13 +447,13 @@ function VUHDO_getOrCreateBuffSwatch(aName, aParent)
 	end
 
 	if (VUHDO_BUFF_SETTINGS["CONFIG"]["WHEEL_SMART_BUFF"]) then
-		tButton:SetAttribute("_onenter", [=[
+		VUHDO_safeSetAttribute(tButton, "_onenter", [=[
 				self:ClearBindings();
 				self:SetBindingClick(0, "MOUSEWHEELUP" , "VuhDoSmartCastGlassButton", "LeftButton");
 				self:SetBindingClick(0, "MOUSEWHEELDOWN" , "VuhDoSmartCastGlassButton", "LeftButton");
 		]=]);
 	else
-		tButton:SetAttribute("_onenter", "self:ClearBindings();");
+		VUHDO_safeSetAttribute(tButton, "_onenter", "self:ClearBindings();");
 	end
 
 	return VUHDO_BUFF_SWATCHES[aName];
@@ -677,6 +721,7 @@ end
 
 --
 local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
+
 	local tButtonName = format("Vd%dH%d", aPanelNum, aButtonNum);
 	local tButton = _G[tButtonName];
 	local tTargetButton = _G[tButtonName .. "Tg"];
@@ -730,9 +775,9 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	-- Tot Mana
 	VUHDO_BARS_PER_BUTTON[tButton][16] = _G[tButtonName .. "TotBgBarHlBarMaBar"];
 	VUHDO_BARS_PER_BUTTON[tTotButton][2] = _G[tButtonName .. "TotBgBarHlBarMaBar"];
-  -- Left side bar
+	-- Left side bar
 	VUHDO_BARS_PER_BUTTON[tButton][17] = _G[tButtonName .. "BgBarIcBarHlBarLsBar"];
-  -- Right side bar
+	-- Right side bar
 	VUHDO_BARS_PER_BUTTON[tButton][18] = _G[tButtonName .. "BgBarIcBarHlBarRsBar"];
 	-- Shield bar
 	VUHDO_BARS_PER_BUTTON[tButton][19] = _G[tButtonName .. "BgBarShBar"];
@@ -759,26 +804,36 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BAR_ICON_CLOCKS[tButton] = { };
 	VUHDO_BAR_ICON_CHARGES[tButton] = { };
 	VUHDO_BAR_ICON_NAMES[tButton] = { };
+
+	return;
+
 end
 
 
 
 --
+local tNewButton;
+local tFunc;
 function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
+
 	if not VUHDO_BUTTONS_PER_PANEL[aPanelNum][aButtonNum] then
-		local tNewButton = CreateFrame("Button",
-			format("Vd%dH%d", aPanelNum, aButtonNum),
-			_G[format("Vd%d", aPanelNum)], "VuhDoButtonSecureTemplate");
+		tNewButton = CreateFrame("Button", format("Vd%dH%d", aPanelNum, aButtonNum), _G[format("Vd%d", aPanelNum)], "VuhDoButtonSecureTemplate");
+
 		VUHDO_fastCacheInitButton(aPanelNum, aButtonNum);
 		VUHDO_initLocalVars(aPanelNum);
 		VUHDO_initHealButton(tNewButton, aPanelNum);
-		VUHDO_positionHealButton(tNewButton);
-		local tFunc = (VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers())
-			 and RegisterUnitWatch or UnregisterUnitWatch;
-		tFunc(tNewButton);
+		VUHDO_positionHealButton(tNewButton, aPanelNum);
+
+		if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+			tFunc = (VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers())
+				and RegisterUnitWatch or UnregisterUnitWatch;
+
+			tFunc(tNewButton);
+		end
 	end
 
 	return VUHDO_BUTTONS_PER_PANEL[aPanelNum][aButtonNum];
+
 end
 
 
