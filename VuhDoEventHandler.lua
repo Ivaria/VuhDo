@@ -17,6 +17,8 @@ local tremove = table.remove;
 local twipe = table.wipe;
 local max = math.max;
 local min = math.min;
+local floor = math.floor;
+
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
@@ -33,97 +35,17 @@ VUHDO_RELOAD_UI_IS_LNF = false;
 
 local VUHDO_HANDLER_PROFILING_ENABLED = false;
 
-local VUHDO_HANDLER_METRICS = {
-	["sessionStartTime"] = 0,
-	["OnUpdate"] = {
-		["invocationCount"] = 0,
-		["segment1"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2A"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2B"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2C"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2D"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2E"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2F"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2G"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2H"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2I"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2J"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2K"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2L"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["segment2M"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-		["total"] = {
-			["totalTimeUs"] = 0,
-			["minTimeUs"] = 9999999,
-			["maxTimeUs"] = 0,
-		},
-	},
-	["OnEvent"] = { },
-};
+local VUHDO_HANDLER_PROFILING_SESSION_START_TIME = 0;
+local VUHDO_HANDLER_PROFILING_METRICS = { };
+local VUHDO_HANDLER_PROFILING_BATCH_SIZE = 10;
+local VUHDO_HANDLER_PROFILING_BATCH_COUNT = 0;
+local VUHDO_HANDLER_PROFILING_PENDING_UPDATES = { };
+local VUHDO_HANDLER_PROFILING_ONUPDATE_INVOCATIONS = 0;
 
 local VUHDO_HANDLER_EVENT_CONFIG = {
 	["LIMIT"] = 5,
 	["THRESHOLD_US"] = 2000,
+	["HISTORY_LIMIT"] = 100,
 };
 
 local VUHDO_HANDLER_EVENT_SNAPSHOTS = {
@@ -170,6 +92,8 @@ local VUHDO_updateCustomDebuffTooltip;
 local VUHDO_getUnitZoneName;
 local VUHDO_getCurrentMouseOver;
 local VUHDO_handleScaleChange;
+local VUHDO_redrawPanel;
+local VUHDO_redrawAllPanels;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -196,7 +120,6 @@ do
 	--
 	local tSnapshots;
 	local tNewSnapshot;
-	local tExistingSnapshot;
 	local tIsDuplicate;
 	local tCompositionKey;
 	local tArgs;
@@ -284,19 +207,22 @@ do
 
 
 	--
-	local tMetrics;
-	function VUHDO_updateHandlerOnUpdateMetrics(aDurationUs)
+	local tSegmentName;
+	local tTracker;
+	function VUHDO_updateOnEventProfilingMetrics(anEventName, aDurationUs)
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnUpdate"] then
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not anEventName then
 			return;
 		end
 
-		tMetrics = VUHDO_HANDLER_METRICS["OnUpdate"];
+		tSegmentName = "OnEvent_" .. anEventName;
 
-		tMetrics["totalTimeUs"] = (tMetrics["totalTimeUs"] or 0) + aDurationUs;
-		tMetrics["invocationCount"] = (tMetrics["invocationCount"] or 0) + 1;
-		tMetrics["minTimeUs"] = min((tMetrics["minTimeUs"] or 9999999), aDurationUs);
-		tMetrics["maxTimeUs"] = max((tMetrics["maxTimeUs"] or 0), aDurationUs);
+		if not VUHDO_HANDLER_PROFILING_METRICS[tSegmentName] then
+			VUHDO_HANDLER_PROFILING_METRICS[tSegmentName] = VUHDO_createPercentileTracker();
+		end
+
+		tTracker = VUHDO_HANDLER_PROFILING_METRICS[tSegmentName];
+		tTracker:update(aDurationUs);
 
 		return;
 
@@ -305,53 +231,17 @@ do
 
 
 	--
-	local tMetrics;
-	function VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, aDurationUs)
-
-		if not VUHDO_HANDLER_PROFILING_ENABLED or not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnUpdate"] then
-			return;
-		end
-
-		tMetrics = VUHDO_HANDLER_METRICS["OnUpdate"][aSegmentName];
-
-		if tMetrics then
-			tMetrics["totalTimeUs"] = tMetrics["totalTimeUs"] + aDurationUs;
-			tMetrics["minTimeUs"] = min(tMetrics["minTimeUs"], aDurationUs);
-			tMetrics["maxTimeUs"] = max(tMetrics["maxTimeUs"], aDurationUs);
-		end
-
-		return;
-
-	end
-
-
-
-	--
-	local tEventMetrics;
 	function VUHDO_updateHandlerOnEventMetrics(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5)
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED or not anEventName or
-			not VUHDO_HANDLER_METRICS or not VUHDO_HANDLER_METRICS["OnEvent"] then
+		if not VUHDO_HANDLER_PROFILING_ENABLED or not anEventName then
 			return;
 		end
 
-		if not VUHDO_HANDLER_METRICS["OnEvent"][anEventName] then
-			VUHDO_HANDLER_METRICS["OnEvent"][anEventName] = {
-				["totalTimeUs"] = 0,
-				["invocationCount"] = 0,
-				["minTimeUs"] = 9999999,
-				["maxTimeUs"] = 0,
-			};
-		end
-
-		tEventMetrics = VUHDO_HANDLER_METRICS["OnEvent"][anEventName];
-
-		tEventMetrics["totalTimeUs"] = (tEventMetrics["totalTimeUs"] or 0) + aDurationUs;
-		tEventMetrics["invocationCount"] = (tEventMetrics["invocationCount"] or 0) + 1;
-		tEventMetrics["minTimeUs"] = min(tEventMetrics["minTimeUs"], aDurationUs);
-		tEventMetrics["maxTimeUs"] = max(tEventMetrics["maxTimeUs"], aDurationUs);
+		VUHDO_updateOnEventProfilingMetrics(anEventName, aDurationUs);
 
 		VUHDO_addEventSnapshot(anEventName, aDurationUs, anArg1, anArg2, anArg3, anArg4, anArg5);
+
+		return;
 
 	end
 
@@ -378,19 +268,11 @@ do
 	};
 	function VUHDO_resetHandlerMetrics()
 
-		VUHDO_HANDLER_METRICS["sessionStartTime"] = GetTime();
-		VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] = 0;
+		VUHDO_HANDLER_PROFILING_SESSION_START_TIME = GetTime();
+		VUHDO_HANDLER_PROFILING_ONUPDATE_INVOCATIONS = 0;
 
-		for _, tSegmentName in ipairs(tOnUpdateSegments) do
-			VUHDO_HANDLER_METRICS["OnUpdate"][tSegmentName] = {
-				["totalTimeUs"] = 0,
-				["minTimeUs"] = 9999999,
-				["maxTimeUs"] = 0,
-			};
-		end
-
-		twipe(VUHDO_HANDLER_METRICS["OnEvent"]);
 		twipe(VUHDO_HANDLER_EVENT_SNAPSHOTS);
+		twipe(VUHDO_HANDLER_PROFILING_METRICS);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_Msg("Handler profiling metrics reset.");
@@ -412,25 +294,40 @@ do
 
 
 	--
-	local tAvg;
-	local function VUHDO_printHandlerMetricSegment(aSegName, aSegData, anInvocationCount, anIndent)
+	local tPercentileKeys;
+	local tPercentileText;
+	function VUHDO_printHandlerMetricSegment(aSegName, aSegData, anInvocationCount, anIndent)
 
 		if not aSegData then
 			return;
 		end
 
-		tAvg = 0;
+		tPercentileKeys = { };
 
-		if anInvocationCount > 0 then
-			tAvg = (aSegData["totalTimeUs"] or 0) / anInvocationCount;
+		for tPercentileKey in pairs(aSegData) do
+			if string.sub(tPercentileKey, 1, 2) == "tm" then
+				tinsert(tPercentileKeys, tPercentileKey);
+			end
 		end
 
-		VUHDO_Msg(format("%s|cffB0E0E6%s:|r Total: %s, Avg: %s, Min: %s, Max: %s",
+		VUHDO_sortPercentileKeys(tPercentileKeys);
+
+		tPercentileText = "";
+
+		for tIndex = 1, #tPercentileKeys do
+			tPercentileKey = tPercentileKeys[tIndex];
+
+			if tIndex > 1 then
+				tPercentileText = tPercentileText .. ", ";
+			end
+
+			tPercentileText = tPercentileText .. tPercentileKey .. ": " .. VUHDO_formatTime(aSegData[tPercentileKey] or 0);
+		end
+
+		VUHDO_Msg(format("%s|cffB0E0E6%s:|r Total: %s, %s",
 			anIndent or "  ", aSegName,
-			VUHDO_formatTime(aSegData["totalTimeUs"] or 0),
-			VUHDO_formatTime(tAvg),
-			VUHDO_formatTime(aSegData["minTimeUs"] == 9999999 and 0 or aSegData["minTimeUs"]),
-			VUHDO_formatTime(aSegData["maxTimeUs"] or 0)
+			VUHDO_formatTime(aSegData["Total"] or 0),
+			tPercentileText
 		));
 
 		return;
@@ -440,6 +337,21 @@ do
 
 
 	--
+	local tSeg2Segments = {
+		["segment2A"] = "Seg 2A (UI Reloads)",
+		["segment2B"] = "Seg 2B (Panel Reset)",
+		["segment2C"] = "Seg 2C (Roster & Core)",
+		["segment2D"] = "Seg 2D (Combat Chk)",
+		["segment2E"] = "Seg 2E (Slow Thres)",
+		["segment2F"] = "Seg 2F (Post-Combat)",
+		["segment2G"] = "Seg 2G (Get Auto Prof)",
+		["segment2H"] = "Seg 2H (Load Profile)",
+		["segment2I"] = "Seg 2I (Hide Blizz)",
+		["segment2J"] = "Seg 2J (Shield Cleanup)",
+		["segment2K"] = "Seg 2K (Zones)",
+		["segment2L"] = "Seg 2L (Inspect)",
+		["segment2M"] = "Seg 2M (Macros)",
+	};
 	local tMetrics;
 	local tSessionDuration;
 	local tOnUpdateMetrics;
@@ -447,71 +359,84 @@ do
 	local tEventStats;
 	local tTotalTime;
 	local tCount;
-	local tAvgTime;
+	local tTrimmedMeans;
+	local tTracker;
+	local tEventName;
+	local tPercentiles;
+	local tTotal;
+	local tCount;
 	local tArgString;
 	local tDedupedText;
 	local tThresholdText;
+	local tSortedSeg2Keys;
+	local tSegmentName;
 	function VUHDO_printHandlerMetrics()
 
-		if not VUHDO_HANDLER_PROFILING_ENABLED and (VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] or 0) == 0 then
+		if not VUHDO_HANDLER_PROFILING_ENABLED then
 			VUHDO_Msg("Handler profiling is currently disabled.");
 
 			return;
 		end
 
-		tMetrics = VUHDO_HANDLER_METRICS;
-
-		tSessionDuration = GetTime() - (tMetrics["sessionStartTime"] or GetTime());
+		tMetrics = VUHDO_getHandlerProfilingMetrics();
+		tSessionDuration = GetTime() - VUHDO_HANDLER_PROFILING_SESSION_START_TIME;
+		tInvocationCount = VUHDO_HANDLER_PROFILING_ONUPDATE_INVOCATIONS;
 
 		VUHDO_Msg("|cffFFD100--- Handler Profiling Metrics (Session: " .. format("%.2f sec", tSessionDuration) .. ") ---|r");
 
-		tOnUpdateMetrics = tMetrics["OnUpdate"];
-		tInvocationCount = tOnUpdateMetrics["invocationCount"] or 0;
-
 		VUHDO_Msg(format("|cffFFA500** VUHDO_OnUpdate Invocations:|r %d", tInvocationCount));
 
-		VUHDO_printHandlerMetricSegment("Segment 1", tOnUpdateMetrics["segment1"], tInvocationCount);
-		VUHDO_printHandlerMetricSegment("Segment 2", tOnUpdateMetrics["segment2"], tInvocationCount);
+		if tMetrics["segment1"] then
+			VUHDO_printHandlerMetricSegment("Segment 1", tMetrics["segment1"], tInvocationCount);
+		end
+
+		if tMetrics["segment2"] then
+			VUHDO_printHandlerMetricSegment("Segment 2", tMetrics["segment2"], tInvocationCount);
+		end
 
 		VUHDO_Msg("  |cff98FB98Detailed Seg2 Breakdown:|r");
 
-		VUHDO_printHandlerMetricSegment("Seg 2A (UI Reloads)", tOnUpdateMetrics["segment2A"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2B (Panel Reset)", tOnUpdateMetrics["segment2B"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2C (Roster & Core)", tOnUpdateMetrics["segment2C"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2D (Combat Chk)", tOnUpdateMetrics["segment2D"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2E (Slow Thres)", tOnUpdateMetrics["segment2E"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2F (Post-Combat)", tOnUpdateMetrics["segment2F"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2G (Get Auto Prof)", tOnUpdateMetrics["segment2G"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2H (Load Profile)", tOnUpdateMetrics["segment2H"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2I (Hide Blizz)", tOnUpdateMetrics["segment2I"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2J (Shield Cleanup)", tOnUpdateMetrics["segment2J"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2K (Zones)", tOnUpdateMetrics["segment2K"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2L (Inspect)", tOnUpdateMetrics["segment2L"], tInvocationCount, "    - ");
-		VUHDO_printHandlerMetricSegment("Seg 2M (Macros)", tOnUpdateMetrics["segment2M"], tInvocationCount, "    - ");
+		tSortedSeg2Keys = VUHDO_sortSeg2SegmentKeys(tSeg2Segments);
 
-		VUHDO_printHandlerMetricSegment("Sum (Seg1+Seg2)", tOnUpdateMetrics["total"], tInvocationCount);
+		for _, tSegmentKey in ipairs(tSortedSeg2Keys) do
+			tSegmentName = tSeg2Segments[tSegmentKey];
+
+			if tMetrics[tSegmentKey] then
+				VUHDO_printHandlerMetricSegment(tSegmentName, tMetrics[tSegmentKey], tInvocationCount, "    - ");
+			end
+		end
+
+		if tMetrics["total"] then
+			VUHDO_printHandlerMetricSegment("Sum (Seg1+Seg2)", tMetrics["total"], tInvocationCount);
+		end
 
 		VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type): **|r");
 
 		tEventStats = { };
 
-		for tEventName, tEventData in pairs(tMetrics["OnEvent"]) do
-			tTotalTime = tEventData["totalTimeUs"] or 0;
-			tCount = tEventData["invocationCount"] or 0;
-			tAvgTime = 0;
+		for tSegmentName, tTracker in pairs(VUHDO_HANDLER_PROFILING_METRICS) do
+			if string.sub(tSegmentName, 1, 8) == "OnEvent_" and tTracker:isInitialized() then
+				tEventName = string.sub(tSegmentName, 9);
 
-			if tCount > 0 then
-				tAvgTime = tTotalTime / tCount;
+				tPercentiles = tTracker:getPercentiles();
+
+				tTotal = 0;
+				tCount = 0;
+
+				for tIndex = 1, tTracker["bufferSize"] do
+					if tTracker["buffer"][tIndex] then
+						tTotal = tTotal + tTracker["buffer"][tIndex];
+						tCount = tCount + 1;
+					end
+				end
+
+				tinsert(tEventStats, {
+					["name"] = tEventName,
+					["totalTime"] = tTotal,
+					["count"] = tCount,
+					["trimmedMeans"] = tPercentiles,
+				});
 			end
-
-			tinsert(tEventStats, {
-				["name"] = tEventName,
-				["totalTime"] = tTotalTime,
-				["count"] = tCount,
-				["avgTime"] = tAvgTime,
-				["minTime"] = tEventData["minTimeUs"],
-				["maxTime"] = tEventData["maxTimeUs"],
-			});
 		end
 
 		if #tEventStats == 0 then
@@ -519,16 +444,36 @@ do
 		else
 			table.sort(tEventStats, VUHDO_sortEventStats);
 
-			VUHDO_Msg("  Sorted by Total Time (Event: Total, Count, Avg, Min, Max)");
+			VUHDO_Msg("  Sorted by Total Time (Event: Total, Count, percentiles)");
 
 			for _, tStats in ipairs(tEventStats) do
-				VUHDO_Msg(format("  %s: Total: %s, Count: %d, Avg: %s, Min: %s, Max: %s",
+				tPercentileKeys = { };
+
+				for tPercentileKey in pairs(tStats["trimmedMeans"]) do
+					if string.sub(tPercentileKey, 1, 2) == "tm" then
+						tinsert(tPercentileKeys, tPercentileKey);
+					end
+				end
+
+				VUHDO_sortPercentileKeys(tPercentileKeys);
+
+				tPercentileText = "";
+
+				for tIndex = 1, #tPercentileKeys do
+					tPercentileKey = tPercentileKeys[tIndex];
+
+					if tIndex > 1 then
+						tPercentileText = tPercentileText .. ", ";
+					end
+
+					tPercentileText = tPercentileText .. tPercentileKey .. ": " .. VUHDO_formatTime(tStats["trimmedMeans"][tPercentileKey] or 0);
+				end
+
+				VUHDO_Msg(format("  %s: Total: %s, Count: %d, %s",
 					tStats["name"],
 					VUHDO_formatTime(tStats["totalTime"]),
 					tStats["count"],
-					VUHDO_formatTime(tStats["avgTime"]),
-					VUHDO_formatTime(tStats["minTime"] == 9999999 and 0 or tStats["minTime"]),
-					VUHDO_formatTime(tStats["maxTime"])
+					tPercentileText
 				));
 			end
 		end
@@ -652,6 +597,14 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
 	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_redrawPanel = _G["VUHDO_deferRedrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_deferRedrawAllPanels"];
+	else
+		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
+	end
 
 	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
@@ -826,7 +779,7 @@ end
 --
 local tName;
 local tProfile;
-local function VUHDO_loadCurrentProfile()
+function VUHDO_loadCurrentProfile()
 
 	if not VUHDO_CONFIG then
 		return;
@@ -1159,6 +1112,8 @@ do
 
 				VUHDO_OPTIONS_SHOW_AFTER_BATTLE = true;
 			end
+
+			VUHDO_processCombatUnsafeTasksBeforeLockdown();
 
 			VUHDO_setIsOutOfCombat(false);
 
@@ -1711,10 +1666,61 @@ do
 				VUHDO_setHandlerProfiling(true);
 			elseif tSubCommand == "off" then
 				VUHDO_setHandlerProfiling(false);
-			elseif strfind(tSubCommand, "res") or tSubCommand == "reset" then
+			elseif strfind(tSubCommand, "res") then
 				VUHDO_resetHandlerMetrics();
 			else
 				VUHDO_printHandlerMetrics();
+			end
+
+		elseif strfind(tCommandWord, "sem") then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setSemaphoreProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setSemaphoreProfiling(false);
+			elseif strfind(tSubCommand, "res") then
+				VUHDO_resetSemaphoreMetrics();
+			else
+				VUHDO_printSemaphoreMetrics();
+			end
+
+		elseif tCommandWord == "defer" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setDeferredRedrawEnabled(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setDeferredRedrawEnabled(false);
+			else
+				VUHDO_printDeferredRedrawStatus();
+			end
+
+		elseif strfind(tCommandWord, "prof") then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setHandlerProfiling(true);
+				VUHDO_setDeferredTaskProfiling(true);
+				VUHDO_setPoolProfiling(true);
+				VUHDO_setSemaphoreProfiling(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setHandlerProfiling(false);
+				VUHDO_setDeferredTaskProfiling(false);
+				VUHDO_setPoolProfiling(false);
+				VUHDO_setSemaphoreProfiling(false);
+			elseif strfind(tSubCommand, "res") then
+				VUHDO_resetHandlerMetrics();
+				VUHDO_resetDeferredTaskMetrics();
+				VUHDO_resetPoolMetrics();
+				VUHDO_resetSemaphoreMetrics();
+
+				VUHDO_Msg("All profiling metrics reset.");
+			else
+				VUHDO_printHandlerMetrics();
+				VUHDO_printDeferredTaskMetrics(false);
+				VUHDO_printPoolMetrics();
+				VUHDO_printSemaphoreMetrics();
 			end
 
 		elseif tCommandWord == "pixel" then
@@ -1885,10 +1891,12 @@ function VUHDO_loadVariables()
 	VUHDO_PLAYER_NAME = UnitName("player");
 
 	VUHDO_loadDefaultConfig();
+	VUHDO_setDeferredRedrawEnabled(VUHDO_CONFIG["USE_DEFERRED_REDRAW"], true);
 	VUHDO_loadSpellArray();
 	VUHDO_loadDefaultPanelSetup();
 	VUHDO_initBuffSettings();
 	VUHDO_loadDefaultBouquets();
+	VUHDO_panelRedrawInitLocalOverrides();
 	VUHDO_initClassColors();
 	VUHDO_initTextProviderConfig();
 
@@ -2106,13 +2114,12 @@ do
 			VUHDO_updateOnUpdateSubSegmentMetrics("segment2", (debugprofilestop() - aSeg2Start) * 1000);
 			VUHDO_updateOnUpdateSubSegmentMetrics("total", (debugprofilestop() - anOverallStart) * 1000);
 
-			VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] = VUHDO_HANDLER_METRICS["OnUpdate"]["invocationCount"] + 1;
+			VUHDO_HANDLER_PROFILING_ONUPDATE_INVOCATIONS = VUHDO_HANDLER_PROFILING_ONUPDATE_INVOCATIONS + 1;
 		end
 
 		return;
 
 	end
-
 
 
 
@@ -2154,11 +2161,14 @@ do
 
 
 	--
+	local tIsDeferredActive;
 	local function VUHDO_handleSegment2A(aTimeDelta, ...)
 
 		-- reload UI?
 		if VUHDO_checkTimer("RELOAD_UI") then
-			if VUHDO_IS_RELOADING or InCombatLockdown() then
+			tIsDeferredActive = VUHDO_CONFIG and VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_isDeferredRedrawActive();
+
+			if VUHDO_IS_RELOADING or InCombatLockdown() or tIsDeferredActive then
 				VUHDO_TIMERS["RELOAD_UI"] = 0.3;
 			else
 				if VUHDO_RELOAD_UI_IS_LNF then
@@ -2180,11 +2190,14 @@ do
 
 
 	--
+	local tIsDeferredActive;
 	local function VUHDO_handleSegment2B(aTimeDelta, ...)
 
 		-- reset single panel?
 		if VUHDO_checkTimer("RELOAD_PANEL") then
-			if VUHDO_IS_RELOADING or InCombatLockdown() then
+			tIsDeferredActive = VUHDO_CONFIG and VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_isDeferredRedrawActive();
+
+			if VUHDO_IS_RELOADING or InCombatLockdown() or tIsDeferredActive then
 				VUHDO_TIMERS["RELOAD_PANEL"] = 0.3;
 			else
 				VUHDO_PROHIBIT_REPOS = true;
@@ -2334,10 +2347,6 @@ do
 
 
 
-
-
-
-
 	--
 	local function VUHDO_handleSegment2F(aTimeDelta, ...)
 
@@ -2462,65 +2471,45 @@ do
 
 
 	--
-	local tSegmentNameMap = {
-		[VUHDO_handleSegment1] = "segment1",
-		[VUHDO_handleSegment2A] = "segment2A",
-		[VUHDO_handleSegment2B] = "segment2B",
-		[VUHDO_handleSegment2C] = "segment2C",
-		[VUHDO_handleSegment2D] = "segment2D",
-		[VUHDO_handleSegment2F] = "segment2F",
-		[VUHDO_handleSegment2G] = "segment2G",
-		[VUHDO_handleSegment2H] = "segment2H",
-		[VUHDO_handleSegment2I] = "segment2I",
-		[VUHDO_handleSegment2J] = "segment2J",
-		[VUHDO_handleSegment2K] = "segment2K",
-		[VUHDO_handleSegment2L] = "segment2L",
-		[VUHDO_handleSegment2M] = "segment2M",
-	};
-	local tSegmentName;
+	local tStartTime;
 	local tProfilerResult;
-	local tSuccess;
-	local function VUHDO_profileSegment(aSegmentFunction, aTimeDelta, aStartTimes)
+	local tEndTime;
+	local tDuration;
+	function VUHDO_profileSegment(aSegmentName, aCallback, aTimeDelta)
 
-		tSegmentName = tSegmentNameMap[aSegmentFunction];
-
-		if not tSegmentName then
-			VUHDO_Msg("Warning: No segment name mapping found for function. Profiling data will be ignored. Function: " .. tostring(aSegmentFunction));
-
-			return;
+		if not VUHDO_HANDLER_PROFILING_ENABLED then
+			return aCallback(aTimeDelta);
 		end
 
-		if MeasureCall then
-			tProfilerResult, tSuccess = MeasureCall(aSegmentFunction, aTimeDelta);
+		tStartTime = debugprofilestop();
+		tProfilerResult = aCallback(aTimeDelta);
+		tEndTime = debugprofilestop();
+		tDuration = (tEndTime - tStartTime) * 1000;
 
-			if VUHDO_HANDLER_PROFILING_ENABLED and tProfilerResult and tProfilerResult.elapsedMilliseconds then
-				VUHDO_updateOnUpdateSubSegmentMetrics(tSegmentName, tProfilerResult.elapsedMilliseconds * 1000);
-			end
+		VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, tDuration);
 
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				aStartTimes[3] = debugprofilestop();
-			end
-		else
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				aStartTimes[3] = debugprofilestop();
-			end
-
-			aSegmentFunction(aTimeDelta);
-
-			if VUHDO_HANDLER_PROFILING_ENABLED then
-				VUHDO_updateOnUpdateSubSegmentMetrics(tSegmentName, (debugprofilestop() - aStartTimes[3]) * 1000);
-
-				aStartTimes[3] = debugprofilestop();
-			end
-		end
-
-		return;
+		return tProfilerResult;
 
 	end
 
 
 
 	--
+	local tSegmentCallbacks = {
+		["segment1"] = function(aTimeDelta) VUHDO_handleSegment1(aTimeDelta); end,
+		["segment2A"] = function(aTimeDelta) VUHDO_handleSegment2A(aTimeDelta); end,
+		["segment2B"] = function(aTimeDelta) VUHDO_handleSegment2B(aTimeDelta); end,
+		["segment2C"] = function(aTimeDelta) VUHDO_handleSegment2C(aTimeDelta); end,
+		["segment2D"] = function(aTimeDelta) VUHDO_handleSegment2D(aTimeDelta); end,
+		["segment2F"] = function(aTimeDelta) VUHDO_handleSegment2F(aTimeDelta); end,
+		["segment2G"] = function(aTimeDelta) VUHDO_handleSegment2G(aTimeDelta); end,
+		["segment2H"] = function(aTimeDelta) VUHDO_handleSegment2H(aTimeDelta); end,
+		["segment2I"] = function(aTimeDelta) VUHDO_handleSegment2I(aTimeDelta); end,
+		["segment2J"] = function(aTimeDelta) VUHDO_handleSegment2J(aTimeDelta); end,
+		["segment2K"] = function(aTimeDelta) VUHDO_handleSegment2K(aTimeDelta); end,
+		["segment2L"] = function(aTimeDelta) VUHDO_handleSegment2L(aTimeDelta); end,
+		["segment2M"] = function(aTimeDelta) VUHDO_handleSegment2M(aTimeDelta); end,
+	};
 	local tStartTimes = {
 		[1] = -1, -- overall
 		[2] = -1, -- segment
@@ -2541,7 +2530,7 @@ do
 		-- These need to update very frequenly to not stutter
 		-- --------------------------------------------------
 
-		VUHDO_profileSegment(VUHDO_handleSegment1, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment1", tSegmentCallbacks["segment1"], aTimeDelta);
 
 		-- process deferred tasks once per frame
 		VUHDO_processDeferredTaskQueue();
@@ -2577,7 +2566,7 @@ do
 
 		-- Segment 2A - UI reloads
 
-		VUHDO_profileSegment(VUHDO_handleSegment2A, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2A", tSegmentCallbacks["segment2A"], aTimeDelta);
 
 		---------------------------------------------------
 		------------------------- below only if vars loaded
@@ -2591,11 +2580,11 @@ do
 
 		-- Segment 2B: Roster and core updates
 
-		VUHDO_profileSegment(VUHDO_handleSegment2B, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2B", tSegmentCallbacks["segment2B"], aTimeDelta);
 
 		-- Segment 2C: Roster and core updates
 
-		VUHDO_profileSegment(VUHDO_handleSegment2C, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2C", tSegmentCallbacks["segment2C"], aTimeDelta);
 
 		-- Segment 2D: Combat checks
 
@@ -2605,7 +2594,7 @@ do
 			return;
 		end
 
-		VUHDO_profileSegment(VUHDO_handleSegment2D, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2D", tSegmentCallbacks["segment2D"], aTimeDelta);
 
 		-- Segment 2E: Slow tasks
 
@@ -2636,40 +2625,42 @@ do
 
 		-- Segment 2F: Post-Combat Reload
 
-		VUHDO_profileSegment(VUHDO_handleSegment2F, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2F", tSegmentCallbacks["segment2F"], aTimeDelta);
 
 		-- automatic profiles, shield cleanup, hide generic blizz party
 		if VUHDO_checkResetTimer("CHECK_PROFILES", 3.1) then
 			-- Segment 2G: Auto profile detection
 
-			VUHDO_profileSegment(VUHDO_handleSegment2G, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment("segment2G", tSegmentCallbacks["segment2G"], aTimeDelta);
 
 			-- Segment 2H: Auto profile loading
 
-			VUHDO_profileSegment(VUHDO_handleSegment2H, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment("segment2H", tSegmentCallbacks["segment2H"], aTimeDelta);
 
 			-- Segment 2I: Hide Blizzard compact party frame
 
-			VUHDO_profileSegment(VUHDO_handleSegment2I, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment("segment2I", tSegmentCallbacks["segment2I"], aTimeDelta);
 
 			-- Segment 2J: Remove obsolete shields
 
-			VUHDO_profileSegment(VUHDO_handleSegment2J, aTimeDelta, tStartTimes);
+			VUHDO_profileSegment("segment2J", tSegmentCallbacks["segment2J"], aTimeDelta);
 		end
 
 		-- Segment 2K: Zones
 
-		VUHDO_profileSegment(VUHDO_handleSegment2K, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2K", tSegmentCallbacks["segment2K"], aTimeDelta);
 
 		-- Segment 2L: Inspect
 
-		VUHDO_profileSegment(VUHDO_handleSegment2L, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2L", tSegmentCallbacks["segment2L"], aTimeDelta);
 
 		-- Segment 2M: Macros
 
-		VUHDO_profileSegment(VUHDO_handleSegment2M, aTimeDelta, tStartTimes);
+		VUHDO_profileSegment("segment2M", tSegmentCallbacks["segment2M"], aTimeDelta);
 
 		VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+
+		VUHDO_flushProfilingBatch();
 
 		return;
 
@@ -2774,4 +2765,180 @@ do
 		return;
 
 	end
+end
+
+
+
+--
+function VUHDO_setDeferredRedrawEnabled(anIsEnabled, anIsQuiet)
+
+	VUHDO_CONFIG["USE_DEFERRED_REDRAW"] = anIsEnabled and true or false;
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_redrawPanel = _G["VUHDO_deferRedrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_deferRedrawAllPanels"];
+	else
+		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
+	end
+
+	if not anIsQuiet then
+		if anIsEnabled then
+			VUHDO_Msg("Deferred panel redraw is enabled.");
+		else
+			VUHDO_Msg("Deferred panel redraw is disabled.");
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_printDeferredRedrawStatus()
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_Msg("Deferred panel redraw is currently |cff00ff00ENABLED|r.");
+	else
+		VUHDO_Msg("Deferred panel redraw is currently |cffff0000DISABLED|r.");
+	end
+
+	return;
+
+end
+
+
+
+--
+local tSegmentName;
+local tDuration;
+function VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, aDuration)
+
+	if not VUHDO_HANDLER_PROFILING_ENABLED then
+		return;
+	end
+
+	VUHDO_HANDLER_PROFILING_BATCH_COUNT = VUHDO_HANDLER_PROFILING_BATCH_COUNT + 1;
+
+	tSegmentName = aSegmentName;
+	tDuration = aDuration;
+
+	VUHDO_HANDLER_PROFILING_PENDING_UPDATES[VUHDO_HANDLER_PROFILING_BATCH_COUNT] = {
+		["segment"] = tSegmentName,
+		["duration"] = tDuration
+	};
+
+	if VUHDO_HANDLER_PROFILING_BATCH_COUNT >= VUHDO_HANDLER_PROFILING_BATCH_SIZE then
+		VUHDO_processProfilingBatch();
+	end
+
+	return;
+
+end
+
+
+
+--
+local tUpdate;
+local tSegmentName;
+local tDuration;
+local tTracker;
+function VUHDO_processProfilingBatch()
+
+	if VUHDO_HANDLER_PROFILING_BATCH_COUNT == 0 then
+		return;
+	end
+
+	for tIndex = 1, VUHDO_HANDLER_PROFILING_BATCH_COUNT do
+		tUpdate = VUHDO_HANDLER_PROFILING_PENDING_UPDATES[tIndex];
+		tSegmentName = tUpdate["segment"];
+		tDuration = tUpdate["duration"];
+
+		if not VUHDO_HANDLER_PROFILING_METRICS[tSegmentName] then
+			VUHDO_HANDLER_PROFILING_METRICS[tSegmentName] = VUHDO_createPercentileTracker();
+		end
+
+		tTracker = VUHDO_HANDLER_PROFILING_METRICS[tSegmentName];
+		tTracker:update(tDuration);
+	end
+
+	VUHDO_HANDLER_PROFILING_BATCH_COUNT = 0;
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_flushProfilingBatch()
+
+	VUHDO_processProfilingBatch();
+
+	return;
+
+end
+
+
+
+--
+local tResult;
+local tPercentiles;
+local tTotal;
+local tCount;
+local tPercentile;
+local tKey;
+function VUHDO_getHandlerProfilingMetrics()
+
+	VUHDO_flushProfilingBatch();
+
+	tResult = { };
+
+	for tSegmentName, tTracker in pairs(VUHDO_HANDLER_PROFILING_METRICS) do
+		tPercentiles = tTracker:getPercentiles();
+		tTotal = 0;
+		tCount = 0;
+
+		for tIndex = 1, tTracker["bufferSize"] do
+			if tTracker["buffer"][tIndex] then
+				tTotal = tTotal + tTracker["buffer"][tIndex];
+				tCount = tCount + 1;
+			end
+		end
+
+		tResult[tSegmentName] = {
+			["Total"] = tTotal,
+			["Count"] = tCount
+		};
+
+		for tIndex = 1, #tTracker["percentiles"] do
+			tPercentile = tTracker["percentiles"][tIndex];
+			tKey = "tm" .. floor(tPercentile * 100);
+
+			tResult[tSegmentName][tKey] = tPercentiles[tKey] or 0;
+		end
+	end
+
+	return tResult;
+
+end
+
+
+
+--
+local tSortedKeys;
+function VUHDO_sortSeg2SegmentKeys(aSeg2Segments)
+
+	tSortedKeys = { };
+
+	for tKey in pairs(aSeg2Segments) do
+		tinsert(tSortedKeys, tKey);
+	end
+
+	table.sort(tSortedKeys);
+
+	return tSortedKeys;
+
 end

@@ -1346,9 +1346,6 @@ VUHDO_I18N_BLACKLIST_KEY_MODIFIES = "Модификатор чёрного сп�
 
 VUHDO_I18N_NICKNAME = "Details!\nНик"
 
-VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TEXT = "Показывать только\nдля дружественных";
-VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TOOLTIP = "Показывать дэбафы только для дружественных юнитов";
-
 VUHDO_I18N_SHOW_OVERSHIELD = "Избыточный\nщит";
 VUHDO_I18N_OVERSHIELD_BAR = "Избыточный щит";
 

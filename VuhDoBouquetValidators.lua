@@ -792,20 +792,40 @@ end
 
 --
 local function VUHDO_classColorIfActiveValidator(anInfo, _)
+
+	if not VUHDO_USER_CLASS_COLORS then
+		VUHDO_initClassColors();
+	end
+
 	if VUHDO_getIsCurrentBouquetActive() then
-		return true, nil, -1, -1, -1,
-			VUHDO_copyColor(VUHDO_USER_CLASS_COLORS[anInfo["classId"]]);
+		if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[anInfo["classId"]] then
+			return true, nil, -1, -1, -1,
+				VUHDO_copyColor(VUHDO_USER_CLASS_COLORS[anInfo["classId"]]);
+		else
+			return true, nil, -1, -1, -1, nil;
+		end
 	else
 		return false, nil, -1, -1, -1;
 	end
+
 end
 
 
 
 --
 local function VUHDO_classColorValidator(anInfo, _)
-	return true, nil, -1, -1, -1,
-		VUHDO_copyColor(VUHDO_USER_CLASS_COLORS[anInfo["classId"]]);
+
+	if not VUHDO_USER_CLASS_COLORS then
+		VUHDO_initClassColors();
+	end
+
+	if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[anInfo["classId"]] then
+		return true, nil, -1, -1, -1,
+			VUHDO_copyColor(VUHDO_USER_CLASS_COLORS[anInfo["classId"]]);
+	else
+		return true, nil, -1, -1, -1, nil;
+	end
+
 end
 
 
