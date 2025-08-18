@@ -274,7 +274,7 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 
 		if tIsIconGlow then
 			VUHDO_LibCustomGlow.PixelGlow_Start(
-				VUHDO_getBarIconFrame(aButton, anIconIndex), 
+				VUHDO_getBarIconButton(aButton, anIconIndex),
 				tCuDeStoConfig["iconGlowColor"] and { 
 					tCuDeStoConfig["iconGlowColor"]["R"],
 					tCuDeStoConfig["iconGlowColor"]["G"],
