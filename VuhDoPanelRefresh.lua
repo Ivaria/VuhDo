@@ -109,15 +109,13 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			if tButton["raidid"] ~= tUnit then
 				VUHDO_setupAllHealButtonAttributes(tButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
 
-				for tCnt = 40, sLastDebuffIcon do
-					tDebuffFrame = VUHDO_getBarIconFrame(tButton, tCnt);
-					if tDebuffFrame then
-						VUHDO_setupAllHealButtonAttributes(tDebuffFrame, tUnit, false, 70 == tModelId, false, true); -- VUHDO_ID_VEHICLES
-					end
+				if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
+					VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tButton), tUnit);
 				end
-				
-				VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tButton), tUnit);
-				VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tButton), tUnit);
+
+				if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
+					VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tButton), tUnit);
+				end
 			end
 
 			tX, tY = VUHDO_getHealButtonPos(tColIdx, tGroupIdx, aPanelNum);
@@ -132,7 +130,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			-- Bei Profil-Wechseln existiert der Button schon, hat aber die falsche Größe
 			VUHDO_initLocalVars(aPanelNum);
 			VUHDO_initHealButton(tButton, aPanelNum);
-			VUHDO_positionHealButton(tButton);
+			VUHDO_positionHealButton(tButton, aPanelNum);
 		end
 
 		tColIdx = tColIdx + 1;
@@ -143,8 +141,8 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 		if not tButton then break; end
 
 		tButton["raidid"] = nil;
-		tButton:SetAttribute("unit", nil);
-		tButton:Hide();
+		VUHDO_safeSetAttribute(tButton, "unit", nil);
+		VUHDO_PixelUtil.Hide(tButton);
 		tButtonIdx = tButtonIdx + 1;
 	end
 end
@@ -155,7 +153,7 @@ end
 local function VUHDO_refreshInitPanel(aPanel, aPanelNum)
 	VUHDO_PixelUtil.SetHeight(aPanel, VUHDO_getHealPanelHeight(aPanelNum));
 	VUHDO_PixelUtil.SetWidth(aPanel, VUHDO_getHealPanelWidth(aPanelNum));
-	aPanel:StopMovingOrSizing();
+	VUHDO_PixelUtil.StopMovingOrSizing(aPanel);
 	aPanel["isMoving"] = false;
 end
 
@@ -167,7 +165,7 @@ local function VUHDO_refreshPanel(aPanelNum)
 	tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
 
 	if VUHDO_hasPanelButtons(aPanelNum) then
-		tPanel:Show();
+		VUHDO_PixelUtil.Show(tPanel);
 
 		VUHDO_refreshInitPanel(tPanel, aPanelNum);
 		VUHDO_positionTableHeaders(tPanel, aPanelNum);
@@ -188,13 +186,13 @@ local function VUHDO_refreshAllPanels()
 		if VUHDO_isPanelVisible(tCnt) then
 			VUHDO_refreshPanel(tCnt);
 		else
-			VUHDO_getActionPanelOrStub(tCnt):Hide();
+			VUHDO_PixelUtil.Hide(VUHDO_getActionPanelOrStub(tCnt));
 		end
 	end
 
 	VUHDO_updateAllRaidBars();
 	VUHDO_updatePanelVisibility();
-	VuhDoGcdStatusBar:Hide();
+	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
 end
 
 

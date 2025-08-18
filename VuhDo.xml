@@ -16,6 +16,7 @@
 	<Script file="VuhDoGuiConst.lua" />
 	<Script file="VuhDoToolbox.lua" />
 	<Script file="VuhDoTask.lua" />
+	<Script file="VuhDoPercentile.lua" />
 	<Script file="VuhDoBuffConst.lua" />
 	<Script file="VuhDoDebuffConst.lua" />
 	<Script file="VuhDoDebuffConstBleed.lua" />

@@ -35,6 +35,7 @@ Bugfixes:
   
 Improvements:  
 -- Incoming spell trace icons now display cast time as time remaining  
+-- Bump TOC interface for 11.2.0  
   
   
 --------------------------------------------------------------  
