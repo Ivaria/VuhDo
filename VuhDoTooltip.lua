@@ -139,7 +139,7 @@ local function VUHDO_initTooltip()
 	if VUHDO_TT_RESET or tFixPos then
 		VUHDO_TT_RESET = false;
 
-		VuhDoTooltip:SetScale(tConfig["SCALE"]);
+		VUHDO_PixelUtil.SetScale(VuhDoTooltip, tConfig["SCALE"]);
 		VuhDoTooltip:SetBackdropColor(VUHDO_backColor(tConfig["BACKGROUND"]));
 		VuhDoTooltip:SetBackdropBorderColor(VUHDO_backColor(tConfig["BORDER"]));
 
@@ -411,7 +411,7 @@ end
 
 --
 function VuhDoTooltipOnMouseUp(aTooltip)
-	aTooltip:StopMovingOrSizing();
+	VUHDO_PixelUtil.StopMovingOrSizing(aTooltip);
 
 	local tX, tY, tRelative, tOrientation;
 	local tPosition = VUHDO_PANEL_SETUP[DESIGN_MISC_PANEL_NUM]["TOOLTIP"];

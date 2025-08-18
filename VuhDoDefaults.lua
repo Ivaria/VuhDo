@@ -627,6 +627,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["LOCK_IN_FIGHT"] = true,
 	["PARSE_COMBAT_LOG"] = false,
 	["HIDE_EMPTY_BUTTONS"] = false,
+	["USE_DEFERRED_REDRAW"] = true,
 
 	["MODE"] = VUHDO_MODE_NEUTRAL,
 	["EMERGENCY_TRIGGER"] = 100,
@@ -961,6 +962,14 @@ function VUHDO_loadDefaultConfig()
 
 	VUHDO_DEFAULT_CONFIG = VUHDO_decompressIfCompressed(VUHDO_DEFAULT_CONFIG);
 	VUHDO_CONFIG = VUHDO_ensureSanity("VUHDO_CONFIG", VUHDO_CONFIG, VUHDO_DEFAULT_CONFIG);
+
+	local tBooleanAllowList = { "USE_DEFERRED_REDRAW", };
+
+	for _, tKey in pairs(tBooleanAllowList) do
+		if VUHDO_DEFAULT_CONFIG[tKey] ~= nil and type(VUHDO_DEFAULT_CONFIG[tKey]) == "boolean" and VUHDO_CONFIG[tKey] == nil then
+			VUHDO_CONFIG[tKey] = VUHDO_DEFAULT_CONFIG[tKey];
+		end
+	end
 
 	-- deprecate "show only for friendly" option in favor of distinct show on friendly and hostile options
 	if VUHDO_CONFIG["CUSTOM_DEBUFF"] and VUHDO_DEFAULT_CONFIG["CUSTOM_DEBUFF"] then

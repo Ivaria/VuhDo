@@ -23,6 +23,8 @@ local VUHDO_getHealthBar;
 local VUHDO_setupSmartCast;
 local VUHDO_updateDirectionFrame;
 local VUHDO_getCurrentKeyModifierString;
+local VUHDO_redrawPanel;
+local VUHDO_redrawAllPanels;
 
 
 
@@ -33,6 +35,7 @@ local VUHDO_CONFIG;
 local VUHDO_INTERNAL_TOGGLES;
 local VUHDO_RAID;
 function VUHDO_actionEventHandlerInitLocalOverrides()
+
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_highlightClusterFor = _G["VUHDO_highlightClusterFor"];
 	VUHDO_showTooltip = _G["VUHDO_showTooltip"];
@@ -50,6 +53,17 @@ function VUHDO_actionEventHandlerInitLocalOverrides()
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
+
+	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+		VUHDO_redrawPanel = _G["VUHDO_deferRedrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_deferRedrawAllPanels"];
+	else
+		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
+		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
+	end
+
+	return;
+
 end
 
 
@@ -68,7 +82,7 @@ local function VUHDO_placePlayerIcon(aButton, anIconNo, anIndex)
 	VUHDO_getBarIconCharge(aButton, anIconNo):Hide();
 
 	local tFrame = VUHDO_getBarIconFrame(aButton, anIconNo);
-	tFrame:SetScale(1);
+	VUHDO_PixelUtil.SetScale(tFrame, 1);
 	tFrame:Show();
 
 	local anIcon = VUHDO_getBarIcon(aButton, anIconNo);
@@ -178,7 +192,7 @@ function VUHDO_hideAllPlayerIcons()
 		for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
 			if tButton:IsShown() then
 				VUHDO_initButtonStatics(tButton, tPanelNum);
-				VUHDO_initAllHotIcons();
+				VUHDO_initAllHotIcons(tPanelNum);
 			end
 		end
 	end
@@ -368,7 +382,7 @@ function VUHDO_startMoving(aPanel)
 	if (IsMouseButtonDown(1) and VUHDO_mayMoveHealPanels()) then
 		if (not aPanel["isMoving"]) then
 			aPanel["isMoving"] = true;
-			if not InCombatLockdown() then aPanel:SetFrameStrata("TOOLTIP"); end
+			VUHDO_PixelUtil.SetFrameStrata(aPanel, "TOOLTIP");
 			aPanel:StartMoving();
 		end
 	elseif IsMouseButtonDown(2) and not InCombatLockdown()
@@ -384,9 +398,9 @@ end
 function VUHDO_stopMoving(aPanel)
 
 	if not InCombatLockdown() then
-		aPanel:StopMovingOrSizing();
+		VUHDO_PixelUtil.StopMovingOrSizing(aPanel);
 
-		aPanel:SetFrameStrata(VUHDO_PANEL_SETUP[VUHDO_getPanelNum(aPanel)]["frameStrata"]);
+		VUHDO_PixelUtil.SetFrameStrata(aPanel, VUHDO_PANEL_SETUP[VUHDO_getPanelNum(aPanel)]["frameStrata"]);
 	end
 
 	aPanel["isMoving"] = false;
