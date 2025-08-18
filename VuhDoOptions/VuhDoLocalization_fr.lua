@@ -1078,9 +1078,11 @@ VUHDO_I18N_BUTTON_FACADE = "Masque";
 VUHDO_I18N_MANA_BAR_HEIGHT = "Hauteur de la barre de mana";
 VUHDO_I18N_SIDE_LEFT_WIDTH = "Largeur du c\195\180t\195\169 gauche";
 VUHDO_I18N_SIDE_RIGHT_WIDTH = "Largeur du c\195\180t\195\169 droit";
+
 VUHDO_I18N_AMBIGUOUS_MACRO = "ATTENTION: Le nom de la macro |cffffffff\"%s\"|r est ambigu avec un nom de sort! Veuillez renommer la macro!";
 VUHDO_I18N_KEYBOARD_GLOBAL = "Touches \nglobales";
 VUHDO_I18N_KEYBOARD_LOCAL = "Touches \nlocales";
+
 VUHDO_I18N_LOCAL_KEY_ASSIGNMENTS = "Assignations de clavier locales";
 VUHDO_I18N_S_M_C_OR_CONSTANT = "Sort, macro ou nom personnalis\195\169 ou cible/assistance/focus";
 VUHDO_I18N_CURRENT_ASSIGNMENT = "Assignation actuelle";
@@ -1138,6 +1140,7 @@ VUHDO_I18N_NEUTRAL = "Neutre";
 VUHDO_I18N_ENEMY = "Ennemi";
 VUHDO_I18N_TAPPED = "Tapp\195\169";
 VUHDO_I18N_SQUARE_7 = "Carr\195\169 7";
+
 VUHDO_I18N_HP = "PV";
 VUHDO_I18N_KNOWN_ONLY = "connus \nseulement";
 VUHDO_I18N_MINUS_INCOMING = "Entrant";
@@ -1145,16 +1148,20 @@ VUHDO_I18N_AOE_ADVICE = "Conseil AoE";
 VUHDO_I18N_CONE = "C\195\180ne";
 VUHDO_I18N_DEGREES = "Degr\195\169s";
 VUHDO_I18N_RAID_MANAGER = "Gestionnaire de raid";
+
 VUHDO_I18N_CAST_TIME_ONLY = "Seulement \nnon Instant";
 VUHDO_I18N_EMPTY_BUTTONS = "Boutons\nvides";
 VUHDO_I18N_HEALTH_COLOR = "Couleur\nde vie";
+
 VUHDO_I18N_HIDE = "Cacher";
 VUHDO_I18N_LEAVE_ALONE = "Laisser tel quel";
 VUHDO_I18N_READY_CHECK = "Ready\nCheck";
+
 VUHDO_I18N_HIDE_OUT_OF_COMBAT = "Uniquement \nen combat";
 VUHDO_I18N_IMPORT = "Importer";
 VUHDO_I18N_IMPORT_STRING_INVALID = "La cha\195\174ne d'importation \195\169tait invalide.";
 VUHDO_I18N_REALLY_IMPORT = "Voulez-vous vraiment importer?\n\nVous devriez uniquement importer des cha\195\174nes de sources connues et\nr\195\169put\195\169es. Ne jamais importer une cha\195\174ne dont la\nsource n'est pas fiable.";
+
 VUHDO_I18N_LUNAR_POWER = "Pouvoir lunaire";
 VUHDO_I18N_MAELSTROM = "Tourbillon";
 VUHDO_I18N_INSANITY = "Folie";
@@ -1162,23 +1169,28 @@ VUHDO_I18N_FURY = "Fureur";
 VUHDO_I18N_PAIN = "Douleur";
 VUHDO_I18N_SPEC_3 = "Sp\195\169c. 3";
 VUHDO_I18N_SPEC_4 = "Sp\195\169c. 4";
+
 VUHDO_I18N_ANNOUNCE_MASS_RES = "Annonce de\nR\195\169surrection \"de masse\"";
+
 VUHDO_I18N_SPELL_TRACE = "Trace de sort";
 VUHDO_I18N_SPELL_TRACE_EDIT_BOX = "Entrez le nom ou l'ID du sort \195\160 tracer";
 VUHDO_I18N_SPELL_TRACE_LIST = "Liste de trace de sort";
 VUHDO_I18N_DURATION = "Dur\195\169e";
 VUHDO_I18N_SEC = "sec";
 VUHDO_I18N_TRAIL_OF_LIGHT = "Tra\195\174n\195\169e\nde lumi\195\168re";
+
 VUHDO_I18N_BAR_GLOW_COLOR = "Lueur \nde la barre";
 VUHDO_I18N_ICON_GLOW_COLOR = "Lueur \nde l'ic\195\180ne";
 VUHDO_I18N_BLACKLIST_KEY_MODIFIES = "Touche modificatrice de la liste d'ignor\195\169s";
+
 VUHDO_I18N_NICKNAME = "D\195\169tails!\nSurnom";
-VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TEXT = "Montrer uniquement\npour les amis";
-VUHDO_I18N_DEBUFF_SHOW_ONLY_FOR_FRIENDLY_TOOLTIP = "Montre les d\195\169buffs uniquement pour les unit\195\169s amies";
+
 VUHDO_I18N_SHOW_OVERSHIELD = "Montrer\nSur-bouclier";
 VUHDO_I18N_OVERSHIELD_BAR = "Barre de sur-bouclier";
+
 VUHDO_I18N_SHOW_HEAL_ABSORB = "Montrer\nAbsorption \nde soins";
 VUHDO_I18N_HEAL_ABSORB_BAR = "Barre d'absorption de soins";
+
 VUHDO_I18N_PLAYER = "Unit\195\169 du joueur";
 VUHDO_I18N_TARGET = "Unit\195\169 \nde la cible";
 VUHDO_I18N_TARGET_TARGET = "Unit\195\169 de la cible de la cible";
@@ -1192,29 +1204,42 @@ VUHDO_I18N_FOCUS_HARM = "Unit\195\169 de focus (hostile uniquement)";
 VUHDO_I18N_MOUSEOVER_HARM = "Unit\195\169 de survol (hostile uniquement)";
 VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Unit\195\169 de la cible de survol (hostile uniquement)";
 VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Unit\195\169 de la cible de la cible de survol (hostile uniquement)";
+
 VUHDO_I18N_CLOCK = "Horloge";
+
 VUHDO_I18N_TEXT_ONLY = "Texte \nuniquement";
+
 VUHDO_I18N_SHOW_FRIENDLY = "Montrer\nAmi";
 VUHDO_I18N_SHOW_ENEMY = "Montrer\nEnnemi";
 VUHDO_I18N_SHOW_ALL = "Montrer tout";
 VUHDO_I18N_BOSS_ONLY = "Boss \nuniquement";
+
 VUHDO_I18N_X = "X";
 VUHDO_I18N_Y = "Y";
+
 VUHDO_I18N_PRIVATE_AURAS = "Auras priv\195\169es";
+
 VUHDO_I18N_PETS_LAST = "Familiers \nen dernier";
+
 VUHDO_I18N_SHOW_EFFECTIVE = "Montrer\nEfficace";
 VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "Liste d'ignor\195\169s des d\195\169buffs import\195\169e avec succ\195\168s.";
+
 VUHDO_I18N_BLEED = "Saignement";
+
 VUHDO_I18N_SQUARE_8 = "Carr\195\169 8";
 VUHDO_I18N_SQUARE_9 = "Carr\195\169 9";
 VUHDO_I18N_SHOW_ON_FRIENDLY = "Montrer sur\nami";
 VUHDO_I18N_SHOW_ON_HOSTILE = "Montrer sur\nhostile";
 VUHDO_I18N_HOSTILE_SPELL_SOURCE = "Source de sort d'unit\195\169 hostile";
+
 VUHDO_I18N_SEARCH_OPTIONS = "Options de recherche";
+
 VUHDO_I18N_CLASS_GRADIENT_COLORS = "Couleurs de d\195\169grad\195\169 de classe";
 VUHDO_I18N_CLASS_GRADIENTS = "D\195\169grad\195\169s\nde classe";
 VUHDO_I18N_LIFE_GRADIENT = "D\195\169grad\195\169\nde vie";
 VUHDO_I18N_MAX_COLOR = "Couleur max";
+
 VUHDO_I18N_ENRAGE = "Enrager";
 VUHDO_I18N_PURGEABLE_BUFFS = "Buffs\npurgeables";
+
 VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Uniquement \nles slots";
