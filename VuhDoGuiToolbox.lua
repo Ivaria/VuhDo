@@ -202,14 +202,34 @@ end
 
 --
 function VUHDO_getClassColor(anInfo)
-	return VUHDO_USER_CLASS_COLORS[anInfo["classId"]];
+
+	if not VUHDO_USER_CLASS_COLORS then
+		VUHDO_initClassColors();
+	end
+
+	if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[anInfo["classId"]] then
+		return VUHDO_USER_CLASS_COLORS[anInfo["classId"]];
+	else
+		return nil;
+	end
+
 end
 
 
 
 --
 function VUHDO_getClassColorByModelId(aModelId)
-	return VUHDO_USER_CLASS_COLORS[aModelId];
+
+	if not VUHDO_USER_CLASS_COLORS then
+		VUHDO_initClassColors();
+	end
+
+	if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[aModelId] then
+		return VUHDO_USER_CLASS_COLORS[aModelId];
+	else
+		return nil;
+	end
+
 end
 
 

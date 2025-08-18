@@ -1876,9 +1876,9 @@ function VUHDO_loadVariables()
 	VUHDO_setDeferredRedrawEnabled(VUHDO_CONFIG["USE_DEFERRED_REDRAW"], true);
 	VUHDO_loadSpellArray();
 	VUHDO_loadDefaultPanelSetup();
-	VUHDO_panelRedrawInitLocalOverrides();
 	VUHDO_initBuffSettings();
 	VUHDO_loadDefaultBouquets();
+	VUHDO_panelRedrawInitLocalOverrides();
 	VUHDO_initClassColors();
 	VUHDO_initTextProviderConfig();
 

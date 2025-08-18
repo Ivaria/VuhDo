@@ -96,7 +96,27 @@ local tIsGradient;
 local tClassId;
 local tMaxColor;
 local tDestMaxColor = { ["useBackground"] = true, ["useOpacity"] = true };
+
+
+
+--
+local function VUHDO_ensureClassColorsInitialized()
+
+	if not VUHDO_USER_CLASS_COLORS or not VUHDO_USER_CLASS_GRADIENT_COLORS then
+		VUHDO_initClassColors();
+	end
+
+	return;
+
+end
+
+
+
+--
 local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue)
+
+	VUHDO_ensureClassColorsInitialized();
+
 	tRadio = anEntry["custom"]["radio"];
 
 	if 1 == tRadio then -- solid
@@ -127,8 +147,13 @@ local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue
 		tIsGradient = anEntry["custom"]["isClassGradient"];
 
 		if tIsGradient then
-			tColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["min"] or anEntry["color"];
-			tMaxColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["max"] or anEntry["custom"]["maxColor"];
+			if VUHDO_USER_CLASS_GRADIENT_COLORS and VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId] then
+				tColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["min"] or anEntry["color"];
+				tMaxColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["max"] or anEntry["custom"]["maxColor"];
+			else
+				tColor = anEntry["color"];
+				tMaxColor = anEntry["custom"]["maxColor"];
+			end
 
 			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
 				= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
@@ -142,7 +167,11 @@ local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue
 				return tDestColor, nil;
 			end
 		else
-			tColor = VUHDO_USER_CLASS_COLORS[tClassId] or anEntry["color"];
+			if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[tClassId] then
+				tColor = VUHDO_USER_CLASS_COLORS[tClassId] or anEntry["color"];
+			else
+				tColor = anEntry["color"];
+			end
 
 			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
 				= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
@@ -177,6 +206,9 @@ local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue
 
 		return tDestColor, nil;
 	end
+
+	return;
+
 end
 
 
@@ -184,7 +216,9 @@ end
 --
 local txActive;
 function VUHDO_getIsCurrentBouquetActive()
+
 	return txActive;
+
 end
 
 
@@ -193,10 +227,13 @@ end
 local txColor = { };
 local tIsTxColorInit = false;
 function VUHDO_getCurrentBouquetColor()
+
 	if (not tIsTxColorInit) then
 		twipe(txColor);
 	end
+
 	return txColor;
+
 end
 
 
@@ -218,7 +255,9 @@ end
 --
 local txCounter;
 function VUHDO_getCurrentBouquetStacks()
+
 	return txCounter;
+
 end
 
 
@@ -226,7 +265,9 @@ end
 --
 local txTimer;
 function VUHDO_getCurrentBouquetTimer()
+
 	return txTimer;
+
 end
 
 
@@ -269,7 +310,6 @@ local tFactor;
 local tMaxColor;
 local tInfo, tUnit;
 local tEmptyInfo = { };
-
 local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 
 	tUnit = (VUHDO_RAID[aUnit] or tEmptyInfo)["isVehicle"] and VUHDO_RAID[aUnit]["petUnit"] or aUnit;

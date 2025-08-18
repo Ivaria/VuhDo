@@ -661,9 +661,12 @@ local VUHDO_CUSTOM_INFO = VUHDO_CUSTOM_INFO;
 --
 local tUnit;
 function VUHDO_getDisplayUnit(aButton)
+
 	tUnit = aButton:GetAttribute("unit");
 
-	if strfind(tUnit, "target", 1, true) and tUnit ~= "target" then
+	if not tUnit then
+		return nil, nil;
+	elseif strfind(tUnit, "target", 1, true) and tUnit ~= "target" then
 		if not VUHDO_CUSTOM_INFO["fixResolveId"] then
 			return tUnit, VUHDO_CUSTOM_INFO;
 		else
@@ -673,8 +676,12 @@ function VUHDO_getDisplayUnit(aButton)
 		if VUHDO_RAID[tUnit] and VUHDO_RAID[tUnit]["isVehicle"] then
 			tUnit = VUHDO_RAID[tUnit]["petUnit"];
 		end
+
 		return tUnit, VUHDO_RAID[tUnit];
 	end
+
+	return;
+
 end
 local VUHDO_getDisplayUnit = VUHDO_getDisplayUnit;
 
@@ -717,9 +724,9 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 	if not tInfo or not tInfo["name"] then
 		VUHDO_getBarText(tHealthBar):SetText(
-			   "focus" == tUnit and VUHDO_I18N_NO_FOCUS
-			or "target" == tUnit and VUHDO_I18N_NO_TARGET
-			or VUHDO_isBossUnit(tUnit) and VUHDO_I18N_NO_BOSS
+			   (tUnit and "focus" == tUnit) and VUHDO_I18N_NO_FOCUS
+			or (tUnit and "target" == tUnit) and VUHDO_I18N_NO_TARGET
+			or (tUnit and VUHDO_isBossUnit(tUnit)) and VUHDO_I18N_NO_BOSS
 			or VUHDO_I18N_NOT_AVAILABLE);
 
 		VUHDO_getLifeText(tHealthBar):SetText("");

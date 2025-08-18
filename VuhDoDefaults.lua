@@ -963,6 +963,14 @@ function VUHDO_loadDefaultConfig()
 	VUHDO_DEFAULT_CONFIG = VUHDO_decompressIfCompressed(VUHDO_DEFAULT_CONFIG);
 	VUHDO_CONFIG = VUHDO_ensureSanity("VUHDO_CONFIG", VUHDO_CONFIG, VUHDO_DEFAULT_CONFIG);
 
+	local tBooleanAllowList = { "USE_DEFERRED_REDRAW", };
+
+	for _, tKey in pairs(tBooleanAllowList) do
+		if VUHDO_DEFAULT_CONFIG[tKey] ~= nil and type(VUHDO_DEFAULT_CONFIG[tKey]) == "boolean" and VUHDO_CONFIG[tKey] == nil then
+			VUHDO_CONFIG[tKey] = VUHDO_DEFAULT_CONFIG[tKey];
+		end
+	end
+
 	-- deprecate "show only for friendly" option in favor of distinct show on friendly and hostile options
 	if VUHDO_CONFIG["CUSTOM_DEBUFF"] and VUHDO_DEFAULT_CONFIG["CUSTOM_DEBUFF"] then
 		-- FIXME: VUHDO_ensureSanity() skips creating booleans but fixing this breaks some models
