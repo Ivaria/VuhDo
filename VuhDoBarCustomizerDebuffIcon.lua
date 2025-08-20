@@ -99,13 +99,14 @@ end
 
 
 --
+local tBlacklistModi;
 local function VUHDO_areBlacklistModifiersPressed()
 
 	if not VUHDO_CONFIG or not VUHDO_CONFIG["CUSTOM_DEBUFF"] then
 		return IsAltKeyDown() and IsControlKeyDown() and IsShiftKeyDown();
 	end
 
-	local tBlacklistModi = VUHDO_CONFIG["CUSTOM_DEBUFF"]["blacklistModi"] or "ALT-CTRL-SHIFT";
+	tBlacklistModi = VUHDO_CONFIG["CUSTOM_DEBUFF"]["blacklistModi"] or "ALT-CTRL-SHIFT";
 
 	if tBlacklistModi == "OFF" then
 		return false;
@@ -338,10 +339,9 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		end
 	end
 
-	if tIsAnim then
-		tButton = VUHDO_getBarIconButton(aButton, anIconIndex);
-		tBaseScale = VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7;
+	tButton = VUHDO_getBarIconButton(aButton, anIconIndex);
 
+	if tIsAnim then
 		if tAliveTime <= 0.5 then
 			tScaleFactor = 1 + tAliveTime * 2;
 		elseif tAliveTime <= 1.0 then
@@ -350,12 +350,9 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 			tScaleFactor = 1;
 		end
 
-		tFinalScale = tBaseScale * tScaleFactor;
-		VUHDO_PixelUtil.SetScale(tButton, tFinalScale);
+		VUHDO_PixelUtil.SetScale(tButton, tScaleFactor);
 	else -- Falls Custom Debuff vorher Animation hatte und dieser nicht
-		tButton = VUHDO_getBarIconButton(aButton, anIconIndex);
-		tBaseScale = VUHDO_CONFIG["CUSTOM_DEBUFF"]["scale"] * 0.7;
-		VUHDO_PixelUtil.SetScale(tButton, tBaseScale);
+		VUHDO_PixelUtil.SetScale(tButton, 1);
 	end
 
 	if sIsName and tAliveTime > 2 then
@@ -370,6 +367,9 @@ end
 
 --
 local tNow;
+local tUnit;
+local tAllDebuffInfos;
+local tDebuffInfo;
 function VUHDO_updateAllDebuffIcons(anIsFrequent)
 
 	tNow = GetTime();
@@ -393,6 +393,7 @@ end
 --
 local tNow;
 local tUnitDebuffInfos;
+local tDebuffInfo;
 function VUHDO_updateUnitDebuffIcons(aUnit, anIsFrequent)
 
 	if not aUnit or not VUHDO_DEBUFF_ICONS then
@@ -420,6 +421,7 @@ end
 
 
 --
+local tUnit;
 function VUHDO_deferUpdateAllDebuffIcons(anIsFrequent, aPriority)
 
 	if not VUHDO_DEBUFF_ICONS then
@@ -523,6 +525,7 @@ end
 local tSlot;
 local tIconInfo;
 local tFrame;
+local tButton;
 function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
 
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
@@ -559,7 +562,7 @@ end
 --
 local tSlot;
 local tIconArray;
-local tAllButtons2;
+local tAllButtons;
 local tFrame;
 function VUHDO_removeDebuffIcon(aUnit, anAuraInstanceId)
 
@@ -579,16 +582,16 @@ function VUHDO_removeDebuffIcon(aUnit, anAuraInstanceId)
 		return;
 	end
 
-	tAllButtons2 = VUHDO_getUnitButtons(aUnit);
+	tAllButtons = VUHDO_getUnitButtons(aUnit);
 
-	if tAllButtons2 then
-		for _, tButton2 in pairs(tAllButtons2) do
-			VUHDO_LibCustomGlow.PixelGlow_Stop(tButton2, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
+	if tAllButtons then
+		for _, tButton in pairs(tAllButtons) do
+			VUHDO_LibCustomGlow.PixelGlow_Stop(tButton, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
 
-			tFrame = VUHDO_getBarIconFrame(tButton2, tSlot + 39);
+			tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
 
 			if tFrame then
-				VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+				VUHDO_LibCustomGlow.PixelGlow_Stop(VUHDO_getBarIconButton(tButton, tSlot + 39), VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
 
 				tFrame:SetAlpha(0);
 
@@ -613,22 +616,25 @@ end
 
 --
 local tFrame;
+local tAllButtons;
+local tButton;
+local tIconArray;
 function VUHDO_removeAllDebuffIcons(aUnit)
 
-	tAllButtons3 = VUHDO_getUnitButtons(aUnit);
+	tAllButtons = VUHDO_getUnitButtons(aUnit);
 
-	if not tAllButtons3 then
+	if not tAllButtons then
 		return;
 	end
 
-	for _, tButton3 in pairs(tAllButtons3) do
-		VUHDO_LibCustomGlow.PixelGlow_Stop(tButton3, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
+	for _, tButton in pairs(tAllButtons) do
+		VUHDO_LibCustomGlow.PixelGlow_Stop(tButton, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
 
-		for tCnt3 = 40, 39 + sMaxIcons do
-			tFrame = VUHDO_getBarIconFrame(tButton3, tCnt3);
+		for tCnt = 40, 39 + sMaxIcons do
+			tFrame = VUHDO_getBarIconFrame(tButton, tCnt);
 
 			if tFrame then
-				VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+				VUHDO_LibCustomGlow.PixelGlow_Stop(VUHDO_getBarIconButton(tButton, tCnt), VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
 
 				tFrame:SetAlpha(0);
 				
