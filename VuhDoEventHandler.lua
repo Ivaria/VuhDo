@@ -1456,6 +1456,7 @@ do
 	local tName;
 	local tUnit;
 	local tSubCommand;
+	local tPanelNum;
 	local tHelpText;
 	function VUHDO_slashCmd(aCommand)
 
@@ -1718,6 +1719,10 @@ do
 				VUHDO_pixelShowScale();
 			elseif tSubCommand == "cache" then
 				VUHDO_pixelPrintCacheStats();
+			elseif tSubCommand == "validate" then
+				tPanelNum = tonumber(tParsedTexts[3]);
+
+				VUHDO_pixelValidate(tPanelNum);
 			else
 				VUHDO_pixelHelp();
 			end
