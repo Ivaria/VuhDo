@@ -525,7 +525,6 @@ end
 local tSlot;
 local tIconInfo;
 local tFrame;
-local tButton;
 function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
 
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
