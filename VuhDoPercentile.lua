@@ -7,34 +7,57 @@ local tsort = table.sort;
 
 
 --
+local tPercentiles;
+local tBufferSize;
 local tPercentileTracker;
-function VUHDO_createPercentileTracker(aPercentiles)
+local tPercentile;
+local tKey;
+function VUHDO_createPercentileTracker(aBufferSize, aPercentiles)
+
+	if not aBufferSize then
+		tBufferSize = 1000;
+	else
+		tBufferSize = aBufferSize;
+	end
 
 	if not aPercentiles then
-		aPercentiles = { 0.5, 0.8, 0.9, 0.99, 1.0 };
+		tPercentiles = { 0.5, 0.8, 0.9, 0.99, 1.0 };
+	else
+		tPercentiles = aPercentiles;
 	end
 
 	tPercentileTracker = {
-		["percentiles"] = aPercentiles,
+		["percentiles"] = tPercentiles,
 		["buffer"] = { },
-		["bufferSize"] = 1000,
+		["bufferSize"] = tBufferSize,
 		["nextIndex"] = 1,
 		["isFull"] = false,
 		["maxValue"] = 0,
 		["totalCount"] = 0,
+		["cumulativeTotal"] = 0,
 		["sorted"] = nil,
 		["lastSortCount"] = 0,
 		["sortThreshold"] = 100,
 		["resultCache"] = { },
 	};
 
-	for tIndex = 1, #aPercentiles do
-		local tPercentile = aPercentiles[tIndex];
-		local tKey = "tm" .. floor(tPercentile * 100);
+	for tIndex = 1, #tPercentiles do
+		tPercentile = tPercentiles[tIndex];
+		tKey = "tm" .. floor(tPercentile * 100);
+
 		tPercentileTracker["resultCache"][tIndex] = tKey;
 	end
 
+	local tOldValue;
+	local tWillOverwrite;
 	function tPercentileTracker:update(aValue)
+
+		tOldValue = 0;
+		tWillOverwrite = self["isFull"];
+
+		if tWillOverwrite then
+			tOldValue = self["buffer"][self["nextIndex"]] or 0;
+		end
 
 		self["buffer"][self["nextIndex"]] = aValue;
 		self["nextIndex"] = self["nextIndex"] + 1;
@@ -43,6 +66,8 @@ function VUHDO_createPercentileTracker(aPercentiles)
 			self["nextIndex"] = 1;
 			self["isFull"] = true;
 		end
+
+		self["cumulativeTotal"] = self["cumulativeTotal"] + aValue;
 
 		if aValue > self["maxValue"] then
 			self["maxValue"] = aValue;
@@ -124,7 +149,6 @@ function VUHDO_createPercentileTracker(aPercentiles)
 			tResult[tCachedKey] = tValue;
 		end
 
-		-- Add max value if 100th percentile (1.0) is included in the percentiles
 		for tIndex = 1, #self["percentiles"] do
 			if self["percentiles"][tIndex] == 1.0 then
 				tResult["tm100"] = self["maxValue"];
@@ -136,9 +160,43 @@ function VUHDO_createPercentileTracker(aPercentiles)
 
 	end
 
+	function tPercentileTracker:getCumulativeTotal()
 
+		return self["cumulativeTotal"];
 
-	--
+	end
+
+	local tPercentileDecimal;
+	local tAllPercentiles;
+	local tClosestKey;
+	local tClosestDiff;
+	local tKeyPercentile;
+	local tDiff;
+	function tPercentileTracker:getPercentile(aPercentile)
+
+		tPercentileDecimal = aPercentile / 100;
+
+		tAllPercentiles = self:getPercentiles();
+
+		tClosestKey = nil;
+		tClosestDiff = math.huge;
+
+		for tKey, tValue in pairs(tAllPercentiles) do
+			if string.sub(tKey, 1, 2) == "tm" then
+				tKeyPercentile = tonumber(string.sub(tKey, 3)) / 100;
+				tDiff = math.abs(tKeyPercentile - tPercentileDecimal);
+
+				if tDiff < tClosestDiff then
+					tClosestDiff = tDiff;
+					tClosestKey = tKey;
+				end
+			end
+		end
+
+		return tAllPercentiles[tClosestKey] or 0;
+
+	end
+
 	function tPercentileTracker:reset()
 
 		for tIndex = 1, self["bufferSize"] do
@@ -149,6 +207,7 @@ function VUHDO_createPercentileTracker(aPercentiles)
 		self["isFull"] = false;
 		self["maxValue"] = 0;
 		self["totalCount"] = 0;
+		self["cumulativeTotal"] = 0;
 		self["sorted"] = nil;
 		self["lastSortCount"] = 0;
 
@@ -156,9 +215,6 @@ function VUHDO_createPercentileTracker(aPercentiles)
 
 	end
 
-
-
-	--
 	function tPercentileTracker:isInitialized()
 
 		return self["totalCount"] > 0;
