@@ -1,6 +1,7 @@
 local _;
 
 local floor = math.floor;
+local abs = math.abs;
 local pairs = pairs;
 local type = type;
 local string = string;
@@ -67,7 +68,9 @@ end
 --
 local tScale;
 local tUIUnitFactor;
+local tPixelValue;
 local tNumPixels;
+local tResult;
 function VUHDO_roundToPixel(aValue, aMinPixels)
 
 	if aValue == 0 and (not aMinPixels or aMinPixels == 0) then
@@ -76,7 +79,15 @@ function VUHDO_roundToPixel(aValue, aMinPixels)
 
 	tScale = VUHDO_getPixelScale();
 	tUIUnitFactor = VUHDO_getPixelToUIUnitFactor();
-	tNumPixels = floor((aValue * tScale) / tUIUnitFactor + 0.5);
+
+	tPixelValue = (aValue * tScale) / tUIUnitFactor;
+	tNumPixels = floor(tPixelValue + 0.5);
+
+	if aValue > 0 and tNumPixels < 0 then
+		tNumPixels = 0;
+	elseif aValue < 0 and tNumPixels > 0 then
+		tNumPixels = 0;
+	end
 
 	if aMinPixels then
 		if aValue < 0.0 then
@@ -90,7 +101,13 @@ function VUHDO_roundToPixel(aValue, aMinPixels)
 		end
 	end
 
-	return tNumPixels * tUIUnitFactor / tScale;
+	tResult = tNumPixels * tUIUnitFactor / tScale;
+
+	if abs(tResult - aValue) < 0.000001 then
+		return aValue;
+	else
+		return tResult;
+	end
 
 end
 
@@ -140,6 +157,8 @@ function VUHDO_handleScaleChange()
 	if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] and VUHDO_CONFIG["PIXEL_PERFECT"]["redrawOnScaleChange"] then
 		if not InCombatLockdown() then
 			tDelay = VUHDO_CONFIG["PIXEL_PERFECT"]["scaleChangeDelay"] or 0.1;
+
+
 
 			for tPanelNum = 1, 10 do
 				VUHDO_timeRedrawPanel(tPanelNum, tDelay);
@@ -573,6 +592,7 @@ end
 
 
 --
+local tHasAnyIssues;
 local tScaling;
 local tBorder;
 local tRowSpacing;
@@ -580,16 +600,24 @@ local tColumnSpacing;
 local tBorderGapX;
 local tBorderGapY;
 local tHeaderSpacing;
-local tNonIntegerValues = { };
+local tSpacingData;
+local tPanelHasIssues;
+local tStatus;
 function VUHDO_pixelTestSpacing()
 
 	VUHDO_Msg("|cffFFD100--- Pixel-Perfect Spacing Test ---|r");
 
 	if not VUHDO_PANEL_SETUP then
 		VUHDO_Msg("|cffFF4444Error:|r Panel setup not loaded.");
-
 		return;
 	end
+
+	VUHDO_Msg("|cffFFA500** System Configuration:**|r");
+	VUHDO_Msg("  |cffB0E0E6UI Scale:|r " .. VUHDO_getUIScale());
+	VUHDO_Msg("  |cffB0E0E6Pixel Scale:|r " .. VUHDO_getPixelScale());
+	VUHDO_Msg("  |cffB0E0E6UI Unit Factor:|r " .. VUHDO_getPixelToUIUnitFactor());
+
+	tHasAnyIssues = false;
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
 		if VUHDO_PANEL_SETUP[tPanelNum] then
@@ -604,47 +632,95 @@ function VUHDO_pixelTestSpacing()
 			tBorderGapY = tScaling["borderGapY"] or 0;
 			tHeaderSpacing = tScaling["headerSpacing"] or 0;
 
-			VUHDO_Msg("  |cffB0E0E6Spacing Values:|r");
-			VUHDO_Msg("    Row Spacing: " .. tRowSpacing .. " (used: " .. VUHDO_getPixelPerfectSpacing(tPanelNum, "rowSpacing") .. ")");
-			VUHDO_Msg("    Column Spacing: " .. tColumnSpacing .. " (used: " .. VUHDO_getPixelPerfectSpacing(tPanelNum, "columnSpacing") .. ")");
-			VUHDO_Msg("    Border Gap X: " .. tBorderGapX .. " (used: " .. VUHDO_getPixelPerfectGap(tPanelNum, "borderGapX") .. ")");
-			VUHDO_Msg("    Border Gap Y: " .. tBorderGapY .. " (used: " .. VUHDO_getPixelPerfectGap(tPanelNum, "borderGapY") .. ")");
-			VUHDO_Msg("    Header Spacing: " .. tHeaderSpacing .. " (used: " .. VUHDO_getPixelPerfectSpacing(tPanelNum, "headerSpacing") .. ")");
+			VUHDO_Msg("  |cffB0E0E6Spacing Values Analysis:|r");
+
+			tSpacingData = {
+				{ ["name"] = "Row Spacing", ["value"] = tRowSpacing, ["used"] = VUHDO_getPixelPerfectSpacing(tPanelNum, "rowSpacing"), },
+				{ ["name"] = "Column Spacing", ["value"] = tColumnSpacing, ["used"] = VUHDO_getPixelPerfectSpacing(tPanelNum, "columnSpacing"), },
+				{ ["name"] = "Border Gap X", ["value"] = tBorderGapX, ["used"] = VUHDO_getPixelPerfectGap(tPanelNum, "borderGapX"), },
+				{ ["name"] = "Border Gap Y", ["value"] = tBorderGapY, ["used"] = VUHDO_getPixelPerfectGap(tPanelNum, "borderGapY"), },
+				{ ["name"] = "Header Spacing", ["value"] = tHeaderSpacing, ["used"] = VUHDO_getPixelPerfectSpacing(tPanelNum, "headerSpacing"), },
+			};
+
+			tPanelHasIssues = false;
+
+			for _, tData in ipairs(tSpacingData) do
+				tStatus = "|cff44FF44[OK]|r";
+
+				if type(tData.value) ~= "number" or tData.value < 0 then
+					tStatus = "|cffFF4444[INVALID]|r";
+					tPanelHasIssues = true;
+					tHasAnyIssues = true;
+				elseif tData.value ~= floor(tData.value) then
+					tStatus = "|cffFFAA00[NON-INTEGER]|r";
+					tPanelHasIssues = true;
+					tHasAnyIssues = true;
+				elseif tData.value ~= tData.used then
+					tStatus = "|cffFFAA00[ROUNDING ISSUE]|r";
+					tPanelHasIssues = true;
+					tHasAnyIssues = true;
+				end
+
+				VUHDO_Msg("    " .. tData.name .. ": " .. tData.value .. " (used: " .. tData.used .. ") " .. tStatus);
+			end
 
 			VUHDO_Msg("  |cffB0E0E6Border Values:|r");
 			VUHDO_Msg("    Edge Size: " .. (tBorder["edgeSize"] or 0) .. " (used: " .. VUHDO_getPixelPerfectBorderEdgeSize(tPanelNum) .. ")");
 			VUHDO_Msg("    Insets: " .. (tBorder["insets"] or 0) .. " (used: " .. VUHDO_getPixelPerfectBorderInsets(tPanelNum) .. ")");
 			VUHDO_Msg("    Color: R=" .. (tBorder["R"] or 0) .. " G=" .. (tBorder["G"] or 0) .. " B=" .. (tBorder["B"] or 0) .. " A=" .. (tBorder["O"] or 0));
 
-			for tKey, _ in pairs(tNonIntegerValues) do
-				tNonIntegerValues[tKey] = nil;
-			end
-
-			if tRowSpacing ~= floor(tRowSpacing) then
-				tinsert(tNonIntegerValues, "rowSpacing");
-			end
-			if tColumnSpacing ~= floor(tColumnSpacing) then
-				tinsert(tNonIntegerValues, "columnSpacing");
-			end
-			if tBorderGapX ~= floor(tBorderGapX) then
-				tinsert(tNonIntegerValues, "borderGapX");
-			end
-			if tBorderGapY ~= floor(tBorderGapY) then
-				tinsert(tNonIntegerValues, "borderGapY");
-			end
-			if tHeaderSpacing ~= floor(tHeaderSpacing) then
-				tinsert(tNonIntegerValues, "headerSpacing");
-			end
-
-			if #tNonIntegerValues > 0 then
-				VUHDO_Msg("  |cffFF4444[!] Warning:|r Non-integer values found: " .. table.concat(tNonIntegerValues, ", "));
+			if tPanelHasIssues then
+				VUHDO_Msg("  |cffFF4444[!] Issues found in Panel " .. tPanelNum .. ":|r");
+				VUHDO_Msg("  |cffFFAA00Issues will be automatically fixed when panels are updated|r");
 			else
-				VUHDO_Msg("  |cff44FF44[OK]|r All spacing values are integers.");
+				VUHDO_Msg("  |cff44FF44[OK]|r All spacing values are pixel-perfect.");
 			end
 		end
 	end
 
+	if tHasAnyIssues then
+		VUHDO_Msg("|cffFFA500** Note:**|r");
+		VUHDO_Msg("  |cffFFAA00Pixel-perfect issues are automatically fixed when panels are updated|r");
+	end
+
 	return;
+
+end
+
+
+
+--
+local tScaling;
+local tSpacingValues;
+local tIssues;
+function VUHDO_validatePixelPerfectSpacing(aPanelNum)
+
+	tScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
+	tSpacingValues = {
+		["rowSpacing"] = tScaling["rowSpacing"] or 0,
+		["columnSpacing"] = tScaling["columnSpacing"] or 0,
+		["borderGapX"] = tScaling["borderGapX"] or 0,
+		["borderGapY"] = tScaling["borderGapY"] or 0,
+		["headerSpacing"] = tScaling["headerSpacing"] or 0
+	};
+
+	tIssues = { };
+
+	for tKey, tValue in pairs(tSpacingValues) do
+		if type(tValue) ~= "number" or tValue < 0 then
+			tinsert(tIssues, tKey .. " (invalid value: " .. tostring(tValue) .. ")");
+		elseif tValue ~= floor(tValue) then
+			tinsert(tIssues, tKey .. " (non-integer: " .. tValue .. ")");
+		end
+	end
+
+	if #tIssues > 0 then
+		VUHDO_Msg("|cffFF4444[!] Pixel-perfect spacing issues in panel " .. aPanelNum .. ":|r " .. table.concat(tIssues, ", "));
+
+		return false;
+	end
+
+	return true;
 
 end
 
@@ -819,6 +895,7 @@ function VUHDO_pixelShowScale()
 
 	VUHDO_Msg("|cffB0E0E6Current UI Scale:|r " .. VUHDO_getUIScale());
 	VUHDO_Msg("|cffFFD100Current Pixel Scale:|r " .. VUHDO_getPixelScale());
+	VUHDO_Msg("|cffFFD100UI Unit Factor:|r " .. VUHDO_getPixelToUIUnitFactor());
 
 	return;
 
@@ -835,6 +912,26 @@ function VUHDO_pixelHelp()
 	VUHDO_Msg("  /vd pixel spacing - Show pixel-perfect spacing values");
 	VUHDO_Msg("  /vd pixel scale - Show current scale values");
 	VUHDO_Msg("  /vd pixel cache - Print backdrop cache metrics");
+	VUHDO_Msg("  /vd pixel validate [panel] - Validate pixel-perfect spacing");
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_pixelValidate(aPanelNum)
+
+	if aPanelNum then
+		VUHDO_validatePixelPerfectSpacing(aPanelNum);
+	else
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[tPanelNum] then
+				VUHDO_validatePixelPerfectSpacing(tPanelNum);
+			end
+		end
+	end
 
 	return;
 

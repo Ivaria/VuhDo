@@ -96,16 +96,18 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 			tIconIdx = 40 + tCnt;
 
 			tButton = VUHDO_getOrCreateCuDeButton(sButton, tIconIdx);
+
 			tButton:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tButton, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
 			VUHDO_PixelUtil.SetSize(tButton, sHeight, sHeight);
-			VUHDO_PixelUtil.SetScale(tButton, tBaseScale);
+			VUHDO_PixelUtil.SetScale(tButton, 1);
 
 			tFrame = VUHDO_getBarIconFrame(sButton, tIconIdx);
+
 			tFrame:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tFrame, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
 			VUHDO_PixelUtil.SetSize(tFrame, sHeight, sHeight);
-
+			VUHDO_PixelUtil.SetScale(tFrame, tBaseScale);
 			tFrame:SetAlpha(0);
 			tFrame:Show();
 
