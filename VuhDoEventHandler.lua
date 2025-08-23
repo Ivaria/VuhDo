@@ -2941,7 +2941,7 @@ function VUHDO_testProfilingSystem()
 
 	VUHDO_Msg("=== Testing Profiling System ===");
 
-	tTestTracker = VUHDO_createPercentileTracker(1000, nil);
+	tTestTracker = VUHDO_createPercentileTracker();
 	tExpectedTotal = 0;
 
 	VUHDO_Msg("Adding 2000 test measurements...");
