@@ -420,15 +420,8 @@ do
 
 				tPercentiles = tTracker:getPercentiles();
 
-				tTotal = 0;
-				tCount = 0;
-
-				for tIndex = 1, tTracker["bufferSize"] do
-					if tTracker["buffer"][tIndex] then
-						tTotal = tTotal + tTracker["buffer"][tIndex];
-						tCount = tCount + 1;
-					end
-				end
+				tTotal = tTracker:getCumulativeTotal();
+				tCount = tTracker["totalCount"];
 
 				tinsert(tEventStats, {
 					["name"] = tEventName,
@@ -1474,6 +1467,7 @@ do
 	local tName;
 	local tUnit;
 	local tSubCommand;
+	local tPanelNum;
 	local tHelpText;
 	function VUHDO_slashCmd(aCommand)
 
@@ -1716,6 +1710,8 @@ do
 				VUHDO_resetSemaphoreMetrics();
 
 				VUHDO_Msg("All profiling metrics reset.");
+			elseif tSubCommand == "test" then
+				VUHDO_testProfilingSystem();
 			else
 				VUHDO_printHandlerMetrics();
 				VUHDO_printDeferredTaskMetrics(false);
@@ -1736,6 +1732,10 @@ do
 				VUHDO_pixelShowScale();
 			elseif tSubCommand == "cache" then
 				VUHDO_pixelPrintCacheStats();
+			elseif tSubCommand == "validate" then
+				tPanelNum = tonumber(tParsedTexts[3]);
+
+				VUHDO_pixelValidate(tPanelNum);
 			else
 				VUHDO_pixelHelp();
 			end
@@ -2755,6 +2755,8 @@ do
 
 		SlashCmdList["RELOADUI"] = ReloadUI;
 
+
+
 		anInstance:SetScript("OnEvent", VUHDO_OnEvent);
 		anInstance:SetScript("OnUpdate", VUHDO_OnUpdate);
 
@@ -2898,15 +2900,9 @@ function VUHDO_getHandlerProfilingMetrics()
 
 	for tSegmentName, tTracker in pairs(VUHDO_HANDLER_PROFILING_METRICS) do
 		tPercentiles = tTracker:getPercentiles();
-		tTotal = 0;
-		tCount = 0;
 
-		for tIndex = 1, tTracker["bufferSize"] do
-			if tTracker["buffer"][tIndex] then
-				tTotal = tTotal + tTracker["buffer"][tIndex];
-				tCount = tCount + 1;
-			end
-		end
+		tTotal = tTracker:getCumulativeTotal();
+		tCount = tTracker["totalCount"];
 
 		tResult[tSegmentName] = {
 			["Total"] = tTotal,
@@ -2940,5 +2936,74 @@ function VUHDO_sortSeg2SegmentKeys(aSeg2Segments)
 	table.sort(tSortedKeys);
 
 	return tSortedKeys;
+
+end
+
+
+
+--
+local tTestTracker;
+local tExpectedTotal;
+local tBufferTotal;
+local tCumulativeTotal;
+local tBufferCount;
+local tCumulativeCount;
+local tValue;
+local tDataLossPercent;
+local tAccuracyPercent;
+local tTm50;
+local tTm80;
+local tTm90;
+local tTm99;
+local tTm100;
+function VUHDO_testProfilingSystem()
+
+	VUHDO_Msg("=== Testing Profiling System ===");
+
+	tTestTracker = VUHDO_createPercentileTracker();
+	tExpectedTotal = 0;
+
+	VUHDO_Msg("Adding 2000 test measurements...");
+
+	for tCnt = 1, 2000 do
+		tValue = 0.1 * tCnt;
+		tExpectedTotal = tExpectedTotal + tValue;
+		tTestTracker:update(tValue);
+	end
+
+	tBufferTotal = 0;
+
+	for tCnt = 1, tTestTracker["bufferSize"] do
+		tBufferTotal = tBufferTotal + tTestTracker["buffer"][tCnt];
+	end
+
+	tCumulativeTotal = tTestTracker:getCumulativeTotal();
+	tBufferCount = tTestTracker["bufferSize"];
+	tCumulativeCount = tTestTracker["totalCount"];
+
+	VUHDO_Msg("Expected Total: " .. string.format("%.2f", tExpectedTotal) .. " ms");
+	VUHDO_Msg("Buffer Total: " .. string.format("%.2f", tBufferTotal) .. " ms");
+	VUHDO_Msg("Cumulative Total: " .. string.format("%.2f", tCumulativeTotal) .. " ms");
+	VUHDO_Msg("Buffer Count: " .. tBufferCount);
+	VUHDO_Msg("Cumulative Count: " .. tCumulativeCount);
+
+	if tBufferCount > 0 then
+		tDataLossPercent = ((tExpectedTotal - tBufferTotal) / tExpectedTotal) * 100;
+		tAccuracyPercent = (tCumulativeTotal / tExpectedTotal) * 100;
+		VUHDO_Msg("Buffer Data Loss: " .. string.format("%.2f", tDataLossPercent) .. "%");
+		VUHDO_Msg("Cumulative Accuracy: " .. string.format("%.2f", tAccuracyPercent) .. "%");
+	end
+
+	tTm50 = tTestTracker:getPercentile(50);
+	tTm80 = tTestTracker:getPercentile(80);
+	tTm90 = tTestTracker:getPercentile(90);
+	tTm99 = tTestTracker:getPercentile(99);
+	tTm100 = tTestTracker:getPercentile(100);
+
+	VUHDO_Msg("tm50: " .. string.format("%.2f", tTm50) .. " ms, tm80: " .. string.format("%.2f", tTm80) .. " ms, tm90: " .. string.format("%.2f", tTm90) .. " ms, tm99: " .. string.format("%.2f", tTm99) .. " ms, tm100: " .. string.format("%.2f", tTm100) .. " ms");
+
+	VUHDO_Msg("=== Test Complete ===");
+
+	return;
 
 end

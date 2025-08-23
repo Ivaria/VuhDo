@@ -12,6 +12,7 @@ local VUHDO_strempty;
 local VUHDO_roundToPixel;
 local VUHDO_splitString;
 local strfind = strfind;
+local abs = math.abs;
 
 function VUHDO_sizeCalculatorInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -59,16 +60,34 @@ end
 
 
 --
+function VUHDO_forceRefreshPixelPerfectCache()
+
+	table.wipe(sPixelPerfectCache);
+	VUHDO_refreshPixelScale();
+
+	return;
+
+end
+
+
+
+--
 local tCacheKey;
 local tBarScaling;
 local tValue;
 function VUHDO_getPixelPerfectSpacing(aPanelNum, aSpacingType)
 
 	tCacheKey = aPanelNum .. "_" .. aSpacingType;
+
 	if not sPixelPerfectCache[tCacheKey] then
 		tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 		tValue = tBarScaling[aSpacingType] or 0;
-		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+
+		if type(tValue) == "number" and tValue >= 0 then
+			sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+		else
+			sPixelPerfectCache[tCacheKey] = 0;
+		end
 	end
 
 	return sPixelPerfectCache[tCacheKey];
@@ -84,10 +103,16 @@ local tValue;
 function VUHDO_getPixelPerfectGap(aPanelNum, aGapType)
 
 	tCacheKey = "gap_" .. aPanelNum .. "_" .. aGapType;
+
 	if not sPixelPerfectCache[tCacheKey] then
 		tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 		tValue = tBarScaling[aGapType] or 0;
-		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+
+		if type(tValue) == "number" and tValue >= 0 then
+			sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+		else
+			sPixelPerfectCache[tCacheKey] = 0;
+		end
 	end
 
 	return sPixelPerfectCache[tCacheKey];
@@ -326,39 +351,58 @@ end
 
 -- Returns total header height
 function VUHDO_getHeaderHeight(aPanelNum)
-	return VUHDO_isPanelHorizontal(aPanelNum)
-		and VUHDO_getHeaderHeightHor(aPanelNum) or VUHDO_getHeaderHeightVer(aPanelNum);
+
+	return VUHDO_isPanelHorizontal(aPanelNum) and VUHDO_getHeaderHeightHor(aPanelNum) or VUHDO_getHeaderHeightVer(aPanelNum);
+
 end
 
 
 
 --
 function VUHDO_getHeaderPos(aHeaderPlace, aPanelNum)
+
+	if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] and VUHDO_CONFIG["PIXEL_PERFECT"]["autoRefresh"] then
+		VUHDO_ensurePixelPerfectSpacing(aPanelNum);
+	end
+
 	if VUHDO_isPanelHorizontal(aPanelNum) then
 		return VUHDO_getHeaderPosHor(aHeaderPlace, aPanelNum);
 	else
 		return VUHDO_getHeaderPosVer(aHeaderPlace, aPanelNum);
 	end
+
 end
 
 
 
 --
 function VUHDO_getHealButtonPos(aPlaceNum, aRowNo, aPanelNum)
-	-- Achtung: Positionen nicht cachen, da z.T. von dynamischen Models abh�ngig
+
+	-- Achtung: Positionen nicht cachen, da z.T. von dynamischen Models abhngig
+
+	if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] and VUHDO_CONFIG["PIXEL_PERFECT"]["autoRefresh"] then
+		VUHDO_ensurePixelPerfectSpacing(aPanelNum);
+	end
+
 	if VUHDO_isPanelHorizontal(aPanelNum) then
 		return VUHDO_getHealButtonPosHor(aPlaceNum, aRowNo, aPanelNum);
 	else
 		return VUHDO_getHealButtonPosVer(aPlaceNum, aRowNo, aPanelNum);
 	end
+
 end
 
 
 
 --
 function VUHDO_getHealPanelWidth(aPanelNum)
-	return VUHDO_isPanelHorizontal(aPanelNum)
-		and VUHDO_getHealPanelWidthHor(aPanelNum) or VUHDO_getHealPanelWidthVer(aPanelNum);
+
+	if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] and VUHDO_CONFIG["PIXEL_PERFECT"]["autoRefresh"] then
+		VUHDO_ensurePixelPerfectSpacing(aPanelNum);
+	end
+
+	return VUHDO_isPanelHorizontal(aPanelNum) and VUHDO_getHealPanelWidthHor(aPanelNum) or VUHDO_getHealPanelWidthVer(aPanelNum);
+
 end
 
 
@@ -366,7 +410,97 @@ end
 --
 local tHeight;
 function VUHDO_getHealPanelHeight(aPanelNum)
-	tHeight = VUHDO_isPanelHorizontal(aPanelNum)
-		and VUHDO_getHealPanelHeightHor(aPanelNum) or VUHDO_getHealPanelHeightVer(aPanelNum);
+
+	if VUHDO_CONFIG and VUHDO_CONFIG["PIXEL_PERFECT"] and VUHDO_CONFIG["PIXEL_PERFECT"]["autoRefresh"] then
+		VUHDO_ensurePixelPerfectSpacing(aPanelNum);
+	end
+
+	tHeight = VUHDO_isPanelHorizontal(aPanelNum) and VUHDO_getHealPanelHeightHor(aPanelNum) or VUHDO_getHealPanelHeightVer(aPanelNum);
+
 	return tHeight >= 20 and tHeight or 20;
+
+end
+
+
+
+--
+local tSpacingKeys = { "rowSpacing", "columnSpacing", "borderGapX", "borderGapY", "headerSpacing" };
+local tBorderKeys = { "edgeSize", "insets" };
+local tScaling;
+local tScale;
+local tUIUnitFactor;
+local tFixed;
+local tValue;
+local tCurrentRendered;
+local tTargetRendered;
+local tNewConfigValue;
+local tBorder;
+function VUHDO_ensurePixelPerfectSpacing(aPanelNum)
+
+	if not VUHDO_PANEL_SETUP or not VUHDO_PANEL_SETUP[aPanelNum] then
+		return;
+	end
+
+	tScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
+	tScale = VUHDO_getPixelScale();
+	tUIUnitFactor = VUHDO_getPixelToUIUnitFactor();
+
+	tFixed = false;
+
+	for _, tKey in ipairs(tSpacingKeys) do
+		tValue = tScaling[tKey] or 0;
+
+		if type(tValue) == "number" and tValue >= 0 then
+			tCurrentRendered = (tValue * tScale) / tUIUnitFactor;
+			tTargetRendered = floor(tCurrentRendered + 0.5);
+			tNewConfigValue = tTargetRendered * tUIUnitFactor / tScale;
+
+			if abs(tNewConfigValue - tValue) < 0.000001 then
+				tNewConfigValue = tValue;
+			end
+
+			if tNewConfigValue ~= tValue then
+				tScaling[tKey] = tNewConfigValue;
+
+				tFixed = true;
+			end
+		else
+			tScaling[tKey] = 0;
+
+			tFixed = true;
+		end
+	end
+
+	tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
+
+	for _, tKey in ipairs(tBorderKeys) do
+		tValue = tBorder[tKey] or 0;
+
+		if type(tValue) == "number" and tValue >= 0 then
+			tCurrentRendered = (tValue * tScale) / tUIUnitFactor;
+			tTargetRendered = floor(tCurrentRendered + 0.5);
+			tNewConfigValue = tTargetRendered * tUIUnitFactor / tScale;
+
+			if abs(tNewConfigValue - tValue) < 0.000001 then
+				tNewConfigValue = tValue;
+			end
+
+			if tNewConfigValue ~= tValue then
+				tBorder[tKey] = tNewConfigValue;
+
+				tFixed = true;
+			end
+		else
+			tBorder[tKey] = 0;
+
+			tFixed = true;
+		end
+	end
+
+	if tFixed then
+		VUHDO_forceRefreshPixelPerfectCache();
+	end
+
+	return;
+
 end
