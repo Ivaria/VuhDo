@@ -372,6 +372,7 @@ VUHDO_I18N_TT.K273 = "用图标显示自定义增、减益.";
 VUHDO_I18N_TT.K274 = "用条颜色显示自定义增、减益.";
 VUHDO_I18N_TT.K275 = "在图标上显示动画效果.";
 VUHDO_I18N_TT.K276 = "图标显示剩余时间.";
+VUHDO_I18N_TT.K277 = "Check to show clock sweep countdown animation.";
 VUHDO_I18N_TT.K279 = "选择玩家获得减益提示声音";
 VUHDO_I18N_TT.K280 = "应用已选定面板设定";
 VUHDO_I18N_TT.K281 = "开启额外的载具面板.宠物也将在此面板显示.所有鼠标点击都只是选定载具/宠物为目标.";

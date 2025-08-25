@@ -372,6 +372,7 @@ VUHDO_I18N_TT.K273 = "用圖標顯示自定義增、減益.";
 VUHDO_I18N_TT.K274 = "用條顏色顯示自定義增、減益.";
 VUHDO_I18N_TT.K275 = "在圖標上顯示動畫效果.";
 VUHDO_I18N_TT.K276 = "圖標顯示剩餘時間.";
+VUHDO_I18N_TT.K277 = "Check to show clock sweep countdown animation.";
 VUHDO_I18N_TT.K279 = "選擇玩家獲得減益提示聲音";
 VUHDO_I18N_TT.K280 = "應用已選定面板設定";
 VUHDO_I18N_TT.K281 = "開啟額外的載具面板.寵物也將在此面板顯示.所有鼠標點擊都只是選定載具/寵物為目標.";
