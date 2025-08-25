@@ -371,6 +371,7 @@ VUHDO_I18N_TT.K273 = "Zeigt die selbstdefinierten (De)Buffs durch ein Symbol an.
 VUHDO_I18N_TT.K274 = "Zeigt die selbstdefinierten (De)Buffs durch Verändern der Balkenfarbe an.";
 VUHDO_I18N_TT.K275 = "Zeigt einen Animationseffekt beim Einblenden des Icons.";
 VUHDO_I18N_TT.K276 = "Zeigt die Restdauer auf den Icons an.";
+VUHDO_I18N_TT.K277 = "Check to show clock sweep countdown animation.";
 VUHDO_I18N_TT.K279 = "Wählen sie einen Klang, der gespielt wird, wenn ein Spieler einen Debuff bekommt.";
 VUHDO_I18N_TT.K280 = "Überträgt die gewählten Einstellungen auf Ihre Fenster.";
 VUHDO_I18N_TT.K281 = "Zeigt ein extra Fenster für Vehikel an.";

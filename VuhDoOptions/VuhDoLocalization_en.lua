@@ -370,6 +370,7 @@ VUHDO_I18N_TT.K273 = "Check to show custom (de)buffs by icon.";
 VUHDO_I18N_TT.K274 = "Check to show custom (de)buffs by bar color.";
 VUHDO_I18N_TT.K275 = "Check to show animation effect on icons.";
 VUHDO_I18N_TT.K276 = "Check to show remaining duration timer on icons.";
+VUHDO_I18N_TT.K277 = "Check to show clock sweep countdown animation.";
 VUHDO_I18N_TT.K279 = "Select a sound to be played when a player gains a debuff";
 VUHDO_I18N_TT.K280 = "Click here to apply the chosen setup to your panels";
 VUHDO_I18N_TT.K281 = "Check this to have an extra panel for vehicles. Pets will show up there also. All mouse clicks will target the vehicle/pet.";

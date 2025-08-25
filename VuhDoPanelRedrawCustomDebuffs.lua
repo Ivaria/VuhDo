@@ -3,6 +3,7 @@ local VUHDO_getBarIcon;
 local VUHDO_getBarIconTimer;
 local VUHDO_getBarIconCounter;
 local VUHDO_getBarIconName;
+local VUHDO_getOrCreateCooldown;
 local VUHDO_customizeIconText;
 local sSign;
 local sMaxNum;
@@ -20,6 +21,7 @@ function VUHDO_panelRedrawCustomDebuffsInitLocalOverrides()
 	VUHDO_getBarIconTimer = _G["VUHDO_getBarIconTimer"];
 	VUHDO_getBarIconCounter = _G["VUHDO_getBarIconCounter"];
 	VUHDO_getBarIconName = _G["VUHDO_getBarIconName"];
+	VUHDO_getOrCreateCooldown = _G["VUHDO_getOrCreateCooldown"];
 	VUHDO_customizeIconText = _G["VUHDO_customizeIconText"];
 
 	sDebuffConfig = VUHDO_CONFIG["CUSTOM_DEBUFF"];
@@ -80,6 +82,7 @@ local tIconIdx;
 local tIconName;
 local tButton;
 local tBaseScale;
+local tClock;
 function VUHDO_initCustomDebuffs(aPanelNum)
 
 	if aPanelNum then
@@ -132,6 +135,17 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 			tName:SetTextColor(1, 1, 1, 1);
 			tName:SetText("");
 			tName:Show();
+
+			tClock = VUHDO_getOrCreateCooldown(tFrame, sButton, tIconIdx);
+
+			tClock:SetAllPoints(tIcon);
+			tClock:SetHideCountdownNumbers(true);
+			tClock:SetReverse(true);
+			tClock:SetDrawSwipe(true);
+			tClock:SetDrawEdge(true);
+			tClock:SetDrawBling(false);
+			tClock:SetCooldown(GetTime(), 0);
+			tClock:SetAlpha(0);
 		end
 	end
 
