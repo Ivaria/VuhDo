@@ -34,7 +34,9 @@ Bugfixes:
   
   
 Improvements:  
+-- Added clock sweep countdown option for debuff icons  
 -- Incoming spell trace icons now display cast time as time remaining  
+-- Added default custom debuffs for Manaforge Omega raid encounters  
 -- Bump TOC interface for 11.2.0  
   
   

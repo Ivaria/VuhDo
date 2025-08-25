@@ -372,6 +372,7 @@ VUHDO_I18N_TT.K273 = "Cochez pour montrer le mode de (de)buffs par ic\195\180ne.
 VUHDO_I18N_TT.K274 = "Cochez pour montrer le mode de (de)buffs par une barre de couleur.";
 VUHDO_I18N_TT.K275 = "Cochez pour voir l'effet d'animation sur les ic\195\180nes.";
 VUHDO_I18N_TT.K276 = "Cochez pour voir le compteur de dur\195\169e restant sur les ic\195\180nes.";
+VUHDO_I18N_TT.K277 = "Check to show clock sweep countdown animation.";
 VUHDO_I18N_TT.K279 = "S\195\169lectionnez un son qui sera jou\195\169 quand un joueur gagne un debuff";
 VUHDO_I18N_TT.K280 = "Cliquez ici pour appliquer le programme d'installation choisi pour vos panneaux";
 VUHDO_I18N_TT.K281 = "Cochez cette case pour avoir un panneau suppl\195\169mentaire pour les v\195\169hicules les familiers. Tous les clics de souris cibleront le v\195\169hicule/familier.";

@@ -9,6 +9,7 @@ local sIsName;
 local _;
 
 local floor = floor;
+local max = max;
 local GetTime = GetTime;
 local pairs = pairs;
 local twipe = table.wipe;
@@ -23,6 +24,7 @@ local VUHDO_getBarIconCounter;
 local VUHDO_getBarIconFrame;
 local VUHDO_getBarIcon;
 local VUHDO_getBarIconName;
+local VUHDO_getBarIconClockOrStub;
 local VUHDO_getShieldPerc;
 local VUHDO_backColor;
 local VUHDO_updateHealthBarsFor;
@@ -48,6 +50,7 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 	VUHDO_getBarIconFrame = _G["VUHDO_getBarIconFrame"];
 	VUHDO_getBarIcon = _G["VUHDO_getBarIcon"];
 	VUHDO_getBarIconName = _G["VUHDO_getBarIconName"];
+	VUHDO_getBarIconClockOrStub = _G["VUHDO_getBarIconClockOrStub"];
 	VUHDO_getShieldPerc = _G["VUHDO_getShieldPerc"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_backColor = _G["VUHDO_backColor"];
@@ -78,6 +81,7 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 		["isOthers"] = true,
 		["isBarGlow"] = false,
 		["isIconGlow"] = false,
+		["isClock"] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isClock"],
 	};
 
 	VUHDO_DEBUFF_COLORS = {
@@ -181,6 +185,10 @@ local tBackdropFrame;
 local tBaseScale;
 local tScaleFactor;
 local tFinalScale;
+local tClock;
+local tStarted;
+local tClockDuration;
+local tMinDuration;
 local tBackdropInfo = {
 	["edgeFile"] = "Interface\\Buttons\\WHITE8X8",
 	["edgeSize"] = 4,
@@ -209,6 +217,12 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 	tAliveTime = anIsInit and 0 or aNow - tTimeStamp;
 	tName = anIconInfo[3];
 
+	if not (anIsInit and anIconInfo[2] == -1) then
+		tRemain = (anIconInfo[4] or aNow - 1) - aNow;
+	else
+		tRemain = 0;
+	end
+
 	if tCuDeStoConfig["timer"] then
 		if tCuDeStoConfig["isAliveTime"] then
 			VUHDO_getBarIconTimer(aButton, anIconIndex):SetText(tAliveTime < 99.5 and floor(tAliveTime + 0.5) or ">>");
@@ -216,8 +230,6 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 			if anIsInit and anIconInfo[2] == -1 then
 				VUHDO_getBarIconTimer(aButton, anIconIndex):SetText("");
 			else
-				tRemain = (anIconInfo[4] or aNow - 1) - aNow;
-
 				if tRemain >= 0 and (tRemain < 10 or tCuDeStoConfig["isFullDuration"]) then
 					VUHDO_getBarIconTimer(aButton, anIconIndex):SetText(tRemain > 100 and ">>" or floor(tRemain));
 				else
@@ -225,6 +237,31 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 				end
 			end
 		end
+	end
+
+	if tCuDeStoConfig["isClock"] then
+		tClock = VUHDO_getBarIconClockOrStub(aButton, anIconIndex, tCuDeStoConfig["isClock"]);
+
+		if tRemain and tRemain > 0 and anIconInfo[6] and anIconInfo[6] > 0 then
+			tStarted = floor(10 * (aNow - anIconInfo[6] + tRemain) + 0.5) * 0.1;
+			tClockDuration = tClock:GetCooldownDuration() * 0.001;
+			tMinDuration = max(anIconInfo[6], 0.1);
+
+			if tMinDuration > 0 and
+				(tClock:GetAlpha() == 0 or (tClock:GetAttribute("started") or tStarted) ~= tStarted or 
+				(tClock:IsVisible() and (tMinDuration > tClockDuration or tMinDuration < 0.1))) then
+				tClock:SetCooldown(tStarted, tMinDuration);
+				tClock:SetAttribute("started", tStarted);
+
+				tClock:SetAlpha(1);
+			end
+		else
+			tClock:SetAlpha(0);
+		end
+	else
+		tClock = VUHDO_getBarIconClockOrStub(aButton, anIconIndex, false);
+
+		tClock:SetAlpha(0);
 	end
 
 	tShieldPerc = VUHDO_getShieldPerc(aUnit, tName);
