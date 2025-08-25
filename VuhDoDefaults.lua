@@ -520,6 +520,7 @@ local function VUHDO_customDebuffsAddDefaultSettings(aBuffName)
 			["isOthers"] = true,
 			["isBarGlow"] = false,
 			["isIconGlow"] = false,
+			["isClock"] = false,
 		}
 	end
 
