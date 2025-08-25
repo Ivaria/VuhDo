@@ -16,6 +16,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added default custom debuffs for MoP Classic raid encounters  
   
   
 --------------------------------------------------------------  

@@ -1178,6 +1178,367 @@ function VUHDO_loadDefaultConfig()
 		[28410] = true,  -- Chains of Kel'Thuzad
 	} );
 
+	-- 5.5.x - MoP Classic
+	VUHDO_addCustomSpellIds(56, {
+		--[[ Heart of Fear ]]
+
+		--Imperial Vizier Zor'lok
+		[122760] = false, --Exhale
+		[123812] = false, --Pheromones of Zeal
+		[122740] = false, --Convert
+		[122706] = false, --Noise Cancelling
+		--Blade Lord Ta'yak
+		[122949] = false, --Unseen Strike
+		[123474] = false, --Overwhelming Assault
+		[124783] = false, --Storm Unleashed
+		[123180] = false, --Wind Step
+		--Garalon
+		[122835] = false, --Pheromones
+		[123081] = false, --Pungency
+		[122774] = false, --Crush (knocked down)
+		[123423] = false, --Weak Points
+		--[123120] = false, --Pheromone Trail
+		--Wind Lord Mel'jarak
+		[121881] = false, --Amber Prison
+		[122055] = false, --Residue
+		[122064] = false, --Corrosive Resin
+		--Amber-Shaper Un'sok
+		[121949] = false, --Parasitic Growth
+		[122784] = false, --Reshape Life
+		[122064] = false, --Corrosive Resin
+		--[122504] = false, --Burning Amber
+		--Grand Empress Shek'zeer
+		[125390] = false, --Fixate
+		[123707] = false, --Eyes of the Empress
+		[123788] = false, --Cry of Terror
+		[124097] = false, --Sticky Resin
+		[125824] = false, --Trapped!
+		[124777] = false, --Poison Bomb
+		[124821] = false, --Poison-Drenched Armor
+		[124827] = false, --Poison Fumes
+		[124849] = false, --Consuming Terror
+		[124863] = false, --Visions of Demise
+		[123845] = false, --Heart of Fear
+		[123184] = false, --Dissonance Field
+		[125283] = false, --Sha Corruption
+		--Trash
+		[123417] = false, --Dismantled Armor
+		[123422] = false, --Arterial Bleeding
+		[123434] = false, --Gouge Throat
+		[123436] = false, --Riposte
+		[123497] = false, --Gale Force Winds
+		[123180] = false, --Wind Step
+		[123420] = false, --Stunning Strike
+		[125081] = false, --Slam
+		[125490] = false, --Burning Sting
+		[126901] = false, --Mortal Rend
+		[126912] = false, --Grievous Whirl
+
+		--[[ Mogushan Vaults ]]
+
+		-- Trash
+		[118562] = false, --Petrified
+		[116596] = false, --Smoke Bomb
+		[116970] = false, --Sundering Bite
+		[121087] = false, --Curse of Vitality
+		[120670] = false, --Pyroblast
+		[116606] = false, --Troll Rush
+		--The Stone Guard
+		[130395] = false, --Jasper Chains
+		[130774] = false, --Amethyst Pool
+		[116038] = false, --Jasper Petrification
+		[115861] = false, --Cobalt Petrification
+		[116060] = false, --Amethyst Petrification
+		[116281] = false, --Cobalt Mine Blast
+		[125206] = false, --Rend Flesh
+		[116008] = false, --Jade Petrification
+		--Feng The Accursed
+		[131788] = false, --Lightning Lash
+		[116040] = false, --Epicenter
+		[116942] = false, --Flaming Spear
+		[116784] = false, --Wildfire Spark
+		[102464] = false, --Arcane Shock
+		[116417] = false, --Arcane Resonance
+		[116364] = false, --Arcane Velocity
+		[116374] = false, --Lightning Charge
+		[131792] = false, --Shadowburn
+		--Gara'jal the Spiritbinder
+		[122151] = false, --Voodoo doll
+		[117723] = false, --Frail Soul
+		[116260] = false, --Crossed Over
+		[116278] = false, --Soul Sever
+		--The Spirit Kings
+		[117708] = false, --Maddening Shout
+		[118303] = false, --Fixate
+		[118048] = false, --Pillaged
+		[118135] = false, --Pinned Down
+		[118047] = false, --Pillage: Target
+		[118163] = false, --Robbed Blind
+		--Elegon
+		[117878] = false, --Overcharged
+		[117949] = false, --Closed circuit
+		[117945] = false, --Arcing Energy
+		[132222] = false, --Destabilizing Energies
+		--Will of the Emperor
+		[116835] = false, --Devastating Arc
+		[132425] = false, --Stomp
+		[116525] = false, --Focused Assault
+		[116778] = false, --Focused Defense
+		[117485] = false, --Impeding Thrust
+		[116550] = false, --Energizing Smash
+		[116829] = false, --Focused Energy
+
+		--[[ Sha of Anger ]]
+
+		[119626] = false, --Aggressive Behavior
+		[119488] = false, --Unleashed Wrath
+		[119610] = false, --Bitter Thoughts
+
+		--[[ Terrace of Endless Spring ]]
+
+		--Protector Kaolan
+		[117519] = false, --Touch of Sha
+		[111850] = false, --Lightning Prison: Targeted
+		[117436] = false, --Lightning Prison: Stunned
+		[118191] = false, --Corrupted Essence
+		[117986] = false, --Defiled Ground: Stacks
+		[117235] = false, --Purified
+		[117283] = false, --Cleansing Waters
+		[117353] = false, --Overwhelming Corruption
+
+		--Tsulong
+		[122768] = false, --Dread Shadows
+		[122777] = false, --Nightmares
+		[122752] = false, --Shadow Breath
+		[122789] = false, --Sunbeam
+		[123012] = false, --Terrorize
+		[123036] = false, --Fright
+		[122858] = false, --Bathed in Light
+
+		--Lei Shi
+		[123121] = false, --Spray
+		[123705] = false, --Scary Fog
+
+		--Sha of Fear
+		[119414] = false, --Breath of Fear
+		[129147] = false, --Onimous Cackle
+		[119983] = false, --Dread Spray
+		[120669] = false, --Naked and Afraid
+		[75683] = false, --Waterspout
+		[120629] = false, --Huddle in Terror
+		[120394] = false, --Eternal Darkness
+		[129189] = false, --Sha Globe
+		[119086] = false, --Penetrating Bolt
+		[119775] = false,  --Reaching Attack
+	} );
+
+
+	VUHDO_addCustomSpellIds(57, {
+		-- Jin'rokh
+		[138006] = false,
+		[137399] = false,
+		[138732] = false,
+		[138349] = false,
+		[137371] = false,
+		-- Horridon
+		[136769] = false,
+		[136767] = false,
+		[136708] = false,
+		[136723] = false,
+		[136587] = false,
+		[136710] = false,
+		[136670] = false,
+		[136573] = false,
+		[136512] = false,
+		[136719] = false,
+		[136654] = false,
+		[140946] = false,
+		-- Council of Elders
+		[136922] = false,
+		[137084] = false,
+		[137641] = false,
+		[136878] = false,
+		[136857] = false,
+		[137650] = false,
+		[137359] = false,
+		[137972] = false,
+		[136860] = false,
+		--Tortos
+		[134030] = false,
+		[134920] = false,
+		[136751] = false,
+		[136753] = false,
+		[137633] = false,
+		--Megaera
+		[139822] = false,
+		[134396] = false,
+		[137731] = false,
+		[136892] = false,
+		[139909] = false,
+		[137746] = false,
+		[139843] = false,
+		[139840] = false,
+		[140179] = false,
+		--Ji-Kun
+		[138309] = false,
+		[138319] = false,
+		[140571] = false,
+		[134372] = false,
+		--Durumu the Forgotten
+		[133768] = false,
+		[133767] = false,
+		[136932] = false,
+		[134122] = false,
+		[134123] = false,
+		[134124] = false,
+		[133795] = false,
+		[133597] = false,
+		[133732] = false,
+		[133677] = false,
+		[133738] = false,
+		[133737] = false,
+		[133675] = false,
+		[134626] = false,
+		--Primordius
+		[140546] = false,
+		[136180] = false,
+		[136181] = false,
+		[136182] = false,
+		[136183] = false,
+		[136184] = false,
+		[136185] = false,
+		[136186] = false,
+		[136187] = false,
+		[136050] = false,
+		--Dark Animus
+		[138569] = false,
+		[138659] = false,
+		[138609] = false,
+		[138691] = false,
+		[136962] = false,
+		[138480] = false,
+		--Iron Qon
+		[134647] = false,
+		[136193] = false,
+		[135147] = false,
+		[134691] = false,
+		[135145] = false,
+		[136520] = false,
+		[137669] = false,
+		[137668] = false,
+		[137654] = false,
+		[136577] = false,
+		[136192] = false,
+		--Twin Consorts
+		[137440] = false,
+		[137417] = false,
+		[138306] = false,
+		[137408] = false,
+		[137360] = false,
+		[137375] = false,
+		[136722] = false,
+		--Lei Shen
+		[135695] = false,
+		[136295] = false,
+		[135000] = false,
+		[136543] = false,
+		[134821] = false,
+		[136326] = false,
+		[137176] = false,
+		[136853] = false,
+		[135153] = false,
+		[136914] = false,
+		[135001] = false,
+		--Ra-den
+	} );
+
+	-- Siege of Orgrimmar
+	VUHDO_addCustomSpellIds(58, {
+		--Trash
+		[143828] = false,
+		[146452] = false,
+		--Immerseus
+		[143436] = false,
+		[143298] = false,
+		--The Fallen Protectors
+		[143962] = false,
+		[144397] = false,
+		[143009] = false,
+		[143198] = false,
+		[1776] = false,
+		[144365] = false,
+		[144176] = false,
+		[147383] = false,
+		[143424] = false,
+		--Sha of Pride
+		[144358] = false,
+		[144574] = false,
+		--Galakras
+		[147200] = false,
+		[146763] = false,
+		[147705] = false,
+		[147029] = false,
+		--Iron Juggernaut
+		[144459] = false,
+		[144467] = false,
+		[144498] = false,
+		[146325] = false,
+		--Kor'kron Dark Shaman
+		[17153] = false,
+		[144215] = false,
+		[144089] = false,
+		[143993] = false,
+		[144331] = false,
+		[144328] = false,
+		[144089] = false,
+		--General Nazgrim
+		[143494] = false,
+		[143638] = false,
+		[143480] = false,
+		[143882] = false,
+		--Malkorok
+		[142990] = false,
+		[142862] = false,
+		[142861] = false,
+		[143919] = false,
+		--Spoils of Pandaria
+		[145993] = false,
+		[144853] = false,
+		[142524] = false,
+		[146217] = false,
+		[145712] = false,
+		--Thok the Bloodthirsty
+		[143766] = false,
+		[143428] = false,
+		[143445] = false,
+		[143780] = false,
+		[143773] = false,
+		[143800] = false,
+		[143767] = false,
+		[143783] = false,
+		--Siegecrafter Blackfuse
+		[143385] = false,
+		[145444] = false,
+		[143856] = false,
+		[144466] = false,
+		--Paragons of the Klaxxi
+		[142931] = false,
+		[34940] = false,
+		[142315] = false,
+		[142929] = false,
+		[142668] = false,
+		[143974] = false,
+		[143735] = false,
+		[143275] = false,
+		[143278] = false,
+		[143339] = false,
+		[142948] = false,
+		[143702] = false,
+		[143358] = false,
+		[142808] = false,
+		--Garrosh Hellscream
+	} );
+
 	local debuffRemovalList = {};
 
 	for tIndex, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
