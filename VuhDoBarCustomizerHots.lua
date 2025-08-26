@@ -269,6 +269,11 @@ end
 
 
 --
+local function VUHDO_noOp() end
+
+
+
+--
 local tDuration2;
 local tChargeTexture;
 local tIsHotShowIcon;
@@ -296,8 +301,8 @@ local function VUHDO_customizeHotIcons(aPanelNum, aButton, aHotName, aRest, aTim
 		return;
 	end
 
-	local VUHDO_UIFrameFlash = (sIsFlashWhenLow or tHotCfg["isFlashWhenLow"]) and _G["VUHDO_UIFrameFlash"] or function() end;
-	local VUHDO_UIFrameFlashStop = (sIsFlashWhenLow or tHotCfg["isFlashWhenLow"]) and _G["VUHDO_UIFrameFlashStop"] or function() end;
+	local VUHDO_UIFrameFlash = (sIsFlashWhenLow or tHotCfg["isFlashWhenLow"]) and _G["VUHDO_UIFrameFlash"] or VUHDO_noOp;
+	local VUHDO_UIFrameFlashStop = (sIsFlashWhenLow or tHotCfg["isFlashWhenLow"]) and _G["VUHDO_UIFrameFlashStop"] or VUHDO_noOp;
 
 	if not aRest then
 		VUHDO_UIFrameFlashStop(tIcon);
