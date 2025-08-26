@@ -501,7 +501,7 @@ do
 			VUHDO_Msg("|cffFFA500** No expensive event invocations captured. **|r");
 		end
 
-		VUHDO_Msg("|cffFFD100--- End of Handler Metrics ---|r");
+		VUHDO_Msg("|cffFFD100--- End of Metrics ---|r")
 
 		return;
 
@@ -1695,10 +1695,7 @@ do
 			elseif tSubCommand == "test" then
 				VUHDO_testProfilingSystem();
 			else
-				VUHDO_printHandlerMetrics();
-				VUHDO_printDeferredTaskMetrics(false);
-				VUHDO_printPoolMetrics();
-				VUHDO_printSemaphoreMetrics();
+				VUHDO_showProfilingMetrics();
 			end
 
 		elseif tCommandWord == "pixel" then
@@ -2984,6 +2981,220 @@ function VUHDO_testProfilingSystem()
 	VUHDO_Msg("tm50: " .. string.format("%.2f", tTm50) .. " ms, tm80: " .. string.format("%.2f", tTm80) .. " ms, tm90: " .. string.format("%.2f", tTm90) .. " ms, tm99: " .. string.format("%.2f", tTm99) .. " ms, tm100: " .. string.format("%.2f", tTm100) .. " ms");
 
 	VUHDO_Msg("=== Test Complete ===");
+
+	return;
+
+end
+
+
+
+--
+local sProfilingFrame;
+local sProfilingScrollFrame;
+local sProfilingScrollChildFrame;
+local sProfilingEditBox;
+local sProfilingCopyButton;
+
+
+
+--
+local tTitle;
+local tProfilingCloseButton;
+local tLeft;
+local tRight;
+local tMiddle;
+function VUHDO_ensureProfilingFrames()
+
+	if sProfilingFrame then
+		return;
+	end
+
+	sProfilingFrame = CreateFrame("Frame", "VuhDoProfilingFrame", UIParent, "BackdropTemplate");
+
+	sProfilingFrame:SetSize(800, 600);
+	sProfilingFrame:SetPoint("CENTER");
+
+	sProfilingFrame:SetBackdrop( {
+		["bgFile"] = "Interface\\Buttons\\WHITE8x8",
+		["edgeFile"] = "Interface\\Tooltips\\UI-Tooltip-Border",
+		["tile"] = true,
+		["tileSize"] = 8,
+		["edgeSize"] = 16,
+		["insets"] = {
+			["left"] = 4,
+			["right"] = 4,
+			["top"] = 4,
+			["bottom"] = 4,
+		},
+	} );
+	sProfilingFrame:SetBackdropColor(0.1, 0.1, 0.1, 0.9);
+	sProfilingFrame:SetBackdropBorderColor(0.6, 0.6, 0.6, 0.8);
+
+	sProfilingFrame:SetMovable(true);
+	sProfilingFrame:EnableMouse(true);
+
+	sProfilingFrame:RegisterForDrag("LeftButton");
+	sProfilingFrame:SetScript("OnDragStart", sProfilingFrame.StartMoving);
+	sProfilingFrame:SetScript("OnDragStop", sProfilingFrame.StopMovingOrSizing);
+
+	tTitle = sProfilingFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge");
+
+	tTitle:SetPoint("TOP", 0, -8);
+	tTitle:SetText("VuhDo Profiling Metrics");
+
+	sProfilingScrollFrame = CreateFrame("ScrollFrame", "VuhDoProfilingFrameScrollFrame", sProfilingFrame, "UIPanelScrollFrameTemplate");
+
+	sProfilingScrollFrame:SetPoint("TOPLEFT", 12, -40);
+	sProfilingScrollFrame:SetPoint("BOTTOMRIGHT", -32, 50);
+
+	sProfilingScrollChildFrame = CreateFrame("Frame", nil, sProfilingScrollFrame);
+
+	sProfilingScrollChildFrame:SetPoint("TOPLEFT");
+	sProfilingScrollChildFrame:SetPoint("TOPRIGHT");
+	sProfilingScrollChildFrame:SetSize(756, 400);
+
+	sProfilingEditBox = CreateFrame("EditBox", nil, sProfilingScrollChildFrame, "InputBoxTemplate");
+
+	sProfilingEditBox:SetPoint("TOPLEFT");
+	sProfilingEditBox:SetPoint("TOPRIGHT");
+	sProfilingEditBox:SetMultiLine(true);
+	sProfilingEditBox:SetAutoFocus(false);
+	sProfilingEditBox:SetFontObject("GameFontHighlight");
+
+	tLeft = sProfilingEditBox["Left"];
+	tRight = sProfilingEditBox["Right"];
+	tMiddle = sProfilingEditBox["Middle"];
+
+	if tLeft then
+		tLeft:SetVertexColor(1, 1, 1, 0);
+	end
+
+	if tRight then
+		tRight:SetVertexColor(1, 1, 1, 0);
+	end
+
+	if tMiddle then
+		tMiddle:SetVertexColor(1, 1, 1, 0);
+	end
+
+	sProfilingEditBox:SetScript("OnEscapePressed", function()
+		if not InCombatLockdown() then
+			sProfilingFrame:Hide();
+		end
+	end);
+
+	sProfilingScrollFrame:SetScrollChild(sProfilingScrollChildFrame);
+
+	sProfilingCopyButton = CreateFrame("Button", nil, sProfilingFrame, "GameMenuButtonTemplate");
+
+	sProfilingCopyButton:SetSize(100, 25);
+	sProfilingCopyButton:SetPoint("BOTTOMLEFT", 12, 12);
+	sProfilingCopyButton:SetText("Select All");
+
+	sProfilingCopyButton:SetScript("OnClick", function()
+		if sProfilingCopyButton:GetText() == "Select All" then
+			sProfilingEditBox:SetFocus();
+			sProfilingEditBox:HighlightText();
+			sProfilingCopyButton:SetText("Unselect All");
+		else
+			sProfilingEditBox:HighlightText(0, 0);
+			sProfilingCopyButton:SetText("Select All");
+		end
+	end);
+
+	tProfilingCloseButton = CreateFrame("Button", nil, sProfilingFrame, "GameMenuButtonTemplate");
+
+	tProfilingCloseButton:SetSize(100, 25);
+	tProfilingCloseButton:SetPoint("BOTTOMRIGHT", -12, 12);
+	tProfilingCloseButton:SetText("Close");
+
+	tProfilingCloseButton:SetScript("OnClick", function()
+		if not InCombatLockdown() then
+			sProfilingFrame:Hide();
+		end
+	end);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_showProfilingFrame()
+
+	if InCombatLockdown() then
+		VUHDO_Msg("Cannot show profiling frame during combat.");
+
+		return;
+	end
+
+	VUHDO_ensureProfilingFrames();
+
+	sProfilingFrame:Show();
+
+	return;
+
+end
+
+
+
+--
+local tCapturedOutput;
+local tOriginalMsg;
+local tOutputText;
+function VUHDO_captureProfilingOutput(aCallback)
+
+	if InCombatLockdown() then
+		VUHDO_Msg("Cannot capture profiling output during combat.");
+
+		return;
+	end
+
+	VUHDO_ensureProfilingFrames();
+
+	tCapturedOutput = { };
+	tOriginalMsg = VUHDO_Msg;
+
+	VUHDO_Msg = function(aMessage, aRed, aGreen, aBlue)
+		tinsert(tCapturedOutput, aMessage);
+
+		return;
+	end
+
+	aCallback();
+
+	VUHDO_Msg = tOriginalMsg;
+
+	tOutputText = "";
+
+	for _, tLine in ipairs(tCapturedOutput) do
+		tOutputText = tOutputText .. tLine .. "\n";
+	end
+
+	sProfilingEditBox:SetText(tOutputText);
+	sProfilingCopyButton:SetText("Select All");
+	sProfilingEditBox:HighlightText(0, 0);
+
+	sProfilingScrollFrame:SetVerticalScroll(0);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_showProfilingMetrics()
+
+	VUHDO_showProfilingFrame();
+
+	VUHDO_captureProfilingOutput(function()
+		VUHDO_printHandlerMetrics();
+		VUHDO_printDeferredTaskMetrics(false);
+		VUHDO_printPoolMetrics();
+		VUHDO_printSemaphoreMetrics();
+	end);
 
 	return;
 
