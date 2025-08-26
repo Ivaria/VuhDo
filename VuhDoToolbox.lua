@@ -2076,7 +2076,7 @@ function VUHDO_printPoolMetrics()
 		if tPool and tPool.getMetrics then
 			tPoolStats = tPool:getMetrics();
 
-			VUHDO_Msg(string.format("|cffFFA500** Pool[%s]:|r (Max:%d CurIdle:%d PeakIdle:%d): Hits=%d Misses=%d Rejected=%d",
+			VUHDO_Msg(string.format("|cffFFA500** Pool[%s]:|r (|cffB0E0E6Max:|r%d |cffB0E0E6CurIdle:|r%d |cffB0E0E6PeakIdle:|r%d): |cff98FB98Hits=|r%d |cff98FB98Misses=|r%d |cff98FB98Rejected=|r%d",
 				tName,
 				tPoolStats["maxSize"],
 				tPoolStats["currentIdle"],
@@ -2644,7 +2644,7 @@ function VUHDO_printSemaphoreMetrics()
 	end
 
 	for tPrefix, tAggData in pairs(tAggregatedMetrics) do
-		VUHDO_Msg(format("|cffFFA500** %s:|r (Instances:%d Active:%d): Inc=%d Dec=%d T=%d CurCount=%d Wait=%d MaxPeakWait=%d MaxTimeout=%dms",
+		VUHDO_Msg(format("|cffFFA500** %s:|r (|cffB0E0E6Instances:|r%d |cffB0E0E6Active:|r%d): |cff98FB98Inc=|r%d |cff98FB98Dec=|r%d |cff98FB98T=|r%d |cffB0E0E6CurCount=|r%d |cffB0E0E6Wait=|r%d |cffB0E0E6MaxPeakWait=|r%d |cffB0E0E6MaxTimeout=|r%dms",
 			tPrefix,
 			tAggData["instances"],
 			tAggData["activeInstances"],
@@ -2686,7 +2686,7 @@ function VUHDO_printDetailedSemaphoreMetrics()
 	for tSemaphoreName, tSemaphore in pairs(VUHDO_REGISTERED_SEMAPHORES) do
 		tMetrics = tSemaphore:getMetrics();
 
-		VUHDO_Msg(format("|cffFFA500** %s:|r (Cur:%d/%d Peak:%d): Inc=%d Dec=%d T=%d Wait=%d Timeout=%dms",
+		VUHDO_Msg(format("|cffFFA500** %s:|r (|cffB0E0E6Cur:|r%d/%d |cffB0E0E6Peak:|r%d): |cff98FB98Inc=|r%d |cff98FB98Dec=|r%d |cff98FB98T=|r%d |cffB0E0E6Wait=|r%d |cffB0E0E6Timeout=|r%dms",
 			tSemaphoreName,
 			tMetrics["currentCount"],
 			tMetrics["maxCount"],
