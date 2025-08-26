@@ -438,7 +438,7 @@ do
 		else
 			table.sort(tEventStats, VUHDO_sortEventStats);
 
-			VUHDO_Msg("  Sorted by Total Time (Event: Total, Count, percentiles)");
+			VUHDO_Msg("  |cff98FB98Sorted by Total Time|r (Event: Total, Count, percentiles)");
 
 			for _, tStats in ipairs(tEventStats) do
 				tPercentileKeys = { };
@@ -460,15 +460,15 @@ do
 						tPercentileText = tPercentileText .. ", ";
 					end
 
-					tPercentileText = tPercentileText .. tPercentileKey .. ": " .. VUHDO_formatTime(tStats["trimmedMeans"][tPercentileKey] or 0);
+					tPercentileText = tPercentileText .. "|cff98FB98" .. tPercentileKey .. ":|r " .. VUHDO_formatTime(tStats["trimmedMeans"][tPercentileKey] or 0);
 				end
 
-				VUHDO_Msg(format("  %s: Total: %s, Count: %d, %s",
-					tStats["name"],
-					VUHDO_formatTime(tStats["totalTime"]),
-					tStats["count"],
-					tPercentileText
-				));
+						VUHDO_Msg(format("  |cffB0E0E6%s:|r |cff98FB98Total:|r %s, |cff98FB98Count:|r %d, %s",
+			tStats["name"],
+			VUHDO_formatTime(tStats["totalTime"]),
+			tStats["count"],
+			tPercentileText
+		));
 			end
 		end
 
@@ -479,17 +479,17 @@ do
 				tThresholdText = "N/A";
 			end
 
-			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_HANDLER_EVENT_SNAPSHOTS .. " Expensive Event Invocations (Threshold: " .. tThresholdText .. "): **|r");
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_HANDLER_EVENT_SNAPSHOTS .. " Expensive Event Invocations (|cffB0E0E6Threshold:|r " .. tThresholdText .. "): **|r");
 
 			for tCnt, tSnapshot in ipairs(VUHDO_HANDLER_EVENT_SNAPSHOTS) do
 				tArgString = table.concat(tSnapshot["args"], ", ");
 				tDedupedText = "";
 
 				if (tSnapshot["dedupedCount"] or 0) > 1 then
-					tDedupedText = format(" (deduped %d times)", tSnapshot["dedupedCount"]);
+					tDedupedText = format(" (|cff98FB98deduped|r %d times)", tSnapshot["dedupedCount"]);
 				end
 
-				VUHDO_Msg(format("  #%d: %s - %s @ %s. Args: %s%s",
+				VUHDO_Msg(format("  #%d: |cffB0E0E6%s|r - %s @ |cffB0E0E6%s|r. |cff98FB98Args:|r %s%s",
 					tCnt,
 					tSnapshot["eventName"],
 					VUHDO_formatTime(tSnapshot["durationUs"]),
