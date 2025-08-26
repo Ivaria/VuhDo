@@ -42,6 +42,53 @@ local VUHDO_getUnitHotInfo;
 local sBarColors;
 local sIsDistance;
 
+local sCustomFlagCache = { };
+local sCustomFlagErrorHandler;
+
+
+
+--
+local tHash;
+local tLen;
+local function VUHDO_getCustomCodeHash(aCustomCodeString)
+
+	tHash = 0;
+	tLen = #aCustomCodeString;
+
+	for tCnt = 1, tLen do
+		tHash = ((tHash * 31) + string.byte(aCustomCodeString, tCnt)) % 0x7FFFFFFF;
+	end
+
+	return tHash;
+
+end
+
+
+
+--
+local function VUHDO_customFlagErrorHandler()
+
+	DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE, 1.0, 0.0, 0.0);
+	DEFAULT_CHAT_FRAME:AddMessage(debugstack(1, 2, 0), 1.0, 0.0, 0.0);
+	DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
+
+	return false, nil, -1, -1, -1;
+
+end
+
+
+
+--
+function VUHDO_clearCustomFlagCache()
+
+	table.wipe(sCustomFlagCache);
+
+	return;
+
+end
+
+
+
 ----------------------------------------------------------
 
 
@@ -77,6 +124,8 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
 	sIsDistance = VUHDO_CONFIG["DIRECTION"]["isDistanceText"];
+
+	sCustomFlagErrorHandler = VUHDO_customFlagErrorHandler;
 
 	if VUHDO_mergeSpellTraceValidators then
 		VUHDO_mergeSpellTraceValidators();
@@ -950,49 +999,63 @@ local exec_env = setmetatable({}, {
 
 --
 function env_getglobal(k)
+
 	return exec_env[k];
+
 end
 
 
 
 --
+local tCustomCodeString;
+local tCodeHash;
+local tCachedFunction;
+local tLoadedFunction
+local tErrorString;
 local function VUHDO_customFlagValidator(anInfo, aCustom)
+
 	if aCustom and aCustom["custom"] and aCustom["custom"]["function"] then
-		local customCodeString = "return true;";
+		tCustomCodeString = "return true;";
 
 		-- compatibility with prior alphas where default code string was '1'
 		if aCustom["custom"]["function"] ~= "1" then
-			customCodeString = aCustom["custom"]["function"];
+			tCustomCodeString = aCustom["custom"]["function"];
 		end
 
-		local loadedFunction, errorString = loadstring("local VUHDO_unitInfo = _G[\"VUHDO_anInfo\"]; " .. customCodeString);
+		tCodeHash = VUHDO_getCustomCodeHash(tCustomCodeString);
+		tCachedFunction = sCustomFlagCache[tCodeHash];
 
-		if loadedFunction then
+		if not tCachedFunction then
+			tLoadedFunction, tErrorString = loadstring("local VUHDO_unitInfo = _G[\"VUHDO_anInfo\"]; " .. tCustomCodeString);
+
+			if tLoadedFunction then
+				setfenv(tLoadedFunction, exec_env);
+
+				sCustomFlagCache[tCodeHash] = tLoadedFunction;
+				tCachedFunction = tLoadedFunction;
+			else
+				DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD, 1.0, 0.0, 0.0);
+				DEFAULT_CHAT_FRAME:AddMessage(tErrorString, 1.0, 0.0, 0.0);
+				DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
+				DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"]["function"], 1.0, 0.0, 0.0);
+
+				return false, nil, -1, -1, -1;
+			end
+		end
+
+		if tCachedFunction then
 			_G["VUHDO_anInfo"] = anInfo;
-			setfenv(loadedFunction, exec_env);
-			local _, ret, ret2, ret3, ret4, ret5 = xpcall(loadedFunction, 
-				function() 
-					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_EXECUTE, 1.0, 0.0, 0.0);
-					DEFAULT_CHAT_FRAME:AddMessage(debugstack(1, 2, 0), 1.0, 0.0, 0.0);
-					DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
-					DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"]["function"], 1.0, 0.0, 0.0);
 
-					return false, nil, -1, -1, -1; 
-				end
-			);
+			local _, ret, ret2, ret3, ret4, ret5 = xpcall(tCachedFunction, sCustomFlagErrorHandler);
 
 			if ret and ret == true then
 				return true, nil, -1, -1, -1;
 			end
-		else
-			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_CUSTOM_FLAG_LOAD, 1.0, 0.0, 0.0);
-			DEFAULT_CHAT_FRAME:AddMessage(errorString, 1.0, 0.0, 0.0);
-			DEFAULT_CHAT_FRAME:AddMessage(VUHDO_I18N_ERROR_INVALID_VALIDATOR, 1.0, 0.0, 0.0);
-			DEFAULT_CHAT_FRAME:AddMessage(aCustom["custom"]["function"], 1.0, 0.0, 0.0);
 		end
 	end
 
 	return false, nil, -1, -1, -1;
+
 end
 
 
