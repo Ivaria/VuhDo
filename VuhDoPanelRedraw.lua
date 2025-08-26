@@ -1572,6 +1572,8 @@ end
 
 
 --
+local tCurrentCycleId;
+local tTrackerKey;
 function VUHDO_deferRedrawPanelComplete(aPanelNum, anIsFixAllFrameLevels, aCycleId)
 
 	if not sPanelCompletionTracker then
@@ -1681,7 +1683,6 @@ local tHealButton;
 function VUHDO_deferInitHealButtonDelegate(aPanelNum, aButtonIndex)
 
 	tHealButton = VUHDO_getOrCreateHealButton(aButtonIndex, aPanelNum);
-	sButton = tHealButton;
 
 	sHealthBar = VUHDO_getHealthBar(tHealButton, 1);
 

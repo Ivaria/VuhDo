@@ -296,6 +296,7 @@ do
 	--
 	local tPercentileKeys;
 	local tPercentileText;
+	local tPercentileKey;
 	function VUHDO_printHandlerMetricSegment(aSegName, aSegData, anInvocationCount, anIndent)
 
 		if not aSegData then

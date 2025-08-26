@@ -729,3 +729,12 @@ function VUHDO_getDebuffIcons()
 	return VUHDO_DEBUFF_ICONS;
 
 end
+
+
+
+--
+function VUHDO_getDebuffIconsMap()
+
+	return VUHDO_DEBUFF_ICONS_MAP;
+
+end
