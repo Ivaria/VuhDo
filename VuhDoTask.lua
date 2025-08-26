@@ -2108,13 +2108,13 @@ do
 		end
 
 		if #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS > 0 then
-			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (Threshold: >" .. (VUHDO_formatTime(VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"])) .. "): **|r");
+			VUHDO_Msg("|cffFFA500** Top " .. #VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS .. " Expensive Deferred Task Chunks (|cffB0E0E6Threshold:|r >" .. (VUHDO_formatTime(VUHDO_DEFERRED_TASK_CONFIG["MAX_EXEC_TIME_US"])) .. "): **|r");
 
 			for tSnapshotCnt, tSnapshot in ipairs(VUHDO_DEFERRED_TASK_CHUNK_SNAPSHOTS) do
 				tDedupedText = "";
 
 				if (tSnapshot["dedupedCount"] or 0) > 1 then
-					tDedupedText = format(" (deduped %d times)", tSnapshot["dedupedCount"]);
+					tDedupedText = format(" (|cff98FB98deduped|r %d times)", tSnapshot["dedupedCount"]);
 				end
 
 				VUHDO_Msg(format("  #%d: |cffB0E0E6ChunkTotalTime:|r %s, |cffB0E0E6NumTasks:|r %d, |cffB0E0E6Timestamp:|r %s%s",
@@ -2129,7 +2129,7 @@ do
 					for tCnt, tTask in ipairs(tSnapshot["tasks"]) do
 						tArgsSummary = tTask["args"] or "none";
 
-						VUHDO_Msg(format("    T%d: |cffB0E0E6Type[%s]|r %s (Args:%s)",
+						VUHDO_Msg(format("    T%d: |cffB0E0E6Type[%s]|r %s (|cff98FB98Args:|r%s)",
 							tCnt,
 							tostring(tTask["type"]),
 							VUHDO_formatTime(tTask["durationUs"]),
