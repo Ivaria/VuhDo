@@ -23,7 +23,6 @@ local VUHDO_getHealthBar;
 local VUHDO_setupSmartCast;
 local VUHDO_updateDirectionFrame;
 local VUHDO_getCurrentKeyModifierString;
-local VUHDO_redrawPanel;
 local VUHDO_redrawAllPanels;
 
 

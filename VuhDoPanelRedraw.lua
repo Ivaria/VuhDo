@@ -536,33 +536,46 @@ end
 
 
 --
-local tLeft, tRight, tTop, tBottom;
+local tLeft;
+local tRight;
+local tTop;
+local tBottom;
 local tIcon;
 local function VUHDO_initButtonButtonFacade(aButton)
+
 	for tCnt = 1, 5 do
 		VUHDO_registerFacadeIcon(aButton, tCnt, VUHDO_I18N_HOTS);
 	end
+
 	for tCnt = 9, 12 do -- VUHDO_MAX_HOTS
 		VUHDO_registerFacadeIcon(aButton, tCnt, VUHDO_I18N_HOTS);
 	end
+
 	tIcon = VUHDO_getBarIcon(aButton, 1);
+
 	if tIcon then
 		tLeft, tTop, _, _, _, _, tRight, tBottom = tIcon:GetTexCoord();
+
 		VUHDO_hotsSetClippings(tLeft, tRight, tTop, tBottom);
 	end
+
+	return;
+
 end
 
 
 
 --
-local tXPos,  tYPos;
+local tXPos;
+local tYPos;
 local tHealButton;
 local tGroupArray;
-local tColumnIndex, tButtonIndex;
+local tColumnIndex;
+local tButtonIndex;
 local tModelArray;
 local tPanelName;
-local tDebuffFrame;
 local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
+
 	tModelArray = VUHDO_getDynamicModelArray(aPanelNum);
 	tPanelName  = aPanel:GetName();
 
@@ -598,6 +611,9 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 
 		tColumnIndex = tColumnIndex + 1;
 	end
+
+	return;
+
 end
 
 
@@ -926,7 +942,8 @@ end
 
 
 --
-local tX, tY;
+local tX;
+local tY;
 local function VUHDO_initRaidIcon(aHealthBar, anIcon, aWidth, aPanelNum)
 
 	tX = sPanelConfig[aPanelNum]["raidIcon"]["xAdjust"] * aWidth * 0.01;
@@ -1207,8 +1224,6 @@ end
 local tIsInverted;
 local tOrientation;
 local tClickPar;
-local tFrame;
-local tIcon;
 function VUHDO_initHealButton(aButton, aPanelNum)
 
 	tClickPar = VUHDO_CONFIG["ON_MOUSE_UP"] and "AnyUp" or "AnyDown";
@@ -1603,7 +1618,6 @@ local tCurrentCycleId;
 local tIsPanelActive;
 local tWaitingRequest;
 local tCycleId;
-local tPanel;
 function VUHDO_deferRedrawPanel(aPanelNum, anIsFixAllFrameLevels, aCycleId)
 
 	tIsFullRedrawCycle = (aCycleId ~= nil);
@@ -1706,13 +1720,7 @@ end
 local tHealButton;
 local tXPos;
 local tYPos;
-local tDebuffFrame;
 local tPanel;
-
-
-
-
-
 function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, aModelIndex, aModelId, aGroupIndex, aColumnIndex)
 
 	tHealButton = VUHDO_getOrCreateHealButton(aButtonIndex, aPanelNum);
@@ -1755,27 +1763,9 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --
 local tCurrentCycleId;
 local tTrackerKey;
-local tIsPopulated;
-local tSemaphoreCycleId;
 local tNextRequest;
 local tPanel;
 local tButtonSemaphores;
@@ -2118,7 +2108,6 @@ end
 local tWaitingRequest;
 local tHasIndividualRedraws;
 local tCycleId;
-local tPanelNum;
 function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 
 	if InCombatLockdown() then
@@ -2243,14 +2232,9 @@ end
 
 
 --
-local tCurrentCycleId;
 local tGcdCol;
 local tNextRequest;
 function VUHDO_deferRedrawAllPanelsCompleteDelegate(anIsFixAllFrameLevels)
-
-	tCurrentCycleId = (sRedrawAllPanelsSemaphore and VUHDO_extractCycleIdFromSemaphoreName(sRedrawAllPanelsSemaphore["name"])) or "UNKNOWN";
-
-
 
 	if sRedrawAllPanelsSemaphore and
 		not sRedrawAllPanelsSemaphore:waitFor(VUHDO_DEFER_REDRAW_ALL_PANELS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, anIsFixAllFrameLevels) then

@@ -32,8 +32,6 @@ local VUHDO_isUnitSwiftmendable;
 local VUHDO_getDebuffColor;
 local VUHDO_getIsCurrentBouquetActive;
 local VUHDO_getUnitDebuffSchoolInfos;
-local VUHDO_getCurrentBouquetStacks;
-local VUHDO_getCurrentBouquetTimer;
 local VUHDO_getRaidTargetIconTexture;
 local VUHDO_getUnitGroupPrivileges;
 local VUHDO_getLatestCustomDebuff;
