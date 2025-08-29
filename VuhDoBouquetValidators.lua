@@ -112,10 +112,8 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_isUnitSwiftmendable = _G["VUHDO_isUnitSwiftmendable"];
 	VUHDO_getDebuffColor = _G["VUHDO_getDebuffColor"];
 	VUHDO_getUnitDebuffSchoolInfos = _G["VUHDO_getUnitDebuffSchoolInfos"];
-	VUHDO_getCurrentBouquetStacks = _G["VUHDO_getCurrentBouquetStacks"];
 	VUHDO_getIsCurrentBouquetActive = _G["VUHDO_getIsCurrentBouquetActive"];
 
-	VUHDO_getCurrentBouquetTimer = _G["VUHDO_getCurrentBouquetTimer"];
 	VUHDO_getRaidTargetIconTexture = _G["VUHDO_getRaidTargetIconTexture"];
 	VUHDO_getUnitGroupPrivileges = _G["VUHDO_getUnitGroupPrivileges"];
 	VUHDO_getLatestCustomDebuff = _G["VUHDO_getLatestCustomDebuff"];
