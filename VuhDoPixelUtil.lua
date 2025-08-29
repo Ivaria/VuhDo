@@ -145,12 +145,10 @@ end
 
 --
 local tCurrentScale;
-local tOldScale;
 local tDelay;
 function VUHDO_handleScaleChange()
 
 	tCurrentScale = UIParent:GetEffectiveScale();
-	tOldScale = sLastKnownScale;
 
 	VUHDO_refreshPixelScale();
 

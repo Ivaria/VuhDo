@@ -342,6 +342,7 @@ do
 
 	--
 	local tGroupSizeMultiplier;
+	local tGroupSize;
 	function VUHDO_getGroupSizeBasedMultiplier()
 
 		tGroupSizeMultiplier = 1.0;

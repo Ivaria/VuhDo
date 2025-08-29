@@ -11,13 +11,10 @@ local InCombatLockdown = InCombatLockdown;
 local tonumber = tonumber;
 local string = string;
 local debugprofilestop = debugprofilestop;
-local MeasureCall = C_AddOnProfiler and C_AddOnProfiler.MeasureCall;
 local format = string.format;
 local tinsert = table.insert;
 local tremove = table.remove;
 local twipe = table.wipe;
-local max = math.max;
-local min = math.min;
 local floor = math.floor;
 
 
@@ -83,7 +80,6 @@ local VUHDO_updateAllDebuffIcons;
 local VUHDO_updateAllAggro;
 local VUHDO_updateUnitAggro;
 local VUHDO_updateAllRange;
-local VUHDO_updateUnitRange;
 local VUHDO_updateAllClusters;
 local VUHDO_updateClusterHighlights;
 local VUHDO_aoeUpdateAll;
@@ -91,7 +87,6 @@ local VUHDO_updateSpellTrace;
 local VUHDO_updateAllRaidBars;
 local VUHDO_updateCustomDebuffTooltip;
 local VUHDO_getUnitZoneName;
-local VUHDO_getCurrentMouseOver;
 local VUHDO_handleScaleChange;
 local VUHDO_redrawPanel;
 local VUHDO_redrawAllPanels;
@@ -297,6 +292,7 @@ do
 	--
 	local tPercentileKeys;
 	local tPercentileText;
+	local tPercentileKey;
 	function VUHDO_printHandlerMetricSegment(aSegName, aSegData, anInvocationCount, anIndent)
 
 		if not aSegData then
@@ -355,13 +351,8 @@ do
 	};
 	local tMetrics;
 	local tSessionDuration;
-	local tOnUpdateMetrics;
 	local tInvocationCount;
 	local tEventStats;
-	local tTotalTime;
-	local tCount;
-	local tTrimmedMeans;
-	local tTracker;
 	local tEventName;
 	local tPercentiles;
 	local tTotal;
@@ -512,7 +503,6 @@ end
 
 
 --
-local sIsHealerMode;
 local sIsDirectionArrow = false;
 local sHotToggleUpdateSecs = 1;
 local sAggroRefreshSecs = 1;
@@ -550,7 +540,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_getUnitZoneName = _G["VUHDO_getUnitZoneName"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_updateClusterHighlights"];
 	VUHDO_updateCustomDebuffTooltip = _G["VUHDO_updateCustomDebuffTooltip"];
-	VUHDO_getCurrentMouseOver = _G["VUHDO_getCurrentMouseOver"];
 	VUHDO_UIFrameFlash_OnUpdate = _G["VUHDO_UIFrameFlash_OnUpdate"];
 	VUHDO_handleScaleChange = _G["VUHDO_handleScaleChange"];
 
@@ -565,7 +554,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateAllAggro = _G["VUHDO_updateAllAggro"];
 	VUHDO_updateUnitAggro = _G["VUHDO_updateUnitAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_updateAllRange"];
-	VUHDO_updateUnitRange = _G["VUHDO_updateUnitRange"];
 
 	VUHDO_initTaskSystem();
 
@@ -581,7 +569,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateAllAggro = _G["VUHDO_deferUpdateAllAggro"];
 	VUHDO_updateUnitAggro = _G["VUHDO_deferUpdateUnitAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_deferUpdateAllRange"];
-	VUHDO_updateUnitRange = _G["VUHDO_deferUpdateUnitRange"];
 	VUHDO_updateAllClusters = _G["VUHDO_deferUpdateAllClusters"];
 	VUHDO_aoeUpdateAll = _G["VUHDO_deferAoeUpdateAll"];
 	VUHDO_updateSpellTrace = _G["VUHDO_deferUpdateSpellTrace"];
@@ -599,8 +586,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
 		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
 	end
-
-	sIsHealerMode = not VUHDO_CONFIG["THREAT"]["IS_TANK_MODE"];
 
 	sIsDirectionArrow = VUHDO_isShowDirectionArrow();
 

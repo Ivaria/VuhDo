@@ -1217,7 +1217,7 @@ do
 				end
 			end
 
-			-- Entweder Fähigkeit vorhanden ODER noch keiner gewählt UND auch nicht entfernbare
+			-- Entweder Fï¿½higkeit vorhanden ODER noch keiner gewï¿½hlt UND auch nicht entfernbare
 			-- Either ability available OR none selected AND not removable (DETECT_DEBUFFS_REMOVABLE_ONLY)
 			if not anIsUpdate and tType and (tAbility or (sIsNotRemovableOnly and tFriend and not tHostile)) then -- VUHDO_DEBUFF_TYPE_NONE
 				VUHDO_addCurChosen(sUnit, anAuraInstanceId, tType, nil, nil, nil);
@@ -1528,7 +1528,6 @@ local tExpiry;
 local tStacks;
 local tSpellId;
 local tSpellIdStr;
-local tAuraInstanceId;
 local tName;
 local tUnitDebuff;
 local tDebuffSettings;
@@ -1654,11 +1653,6 @@ do
 	local tDoUpdateUnitDebuffInfo = { };
 	local tUnitCustomDebuffs;
 	local tUnitCurIcons;
-	local tUnitCustomDebuffSpells;
-	local tName;
-	local tSpellCount;
-	local tSpellId;
-	local tSpellIdStr;
 	function VUHDO_determineDebuff(aUnit, aUpdateInfo)
 
 		tInfo = (VUHDO_RAID or sEmpty)[aUnit];

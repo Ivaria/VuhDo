@@ -32,9 +32,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Warlock 'Soulstone' spell binding while in combat  
   
   
 Improvements:  
+-- Added Warlock and Death Knight combat resurrections to Smart Cast  
 -- Added clock sweep countdown option for debuff icons  
 -- Incoming spell trace icons now display cast time as time remaining  
 -- Added default custom debuffs for Manaforge Omega raid encounters  
