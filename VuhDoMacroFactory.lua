@@ -337,6 +337,7 @@ local VUHDO_PROHIBIT_HELP = {
 	[VUHDO_SPELL_ID.RAISE_ALLY] = true,
 	[VUHDO_SPELL_ID.RETURN] = true,
 	[VUHDO_SPELL_ID.MASS_RETURN] = true,
+	[VUHDO_SPELL_ID.SOULSTONE] = true,
 }
 
 
@@ -345,9 +346,9 @@ local VUHDO_PROHIBIT_HELP = {
 local tRezText;
 local function VUHDO_getAutoBattleRezText(anIsKeyboard)
 
-	if ("DRUID" == VUHDO_PLAYER_CLASS or "PALADIN" == VUHDO_PLAYER_CLASS) and VUHDO_SPELL_CONFIG["autoBattleRez"] then
+	if VUHDO_SPELL_CONFIG["autoBattleRez"] and "DRUID" == VUHDO_PLAYER_CLASS then
 		tRezText = "/use [dead,combat,@" .. (anIsKeyboard and "mouseover" or "vuhdo");
-		
+
 		if VUHDO_SPELL_CONFIG["smartCastModi"] ~= "all" then
 			tRezText = tRezText .. ",mod:" .. VUHDO_SPELL_CONFIG["smartCastModi"];
 		end

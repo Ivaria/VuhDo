@@ -2280,14 +2280,11 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tMetrics;
 	local tTask;
 	local tAllDependenciesZero;
-	local tDependency;
-	local tProcessedTask;
 	local tTasksToProcess;
 	local tIndex;
 	local tShouldProcess;
 	local tShouldMigrate;
 	local tMigrateToSemaphore;
-	local tWaitingTask;
 	function tSemaphore:decrement()
 
 		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
@@ -2360,7 +2357,6 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tIsProfile;
 	local tMetrics;
 	local tTaskKey;
-	local tExistingTask;
 	function tSemaphore:waitFor(aTaskType, aPriority, ...)
 
 		if not self then
@@ -2434,7 +2430,6 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tIsProfile;
 	local tMetrics;
 	local tTask;
-	local tIsTimedOut;
 	local tTimedOutCount;
 	function tSemaphore:checkTimeouts()
 
@@ -2450,7 +2445,6 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 			tTask = self["waitingTasks"][tIndex];
 
 			if tCurrentTime >= tTask["timeoutTime"] then
-				tIsTimedOut = true;
 				tTimedOutCount = tTimedOutCount + 1;
 
 				if VUHDO_SEMAPHORE_PROFILING_ENABLED then
@@ -2548,8 +2542,6 @@ do
 	local tAlreadyWaiting;
 	local tFirstNonZeroSemaphore;
 	local tMaxTimeout;
-	local tSemaphore;
-	local tWaitingTask;
 	function VUHDO_waitForSemaphores(aSemaphores, aTaskType, aPriority, ...)
 
 		if not aSemaphores or #aSemaphores == 0 then
@@ -2672,8 +2664,6 @@ local tInconsistentSemaphores;
 local tAggregatedMetrics;
 local tPrefix;
 local tAggData;
-local tSemaphoreName;
-local tSemaphore;
 function VUHDO_printSemaphoreMetrics()
 
 	if not VUHDO_SEMAPHORE_PROFILING_ENABLED then
