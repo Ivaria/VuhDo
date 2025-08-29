@@ -1,12 +1,6 @@
 local _;
 
 local GetTime = GetTime;
-local tonumber = tonumber;
-
-local VUHDO_RAID = { };
-local VUHDO_USER_CLASS_COLORS;
-local VUHDO_PANEL_SETUP;
-local VUHDO_CONFIG;
 
 local VUHDO_getSpellTraceForUnit;
 local VUHDO_getSpellTraceIncomingForUnit;
@@ -15,8 +9,6 @@ local VUHDO_getSpellTraceTrailOfLightForUnit;
 local VUHDO_isSpellTraceTrailOfLightNextUnit;
 local VUHDO_getAoeAdviceForUnit;
 
-local sSpellTraceStoredSettings;
-local sSpellTraceDefaultDuration;
 
 ----------------------------------------------------------
 
@@ -24,20 +16,12 @@ local sSpellTraceDefaultDuration;
 
 function VUHDO_bouquetValidatorsSpellTraceInitLocalOverrides()
 
-	VUHDO_RAID = _G["VUHDO_RAID"];
-	VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
-	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
-	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
-
 	VUHDO_getSpellTraceForUnit = _G["VUHDO_getSpellTraceForUnit"];
 	VUHDO_getSpellTraceIncomingForUnit = _G["VUHDO_getSpellTraceIncomingForUnit"];
 	VUHDO_getSpellTraceHealForUnit = _G["VUHDO_getSpellTraceHealForUnit"];
 	VUHDO_getSpellTraceTrailOfLightForUnit = _G["VUHDO_getSpellTraceTrailOfLightForUnit"];
 	VUHDO_isSpellTraceTrailOfLightNextUnit = _G["VUHDO_isSpellTraceTrailOfLightNextUnit"];
 	VUHDO_getAoeAdviceForUnit = _G["VUHDO_getAoeAdviceForUnit"];
-
-	sSpellTraceStoredSettings = VUHDO_CONFIG["SPELL_TRACE"]["STORED_SETTINGS"];
-	sSpellTraceDefaultDuration = VUHDO_CONFIG["SPELL_TRACE"]["duration"];
 
 end
 

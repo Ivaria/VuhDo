@@ -182,9 +182,7 @@ local tCurChosenInfo;
 local tType;
 local tButton;
 local tBackdropFrame;
-local tBaseScale;
 local tScaleFactor;
-local tFinalScale;
 local tClock;
 local tStarted;
 local tClockDuration;
@@ -404,9 +402,6 @@ end
 
 --
 local tNow;
-local tUnit;
-local tAllDebuffInfos;
-local tDebuffInfo;
 function VUHDO_updateAllDebuffIcons(anIsFrequent)
 
 	tNow = GetTime();
@@ -430,7 +425,6 @@ end
 --
 local tNow;
 local tUnitDebuffInfos;
-local tDebuffInfo;
 function VUHDO_updateUnitDebuffIcons(aUnit, anIsFrequent)
 
 	if not aUnit or not VUHDO_DEBUFF_ICONS then
@@ -458,7 +452,6 @@ end
 
 
 --
-local tUnit;
 function VUHDO_deferUpdateAllDebuffIcons(anIsFrequent, aPriority)
 
 	if not VUHDO_DEBUFF_ICONS then
@@ -653,8 +646,6 @@ end
 --
 local tFrame;
 local tAllButtons;
-local tButton;
-local tIconArray;
 function VUHDO_removeAllDebuffIcons(aUnit)
 
 	tAllButtons = VUHDO_getUnitButtons(aUnit);
@@ -727,5 +718,14 @@ end
 function VUHDO_getDebuffIcons()
 
 	return VUHDO_DEBUFF_ICONS;
+
+end
+
+
+
+--
+function VUHDO_getDebuffIconsMap()
+
+	return VUHDO_DEBUFF_ICONS_MAP;
 
 end

@@ -186,7 +186,6 @@ end
 -- Returns the total height of optional threat bars
 local tTopSpace;
 local tNamePos;
-local tNameHeight;
 function VUHDO_getAdditionalTopHeight(aPanelNum)
 
 	if not sTopHeightCache[aPanelNum] then
@@ -215,7 +214,6 @@ end
 local tHotCfg;
 local tBottomSpace;
 local tNamePos;
-local tNameHeight;
 function VUHDO_getAdditionalBottomHeight(aPanelNum)
 
 	if not sBottomHeightCache[aPanelNum] then
@@ -267,7 +265,6 @@ end
 
 --
 local tSlots;
-local tCnt;
 function VUHDO_getNumHotSlots(aPanelNum)
 
 	if not sHotSlotsCache[aPanelNum] then

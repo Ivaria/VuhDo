@@ -199,13 +199,11 @@ end
 -- Returns the width of the given row in Pixels
 local tWidth;
 local tMaxBarInRow;
-local tBarScaling;
 local tCfgPanel;
 local tColumnSpacing;
 local tHeaderSpacing;
 local function VUHDO_getColumnWidth(aRowNum, aPanelNum)
 
-	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 	tWidth = 0;
 	if VUHDO_isTableHeadersShowing(aPanelNum) or aRowNum > 1 then
 		tWidth = tWidth + VUHDO_getHeaderFooterTotalWidth(aPanelNum);
@@ -240,7 +238,6 @@ end
 local tRowY;
 local tRowNum;
 local tBorderGapX;
-local tCnt;
 local function VUHDO_getColumnPos(aPlaceNum, aPanelNum)
 
 	tBorderGapX = VUHDO_getPixelPerfectGap(aPanelNum, "borderGapX");
@@ -264,14 +261,12 @@ end
 
 -- Returns the pixel Y-offset of a given model slot
 local tColX;
-local tBarScaling;
 local tGridColNo;
 local tColSpacing;
 local tRowSpacing;
 local tBorderGapY;
 local function VUHDO_getRowPos(aPlaceNum, aPanelNum, aRowNo)
 
-	tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 	tGridColNo = VUHDO_determineGridRow(aPlaceNum, aPanelNum, aRowNo);
 	tRowSpacing = VUHDO_getPixelPerfectSpacing(aPanelNum, "rowSpacing");
 	tColSpacing = VUHDO_getHealButtonHeight(aPanelNum) + tRowSpacing;
@@ -288,7 +283,7 @@ end
 
 --
 local tX, tY, tOffset;
-local tColumnNum, tBarScaling;
+local tColumnNum;
 local tHeaderSpacing;
 function VUHDO_getHeaderPosHor(aHeaderPlace, aPanelNum)
 
@@ -296,7 +291,6 @@ function VUHDO_getHeaderPosHor(aHeaderPlace, aPanelNum)
 	tY = VUHDO_getRowPos(aHeaderPlace, aPanelNum);
 	if VUHDO_isTableFootersShowing(aPanelNum) then
 		tColumnNum = VUHDO_determineGridColumn(aHeaderPlace, aPanelNum);
-		tBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 		tHeaderSpacing = VUHDO_getPixelPerfectSpacing(aPanelNum, "headerSpacing");
 		tOffset = tHeaderSpacing;
 		tX = tX + VUHDO_getColumnWidth(tColumnNum, aPanelNum) + tOffset;
@@ -430,4 +424,3 @@ function VUHDO_getHealPanelHeightHor(aPanelNum)
 
 	return tWidth;
 end
-
