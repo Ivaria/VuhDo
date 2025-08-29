@@ -54,10 +54,8 @@ function VUHDO_actionEventHandlerInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 
 	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
-		VUHDO_redrawPanel = _G["VUHDO_deferRedrawPanel"];
 		VUHDO_redrawAllPanels = _G["VUHDO_deferRedrawAllPanels"];
 	else
-		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
 		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
 	end
 
