@@ -25,6 +25,8 @@ local sRedrawPanelSemaphores = { };
 local sPanelCompletionTracker;
 local sWaitingAllPanelsRedraws = { };
 local sWaitingIndividualRedraws = { };
+local sQueuedAllPanelsRequests = { };
+local sQueuedIndividualRequests = { };
 local sIsManaBouquet = { };
 
 local VUHDO_SEMAPHORE_CONFIG = {
@@ -1642,12 +1644,21 @@ function VUHDO_deferRedrawPanel(aPanelNum, anIsFixAllFrameLevels, aCycleId)
 			sWaitingIndividualRedraws[aPanelNum] = { };
 		end
 
+		if not sQueuedIndividualRequests[aPanelNum] then
+			sQueuedIndividualRequests[aPanelNum] = { };
+		end
+
+		if sQueuedIndividualRequests[aPanelNum][anIsFixAllFrameLevels] then
+			return;
+		end
+
 		tWaitingRequest = {
 			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
 			["cycleId"] = aCycleId,
 			["timestamp"] = GetTime()
 		};
 
+		sQueuedIndividualRequests[aPanelNum][anIsFixAllFrameLevels] = true;
 		tinsert(sWaitingIndividualRedraws[aPanelNum], tWaitingRequest);
 
 		return;
@@ -1824,10 +1835,16 @@ function VUHDO_deferRedrawPanelCompleteDelegate(aPanelNum, anIsFixAllFrameLevels
 			if sWaitingIndividualRedraws[aPanelNum] and #sWaitingIndividualRedraws[aPanelNum] > 0 then
 				tNextRequest = tremove(sWaitingIndividualRedraws[aPanelNum], 1);
 
+				if sQueuedIndividualRequests[aPanelNum] then
+					sQueuedIndividualRequests[aPanelNum][tNextRequest["isFixAllFrameLevels"]] = nil;
+				end
+
 				VUHDO_deferRedrawPanel(aPanelNum, tNextRequest["isFixAllFrameLevels"], tNextRequest["cycleId"]);
 			else
 				if #sWaitingAllPanelsRedraws > 0 then
 					tNextRequest = tremove(sWaitingAllPanelsRedraws, 1);
+
+					sQueuedAllPanelsRequests[tNextRequest["isFixAllFrameLevels"]] = nil;
 
 					VUHDO_deferRedrawAllPanels(tNextRequest["isFixAllFrameLevels"]);
 				end
@@ -2115,11 +2132,16 @@ function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 	end
 
 	if sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+		if sQueuedAllPanelsRequests[anIsFixAllFrameLevels] then
+			return;
+		end
+
 		tWaitingRequest = {
 			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
 			["timestamp"] = GetTime()
 		};
 
+		sQueuedAllPanelsRequests[anIsFixAllFrameLevels] = true;
 		tinsert(sWaitingAllPanelsRedraws, tWaitingRequest);
 
 		return;
@@ -2136,11 +2158,16 @@ function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 	end
 
 	if tHasIndividualRedraws then
+		if sQueuedAllPanelsRequests[anIsFixAllFrameLevels] then
+			return;
+		end
+
 		tWaitingRequest = {
 			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
 			["timestamp"] = GetTime()
 		};
 
+		sQueuedAllPanelsRequests[anIsFixAllFrameLevels] = true;
 		tinsert(sWaitingAllPanelsRedraws, tWaitingRequest);
 
 		return;
@@ -2164,11 +2191,16 @@ function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 	VUHDO_calculateSemaphoreTimeouts();
 
 	if sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+		if sQueuedAllPanelsRequests[anIsFixAllFrameLevels] then
+			return;
+		end
+
 		tWaitingRequest = {
 			["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
 			["timestamp"] = GetTime()
 		};
 
+		sQueuedAllPanelsRequests[anIsFixAllFrameLevels] = true;
 		tinsert(sWaitingAllPanelsRedraws, tWaitingRequest);
 
 		return;
@@ -2185,6 +2217,10 @@ function VUHDO_deferRedrawAllPanels(anIsFixAllFrameLevels)
 	for tPanelNum = 1, 10 do
 		if sWaitingIndividualRedraws[tPanelNum] and #sWaitingIndividualRedraws[tPanelNum] > 0 then
 			twipe(sWaitingIndividualRedraws[tPanelNum]);
+		end
+
+		if sQueuedIndividualRequests[tPanelNum] then
+			twipe(sQueuedIndividualRequests[tPanelNum]);
 		end
 
 		if sButtonInitSemaphores[tPanelNum] then
@@ -2275,6 +2311,8 @@ function VUHDO_deferRedrawAllPanelsCompleteDelegate(anIsFixAllFrameLevels)
 
 	if #sWaitingAllPanelsRedraws > 0 then
 		tNextRequest = tremove(sWaitingAllPanelsRedraws, 1);
+
+		sQueuedAllPanelsRequests[tNextRequest["isFixAllFrameLevels"]] = nil;
 
 		VUHDO_deferRedrawAllPanels(tNextRequest["isFixAllFrameLevels"]);
 	end
