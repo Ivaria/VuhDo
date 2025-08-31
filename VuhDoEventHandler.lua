@@ -10,6 +10,7 @@ local InCombatLockdown = InCombatLockdown;
 local tonumber = tonumber;
 local string = string;
 local debugprofilestop = debugprofilestop;
+local MeasureCall = C_AddOnProfiler and C_AddOnProfiler.MeasureCall;
 local format = string.format;
 local tinsert = table.insert;
 local tremove = table.remove;
@@ -244,8 +245,10 @@ do
 
 	--
 	local tOnUpdateSegments = {
-		"segment1",
-		"segment2",
+		"segment1A",
+		"segment1B",
+		"segment1Total",
+		"segment2Total",
 		"segment2A",
 		"segment2B",
 		"segment2C",
@@ -333,6 +336,10 @@ do
 
 
 	--
+	local tSeg1Segments = {
+		["segment1A"] = "Seg 1A (Animations)",
+		["segment1B"] = "Seg 1B (Deferred Tasks)",
+	};
 	local tSeg2Segments = {
 		["segment2A"] = "Seg 2A (UI Reloads)",
 		["segment2B"] = "Seg 2B (Panel Reset)",
@@ -359,7 +366,7 @@ do
 	local tArgString;
 	local tDedupedText;
 	local tThresholdText;
-	local tSortedSeg2Keys;
+	local tSortedKeys;
 	local tSegmentName;
 	function VUHDO_printHandlerMetrics()
 
@@ -377,19 +384,31 @@ do
 
 		VUHDO_Msg(format("|cffFFA500** VUHDO_OnUpdate Invocations:|r %d", tInvocationCount));
 
-		if tMetrics["segment1"] then
-			VUHDO_printHandlerMetricSegment("Segment 1", tMetrics["segment1"], tInvocationCount);
+		if tMetrics["segment1Total"] then
+			VUHDO_printHandlerMetricSegment("Segment 1 Total", tMetrics["segment1Total"], tInvocationCount);
 		end
 
-		if tMetrics["segment2"] then
-			VUHDO_printHandlerMetricSegment("Segment 2", tMetrics["segment2"], tInvocationCount);
+		VUHDO_Msg("  |cff98FB98Detailed Segment 1 Breakdown:|r");
+
+		tSortedKeys = VUHDO_sortSegmentKeys(tSeg1Segments);
+
+		for _, tSegmentKey in ipairs(tSortedKeys) do
+			tSegmentName = tSeg1Segments[tSegmentKey];
+
+			if tMetrics[tSegmentKey] then
+				VUHDO_printHandlerMetricSegment(tSegmentName, tMetrics[tSegmentKey], tInvocationCount, "    - ");
+			end
 		end
 
-		VUHDO_Msg("  |cff98FB98Detailed Seg2 Breakdown:|r");
+		if tMetrics["segment2Total"] then
+			VUHDO_printHandlerMetricSegment("Segment 2 Total", tMetrics["segment2Total"], tInvocationCount);
+		end
 
-		tSortedSeg2Keys = VUHDO_sortSeg2SegmentKeys(tSeg2Segments);
+		VUHDO_Msg("  |cff98FB98Detailed Segment 2 Breakdown:|r");
 
-		for _, tSegmentKey in ipairs(tSortedSeg2Keys) do
+		tSortedKeys = VUHDO_sortSegmentKeys(tSeg2Segments);
+
+		for _, tSegmentKey in ipairs(tSortedKeys) do
 			tSegmentName = tSeg2Segments[tSegmentKey];
 
 			if tMetrics[tSegmentKey] then
@@ -398,7 +417,7 @@ do
 		end
 
 		if tMetrics["total"] then
-			VUHDO_printHandlerMetricSegment("Sum (Seg1+Seg2)", tMetrics["total"], tInvocationCount);
+			VUHDO_printHandlerMetricSegment("Sum (Segment 1 + Segment 2)", tMetrics["total"], tInvocationCount);
 		end
 
 		VUHDO_Msg("|cffFFA500** VUHDO_OnEvent (time per event type): **|r");
@@ -2072,10 +2091,11 @@ do
 
 
 	--
-	local function VUHDO_finalizeOnUpdateMetrics(anOverallStart, aSeg2Start)
+	local function VUHDO_finalizeOnUpdateMetrics(anOverallStart, aSeg2Start, aSegment1Total)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
-			VUHDO_updateOnUpdateSubSegmentMetrics("segment2", (debugprofilestop() - aSeg2Start) * 1000);
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment1Total", aSegment1Total);
+			VUHDO_updateOnUpdateSubSegmentMetrics("segment2Total", (debugprofilestop() - aSeg2Start) * 1000);
 			VUHDO_updateOnUpdateSubSegmentMetrics("total", (debugprofilestop() - anOverallStart) * 1000);
 
 			VUHDO_HANDLER_PROFILING_ONUPDATE_INVOCATIONS = VUHDO_HANDLER_PROFILING_ONUPDATE_INVOCATIONS + 1;
@@ -2090,7 +2110,7 @@ do
 	--
 	local tGcdStart;
 	local tGcdDuration;
-	local function VUHDO_handleSegment1(aTimeDelta, ...)
+	local function VUHDO_handleSegment1A(aTimeDelta, ...)
 
 		-- Update custom debuff animation
 		if VUHDO_DEBUFF_ANIMATION > 0 then
@@ -2437,22 +2457,35 @@ do
 	--
 	local tStartTime;
 	local tProfilerResult;
+	local tCallbackResult;
 	local tEndTime;
 	local tDuration;
-	function VUHDO_profileSegment(aSegmentName, aCallback, aTimeDelta)
+	function VUHDO_profileSegment(aSegmentName, aCallback, ...)
 
 		if not VUHDO_HANDLER_PROFILING_ENABLED then
-			return aCallback(aTimeDelta);
+			return aCallback(...), 0;
 		end
 
-		tStartTime = debugprofilestop();
-		tProfilerResult = aCallback(aTimeDelta);
-		tEndTime = debugprofilestop();
-		tDuration = (tEndTime - tStartTime) * 1000;
+		if MeasureCall then
+			tProfilerResult, tCallbackResult = MeasureCall(aCallback, ...);
+
+			if tProfilerResult and tProfilerResult["elapsedMilliseconds"] then
+				tDuration = tProfilerResult["elapsedMilliseconds"] * 1000;
+			else
+				tDuration = 0;
+			end
+		else
+			tStartTime = debugprofilestop();
+
+			tCallbackResult = aCallback(...);
+
+			tEndTime = debugprofilestop();
+			tDuration = (tEndTime - tStartTime) * 1000;
+		end
 
 		VUHDO_updateOnUpdateSubSegmentMetrics(aSegmentName, tDuration);
 
-		return tProfilerResult;
+		return tCallbackResult, tDuration;
 
 	end
 
@@ -2460,30 +2493,37 @@ do
 
 	--
 	local tSegmentCallbacks = {
-		["segment1"] = function(aTimeDelta) VUHDO_handleSegment1(aTimeDelta); end,
-		["segment2A"] = function(aTimeDelta) VUHDO_handleSegment2A(aTimeDelta); end,
-		["segment2B"] = function(aTimeDelta) VUHDO_handleSegment2B(aTimeDelta); end,
-		["segment2C"] = function(aTimeDelta) VUHDO_handleSegment2C(aTimeDelta); end,
-		["segment2D"] = function(aTimeDelta) VUHDO_handleSegment2D(aTimeDelta); end,
-		["segment2F"] = function(aTimeDelta) VUHDO_handleSegment2F(aTimeDelta); end,
-		["segment2G"] = function(aTimeDelta) VUHDO_handleSegment2G(aTimeDelta); end,
-		["segment2H"] = function(aTimeDelta) VUHDO_handleSegment2H(aTimeDelta); end,
-		["segment2I"] = function(aTimeDelta) VUHDO_handleSegment2I(aTimeDelta); end,
-		["segment2J"] = function(aTimeDelta) VUHDO_handleSegment2J(aTimeDelta); end,
-		["segment2K"] = function(aTimeDelta) VUHDO_handleSegment2K(aTimeDelta); end,
-		["segment2L"] = function(aTimeDelta) VUHDO_handleSegment2L(aTimeDelta); end,
-		["segment2M"] = function(aTimeDelta) VUHDO_handleSegment2M(aTimeDelta); end,
+		["segment1A"] = function(...) VUHDO_handleSegment1A(...); end,
+		["segment1B"] = function() VUHDO_processDeferredTaskQueue(); end,
+		["segment2A"] = function(...) VUHDO_handleSegment2A(...); end,
+		["segment2B"] = function(...) VUHDO_handleSegment2B(...); end,
+		["segment2C"] = function(...) VUHDO_handleSegment2C(...); end,
+		["segment2D"] = function(...) VUHDO_handleSegment2D(...); end,
+		["segment2E"] = function(...) VUHDO_handleSegment2E(...); end,
+		["segment2F"] = function(...) VUHDO_handleSegment2F(...); end,
+		["segment2G"] = function(...) VUHDO_handleSegment2G(...); end,
+		["segment2H"] = function(...) VUHDO_handleSegment2H(...); end,
+		["segment2I"] = function(...) VUHDO_handleSegment2I(...); end,
+		["segment2J"] = function(...) VUHDO_handleSegment2J(...); end,
+		["segment2K"] = function(...) VUHDO_handleSegment2K(...); end,
+		["segment2L"] = function(...) VUHDO_handleSegment2L(...); end,
+		["segment2M"] = function(...) VUHDO_handleSegment2M(...); end,
 	};
 	local tStartTimes = {
 		[1] = -1, -- overall
 		[2] = -1, -- segment
 		[3] = -1, -- subsegment
 	};
+	local tSegment1ADuration;
+	local tSegment1BDuration;
+	local tSegment1Total;
 	function VUHDO_OnUpdate(anInstance, aTimeDelta)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			tStartTimes[1] = debugprofilestop();
 			tStartTimes[2] = tStartTimes[1];
+
+			tSegment1Total = 0;
 		end
 
 		-----------------------------------------------------
@@ -2494,12 +2534,20 @@ do
 		-- These need to update very frequenly to not stutter
 		-- --------------------------------------------------
 
-		VUHDO_profileSegment("segment1", tSegmentCallbacks["segment1"], aTimeDelta);
+		-- Segment 1A - Animations etc.
 
-		-- process deferred tasks once per frame
-		VUHDO_processDeferredTaskQueue();
+		_, tSegment1ADuration = VUHDO_profileSegment("segment1A", tSegmentCallbacks["segment1A"], aTimeDelta);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tSegment1Total = tSegment1Total + tSegment1ADuration;
+		end
+
+		-- Segment 1B - Process deferred tasks
+		_, tSegment1BDuration = VUHDO_profileSegment("segment1B", tSegmentCallbacks["segment1B"]);
+
+		if VUHDO_HANDLER_PROFILING_ENABLED then
+			tSegment1Total = tSegment1Total + tSegment1BDuration;
+
 			tStartTimes[2] = debugprofilestop();
 		end
 
@@ -2515,7 +2563,7 @@ do
 			sTimeDelta = sTimeDelta + aTimeDelta;
 			sSlowDelta = sSlowDelta + aTimeDelta;
 
-			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2], tSegment1Total);
 
 			return;
 		else
@@ -2537,7 +2585,7 @@ do
 		---------------------------------------------------
 
 		if not VUHDO_VARIABLES_LOADED then
-			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2], tSegment1Total);
 
 			return;
 		end
@@ -2553,7 +2601,7 @@ do
 		-- Segment 2D: Combat checks
 
 		if VUHDO_CONFIG_SHOW_RAID then
-			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2], tSegment1Total);
 
 			return;
 		end
@@ -2573,7 +2621,7 @@ do
 				VUHDO_updateOnUpdateSubSegmentMetrics("segment2E", (debugprofilestop() - tStartTimes[3]) * 1000);
 			end
 
-			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2], tSegment1Total);
 
 			return;
 		else
@@ -2622,7 +2670,7 @@ do
 
 		VUHDO_profileSegment("segment2M", tSegmentCallbacks["segment2M"], aTimeDelta);
 
-		VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2]);
+		VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2], tSegment1Total);
 
 		VUHDO_flushProfilingBatch();
 
@@ -2888,11 +2936,11 @@ end
 
 --
 local tSortedKeys;
-function VUHDO_sortSeg2SegmentKeys(aSeg2Segments)
+function VUHDO_sortSegmentKeys(aSegments)
 
 	tSortedKeys = { };
 
-	for tKey in pairs(aSeg2Segments) do
+	for tKey in pairs(aSegments) do
 		tinsert(tSortedKeys, tKey);
 	end
 
