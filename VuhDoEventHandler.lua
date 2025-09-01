@@ -2128,7 +2128,7 @@ do
 	--
 	local tGcdStart;
 	local tGcdDuration;
-	local function VUHDO_handleSegment1A(aTimeDelta, ...)
+	local function VUHDO_handleSegment1A(aTimeDelta)
 
 		-- Update custom debuff animation
 		if VUHDO_DEBUFF_ANIMATION > 0 then
@@ -2164,7 +2164,7 @@ do
 
 	--
 	local tIsDeferredActive;
-	local function VUHDO_handleSegment2A(aTimeDelta, ...)
+	local function VUHDO_handleSegment2A(aTimeDelta)
 
 		-- reload UI?
 		if VUHDO_checkTimer("RELOAD_UI") then
@@ -2193,7 +2193,7 @@ do
 
 	--
 	local tIsDeferredActive;
-	local function VUHDO_handleSegment2B(aTimeDelta, ...)
+	local function VUHDO_handleSegment2B(aTimeDelta)
 
 		-- reset single panel?
 		if VUHDO_checkTimer("RELOAD_PANEL") then
@@ -2223,7 +2223,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2C(aTimeDelta, ...)
+	local function VUHDO_handleSegment2C(aTimeDelta)
 
 		-- Reload raid roster?
 		if VUHDO_checkTimer("RELOAD_RAID") then
@@ -2321,7 +2321,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2D(aTimeDelta, ...)
+	local function VUHDO_handleSegment2D(aTimeDelta)
 
 		-- refresh aggro?
 		if VUHDO_checkResetTimer("UPDATE_AGGRO", sAggroRefreshSecs) then
@@ -2350,7 +2350,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2F(aTimeDelta, ...)
+	local function VUHDO_handleSegment2F(aTimeDelta)
 
 		-- reload after battle
 		if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
@@ -2374,7 +2374,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2G(aTimeDelta, ...)
+	local function VUHDO_handleSegment2G(aTimeDelta)
 
 		if not InCombatLockdown() then
 			sAutoProfile, sTrigger = VUHDO_getAutoProfile();
@@ -2387,7 +2387,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2H(aTimeDelta, ...)
+	local function VUHDO_handleSegment2H(aTimeDelta)
 
 		if not InCombatLockdown() and sAutoProfile and not VUHDO_IS_CONFIG then
 			VUHDO_Msg(VUHDO_I18N_AUTO_ARRANG_1 .. sTrigger .. VUHDO_I18N_AUTO_ARRANG_2 .. "|cffffffff" .. sAutoProfile .. "|r\"");
@@ -2402,7 +2402,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2I(aTimeDelta, ...)
+	local function VUHDO_handleSegment2I(aTimeDelta)
 
 		VUHDO_hideBlizzCompactPartyFrame();
 
@@ -2413,7 +2413,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2J(aTimeDelta, ...)
+	local function VUHDO_handleSegment2J(aTimeDelta)
 
 		VUHDO_removeObsoleteShields();
 
@@ -2424,7 +2424,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2K(aTimeDelta, ...)
+	local function VUHDO_handleSegment2K(aTimeDelta)
 
 		-- Unit Zones
 		if VUHDO_checkResetTimer("RELOAD_ZONES", 3.45) then
@@ -2442,7 +2442,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2L(aTimeDelta, ...)
+	local function VUHDO_handleSegment2L(aTimeDelta)
 
 		if not VUHDO_NEXT_INSPECT_UNIT and not InCombatLockdown() and VUHDO_checkResetTimer("REFRESH_INSPECT", 2.1) then
 			VUHDO_tryInspectNext();
@@ -2455,7 +2455,7 @@ do
 
 
 	--
-	local function VUHDO_handleSegment2M(aTimeDelta, ...)
+	local function VUHDO_handleSegment2M(aTimeDelta)
 
 		-- Refresh d/c shield macros?
 		if VUHDO_checkTimer("MIRROR_TO_MACRO") then
@@ -2511,21 +2511,21 @@ do
 
 	--
 	local tSegmentCallbacks = {
-		["segment1A"] = function(...) VUHDO_handleSegment1A(...); end,
+		["segment1A"] = function(aTimeDelta) VUHDO_handleSegment1A(aTimeDelta); end,
 		["segment1B"] = function() VUHDO_processDeferredTaskQueue(); end,
-		["segment2A"] = function(...) VUHDO_handleSegment2A(...); end,
-		["segment2B"] = function(...) VUHDO_handleSegment2B(...); end,
-		["segment2C"] = function(...) VUHDO_handleSegment2C(...); end,
-		["segment2D"] = function(...) VUHDO_handleSegment2D(...); end,
-		["segment2E"] = function(...) VUHDO_handleSegment2E(...); end,
-		["segment2F"] = function(...) VUHDO_handleSegment2F(...); end,
-		["segment2G"] = function(...) VUHDO_handleSegment2G(...); end,
-		["segment2H"] = function(...) VUHDO_handleSegment2H(...); end,
-		["segment2I"] = function(...) VUHDO_handleSegment2I(...); end,
-		["segment2J"] = function(...) VUHDO_handleSegment2J(...); end,
-		["segment2K"] = function(...) VUHDO_handleSegment2K(...); end,
-		["segment2L"] = function(...) VUHDO_handleSegment2L(...); end,
-		["segment2M"] = function(...) VUHDO_handleSegment2M(...); end,
+		["segment2A"] = function(aTimeDelta) VUHDO_handleSegment2A(aTimeDelta); end,
+		["segment2B"] = function(aTimeDelta) VUHDO_handleSegment2B(aTimeDelta); end,
+		["segment2C"] = function(aTimeDelta) VUHDO_handleSegment2C(aTimeDelta); end,
+		["segment2D"] = function(aTimeDelta) VUHDO_handleSegment2D(aTimeDelta); end,
+		["segment2E"] = function(aTimeDelta) VUHDO_handleSegment2E(aTimeDelta); end,
+		["segment2F"] = function(aTimeDelta) VUHDO_handleSegment2F(aTimeDelta); end,
+		["segment2G"] = function(aTimeDelta) VUHDO_handleSegment2G(aTimeDelta); end,
+		["segment2H"] = function(aTimeDelta) VUHDO_handleSegment2H(aTimeDelta); end,
+		["segment2I"] = function(aTimeDelta) VUHDO_handleSegment2I(aTimeDelta); end,
+		["segment2J"] = function(aTimeDelta) VUHDO_handleSegment2J(aTimeDelta); end,
+		["segment2K"] = function(aTimeDelta) VUHDO_handleSegment2K(aTimeDelta); end,
+		["segment2L"] = function(aTimeDelta) VUHDO_handleSegment2L(aTimeDelta); end,
+		["segment2M"] = function(aTimeDelta) VUHDO_handleSegment2M(aTimeDelta); end,
 	};
 	local tStartTimes = {
 		[1] = -1, -- overall
