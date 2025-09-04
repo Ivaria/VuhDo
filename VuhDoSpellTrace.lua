@@ -1,11 +1,14 @@
+local _;
+
 local next = next;
 local pairs = pairs;
 local tostring = tostring;
 local tonumber = tonumber;
 local tinsert = table.insert;
 local twipe = table.wipe;
+
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
-local _;
+local UnitGUID = UnitGUID;
 
 local VUHDO_ACTIVE_TRACE_SPELLS = { 
 	-- [<unit GUID>] = {
@@ -591,5 +594,107 @@ function VUHDO_isSpellTraceTrailOfLightNextUnit(aUnit)
 	else
 		return true;
 	end
+
+end
+
+
+
+--
+local tSrcGuid;
+local tActiveTraceSpells;
+local function VUHDO_cleanupSpellTraceForSourceUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	tSrcGuid = UnitGUID(aUnit);
+
+	if not tSrcGuid or not VUHDO_ACTIVE_TRACE_GUIDS[tSrcGuid] then
+		return;
+	end
+
+	tActiveTraceSpells = VUHDO_ACTIVE_TRACE_GUIDS[tSrcGuid];
+
+	for tSpellId, tDstGuid in pairs(tActiveTraceSpells) do
+		VUHDO_removeSpellTrace(tSrcGuid, tDstGuid, tSpellId);
+
+		if VUHDO_RAID_GUIDS[tDstGuid] then
+			VUHDO_updateSpellTraceBouquets(VUHDO_RAID_GUIDS[tDstGuid]);
+		end
+	end
+
+	VUHDO_ACTIVE_TRACE_GUIDS[tSrcGuid] = nil;
+
+	return;
+
+end
+
+
+
+--
+local tDstGuid;
+local tActiveTraceSpells;
+local function VUHDO_cleanupSpellTraceForDestinationUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	tDstGuid = UnitGUID(aUnit);
+
+	if not tDstGuid or not VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid] then
+		return;
+	end
+
+	tActiveTraceSpells = VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid]["spells"];
+
+	for tSpellId, tSpellData in pairs(tActiveTraceSpells) do
+		if tSpellData and tSpellData["srcGuid"] then
+			VUHDO_removeSpellTrace(tSpellData["srcGuid"], tDstGuid, tSpellId);
+		end
+	end
+
+	VUHDO_ACTIVE_TRACE_SPELLS[tDstGuid] = nil;
+
+	VUHDO_updateSpellTraceBouquets(aUnit);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_cleanupSpellTraceForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	VUHDO_cleanupSpellTraceForDestinationUnit(aUnit);
+
+	VUHDO_cleanupSpellTraceForSourceUnit(aUnit);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_clearAllSpellTraces()
+
+	twipe(VUHDO_ACTIVE_TRACE_SPELLS);
+	twipe(VUHDO_ACTIVE_TRACE_GUIDS);
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_updateSpellTraceBouquets(tUnit);
+	end
+
+	VUHDO_updateSpellTraceBouquets("target");
+	VUHDO_updateSpellTraceBouquets("focus");
+
+	return;
 
 end

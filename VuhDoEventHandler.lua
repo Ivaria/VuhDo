@@ -84,6 +84,8 @@ local VUHDO_updateAllClusters;
 local VUHDO_updateClusterHighlights;
 local VUHDO_aoeUpdateAll;
 local VUHDO_updateSpellTrace;
+local VUHDO_cleanupSpellTraceForUnit;
+local VUHDO_clearAllSpellTraces;
 local VUHDO_updateAllRaidBars;
 local VUHDO_updateCustomDebuffTooltip;
 local VUHDO_getUnitZoneName;
@@ -573,6 +575,9 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateUnitAggro = _G["VUHDO_updateUnitAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_updateAllRange"];
 
+	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
+	VUHDO_clearAllSpellTraces = _G["VUHDO_clearAllSpellTraces"];
+
 	VUHDO_initTaskSystem();
 
 	-- override the base functions with their deferred counterparts
@@ -892,7 +897,7 @@ local function VUHDO_init()
 		return;
 	end
 
-	VUHDO_COMBAT_LOG_TRACE = {};
+	--VUHDO_COMBAT_LOG_TRACE = {};
 
 	if not VUHDO_RAID then
 		VUHDO_RAID = { };
@@ -1085,6 +1090,11 @@ do
 				VUHDO_removeIncomingSpellTrace(anArg1, anArg2, anArg3);
 			end
 
+		elseif "NAME_PLATE_UNIT_REMOVED" == anEvent then
+			if anArg1 and VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+				VUHDO_cleanupSpellTraceForUnit(anArg1);
+			end
+
 		elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_updateUnitAggro(anArg1);
@@ -1188,6 +1198,10 @@ do
 						VUHDO_removeAllDebuffIcons("focus");
 						VUHDO_resetDebuffsFor("focus");
 
+						if VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+							VUHDO_cleanupSpellTraceForUnit("focus");
+						end
+
 						if VUHDO_RAID["focus"] then
 							table.wipe(VUHDO_RAID["focus"]);
 						end
@@ -1217,6 +1231,10 @@ do
 		elseif "PLAYER_ENTERING_WORLD" == anEvent then
 			VUHDO_init();
 			VUHDO_initAddonMessages();
+
+			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+				VUHDO_clearAllSpellTraces();
+			end
 
 		elseif "UNIT_POWER_BAR_SHOW" == anEvent or "UNIT_POWER_BAR_HIDE" == anEvent then
 			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
@@ -2724,6 +2742,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"PLAYER_SPECIALIZATION_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",
+	"NAME_PLATE_UNIT_REMOVED",
 	"UI_SCALE_CHANGED", "DISPLAY_SIZE_CHANGED",
 };
 
