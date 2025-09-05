@@ -16,9 +16,13 @@ local VUHDO_updateTargetBars;
 local VUHDO_updateHealthBarsFor;
 local VUHDO_getUnitButtonsSafe;
 local VUHDO_getPlayerTargetFrame;
+local VUHDO_cleanupSpellTraceForUnit;
+
+
 
 --
 function VUHDO_playerTargetEventHandlerInitLocalOverrides()
+
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 
@@ -31,6 +35,10 @@ function VUHDO_playerTargetEventHandlerInitLocalOverrides()
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getPlayerTargetFrame = _G["VUHDO_getPlayerTargetFrame"];
+	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
+
+	return;
+
 end
 
 
@@ -41,7 +49,9 @@ local tTargetUnit;
 local tOldTarget;
 local tEmptyInfo = { };
 function VUHDO_updatePlayerTarget()
+
 	tTargetUnit = nil;
+
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if UnitIsUnit("target", tUnit) and tUnit ~= "focus" and tUnit ~= "target" and not VUHDO_isBossUnit(tUnit) then 
 			if tInfo["isPet"] and (VUHDO_RAID[tInfo["ownerUnit"]] or tEmptyInfo)["isVehicle"] then
@@ -49,6 +59,7 @@ function VUHDO_updatePlayerTarget()
 			else
 				tTargetUnit = tUnit;
 			end
+
 			break;
 		end
 	end
@@ -72,6 +83,10 @@ function VUHDO_updatePlayerTarget()
 			VUHDO_removeAllDebuffIcons("target");
 			VUHDO_resetDebuffsFor("target");
 
+			if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+				VUHDO_cleanupSpellTraceForUnit("target");
+			end
+
 			VUHDO_updateTargetBars("target");
 
 			table.wipe(VUHDO_RAID["target"] or tEmptyInfo);
@@ -81,6 +96,9 @@ function VUHDO_updatePlayerTarget()
 		VUHDO_updateHealthBarsFor("target", 1); -- VUHDO_UPDATE_ALL
 		VUHDO_initEventBouquetsFor("target");
 	end
+
+	return;
+
 end
 
 
