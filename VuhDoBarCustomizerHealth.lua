@@ -257,7 +257,18 @@ function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota, aAmountInc)
 	tInfo = VUHDO_RAID[aUnit];
 	tAllButtons = VUHDO_getUnitButtons(VUHDO_resolveVehicleUnit(aUnit));
 
-	if not tInfo or not tAllButtons or not tInfo["connected"] or tInfo["dead"] or tInfo["healthmax"] <= 0 then
+	if not tInfo or not tAllButtons or tInfo["healthmax"] <= 0 then
+		return;
+	end
+
+	if not tInfo["connected"] or tInfo["dead"] then
+		for _, tButton in pairs(tAllButtons) do
+			tHealthBar = VUHDO_getHealthBar(tButton, 1);
+			tOvershieldBar = VUHDO_getOvershieldBarTexture(tHealthBar);
+
+			tOvershieldBar:Hide();
+		end
+
 		return;
 	end
 
@@ -430,7 +441,18 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 	tInfo = VUHDO_RAID[aUnit];
 	tAllButtons = VUHDO_getUnitButtons(VUHDO_resolveVehicleUnit(aUnit));
 
-	if not tInfo or not tAllButtons or not tInfo["connected"] or tInfo["dead"] or tInfo["healthmax"] <= 0 then
+	if not tInfo or not tAllButtons or tInfo["healthmax"] <= 0 then
+		return;
+	end
+
+	if not tInfo["connected"] or tInfo["dead"] then
+		for _, tButton in pairs(tAllButtons) do
+			tHealthBar = VUHDO_getHealthBar(tButton, 1);
+			tHealAbsorbBar = VUHDO_getHealAbsorbBarTexture(tHealthBar);
+
+			tHealAbsorbBar:Hide();
+		end
+
 		return;
 	end
 
