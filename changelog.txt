@@ -63,6 +63,7 @@ Bugfixes:
 Improvements:  
 -- Added Warlock and Death Knight combat resurrections to Smart Cast  
 -- Added clock sweep countdown option for debuff icons  
+-- Added debuff default setting to display full timer duration  
 -- Incoming spell trace icons now display cast time as time remaining  
 -- Added default custom debuffs for Manaforge Omega raid encounters  
 -- Added default custom debuffs for season 3 dungeon encounters  
