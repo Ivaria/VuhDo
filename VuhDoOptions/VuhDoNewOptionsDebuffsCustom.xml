@@ -79,7 +79,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="394" y="-29" />
+									<AbsDimension x="394" y="-63" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -95,7 +95,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-63" />
+									<AbsDimension x="394" y="-29" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -135,6 +135,22 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.CUSTOM_DEBUFF.isColor");
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K267);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentFullDurationCheckButton" text="VUHDO_I18N_FULL_DURATION" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-63" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_CONFIG.CUSTOM_DEBUFF.isFullDuration");
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K528);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -366,7 +382,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-94" />
+									<AbsDimension x="394" y="-60" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -381,7 +397,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="140" y="-94" />
+									<AbsDimension x="13" y="-94" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -411,7 +427,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="394" y="-94" />
+									<AbsDimension x="140" y="-94" />
 								</Offset>
 							</Anchor>
 						</Anchors>

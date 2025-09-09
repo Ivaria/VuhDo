@@ -829,7 +829,7 @@ VUHDO_I18N_EXPIRY_WARNING = "Expiry Warning";
 VUHDO_I18N_COUNTDOWN_OFF = "Countdown: Off";
 VUHDO_I18N_SECS = "secs";
 VUHDO_I18N_SECS_10 = "sec/10";
-VUHDO_I18N_FULL_DURATION = "full duration";
+VUHDO_I18N_FULL_DURATION = "Full\nDuration";
 VUHDO_I18N_TOOLS = "Tools";
 VUHDO_I18N_TIMER = "Timer";
 VUHDO_I18N_SOUND = "Sound";
@@ -1013,7 +1013,7 @@ VUHDO_I18N_DISTANCE = "Distance";
 VUHDO_I18N_DEAD_ONLY = "Dead only";
 VUHDO_I18N_DIRECTION = "Direction";
 VUHDO_I18N_IF_OOR_SHOW = "If unit is out of range show...";
-VUHDO_I18N_DEBUFF_NAME = "Debuff Name";
+VUHDO_I18N_DEBUFF_NAME = "Debuff\nName";
 -- 2.18
 VUHDO_I18N_DISABLE = "Disable";
 VUHDO_I18N_DC_RESTORE = "D/C Shield";
