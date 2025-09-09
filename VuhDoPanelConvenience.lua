@@ -105,6 +105,12 @@ local tDebuffOnEnterSnippet = [[
 	tFrame = self:GetParent():GetParent():GetParent():GetParent();
 
 	if tFrame then
+		if sHealButton then
+			sHealButton:ClearBindings();
+		end
+
+		sHealButton = tFrame;
+
 		tBody = tFrame:GetAttribute("vuhdo_onenter");
 
 		if tBody then
@@ -116,6 +122,8 @@ local tDebuffOnLeaveSnippet = [[
 	tFrame = self:GetParent():GetParent():GetParent():GetParent();
 
 	if tFrame then
+		sHealButton = nil;
+
 		tBody = tFrame:GetAttribute("vuhdo_onleave");
 
 		if tBody then
