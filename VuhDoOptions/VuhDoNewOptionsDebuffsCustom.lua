@@ -456,6 +456,7 @@ function VUHDO_applyToAllCustomDebuffOnClick()
 		tSettings["timer"] = VUHDO_CONFIG.CUSTOM_DEBUFF.timer;
 		tSettings["isClock"] = VUHDO_CONFIG.CUSTOM_DEBUFF.isClock;
 		tSettings["isStacks"] = VUHDO_CONFIG.CUSTOM_DEBUFF.isStacks;
+		tSettings["isFullDuration"] = VUHDO_CONFIG.CUSTOM_DEBUFF.isFullDuration;
 		if (tSettings["isColor"]) then
 			tSettings["color"] = VUHDO_deepCopyTable(VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM]);
 		else

@@ -523,6 +523,7 @@ local function VUHDO_customDebuffsAddDefaultSettings(aBuffName)
 			["isBarGlow"] = false,
 			["isIconGlow"] = false,
 			["isClock"] = false,
+			["isFullDuration"] = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isFullDuration"],
 		}
 	end
 
@@ -700,7 +701,8 @@ local VUHDO_DEFAULT_CONFIG = {
 		["isIcon"] = true,
 		["isColor"] = false,
 		["isStacks"] = true,
-		["isName"] = false, 
+		["isName"] = false,
+		["isFullDuration"] = false,
 		["isShowFriendly"] = true,
 		["isShowHostile"] = true,
 		["isHostileMine"] = true,
