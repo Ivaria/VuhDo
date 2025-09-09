@@ -1242,7 +1242,7 @@ do
 				VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
 			end
 
-		elseif "LEARNED_SPELL_IN_SKILL_LINE" == anEvent or "TRAIT_CONFIG_UPDATED" == anEvent or "SPELLS_CHANGED" == anEvent then
+		elseif "LEARNED_SPELL_IN_TAB" == anEvent or "TRAIT_CONFIG_UPDATED" == anEvent or "SPELLS_CHANGED" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_initFromSpellbook();
 				VUHDO_registerAllBouquets(false);
