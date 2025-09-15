@@ -34,6 +34,7 @@ Known issues:
 Bugfixes:  
 -- Fixed Warlock 'Soulstone' spell binding while in combat  
 -- Fixed NPC units showing in class specific panel groups  
+-- Fixed truncation of player name text with special characters  
   
   
 Improvements:  
