@@ -953,27 +953,59 @@ end
 
 
 --
-local tNumChars;
+local tStringLen;
 local tNumCut;
+local tNumChars;
 local tByte;
 function VUHDO_utf8Cut(aString, aNumChars)
+
+	if not aString or aNumChars <= 0 then
+		return "";
+	end
+
+	tStringLen = #aString;
+
+	if tStringLen == 0 then
+		return "";
+	end
+
 	tNumCut = 1;
 	tNumChars = 0;
-	while tNumCut < #aString and tNumChars < aNumChars do
+
+	while tNumCut <= tStringLen and tNumChars < aNumChars do
 		tByte = strbyte(aString, tNumCut);
 
-		tNumCut = tNumCut + (
-			    tByte < 194 and 1
-			 or tByte < 224 and 2
-			 or tByte < 240 and 3
-			 or tByte < 245 and 4
-			 or 1 -- invalid
-		);
+		if tByte < 128 then
+			tNumCut = tNumCut + 1;
+		elseif tByte < 192 then
+			tNumCut = tNumCut + 1;
+		elseif tByte < 224 then
+			if tNumCut + 1 <= tStringLen then
+				tNumCut = tNumCut + 2;
+			else
+				break;
+			end
+		elseif tByte < 240 then
+			if tNumCut + 2 <= tStringLen then
+				tNumCut = tNumCut + 3;
+			else
+				break;
+			end
+		elseif tByte < 248 then
+			if tNumCut + 3 <= tStringLen then
+				tNumCut = tNumCut + 4;
+			else
+				break;
+			end
+		else
+			tNumCut = tNumCut + 1;
+		end
 
 		tNumChars = tNumChars + 1;
 	end
 
 	return strsub(aString, 1, tNumCut - 1);
+
 end
 
 
