@@ -76,16 +76,16 @@ function VUHDO_updatePlayerTarget()
 	VUHDO_clParserSetCurrentTarget(tTargetUnit);
 
 	if VUHDO_INTERNAL_TOGGLES[27] then -- VUHDO_UPDATE_PLAYER_TARGET
+		if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+			VUHDO_cleanupSpellTraceForUnit("target");
+		end
+
 		if UnitExists("target") then
 			VUHDO_setHealth("target", 1); -- VUHDO_UPDATE_ALL
 		else
 			VUHDO_removeHots("target");
 			VUHDO_removeAllDebuffIcons("target");
 			VUHDO_resetDebuffsFor("target");
-
-			if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
-				VUHDO_cleanupSpellTraceForUnit("target");
-			end
 
 			VUHDO_updateTargetBars("target");
 
