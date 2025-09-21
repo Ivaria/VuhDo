@@ -1191,16 +1191,16 @@ do
 
 				if VUHDO_isModelConfigured(VUHDO_ID_FOCUS) or
 					(VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_FOCUS"]) then
+					if VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+						VUHDO_cleanupSpellTraceForUnit("focus");
+					end
+
 					if UnitExists("focus") then
 						VUHDO_setHealth("focus", 1); -- VUHDO_UPDATE_ALL
 					else
 						VUHDO_removeHots("focus");
 						VUHDO_removeAllDebuffIcons("focus");
 						VUHDO_resetDebuffsFor("focus");
-
-						if VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
-							VUHDO_cleanupSpellTraceForUnit("focus");
-						end
 
 						if VUHDO_RAID["focus"] then
 							table.wipe(VUHDO_RAID["focus"]);
