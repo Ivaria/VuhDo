@@ -1203,6 +1203,8 @@ do
 					(VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_FOCUS"]) then
 					if VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
 						VUHDO_cleanupSpellTraceForUnit("focus");
+
+						VUHDO_cleanupStaleSpellTracesForTargetFocus();
 					end
 
 					if UnitExists("focus") then
