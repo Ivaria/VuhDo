@@ -78,6 +78,8 @@ function VUHDO_updatePlayerTarget()
 	if VUHDO_INTERNAL_TOGGLES[27] then -- VUHDO_UPDATE_PLAYER_TARGET
 		if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
 			VUHDO_cleanupSpellTraceForUnit("target");
+
+			VUHDO_cleanupStaleSpellTracesForTargetFocus();
 		end
 
 		if UnitExists("target") then
