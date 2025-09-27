@@ -56,6 +56,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed HoT and debuff icon scale for non-pixel perfect UIs  
   
   
 Improvements:  
