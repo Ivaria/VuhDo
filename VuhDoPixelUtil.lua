@@ -16,9 +16,6 @@ local sLastKnownScale = nil;
 local sBackdropCache = { };
 local sInsetsCache = { };
 local sPixelToUIUnitFactor = nil;
-local sPixelScaleThreshold = 0.05;
-local sExpectedUIScale = nil;
-local sCachedScaleCorrection = nil;
 
 
 
@@ -74,7 +71,6 @@ local tUIUnitFactor;
 local tPixelValue;
 local tNumPixels;
 local tResult;
-local tScaleMismatch;
 function VUHDO_roundToPixel(aValue, aMinPixels)
 
 	if aValue == 0 and (not aMinPixels or aMinPixels == 0) then
@@ -84,18 +80,7 @@ function VUHDO_roundToPixel(aValue, aMinPixels)
 	tScale = VUHDO_getPixelScale();
 	tUIUnitFactor = VUHDO_getPixelToUIUnitFactor();
 
-	if not sCachedScaleCorrection then
-		sExpectedUIScale = tUIUnitFactor;
-		tScaleMismatch = abs(tScale - sExpectedUIScale) / sExpectedUIScale;
-
-		if tScaleMismatch > sPixelScaleThreshold then
-			sCachedScaleCorrection = sExpectedUIScale;
-		else
-			sCachedScaleCorrection = tScale;
-		end
-	end
-
-	tPixelValue = (aValue * sCachedScaleCorrection) / tUIUnitFactor;
+	tPixelValue = (aValue * tScale) / tUIUnitFactor;
 	tNumPixels = floor(tPixelValue + 0.5);
 
 	if aValue > 0 and tNumPixels < 0 then
@@ -116,7 +101,7 @@ function VUHDO_roundToPixel(aValue, aMinPixels)
 		end
 	end
 
-	tResult = tNumPixels * tUIUnitFactor / sCachedScaleCorrection;
+	tResult = tNumPixels * tUIUnitFactor / tScale;
 
 	if abs(tResult - aValue) < 0.000001 then
 		return aValue;
@@ -134,8 +119,6 @@ function VUHDO_refreshPixelScale()
 	sPixelScale = nil;
 	sUIScale = nil;
 	sPixelToUIUnitFactor = nil;
-	sExpectedUIScale = nil;
-	sCachedScaleCorrection = nil;
 
 	return;
 
