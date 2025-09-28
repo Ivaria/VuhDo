@@ -1227,7 +1227,7 @@ function VUHDO_loadDefaultConfig()
 		[123417] = false, --Dismantled Armor
 		[123422] = false, --Arterial Bleeding
 		[123434] = false, --Gouge Throat
-		[123436] = false, --Riposte
+		[123436] = true, --Riposte
 		[123497] = false, --Gale Force Winds
 		[123180] = false, --Wind Step
 		[123420] = false, --Stunning Strike
