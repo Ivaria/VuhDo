@@ -222,7 +222,7 @@ function VUHDO_getAdditionalBottomHeight(aPanelNum)
 		tBottomSpace = 0;
 
 		if tHotCfg["radioValue"] == 7 or tHotCfg["radioValue"] == 8 then
-			tBottomSpace = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"] * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
+			tBottomSpace = VUHDO_roundToPixel(VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"]) * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
 		end
 
 		tNamePos = VUHDO_parseNamePosition(aPanelNum);
