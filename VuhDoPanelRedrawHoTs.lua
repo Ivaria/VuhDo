@@ -49,7 +49,7 @@ function VUHDO_panelRedrwawHotsInitLocalVars(aPanelNum)
 
 	sBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];	
 
-	sHotIconSize = sBarScaling["barHeight"] * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
+	sHotIconSize = VUHDO_roundToPixel(sBarScaling["barHeight"]) * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
 
 	if sHotIconSize == 0 then
 		sHotIconSize = 0.001;
@@ -84,7 +84,7 @@ function VUHDO_panelRedrwawHotsInitLocalVars(aPanelNum)
 		sHotBarHeight = VUHDO_getHealthBarHeight(aPanelNum);
 	else
 		sHotBarWidth = VUHDO_getHealthBarWidth(aPanelNum);
-		sHotBarHeight = sBarScaling["barHeight"] * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["BARS"]["width"] * 0.01;
+		sHotBarHeight = VUHDO_roundToPixel(sBarScaling["barHeight"]) * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["BARS"]["width"] * 0.01;
 	end
 
 end
