@@ -1181,8 +1181,9 @@ function VUHDO_loadDefaultConfig()
 	} );
 
 	-- 5.5.x - MoP Classic
+	--[[
 	VUHDO_addCustomSpellIds(56, {
-		--[[ Heart of Fear ]]
+		-- Heart of Fear
 
 		--Imperial Vizier Zor'lok
 		[122760] = false, --Exhale
@@ -1236,7 +1237,7 @@ function VUHDO_loadDefaultConfig()
 		[126901] = false, --Mortal Rend
 		[126912] = false, --Grievous Whirl
 
-		--[[ Mogushan Vaults ]]
+		-- Mogushan Vaults
 
 		-- Trash
 		[118562] = false, --Petrified
@@ -1290,13 +1291,13 @@ function VUHDO_loadDefaultConfig()
 		[116550] = false, --Energizing Smash
 		[116829] = false, --Focused Energy
 
-		--[[ Sha of Anger ]]
+		-- Sha of Anger
 
 		[119626] = false, --Aggressive Behavior
 		[119488] = false, --Unleashed Wrath
 		[119610] = false, --Bitter Thoughts
 
-		--[[ Terrace of Endless Spring ]]
+		-- Terrace of Endless Spring
 
 		--Protector Kaolan
 		[117519] = false, --Touch of Sha
@@ -1333,8 +1334,10 @@ function VUHDO_loadDefaultConfig()
 		[119086] = false, --Penetrating Bolt
 		[119775] = false,  --Reaching Attack
 	} );
+	--]]
 
 
+	--[[
 	VUHDO_addCustomSpellIds(57, {
 		-- Jin'rokh
 		[138006] = false,
@@ -1453,8 +1456,10 @@ function VUHDO_loadDefaultConfig()
 		[135001] = false,
 		--Ra-den
 	} );
+	--]]
 
 	-- Siege of Orgrimmar
+	--[[
 	VUHDO_addCustomSpellIds(58, {
 		--Trash
 		[143828] = false,
@@ -1540,6 +1545,7 @@ function VUHDO_loadDefaultConfig()
 		[142808] = false,
 		--Garrosh Hellscream
 	} );
+	--]]
 
 	local debuffRemovalList = {};
 
