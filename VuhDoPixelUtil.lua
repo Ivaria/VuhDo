@@ -307,21 +307,17 @@ function tPixelUtil.ApplyBackdrop(aFrame, aBackdropInfo)
 
 			for tKey, tValue in pairs(aBackdropInfo) do
 				if tKey == "edgeSize" then
-					if tValue == floor(tValue) then
-						tBackdrop["edgeSize"] = tValue;
-					else
-						tBackdrop["edgeSize"] = VUHDO_roundToPixel(tValue);
-					end
+					tBackdrop["edgeSize"] = VUHDO_roundToPixel(tValue);
 				elseif tKey == "insets" and type(tValue) == "table" then
 					tInsetsKey = tCurrentScale .. ":" .. (tValue["left"] or 0) .. "," .. (tValue["right"] or 0) .. "," .. (tValue["top"] or 0) .. "," .. (tValue["bottom"] or 0);
 
 					if not sInsetsCache[tInsetsKey] then
 						tInsets = { };
 
-						tInsets["left"] = (tValue["left"] or 0) == floor(tValue["left"] or 0) and (tValue["left"] or 0) or VUHDO_roundToPixel(tValue["left"] or 0);
-						tInsets["right"] = (tValue["right"] or 0) == floor(tValue["right"] or 0) and (tValue["right"] or 0) or VUHDO_roundToPixel(tValue["right"] or 0);
-						tInsets["top"] = (tValue["top"] or 0) == floor(tValue["top"] or 0) and (tValue["top"] or 0) or VUHDO_roundToPixel(tValue["top"] or 0);
-						tInsets["bottom"] = (tValue["bottom"] or 0) == floor(tValue["bottom"] or 0) and (tValue["bottom"] or 0) or VUHDO_roundToPixel(tValue["bottom"] or 0);
+						tInsets["left"] = VUHDO_roundToPixel(tValue["left"] or 0);
+						tInsets["right"] = VUHDO_roundToPixel(tValue["right"] or 0);
+						tInsets["top"] = VUHDO_roundToPixel(tValue["top"] or 0);
+						tInsets["bottom"] = VUHDO_roundToPixel(tValue["bottom"] or 0);
 
 						sInsetsCache[tInsetsKey] = tInsets;
 					end

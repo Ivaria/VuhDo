@@ -2,7 +2,7 @@ VUHDO_MAY_DEBUFF_ANIM = true;
 
 local VUHDO_DEBUFF_ICONS = { };
 local VUHDO_DEBUFF_ICONS_MAP = { };
-local sIsName;
+local VUHDO_MAX_ANIMATION_SCALE = 1.3;
 
 -- BURST CACHE ---------------------------------------------------
 
@@ -36,8 +36,13 @@ local VUHDO_CONFIG;
 local VUHDO_RAID;
 local sCuDeStoredSettings;
 local sMaxIcons;
+local sIsName;
 local sStaticConfig;
 local VUHDO_DEBUFF_COLORS;
+local sOriginalFrameLevels = { };
+local sAnimatedDebuffs = { };
+local sAnimationGroups = { };
+local sAuraFrames = { };
 
 local sEmpty = { };
 
@@ -63,11 +68,14 @@ function VUHDO_customDebuffIconsInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
+
 	sCuDeStoredSettings = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"];
 	sMaxIcons = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"];
+
 	if (sMaxIcons < 1) then -- Damit das Bouquet item "Letzter Debuff" funktioniert
 		sMaxIcons = 1;
 	end
+
 	sIsName = VUHDO_CONFIG["CUSTOM_DEBUFF"]["isName"];
 
 	sStaticConfig = {
@@ -178,22 +186,27 @@ local tIsAnim;
 local tIsBarGlow;
 local tIsIconGlow;
 local tTimeStamp;
+local tActualAliveTime;
 local tAliveTime;
 local tName;
 local tRemain;
 local tShieldPerc;
 local tStacks;
-local tNameLabel;
 local tAuraInstanceId;
 local tCurChosenInfo;
 local tType;
-local tButton;
-local tBackdropFrame;
-local tScaleFactor;
+local tIsPlaying;
 local tClock;
 local tStarted;
 local tClockDuration;
 local tMinDuration;
+local tShouldAnimate;
+local tExistingAnimGroup;
+local tButtonName;
+local tR;
+local tG;
+local tB;
+local tA;
 local tBackdropInfo = {
 	["edgeFile"] = "Interface\\Buttons\\WHITE8X8",
 	["edgeSize"] = 4,
@@ -204,13 +217,22 @@ local tBackdropInfo = {
 		["bottom"] = 0,
 	},
 };
+local tAnimGroup;
+local tAnimationKey;
+local tLookedUpAnimGroup;
 local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, anIsInit, aUnit)
 
-	tCuDeStoConfig = sCuDeStoredSettings[anIconInfo[3]] or sCuDeStoredSettings[tostring(anIconInfo[7])] or sStaticConfig;
+	tTimeStamp = anIconInfo[2];
+	tName = anIconInfo[3];
+	tStacks = anIconInfo[5];
+	tMinDuration = anIconInfo[6];
+	tAuraInstanceId = anIconInfo[8];
 
-	if tCuDeStoConfig["isStaticConfig"] and 
-		(VUHDO_DEBUFF_BLACKLIST[anIconInfo[3]] or VUHDO_DEBUFF_BLACKLIST[tostring(anIconInfo[7])]) then
-		VUHDO_removeDebuffIcon(aUnit, anIconInfo[8]);
+	tCuDeStoConfig = sCuDeStoredSettings[tName] or sCuDeStoredSettings[tostring(anIconInfo[7])] or sStaticConfig;
+
+	if tCuDeStoConfig["isStaticConfig"] and
+		(VUHDO_DEBUFF_BLACKLIST[tName] or VUHDO_DEBUFF_BLACKLIST[tostring(anIconInfo[7])]) then
+		VUHDO_removeDebuffIcon(aUnit, tAuraInstanceId);
 
 		return;
 	end
@@ -226,11 +248,10 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 	tIsAnim = tCuDeStoConfig["animate"] and VUHDO_MAY_DEBUFF_ANIM;
 	tIsBarGlow = tCuDeStoConfig["isBarGlow"];
 	tIsIconGlow = tCuDeStoConfig["isIconGlow"];
-	tTimeStamp = anIconInfo[2];
-	tAliveTime = anIsInit and 0 or aNow - tTimeStamp;
-	tName = anIconInfo[3];
+	tActualAliveTime = (tTimeStamp and tTimeStamp > 0) and (aNow - tTimeStamp) or 0;
+	tAliveTime = anIsInit and 0 or tActualAliveTime;
 
-	if not (anIsInit and anIconInfo[2] == -1) then
+	if not (anIsInit and tTimeStamp == -1) then
 		tRemain = (anIconInfo[4] or aNow - 1) - aNow;
 	else
 		tRemain = 0;
@@ -240,7 +261,7 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		if tCuDeStoConfig["isAliveTime"] then
 			tBarIconTimer:SetText(tAliveTime < 99.5 and floor(tAliveTime + 0.5) or ">>");
 		else
-			if anIsInit and anIconInfo[2] == -1 then
+			if anIsInit and tTimeStamp == -1 then
 				tBarIconTimer:SetText("");
 			else
 				if tRemain >= 0 and (tRemain < 10 or tCuDeStoConfig["isFullDuration"]) then
@@ -255,13 +276,13 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 	if tCuDeStoConfig["isClock"] then
 		tClock = VUHDO_getBarIconClockOrStub(aButton, anIconIndex, tCuDeStoConfig["isClock"]);
 
-		if tRemain and tRemain > 0 and anIconInfo[6] and anIconInfo[6] > 0 then
-			tStarted = floor(10 * (aNow - anIconInfo[6] + tRemain) + 0.5) * 0.1;
+		if tRemain and tRemain > 0 and tMinDuration and tMinDuration > 0 then
+			tStarted = floor(10 * (aNow - tMinDuration + tRemain) + 0.5) * 0.1;
 			tClockDuration = tClock:GetCooldownDuration() * 0.001;
-			tMinDuration = max(anIconInfo[6], 0.1);
+			tMinDuration = max(tMinDuration, 0.1);
 
 			if tMinDuration > 0 and
-				(tClock:GetAlpha() == 0 or (tClock:GetAttribute("started") or tStarted) ~= tStarted or 
+				(tClock:GetAlpha() == 0 or (tClock:GetAttribute("started") or tStarted) ~= tStarted or
 				(tClock:IsVisible() and (tMinDuration > tClockDuration or tMinDuration < 0.1))) then
 				tClock:SetCooldown(tStarted, tMinDuration);
 				tClock:SetAttribute("started", tStarted);
@@ -278,7 +299,7 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 	end
 
 	tShieldPerc = VUHDO_getShieldPerc(aUnit, tName);
-	tStacks = tShieldPerc ~= 0 and tShieldPerc or anIconInfo[5] or 0;
+	tStacks = tShieldPerc ~= 0 and tShieldPerc or tStacks or 0;
 
 	tBarIconCounter:SetText((tCuDeStoConfig["isStacks"] and tStacks > 1) and tStacks or "");
 
@@ -293,24 +314,68 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 
 		tBarIconFrame:SetAlpha(1);
 
+		tShouldAnimate = false;
+		tAnimGroup = nil;
+
 		if tIsAnim then
-			VUHDO_setDebuffAnimation(1.2);
+			tButtonName = aButton:GetName();
+			tAnimationKey = tButtonName .. "_" .. anIconIndex;
+
+			if not sAuraFrames[tAuraInstanceId] then
+				sAuraFrames[tAuraInstanceId] = { };
+			end
+
+			for tFrameKey, _ in pairs(sAuraFrames[tAuraInstanceId]) do
+				if tFrameKey ~= tAnimationKey then
+					tExistingAnimGroup = sAnimationGroups[tFrameKey];
+
+					if tExistingAnimGroup and tExistingAnimGroup:IsPlaying() then
+						tShouldAnimate = true;
+
+						break;
+					end
+				end
+			end
+
+			if not tShouldAnimate and not sAnimatedDebuffs[tAuraInstanceId] then
+				if not tTimeStamp or tTimeStamp <= 0 or (tTimeStamp > 0 and tActualAliveTime < 0.05) then
+					tShouldAnimate = true;
+				end
+			end
+
+			if tShouldAnimate then
+				if not sAnimatedDebuffs[tAuraInstanceId] then
+					sAnimatedDebuffs[tAuraInstanceId] = true;
+				end
+
+				for tOtherAuraId, tFrameKeys in pairs(sAuraFrames) do
+					if tOtherAuraId ~= tAuraInstanceId and tFrameKeys[tAnimationKey] then
+						tFrameKeys[tAnimationKey] = nil;
+					end
+				end
+
+				sAuraFrames[tAuraInstanceId][tAnimationKey] = true;
+
+				tAnimGroup = VUHDO_createDebuffIconAnimation(aButton, anIconIndex, tAuraInstanceId);
+			else
+				tAnimGroup = nil;
+			end
 		end
 
 		if tIsBarGlow then
 			VUHDO_LibCustomGlow.PixelGlow_Start(
-				aButton, 
-				tCuDeStoConfig["barGlowColor"] and { 
+				aButton,
+				tCuDeStoConfig["barGlowColor"] and {
 					tCuDeStoConfig["barGlowColor"]["R"],
 					tCuDeStoConfig["barGlowColor"]["G"],
 					tCuDeStoConfig["barGlowColor"]["B"],
 					tCuDeStoConfig["barGlowColor"]["O"]
-				} or { 
+				} or {
 					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["R"],
 					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["G"],
 					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["B"],
 					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_BAR_GLOW"]["O"]
-				}, 
+				},
 				14,                             -- number of particles
 				0.3,                            -- frequency
 				8,                              -- length
@@ -323,28 +388,51 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		end
 
 		if tIsIconGlow then
-			VUHDO_LibCustomGlow.PixelGlow_Start(
-				tBarIconButton,
-				tCuDeStoConfig["iconGlowColor"] and { 
-					tCuDeStoConfig["iconGlowColor"]["R"],
-					tCuDeStoConfig["iconGlowColor"]["G"],
-					tCuDeStoConfig["iconGlowColor"]["B"],
-					tCuDeStoConfig["iconGlowColor"]["O"]
-				} or { 
-					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["R"],
-					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["G"],
-					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["B"],
-					VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["O"]
-				}, 
-				8,                                           -- number of particles
-				0.3,                                         -- frequency
-				6,                                           -- length
-				2,                                           -- thickness
-				0,                                           -- x offset
-				0,                                           -- y offset
-				false,                                       -- border
-				VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY
-			);
+			if tIsAnim and tShouldAnimate and tAnimGroup then
+				if not tAnimGroup["iconGlowSettings"] then
+					tAnimGroup["iconGlowSettings"] = {
+						["button"] = tBarIconButton,
+						["color"] = tCuDeStoConfig["iconGlowColor"] and {
+							tCuDeStoConfig["iconGlowColor"]["R"],
+							tCuDeStoConfig["iconGlowColor"]["G"],
+							tCuDeStoConfig["iconGlowColor"]["B"],
+							tCuDeStoConfig["iconGlowColor"]["O"]
+						} or {
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["R"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["G"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["B"],
+							VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["O"]
+						}
+					};
+				end
+			else
+				VUHDO_LibCustomGlow.PixelGlow_Start(
+					tBarIconButton,
+					tCuDeStoConfig["iconGlowColor"] and {
+						tCuDeStoConfig["iconGlowColor"]["R"],
+						tCuDeStoConfig["iconGlowColor"]["G"],
+						tCuDeStoConfig["iconGlowColor"]["B"],
+						tCuDeStoConfig["iconGlowColor"]["O"]
+					} or {
+						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["R"],
+						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["G"],
+						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["B"],
+						VUHDO_PANEL_SETUP.BAR_COLORS["DEBUFF_ICON_GLOW"]["O"]
+					},
+					8,                                           -- number of particles
+					0.3,                                         -- frequency
+					6,                                           -- length
+					2,                                           -- thickness
+					0,                                           -- x offset
+					0,                                           -- y offset
+					false,                                       -- border
+					VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY
+				);
+			end
+		end
+
+		if tIsAnim and tShouldAnimate and tAnimGroup and not tAnimGroup:IsPlaying() then
+			tAnimGroup:Play();
 		end
 	elseif tBarIcon:GetTexture() ~= anIconInfo[1] then
 		tBarIcon:SetTexture(anIconInfo[1]);
@@ -355,7 +443,7 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		VUHDO_updateHealthBarsFor(aUnit, VUHDO_UPDATE_RANGE);
 	end
 
-	if tBarIconFrame and tBarIconFrame:GetAlpha() == 0 and tBarIconFrame["debuffInfo"] == anIconInfo[3] and tBarIconFrame["debuffInstanceId"] == anIconInfo[8] then
+	if tBarIconFrame and tBarIconFrame:GetAlpha() == 0 and tBarIconFrame["debuffInfo"] == tName and tBarIconFrame["debuffInstanceId"] == tAuraInstanceId then
 		tBarIconFrame:SetAlpha(1);
 	end
 
@@ -364,21 +452,43 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 	tCurChosenInfo = VUHDO_getDebuffCurChosenInfo()[aUnit] and VUHDO_getDebuffCurChosenInfo()[aUnit][tAuraInstanceId];
 	tType = tCurChosenInfo and tCurChosenInfo[1];
 
+	if not tAnimGroup and tIsAnim then
+		tButtonName = aButton:GetName();
+		tAnimationKey = tButtonName .. "_" .. anIconIndex;
+		tLookedUpAnimGroup = sAnimationGroups[tAnimationKey];
+
+		if tLookedUpAnimGroup and tLookedUpAnimGroup:IsPlaying() then
+			tAnimGroup = tLookedUpAnimGroup;
+		end
+	end
+
 	if tType and tType > 0 and VUHDO_DEBUFF_COLORS[tType] and VUHDO_DEBUFF_COLORS[tType]["useBorder"] then
-		-- offset for backdrop border
-		tBarIcon:SetTexCoord(.08, .92, .08, .92);
+		tIsPlaying = tAnimGroup and tAnimGroup:IsPlaying();
 
-		if tBarIconFrameBackground then
-			if not tBarIconFrameBackground:GetBackdrop() then
-				VUHDO_PixelUtil.ApplyBackdrop(tBarIconFrameBackground, tBackdropInfo);
+		if tIsAnim and tAnimGroup and tIsPlaying then
+			tBarIcon:SetTexCoord(0, 1, 0, 1);
+
+			if tBarIconFrameBackground then
+				tBarIconFrameBackground:SetBackdropBorderColor(0, 0, 0, 0);
 			end
+		else
+			tBarIcon:SetTexCoord(.08, .92, .08, .92);
 
-			tBarIconFrameBackground:SetBackdropBorderColor(VUHDO_backColor(VUHDO_DEBUFF_COLORS[tType]));
-			tBarIconFrameBackground:SetAlpha(1);
-			tBarIconFrameBackground:Show();
+			if tBarIconFrameBackground then
+				if not tBarIconFrameBackground:GetBackdrop() then
+					VUHDO_PixelUtil.ApplyBackdrop(tBarIconFrameBackground, tBackdropInfo);
+				end
+
+				tR, tG, tB, tA = VUHDO_backColor(VUHDO_DEBUFF_COLORS[tType]);
+				tBarIconFrameBackground:SetBackdropBorderColor(tR, tG, tB, tA);
+
+				tBarIconFrameBackground["originalBorderColor"] = {tR, tG, tB, tA};
+
+				tBarIconFrameBackground:SetAlpha(1);
+				tBarIconFrameBackground:Show();
+			end
 		end
 	else
-		-- default border no offset
 		tBarIcon:SetTexCoord(0, 1, 0, 1);
 
 		if tBarIconFrameBackground then
@@ -388,22 +498,192 @@ local function VUHDO_animateDebuffIcon(aButton, anIconInfo, aNow, anIconIndex, a
 		end
 	end
 
-	if tIsAnim then
-		if tAliveTime <= 0.5 then
-			tScaleFactor = 1 + tAliveTime * 2;
-		elseif tAliveTime <= 1.0 then
-			tScaleFactor = 3 - tAliveTime * 2;
-		else
-			tScaleFactor = 1;
-		end
-
-		VUHDO_PixelUtil.SetScale(tBarIconButton, tScaleFactor);
-	else -- Falls Custom Debuff vorher Animation hatte und dieser nicht
-		VUHDO_PixelUtil.SetScale(tBarIconButton, 1);
-	end
-
 	if sIsName and tAliveTime > 2 then
 		tBarIconName:SetAlpha(0);
+	end
+
+	return;
+
+end
+
+
+
+--
+local tIconButton;
+local tAnimKey;
+local function VUHDO_onAnimationPlay(self)
+
+	tAnimKey = self["animKey"];
+
+	if not tAnimKey then
+		return;
+	end
+
+	tIconButton = self:GetParent();
+
+	if tIconButton then
+		sOriginalFrameLevels[tAnimKey] = tIconButton:GetFrameLevel();
+
+		VUHDO_PixelUtil.SetFrameLevel(tIconButton, sOriginalFrameLevels[tAnimKey] + 10);
+	end
+
+	return;
+
+end
+
+
+
+--
+local tIconButton;
+local tBarIconFrameBackground;
+local tAnimKey;
+local tGlowSettings;
+local tButton;
+local tSuccess;
+local tIconTexture;
+local function VUHDO_onAnimationFinished(self)
+
+	tAnimKey = self["animKey"];
+
+	if not tAnimKey then
+		return;
+	end
+
+	tIconButton = self:GetParent();
+
+	if tIconButton then
+		VUHDO_PixelUtil.SetScale(tIconButton, 1);
+
+		if self["iconGlowSettings"] then
+			tGlowSettings = self["iconGlowSettings"];
+
+			if tGlowSettings["button"] and tGlowSettings["color"] then
+				VUHDO_LibCustomGlow.PixelGlow_Start(
+					tGlowSettings["button"],
+					tGlowSettings["color"],
+					8,                                           -- number of particles
+					0.3,                                         -- frequency
+					6,                                           -- length
+					2,                                           -- thickness
+					0,                                           -- x offset
+					0,                                           -- y offset
+					false,                                       -- border
+					VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY
+				);
+			end
+			self["iconGlowSettings"] = nil;
+		end
+
+		if sOriginalFrameLevels[tAnimKey] then
+			VUHDO_PixelUtil.SetFrameLevel(tIconButton, sOriginalFrameLevels[tAnimKey]);
+		end
+
+		tBarIconFrameBackground = tIconButton;
+
+		if tBarIconFrameBackground and tBarIconFrameBackground:GetBackdrop() then
+			if tBarIconFrameBackground["originalBorderColor"] then
+				tBarIconFrameBackground:SetBackdropBorderColor(tBarIconFrameBackground["originalBorderColor"][1], tBarIconFrameBackground["originalBorderColor"][2], tBarIconFrameBackground["originalBorderColor"][3], tBarIconFrameBackground["originalBorderColor"][4]);
+			end
+
+			if self["iconIndex"] then
+				tButton = tIconButton:GetParent():GetParent();
+
+				if tButton then
+					tSuccess, tIconTexture = pcall(VUHDO_getBarIcon, tButton, self["iconIndex"]);
+
+					if tSuccess and tIconTexture and tIconTexture.SetTexCoord then
+						tIconTexture:SetTexCoord(.08, .92, .08, .92);
+					end
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local tBarIconButton;
+local tAnimationKey;
+local tAnimGroup;
+local tScaleAnimOut;
+local tScaleAnimIn;
+function VUHDO_createDebuffIconAnimation(aButton, anIconIndex, anAuraInstanceId)
+
+	tBarIconButton = VUHDO_getBarIconButton(aButton, anIconIndex);
+
+	if not tBarIconButton then
+		return;
+	end
+
+	tAnimationKey = aButton:GetName() .. "_" .. anIconIndex;
+	tAnimGroup = sAnimationGroups[tAnimationKey];
+
+	if not tAnimGroup then
+		tAnimGroup = tBarIconButton:CreateAnimationGroup();
+
+		tAnimGroup:SetLooping("NONE");
+
+		tScaleAnimOut = tAnimGroup:CreateAnimation("Scale");
+
+		tScaleAnimOut:SetOrigin("CENTER", 0, 0);
+		tScaleAnimOut:SetScaleFrom(1, 1);
+		tScaleAnimOut:SetScaleTo(VUHDO_MAX_ANIMATION_SCALE, VUHDO_MAX_ANIMATION_SCALE);
+		tScaleAnimOut:SetDuration(0.5);
+		tScaleAnimOut:SetSmoothing("NONE");
+		tScaleAnimOut:SetOrder(1);
+
+		tScaleAnimIn = tAnimGroup:CreateAnimation("Scale");
+
+		tScaleAnimIn:SetOrigin("CENTER", 0, 0);
+		tScaleAnimIn:SetScaleFrom(VUHDO_MAX_ANIMATION_SCALE, VUHDO_MAX_ANIMATION_SCALE);
+		tScaleAnimIn:SetScaleTo(1, 1);
+		tScaleAnimIn:SetDuration(0.5);
+		tScaleAnimIn:SetSmoothing("NONE");
+		tScaleAnimIn:SetOrder(2);
+
+		tAnimGroup:SetScript("OnPlay", VUHDO_onAnimationPlay);
+		tAnimGroup:SetScript("OnFinished", VUHDO_onAnimationFinished);
+
+		tAnimGroup["iconIndex"] = anIconIndex;
+		tAnimGroup["animKey"] = tAnimationKey;
+
+		sAnimationGroups[tAnimationKey] = tAnimGroup;
+	end
+
+	return tAnimGroup;
+
+end
+
+
+
+--
+local tAnimationKey;
+local tAnimGroup;
+local tBarIconButton;
+function VUHDO_cleanupDebuffIconAnimation(aButton, anIconIndex)
+
+	tAnimationKey = aButton:GetName() .. "_" .. anIconIndex;
+	tAnimGroup = sAnimationGroups[tAnimationKey];
+
+	if tAnimGroup then
+		tAnimGroup:Stop();
+
+		tBarIconButton = VUHDO_getBarIconButton(aButton, anIconIndex);
+
+		if tBarIconButton then
+			VUHDO_PixelUtil.SetScale(tBarIconButton, 1);
+
+			if sOriginalFrameLevels[tAnimationKey] then
+				VUHDO_PixelUtil.SetFrameLevel(tBarIconButton, sOriginalFrameLevels[tAnimationKey]);
+			end
+		end
+
+		sAnimationGroups[tAnimationKey] = nil;
+		sOriginalFrameLevels[tAnimationKey] = nil;
 	end
 
 	return;
@@ -605,6 +885,8 @@ local tSlot;
 local tIconArray;
 local tAllButtons;
 local tFrame;
+local tAnimKey;
+local tAnimGroup;
 function VUHDO_removeDebuffIcon(aUnit, anAuraInstanceId)
 
 	if not VUHDO_DEBUFF_ICONS[aUnit] then
@@ -629,10 +911,21 @@ function VUHDO_removeDebuffIcon(aUnit, anAuraInstanceId)
 		for _, tButton in pairs(tAllButtons) do
 			VUHDO_LibCustomGlow.PixelGlow_Stop(tButton, VUHDO_CUSTOM_GLOW_CUDE_FRAME_KEY);
 
+			VUHDO_cleanupDebuffIconAnimation(tButton, tSlot + 39);
+
 			tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
 
 			if tFrame then
-				VUHDO_LibCustomGlow.PixelGlow_Stop(VUHDO_getBarIconButton(tButton, tSlot + 39), VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+				tAnimKey = tButton:GetName() .. "_" .. (tSlot + 39);
+				tAnimGroup = sAnimationGroups[tAnimKey];
+
+				if not (tAnimGroup and tAnimGroup:IsPlaying()) then
+					VUHDO_LibCustomGlow.PixelGlow_Stop(VUHDO_getBarIconButton(tButton, tSlot + 39), VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+				end
+
+				if sAuraFrames[anAuraInstanceId] then
+					sAuraFrames[anAuraInstanceId][tAnimKey] = nil;
+				end
 
 				tFrame:SetAlpha(0);
 
@@ -641,11 +934,14 @@ function VUHDO_removeDebuffIcon(aUnit, anAuraInstanceId)
 				tFrame["isBuff"] = nil;
 				tFrame["debuffInstanceId"] = nil;
 			end
+
 		end
 	end
 
 	VUHDO_DEBUFF_ICONS[aUnit][tSlot] = nil;
 	VUHDO_DEBUFF_ICONS_MAP[aUnit][anAuraInstanceId] = nil;
+	sAnimatedDebuffs[anAuraInstanceId] = nil;
+	sAuraFrames[anAuraInstanceId] = nil;
 
 	VUHDO_releasePooledIconArray(tIconArray);
 
@@ -658,6 +954,8 @@ end
 --
 local tFrame;
 local tAllButtons;
+local tAnimKey;
+local tAnimGroup;
 function VUHDO_removeAllDebuffIcons(aUnit)
 
 	tAllButtons = VUHDO_getUnitButtons(aUnit);
@@ -673,10 +971,15 @@ function VUHDO_removeAllDebuffIcons(aUnit)
 			tFrame = VUHDO_getBarIconFrame(tButton, tCnt);
 
 			if tFrame then
-				VUHDO_LibCustomGlow.PixelGlow_Stop(VUHDO_getBarIconButton(tButton, tCnt), VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+				tAnimKey = tButton:GetName() .. "_" .. tCnt;
+				tAnimGroup = sAnimationGroups[tAnimKey];
+
+				if not (tAnimGroup and tAnimGroup:IsPlaying()) then
+					VUHDO_LibCustomGlow.PixelGlow_Stop(VUHDO_getBarIconButton(tButton, tCnt), VUHDO_CUSTOM_GLOW_CUDE_ICON_KEY);
+				end
 
 				tFrame:SetAlpha(0);
-				
+
 				tFrame["debuffInfo"] = nil;
 				tFrame["debuffSpellId"] = nil;
 				tFrame["isBuff"] = nil;
@@ -690,7 +993,7 @@ function VUHDO_removeAllDebuffIcons(aUnit)
 			VUHDO_releasePooledIconArray(tIconArray);
 
 			VUHDO_DEBUFF_ICONS[aUnit][tCnt] = nil;
-	        end
+        end
 	end
 
 	if VUHDO_DEBUFF_ICONS_MAP[aUnit] then
