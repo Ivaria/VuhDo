@@ -145,6 +145,14 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 		VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] = _G[tFrameName .. "B"];
 		VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber] = _G[tFrameName .. "B"];
 
+		local tBackdropFrame = VUHDO_BAR_ICON_FRAME_BACKGROUNDS[aButton][anIconNumber];
+
+		if tBackdropFrame then
+			VUHDO_PixelUtil.ClearAllPoints(tBackdropFrame);
+			VUHDO_PixelUtil.SetPoint(tBackdropFrame, "TOPLEFT", tBarIconFrame, "TOPLEFT", 0, 0);
+			VUHDO_PixelUtil.SetPoint(tBackdropFrame, "BOTTOMRIGHT", tBarIconFrame, "BOTTOMRIGHT", 0, 0);
+		end
+
 		VUHDO_BAR_ICONS[aButton][anIconNumber] = _G[tFrameName .. "BI"];
 		VUHDO_BAR_ICON_TIMERS[aButton][anIconNumber] = _G[tFrameName .. "BT"];
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "BC"];
