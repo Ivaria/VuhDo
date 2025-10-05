@@ -286,13 +286,15 @@ local tWheelDefString;
 local tBinding;
 local tHeaderFrame;
 local tOnEnterSnippet = [[
-	if sHealButton then
+	if sHealButton and sHealButton ~= self then
 		sHealButton:ClearBindings();
 	end
 
 	sHealButton = self;
 ]]
 local tOnLeaveSnippet = [[
+	self:ClearBindings();
+
 	sHealButton = nil;
 ]]
 local tClearBindsSnippet = [[
