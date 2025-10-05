@@ -21,7 +21,6 @@ local floor = math.floor;
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
-local VUHDO_DEBUFF_ANIMATION = 0;
 
 local VUHDO_INSTANCE = nil;
 
@@ -78,6 +77,8 @@ local VUHDO_updateBouquetsForEvent;
 local VUHDO_updateAllHoTs;
 local VUHDO_updateAllCyclicBouquets;
 local VUHDO_updateAllDebuffIcons;
+local VUHDO_createDebuffIconAnimation;
+local VUHDO_cleanupDebuffIconAnimation;
 local VUHDO_updateAllAggro;
 local VUHDO_updateUnitAggro;
 local VUHDO_updateAllRange;
@@ -552,6 +553,8 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateAllHoTs = _G["VUHDO_updateAllHoTs"];
 	VUHDO_updateAllCyclicBouquets = _G["VUHDO_updateAllCyclicBouquets"];
 	VUHDO_updateAllDebuffIcons = _G["VUHDO_updateAllDebuffIcons"];
+	VUHDO_createDebuffIconAnimation = _G["VUHDO_createDebuffIconAnimation"];
+	VUHDO_cleanupDebuffIconAnimation = _G["VUHDO_cleanupDebuffIconAnimation"];
 	VUHDO_updateAllRaidTargetIndices = _G["VUHDO_updateAllRaidTargetIndices"];
 	VUHDO_updateAllClusters = _G["VUHDO_updateAllClusters"];
 	VUHDO_aoeUpdateAll = _G["VUHDO_aoeUpdateAll"];
@@ -1999,14 +2002,6 @@ end
 
 
 
---
-function VUHDO_setDebuffAnimation(aTimeSecs)
-
-	VUHDO_DEBUFF_ANIMATION = aTimeSecs;
-
-	return;
-
-end
 
 
 
@@ -2141,11 +2136,6 @@ do
 	local tGcdStart;
 	local tGcdDuration;
 	local function VUHDO_handleSegment1A(aTimeDelta)
-
-		-- Update custom debuff animation
-		if VUHDO_DEBUFF_ANIMATION > 0 then
-			VUHDO_DEBUFF_ANIMATION = VUHDO_DEBUFF_ANIMATION - aTimeDelta;
-		end
 
 		-- Update GCD-Bar
 		if VUHDO_GCD_UPDATE then
