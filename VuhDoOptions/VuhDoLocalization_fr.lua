@@ -1249,6 +1249,17 @@ VUHDO_I18N_PURGEABLE_BUFFS = "Buffs\npurgeables";
 
 VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Uniquement \nles slots";
 
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Ce débuff est dans la liste d'ignorance et sera masqué.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignorer \"%s\" remplace les paramètres de débuff personnalisés existants.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "Supprimer \"%s\" de la liste d'ignorance permettra maintenant aux paramètres de débuff personnalisés de prendre effet.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "Débuff personnalisé \"%s\" est dans la liste d'ignorance et sera masqué.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "Débuff personnalisé \"%s\" supprimé qui était dans la liste d'ignorance et restera masqué.";
+VUHDO_I18N_DEBUFF_ADDED_TO_IGNORE_LIST = "(De)Buff \"%s\" ajouté à la liste d'ignorance.";
+VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST = "(De)Buff \"%s\" supprimé de la liste d'ignorance.";
+VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM = "(De)Buff \"%s\" ajouté aux débuffs personnalisés.";
+VUHDO_I18N_DEBUFF_REMOVED_FROM_CUSTOM = "(De)Buff \"%s\" supprimé des débuffs personnalisés.";
+VUHDO_I18N_DEBUFF_DOES_NOT_EXIST = "(De)Buff \"%s\" n'existe pas.";
+
 -- Classic Era game version specific strings
 
 VUHDO_I18N_LIBHEALCOMM = "Use Lib\nHealComm";
