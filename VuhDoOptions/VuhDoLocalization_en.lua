@@ -1228,3 +1228,14 @@ VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
 VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
+
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "This debuff is in the ignore list and will be hidden.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignoring \"%s\" overrides existing custom debuff settings.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "Removing \"%s\" from ignore list will now allow custom debuff settings to take effect.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "Custom debuff \"%s\" is in ignore list and will be hidden.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "Removed custom debuff \"%s\" that was in ignore list and will remain hidden.";
+VUHDO_I18N_DEBUFF_ADDED_TO_IGNORE_LIST = "(De)Buff \"%s\" added to ignore list.";
+VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST = "(De)Buff \"%s\" removed from ignore list.";
+VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM = "(De)Buff \"%s\" added to custom debuffs.";
+VUHDO_I18N_DEBUFF_REMOVED_FROM_CUSTOM = "(De)Buff \"%s\" removed from custom debuffs.";
+VUHDO_I18N_DEBUFF_DOES_NOT_EXIST = "(De)Buff \"%s\" doesn't exist.";
