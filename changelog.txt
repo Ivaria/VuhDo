@@ -35,6 +35,8 @@ Bugfixes:
   
   
 Improvements:  
+-- Debuff ignore list now overrides custom debuff settings  
+-- Debuff ignore list now also suppresses helpful auras  
   
   
 --------------------------------------------------------------  

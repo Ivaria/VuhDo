@@ -1126,7 +1126,6 @@ do
 	local tType;
 	local tDebuffClassIgnoreList;
 	local tIsRelevant;
-	local tIsIgnored;
 	local tFriend;
 	local tHostile;
 	local tAbility;
@@ -1147,6 +1146,10 @@ do
 		end
 
 		tSpellIdStr = aSpellId and tostring(aSpellId);
+
+		if VUHDO_DEBUFF_BLACKLIST[aName] or (tSpellIdStr and VUHDO_DEBUFF_BLACKLIST[tSpellIdStr]) then
+			return;
+		end
 
 		-- Custom Debuff?
 		if tSpellIdStr then
@@ -1194,9 +1197,7 @@ do
 			VUHDO_addUnitDebuffInfo(sUnit, tType, anAuraInstanceId, anIcon, anExpiry, aStacks, aDuration);
 		end
 
-		tIsIgnored = VUHDO_DEBUFF_BLACKLIST[aName] or (tSpellIdStr and VUHDO_DEBUFF_BLACKLIST[tSpellIdStr]);
-
-		if not tIsCustomColorShown and not tIsIgnored and tIsRelevant then
+		if not tIsCustomColorShown and tIsRelevant then
 			tFriend = UnitIsFriend("player", sUnit);
 			tHostile = UnitIsEnemy("player", sUnit);
 
@@ -1247,6 +1248,10 @@ do
 		end
 
 		tSpellIdStr = aSpellId and tostring(aSpellId);
+
+		if VUHDO_DEBUFF_BLACKLIST[aName] or (tSpellIdStr and VUHDO_DEBUFF_BLACKLIST[tSpellIdStr]) then
+			return;
+		end
 
 		if tSpellIdStr then
 			tDebuffConfig = VUHDO_CUSTOM_DEBUFF_CONFIG[tSpellIdStr];
@@ -1752,6 +1757,48 @@ do
 	end
 end
 local VUHDO_determineDebuff = VUHDO_determineDebuff;
+
+
+
+--
+local tUnitCustomDebuffs;
+local tCustomDebuffSpellId;
+local tCustomDebuffName;
+local tAuraInstanceIdsToRemove;
+local tIgnoredNameOrId;
+function VUHDO_removeIgnoredDebuffFromAllUnits(aNameOrSpellId)
+
+	if not aNameOrSpellId or not VUHDO_RAID then
+		return;
+	end
+
+	tIgnoredNameOrId = tostring(aNameOrSpellId);
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		tUnitCustomDebuffs = VUHDO_UNIT_CUSTOM_DEBUFFS[tUnit];
+
+		if tUnitCustomDebuffs then
+			tAuraInstanceIdsToRemove = { };
+
+			for tAuraInstanceId, tCustomDebuffInfo in pairs(tUnitCustomDebuffs) do
+				tCustomDebuffSpellId = tCustomDebuffInfo[6];
+				tCustomDebuffName = tCustomDebuffInfo[5];
+
+				if (tCustomDebuffSpellId and tostring(tCustomDebuffSpellId) == tIgnoredNameOrId)
+					or (tCustomDebuffName and tCustomDebuffName == tIgnoredNameOrId) then
+					table.insert(tAuraInstanceIdsToRemove, tAuraInstanceId);
+				end
+			end
+
+			for _, tAuraInstanceId in pairs(tAuraInstanceIdsToRemove) do
+				VUHDO_removeDebuff(tUnit, tAuraInstanceId);
+			end
+		end
+	end
+
+	return;
+
+end
 
 
 
