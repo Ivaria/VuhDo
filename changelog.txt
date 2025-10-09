@@ -32,11 +32,13 @@ Known issues:
   
 Bugfixes:  
 -- Fixed HoT and debuff icon scale for non-pixel perfect UIs  
+-- Fixed range check for different world tiers in Legion Remix  
   
   
 Improvements:  
 -- Debuff ignore list now overrides custom debuff settings  
 -- Debuff ignore list now also suppresses helpful auras  
+-- Bump TOC interface for 11.2.5  
   
   
 --------------------------------------------------------------  
