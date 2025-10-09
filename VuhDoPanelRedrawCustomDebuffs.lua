@@ -148,6 +148,7 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 				tFrame:SetWidth(0.001);
 				tFrame:SetHeight(0.001);
 			end
+
 			tFrame:SetAlpha(0);
 			tFrame:Show();
 
