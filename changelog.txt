@@ -17,6 +17,7 @@ Bugfixes:
 Improvements:  
 -- Debuff ignore list now overrides custom debuff settings  
 -- Debuff ignore list now also suppresses helpful auras  
+-- Bump TOC interface for 11.2.5  
   
   
 --------------------------------------------------------------  
