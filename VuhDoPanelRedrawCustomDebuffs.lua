@@ -11,6 +11,7 @@ local sPoint;
 local sColSpacing;
 local sTopSpacing;
 local sBottomSpacing;
+local sIsTooltipCache = { };
 
 
 
@@ -47,6 +48,7 @@ function VUHDO_panelRedrawCustomDebuffsInitLocalVars(aPanelNum)
 	sYOffset = -sDebuffConfig["yAdjust"] * VUHDO_roundToPixel(sBarScaling["barHeight"]) * 0.01;
 	sHeight = sBarScaling["barHeight"];
 	sStep = sSign * sHeight;
+	table.wipe(sIsTooltipCache);
 	sColSpacing = sBarScaling["columnSpacing"];
 	sTopSpacing = sBarScaling["rowSpacing"] + VUHDO_getAdditionalTopHeight(aPanelNum);
 	sBottomSpacing = sBarScaling["rowSpacing"] + VUHDO_getAdditionalBottomHeight(aPanelNum);
@@ -71,7 +73,32 @@ end
 
 
 
+--
+local tMaxDiff;
+local tMaxDiffTop;
+local tMaxDiffBottom;
+local tMaxDiffX;
+local tRScale;
+local tPScale;
+local function VUHDO_isMostlyInBounds(aRegion, aParent, aMaxDiffFactor)
 
+	if not aRegion:GetTop() or not aParent:GetTop() then
+		return nil;
+	end
+
+	tRScale, tPScale = aRegion:GetEffectiveScale() or 1, aParent:GetEffectiveScale() or 1;
+
+	tMaxDiff = (aRegion:GetWidth() or 0) * aMaxDiffFactor * tRScale;
+	tMaxDiffX = tMaxDiff + sColSpacing * tPScale;
+	tMaxDiffTop = tMaxDiff + sTopSpacing * tPScale;
+	tMaxDiffBottom = tMaxDiff + sBottomSpacing * tPScale;
+
+	return ((aRegion:GetLeft()   or 0) * tRScale >= (aParent:GetLeft()   or 0) * tPScale - tMaxDiffX
+		  and (aRegion:GetTop()    or 0) * tRScale <= (aParent:GetTop()    or 0) * tPScale + tMaxDiffTop
+		  and (aRegion:GetRight()  or 0) * tRScale <= (aParent:GetRight()  or 0) * tPScale + tMaxDiffX
+		  and (aRegion:GetBottom() or 0) * tRScale >= (aParent:GetBottom() or 0) * tPScale - tMaxDiffBottom) and 1 or 0;
+
+end
 
 
 
@@ -109,8 +136,19 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 
 			tFrame:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tFrame, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
-			VUHDO_PixelUtil.SetSize(tFrame, sHeight, sHeight);
 			VUHDO_PixelUtil.SetScale(tFrame, tBaseScale);
+
+			if not sIsTooltipCache[tIconIdx] then
+				sIsTooltipCache[tIconIdx] = VUHDO_isMostlyInBounds(tFrame, sButton, 0.33);
+			end
+
+			if VUHDO_CONFIG["DEBUFF_TOOLTIP"] and sIsTooltipCache[tIconIdx] == 1 then
+				VUHDO_PixelUtil.SetSize(tFrame, sHeight, sHeight);
+			else
+				tFrame:SetWidth(0.001);
+				tFrame:SetHeight(0.001);
+			end
+
 			tFrame:SetAlpha(0);
 			tFrame:Show();
 
