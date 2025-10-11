@@ -2010,6 +2010,7 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
 
 	-- Direction arrow
+	VUHDO_PixelUtil.ApplySettings(VuhDoDirectionFrameArrow);
 	VuhDoDirectionFrameArrow:SetVertexColor(VUHDO_backColor(VUHDO_PANEL_SETUP["BAR_COLORS"]["DIRECTION"]));
 	VUHDO_PixelUtil.SetPoint(VuhDoDirectionFrameText, "TOP", "VuhDoDirectionFrameArrow", "CENTER", 5,  -2);
 	VuhDoDirectionFrameText:SetText("");
@@ -2294,6 +2295,7 @@ function VUHDO_deferRedrawAllPanelsCompleteDelegate(anIsFixAllFrameLevels)
 
 	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
 
+	VUHDO_PixelUtil.ApplySettings(VuhDoDirectionFrameArrow);
 	VuhDoDirectionFrameArrow:SetVertexColor(VUHDO_backColor(VUHDO_PANEL_SETUP["BAR_COLORS"]["DIRECTION"]));
 	VUHDO_PixelUtil.SetPoint(VuhDoDirectionFrameText, "TOP", "VuhDoDirectionFrameArrow", "CENTER", 5,  -2);
 	VuhDoDirectionFrameText:SetText("");
