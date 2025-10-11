@@ -45,7 +45,7 @@ function VUHDO_panelRedrawCustomDebuffsInitLocalVars(aPanelNum)
 
 	sBarScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
 	sXOffset = sDebuffConfig["xAdjust"] * sBarScaling["barWidth"] * 0.01;
-	sYOffset = -sDebuffConfig["yAdjust"] * VUHDO_roundToPixel(sBarScaling["barHeight"]) * 0.01;
+	sYOffset = -sDebuffConfig["yAdjust"] * sBarScaling["barHeight"] * 0.01;
 	sHeight = sBarScaling["barHeight"];
 	sStep = sSign * sHeight;
 	table.wipe(sIsTooltipCache);

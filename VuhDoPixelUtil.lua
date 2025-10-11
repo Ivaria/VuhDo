@@ -71,13 +71,13 @@ local tUIUnitFactor;
 local tPixelValue;
 local tNumPixels;
 local tResult;
-function VUHDO_roundToPixel(aValue, aMinPixels)
+local function VUHDO_roundToPixel(aValue, aScale, aMinPixels)
 
 	if aValue == 0 and (not aMinPixels or aMinPixels == 0) then
 		return 0;
 	end
 
-	tScale = VUHDO_getPixelScale();
+	tScale = aScale or VUHDO_getPixelScale();
 	tUIUnitFactor = VUHDO_getPixelToUIUnitFactor();
 
 	tPixelValue = (aValue * tScale) / tUIUnitFactor;
@@ -173,14 +173,16 @@ end
 --
 local tX;
 local tY;
+local tFrameScale;
 function tPixelUtil.SetPoint(aFrame, aPoint, aRelativeFrame, aRelativePoint, aXOffset, aYOffset)
 
 	if not aFrame then
 		return;
 	end
 
-	tX = aXOffset and VUHDO_roundToPixel(aXOffset) or 0;
-	tY = aYOffset and VUHDO_roundToPixel(aYOffset) or 0;
+	tFrameScale = aFrame:GetEffectiveScale();
+	tX = aXOffset and VUHDO_roundToPixel(aXOffset, tFrameScale) or 0;
+	tY = aYOffset and VUHDO_roundToPixel(aYOffset, tFrameScale) or 0;
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetPoint(aPoint, aRelativeFrame, aRelativePoint, tX, tY);
@@ -197,14 +199,16 @@ end
 --
 local tWidth;
 local tHeight;
+local tFrameScale;
 function tPixelUtil.SetSize(aFrame, aWidth, aHeight)
 
 	if not aFrame then
 		return;
 	end
 
-	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
-	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
+	tFrameScale = aFrame:GetEffectiveScale();
+	tWidth = aWidth and VUHDO_roundToPixel(aWidth, tFrameScale) or aFrame:GetWidth();
+	tHeight = aHeight and VUHDO_roundToPixel(aHeight, tFrameScale) or aFrame:GetHeight();
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetSize(tWidth, tHeight);
@@ -220,13 +224,15 @@ end
 
 --
 local tWidth;
+local tFrameScale;
 function tPixelUtil.SetWidth(aFrame, aWidth)
 
 	if not aFrame then
 		return;
 	end
 
-	tWidth = aWidth and VUHDO_roundToPixel(aWidth) or aFrame:GetWidth();
+	tFrameScale = aFrame:GetEffectiveScale();
+	tWidth = aWidth and VUHDO_roundToPixel(aWidth, tFrameScale) or aFrame:GetWidth();
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetWidth(tWidth);
@@ -242,13 +248,15 @@ end
 
 --
 local tHeight;
+local tFrameScale;
 function tPixelUtil.SetHeight(aFrame, aHeight)
 
 	if not aFrame then
 		return;
 	end
 
-	tHeight = aHeight and VUHDO_roundToPixel(aHeight) or aFrame:GetHeight();
+	tFrameScale = aFrame:GetEffectiveScale();
+	tHeight = aHeight and VUHDO_roundToPixel(aHeight, tFrameScale) or aFrame:GetHeight();
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetHeight(tHeight);
@@ -504,6 +512,43 @@ function tPixelUtil.SetFrameLevel(aFrame, aLevel)
 	else
 		VUHDO_Msg("WARNING: VUHDO_PixelUtil.SetFrameLevel blocked during combat for frame: " .. tostring(aFrame:GetName() or "unnamed") .. " Stack:\n" .. debugstack(2, 5, 5));
 	end
+
+	return;
+
+end
+
+
+
+--
+function tPixelUtil.RoundToPixel(aValue)
+
+	return VUHDO_roundToPixel(aValue);
+
+end
+
+
+
+--
+local tBaseValue;
+local tPercentage;
+local tCalculated;
+function tPixelUtil.SetSizeFromPercentage(aFrame, aBaseWidth, aBaseHeight, aWidthPercent, aHeightPercent)
+
+	if not aFrame then
+		return;
+	end
+
+	tBaseValue = aBaseWidth or 0;
+	tPercentage = (aWidthPercent or 100) * 0.01;
+	tCalculated = tBaseValue * tPercentage;
+
+	tPixelUtil.SetWidth(aFrame, tCalculated);
+
+	tBaseValue = aBaseHeight or 0;
+	tPercentage = (aHeightPercent or 100) * 0.01;
+	tCalculated = tBaseValue * tPercentage;
+
+	tPixelUtil.SetHeight(aFrame, tCalculated);
 
 	return;
 
@@ -785,7 +830,7 @@ function VUHDO_testPixelPerfectValues()
 
 	for _, tValue in ipairs(tTestValues) do
 		tRounded = VUHDO_roundToPixel(tValue);
-		tRoundedWithMin = VUHDO_roundToPixel(tValue, 1);
+		tRoundedWithMin = VUHDO_roundToPixel(tValue, nil, 1);
 
 		VUHDO_Msg(format("  %.2f -> %.2f (min: %.2f)", tValue, tRounded, tRoundedWithMin));
 	end
@@ -793,9 +838,9 @@ function VUHDO_testPixelPerfectValues()
 	VUHDO_Msg("|cffFFA500** Edge Case Tests:|r");
 	VUHDO_Msg("  Zero value: " .. VUHDO_roundToPixel(0));
 	VUHDO_Msg("  Negative value: " .. VUHDO_roundToPixel(-1.5));
-	VUHDO_Msg("  Negative with min: " .. VUHDO_roundToPixel(-1.5, 1));
+	VUHDO_Msg("  Negative with min: " .. VUHDO_roundToPixel(-1.5, nil, 1));
 	VUHDO_Msg("  Tiny value: " .. VUHDO_roundToPixel(0.1));
-	VUHDO_Msg("  Tiny with min: " .. VUHDO_roundToPixel(0.1, 1));
+	VUHDO_Msg("  Tiny with min: " .. VUHDO_roundToPixel(0.1, nil, 1));
 
 	VUHDO_Msg("|cffFFD100--- End of Enhanced Pixel-Perfect Value Test ---|r");
 
