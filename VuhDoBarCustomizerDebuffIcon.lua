@@ -1511,8 +1511,10 @@ function VUHDO_animTest(aCount)
 			tTestFrame:SetScript("OnDragStop", tTestFrame.StopMovingOrSizing);
 
 			tTestTexture = tTestFrame:CreateTexture(nil, "ARTWORK");
+
 			tTestTexture:SetAllPoints(tTestFrame);
 			tTestTexture:SetTexture("Interface\\Icons\\Spell_Nature_Lightning");
+			VUHDO_PixelUtil.ApplySettings(tTestTexture);
 
 			tTestFrame["texture"] = tTestTexture;
 			tTestFrame["testKey"] = "VuhDoAnimTestOnUpdateFrame" .. tIndex;
@@ -1565,8 +1567,10 @@ function VUHDO_animTest(aCount)
 			tTestFrame:SetScript("OnDragStop", tTestFrame.StopMovingOrSizing);
 
 			tTestTexture = tTestFrame:CreateTexture(nil, "ARTWORK");
+
 			tTestTexture:SetAllPoints(tTestFrame);
 			tTestTexture:SetTexture("Interface\\Icons\\Spell_Shadow_CurseOfTounges");
+			VUHDO_PixelUtil.ApplySettings(tTestTexture);
 
 			tTestFrame["texture"] = tTestTexture;
 		end
