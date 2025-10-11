@@ -1739,6 +1739,24 @@ do
 				VUHDO_pixelHelp();
 			end
 
+		elseif tCommandWord == "anim" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "test" then
+				tCount = tonumber(tParsedTexts[3]) or 5;
+				tCount = max(1, min(40, tCount));
+
+				VUHDO_animTest(tCount);
+			elseif tSubCommand == "hide" then
+				VUHDO_animHideTestFrames();
+			elseif tSubCommand == "on" then
+				VUHDO_setAnimationGroupEnabled(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setAnimationGroupEnabled(false);
+			else
+				VUHDO_animHelp();
+			end
+
 		elseif tCommandWord == "ab" or tCommandWord == "about" then
 			VUHDO_printAbout();
 
@@ -2838,6 +2856,42 @@ function VUHDO_printDeferredRedrawStatus()
 		VUHDO_Msg("Deferred panel redraw is currently |cff00ff00ENABLED|r.");
 	else
 		VUHDO_Msg("Deferred panel redraw is currently |cffff0000DISABLED|r.");
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_setAnimationGroupEnabled(anIsEnabled, anIsQuiet)
+
+	VUHDO_CONFIG["USE_ANIMATION_GROUPS"] = anIsEnabled and true or false;
+
+	if not anIsQuiet then
+		if anIsEnabled then
+			VUHDO_Msg("Debuff icon AnimationGroup API is now |cff00ff00ENABLED|r.");
+			VUHDO_Msg("  |cffB0E0E6Note:|r Type '/reload' for a clean transition.");
+		else
+			VUHDO_Msg("Debuff icon AnimationGroup API is now |cffff0000DISABLED|r (using OnUpdate).");
+			VUHDO_Msg("  |cffB0E0E6Note:|r Type '/reload' for a clean transition.");
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_printAnimationMethodStatus()
+
+	if VUHDO_CONFIG["USE_ANIMATION_GROUPS"] then
+		VUHDO_Msg("Debuff icon animation method: |cff00ff00AnimationGroup API|r");
+	else
+		VUHDO_Msg("Debuff icon animation method: |cffff0000OnUpdate Script|r");
 	end
 
 	return;
