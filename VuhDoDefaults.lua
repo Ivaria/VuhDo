@@ -632,6 +632,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["PARSE_COMBAT_LOG"] = false,
 	["HIDE_EMPTY_BUTTONS"] = false,
 	["USE_DEFERRED_REDRAW"] = true,
+	["USE_ANIMATION_GROUPS"] = true,
 
 	["MODE"] = VUHDO_MODE_NEUTRAL,
 	["EMERGENCY_TRIGGER"] = 100,
@@ -969,7 +970,7 @@ function VUHDO_loadDefaultConfig()
 	VUHDO_DEFAULT_CONFIG = VUHDO_decompressIfCompressed(VUHDO_DEFAULT_CONFIG);
 	VUHDO_CONFIG = VUHDO_ensureSanity("VUHDO_CONFIG", VUHDO_CONFIG, VUHDO_DEFAULT_CONFIG);
 
-	local tBooleanAllowList = { "USE_DEFERRED_REDRAW", };
+	local tBooleanAllowList = { "USE_DEFERRED_REDRAW", "USE_ANIMATION_GROUPS", };
 
 	for _, tKey in pairs(tBooleanAllowList) do
 		if VUHDO_DEFAULT_CONFIG[tKey] ~= nil and type(VUHDO_DEFAULT_CONFIG[tKey]) == "boolean" and VUHDO_CONFIG[tKey] == nil then
