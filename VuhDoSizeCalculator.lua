@@ -9,7 +9,6 @@ local VUHDO_getHeaderPosVer;
 local VUHDO_getHealButtonPosHor;
 local VUHDO_getHealButtonPosVer;
 local VUHDO_strempty;
-local VUHDO_roundToPixel;
 local VUHDO_splitString;
 local strfind = strfind;
 local abs = math.abs;
@@ -28,7 +27,6 @@ function VUHDO_sizeCalculatorInitLocalOverrides()
 	VUHDO_getHealButtonPosHor = _G["VUHDO_getHealButtonPosHor"];
 	VUHDO_getHealButtonPosVer = _G["VUHDO_getHealButtonPosVer"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
-	VUHDO_roundToPixel = _G["VUHDO_roundToPixel"];
 	VUHDO_splitString = _G["VUHDO_splitString"];
 
 	return;
@@ -84,7 +82,7 @@ function VUHDO_getPixelPerfectSpacing(aPanelNum, aSpacingType)
 		tValue = tBarScaling[aSpacingType] or 0;
 
 		if type(tValue) == "number" and tValue >= 0 then
-			sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+			sPixelPerfectCache[tCacheKey] = VUHDO_PixelUtil.RoundToPixel(tValue);
 		else
 			sPixelPerfectCache[tCacheKey] = 0;
 		end
@@ -109,7 +107,7 @@ function VUHDO_getPixelPerfectGap(aPanelNum, aGapType)
 		tValue = tBarScaling[aGapType] or 0;
 
 		if type(tValue) == "number" and tValue >= 0 then
-			sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+			sPixelPerfectCache[tCacheKey] = VUHDO_PixelUtil.RoundToPixel(tValue);
 		else
 			sPixelPerfectCache[tCacheKey] = 0;
 		end
@@ -131,7 +129,7 @@ function VUHDO_getPixelPerfectBorderEdgeSize(aPanelNum)
 	if not sPixelPerfectCache[tCacheKey] then
 		tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
 		tValue = tBorder["edgeSize"] or 0;
-		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+		sPixelPerfectCache[tCacheKey] = VUHDO_PixelUtil.RoundToPixel(tValue);
 	end
 
 	return sPixelPerfectCache[tCacheKey];
@@ -150,7 +148,7 @@ function VUHDO_getPixelPerfectBorderInsets(aPanelNum)
 	if not sPixelPerfectCache[tCacheKey] then
 		tBorder = VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["BORDER"];
 		tValue = tBorder["insets"] or 0;
-		sPixelPerfectCache[tCacheKey] = VUHDO_roundToPixel(tValue);
+		sPixelPerfectCache[tCacheKey] = VUHDO_PixelUtil.RoundToPixel(tValue);
 	end
 
 	return sPixelPerfectCache[tCacheKey];
@@ -222,7 +220,7 @@ function VUHDO_getAdditionalBottomHeight(aPanelNum)
 		tBottomSpace = 0;
 
 		if tHotCfg["radioValue"] == 7 or tHotCfg["radioValue"] == 8 then
-			tBottomSpace = VUHDO_roundToPixel(VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"]) * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
+			tBottomSpace = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"] * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01;
 		end
 
 		tNamePos = VUHDO_parseNamePosition(aPanelNum);
