@@ -324,7 +324,7 @@ function VUHDO_getHealButtonPosHor(aPlaceNum, aRowNo, aPanelNum)
 	tHots = VUHDO_PANEL_SETUP[aPanelNum]["HOTS"];
 	if tHots["radioValue"] == 1 then
 		tHotslots = VUHDO_getNumHotSlots(aPanelNum);
-		tButtonX = tButtonX + VUHDO_roundToPixel(VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"]) * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01 * tHotslots;
+		tButtonX = tButtonX + VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barHeight"] * VUHDO_PANEL_SETUP[aPanelNum]["HOTS"]["size"] * 0.01 * tHotslots;
 	end
 
 	tScaling = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"];
