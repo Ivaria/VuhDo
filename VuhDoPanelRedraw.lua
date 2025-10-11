@@ -864,7 +864,7 @@ local function VUHDO_initOverhealText(aHealthBar, aWidth, aPanelNum)
 	VUHDO_PixelUtil.SetScale(tOvhPanel, 1);
 
 	tX = sPanelConfig[aPanelNum]["overhealText"]["xAdjust"] * aWidth * 0.01;
-	tY = -sPanelConfig[aPanelNum]["overhealText"]["yAdjust"] * VUHDO_roundToPixel(sPanelConfig[aPanelNum]["barScaling"]["barHeight"]) * 0.01;
+	tY = -sPanelConfig[aPanelNum]["overhealText"]["yAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * 0.01;
 	tOvhPanel:ClearAllPoints();
 	VUHDO_PixelUtil.SetPoint(tOvhPanel, sPanelConfig[aPanelNum]["overhealText"]["point"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["overhealText"]["point"], tX, tY);
 
@@ -949,7 +949,7 @@ local tY;
 local function VUHDO_initRaidIcon(aHealthBar, anIcon, aWidth, aPanelNum)
 
 	tX = sPanelConfig[aPanelNum]["raidIcon"]["xAdjust"] * aWidth * 0.01;
-	tY = -sPanelConfig[aPanelNum]["raidIcon"]["yAdjust"] * VUHDO_roundToPixel(sPanelConfig[aPanelNum]["barScaling"]["barHeight"]) * 0.01;
+	tY = -sPanelConfig[aPanelNum]["raidIcon"]["yAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * 0.01;
 
 	VUHDO_PixelUtil.Hide(anIcon);
 	VUHDO_PixelUtil.ClearAllPoints(anIcon);
@@ -980,11 +980,11 @@ local function VUHDO_initSwiftmendIndicator(aButton, aHealthBar, aPanelNum)
 	end
 
 	tX = sPanelConfig[aPanelNum]["swiftmendIndicatorSetup"]["xAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barWidth"] * 0.01;
-	tY = -sPanelConfig[aPanelNum]["swiftmendIndicatorSetup"]["yAdjust"] * VUHDO_roundToPixel(sPanelConfig[aPanelNum]["barScaling"]["barHeight"]) * 0.01;
+	tY = -sPanelConfig[aPanelNum]["swiftmendIndicatorSetup"]["yAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * 0.01;
 	VUHDO_PixelUtil.SetPoint(tIcon, sPanelConfig[aPanelNum]["swiftmendIndicatorSetup"]["anchor"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["swiftmendIndicatorSetup"]["anchor"], tX, tY);
 
-	tHeight = VUHDO_roundToPixel(sPanelConfig[aPanelNum]["barScaling"]["barHeight"]) * 0.5 * sPanelConfig[aPanelNum]["swiftmendIndicatorSetup"]["SCALE"];
-	VUHDO_PixelUtil.SetSize(tIcon, tHeight, tHeight);
+	tHeight = 50 * sPanelConfig[aPanelNum]["swiftmendIndicatorSetup"]["SCALE"];
+	VUHDO_PixelUtil.SetSizeFromPercentage(tIcon, sPanelConfig[aPanelNum]["barScaling"]["barHeight"], sPanelConfig[aPanelNum]["barScaling"]["barHeight"], tHeight, tHeight);
 
 	return;
 
