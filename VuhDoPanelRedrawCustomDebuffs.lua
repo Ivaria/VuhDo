@@ -136,10 +136,9 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 
 			tFrame:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(tFrame, sPoint, sHealthBar, sPoint, sXOffset + (tCnt * sStep), sYOffset); -- center
-			VUHDO_PixelUtil.SetScale(tFrame, tBaseScale);
 
 			if not sIsTooltipCache[tIconIdx] then
-				sIsTooltipCache[tIconIdx] = VUHDO_isMostlyInBounds(tFrame, sButton, 0.33);
+				sIsTooltipCache[tIconIdx] = VUHDO_isMostlyInBounds(tButton, sButton, 0.33);
 			end
 
 			if VUHDO_CONFIG["DEBUFF_TOOLTIP"] and sIsTooltipCache[tIconIdx] == 1 then
@@ -150,6 +149,7 @@ function VUHDO_initCustomDebuffs(aPanelNum)
 			end
 
 			tFrame:SetAlpha(0);
+			VUHDO_PixelUtil.SetScale(tFrame, tBaseScale);
 			tFrame:Show();
 
 			tIcon = VUHDO_getBarIcon(sButton, tIconIdx);
