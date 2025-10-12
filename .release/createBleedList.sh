@@ -167,15 +167,15 @@ fi
 MAJOR_VERSION=$(echo "$BUILD_PARAM" | cut -d. -f1)
 
 if [ "$MAJOR_VERSION" -ge 12 ]; then
-	SPELLID_COL=37
+	SPELL_EFFECT_SPELLID_COL=37
 else
-	SPELLID_COL=36
+	SPELL_EFFECT_SPELLID_COL=36
 fi
 
-SPELL_EFFECT_MECHANIC_COL=13
-SPELL_EFFECT_AURA_COL=5
+SPELL_EFFECT_EFFECTMECHANIC_COL=13
+SPELL_EFFECT_EFFECT_COL=5
 SPELL_CATEGORIES_MECHANIC_COL=6
-SPELL_CATEGORIES_CATEGORY_COL=10
+SPELL_CATEGORIES_SPELLID_COL=10
 
 BUILD_QUERY="?build=$BUILD_PARAM"
 
@@ -185,12 +185,12 @@ DATE=$(date -d "today" +"%Y%m%d%H%M")
 
 curl "https://wago.tools/db2/SpellEffect/csv$BUILD_QUERY" -o wow_db2_spelleffect_$DATE.csv
 
-cat wow_db2_spelleffect_$DATE.csv | cut -d, -f$SPELL_EFFECT_MECHANIC_COL,$SPELLID_COL | grep "^15,.*" | cut -d, -f2 > wow_bleed_list_$DATE.txt
+cat wow_db2_spelleffect_$DATE.csv | cut -d, -f$SPELL_EFFECT_EFFECTMECHANIC_COL,$SPELL_EFFECT_SPELLID_COL | grep "^15,.*" | cut -d, -f2 > wow_bleed_list_$DATE.txt
 
 curl "https://wago.tools/db2/SpellCategories/csv$BUILD_QUERY" -o wow_db2_spellcategories_$DATE.csv
 
-cat wow_db2_spellcategories_$DATE.csv | cut -d, -f$SPELL_CATEGORIES_MECHANIC_COL,$SPELL_CATEGORIES_CATEGORY_COL | grep "^15,.*" | cut -d, -f2 | sort | uniq > wow_spellcategories_mechanic_15_$DATE.txt
-cat wow_db2_spelleffect_$DATE.csv | cut -d, -f$SPELL_EFFECT_AURA_COL,$SPELLID_COL | grep "^6,.*" | cut -d, -f2 | sort | uniq > wow_spelleffect_effectaura_6_$DATE.txt
+cat wow_db2_spellcategories_$DATE.csv | cut -d, -f$SPELL_CATEGORIES_MECHANIC_COL,$SPELL_CATEGORIES_SPELLID_COL | grep "^15,.*" | cut -d, -f2 | sort | uniq > wow_spellcategories_mechanic_15_$DATE.txt
+cat wow_db2_spelleffect_$DATE.csv | cut -d, -f$SPELL_EFFECT_EFFECT_COL,$SPELL_EFFECT_SPELLID_COL | grep "^6,.*" | cut -d, -f2 | sort | uniq > wow_spelleffect_effectaura_6_$DATE.txt
 
 join wow_spellcategories_mechanic_15_$DATE.txt wow_spelleffect_effectaura_6_$DATE.txt | sort -n | uniq >> wow_bleed_list_$DATE.txt
 
