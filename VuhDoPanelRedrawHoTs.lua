@@ -348,6 +348,7 @@ local function VUHDO_initHotPosOffset(anIndex)
 	end
 
 	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1), sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1));
+	VUHDO_PixelUtil.SetScale(VUHDO_getBarIconFrame(sButton, anIndex), 1);
 
 end
 
@@ -390,7 +391,8 @@ local function VUHDO_initHotPosSides(anIndex)
 		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", sBarScaling["barWidth"] * 0.2, 0);
 	end
 
-	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1), sHotIconSize * (tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1));
+	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * 0.5, sHotIconSize * 0.5);
+	VUHDO_PixelUtil.SetScale(VUHDO_getBarIconFrame(sButton, anIndex), tHotConfig["SLOTCFG"]["" .. anIndex]["scale"] or 1);
 
 end
 
@@ -422,7 +424,8 @@ local function VUHDO_initHotPosEdges(anIndex)
 		VUHDO_PixelUtil.SetPoint(tHotIcon, "CENTER", sHealthBarName, "CENTER", sBarScaling["barWidth"] * 0.2, 0);
 	end
 
-	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * (sHotConfig[sPanelNum]["SLOTCFG"]["" .. anIndex]["scale"] or 1), sHotIconSize * (sHotConfig[sPanelNum]["SLOTCFG"]["" .. anIndex]["scale"] or 1));
+	VUHDO_PixelUtil.SetSize(tHotIcon, sHotIconSize * 0.5, sHotIconSize * 0.5);
+	VUHDO_PixelUtil.SetScale(VUHDO_getBarIconFrame(sButton, anIndex), sHotConfig[sPanelNum]["SLOTCFG"]["" .. anIndex]["scale"] or 1);
 
 end
 
