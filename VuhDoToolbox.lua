@@ -2158,9 +2158,19 @@ end
 ---------------------------------
 -- CLASSIC COMPATIBILITY LAYER --
 ---------------------------------
+function VUHDO_isClassicEra()
+
+	return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC;
+
+end
+
+
+
 function VUHDO_getSpecialization()
 
-	if C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
+	if VUHDO_isClassicEra() and GetActiveTalentGroup then
+		return GetActiveTalentGroup();
+	elseif C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
 		return C_SpecializationInfo.GetSpecialization();
 	elseif GetSpecialization then
 		return GetSpecialization();
@@ -2172,9 +2182,14 @@ end
 
 
 
+local tSpecNum;
 function VUHDO_getSpecializationInfo(aSpecNum, ...)
 
-	if C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo then
+	if VUHDO_isClassicEra() and GetActiveTalentGroup then
+		tSpecNum = aSpecNum or GetActiveTalentGroup();
+
+		return tSpecNum, tSpecNum == 1 and "Primary" or (tSpecNum == 2 and "Secondary" or "Unknown"), _, _, "NONE";		
+	elseif C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo then
 		return C_SpecializationInfo.GetSpecializationInfo(aSpecNum, ...);
 	elseif GetSpecializationInfo then
 		return GetSpecializationInfo(aSpecNum, ...);
