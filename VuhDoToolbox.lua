@@ -2160,10 +2160,12 @@ end
 ---------------------------------
 function VUHDO_getSpecialization()
 
-	if not GetSpecialization then
-		return GetActiveTalentGroup();
-	else
+	if C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
+		return C_SpecializationInfo.GetSpecialization();
+	elseif GetSpecialization then
 		return GetSpecialization();
+	else
+		return 1;
 	end
 
 end
@@ -2172,12 +2174,12 @@ end
 
 function VUHDO_getSpecializationInfo(aSpecNum, ...)
 
-	if not GetSpecializationInfo then
-		local tSpecNum = aSpecNum or VUHDO_getSpecialization();
-
-		return tSpecNum, tSpecNum == 1 and "Primary" or (tSpecNum == 2 and "Secondary" or "Unknown"), _, _, GetTalentGroupRole(tSpecNum) or "NONE";
-	else
+	if C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo then
+		return C_SpecializationInfo.GetSpecializationInfo(aSpecNum, ...);
+	elseif GetSpecializationInfo then
 		return GetSpecializationInfo(aSpecNum, ...);
+	else
+		return 1, "Unknown", _, _, _, "NONE";
 	end
 
 end
@@ -2205,6 +2207,7 @@ function VUHDO_getSpecializationRoleByID(...)
 	end
 
 end
+
 
 
 do
