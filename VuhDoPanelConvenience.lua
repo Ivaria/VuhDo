@@ -111,7 +111,7 @@ local tDebuffOnEnterSnippet = [[
 
 		sHealButton = tFrame;
 
-		tBody = tFrame:GetAttribute("vuhdo_onenter");
+		tBody = tFrame:GetAttribute("vuhdo_onenter_hook");
 
 		if tBody then
 			owner:RunFor(tFrame, tBody);
@@ -126,7 +126,7 @@ local tDebuffOnLeaveSnippet = [[
 
 		sHealButton = nil;
 
-		tBody = tFrame:GetAttribute("vuhdo_onleave");
+		tBody = tFrame:GetAttribute("vuhdo_onleave_hook");
 
 		if tBody then
 			owner:RunFor(tFrame, tBody);
@@ -158,7 +158,7 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "BC"];
 		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "BN"];
 
-		if not tBarIconFrame:GetAttribute("vd_tt_hook") then
+		if not tBarIconFrame:GetAttribute("vuhdo_tooltip_hook") then
 			tBarIconFrame:SetScript("OnEnter", function(self)
 				VUHDO_showDebuffTooltip(self);
 				VuhDoActionOnEnter(self:GetParent():GetParent():GetParent():GetParent());
@@ -169,7 +169,7 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 				VuhDoActionOnLeave(self:GetParent():GetParent():GetParent():GetParent());
 			end);
 
-			VUHDO_safeSetAttribute(tBarIconFrame, "vd_tt_hook", true);
+			VUHDO_safeSetAttribute(tBarIconFrame, "vuhdo_tooltip_hook", true);
 		end
 
 		if not tBarIconFrame:GetAttribute("vuhdo_secureheader_wrap") then

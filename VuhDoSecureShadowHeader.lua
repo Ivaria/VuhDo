@@ -20,7 +20,7 @@ local tInitConfigFunc = [=[
 	tinsert(sShadowFrames, self);
 
 	self:SetID(#sShadowFrames);
-	self:SetAttribute("Manager", sManager);
+	self:SetAttribute("vuhdo_manager_ref", sManager);
 
 	sManager:CallMethod("UpdateShadowButtonCount", #sShadowFrames);
 ]=];
@@ -34,10 +34,10 @@ local tOnAttributeChanged = [=[
 			tUnit = nil;
 		end;
 
-		local tManager = self:GetAttribute("Manager");
+		local tManager = self:GetAttribute("vuhdo_manager_ref");
 
 		if tManager then
-			tManager:RunAttribute("_processunit", tUnit);
+			tManager:RunAttribute("vuhdo_process_unit_method", tUnit);
 		end
 	end
 ]=];
@@ -115,7 +115,7 @@ function VUHDO_initSecureShadowHeader()
 		end
 	]=]);
 
-	sManagerFrame:SetAttribute("_processunit", [=[
+	sManagerFrame:SetAttribute("vuhdo_process_unit_method", [=[
 		local tUnit = ...;
 
 		if not tUnit then

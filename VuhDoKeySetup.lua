@@ -308,7 +308,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		aButton["raidid"] = aUnit;
 	end
 
-	if not aButton:GetAttribute("vd_tt_hook") then
+	if not aButton:GetAttribute("vuhdo_tooltip_hook") then
 		if anIsIcButton then
 			aButton:HookScript("OnEnter", function(self) VUHDO_showDebuffTooltip(self); VuhDoActionOnEnter(self:GetParent():GetParent():GetParent():GetParent()) end);
 			aButton:HookScript("OnLeave", function(self) VUHDO_hideDebuffTooltip(); VuhDoActionOnLeave(self:GetParent():GetParent():GetParent():GetParent()) end);
@@ -317,7 +317,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			aButton:HookScript("OnLeave",	function(self) VuhDoActionOnLeave(self); end);
 		end
 
-		VUHDO_safeSetAttribute(aButton, "vd_tt_hook", true);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_tooltip_hook", true);
 	end
 
 	if sIsCliqueCompat then
@@ -375,8 +375,8 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		VUHDO_safeSetAttribute(aButton, "_onshow", tClearBindsSnippet);
 		VUHDO_safeSetAttribute(aButton, "_onhide", tClearBindsSnippet);
 
-		VUHDO_safeSetAttribute(aButton, "vuhdo_onenter", tWheelDefString);
-		VUHDO_safeSetAttribute(aButton, "vuhdo_onleave", tClearBindsSnippet);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_onenter_hook", tWheelDefString);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_onleave_hook", tClearBindsSnippet);
 
 		tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
 
