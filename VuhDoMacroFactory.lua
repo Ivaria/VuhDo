@@ -1,5 +1,6 @@
 VUHDO_IS_SFX_ENABLED = true;
 VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = true;
+VUHDO_LAST_COMBAT_ROSTER_ENABLED = nil;
 
 local VUHDO_RAID;
 local VUHDO_SPELL_CONFIG;
@@ -19,7 +20,9 @@ CreateFrame("Button", "VDSTB", nil, "SecureActionButtonTemplate"):SetAttribute("
 local sStopTargetText = "/click VDSTB LeftButton\n";
 
 
+--
 function VUHDO_macroFactoryInitLocalOverrides()
+
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_SPELL_CONFIG = _G["VUHDO_SPELL_CONFIG"];
 	VUHDO_SPELLS = _G["VUHDO_SPELLS"];
@@ -32,6 +35,9 @@ function VUHDO_macroFactoryInitLocalOverrides()
 		or (VUHDO_SPELL_CONFIG["IS_FIRE_CUSTOM_1"] and not VUHDO_strempty(VUHDO_SPELL_CONFIG["FIRE_CUSTOM_1_SPELL"]))
 		or (VUHDO_SPELL_CONFIG["IS_FIRE_CUSTOM_2"] and not VUHDO_strempty(VUHDO_SPELL_CONFIG["FIRE_CUSTOM_2_SPELL"]))
 	);
+
+	return;
+
 end
 
 
@@ -44,16 +50,22 @@ local sFireText = nil;
 
 --
 function VUHDO_resetMacroCaches()
+
 	twipe(VUHDO_RAID_MACRO_CACHE);
 	twipe(VUHDO_TARGET_MACRO_CACHE);
 	sFireText = nil;
+
+	return;
+
 end
 
 
 
 --
 local function VUHDO_isFireSomething(anAction)
+
 	return sIsAnyAutoFireConfigured and (VUHDO_SPELL_CONFIG["IS_FIRE_HOT"] or not (VUHDO_SPELLS[anAction] or sEmpty)["isHot"]);
+
 end
 
 
@@ -61,9 +73,10 @@ end
 --
 local tInstant, tModi2, tCustomUnit;
 local function VUHDO_getInstantFireText(aSlotNum)
-	tInstant = VUHDO_SPELL_CONFIG["FIRE_CUSTOM_" .. aSlotNum .. "_SPELL"];
-	if VUHDO_SPELL_CONFIG["IS_FIRE_CUSTOM_" .. aSlotNum] and not VUHDO_strempty(tInstant) then
 
+	tInstant = VUHDO_SPELL_CONFIG["FIRE_CUSTOM_" .. aSlotNum .. "_SPELL"];
+
+	if VUHDO_SPELL_CONFIG["IS_FIRE_CUSTOM_" .. aSlotNum] and not VUHDO_strempty(tInstant) then
 		tCustomUnit = VUHDO_SPELL_CONFIG["custom" .. aSlotNum .. "Unit"] or ""
 
 		if VUHDO_SPELL_CONFIG["IS_FIRE_OUT_FIGHT"] then
@@ -84,6 +97,7 @@ local function VUHDO_getInstantFireText(aSlotNum)
 	else
 		return "";
 	end
+
 end
 
 
@@ -150,11 +164,13 @@ end
 
 --
 local function VUHDO_getMacroPetUnit(aTarget)
+
 	if VUHDO_RAID[aTarget] and not VUHDO_RAID[aTarget]["isPet"] then
 		return VUHDO_RAID[aTarget]["petUnit"];
 	else
 		return nil;
 	end
+
 end
 
 
@@ -167,6 +183,7 @@ local tMacroId, tMacroText;
 local tLowerFriendly, tLowerHostile, tStopText;
 local tIsNoHelp;
 local function VUHDO_generateTargetMacroText(aTarget, aFriendlyAction, aHostileAction)
+
 	if not aFriendlyAction or not aHostileAction then	return ""; end
 
 	tMacroId = GetMacroIndexByName(aHostileAction);
@@ -223,6 +240,7 @@ local function VUHDO_generateTargetMacroText(aTarget, aFriendlyAction, aHostileA
 	end
 
 	tLowerHostile = strlower(aHostileAction);
+
 	if tIsNoHelp then
 		tEnemyText = "";
 	elseif "target" == tLowerHostile then
@@ -238,6 +256,7 @@ local function VUHDO_generateTargetMacroText(aTarget, aFriendlyAction, aHostileA
 	end
 
 	return sStopTargetText .. tStopText .. VUHDO_getFireText(aFriendlyAction) .. tFriendText .. tEnemyText;
+
 end
 
 
@@ -245,6 +264,7 @@ end
 --
 local tIndex;
 function VUHDO_buildTargetButtonMacroText(aTarget, aFriendlyAction, aHostileAction)
+
 	tIndex = aFriendlyAction .. "*" .. aHostileAction;
 
 	if not VUHDO_TARGET_MACRO_CACHE[tIndex] then
@@ -252,70 +272,122 @@ function VUHDO_buildTargetButtonMacroText(aTarget, aFriendlyAction, aHostileActi
 	end
 
 	return VUHDO_replaceMacroTemplates(VUHDO_TARGET_MACRO_CACHE[tIndex], aTarget);
+
 end
 
 
 
 --
 local tPet;
-function VUHDO_buildFocusMacroText(aTarget)
+local tUnitToken;
+local tPetToken;
+function VUHDO_buildFocusMacroText(aTarget, aUseMouseover)
+
 	tPet = VUHDO_getMacroPetUnit(aTarget);
 
-	if tPet then
-		return format("/focus [@%s,help][@%s,help][@%s]", aTarget, tPet, aTarget);
+	if aUseMouseover then
+		tUnitToken = "@mouseover";
 	else
-		return "/focus [@" .. aTarget .. "]";
+		tUnitToken = "@" .. aTarget;
 	end
+
+	if tPet then
+		tPetToken = aUseMouseover and "@mouseover" or "@" .. tPet;
+
+		return format("/focus [%s,help][%s,help][%s]", tUnitToken, tPetToken, tUnitToken);
+	else
+		return "/focus [" .. tUnitToken .. "]";
+	end
+
 end
 
 
 
 --
 local tPet;
-function VUHDO_buildTargetMacroText(aTarget)
+local tUnitToken;
+local tPetToken;
+function VUHDO_buildTargetMacroText(aTarget, aUseMouseover)
+
 	tPet = VUHDO_getMacroPetUnit(aTarget);
 
-	if tPet then
-		return format("/tar [@%s,help][@%s,help][@%s]", aTarget, tPet, aTarget);
+	if aUseMouseover then
+		tUnitToken = "@mouseover";
 	else
-		return "/tar [@" .. aTarget .. "]";
+		tUnitToken = "@" .. aTarget;
 	end
+
+	if tPet then
+		tPetToken = aUseMouseover and "@mouseover" or "@" .. tPet;
+
+		return format("/tar [%s,help][%s,help][%s]", tUnitToken, tPetToken, tUnitToken);
+	else
+		return "/tar [" .. tUnitToken .. "]";
+	end
+
 end
 
 
 
 --
 local tPet;
-function VUHDO_buildAssistMacroText(aTarget)
+local tUnitToken;
+function VUHDO_buildAssistMacroText(aTarget, aUseMouseover)
+
 	tPet = VUHDO_getMacroPetUnit(aTarget);
 
-	if tPet then
-		return format("/assist [@%s,help][@%s,help][@%s]", aTarget, tPet, aTarget);
+	if aUseMouseover then
+		tUnitToken = "@mouseover";
 	else
-		return "/assist [@" .. aTarget .. "]";
+		tUnitToken = "@" .. aTarget;
 	end
+
+	if tPet then
+		tPetToken = aUseMouseover and "@mouseover" or "@" .. tPet;
+
+		return format("/assist [%s,help][%s,help][%s]", tUnitToken, tPetToken, tUnitToken);
+	else
+		return "/assist [" .. tUnitToken .. "]";
+	end
+
 end
 
 
 
 --
-function VUHDO_buildExtraActionButtonMacroText(aTarget)
-	return "/tar [@" .. aTarget .. "]\n/click ExtraActionButton1 LeftButton\n/targetlasttarget";
+function VUHDO_buildExtraActionButtonMacroText(aTarget, aUseMouseover)
+
+	if not aTarget and not aUseMouseover then
+		return "";
+	end
+
+	tUnitToken = aUseMouseover and "@mouseover" or "@" .. aTarget;
+
+	return "/tar [" .. tUnitToken .. "]\n/click ExtraActionButton1 LeftButton\n/targetlasttarget";
+
 end
 
 
 
 --
 function VUHDO_buildMouseLookMacroText()
+
 	return "/run if IsMouselooking() then MouselookStop() else MouselookStart() end\n";
+
 end
 
 
 
 --
-function VUHDO_buildPingMacroText(aTarget)
+function VUHDO_buildPingMacroText(aTarget, aUseMouseover)
 
-	return "/ping [@" .. aTarget .. ",harm] Attack;[@" .. aTarget .. ",help] Assist;[@" .. aTarget .. ",exists] Ping";
+	if not aTarget and not aUseMouseover then
+		return "";
+	end
+
+	tUnitToken = aUseMouseover and "@mouseover" or "@" .. aTarget;
+
+	return "/ping [" .. tUnitToken .. ",harm] Attack;[" .. tUnitToken .. ",help] Assist;[" .. tUnitToken .. ",exists] Ping";
 
 end
 
@@ -382,7 +454,9 @@ local tSpellPost;
 local tVehicleCond;
 local tStopText;
 local tCastText;
-local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, aPet)
+local tUnitToken;
+local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, aPet, aUseMouseover)
+
 	if VUHDO_SPELL_CONFIG["IS_CANCEL_CURRENT"] then
 		tStopText = "/stopcasting\n";
 	else
@@ -408,8 +482,14 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		tCastText = "/use ";
 	end
 
+	if aUseMouseover then
+		tUnitToken = "@mouseover";
+	else
+		tUnitToken = "@vuhdo";
+	end
+
 	if anIsKeyboard then
-		tText = tText .. tCastText .. "[" .. tModiSpell .. "@mouseover] " .. anAction .. "\n";
+		tText = tText .. tCastText .. "[" .. tModiSpell .. tUnitToken .. "] " .. anAction .. "\n";
 		tText = tText .. tSpellPost;
 	else
 		if aPet and VUHDO_SPELL_ID.REBIRTH ~= anAction and VUHDO_SPELL_ID.INTERCESSION ~= anAction then
@@ -417,22 +497,26 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		else
 			tVehicleCond = "";
 		end
+
 		-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
 		-- For now just disable vehicle support (note: this breaks encounters like Malygos)
 		--tText = tText .. tCastText .. "[" .. tModiSpell .. "nounithasvehicleui,@vuhdo]" .. tVehicleCond .. " " .. anAction .. "\n";
-		tText = tText .. tCastText .. "[" .. tModiSpell .. "@vuhdo]" .. tVehicleCond .. " " .. anAction .. "\n";
+		tText = tText .. tCastText .. "[" .. tModiSpell .. tUnitToken .. "]" .. tVehicleCond .. " " .. anAction .. "\n";
 		tText = tText .. tSpellPost;
+
 		if aPet then
 			tText = tText .. "/tar [unithasvehicleui,@vdpet]\n";
 		end
 
 		if VUHDO_SPELL_CONFIG["IS_AUTO_TARGET"] then
-			tText = tText .. "/tar [@vuhdo]\n";
+			tText = tText .. "/tar [" .. tUnitToken .. "]\n";
 		else
-			tText = tText .. "/tar [harm,@vuhdo]\n";
+			tText = tText .. "/tar [harm," .. tUnitToken .. "]\n";
 		end
 	end
+
 	return tText;
+
 end
 
 
@@ -441,52 +525,100 @@ end
 local tIndex;
 local tPet;
 local tText;
+local tUseMouseover;
+local tNewEnabled;
 function VUHDO_buildMacroText(anAction, anIsKeyboard, aTarget)
+
 	tPet = VUHDO_getMacroPetUnit(aTarget);
 
+	tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
+
+	-- Check for config change and clear cache if needed
+	tNewEnabled = tUseMouseover;
+	if VUHDO_LAST_COMBAT_ROSTER_ENABLED ~= tNewEnabled then
+		VUHDO_LAST_COMBAT_ROSTER_ENABLED = tNewEnabled;
+		VUHDO_RAID_MACRO_CACHE = {};  -- Clear cache
+		if not InCombatLockdown() then
+			VUHDO_refreshUI();  -- Rebuild all buttons
+		end
+	end
+
+	-- Build cache key
 	if anIsKeyboard then
 		tIndex = anAction .. (tPet and (anAction .. "X") or (anAction .. "K"));
 	else
 		tIndex = anAction .. (tPet and (anAction .. "P") or anAction);
 	end
 
-	if not VUHDO_RAID_MACRO_CACHE[tIndex] then
-		VUHDO_RAID_MACRO_CACHE[tIndex] = VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, tPet);
+	-- Add mode to cache key
+	if tUseMouseover then
+		tIndex = tIndex .. "_MO";
 	end
 
-	tText = VUHDO_replaceMacroTemplates(VUHDO_RAID_MACRO_CACHE[tIndex], aTarget);
+	-- Generate or retrieve from cache
+	if not VUHDO_RAID_MACRO_CACHE[tIndex] then
+		VUHDO_RAID_MACRO_CACHE[tIndex] = VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, tPet, tUseMouseover);
+	end
+
+	-- Skip template replacement if using mouseover
+	if tUseMouseover then
+		tText = VUHDO_RAID_MACRO_CACHE[tIndex];
+	else
+		tText = VUHDO_replaceMacroTemplates(VUHDO_RAID_MACRO_CACHE[tIndex], aTarget);
+	end
+
 	--VUHDO_DEBUG[tIndex] = tText;
 	if anIsKeyboard and #tText > 256 then
 		VUHDO_Msg(VUHDO_I18N_MACRO_KEY_ERR_1 .. anAction .. " (" .. #tText .. VUHDO_I18N_MACRO_KEY_ERR_2, 1, 0.3, 0.3);
 	end
+
 	return tText;
+
 end
 
 
 
 --
 local tText;
-function VUHDO_buildPurgeMacroText(anAction, aTarget)
-	tText = format("/use [@%s] %s\n", aTarget, anAction);
+function VUHDO_buildPurgeMacroText(anAction, aTarget, aUseMouseover)
+
+	if not aTarget and not aUseMouseover then
+		return "";
+	end
+
+	tUnitToken = aUseMouseover and "@mouseover" or "@" .. aTarget;
+
+	tText = format("/use [%s] %s\n", tUnitToken, anAction);
 
 	if VUHDO_SPELL_CONFIG["IS_AUTO_TARGET"] then
-		tText = format("%s/tar [@%s]\n", tText, aTarget);
+		tText = format("%s/tar [%s]\n", tText, tUnitToken);
 	end
+
 	return tText;
+
 end
 
 
 
 -- Catch players who have released spirit
 local tText;
-function VUHDO_buildRezMacroText(anAction, aTarget)
-	tText = format("/tar [@%s]\n", aTarget);
+function VUHDO_buildRezMacroText(anAction, aTarget, aUseMouseover)
+
+	if not aTarget and not aUseMouseover then
+		return "";
+	end
+
+	tUnitToken = aUseMouseover and "@mouseover" or "@" .. aTarget;
+
+	tText = format("/tar [%s]\n", tUnitToken);
 	tText = format("%s/use %s\n", tText, anAction);
+
 	if not VUHDO_SPELL_CONFIG["IS_AUTO_TARGET"] then
 		tText = format("%s/targetlasttarget\n", tText);
 	end
 
 	return tText;
+
 end
 
 
@@ -496,37 +628,49 @@ local tName;
 local tIndex;
 local tNumLocal;
 local function VUHDO_createOrUpdateMacro(aMacroNum, aMacroText, aSpell)
+
 	tName = "VuhDoAuto" .. aMacroNum;
 	tIndex = GetMacroIndexByName(tName);
+
 	if tIndex == 0 then
 		_, tNumLocal = GetNumMacros();
+
 		if tNumLocal >= 18 then
 			VUHDO_Msg(VUHDO_I18N_MACRO_NUM_ERR .. aSpell, 1, 0.4, 0.4);
+
 			return nil;
 		end
+
 		return CreateMacro(tName, "Spell_Holy_GreaterHeal", aMacroText, true, nil);
 	else
 		return EditMacro(tIndex, tName, "Spell_Holy_GreaterHeal", aMacroText, true, nil)
 	end
+
 end
 
 
 
 --
+local tBindPrefix;
+local tSpell;
+local tBindingName;
+local tKey1;
+local tKey2;
+local tBody;
+local tMacroId;
 function VUHDO_initKeyboardMacros()
-	local tBindingName;
-	local tMacroId;
-	local tSpell;
-	local tBody;
-	local tKey1, tKey2;
-	local tBindPrefix = "VUHDO_KEY_ASSIGN_";
+
+	tBindPrefix = "VUHDO_KEY_ASSIGN_";
 
 	VUHDO_IS_SFX_ENABLED = tonumber(GetCVar("Sound_EnableSFX")) == 1;
 	VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = tonumber(GetCVar("Sound_EnableErrorSpeech")) == 1;
 
-	if not VUHDO_SPELLS_KEYBOARD then return; end
+	if not VUHDO_SPELLS_KEYBOARD then
+		return;
+	end
 
 	ClearOverrideBindings(VuhDo);
+
 	for tCnt = 1, 16 do
 		tSpell = VUHDO_SPELLS_KEYBOARD[format("SPELL%d", tCnt)];
 		tBindingName = format("%s %d", VUHDO_I18N_MOUSE_OVER_BINDING, tCnt);
@@ -540,12 +684,19 @@ function VUHDO_initKeyboardMacros()
 		_G[format("BINDING_NAME_%s%d", tBindPrefix, tCnt)] = tBindingName;
 
 		tKey1, tKey2 = GetBindingKey(tBindPrefix .. tCnt);
+
 		if not VUHDO_strempty(tSpell) and (tKey1 or tKey2) then
 			tBody = VUHDO_buildMacroText(tSpell, true, nil);
 			tMacroId = VUHDO_createOrUpdateMacro(tCnt, tBody, tSpell);
+
 			if tMacroId then
-				if tKey1 then SetOverrideBindingMacro(VuhDo, true, tKey1, tMacroId); end
-				if tKey2 then SetOverrideBindingMacro(VuhDo, true, tKey2, tMacroId); end
+				if tKey1 then
+					SetOverrideBindingMacro(VuhDo, true, tKey1, tMacroId);
+				end
+
+				if tKey2 then
+					SetOverrideBindingMacro(VuhDo, true, tKey2, tMacroId);
+				end
 			end
 		else
 			DeleteMacro(format("VuhDoAuto%d", tCnt));
@@ -554,6 +705,15 @@ function VUHDO_initKeyboardMacros()
 
 	-- Buff watch smart cast binding
 	tKey1, tKey2 = GetBindingKey(tBindPrefix .. "SMART_BUFF");
-	if tKey1 then SetOverrideBindingClick(VuhDo, true, tKey1, "VuhDoSmartCastGlassButton", "LeftButton"); end
-	if tKey2 then SetOverrideBindingClick(VuhDo, true, tKey2, "VuhDoSmartCastGlassButton", "LeftButton"); end
+
+	if tKey1 then
+		SetOverrideBindingClick(VuhDo, true, tKey1, "VuhDoSmartCastGlassButton", "LeftButton");
+	end
+
+	if tKey2 then
+		SetOverrideBindingClick(VuhDo, true, tKey2, "VuhDoSmartCastGlassButton", "LeftButton");
+	end
+
+	return;
+
 end

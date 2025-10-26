@@ -457,7 +457,7 @@ function VUHDO_getOrCreateBuffSwatch(aName, aParent)
 		VUHDO_safeSetAttribute(tButton, "_onshow", "self:ClearBindings();");
 		VUHDO_safeSetAttribute(tButton, "_onhide", "self:ClearBindings();");
 		VUHDO_safeSetAttribute(tButton,
-			"_onmousedown", 
+			"_onmousedown",
 			"if not self:IsUnderMouse(false) then self:ClearBindings(); end"
 		);
 	else
@@ -842,11 +842,35 @@ function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
 		VUHDO_initHealButton(tNewButton, aPanelNum);
 		VUHDO_positionHealButton(tNewButton, aPanelNum);
 
+		if not InCombatLockdown() and VUHDO_isSecureSystemReady() then
+			VUHDO_registerSecureRealFrame(aPanelNum, aButtonNum, tNewButton);
+		end
+
 		if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
 			tFunc = (VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers())
 				and RegisterUnitWatch or UnregisterUnitWatch;
 
 			tFunc(tNewButton);
+		end
+
+		if not tNewButton:GetAttribute("vuhdo_raidid_sync_hook") then
+			tNewButton:HookScript("OnAttributeChanged", function(self, name, value)
+				if name == "unit" then
+					local tOldRaidId = self.raidid;
+					self.raidid = value;
+
+					if value and value ~= tOldRaidId then
+						local tButtonName = self:GetName();
+						local tPanelNum = tonumber(tButtonName:match("Vd(%d+)"));
+
+						if tPanelNum then
+							VUHDO_addUnitButton(self, tPanelNum);
+						end
+					end
+				end
+			end);
+
+			tNewButton:SetAttribute("vuhdo_raidid_sync_hook", true);
 		end
 	end
 
@@ -858,7 +882,9 @@ end
 
 --
 function VUHDO_getPanelButtons(aPanelNum)
+
 	return VUHDO_BUTTONS_PER_PANEL[aPanelNum];
+
 end
 
 
