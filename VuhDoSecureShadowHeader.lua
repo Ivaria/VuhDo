@@ -7,7 +7,7 @@ local sInitialized = false;
 
 
 --
-function VUHDO_isSecureSystemReady()
+function VUHDO_isSecureShadowHeaderReady()
 
 	return sInitialized;
 
@@ -26,18 +26,26 @@ local tInitConfigFunc = [=[
 ]=];
 local tOnAttributeChanged = [=[
 	if name == "unit" then
-		local tUnit = value;
-
-		if type(tUnit) == "string" then
-			tUnit = strlower(tUnit);
-		else
-			tUnit = nil;
-		end;
-
 		local tManager = self:GetAttribute("vuhdo_manager_ref");
 
 		if tManager then
-			tManager:RunAttribute("vuhdo_process_unit_method", tUnit);
+			local tUnit = value;
+
+			if type(tUnit) == "string" then
+				tUnit = strlower(tUnit);
+			else
+				tUnit = nil;
+			end
+
+			local tOldUnit = self:GetAttribute("vuhdo_last_unit");
+
+			if not tUnit and tOldUnit then
+				tManager:RunAttribute("vuhdo_clear_unit_method", tOldUnit);
+			elseif tUnit then
+				tManager:RunAttribute("vuhdo_process_unit_method", tUnit);
+			end
+
+			self:SetAttribute("vuhdo_last_unit", tUnit);
 		end
 	end
 ]=];
@@ -168,6 +176,29 @@ function VUHDO_initSecureShadowHeader()
 		end
 	]=]);
 
+	sManagerFrame:SetAttribute("vuhdo_clear_unit_method", [=[
+		local tUnit = ...;
+
+		if not tUnit then
+			return;
+		end
+
+		local tMappings = sUnitMap[tUnit];
+
+		if tMappings then
+			for tMappingIdx = 1, #tMappings do
+				local tMapping = tMappings[tMappingIdx];
+				local tPanelNum = tMapping[1];
+				local tButtonNum = tMapping[2];
+				local tRealFrame = sRealFrames[tPanelNum] and sRealFrames[tPanelNum][tButtonNum];
+
+				if tRealFrame then
+					tRealFrame:SetAttribute("unit", nil);
+				end
+			end
+		end
+	]=]);
+
 	sShadowHeader:SetFrameRef("sManager", sManagerFrame);
 
 	sShadowHeader:Execute([=[
@@ -194,8 +225,8 @@ function VUHDO_initSecureShadowHeader()
 	sShadowHeader:Show();
 	sShadowHeader:SetAttribute("startingIndex", 1);
 
-	for tIdx = 1, 40 do
-		tChild = sShadowHeader:GetAttribute("child" .. tIdx);
+	for tCnt = 1, 40 do
+		tChild = sShadowHeader:GetAttribute("child" .. tCnt);
 
 		if tChild then
 			tChild:SetAttribute("_onattributechanged", tOnAttributeChanged);
@@ -203,8 +234,6 @@ function VUHDO_initSecureShadowHeader()
 	end
 
 	sInitialized = true;
-
-	VUHDO_refreshUI();
 
 	return true;
 

@@ -31,7 +31,6 @@ local VUHDO_isPanelVisible;
 local VUHDO_positionHealButton;
 local VUHDO_positionTableHeaders;
 
-local sLastDebuffIcon;
 local sShowPanels;
 
 
@@ -64,8 +63,10 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_positionHealButton = _G["VUHDO_positionHealButton"];
 	VUHDO_positionTableHeaders = _G["VUHDO_positionTableHeaders"];
 
-	sLastDebuffIcon = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39;
 	sShowPanels = VUHDO_CONFIG["SHOW_PANELS"];
+
+	return;
+
 end
 -- BURST CACHE ---------------------------------------------------
 
@@ -171,15 +172,15 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 		tFallbackPanels = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanels"] or { 1 };
 		tIsFallbackPanel = false;
 
-		for tIdx = 1, #tFallbackPanels do
-			if tFallbackPanels[tIdx] == aPanelNum then
+		for tFallbackIdx = 1, #tFallbackPanels do
+			if tFallbackPanels[tFallbackIdx] == aPanelNum then
 				tIsFallbackPanel = true;
 				break;
 			end
 		end
 
 		if tIsFallbackPanel then
-			if not VUHDO_isSecureSystemReady() then
+			if not VUHDO_isSecureShadowHeaderReady() then
 				return;
 			end
 

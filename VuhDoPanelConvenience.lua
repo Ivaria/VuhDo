@@ -2,6 +2,7 @@ local _G = _G;
 local pairs = pairs;
 local format = format;
 local CreateFrame = CreateFrame;
+local tremove = table.remove;
 local _;
 
 -- Fast caches
@@ -842,7 +843,7 @@ function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
 		VUHDO_initHealButton(tNewButton, aPanelNum);
 		VUHDO_positionHealButton(tNewButton, aPanelNum);
 
-		if not InCombatLockdown() and VUHDO_isSecureSystemReady() then
+		if not InCombatLockdown() and VUHDO_isSecureShadowHeaderReady() then
 			VUHDO_registerSecureRealFrame(aPanelNum, aButtonNum, tNewButton);
 		end
 
@@ -857,14 +858,44 @@ function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
 			tNewButton:HookScript("OnAttributeChanged", function(self, name, value)
 				if name == "unit" then
 					local tOldRaidId = self.raidid;
-					self.raidid = value;
 
-					if value and value ~= tOldRaidId then
-						local tButtonName = self:GetName();
-						local tPanelNum = tonumber(tButtonName:match("Vd(%d+)"));
+					if tOldRaidId ~= value then
+						if tOldRaidId then
+							if VUHDO_UNIT_BUTTONS[tOldRaidId] then
+								for tCnt = #VUHDO_UNIT_BUTTONS[tOldRaidId], 1, -1 do
+									if VUHDO_UNIT_BUTTONS[tOldRaidId][tCnt] == self then
+										tremove(VUHDO_UNIT_BUTTONS[tOldRaidId], tCnt);
 
-						if tPanelNum then
-							VUHDO_addUnitButton(self, tPanelNum);
+										break;
+									end
+								end
+							end
+
+							if VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId] then
+								local tButtonName = self:GetName();
+								local tPanelNum = tonumber(tButtonName:match("Vd(%d+)"));
+
+								if tPanelNum and VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum] then
+									for tCnt = #VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum], 1, -1 do
+										if VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum][tCnt] == self then
+											tremove(VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum], tCnt);
+
+											break;
+										end
+									end
+								end
+							end
+						end
+
+						self.raidid = value;
+
+						if value then
+							local tButtonName = self:GetName();
+							local tPanelNum = tonumber(tButtonName:match("Vd(%d+)"));
+
+							if tPanelNum then
+								VUHDO_addUnitButton(self, tPanelNum);
+							end
 						end
 					end
 				end
