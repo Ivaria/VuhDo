@@ -124,6 +124,7 @@ function VUHDO_initSecureShadowHeader()
 
 		sProcessQueue = newtable();
 		sClearQueue = newtable();
+
 		sPendingRefresh = false;
 	]=]);
 
