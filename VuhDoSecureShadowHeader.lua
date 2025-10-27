@@ -121,6 +121,10 @@ function VUHDO_initSecureShadowHeader()
 			sNextFallbackButton[tPanelNum] = 1;
 			sFallbackButtonStart[tPanelNum] = 1;
 		end
+
+		sProcessQueue = newtable();
+		sClearQueue = newtable();
+		sPendingRefresh = false;
 	]=]);
 
 	sManagerFrame:SetAttribute("vuhdo_process_unit_method", [=[
@@ -130,50 +134,12 @@ function VUHDO_initSecureShadowHeader()
 			return;
 		end
 
-		local tMappings = sUnitMap[tUnit];
+		sProcessQueue[tUnit] = true;
+		sClearQueue[tUnit] = nil;
 
-		if tMappings then
-			for tMappingIdx = 1, #tMappings do
-				local tMapping = tMappings[tMappingIdx];
-				local tPanelNum = tMapping[1];
-				local tButtonNum = tMapping[2];
-				local tRealFrame = sRealFrames[tPanelNum] and sRealFrames[tPanelNum][tButtonNum];
+		sPendingRefresh = true;
 
-				if tRealFrame then
-					tRealFrame:SetAttribute("unit", tUnit);
-
-					tRealFrame:Show();
-				end
-			end
-		else
-			for tFallbackIdx = 1, #sFallbackPanels do
-				local tFallbackPanel = sFallbackPanels[tFallbackIdx];
-				local tFallbackButton = sNextFallbackButton[tFallbackPanel];
-				local tFallbackFrame = sRealFrames[tFallbackPanel] and sRealFrames[tFallbackPanel][tFallbackButton];
-
-				if tFallbackFrame then
-					tFallbackFrame:SetAttribute("unit", tUnit);
-
-					tFallbackFrame:Show();
-
-					sNextFallbackButton[tFallbackPanel] = tFallbackButton + 1;
-				end
-			end
-
-			if #sFallbackPanels > 0 then
-				local tFirstPanel = sFallbackPanels[1];
-				local tFirstButton = sNextFallbackButton[tFirstPanel] - 1;
-
-				local tTempMapping = newtable();
-				tTempMapping[1] = tFirstPanel;
-				tTempMapping[2] = tFirstButton;
-
-				local tTempMappings = newtable();
-				tinsert(tTempMappings, tTempMapping);
-
-				sUnitMap[tUnit] = tTempMappings;
-			end
-		end
+		sManager:SetAttribute("state-vuhdo_batch_timer", "process");
 	]=]);
 
 	sManagerFrame:SetAttribute("vuhdo_clear_unit_method", [=[
@@ -183,21 +149,88 @@ function VUHDO_initSecureShadowHeader()
 			return;
 		end
 
-		local tMappings = sUnitMap[tUnit];
+		sClearQueue[tUnit] = true;
+		sProcessQueue[tUnit] = nil;
 
-		if tMappings then
-			for tMappingIdx = 1, #tMappings do
-				local tMapping = tMappings[tMappingIdx];
-				local tPanelNum = tMapping[1];
-				local tButtonNum = tMapping[2];
-				local tRealFrame = sRealFrames[tPanelNum] and sRealFrames[tPanelNum][tButtonNum];
+		sPendingRefresh = true;
 
-				if tRealFrame then
-					tRealFrame:SetAttribute("unit", nil);
+		sManager:SetAttribute("state-vuhdo_batch_timer", "process");
+	]=]);
+
+	sManagerFrame:SetAttribute("_onstate-vuhdo_batch_timer", [=[
+		if newstate ~= "process" and sPendingRefresh then
+			for tUnit, _ in pairs(sClearQueue) do
+				local tMappings = sUnitMap[tUnit];
+
+				if tMappings then
+					for tMappingIdx = 1, #tMappings do
+						local tMapping = tMappings[tMappingIdx];
+						local tPanelNum = tMapping[1];
+						local tButtonNum = tMapping[2];
+						local tRealFrame = sRealFrames[tPanelNum] and sRealFrames[tPanelNum][tButtonNum];
+
+						if tRealFrame then
+							tRealFrame:SetAttribute("unit", nil);
+						end
+					end
 				end
 			end
+
+			for tUnit, _ in pairs(sProcessQueue) do
+				local tMappings = sUnitMap[tUnit];
+
+				if tMappings then
+					for tMappingIdx = 1, #tMappings do
+						local tMapping = tMappings[tMappingIdx];
+						local tPanelNum = tMapping[1];
+						local tButtonNum = tMapping[2];
+						local tRealFrame = sRealFrames[tPanelNum] and sRealFrames[tPanelNum][tButtonNum];
+
+						if tRealFrame then
+							tRealFrame:SetAttribute("unit", tUnit);
+
+							tRealFrame:Show();
+						end
+					end
+				else
+					for tFallbackIdx = 1, #sFallbackPanels do
+						local tFallbackPanel = sFallbackPanels[tFallbackIdx];
+						local tFallbackButton = sNextFallbackButton[tFallbackPanel];
+						local tFallbackFrame = sRealFrames[tFallbackPanel] and sRealFrames[tFallbackPanel][tFallbackButton];
+
+						if tFallbackFrame then
+							tFallbackFrame:SetAttribute("unit", tUnit);
+
+							tFallbackFrame:Show();
+
+							sNextFallbackButton[tFallbackPanel] = tFallbackButton + 1;
+						end
+					end
+
+					if #sFallbackPanels > 0 then
+						local tFirstPanel = sFallbackPanels[1];
+						local tFirstButton = sNextFallbackButton[tFirstPanel] - 1;
+
+						local tTempMapping = newtable();
+						tTempMapping[1] = tFirstPanel;
+						tTempMapping[2] = tFirstButton;
+
+						local tTempMappings = newtable();
+						tinsert(tTempMappings, tTempMapping);
+
+						sUnitMap[tUnit] = tTempMappings;
+					end
+				end
+			end
+
+			wipe(sProcessQueue);
+			wipe(sClearQueue);
+
+			sPendingRefresh = false;
 		end
 	]=]);
+
+	RegisterStateDriver(sManagerFrame, "vuhdo_batch_timer", "[combat]combat;nocombat;");
 
 	sShadowHeader:SetFrameRef("sManager", sManagerFrame);
 
