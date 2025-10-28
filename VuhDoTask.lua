@@ -102,10 +102,6 @@ local sNextTaskEnqueueOrder = 0;
 
 local VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
 
-local VUHDO_MAX_EXEC_TIME_COMBAT_US = 200 * 1000;
-local VUHDO_MAX_EXEC_TIME_OOC_US = 1500 * 1000;
-local VUHDO_MAX_EXEC_TIME_FRACTION = 0.6;
-
 local VUHDO_DEFERRED_TASK_CONFIG = {
 	["TARGET_EXEC_TIME_US"] = 50000,
 	["MAX_EXEC_TIME_US"] = 75000,
@@ -114,29 +110,6 @@ local VUHDO_DEFERRED_TASK_CONFIG = {
 	["MAX_TASKS_PER_FRAME"] = 500,
 	["ADJUST_INTERVAL_SECS"] = 1.5,
 	["IDLE_TASK_INC_THRESHOLD_US"] = 50,
-	["DEFAULT_TARGET_FPS"] = 120,
-	["ABS_MAX_QUEUE_TIME_US"] = 500000,
-	["ABS_MIN_QUEUE_TIME_US"] = 75,
-	["QUEUE_TIME_BUDGET_THRESHOLDS"] = {
-		["HIGH"] = 25000,
-		["MEDIUM"] = 10000,
-		["LOW"] = 5000,
-	},
-	["QUEUE_TIME_BUDGET_MULTIPLIERS"] = {
-		["HIGH"] = 4.0,
-		["MEDIUM"] = 2.5,
-		["LOW"] = 1.5,
-	},
-	["QUEUE_LENGTH_BUDGET_MULTIPLIERS"] = {
-		["HIGH"] = 1.5,
-		["MEDIUM"] = 1.25,
-		["LOW"] = 1.1,
-	},
-	["QUEUE_LENGTH_THRESHOLDS"] = {
-		["HIGH"] = 100,
-		["MEDIUM"] = 50,
-		["LOW"] = 20,
-	},
 	["CHUNK_SNAPSHOT_LIMIT"] = 5,
 };
 
@@ -192,7 +165,6 @@ local VUHDO_DEFERRED_TASK_STATE = {
 		["tasksInChunkPercentileTracker"] = nil,
 		["chunkTimePercentileTracker"] = nil,
 		["hardStopsHit"] = 0,
-		["budgetExceededStops"] = 0,
 		["unsafeTasksProcessed"] = 0,
 		["tasksEnqueuedByType"] = { },
 		["tasksProcessedByTypeSession"] = { },
@@ -305,112 +277,6 @@ do
 		end
 
 		return tPercentileFormatString, tPercentileValueString, tPercentileKeys;
-
-	end
-end
-
-
-
-do
-	--
-	local tOldestQueueTimeUs;
-	local tCurrentTime;
-	local tTask;
-	local tQueueTimeUs;
-	function VUHDO_getOldestTaskQueueTime()
-
-		tOldestQueueTimeUs = 0;
-		tCurrentTime = GetTime();
-
-		for tIndex = 1, #VUHDO_TASK_PRIORITY_QUEUE do
-			tTask = VUHDO_TASK_PRIORITY_QUEUE[tIndex];
-
-			if tTask and tTask["enqueueTime"] then
-				tQueueTimeUs = (tCurrentTime - tTask["enqueueTime"]) * 1000000;
-
-				if tQueueTimeUs > tOldestQueueTimeUs then
-					tOldestQueueTimeUs = tQueueTimeUs;
-				end
-			end
-		end
-
-		return tOldestQueueTimeUs;
-
-	end
-
-
-
-	--
-	local tGroupSizeMultiplier;
-	local tGroupSize;
-	function VUHDO_getGroupSizeBasedMultiplier()
-
-		tGroupSizeMultiplier = 1.0;
-		tGroupSize = GetNumGroupMembers();
-
-		if tGroupSize > 20 then
-			tGroupSizeMultiplier = 2.0;  -- 40-man raids: double the budget
-		elseif tGroupSize > 10 then
-			tGroupSizeMultiplier = 1.5;  -- 20-man raids: 1.5x budget
-		elseif tGroupSize > 5 then
-			tGroupSizeMultiplier = 1.25; -- 10-man raids: 1.25x budget
-		else
-			tGroupSizeMultiplier = 1.0;  -- solo/5-man: normal budget
-		end
-
-		return tGroupSizeMultiplier;
-
-	end
-
-
-
-	--
-	local tOldestQueueTimeUs;
-	local tBaseBudgetUs;
-	local tBudgetMultiplier;
-	local tAdjustedBudgetUs;
-	local tQueueLengthMultiplier;
-	local tCurrentQueueLength;
-	local tCurrentHardCap;
-	local tAvailableBudget;
-	function VUHDO_calculateQueueTimeAdjustedBudget(aBaseBudgetUs)
-
-		tOldestQueueTimeUs = VUHDO_getOldestTaskQueueTime();
-
-		tBaseBudgetUs = aBaseBudgetUs;
-		tBudgetMultiplier = 1.0;
-		tQueueLengthMultiplier = 1.0;
-
-		tGroupSizeMultiplier = VUHDO_getGroupSizeBasedMultiplier();
-
-		if tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["HIGH"] then
-			tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["HIGH"];
-		elseif tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["MEDIUM"] then
-			tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["MEDIUM"];
-		elseif tOldestQueueTimeUs > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_THRESHOLDS"]["LOW"] then
-			tBudgetMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_TIME_BUDGET_MULTIPLIERS"]["LOW"];
-		end
-
-		tCurrentQueueLength = #VUHDO_TASK_PRIORITY_QUEUE;
-
-		if tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["HIGH"] then
-			tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["HIGH"];
-		elseif tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["MEDIUM"] then
-			tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["MEDIUM"];
-		elseif tCurrentQueueLength > VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_THRESHOLDS"]["LOW"] then
-			tQueueLengthMultiplier = VUHDO_DEFERRED_TASK_CONFIG["QUEUE_LENGTH_BUDGET_MULTIPLIERS"]["LOW"];
-		end
-
-		tAdjustedBudgetUs = tBaseBudgetUs * tBudgetMultiplier * tQueueLengthMultiplier * tGroupSizeMultiplier;
-
-		tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
-		tAvailableBudget = tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION;
-
-		if tAdjustedBudgetUs > tAvailableBudget then
-			tAdjustedBudgetUs = tAvailableBudget;
-		end
-
-		return tAdjustedBudgetUs, tOldestQueueTimeUs, tBudgetMultiplier;
 
 	end
 end
@@ -962,23 +828,6 @@ do
 
 	--
 	local tMetrics;
-	local function VUHDO_incrementDeferredTaskBudgetExceededStops()
-
-		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-			return;
-		end
-
-		tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
-		tMetrics["budgetExceededStops"] = (tMetrics["budgetExceededStops"] or 0) + 1;
-
-		return;
-
-	end
-
-
-
-	--
-	local tMetrics;
 	local function VUHDO_updateDeferredTasksInChunkPercentiles(aTasksCompletedInChunk)
 
 		if not VUHDO_DEFERRED_TASK_PROFILING_ENABLED or not aTasksCompletedInChunk or aTasksCompletedInChunk <= 0 then
@@ -1139,51 +988,6 @@ do
 
 
 	--
-	local tTaskConfig;
-	local tCurFps;
-	local tBaseFpsForBudget;
-	local tCVarMaxFps;
-	local tMaxExecTimeUs;
-	local tAbsMaxQueueTimeUs;
-	local tExecLimitUs;
-	local tMaxQueueTimeUs;
-	function VUHDO_updateDynamicDeferTargets()
-
-		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
-
-		tCurFps = GetFramerate();
-
-		if not tCurFps or tCurFps <= 0 then
-			tBaseFpsForBudget = tTaskConfig["DEFAULT_TARGET_FPS"];
-		else
-			tBaseFpsForBudget = tCurFps;
-		end
-
-		tCVarMaxFps = tonumber(GetCVar("maxFPS")) or 0;
-
-		if tCVarMaxFps > 0 and tCVarMaxFps < 999 then
-			tBaseFpsForBudget = min(tBaseFpsForBudget, tCVarMaxFps);
-		end
-
-		if InCombatLockdown() then
-			tMaxExecTimeUs = VUHDO_MAX_EXEC_TIME_COMBAT_US;
-		else
-			tMaxExecTimeUs = VUHDO_MAX_EXEC_TIME_OOC_US;
-		end
-
-		tAbsMaxQueueTimeUs = tTaskConfig["ABS_MAX_QUEUE_TIME_US"];
-		tExecLimitUs = floor(tMaxExecTimeUs * VUHDO_MAX_EXEC_TIME_FRACTION);
-
-		tMaxQueueTimeUs = min(tAbsMaxQueueTimeUs, tExecLimitUs);
-		tMaxQueueTimeUs = max(tMaxQueueTimeUs, tTaskConfig["ABS_MIN_QUEUE_TIME_US"]);
-
-		return;
-
-	end
-
-
-
-	--
 	local tDelegate;
 	local tTaskKey;
 	local tTask;
@@ -1274,8 +1078,6 @@ do
 	local tDefaultCost;
 	local tMaxReasonableCost;
 	function VUHDO_adjustDynamicDeferTasks()
-
-		VUHDO_updateDynamicDeferTargets();
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
@@ -1509,18 +1311,15 @@ do
 	local tTaskConfig;
 	local tTasksCompleted;
 	local tHardStopTime;
-	local tBudgetRemainingUs;
-	local tDefaultEstimatedCostPerTask;
 	local tTask;
 	local tTaskType;
-	local tEstimatedCostOfNextTask;
 	local tTaskDurationUs;
 	local tCurrentQueueLen;
 	local tTaskMetricsForSnapshot = { };
 	local tArgsSummary;
 	local tQueueTimeUs;
-	local tAdjustedBudgetUs;
 	local tShouldProcessTask;
+	local tEstimatedCostOfNextTask;
 	local tPredictionError;
 	local tPredictionAccuracy;
 	local tAccuracy;
@@ -1540,11 +1339,6 @@ do
 		tTasksCompleted = 0;
 		tHardStopTime = (debugprofilestop() * 1000) + tTaskConfig["MAX_EXEC_TIME_US"] + 100;
 
-		tAdjustedBudgetUs, _, _ = VUHDO_calculateQueueTimeAdjustedBudget(tTaskConfig["TARGET_EXEC_TIME_US"]);
-		tBudgetRemainingUs = tAdjustedBudgetUs;
-
-		tDefaultEstimatedCostPerTask = (tTaskConfig["TARGET_EXEC_TIME_US"] / max(1, tTaskConfig["MAX_TASKS_PER_FRAME"])) * 1.2;
-
 		for tTaskCount = 1, tTaskState["maxTasksPerFrame"] do
 			if #VUHDO_TASK_PRIORITY_QUEUE == 0 then
 				break;
@@ -1559,12 +1353,9 @@ do
 			tTask = VUHDO_TASK_PRIORITY_QUEUE[1];
 
 			tTaskType = tTask["type"];
-			tEstimatedCostOfNextTask = tTaskState["avgCostUsByType"][tTaskType] or VUHDO_TASK_TYPE_DEFAULT_COSTS[tTaskType] or tDefaultEstimatedCostPerTask;
 
-			tCurrentQueueLen = #VUHDO_TASK_PRIORITY_QUEUE;
 			tShouldProcessTask = (tTasksCompleted < tTaskConfig["MIN_TASKS_PER_FRAME"]) or
-				(tTasksCompleted < tTaskState["maxTasksPerFrame"] and
-					(tEstimatedCostOfNextTask <= tBudgetRemainingUs or tCurrentQueueLen > tTaskConfig["QUEUE_LENGTH_THRESHOLDS"]["HIGH"]));
+				(tTasksCompleted < tTaskState["maxTasksPerFrame"]);
 
 			if tShouldProcessTask then
 				tTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
@@ -1606,6 +1397,7 @@ do
 					end
 
 					if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+						tEstimatedCostOfNextTask = tTaskState["avgCostUsByType"][tTaskType] or VUHDO_TASK_TYPE_DEFAULT_COSTS[tTaskType] or 0;
 						tPredictionError = abs(tEstimatedCostOfNextTask - tTaskDurationUs);
 						tPredictionAccuracy = 1 - (tPredictionError / max(1, tTaskDurationUs));
 
@@ -1631,16 +1423,11 @@ do
 					end
 
 					tTasksCompleted = tTasksCompleted + 1;
-					tBudgetRemainingUs = tBudgetRemainingUs - tTaskDurationUs;
 
 					VUHDO_DEFERRED_TASK_POOL:release(tTask);
 
 					tTask = nil;
 				end
-			else
-				VUHDO_incrementDeferredTaskBudgetExceededStops();
-
-				break;
 			end
 		end
 
@@ -1791,7 +1578,6 @@ do
 		end
 
 		tMetricsReset["hardStopsHit"] = 0;
-		tMetricsReset["budgetExceededStops"] = 0;
 		tMetricsReset["unsafeTasksProcessed"] = 0;
 
 		twipe(tMetricsReset["tasksEnqueuedByType"]);
@@ -1954,8 +1740,8 @@ do
 			VUHDO_Msg("  |cff98FB98No chunks processed tasks or metrics reset.|r");
 		end
 
-		VUHDO_Msg(format("  |cff98FB98Stops:|r Hard (Time Limit): %d, Budget Exceeded: %d",
-			(tMetrics["hardStopsHit"] or 0), (tMetrics["budgetExceededStops"] or 0)));
+		VUHDO_Msg(format("  |cff98FB98Stops:|r Hard (Time Limit): %d",
+			(tMetrics["hardStopsHit"] or 0)));
 
 		tTotalTasksProcessed = tMetrics["totalTasksProcessedSession"] or 0;
 		tSessionDuration = GetTime() - (tMetrics["sessionStartTime"] or GetTime());
@@ -2075,25 +1861,6 @@ do
 			VUHDO_formatTime(tTaskConfig["TARGET_EXEC_TIME_US"]), VUHDO_formatTime(tTaskConfig["MAX_EXEC_TIME_US"])));
 		VUHDO_Msg(format("  |cffB0E0E6Max Tasks/Frame:|r %d, |cffB0E0E6Idle Inc Threshold:|r %s",
 			(VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] or 0), VUHDO_formatTime(tTaskConfig["IDLE_TASK_INC_THRESHOLD_US"])));
-
-		tCurrentHardCap = InCombatLockdown() and VUHDO_MAX_EXEC_TIME_COMBAT_US or VUHDO_MAX_EXEC_TIME_OOC_US;
-
-		VUHDO_Msg(format("  |cffB0E0E6Game Hard Cap|r (Combat=%s): %s, |cffB0E0E6Effective Max Queue Time:|r %s",
-			tostring(InCombatLockdown()), VUHDO_formatTime(tCurrentHardCap),
-			VUHDO_formatTime(min((tTaskConfig["ABS_MAX_QUEUE_TIME_US"] or 0), floor(tCurrentHardCap * VUHDO_MAX_EXEC_TIME_FRACTION)))
-		));
-
-		VUHDO_Msg("|cffFFA500** Queue Time Budget Adjustment:|r");
-		VUHDO_Msg(format("  |cff98FB98Thresholds:|r Low=%s, Medium=%s, High=%s",
-			VUHDO_formatTime(tTaskConfig["QUEUE_TIME_BUDGET_THRESHOLDS"]["LOW"]),
-			VUHDO_formatTime(tTaskConfig["QUEUE_TIME_BUDGET_THRESHOLDS"]["MEDIUM"]),
-			VUHDO_formatTime(tTaskConfig["QUEUE_TIME_BUDGET_THRESHOLDS"]["HIGH"])
-		));
-		VUHDO_Msg(format("  |cff98FB98Multipliers:|r Low=%.1fx, Medium=%.1fx, High=%.1fx",
-			tTaskConfig["QUEUE_TIME_BUDGET_MULTIPLIERS"]["LOW"],
-			tTaskConfig["QUEUE_TIME_BUDGET_MULTIPLIERS"]["MEDIUM"],
-			tTaskConfig["QUEUE_TIME_BUDGET_MULTIPLIERS"]["HIGH"]
-		));
 
 		VUHDO_Msg("|cffFFA500** Pool Stats (Size, Idle, PeakIdle, Hits, Misses, RejectedReleases): **|r");
 
@@ -2298,7 +2065,6 @@ function VUHDO_initTaskSystem()
 			tTaskTypeCount = #VUHDO_DEFERRED_TASK_TYPES;
 		end
 
-
 		VUHDO_DEFERRED_TASK_STATE["invocationCountByType"] = tcreate(0, tTaskTypeCount);
 		VUHDO_DEFERRED_TASK_STATE["avgCostUsByType"] = tcreate(0, tTaskTypeCount);
 
@@ -2322,8 +2088,6 @@ function VUHDO_initTaskSystem()
 		end
 
 		sNextTaskEnqueueOrder = 0;
-
-		VUHDO_updateDynamicDeferTargets();
 
 		VUHDO_DEFERRED_TASK_STATE["lastAdjustTime"] = GetTime();
 		VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] = VUHDO_DEFERRED_TASK_CONFIG["MAX_TASKS_PER_FRAME"];
