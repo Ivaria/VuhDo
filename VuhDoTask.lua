@@ -2,13 +2,10 @@ local _;
 
 local GetTime = GetTime;
 local pairs = pairs;
-local GetCVar = GetCVar;
-local tonumber = tonumber;
 local string = string;
 local xpcall = xpcall;
 local debugprofilestop = debugprofilestop;
 local MeasureCall = C_AddOnProfiler and C_AddOnProfiler.MeasureCall;
-local GetFramerate = GetFramerate;
 local format = string.format;
 local tinsert = table.insert;
 local tcreate = table.create or VUHDO_tableCreate;
@@ -18,7 +15,6 @@ local max = math.max;
 local min = math.min;
 local floor = math.floor;
 local abs = math.abs;
-local InCombatLockdown = InCombatLockdown;
 
 
 
@@ -143,7 +139,6 @@ local VUHDO_DEFERRED_TASK_STATE = {
 	["isInit"] = false,
 	["maxTasksPerFrame"] = VUHDO_DEFERRED_TASK_CONFIG["INITIAL_TASKS_PER_FRAME"],
 	["lastAdjustTime"] = 0,
-	["totalFramesInInterval"] = 0,
 	["invocationCountByType"] = nil,
 	["avgCostUsByType"] = nil,
 	["costHistoryByType"] = nil,
@@ -1036,7 +1031,10 @@ do
 			tNewTask["delegate"] = tDelegate;
 			tNewTask["type"] = aType;
 			tNewTask["priority"] = tCurrentPriority;
-			tNewTask["enqueueTime"] = GetTime(); -- Track when task was enqueued
+
+			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+				tNewTask["enqueueTime"] = GetTime();
+			end
 
 			tTaskKey = VUHDO_getTaskKey(aType, tNewTask["args"]);
 			tTask = VUHDO_TASK_QUEUE_MAP[tTaskKey];
@@ -1084,7 +1082,7 @@ do
 
 		tMaxTasksPerFrame = tTaskState["maxTasksPerFrame"];
 
-		if VUHDO_DEFERRED_TASK_TYPES then
+		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and VUHDO_DEFERRED_TASK_TYPES then
 			for _, tTaskType in pairs(VUHDO_DEFERRED_TASK_TYPES) do
 				tInvocationCount = tTaskState["invocationCountByType"][tTaskType] or 0;
 
@@ -1170,9 +1168,6 @@ do
 
 		tTaskState["maxTasksPerFrame"] = floor(max(tTaskConfig["MIN_TASKS_PER_FRAME"], min(tMaxTasksPerFrame, tTaskConfig["MAX_TASKS_PER_FRAME"])));
 
-		tTaskState["totalFramesInInterval"] = 0;
-		tTaskState["lastAdjustTime"] = GetTime();
-
 		return;
 
 	end
@@ -1238,46 +1233,53 @@ do
 
 		sCurrentTaskForPcall = tTask;
 
-		tTaskDurationUs = 0;
+		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+			tTaskDurationUs = 0;
 
-		if MeasureCall then
-			tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(VUHDO_pcallWrapper);
+			if MeasureCall then
+				tProfilerResult, tDelegateSuccess, tDelegateResult = MeasureCall(VUHDO_pcallWrapper);
 
-			if tProfilerResult and tProfilerResult.elapsedMilliseconds then
-				tTaskDurationUs = tProfilerResult.elapsedMilliseconds * 1000;
+				if tProfilerResult and tProfilerResult.elapsedMilliseconds then
+					tTaskDurationUs = tProfilerResult.elapsedMilliseconds * 1000;
+				end
+			else
+				tTaskStartTime = debugprofilestop();
+
+				tDelegateSuccess, tDelegateResult = VUHDO_pcallWrapper();
+
+				tTaskDurationUs = (debugprofilestop() - tTaskStartTime) * 1000;
 			end
 		else
-			tTaskStartTime = debugprofilestop();
-
 			tDelegateSuccess, tDelegateResult = VUHDO_pcallWrapper();
-
-			tTaskDurationUs = (debugprofilestop() - tTaskStartTime) * 1000;
 		end
 
 		sCurrentTaskForPcall = nil;
-		tQueueTimeUs = 0;
 
-		if tTask["enqueueTime"] then
-			tQueueTimeUs = (GetTime() - tTask["enqueueTime"]) * 1000000;
+		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+			tQueueTimeUs = 0;
+
+			if tTask["enqueueTime"] then
+				tQueueTimeUs = (GetTime() - tTask["enqueueTime"]) * 1000000;
+			end
+
+			VUHDO_DEFERRED_TASK_STATE["invocationCountByType"][tTaskType] = (VUHDO_DEFERRED_TASK_STATE["invocationCountByType"][tTaskType] or 0) + 1;
+
+			if not VUHDO_DEFERRED_TASK_STATE["individualCostsByType"] then
+				VUHDO_DEFERRED_TASK_STATE["individualCostsByType"] = { };
+			end
+
+			if not VUHDO_DEFERRED_TASK_STATE["individualCostsByType"][tTaskType] then
+				VUHDO_DEFERRED_TASK_STATE["individualCostsByType"][tTaskType] = { };
+			end
+
+			tinsert(VUHDO_DEFERRED_TASK_STATE["individualCostsByType"][tTaskType], tTaskDurationUs);
+
+			if not VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"] then
+				VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"] = { };
+			end
+
+			VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"][tTaskType] = (VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"][tTaskType] or 0) + tQueueTimeUs;
 		end
-
-		VUHDO_DEFERRED_TASK_STATE["invocationCountByType"][tTaskType] = (VUHDO_DEFERRED_TASK_STATE["invocationCountByType"][tTaskType] or 0) + 1;
-
-		if not VUHDO_DEFERRED_TASK_STATE["individualCostsByType"] then
-			VUHDO_DEFERRED_TASK_STATE["individualCostsByType"] = { };
-		end
-
-		if not VUHDO_DEFERRED_TASK_STATE["individualCostsByType"][tTaskType] then
-			VUHDO_DEFERRED_TASK_STATE["individualCostsByType"][tTaskType] = { };
-		end
-
-		tinsert(VUHDO_DEFERRED_TASK_STATE["individualCostsByType"][tTaskType], tTaskDurationUs);
-
-		if not VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"] then
-			VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"] = { };
-		end
-
-		VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"][tTaskType] = (VUHDO_DEFERRED_TASK_STATE["queueTimeUsByType"][tTaskType] or 0) + tQueueTimeUs;
 
 		if not tDelegateSuccess then
 			tArgsSummary = "";
@@ -1394,9 +1396,7 @@ do
 								["durationUs"] = tTaskDurationUs,
 							});
 						end
-					end
 
-					if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 						tEstimatedCostOfNextTask = tTaskState["avgCostUsByType"][tTaskType] or VUHDO_TASK_TYPE_DEFAULT_COSTS[tTaskType] or 0;
 						tPredictionError = abs(tEstimatedCostOfNextTask - tTaskDurationUs);
 						tPredictionAccuracy = 1 - (tPredictionError / max(1, tTaskDurationUs));
@@ -1454,54 +1454,49 @@ do
 
 		VUHDO_checkAllSemaphoreTimeouts();
 
-		if VUHDO_DEFERRED_TASK_STATE["totalFramesInInterval"] % 100 == 0 then
-			VUHDO_validateAllSemaphoreStates();
-		end
-
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
 
-		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
-			tMetrics = VUHDO_DEFERRED_TASK_STATE["metrics"];
-		end
-
 		tNumTasksProcessed = 0;
-		tChunkElapsedTime = 0;
 
 		if not VUHDO_DEFERRED_TASK_POOL then
 			return;
 		end
 
 		if #VUHDO_TASK_PRIORITY_QUEUE > 0 then
-			tChunkDelegate = VUHDO_executeDeferredTaskChunk;
+			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
+				tChunkDelegate = VUHDO_executeDeferredTaskChunk;
 
-			if MeasureCall then
-				tProfilerResult, tNumTasksProcessed, tChunkTaskMetrics = MeasureCall(tChunkDelegate);
+				if MeasureCall then
+					tProfilerResult, tNumTasksProcessed, tChunkTaskMetrics = MeasureCall(tChunkDelegate);
 
-				if tProfilerResult and tProfilerResult.elapsedMilliseconds then
-					tChunkElapsedTime = tProfilerResult.elapsedMilliseconds * 1000;
+					if tProfilerResult and tProfilerResult.elapsedMilliseconds then
+						tChunkElapsedTime = tProfilerResult.elapsedMilliseconds * 1000;
+					end
+				else
+					tChunkStartTime = debugprofilestop();
+
+					tNumTasksProcessed, tChunkTaskMetrics = tChunkDelegate();
+
+					tChunkElapsedTime = (debugprofilestop() - tChunkStartTime) * 1000;
+				end
+
+				if tNumTasksProcessed and tNumTasksProcessed > 0 then
+					VUHDO_updateDeferredTaskChunkMetrics(tChunkElapsedTime, tNumTasksProcessed);
+
+					if tChunkTaskMetrics then
+						VUHDO_addChunkSnapshot(tChunkElapsedTime, tNumTasksProcessed, tChunkTaskMetrics);
+					end
 				end
 			else
-				tChunkStartTime = debugprofilestop();
-
-				tNumTasksProcessed, tChunkTaskMetrics = tChunkDelegate();
-
-				tChunkElapsedTime = (debugprofilestop() - tChunkStartTime) * 1000;
-			end
-
-			if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and tNumTasksProcessed and tNumTasksProcessed > 0 then
-				VUHDO_updateDeferredTaskChunkMetrics(tChunkElapsedTime, tNumTasksProcessed);
-
-				if tChunkTaskMetrics then
-					VUHDO_addChunkSnapshot(tChunkElapsedTime, tNumTasksProcessed, tChunkTaskMetrics);
-				end
+				tNumTasksProcessed = VUHDO_executeDeferredTaskChunk();
 			end
 		end
 
-		tTaskState["totalFramesInInterval"] = tTaskState["totalFramesInInterval"] + 1;
-
-		if GetTime() - tTaskState["lastAdjustTime"] >= tTaskConfig["ADJUST_INTERVAL_SECS"] then
+		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and GetTime() - tTaskState["lastAdjustTime"] >= tTaskConfig["ADJUST_INTERVAL_SECS"] then
 			VUHDO_adjustDynamicDeferTasks();
+
+			tTaskState["lastAdjustTime"] = GetTime();
 		end
 
 		return;
@@ -1654,7 +1649,6 @@ do
 	local tTaskConfig;
 	local tEnqueued;
 	local tProcessed;
-	local tCurrentHardCap;
 	local tPoolMetrics;
 	local tMaxTaskContextArgs;
 	local tDedupedText;
