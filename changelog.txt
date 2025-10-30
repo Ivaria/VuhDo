@@ -12,7 +12,8 @@ Known issues:
 --   unpredictable, negative results.  Be warned!  
   
   
-Bugfixes:  
+Bugfixes:
+-- Bump TOC interface for 5.5.2  
   
   
 Improvements:  
