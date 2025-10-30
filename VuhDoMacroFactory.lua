@@ -1,10 +1,12 @@
 VUHDO_IS_SFX_ENABLED = true;
 VUHDO_IS_SOUND_ERRORSPEECH_ENABLED = true;
-VUHDO_LAST_COMBAT_ROSTER_ENABLED = nil;
 
 local VUHDO_RAID;
 local VUHDO_SPELL_CONFIG;
 local VUHDO_SPELLS;
+
+local VUHDO_LAST_RAID_MACRO_USE_MOUSEOVER;
+local VUHDO_LAST_TARGET_MACRO_USE_MOUSEOVER;
 
 local GetMacroIndexByName = GetMacroIndexByName;
 local GetMacroInfo = GetMacroInfo;
@@ -263,18 +265,25 @@ end
 
 --
 local tIndex;
-local tUseMouseover;
-function VUHDO_buildTargetButtonMacroText(aTarget, aFriendlyAction, aHostileAction)
+function VUHDO_buildTargetButtonMacroText(aTarget, aFriendlyAction, aHostileAction, aUseMouseover)
 
 	tIndex = aFriendlyAction .. "*" .. aHostileAction;
+
+	if VUHDO_LAST_TARGET_MACRO_USE_MOUSEOVER ~= aUseMouseover then
+		VUHDO_LAST_TARGET_MACRO_USE_MOUSEOVER = aUseMouseover;
+
+		twipe(VUHDO_TARGET_MACRO_CACHE);
+	end
+
+	if aUseMouseover then
+		tIndex = tIndex .. "_MO";
+	end
 
 	if not VUHDO_TARGET_MACRO_CACHE[tIndex] then
 		VUHDO_TARGET_MACRO_CACHE[tIndex] = VUHDO_generateTargetMacroText(aTarget, aFriendlyAction, aHostileAction);
 	end
 
-	tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
-
-	return VUHDO_replaceMacroTemplates(VUHDO_TARGET_MACRO_CACHE[tIndex], aTarget, tUseMouseover);
+	return VUHDO_replaceMacroTemplates(VUHDO_TARGET_MACRO_CACHE[tIndex], aTarget, aUseMouseover);
 
 end
 
@@ -528,23 +537,14 @@ end
 local tIndex;
 local tPet;
 local tText;
-local tUseMouseover;
-local tNewEnabled;
-function VUHDO_buildMacroText(anAction, anIsKeyboard, aTarget)
+function VUHDO_buildMacroText(anAction, anIsKeyboard, aTarget, aUseMouseover)
 
 	tPet = VUHDO_getMacroPetUnit(aTarget);
 
-	tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
-	tNewEnabled = tUseMouseover;
+	if VUHDO_LAST_RAID_MACRO_USE_MOUSEOVER ~= aUseMouseover then
+		VUHDO_LAST_RAID_MACRO_USE_MOUSEOVER = aUseMouseover;
 
-	if VUHDO_LAST_COMBAT_ROSTER_ENABLED ~= tNewEnabled then
-		VUHDO_LAST_COMBAT_ROSTER_ENABLED = tNewEnabled;
-
-		VUHDO_RAID_MACRO_CACHE = { };
-
-		if not InCombatLockdown() then
-VUHDO_refreshUI();
-		end
+		twipe(VUHDO_RAID_MACRO_CACHE);
 	end
 
 	if anIsKeyboard then
@@ -553,15 +553,15 @@ VUHDO_refreshUI();
 		tIndex = anAction .. (tPet and (anAction .. "P") or anAction);
 	end
 
-	if tUseMouseover then
+	if aUseMouseover then
 		tIndex = tIndex .. "_MO";
 	end
 
 	if not VUHDO_RAID_MACRO_CACHE[tIndex] then
-		VUHDO_RAID_MACRO_CACHE[tIndex] = VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, tPet, tUseMouseover);
+		VUHDO_RAID_MACRO_CACHE[tIndex] = VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, tPet, aUseMouseover);
 	end
 
-	tText = VUHDO_replaceMacroTemplates(VUHDO_RAID_MACRO_CACHE[tIndex], aTarget, tUseMouseover);
+	tText = VUHDO_replaceMacroTemplates(VUHDO_RAID_MACRO_CACHE[tIndex], aTarget, aUseMouseover);
 
 	--VUHDO_DEBUG[tIndex] = tText;
 
@@ -655,6 +655,7 @@ local tKey1;
 local tKey2;
 local tBody;
 local tMacroId;
+local tUseMouseover;
 function VUHDO_initKeyboardMacros()
 
 	tBindPrefix = "VUHDO_KEY_ASSIGN_";
@@ -683,7 +684,9 @@ function VUHDO_initKeyboardMacros()
 		tKey1, tKey2 = GetBindingKey(tBindPrefix .. tCnt);
 
 		if not VUHDO_strempty(tSpell) and (tKey1 or tKey2) then
-			tBody = VUHDO_buildMacroText(tSpell, true, nil);
+			tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
+
+			tBody = VUHDO_buildMacroText(tSpell, true, nil, tUseMouseover);
 			tMacroId = VUHDO_createOrUpdateMacro(tCnt, tBody, tSpell);
 
 			if tMacroId then

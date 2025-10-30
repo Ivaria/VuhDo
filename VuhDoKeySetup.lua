@@ -179,7 +179,7 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 				else
 					-- build a spell macro
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit));
+					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit, aUseMouseover));
 				end
 			else
 				tMacroId = GetMacroIndexByName(anAction);
@@ -228,7 +228,7 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 
 		if (tHostSpell or "") ~= "" or (tActionLow or "") ~= "" then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell));
+				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell, aUseMouseover));
 		else
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, nil);
 		end
