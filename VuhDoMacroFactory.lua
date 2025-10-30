@@ -263,6 +263,7 @@ end
 
 --
 local tIndex;
+local tUseMouseover;
 function VUHDO_buildTargetButtonMacroText(aTarget, aFriendlyAction, aHostileAction)
 
 	tIndex = aFriendlyAction .. "*" .. aHostileAction;
@@ -271,7 +272,9 @@ function VUHDO_buildTargetButtonMacroText(aTarget, aFriendlyAction, aHostileActi
 		VUHDO_TARGET_MACRO_CACHE[tIndex] = VUHDO_generateTargetMacroText(aTarget, aFriendlyAction, aHostileAction);
 	end
 
-	return VUHDO_replaceMacroTemplates(VUHDO_TARGET_MACRO_CACHE[tIndex], aTarget);
+	tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
+
+	return VUHDO_replaceMacroTemplates(VUHDO_TARGET_MACRO_CACHE[tIndex], aTarget, tUseMouseover);
 
 end
 
@@ -532,42 +535,36 @@ function VUHDO_buildMacroText(anAction, anIsKeyboard, aTarget)
 	tPet = VUHDO_getMacroPetUnit(aTarget);
 
 	tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
-
-	-- Check for config change and clear cache if needed
 	tNewEnabled = tUseMouseover;
+
 	if VUHDO_LAST_COMBAT_ROSTER_ENABLED ~= tNewEnabled then
 		VUHDO_LAST_COMBAT_ROSTER_ENABLED = tNewEnabled;
-		VUHDO_RAID_MACRO_CACHE = {};  -- Clear cache
+
+		VUHDO_RAID_MACRO_CACHE = { };
+
 		if not InCombatLockdown() then
-			VUHDO_refreshUI();  -- Rebuild all buttons
+VUHDO_refreshUI();
 		end
 	end
 
-	-- Build cache key
 	if anIsKeyboard then
 		tIndex = anAction .. (tPet and (anAction .. "X") or (anAction .. "K"));
 	else
 		tIndex = anAction .. (tPet and (anAction .. "P") or anAction);
 	end
 
-	-- Add mode to cache key
 	if tUseMouseover then
 		tIndex = tIndex .. "_MO";
 	end
 
-	-- Generate or retrieve from cache
 	if not VUHDO_RAID_MACRO_CACHE[tIndex] then
 		VUHDO_RAID_MACRO_CACHE[tIndex] = VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, tPet, tUseMouseover);
 	end
 
-	-- Skip template replacement if using mouseover
-	if tUseMouseover then
-		tText = VUHDO_RAID_MACRO_CACHE[tIndex];
-	else
-		tText = VUHDO_replaceMacroTemplates(VUHDO_RAID_MACRO_CACHE[tIndex], aTarget);
-	end
+	tText = VUHDO_replaceMacroTemplates(VUHDO_RAID_MACRO_CACHE[tIndex], aTarget, tUseMouseover);
 
 	--VUHDO_DEBUG[tIndex] = tText;
+
 	if anIsKeyboard and #tText > 256 then
 		VUHDO_Msg(VUHDO_I18N_MACRO_KEY_ERR_1 .. anAction .. " (" .. #tText .. VUHDO_I18N_MACRO_KEY_ERR_2, 1, 0.3, 0.3);
 	end
