@@ -186,15 +186,19 @@ local tLowerFriendly, tLowerHostile, tStopText;
 local tIsNoHelp;
 local function VUHDO_generateTargetMacroText(aTarget, aFriendlyAction, aHostileAction)
 
-	if not aFriendlyAction or not aHostileAction then	return ""; end
+	if not aFriendlyAction or not aHostileAction then
+		return "";
+	end
 
 	tMacroId = GetMacroIndexByName(aHostileAction);
+
 	if tMacroId == 0 then
 		tMacroId = GetMacroIndexByName(aFriendlyAction);
 	end
 
 	if (tMacroId ~= 0) then
 		_, _, tMacroText = GetMacroInfo(tMacroId);
+
 		return tMacroText;
 	end
 
@@ -304,7 +308,7 @@ function VUHDO_buildFocusMacroText(aTarget, aUseMouseover)
 	end
 
 	if tPet then
-		tPetToken = aUseMouseover and "@mouseover" or "@" .. tPet;
+		tPetToken = aUseMouseover and "@mouseoverpet" or "@" .. tPet;
 
 		return format("/focus [%s,help][%s,help][%s]", tUnitToken, tPetToken, tUnitToken);
 	else
@@ -330,7 +334,7 @@ function VUHDO_buildTargetMacroText(aTarget, aUseMouseover)
 	end
 
 	if tPet then
-		tPetToken = aUseMouseover and "@mouseover" or "@" .. tPet;
+		tPetToken = aUseMouseover and "@mouseoverpet" or "@" .. tPet;
 
 		return format("/tar [%s,help][%s,help][%s]", tUnitToken, tPetToken, tUnitToken);
 	else
@@ -344,6 +348,7 @@ end
 --
 local tPet;
 local tUnitToken;
+local tPetToken;
 function VUHDO_buildAssistMacroText(aTarget, aUseMouseover)
 
 	tPet = VUHDO_getMacroPetUnit(aTarget);
@@ -355,7 +360,7 @@ function VUHDO_buildAssistMacroText(aTarget, aUseMouseover)
 	end
 
 	if tPet then
-		tPetToken = aUseMouseover and "@mouseover" or "@" .. tPet;
+		tPetToken = aUseMouseover and "@mouseoverpet" or "@" .. tPet;
 
 		return format("/assist [%s,help][%s,help][%s]", tUnitToken, tPetToken, tUnitToken);
 	else
@@ -428,11 +433,11 @@ local VUHDO_PROHIBIT_HELP = {
 
 --
 local tRezText;
-local function VUHDO_getAutoBattleRezText(anIsKeyboard)
+local function VUHDO_getAutoBattleRezText(aUseMouseover)
 
 	if VUHDO_SPELL_CONFIG["autoBattleRez"] and
 		("DRUID" == VUHDO_PLAYER_CLASS or "PALADIN" == VUHDO_PLAYER_CLASS or "DEATHKNIGHT" == VUHDO_PLAYER_CLASS or "WARLOCK" == VUHDO_PLAYER_CLASS) then
-		tRezText = "/use [dead,combat,@" .. (anIsKeyboard and "mouseover" or "vuhdo");
+		tRezText = "/use [dead,combat,@" .. (aUseMouseover and "mouseover" or "vuhdo");
 
 		if VUHDO_SPELL_CONFIG["smartCastModi"] ~= "all" then
 			tRezText = tRezText .. ",mod:" .. VUHDO_SPELL_CONFIG["smartCastModi"];
@@ -483,7 +488,7 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		tModiSpell = "help,nodead,";
 	end
 
-	tSpellPost = VUHDO_getAutoBattleRezText(anIsKeyboard);
+	tSpellPost = VUHDO_getAutoBattleRezText(aUseMouseover);
 
 	-- Legion introduced an Order Hall follower for Shamans which yields a mission reward
 	-- This reward is an item ambiguously named 'Healing Stream Totem'
