@@ -1233,11 +1233,11 @@ VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "此debuff在忽略清單中，將被隱藏。";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "忽略 "%s" 將覆蓋現有的自定義debuff設定。";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED = "已移除與自定義debuff衝突的忽略清單條目 "%s": "%s"";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "自定義debuff "%s" 在忽略清單中且將被隱藏。";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "已移除在忽略清單中的自定義debuff "%s" 且將保持隱藏。";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "從忽略清單中刪除 "%s" 現在將允許自定義debuff設定生效。";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "忽略 \"%s\" 將覆蓋現有的自定義debuff設定。";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED = "已移除與自定義debuff衝突的忽略清單條目 \"%s\": \"%s\"";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "自定義debuff \"%s\" 在忽略清單中且將被隱藏。";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "已移除在忽略清單中的自定義debuff \"%s\" 且將保持隱藏。";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "從忽略清單中刪除 \"%s\" 現在將允許自定義debuff設定生效。";
 VUHDO_I18N_DEBUFF_ADDED_TO_IGNORE_LIST = "(De)Buff \"%s\" 已添加到忽略清單。";
 VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST = "(De)Buff \"%s\" 已從忽略清單中移除。";
 VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM = "(De)Buff \"%s\" 已添加到自定義debuff。";
