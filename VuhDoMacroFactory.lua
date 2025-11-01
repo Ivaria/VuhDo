@@ -472,6 +472,7 @@ local tVehicleCond;
 local tStopText;
 local tCastText;
 local tUnitToken;
+local tPetToken;
 local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, aPet, aUseMouseover)
 
 	if VUHDO_SPELL_CONFIG["IS_CANCEL_CURRENT"] then
@@ -501,8 +502,10 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 
 	if aUseMouseover then
 		tUnitToken = "@mouseover";
+		tPetToken = "@mouseoverpet";
 	else
 		tUnitToken = "@vuhdo";
+		tPetToken = "@vdpet";
 	end
 
 	if anIsKeyboard then
@@ -510,19 +513,19 @@ local function VUHDO_generateRaidMacroTemplate(anAction, anIsKeyboard, aTarget, 
 		tText = tText .. tSpellPost;
 	else
 		if aPet and VUHDO_SPELL_ID.REBIRTH ~= anAction and VUHDO_SPELL_ID.INTERCESSION ~= anAction then
-			tVehicleCond = "[nodead,help,@vdpet]";
+			tVehicleCond = "[nodead,help," .. tPetToken .. "]";
 		else
 			tVehicleCond = "";
 		end
 
 		-- Blizzard has broken the way vehicles work for the Antoran High Command encounter
 		-- For now just disable vehicle support (note: this breaks encounters like Malygos)
-		--tText = tText .. tCastText .. "[" .. tModiSpell .. "nounithasvehicleui,@vuhdo]" .. tVehicleCond .. " " .. anAction .. "\n";
+		--tText = tText .. tCastText .. "[" .. tModiSpell .. "nounithasvehicleui," .. tUnitToken .. "]" .. tVehicleCond .. " " .. anAction .. "\n";
 		tText = tText .. tCastText .. "[" .. tModiSpell .. tUnitToken .. "]" .. tVehicleCond .. " " .. anAction .. "\n";
 		tText = tText .. tSpellPost;
 
 		if aPet then
-			tText = tText .. "/tar [unithasvehicleui,@vdpet]\n";
+			tText = tText .. "/tar [unithasvehicleui," .. tPetToken .. "]\n";
 		end
 
 		if VUHDO_SPELL_CONFIG["IS_AUTO_TARGET"] then
