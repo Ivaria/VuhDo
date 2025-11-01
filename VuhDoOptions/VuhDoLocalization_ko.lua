@@ -1236,11 +1236,11 @@ VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "이 디버프는 무시 목록에 있어 숨겨집니다.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = ""%s" 무시는 기존 사용자 정의 디버프 설정을 덮어씁니다.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED = "사용자 정의 디버프와 충돌하는 무시 목록 항목 "%s"이(가) 제거되었습니다: "%s"";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "사용자 정의 디버프 "%s"이(가) 무시 목록에 있으며 숨겨집니다.";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "무시 목록에 있던 사용자 정의 디버프 "%s"이(가) 제거되었으며 계속 숨겨집니다.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = ""%s"을(를) 무시 목록에서 제거하면 이제 사용자 정의 디버프 설정이 적용됩니다.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "\"%s\" 무시는 기존 사용자 정의 디버프 설정을 덮어씁니다.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED = "사용자 정의 디버프와 충돌하는 무시 목록 항목 \"%s\"이(가) 제거되었습니다: \"%s\"";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "사용자 정의 디버프 \"%s\"이(가) 무시 목록에 있으며 숨겨집니다.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "무시 목록에 있던 사용자 정의 디버프 \"%s\"이(가) 제거되었으며 계속 숨겨집니다.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "\"%s\"을(를) 무시 목록에서 제거하면 이제 사용자 정의 디버프 설정이 적용됩니다.";
 VUHDO_I18N_DEBUFF_ADDED_TO_IGNORE_LIST = "(De)Buff \"%s\"이(가) 무시 목록에 추가되었습니다.";
 VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST = "(De)Buff \"%s\"이(가) 무시 목록에서 제거되었습니다.";
 VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM = "(De)Buff \"%s\"이(가) 사용자 정의 디버프에 추가되었습니다.";

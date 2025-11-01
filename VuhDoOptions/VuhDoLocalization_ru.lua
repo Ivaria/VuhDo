@@ -1406,11 +1406,11 @@ VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Этот дебафф находится в списке игнорирования и будет скрыт.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Игнорирование "%s" переопределяет существующие настройки пользовательского дебаффа.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED = "Удалена запись списка игнорирования "%s", которая конфликтует с пользовательскими дебаффами: "%s"";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "Пользовательский дебафф "%s" находится в списке игнорирования и будет скрыт.";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "Удалён пользовательский дебафф "%s", который был в списке игнорирования и останется скрытым.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "Удаление "%s" из списка игнорирования теперь позволит пользовательским настройкам дебаффа вступить в силу.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Игнорирование \"%s\" переопределяет существующие настройки пользовательского дебаффа.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED = "Удалена запись списка игнорирования \"%s\", которая конфликтует с пользовательскими дебаффами: \"%s\"";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "Пользовательский дебафф \"%s\" находится в списке игнорирования и будет скрыт.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "Удалён пользовательский дебафф \"%s\", который был в списке игнорирования и останется скрытым.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "Удаление \"%s\" из списка игнорирования теперь позволит пользовательским настройкам дебаффа вступить в силу.";
 VUHDO_I18N_DEBUFF_ADDED_TO_IGNORE_LIST = "(De)Buff \"%s\" добавлен в список игнорирования.";
 VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST = "(De)Buff \"%s\" удален из списка игнорирования.";
 VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM = "(De)Buff \"%s\" добавлен к пользовательским дебаффам.";
