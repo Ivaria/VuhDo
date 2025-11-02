@@ -41,7 +41,7 @@ local tOnAttributeChanged = [=[
 
 			if not tUnit and tOldUnit then
 				tManager:RunAttribute("vuhdo_clear_unit_method", tOldUnit);
-			elseif tUnit then
+			elseif tUnit and tUnit ~= tOldUnit then
 				tManager:RunAttribute("vuhdo_process_unit_method", tUnit);
 			end
 
