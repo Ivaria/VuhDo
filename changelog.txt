@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed group target type auras in Buff Watch  
   
   
 Improvements:  
