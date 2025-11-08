@@ -1063,18 +1063,14 @@ do
 			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 
-				if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
-					VUHDO_updateShieldBar(anArg1);
-				end
+				VUHDO_updateShieldBar(anArg1);
 			end
 
 		elseif "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" == anEvent then
 			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 
-				if VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"] then
-					VUHDO_updateHealAbsorbBar(anArg1);
-				end
+				VUHDO_updateHealAbsorbBar(anArg1);
 			end
 
 		elseif "UNIT_SPELLCAST_SENT" == anEvent then

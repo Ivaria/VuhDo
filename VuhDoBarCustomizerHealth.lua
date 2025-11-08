@@ -250,21 +250,60 @@ local tIsInvertGrowth, tIsTurnAxisOvershield;
 local tPixelThreshold;
 function VUHDO_updateShieldBar(aUnit, aHealthPlusIncQuota, aAmountInc)
 
-	if not VUHDO_CONFIG["SHOW_SHIELD_BAR"] then 
-		return;
-	end
-
 	tInfo = VUHDO_RAID[aUnit];
 	tAllButtons = VUHDO_getUnitButtons(VUHDO_resolveVehicleUnit(aUnit));
 
-	if not tInfo or not tAllButtons or tInfo["healthmax"] <= 0 then
+	if not tAllButtons then
+		return;
+	end
+
+	if not tInfo then
+		for _, tButton in pairs(tAllButtons) do
+			tShieldBar = VUHDO_getHealthBar(tButton, 19);
+
+			if tShieldBar then
+				tShieldBar:SetValueRange(0, 0);
+			end
+
+			tHealthBar = VUHDO_getHealthBar(tButton, 1);
+			tOvershieldBar = VUHDO_getOvershieldBarTexture(tHealthBar);
+
+			if tOvershieldBar then
+				tOvershieldBar:Hide();
+			end
+		end
+
+		return;
+	end
+
+	if not VUHDO_CONFIG["SHOW_SHIELD_BAR"] or tInfo["healthmax"] <= 0 then
+		for _, tButton in pairs(tAllButtons) do
+			tShieldBar = VUHDO_getHealthBar(tButton, 19);
+
+			if tShieldBar then
+				tShieldBar:SetValueRange(0, 0);
+			end
+
+			tHealthBar = VUHDO_getHealthBar(tButton, 1);
+			tOvershieldBar = VUHDO_getOvershieldBarTexture(tHealthBar);
+
+			if tOvershieldBar then
+				tOvershieldBar:Hide();
+			end
+		end
+
 		return;
 	end
 
 	if not tInfo["connected"] or tInfo["dead"] then
 		for _, tButton in pairs(tAllButtons) do
 			tHealthBar = VUHDO_getHealthBar(tButton, 1);
+			tShieldBar = VUHDO_getHealthBar(tButton, 19);
 			tOvershieldBar = VUHDO_getOvershieldBarTexture(tHealthBar);
+
+			if tShieldBar then
+				tShieldBar:SetValueRange(0, 0);
+			end
 
 			tOvershieldBar:Hide();
 		end
@@ -434,14 +473,23 @@ local tIsInvertGrowth, tIsTurnAxisHealAbsorb;
 local tPixelThreshold;
 function VUHDO_updateHealAbsorbBar(aUnit)
 
-	if not VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"] then 
-		return; 
-	end
-
 	tInfo = VUHDO_RAID[aUnit];
 	tAllButtons = VUHDO_getUnitButtons(VUHDO_resolveVehicleUnit(aUnit));
 
-	if not tInfo or not tAllButtons or tInfo["healthmax"] <= 0 then
+	if not tAllButtons then
+		return;
+	end
+
+	if not VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"] or not tInfo or tInfo["healthmax"] <= 0 then
+		for _, tButton in pairs(tAllButtons) do
+			tHealthBar = VUHDO_getHealthBar(tButton, 1);
+			tHealAbsorbBar = VUHDO_getHealAbsorbBarTexture(tHealthBar);
+
+			if tHealAbsorbBar then
+				tHealAbsorbBar:Hide();
+			end
+		end
+
 		return;
 	end
 
@@ -613,13 +661,8 @@ local function VUHDO_updateIncHeal(aUnit)
 		end
 	end
 
-	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
-		VUHDO_updateShieldBar(aUnit, tHealthPlusInc, tAmountInc);
-	end
-
-	if VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"] then
-		VUHDO_updateHealAbsorbBar(aUnit);
-	end
+	VUHDO_updateShieldBar(aUnit, tHealthPlusInc, tAmountInc);
+	VUHDO_updateHealAbsorbBar(aUnit);
 
 	return;
 
