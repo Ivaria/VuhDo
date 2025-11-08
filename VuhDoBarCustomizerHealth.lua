@@ -613,8 +613,13 @@ local function VUHDO_updateIncHeal(aUnit)
 		end
 	end
 
-	VUHDO_updateShieldBar(aUnit, tHealthPlusInc, tAmountInc);
-	VUHDO_updateHealAbsorbBar(aUnit);
+	if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
+		VUHDO_updateShieldBar(aUnit, tHealthPlusInc, tAmountInc);
+	end
+
+	if VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"] then
+		VUHDO_updateHealAbsorbBar(aUnit);
+	end
 
 	return;
 

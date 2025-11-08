@@ -17,7 +17,6 @@ local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
 
-
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
 
@@ -1063,13 +1062,19 @@ do
 		elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
 			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
-				VUHDO_updateShieldBar(anArg1);
+
+				if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
+					VUHDO_updateShieldBar(anArg1);
+				end
 			end
 
 		elseif "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" == anEvent then
 			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
-				VUHDO_updateHealAbsorbBar(anArg1);
+
+				if VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"] then
+					VUHDO_updateHealAbsorbBar(anArg1);
+				end
 			end
 
 		elseif "UNIT_SPELLCAST_SENT" == anEvent then
@@ -1807,6 +1812,8 @@ end
 
 
 --
+local tIsShieldInterest;
+local tIsHealAbsorbInterest;
 function VUHDO_updateGlobalToggles()
 
 	if not VUHDO_INSTANCE then
@@ -1887,14 +1894,21 @@ function VUHDO_updateGlobalToggles()
 	VUHDO_UnRegisterEvent(not VUHDO_CONFIG["IS_READY_CHECK_DISABLED"],
 		"READY_CHECK", "READY_CHECK_CONFIRM", "READY_CHECK_FINISHED");
 
-	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD] =
+	tIsShieldInterest =
 		VUHDO_PANEL_SETUP["BAR_COLORS"]["HOTS"]["showShieldAbsorb"]
 			or VUHDO_CONFIG["SHOW_SHIELD_BAR"]
-			or VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"]
 			or VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_SHIELD);
 
-	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD], "UNIT_ABSORB_AMOUNT_CHANGED");
-	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD], "UNIT_HEAL_ABSORB_AMOUNT_CHANGED");
+	tIsHealAbsorbInterest =
+		VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"]
+			or VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_SHIELD);
+
+	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SHIELD] =
+		tIsShieldInterest
+			or tIsHealAbsorbInterest;
+
+	VUHDO_UnRegisterEvent(tIsShieldInterest, "UNIT_ABSORB_AMOUNT_CHANGED");
+	VUHDO_UnRegisterEvent(tIsHealAbsorbInterest, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED");
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE] = VUHDO_CONFIG["SHOW_SPELL_TRACE"]
 		or VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_SPELL_TRACE);
