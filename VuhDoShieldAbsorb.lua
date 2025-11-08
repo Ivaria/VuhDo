@@ -442,8 +442,13 @@ function VUHDO_parseCombatLogShieldAbsorb(aMessage, aSrcGuid, aDstGuid, aShieldN
 	if tDoUpdate then
 		VUHDO_updateBouquetsForEvent(tUnit, 36); -- VUHDO_UPDATE_SHIELD
 
-		VUHDO_updateShieldBar(tUnit);
-		VUHDO_updateHealAbsorbBar(tUnit);
+		if VUHDO_CONFIG["SHOW_SHIELD_BAR"] then
+			VUHDO_updateShieldBar(tUnit);
+		end
+
+		if VUHDO_CONFIG["SHOW_HEAL_ABSORB_BAR"] then
+			VUHDO_updateHealAbsorbBar(tUnit);
+		end
 	end
 
 end
