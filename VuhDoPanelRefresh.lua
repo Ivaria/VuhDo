@@ -138,10 +138,23 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 	while true do
 		tButton = VUHDO_getHealButton(tButtonIdx, aPanelNum);
-		if not tButton then break; end
+
+		if not tButton then
+			break;
+		end
 
 		tButton["raidid"] = nil;
 		VUHDO_safeSetAttribute(tButton, "unit", nil);
+
+		for tDebuffCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+			tDebuffFrame = VUHDO_getBarIconFrame(tButton, tDebuffCnt);
+
+			if tDebuffFrame then
+				VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+				tDebuffFrame["raidid"] = nil;
+			end
+		end
+
 		VUHDO_PixelUtil.Hide(tButton);
 		tButtonIdx = tButtonIdx + 1;
 	end
