@@ -1122,23 +1122,10 @@ do
 				VUHDO_OPTIONS_SHOW_AFTER_BATTLE = false;
 			end
 
-			if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] and not InCombatLockdown() then
+			if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
 				VUHDO_computeAndPushSecureMappings();
 				VUHDO_refreshUI();
-
-				for tPanelNum = 1, 10 do
-					for tButtonIdx = 1, 50 do
-						tButton = VUHDO_getHealButton(tButtonIdx, tPanelNum);
-
-						if tButton then
-							tUnit = tButton:GetAttribute("unit");
-
-							if tUnit and tButton["raidid"] ~= tUnit then
-								tButton["raidid"] = tUnit;
-							end
-						end
-					end
-				end
+				VUHDO_syncPanelButtonRaidIds();
 			end
 
 			VUHDO_setIsOutOfCombat(true);
@@ -1151,6 +1138,10 @@ do
 			end
 
 			VUHDO_processCombatUnsafeTasksBeforeLockdown();
+
+			if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
+				VUHDO_computeAndPushSecureMappings();
+			end
 
 			VUHDO_setIsOutOfCombat(false);
 

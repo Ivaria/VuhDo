@@ -306,6 +306,9 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 	if aUnit then
 		VUHDO_safeSetAttribute(aButton, "unit", aUnit);
 		aButton["raidid"] = aUnit;
+	else
+		VUHDO_safeSetAttribute(aButton, "unit", nil);
+		aButton["raidid"] = nil;
 	end
 
 	if not aButton:GetAttribute("vuhdo_tooltip_hook") then

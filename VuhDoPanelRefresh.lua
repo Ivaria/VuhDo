@@ -30,6 +30,7 @@ local VUHDO_reloadRaidMembers;
 local VUHDO_isPanelVisible;
 local VUHDO_positionHealButton;
 local VUHDO_positionTableHeaders;
+local VUHDO_computeAndPushSecureMappings;
 
 local sShowPanels;
 
@@ -62,6 +63,7 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_isPanelVisible = _G["VUHDO_isPanelVisible"];
 	VUHDO_positionHealButton = _G["VUHDO_positionHealButton"];
 	VUHDO_positionTableHeaders = _G["VUHDO_positionTableHeaders"];
+	VUHDO_computeAndPushSecureMappings = _G["VUHDO_computeAndPushSecureMappings"];
 
 	sShowPanels = VUHDO_CONFIG["SHOW_PANELS"];
 
@@ -343,11 +345,11 @@ function VUHDO_refreshUI()
 
 	VUHDO_reloadRaidMembers();
 
+	VUHDO_refreshUiNoMembers();
+
 	if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] and not InCombatLockdown() then
 		VUHDO_computeAndPushSecureMappings();
 	end
-
-	VUHDO_refreshUiNoMembers();
 
 	VUHDO_IS_RELOADING = false;
 
@@ -421,75 +423,4 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 
 	return;
 
-end
-
-
-
-do
-	--
-	local tUnitMappings = { };
-	local tFallbackPanels;
-	local tModels;
-	local tSetup;
-	local tSortBy;
-	local tButtonIdx;
-	local tColIdx;
-	local tGroupArray;
-	local tUnitCount;
-	function VUHDO_computeAndPushSecureMappings()
-
-		if InCombatLockdown() then
-			return false;
-		end
-
-		VUHDO_clearSecureMappings();
-
-		table.wipe(tUnitMappings);
-
-		tFallbackPanels = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanels"] or { 1 };
-
-		VUHDO_setSecureFallbackPanels(tFallbackPanels);
-
-		for tPanelNum = 1, 10 do
-			if VUHDO_isPanelVisible(tPanelNum) then
-				tModels = VUHDO_getDynamicModelArray(tPanelNum);
-				tSetup = VUHDO_PANEL_SETUP[tPanelNum];
-				tSortBy = tSetup["MODEL"]["sort"];
-
-				tButtonIdx = 1;
-				tColIdx = 1;
-
-				for tModelIndex, tModelId in ipairs(tModels) do
-					tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, tPanelNum, tModelIndex);
-
-					for _, tUnit in ipairs(tGroupArray) do
-						if not tUnitMappings[tUnit] then
-							tUnitMappings[tUnit] = {};
-						end
-
-						table.insert(tUnitMappings[tUnit], {tPanelNum, tButtonIdx});
-
-						tButtonIdx = tButtonIdx + 1;
-					end
-
-					tColIdx = tColIdx + 1;
-				end
-			end
-		end
-
-		tUnitCount = 0;
-
-		for tUnit, tMappings in pairs(tUnitMappings) do
-			VUHDO_pushSecureUnitMapping(tUnit, tMappings);
-
-			tUnitCount = tUnitCount + 1;
-		end
-
-		if VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] then
-			VUHDO_debugSecureEnvironment();
-		end
-
-		return true;
-
-	end
 end
