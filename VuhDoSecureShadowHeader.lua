@@ -3,6 +3,7 @@ local _;
 local tinsert = table.insert;
 
 local VUHDO_PLAYER_UNIT = "player";
+local VUHDO_MAX_SHADOW_BUTTONS = 40;
 
 local sManagerFrame;
 local sShadowHeader;
@@ -148,13 +149,36 @@ function VUHDO_initSecureShadowHeader()
 
 		sProcessQueue = newtable();
 		sClearQueue = newtable();
-
+		sProcessQueuePool = newtable();
 		sShadowLastUnit = newtable();
 		sShadowClearedUnit = newtable();
 
 		sPlayerRaidToken = nil;
-
 		sPendingRefresh = false;
+
+		sMaxShadowButtons = 40; -- VUHDO_MAX_SHADOW_BUTTONS
+
+		sFallbackMappingPool = newtable();
+
+		for tIdx = 1, sMaxShadowButtons do
+			local tMapping = newtable();
+			tMapping[1] = 0;
+			tMapping[2] = 0;
+
+			local tMappings = newtable();
+			tinsert(tMappings, tMapping);
+
+			local tPoolEntry = newtable();
+			tPoolEntry[1] = tMapping;
+			tPoolEntry[2] = tMappings;
+
+			tinsert(sFallbackMappingPool, tPoolEntry);
+
+			local tQueueEntry = newtable();
+			tinsert(sProcessQueuePool, tQueueEntry);
+		end
+
+		sFallbackPoolIndex = 1;
 	]=]);
 
 	sLastSecurePlayerToken = nil;
@@ -168,11 +192,19 @@ function VUHDO_initSecureShadowHeader()
 
 		local tQueueData = sProcessQueue[tShadowButtonId];
 
-		if tQueueData then
-			wipe(tQueueData);
-		else
-			tQueueData = newtable();
+		if not tQueueData then
+			local tPoolSize = #sProcessQueuePool;
+
+			if tPoolSize > 0 then
+				tQueueData = sProcessQueuePool[tPoolSize];
+				sProcessQueuePool[tPoolSize] = nil;
+			else
+				tQueueData = newtable();
+			end
+
 			sProcessQueue[tShadowButtonId] = tQueueData;
+		else
+			wipe(tQueueData);
 		end
 
 		local tRawUnit = tUnit;
@@ -190,10 +222,8 @@ function VUHDO_initSecureShadowHeader()
 
 		if tOldUnit and tPreviousAlias and tOldUnit == tPreviousAlias then
 			sPlayerRaidToken = tRawUnit or tPreviousAlias;
-			tPreviousAlias = sPlayerRaidToken;
-		elseif not tPreviousAlias and tRawUnit then
+		elseif not tPreviousAlias and tRawUnit and tRawUnit ~= "player" then
 			sPlayerRaidToken = tRawUnit;
-			tPreviousAlias = sPlayerRaidToken;
 		end
 
 		if tRawUnit and (tRawUnit == "player" or (sPlayerRaidToken and tRawUnit == sPlayerRaidToken)) then
@@ -202,7 +232,7 @@ function VUHDO_initSecureShadowHeader()
 			tUnit = tRawUnit;
 		end
 
-		if tPrevUnit and (tPrevUnit == "player" or (sPlayerRaidToken and tPrevUnit == sPlayerRaidToken)) then
+		if tPrevUnit and (tPrevUnit == "player" or (tPreviousAlias and tPrevUnit == tPreviousAlias)) then
 			tPrevUnit = "player";
 		end
 
@@ -243,6 +273,11 @@ function VUHDO_initSecureShadowHeader()
 
 	sManagerFrame:SetAttribute("_onstate-vuhdo_batch_timer", [=[
 		if newstate ~= "process" and sPendingRefresh then
+			if next(sClearQueue) == nil and next(sProcessQueue) == nil then
+				sPendingRefresh = false;
+
+				return;
+			end
 
 			for tShadowButtonId, tOldUnit in pairs(sClearQueue) do
 				local tHasPreMapping = sShadowButtonHasMapping[tShadowButtonId];
@@ -325,7 +360,7 @@ function VUHDO_initSecureShadowHeader()
 									tRealFrame:SetAttribute("unit", tUnit);
 
 									tRealFrame:Show();
-							end
+								end
 							end
 						end
 					end
@@ -388,22 +423,35 @@ function VUHDO_initSecureShadowHeader()
 								local tFirstPanel = sFallbackPanels[1];
 								local tFirstButton = sNextFallbackButton[tFirstPanel] - 1;
 
-								local tTempMapping = newtable();
-								tTempMapping[1] = tFirstPanel;
-								tTempMapping[2] = tFirstButton;
+								if sFallbackPoolIndex <= sMaxShadowButtons then
+									local tPoolEntry = sFallbackMappingPool[sFallbackPoolIndex];
+									sFallbackPoolIndex = sFallbackPoolIndex + 1;
 
-								local tTempMappings = newtable();
-								tinsert(tTempMappings, tTempMapping);
+									local tTempMapping = tPoolEntry[1];
+									local tTempMappings = tPoolEntry[2];
 
-								sUnitMap[tUnit] = tTempMappings;
+									tTempMapping[1] = tFirstPanel;
+									tTempMapping[2] = tFirstButton;
+
+									sUnitMap[tUnit] = tTempMappings;
+								end
 							end
 						end
 					end
 				end
 			end
 
-			wipe(sProcessQueue);
+			for tShadowButtonId, tQueueData in pairs(sProcessQueue) do
+				wipe(tQueueData);
+
+				tinsert(sProcessQueuePool, tQueueData);
+
+				sProcessQueue[tShadowButtonId] = nil;
+			end
+
 			wipe(sClearQueue);
+
+			sFallbackPoolIndex = 1;
 
 			sPendingRefresh = false;
 		end
