@@ -118,6 +118,7 @@ local tFallbackCol;
 local tFallbackRow;
 local tCleanupButton;
 local tFallbackUnit;
+local tDebuffFrame;
 local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 	if InCombatLockdown() then
@@ -161,7 +162,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			VUHDO_addUnitButton(tButton, aPanelNum);
 			if not tButton:IsShown() then tButton:Show(); end -- Wg. Secure handlers?
 
-			-- Bei Profil-Wechseln existiert der Button schon, hat aber die falsche Größe
+			-- Bei Profil-Wechseln existiert der Button schon, hat aber die falsche Grï¿½ï¿½e
 			VUHDO_initLocalVars(aPanelNum);
 			VUHDO_initHealButton(tButton, aPanelNum);
 			VUHDO_positionHealButton(tButton, aPanelNum);
@@ -254,17 +255,25 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 	end
 
 	while true do
-		tCleanupButton = VUHDO_getHealButton(tButtonIdx, aPanelNum);
+		tButton = VUHDO_getHealButton(tButtonIdx, aPanelNum);
 
-		if not tCleanupButton then
+		if not tButton then
 			break;
 		end
 
-		tCleanupButton["raidid"] = nil;
-		VUHDO_safeSetAttribute(tCleanupButton, "unit", nil);
+		tButton["raidid"] = nil;
+		VUHDO_safeSetAttribute(tButton, "unit", nil);
 
-		VUHDO_PixelUtil.Hide(tCleanupButton);
+		for tDebuffCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+			tDebuffFrame = VUHDO_getBarIconFrame(tButton, tDebuffCnt);
 
+			if tDebuffFrame then
+				VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+				tDebuffFrame["raidid"] = nil;
+			end
+		end
+
+		VUHDO_PixelUtil.Hide(tButton);
 		tButtonIdx = tButtonIdx + 1;
 	end
 

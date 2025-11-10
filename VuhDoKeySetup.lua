@@ -301,14 +301,34 @@ local tClearBindsSnippet = [[
 	self:ClearBindings();
 ]]
 local tUseMouseover;
+local tDebuffFrame;
 function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceTarget, anIsTgButton, anIsIcButton)
 
 	if aUnit then
 		VUHDO_safeSetAttribute(aButton, "unit", aUnit);
 		aButton["raidid"] = aUnit;
+
+		for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+			tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+
+			if tDebuffFrame then
+				VUHDO_safeSetAttribute(tDebuffFrame, "unit", aUnit);
+				tDebuffFrame["raidid"] = aUnit;
+			end
+		end
+
 	else
 		VUHDO_safeSetAttribute(aButton, "unit", nil);
 		aButton["raidid"] = nil;
+
+		for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+			tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+
+			if tDebuffFrame then
+				VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+				tDebuffFrame["raidid"] = nil;
+			end
+		end
 	end
 
 	if not aButton:GetAttribute("vuhdo_tooltip_hook") then
