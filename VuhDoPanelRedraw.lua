@@ -1324,6 +1324,7 @@ local tHealButton;
 local tGroupPanel;
 local tNumButtons;
 local tCnt;
+local tDebuffFrame;
 local function VUHDO_initAllHealButtons(aPanel, aPanelNum)
 
 	tNumButtons = VUHDO_getNumButtonsPanel(aPanelNum);
@@ -1346,6 +1347,15 @@ local function VUHDO_initAllHealButtons(aPanel, aPanelNum)
 		if tHealButton then
 			tHealButton["raidid"] = nil;
 			VUHDO_safeSetAttribute(tHealButton, "unit", nil);
+
+			for tDebuffCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+				tDebuffFrame = VUHDO_getBarIconFrame(tHealButton, tDebuffCnt);
+
+				if tDebuffFrame then
+					VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+					tDebuffFrame["raidid"] = nil;
+				end
+			end
 
 			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 			VUHDO_PixelUtil.Hide(tHealButton);
@@ -1869,6 +1879,7 @@ end
 local tCnt;
 local tHealButton;
 local tGroupPanel;
+local tDebuffFrame;
 function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
 
 	if sButtonInitSemaphores[aPanelNum] and not sButtonInitSemaphores[aPanelNum]:waitFor(VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum) then
@@ -1883,6 +1894,15 @@ function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
 		if tHealButton then
 			tHealButton["raidid"] = nil;
 			VUHDO_safeSetAttribute(tHealButton, "unit", nil);
+
+			for tDebuffCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+				tDebuffFrame = VUHDO_getBarIconFrame(tHealButton, tDebuffCnt);
+
+				if tDebuffFrame then
+					VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+					tDebuffFrame["raidid"] = nil;
+				end
+			end
 
 			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 			VUHDO_PixelUtil.Hide(tHealButton);
