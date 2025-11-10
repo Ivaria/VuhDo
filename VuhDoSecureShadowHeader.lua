@@ -776,6 +776,7 @@ local tButtonIdx;
 local tColIdx;
 local tGroupArray;
 local tUnitCount;
+local tNormalizedUnit;
 function VUHDO_computeAndPushSecureMappings()
 
 	if not sInitialized or InCombatLockdown() then
@@ -804,10 +805,10 @@ function VUHDO_computeAndPushSecureMappings()
 				tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, tPanelNum, tModelIndex);
 
 				for _, tUnit in ipairs(tGroupArray) do
-					local tNormalizedUnit = VUHDO_normalizeMappingUnit(tUnit);
+					tNormalizedUnit = VUHDO_normalizeMappingUnit(tUnit);
 
-					if not tUnitMappings[tNormalizedUnit] then
-						tUnitMappings[tNormalizedUnit] = {};
+					if tNormalizedUnit and not tUnitMappings[tNormalizedUnit] then
+						tUnitMappings[tNormalizedUnit] = { };
 					end
 
 					tinsert(tUnitMappings[tNormalizedUnit], {tPanelNum, tButtonIdx});
