@@ -3,12 +3,20 @@ local _;
 local tinsert = table.insert;
 
 local VUHDO_PLAYER_UNIT = "player";
-local VUHDO_MAX_SHADOW_BUTTONS = 40;
 
 local sManagerFrame;
 local sShadowHeader;
 local sLastSecurePlayerToken;
 local sInitialized = false;
+
+
+
+--
+function VUHDO_isSecureShadowHeaderReady()
+
+	return sInitialized;
+
+end
 
 
 
@@ -27,15 +35,6 @@ local function VUHDO_normalizeMappingUnit(aUnit)
 	end
 
 	return aUnit;
-
-end
-
-
-
---
-function VUHDO_isSecureShadowHeaderReady()
-
-	return sInitialized;
 
 end
 
@@ -123,9 +122,11 @@ function VUHDO_initSecureShadowHeader()
 		sManager = self;
 
 		sRealFrames = newtable();
+		sDebuffFrames = newtable();
 
 		for tPanelNum = 1, 10 do
 			sRealFrames[tPanelNum] = newtable();
+			sDebuffFrames[tPanelNum] = newtable();
 		end;
 
 		sUnitMap = newtable();
@@ -156,7 +157,7 @@ function VUHDO_initSecureShadowHeader()
 		sPlayerRaidToken = nil;
 		sPendingRefresh = false;
 
-		sMaxShadowButtons = 40; -- VUHDO_MAX_SHADOW_BUTTONS
+		sMaxShadowButtons = 40;
 
 		sFallbackMappingPool = newtable();
 
@@ -292,6 +293,13 @@ function VUHDO_initSecureShadowHeader()
 
 							if tRealFrame then
 								tRealFrame:SetAttribute("unit", nil);
+								local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
+
+								if tDebuffFrames then
+									for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+										tDebuffFrame:SetAttribute("unit", nil);
+									end
+								end
 							end
 						end
 					end
@@ -305,6 +313,14 @@ function VUHDO_initSecureShadowHeader()
 
 							if tRealFrame then
 								tRealFrame:SetAttribute("unit", nil);
+
+								local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
+
+								if tDebuffFrames then
+									for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+										tDebuffFrame:SetAttribute("unit", nil);
+									end
+								end
 
 								tRealFrame:Hide();
 							end
@@ -332,6 +348,14 @@ function VUHDO_initSecureShadowHeader()
 							if tFallbackFrame then
 								tFallbackFrame:SetAttribute("unit", nil);
 
+								local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
+
+								if tDebuffFrames then
+									for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+										tDebuffFrame:SetAttribute("unit", nil);
+									end
+								end
+
 								tFallbackFrame:Hide();
 							end
 						end
@@ -348,6 +372,14 @@ function VUHDO_initSecureShadowHeader()
 								if tRealFrame then
 									tRealFrame:SetAttribute("unit", nil);
 
+									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
+
+									if tDebuffFrames then
+										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+											tDebuffFrame:SetAttribute("unit", nil);
+										end
+									end
+
 									tRealFrame:Hide();
 								end
 							end
@@ -358,6 +390,14 @@ function VUHDO_initSecureShadowHeader()
 
 								if tRealFrame then
 									tRealFrame:SetAttribute("unit", tUnit);
+
+									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
+
+									if tDebuffFrames then
+										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+											tDebuffFrame:SetAttribute("unit", tUnit);
+										end
+									end
 
 									tRealFrame:Show();
 								end
@@ -385,8 +425,16 @@ function VUHDO_initSecureShadowHeader()
 								if tRealFrame then
 									tRealFrame:SetAttribute("unit", tUnit);
 
+									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
+
+									if tDebuffFrames then
+										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+											tDebuffFrame:SetAttribute("unit", tUnit);
+										end
+									end
+
 									tRealFrame:Show();
-							end
+								end
 							end
 						elseif tOldUnit and sUnitMap[tOldUnit] then
 							sUnitMap[tUnit] = sUnitMap[tOldUnit];
@@ -401,8 +449,16 @@ function VUHDO_initSecureShadowHeader()
 								if tRealFrame then
 									tRealFrame:SetAttribute("unit", tUnit);
 
+									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
+
+									if tDebuffFrames then
+										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+											tDebuffFrame:SetAttribute("unit", tUnit);
+										end
+									end
+
 									tRealFrame:Show();
-							end
+								end
 							end
 						else
 							for tFallbackIdx = 1, #sFallbackPanels do
@@ -412,6 +468,14 @@ function VUHDO_initSecureShadowHeader()
 
 								if tFallbackFrame then
 									tFallbackFrame:SetAttribute("unit", tUnit);
+
+									local tDebuffFrames = sDebuffFrames[tFallbackPanel] and sDebuffFrames[tFallbackPanel][tFallbackButton];
+
+									if tDebuffFrames then
+										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+											tDebuffFrame:SetAttribute("unit", tUnit);
+										end
+									end
 
 									tFallbackFrame:Show();
 
@@ -529,6 +593,38 @@ end
 
 
 --
+function VUHDO_registerSecureDebuffFrame(aPanelNum, aButtonNum, anIconNum, aDebuffFrame)
+
+	if not sInitialized or InCombatLockdown() then
+		return false;
+	end
+
+	sManagerFrame:SetFrameRef("tempDebuffFrame", aDebuffFrame);
+
+	sManagerFrame:Execute(format([=[
+		local tPanelNum = %d;
+		local tButtonNum = %d;
+		local tIconNum = %d;
+		local tDebuffFrame = self:GetFrameRef("tempDebuffFrame");
+
+		if not sDebuffFrames[tPanelNum] then
+			sDebuffFrames[tPanelNum] = newtable();
+		end
+
+		if not sDebuffFrames[tPanelNum][tButtonNum] then
+			sDebuffFrames[tPanelNum][tButtonNum] = newtable();
+		end
+
+		sDebuffFrames[tPanelNum][tButtonNum][tIconNum] = tDebuffFrame;
+	]=], aPanelNum, aButtonNum, anIconNum));
+
+	return true;
+
+end
+
+
+
+--
 function VUHDO_debugSecureEnvironment()
 
 	if not sInitialized then
@@ -543,12 +639,21 @@ function VUHDO_debugSecureEnvironment()
 
 	sManagerFrame:Execute([=[
 		local tFrameCount = 0;
+		local tDebuffFrameCount = 0;
 
 		for tPanel = 1, 10 do
 			if sRealFrames[tPanel] then
 				for tButton = 1, 40 do
 					if sRealFrames[tPanel][tButton] then
 						tFrameCount = tFrameCount + 1;
+					end
+
+					if sDebuffFrames[tPanel] and sDebuffFrames[tPanel][tButton] then
+						for tIconNum, tDebuffFrame in pairs(sDebuffFrames[tPanel][tButton]) do
+							if tDebuffFrame then
+								tDebuffFrameCount = tDebuffFrameCount + 1;
+							end
+						end
 					end
 				end
 			end
@@ -566,7 +671,7 @@ function VUHDO_debugSecureEnvironment()
 			tFallbackMappingCount = tFallbackMappingCount + 1;
 		end
 
-		print(format("VuhDo: Secure environment: %d real frames registered, %d shadow-to-real mappings, %d fallback unit mappings, player token: %s", tFrameCount, tShadowMappingCount, tFallbackMappingCount, tostring(sPlayerRaidToken)));
+		print(format("VuhDo: Secure environment: %d real frames, %d debuff frames, %d shadow-to-real mappings, %d fallback unit mappings, player token: %s", tFrameCount, tDebuffFrameCount, tShadowMappingCount, tFallbackMappingCount, tostring(sPlayerRaidToken)));
 	]=]);
 
 	return;
@@ -669,11 +774,11 @@ local function VUHDO_setSecurePlayerToken(aPlayerToken)
 	if aPlayerToken then
 		sManagerFrame:Execute(format([=[
 			sPlayerRaidToken = %q;
-	]=], aPlayerToken));
+		]=], aPlayerToken));
 	else
 		sManagerFrame:Execute([=[
 			sPlayerRaidToken = nil;
-	]=]);
+		]=]);
 	end
 
 	sLastSecurePlayerToken = aPlayerToken;
