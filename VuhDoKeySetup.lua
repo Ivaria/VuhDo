@@ -278,7 +278,7 @@ end
 
 
 
--- Parse and interpret action-type
+--
 local tPreAction;
 local tIsWheel;
 local tHostSpell;
@@ -307,12 +307,14 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		VUHDO_safeSetAttribute(aButton, "unit", aUnit);
 		aButton["raidid"] = aUnit;
 
-		for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-			tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+		if not anIsTgButton then
+			for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+				tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
 
-			if tDebuffFrame then
-				VUHDO_safeSetAttribute(tDebuffFrame, "unit", aUnit);
-				tDebuffFrame["raidid"] = aUnit;
+				if tDebuffFrame then
+					VUHDO_safeSetAttribute(tDebuffFrame, "unit", aUnit);
+					tDebuffFrame["raidid"] = aUnit;
+				end
 			end
 		end
 	end
@@ -325,11 +327,13 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			aButton:HookScript("OnEnter",	function(self) VuhDoActionOnEnter(self); end);
 			aButton:HookScript("OnLeave",	function(self) VuhDoActionOnLeave(self); end);
 		end
+
 		VUHDO_safeSetAttribute(aButton, "vd_tt_hook", true);
 	end
 
 	if sIsCliqueCompat then
 		VUHDO_PixelUtil.EnableMouseWheel(aButton, 1);
+
 		return;
 	end
 
@@ -338,6 +342,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 	for tNoMinus, tWithMinus in pairs(VUHDO_MODIFIER_KEYS) do
 		for tCnt = 1, 16 do -- VUHDO_NUM_MOUSE_BUTTONS
 			tBinding = VUHDO_SPELL_ASSIGNMENTS[format("%s%d", tNoMinus, tCnt)];
+
 			VUHDO_setupHealButtonAttributes(tWithMinus, tCnt,
 				tPreAction or tBinding ~= nil and tBinding[3] or "",
 				aButton, anIsTgButton);
@@ -345,10 +350,13 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 	end
 
 	tIsWheel = false;
+
 	for tIndex, tSpellDescr in pairs(VUHDO_SPELLS_KEYBOARD["WHEEL"]) do
 		tHostSpell = VUHDO_SPELLS_KEYBOARD["HOSTILE_WHEEL"][tIndex][3];
+
 		if #tSpellDescr[3] > 0 or #tHostSpell > 0 then
 			tIsWheel = true;
+
 			VUHDO_setupHealButtonAttributes("", tSpellDescr[2], tSpellDescr[3], aButton, anIsTgButton, tIndex);
 		end
 	end
