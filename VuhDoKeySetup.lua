@@ -278,7 +278,7 @@ end
 
 
 
--- Parse and interpret action-type
+--
 local tPreAction;
 local tIsWheel;
 local tHostSpell;
@@ -304,29 +304,33 @@ local tUseMouseover;
 local tDebuffFrame;
 function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceTarget, anIsTgButton, anIsIcButton)
 
-	if aUnit then
+	if aUnit and not anIsIcButton then
 		VUHDO_safeSetAttribute(aButton, "unit", aUnit);
 		aButton["raidid"] = aUnit;
 
-		for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-			tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+		if not anIsTgButton then
+			for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+				tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
 
-			if tDebuffFrame then
-				VUHDO_safeSetAttribute(tDebuffFrame, "unit", aUnit);
-				tDebuffFrame["raidid"] = aUnit;
+				if tDebuffFrame then
+					VUHDO_safeSetAttribute(tDebuffFrame, "unit", aUnit);
+					tDebuffFrame["raidid"] = aUnit;
+				end
 			end
 		end
 
-	else
+	elseif not anIsIcButton then
 		VUHDO_safeSetAttribute(aButton, "unit", nil);
 		aButton["raidid"] = nil;
 
-		for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-			tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+		if not anIsTgButton then
+			for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+				tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
 
-			if tDebuffFrame then
-				VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
-				tDebuffFrame["raidid"] = nil;
+				if tDebuffFrame then
+					VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+					tDebuffFrame["raidid"] = nil;
+				end
 			end
 		end
 	end
