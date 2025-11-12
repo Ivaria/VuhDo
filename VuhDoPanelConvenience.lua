@@ -868,7 +868,7 @@ function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
 		VUHDO_positionHealButton(tNewButton, aPanelNum);
 
 		if not InCombatLockdown() and VUHDO_isSecureShadowHeaderReady() then
-			VUHDO_registerSecureRealFrame(aPanelNum, aButtonNum, tNewButton);
+			VUHDO_registerSecureRealButton(aPanelNum, aButtonNum, tNewButton);
 		end
 
 		if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then

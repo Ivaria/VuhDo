@@ -43,12 +43,12 @@ end
 
 --
 local tInitConfigFunc = [=[
-	tinsert(sShadowFrames, self);
+	tinsert(sShadowButtons, self);
 
-	self:SetID(#sShadowFrames);
+	self:SetID(#sShadowButtons);
 	self:SetAttribute("vuhdo_manager_ref", sManager);
 
-	sManager:CallMethod("UpdateShadowButtonCount", #sShadowFrames);
+	sManager:CallMethod("UpdateShadowButtonCount", #sShadowButtons);
 ]=];
 local tOnAttributeChanged = [=[
 	if name == "unit" then
@@ -122,11 +122,11 @@ function VUHDO_initSecureShadowHeader()
 	sManagerFrame:Execute([=[
 		sManager = self;
 
-		sRealFrames = newtable();
+		sRealButtons = newtable();
 		sDebuffFrames = newtable();
 
 		for tPanelNum = 1, 10 do
-			sRealFrames[tPanelNum] = newtable();
+			sRealButtons[tPanelNum] = newtable();
 			sDebuffFrames[tPanelNum] = newtable();
 		end;
 
@@ -162,7 +162,7 @@ function VUHDO_initSecureShadowHeader()
 
 		sFallbackMappingPool = newtable();
 
-		for tIdx = 1, sMaxShadowButtons do
+		for tCnt = 1, sMaxShadowButtons do
 			local tMapping = newtable();
 			tMapping[1] = 0;
 			tMapping[2] = 0;
@@ -290,10 +290,11 @@ function VUHDO_initSecureShadowHeader()
 					if tMappings then
 						for tMappingIdx = 1, #tMappings do
 							local tMapping = tMappings[tMappingIdx];
-							local tRealFrame = sRealFrames[tMapping[1]] and sRealFrames[tMapping[1]][tMapping[2]];
+							local tRealButton = sRealButtons[tMapping[1]] and sRealButtons[tMapping[1]][tMapping[2]];
 
-							if tRealFrame then
-								tRealFrame:SetAttribute("unit", nil);
+							if tRealButton then
+								tRealButton:SetAttribute("unit", nil);
+
 								local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
 
 								if tDebuffFrames then
@@ -310,10 +311,10 @@ function VUHDO_initSecureShadowHeader()
 					if tMappings then
 						for tMappingIdx = 1, #tMappings do
 							local tMapping = tMappings[tMappingIdx];
-							local tRealFrame = sRealFrames[tMapping[1]] and sRealFrames[tMapping[1]][tMapping[2]];
+							local tRealButton = sRealButtons[tMapping[1]] and sRealButtons[tMapping[1]][tMapping[2]];
 
-							if tRealFrame then
-								tRealFrame:SetAttribute("unit", nil);
+							if tRealButton then
+								tRealButton:SetAttribute("unit", nil);
 
 								local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
 
@@ -323,7 +324,7 @@ function VUHDO_initSecureShadowHeader()
 									end
 								end
 
-								tRealFrame:Hide();
+								tRealButton:Hide();
 							end
 						end
 
@@ -344,10 +345,10 @@ function VUHDO_initSecureShadowHeader()
 					if tFallbackMappings then
 						for tMappingIdx = 1, #tFallbackMappings do
 							local tMapping = tFallbackMappings[tMappingIdx];
-							local tFallbackFrame = sRealFrames[tMapping[1]] and sRealFrames[tMapping[1]][tMapping[2]];
+							local tFallbackButton = sRealButtons[tMapping[1]] and sRealButtons[tMapping[1]][tMapping[2]];
 
-							if tFallbackFrame then
-								tFallbackFrame:SetAttribute("unit", nil);
+							if tFallbackButton then
+								tFallbackButton:SetAttribute("unit", nil);
 
 								local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
 
@@ -357,7 +358,7 @@ function VUHDO_initSecureShadowHeader()
 									end
 								end
 
-								tFallbackFrame:Hide();
+								tFallbackButton:Hide();
 							end
 						end
 					end
@@ -368,10 +369,10 @@ function VUHDO_initSecureShadowHeader()
 						if tUnit == "player" then
 							for tMappingIdx = 1, #tMappings do
 								local tMapping = tMappings[tMappingIdx];
-								local tRealFrame = sRealFrames[tMapping[1]] and sRealFrames[tMapping[1]][tMapping[2]];
+								local tRealButton = sRealButtons[tMapping[1]] and sRealButtons[tMapping[1]][tMapping[2]];
 
-								if tRealFrame then
-									tRealFrame:SetAttribute("unit", nil);
+								if tRealButton then
+									tRealButton:SetAttribute("unit", nil);
 
 									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
 
@@ -381,16 +382,16 @@ function VUHDO_initSecureShadowHeader()
 										end
 									end
 
-									tRealFrame:Hide();
+									tRealButton:Hide();
 								end
 							end
 						else
 							for tMappingIdx = 1, #tMappings do
 								local tMapping = tMappings[tMappingIdx];
-								local tRealFrame = sRealFrames[tMapping[1]] and sRealFrames[tMapping[1]][tMapping[2]];
+								local tRealButton = sRealButtons[tMapping[1]] and sRealButtons[tMapping[1]][tMapping[2]];
 
-								if tRealFrame then
-									tRealFrame:SetAttribute("unit", tUnit);
+								if tRealButton then
+									tRealButton:SetAttribute("unit", tUnit);
 
 									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
 
@@ -400,7 +401,7 @@ function VUHDO_initSecureShadowHeader()
 										end
 									end
 
-									tRealFrame:Show();
+									tRealButton:Show();
 								end
 							end
 						end
@@ -421,10 +422,10 @@ function VUHDO_initSecureShadowHeader()
 						if tMappings then
 							for tMappingIdx = 1, #tMappings do
 								local tMapping = tMappings[tMappingIdx];
-								local tRealFrame = sRealFrames[tMapping[1]] and sRealFrames[tMapping[1]][tMapping[2]];
+								local tRealButton = sRealButtons[tMapping[1]] and sRealButtons[tMapping[1]][tMapping[2]];
 
-								if tRealFrame then
-									tRealFrame:SetAttribute("unit", tUnit);
+								if tRealButton then
+									tRealButton:SetAttribute("unit", tUnit);
 
 									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
 
@@ -434,7 +435,7 @@ function VUHDO_initSecureShadowHeader()
 										end
 									end
 
-									tRealFrame:Show();
+									tRealButton:Show();
 								end
 							end
 						elseif tOldUnit and sUnitMap[tOldUnit] then
@@ -445,10 +446,10 @@ function VUHDO_initSecureShadowHeader()
 
 							for tMappingIdx = 1, #tReassignedMappings do
 								local tMapping = tReassignedMappings[tMappingIdx];
-								local tRealFrame = sRealFrames[tMapping[1]] and sRealFrames[tMapping[1]][tMapping[2]];
+								local tRealButton = sRealButtons[tMapping[1]] and sRealButtons[tMapping[1]][tMapping[2]];
 
-								if tRealFrame then
-									tRealFrame:SetAttribute("unit", tUnit);
+								if tRealButton then
+									tRealButton:SetAttribute("unit", tUnit);
 
 									local tDebuffFrames = sDebuffFrames[tMapping[1]] and sDebuffFrames[tMapping[1]][tMapping[2]];
 
@@ -458,19 +459,19 @@ function VUHDO_initSecureShadowHeader()
 										end
 									end
 
-									tRealFrame:Show();
+									tRealButton:Show();
 								end
 							end
 						else
 							for tFallbackIdx = 1, #sFallbackPanels do
 								local tFallbackPanel = sFallbackPanels[tFallbackIdx];
-								local tFallbackButton = sNextFallbackButton[tFallbackPanel];
-								local tFallbackFrame = sRealFrames[tFallbackPanel] and sRealFrames[tFallbackPanel][tFallbackButton];
+								local tFallbackButtonIndex = sNextFallbackButton[tFallbackPanel];
+								local tFallbackButton = sRealButtons[tFallbackPanel] and sRealButtons[tFallbackPanel][tFallbackButtonIndex];
 
-								if tFallbackFrame then
-									tFallbackFrame:SetAttribute("unit", tUnit);
+								if tFallbackButton then
+									tFallbackButton:SetAttribute("unit", tUnit);
 
-									local tDebuffFrames = sDebuffFrames[tFallbackPanel] and sDebuffFrames[tFallbackPanel][tFallbackButton];
+									local tDebuffFrames = sDebuffFrames[tFallbackPanel] and sDebuffFrames[tFallbackPanel][tFallbackButtonIndex];
 
 									if tDebuffFrames then
 										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
@@ -478,15 +479,15 @@ function VUHDO_initSecureShadowHeader()
 										end
 									end
 
-									tFallbackFrame:Show();
+									tFallbackButton:Show();
 
-									sNextFallbackButton[tFallbackPanel] = tFallbackButton + 1;
+									sNextFallbackButton[tFallbackPanel] = tFallbackButtonIndex + 1;
 								end
 							end
 
 							if #sFallbackPanels > 0 then
 								local tFirstPanel = sFallbackPanels[1];
-								local tFirstButton = sNextFallbackButton[tFirstPanel] - 1;
+								local tFirstButtonIndex = sNextFallbackButton[tFirstPanel] - 1;
 
 								if sFallbackPoolIndex <= sMaxShadowButtons then
 									local tPoolEntry = sFallbackMappingPool[sFallbackPoolIndex];
@@ -496,7 +497,7 @@ function VUHDO_initSecureShadowHeader()
 									local tTempMappings = tPoolEntry[2];
 
 									tTempMapping[1] = tFirstPanel;
-									tTempMapping[2] = tFirstButton;
+									tTempMapping[2] = tFirstButtonIndex;
 
 									sUnitMap[tUnit] = tTempMappings;
 								end
@@ -529,7 +530,7 @@ function VUHDO_initSecureShadowHeader()
 	sShadowHeader:Execute([=[
 		sManager = self:GetFrameRef("sManager");
 
-		sShadowFrames = newtable();
+		sShadowButtons = newtable();
 	]=]);
 
 	sShadowHeader:SetAttribute("showPlayer", true);
@@ -567,24 +568,24 @@ end
 
 
 --
-function VUHDO_registerSecureRealFrame(aPanelNum, aButtonNum, aFrame)
+function VUHDO_registerSecureRealButton(aPanelNum, aButtonNum, aButton)
 
 	if not sInitialized or InCombatLockdown() then
 		return false;
 	end
 
-	sManagerFrame:SetFrameRef("tempFrame", aFrame);
+	sManagerFrame:SetFrameRef("sRealButton", aButton);
 
 	sManagerFrame:Execute(format([=[
 		local tPanelNum = %d;
 		local tButtonNum = %d;
-		local tRealFrame = self:GetFrameRef("tempFrame");
+		local tRealButton = self:GetFrameRef("sRealButton");
 
-		if not sRealFrames[tPanelNum] then
-			sRealFrames[tPanelNum] = newtable();
+		if not sRealButtons[tPanelNum] then
+			sRealButtons[tPanelNum] = newtable();
 		end
 
-		sRealFrames[tPanelNum][tButtonNum] = tRealFrame;
+		sRealButtons[tPanelNum][tButtonNum] = tRealButton;
 	]=], aPanelNum, aButtonNum));
 
 	return true;
@@ -600,13 +601,13 @@ function VUHDO_registerSecureDebuffFrame(aPanelNum, aButtonNum, anIconNum, aDebu
 		return false;
 	end
 
-	sManagerFrame:SetFrameRef("tempDebuffFrame", aDebuffFrame);
+	sManagerFrame:SetFrameRef("sDebuffFrame", aDebuffFrame);
 
 	sManagerFrame:Execute(format([=[
 		local tPanelNum = %d;
 		local tButtonNum = %d;
 		local tIconNum = %d;
-		local tDebuffFrame = self:GetFrameRef("tempDebuffFrame");
+		local tDebuffFrame = self:GetFrameRef("sDebuffFrame");
 
 		if not sDebuffFrames[tPanelNum] then
 			sDebuffFrames[tPanelNum] = newtable();
@@ -643,14 +644,14 @@ function VUHDO_debugSecureEnvironment()
 		local tDebuffFrameCount = 0;
 
 		for tPanel = 1, 10 do
-			if sRealFrames[tPanel] then
-				for tButton = 1, 40 do
-					if sRealFrames[tPanel][tButton] then
+			if sRealButtons[tPanel] then
+				for tButtonIndex = 1, 40 do
+					if sRealButtons[tPanel][tButtonIndex] then
 						tFrameCount = tFrameCount + 1;
 					end
 
-					if sDebuffFrames[tPanel] and sDebuffFrames[tPanel][tButton] then
-						for tIconNum, tDebuffFrame in pairs(sDebuffFrames[tPanel][tButton]) do
+					if sDebuffFrames[tPanel] and sDebuffFrames[tPanel][tButtonIndex] then
+						for tIconNum, tDebuffFrame in pairs(sDebuffFrames[tPanel][tButtonIndex]) do
 							if tDebuffFrame then
 								tDebuffFrameCount = tDebuffFrameCount + 1;
 							end
@@ -846,7 +847,7 @@ local function VUHDO_initShadowToRealMappings()
 			tUnit = tShadowButton:GetAttribute("unit");
 
 			if tUnit then
-				sManagerFrame:SetFrameRef("tempShadowButton", tShadowButton);
+				sManagerFrame:SetFrameRef("sShadowButton", tShadowButton);
 
 				sManagerFrame:Execute(format([=[
 					local tShadowId = %d;
@@ -878,8 +879,8 @@ local tFallbackPanels;
 local tModels;
 local tSetup;
 local tSortBy;
-local tButtonIdx;
-local tColIdx;
+local tButtonIndex;
+local tColIndex;
 local tGroupArray;
 local tUnitCount;
 local tNormalizedUnit;
@@ -904,8 +905,8 @@ function VUHDO_computeAndPushSecureMappings()
 			tSetup = VUHDO_PANEL_SETUP[tPanelNum];
 			tSortBy = tSetup["MODEL"]["sort"];
 
-			tButtonIdx = 1;
-			tColIdx = 1;
+			tButtonIndex = 1;
+			tColIndex = 1;
 
 			for tModelIndex, tModelId in ipairs(tModels) do
 				tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, tPanelNum, tModelIndex);
@@ -917,12 +918,12 @@ function VUHDO_computeAndPushSecureMappings()
 						tUnitMappings[tNormalizedUnit] = { };
 					end
 
-					tinsert(tUnitMappings[tNormalizedUnit], {tPanelNum, tButtonIdx});
+					tinsert(tUnitMappings[tNormalizedUnit], {tPanelNum, tButtonIndex});
 
-					tButtonIdx = tButtonIdx + 1;
+					tButtonIndex = tButtonIndex + 1;
 				end
 
-				tColIdx = tColIdx + 1;
+				tColIndex = tColIndex + 1;
 			end
 		end
 	end
