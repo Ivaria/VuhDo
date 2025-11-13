@@ -107,7 +107,6 @@ function VUHDO_initSecureShadowHeader()
 
 	end
 
-
 	function sShadowHeader:Execute(aBody)
 
 		return SecureHandlerExecute(self, aBody);
@@ -129,7 +128,7 @@ function VUHDO_initSecureShadowHeader()
 		for tPanelNum = 1, 10 do
 			sRealButtons[tPanelNum] = newtable();
 			sDebuffFrames[tPanelNum] = newtable();
-		end;
+		end
 
 		sUnitMap = newtable();
 		sShadowToRealMap = newtable();
