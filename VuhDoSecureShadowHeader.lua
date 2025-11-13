@@ -105,7 +105,8 @@ function VUHDO_initSecureShadowHeader()
 
 		return;
 
-	end;
+	end
+
 
 	function sShadowHeader:Execute(aBody)
 
@@ -952,6 +953,7 @@ end
 local tPanelButtons;
 local tButton;
 local tUnit;
+local tDebuffFrame;
 function VUHDO_syncPanelButtonRaidIds()
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
@@ -966,6 +968,18 @@ function VUHDO_syncPanelButtonRaidIds()
 
 					if tUnit and tButton["raidid"] ~= tUnit then
 						tButton["raidid"] = tUnit;
+					end
+
+					for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+						tDebuffFrame = VUHDO_getBarIconFrame(tButton, tCnt);
+
+						if tDebuffFrame then
+							tUnit = tDebuffFrame:GetAttribute("unit");
+
+							if tUnit and tDebuffFrame["raidid"] ~= tUnit then
+								tDebuffFrame["raidid"] = tUnit;
+							end
+						end
 					end
 				end
 			end
