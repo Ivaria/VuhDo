@@ -303,7 +303,7 @@ local tClearBindsSnippet = [[
 local tDebuffFrame;
 function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceTarget, anIsTgButton, anIsIcButton)
 
-	if aUnit then
+	if aUnit and not anIsIcButton then
 		VUHDO_safeSetAttribute(aButton, "unit", aUnit);
 		aButton["raidid"] = aUnit;
 
