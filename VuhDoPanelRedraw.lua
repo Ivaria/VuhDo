@@ -14,6 +14,8 @@ local strfind = strfind;
 local twipe = table.wipe;
 local tinsert = table.insert;
 local InCombatLockdown = InCombatLockdown;
+local UnitIsUnit = UnitIsUnit;
+local IsInRaid = IsInRaid;
 
 
 --
@@ -576,6 +578,7 @@ local tColumnIndex;
 local tButtonIndex;
 local tModelArray;
 local tPanelName;
+local tButtonUnit;
 local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 
 	tModelArray = VUHDO_getDynamicModelArray(aPanelNum);
@@ -588,20 +591,20 @@ local function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 		tGroupArray = VUHDO_getGroupMembersSorted(tModelId, sPanelConfig[aPanelNum]["sortCriterion"], aPanelNum, tModelIndex);
 
 		for tGroupIndex, tUnit  in ipairs(tGroupArray)  do
-			tHealButton = VUHDO_getHealButton(tButtonIndex, aPanelNum);
+		tHealButton = VUHDO_getHealButton(tButtonIndex, aPanelNum);
 
-			tButtonIndex = tButtonIndex  + 1;
-			VUHDO_positionHealButton(tHealButton, aPanelNum);
+		tButtonIndex = tButtonIndex  + 1;
+		VUHDO_positionHealButton(tHealButton, aPanelNum);
 
-			VUHDO_setupAllHealButtonAttributes(tHealButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
+		VUHDO_setupAllHealButtonAttributes(tHealButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
 
-			if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
-				VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton), tUnit);
-			end
+		if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
+			VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tHealButton), tUnit);
+		end
 
-			if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
-				VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), tUnit);
-			end
+		if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
+			VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tHealButton), tUnit);
+		end
 
 			tXPos, tYPos = VUHDO_getHealButtonPos(tColumnIndex, tGroupIndex, aPanelNum);
 			VUHDO_PixelUtil.Hide(tHealButton);
@@ -1742,6 +1745,7 @@ local tHealButton;
 local tXPos;
 local tYPos;
 local tPanel;
+local tButtonUnit;
 function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, aModelIndex, aModelId, aGroupIndex, aColumnIndex)
 
 	tHealButton = VUHDO_getOrCreateHealButton(aButtonIndex, aPanelNum);

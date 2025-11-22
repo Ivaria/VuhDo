@@ -207,7 +207,10 @@ local VuhDoDummyStub = {
 	["IsForbidden"] = function() return false; end,
 };
 
+local tPlayerUnit;
 function VUHDO_updateAllClusters()
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
 
 	-- as of patch 7.1 APIs related to unit position/distance do not function inside instances
 	tIsInInstance, _ = IsInInstance();
@@ -323,8 +326,8 @@ function VUHDO_updateAllClusters()
 
 	-- Otherwise get from heuristic database
 	if (tMaxX or 0) == 0 then
-		if VUHDO_COORD_DELTAS["player"] then
-			for tUnit, tDeltas in pairs(VUHDO_COORD_DELTAS["player"]) do
+		if VUHDO_COORD_DELTAS[tPlayerUnit] then
+			for tUnit, tDeltas in pairs(VUHDO_COORD_DELTAS[tPlayerUnit]) do
 				VUHDO_calibrateMapScale(tUnit, tDeltas[1], tDeltas[2]);
 			end
 		end

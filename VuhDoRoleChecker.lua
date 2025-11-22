@@ -111,7 +111,7 @@ local function VUHDO_shouldBeInspected(aUnit)
 	end
 
 	-- Determined by role or can't tell by talent trees (dk)?
-	if VUHDO_CLASS_ROLES[tInfo["classId"]] then -- VUHDO_ID_DEATH_KNIGHT, hat zwar keine feste Rolle, Talentbäume bringen aber auch nichts
+	if VUHDO_CLASS_ROLES[tInfo["classId"]] then -- VUHDO_ID_DEATH_KNIGHT, hat zwar keine feste Rolle, Talentbï¿½ume bringen aber auch nichts
 		return false;
 	end
 
@@ -131,13 +131,17 @@ end
 
 
 --
+local tPlayerUnit;
 function VUHDO_tryInspectNext()
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		if VUHDO_shouldBeInspected(tUnit) then
 			VUHDO_NEXT_INSPECT_TIME_OUT = GetTime() + VUHDO_INSPECT_TIMEOUT;
 			VUHDO_NEXT_INSPECT_UNIT = tUnit;
 
-			if "player" == tUnit then VUHDO_inspectLockRole();
+			if tPlayerUnit == tUnit then VUHDO_inspectLockRole();
 			else NotifyInspect(tUnit); end
 
 			return;
@@ -148,6 +152,7 @@ end
 
 
 --
+local tPlayerUnit;
 local tActiveTree;
 local tInfo;
 local tClassId;
@@ -155,13 +160,15 @@ local tRole;
 local tTreeId;
 function VUHDO_inspectRole(aUnit)
 
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
 	tInfo = VUHDO_RAID[aUnit];
 
 	if not tInfo then 
 		return VUHDO_ID_UNDEFINED; 
 	end
 
-	if "player" == aUnit then
+	if tPlayerUnit == aUnit then
 		tActiveTree = GetSpecialization();
 
 		if not tActiveTree then

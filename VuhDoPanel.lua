@@ -180,6 +180,7 @@ local sIsPetsLast;
 local tInfo1, tInfo2;
 local tRole1, tRole2;
 local tFirstIdx, tSecondIdx;
+local tPlayerUnit;
 
 
 
@@ -187,9 +188,9 @@ local tFirstIdx, tSecondIdx;
 local VUHDO_RAID_SORTERS = {
 	[VUHDO_SORT_RAID_UNITID]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif sIsPlayerFirst and anotherUnitId == "player" then
+				elseif sIsPlayerFirst and anotherUnitId == tPlayerUnit then
 					return false;
 				else
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -210,9 +211,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_RAID_NAME]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif sIsPlayerFirst and anotherUnitId == "player" then
+				elseif sIsPlayerFirst and anotherUnitId == tPlayerUnit then
 					return false;
 				else
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -233,9 +234,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_RAID_CLASS]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif sIsPlayerFirst and anotherUnitId == "player" then
+				elseif sIsPlayerFirst and anotherUnitId == tPlayerUnit then
 					return false;
 				elseif VUHDO_RAID[aUnitId]["class"] and VUHDO_RAID[anotherUnitId]["class"] then
 					if (VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"]) then
@@ -270,9 +271,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_RAID_MAX_HP]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif sIsPlayerFirst and anotherUnitId == "player" then
+				elseif sIsPlayerFirst and anotherUnitId == tPlayerUnit then
 					return false;
 				elseif VUHDO_RAID[aUnitId]["sortMaxHp"] and VUHDO_RAID[anotherUnitId]["sortMaxHp"] then
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -307,9 +308,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_RAID_MODELS]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif sIsPlayerFirst and anotherUnitId == "player" then
+				elseif sIsPlayerFirst and anotherUnitId == tPlayerUnit then
 					return false;
 				else
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -337,9 +338,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_TA_DD_HL]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif (sIsPlayerFirst and anotherUnitId == "player") then
+				elseif (sIsPlayerFirst and anotherUnitId == tPlayerUnit) then
 					return false;
 				else
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -369,9 +370,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_TA_HL_DD]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif (sIsPlayerFirst and anotherUnitId == "player") then
+				elseif (sIsPlayerFirst and anotherUnitId == tPlayerUnit) then
 					return false;
 				else
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -403,9 +404,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_HL_TA_DD]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif sIsPlayerFirst and anotherUnitId == "player" then
+				elseif sIsPlayerFirst and anotherUnitId == tPlayerUnit then
 					return false;
 				else
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -437,9 +438,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_TA_MD_RD_HL]
 		= function(aUnitId, anotherUnitId)
-				if sIsPlayerFirst and aUnitId == "player" then
+				if sIsPlayerFirst and aUnitId == tPlayerUnit then
 					return true;
-				elseif (sIsPlayerFirst and anotherUnitId == "player") then
+				elseif (sIsPlayerFirst and anotherUnitId == tPlayerUnit) then
 					return false;
 				else
 					if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -479,9 +480,9 @@ local VUHDO_RAID_SORTERS = {
 
 	[VUHDO_SORT_TA_HL_MD_RD] 
 		= function(aUnitId, anotherUnitId)
-			if sIsPlayerFirst and aUnitId == "player" then
+			if sIsPlayerFirst and aUnitId == tPlayerUnit then
 				return true;
-			elseif (sIsPlayerFirst and anotherUnitId == "player") then
+			elseif (sIsPlayerFirst and anotherUnitId == tPlayerUnit) then
 				return false;
 			else
 				if VUHDO_PANEL_SETUP[sPanelNum]["MODEL"]["isReverse"] then
@@ -532,6 +533,7 @@ function VUHDO_getGroupMembersSorted(anIdentifier, aSortCriterion, aPanelNum, aM
 	tMembers = VUHDO_getGroupMembers(anIdentifier, aPanelNum, aModelIndex);
 	sIsPlayerFirst = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["isPlayerOnTop"];
 	sIsPetsLast = VUHDO_PANEL_SETUP[aPanelNum]["MODEL"]["isPetsLast"];
+	tPlayerUnit = VUHDO_getPlayerUnit();
 
 	if 41 ~= anIdentifier then -- VUHDO_ID_MAINTANKS
 		twipe(tSorted);
@@ -549,9 +551,9 @@ function VUHDO_getGroupMembersSorted(anIdentifier, aSortCriterion, aPanelNum, aM
 		if 70 == anIdentifier or tNoExists then -- VUHDO_ID_VEHICLES
 			tsort(tSorted,
 				function(aUnitId, anotherUnitId)
-					if sIsPlayerFirst and aUnitId == "player" then
+					if sIsPlayerFirst and aUnitId == tPlayerUnit then
 						return true;
-					elseif sIsPlayerFirst and anotherUnitId == "player" then
+					elseif sIsPlayerFirst and anotherUnitId == tPlayerUnit then
 						return false;
 					else
 						return aUnitId < anotherUnitId;

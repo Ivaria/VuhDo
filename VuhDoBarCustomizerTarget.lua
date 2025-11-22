@@ -88,11 +88,15 @@ end
 
 
 --
+local tPlayerInfo;
 local tInfo;
 local tLocalClass, tClassName;
 local tPowerType;
 local tName;
 local function VUHDO_fillCustomInfo(aUnit)
+
+	tPlayerInfo = VUHDO_getPlayerRaidInfo();
+
 	tLocalClass, tClassName = UnitClass(aUnit);
 	tPowerType = UnitPowerType(aUnit);
 	tName = UnitName(aUnit);
@@ -115,7 +119,7 @@ local function VUHDO_fillCustomInfo(aUnit)
 	end
 	tInfo["classId"] = VUHDO_CLASS_IDS[tClassName];
 	tInfo["fullName"] = tName;
-	tInfo["zone"], tInfo["map"] = (VUHDO_RAID["player"] or { })["zone"], (VUHDO_RAID["player"] or { })["map"];
+	tInfo["zone"], tInfo["map"] = (tPlayerInfo or { })["zone"], (tPlayerInfo or { })["map"];
 	tInfo["fixResolveId"] = nil;
 
 	tInfo["raidIcon"] = GetRaidTargetIndex(aUnit);
