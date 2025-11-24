@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Shaman weapon enchant timers in Buff Watch  
   
   
 Improvements:  

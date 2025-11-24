@@ -789,6 +789,8 @@ do
 			tName = strmatch(_G["VuhDoScanTooltipTextLeft" .. tCnt]:GetText(), "^.+ %(%d+%s+.+%)$");
 			if tName then
 				tEnchant = gsub(tName, " [0-9]+ %(.+%)", "");
+				tEnchant = gsub(tEnchant, "%s+%d+$", "");
+				tEnchant = tEnchant .. " Weapon";
 				return tEnchant;
 			end
 		end
