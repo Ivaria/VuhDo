@@ -971,7 +971,9 @@ function VUHDO_setSecureDebugEnabled(anIsEnabled)
 		sIsDebugEnabled = %s;
 	]=], anIsEnabled and "true" or "false"));
 
-	if VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] then
+	VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] = anIsEnabled;
+
+	if anIsEnabled then
 		VUHDO_Msg("Secure shadow header debug is now |cff00ff00enabled|r.");
 	else
 		VUHDO_Msg("Secure shadow header debug is now |cffff0000disabled|r.");
