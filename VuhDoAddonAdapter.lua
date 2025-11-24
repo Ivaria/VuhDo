@@ -18,6 +18,7 @@ VUHDO_LibBase64 = LibStub:GetLibrary("LibBase64-1.0");
 VUHDO_LibCustomGlow = LibStub("LibCustomGlow-1.0");
 VUHDO_LibNickTag = LibStub("NickTag-1.0");
 VUHDO_LibSpec = LibStub("LibSpecialization", true);
+VUHDO_LibHealComm = LibStub("LibHealComm-4.0", true);
 
 VUHDO_LibSharedMedia:Register("font", "Arial Black", "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf");
 VUHDO_LibSharedMedia:Register("font", "Emblem",	"Interface\\AddOns\\VuhDo\\Fonts\\Emblem.ttf");
@@ -276,5 +277,42 @@ function VUHDO_initShowAddOnCompartment()
 			VUHDO_LibDBIcon:RemoveButtonFromCompartment("VuhDo");
 		end
 	end
+
+end
+
+
+
+--
+local tInstance;
+local tTarget;
+local tTargets;
+function VUHDO_initLibHealComm()
+
+	if not VUHDO_LibHealComm then
+		return;
+	end
+
+	tInstance = _G["VuhDo"];
+
+	local function HealComm_HealUpdated(aEvent, aCasterGUID, aSpellID, aHealType, aEndTime, ...)
+
+		tTargets = { n = select("#", ...), ... };
+
+		for tCnt = 1, tTargets.n do
+			tTarget = VUHDO_RAID_GUIDS[tTargets[tCnt]];
+
+			if (VUHDO_RAID or sEmpty)[tTarget] then
+				VUHDO_updateHealth(tTarget, 9); -- VUHDO_UPDATE_INC
+				VUHDO_updateBouquetsForEvent(tTarget, 9); -- VUHDO_UPDATE_ALT_POWER
+			end
+		end
+
+	end
+
+	VUHDO_LibHealComm.RegisterCallback(tInstance, "HealComm_HealUpdated", HealComm_HealUpdated);
+	VUHDO_LibHealComm.RegisterCallback(tInstance, "HealComm_ModifierChanged", HealComm_HealUpdated);
+	VUHDO_LibHealComm.RegisterCallback(tInstance, "HealComm_GUIDDisappeared", HealComm_HealUpdated);
+
+	return;
 
 end

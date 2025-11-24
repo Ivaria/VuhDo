@@ -16,10 +16,10 @@ VUHDO_NEXT_INSPECT_TIME_OUT = nil;
 
 --------------------------------------------------------------
 local NotifyInspect = NotifyInspect;
-local GetSpecializationInfo = GetSpecializationInfo;
+local GetSpecializationInfo = VUHDO_getSpecializationInfo;
 local ClearInspectPlayer = ClearInspectPlayer;
 local UnitStat = UnitStat;
-local UnitGroupRolesAssigned = UnitGroupRolesAssigned;
+local UnitGroupRolesAssigned = VUHDO_unitGroupRolesAssigned;
 local UnitPowerType = UnitPowerType;
 local VUHDO_isUnitInModel;
 local VUHDO_checkInteractDistance;
@@ -111,7 +111,7 @@ local function VUHDO_shouldBeInspected(aUnit)
 	end
 
 	-- Determined by role or can't tell by talent trees (dk)?
-	if VUHDO_CLASS_ROLES[tInfo["classId"]] then -- VUHDO_ID_DEATH_KNIGHT, hat zwar keine feste Rolle, Talentbäume bringen aber auch nichts
+	if VUHDO_CLASS_ROLES[tInfo["classId"]] then -- VUHDO_ID_DEATH_KNIGHT, hat zwar keine feste Rolle, Talentbï¿½ume bringen aber auch nichts
 		return false;
 	end
 
@@ -162,16 +162,16 @@ function VUHDO_inspectRole(aUnit)
 	end
 
 	if "player" == aUnit then
-		tActiveTree = GetSpecialization();
+		tActiveTree = VUHDO_getSpecialization();
 
 		if not tActiveTree then
 			return VUHDO_ID_UNDEFINED;
 		end
 		
-		tTreeId, _, _, _, tRole = GetSpecializationInfo(tActiveTree, false, false);
+		tTreeId, _, _, _, tRole = VUHDO_getSpecializationInfo(tActiveTree, false, false);
 	else
-		tTreeId = GetInspectSpecialization(aUnit);
-		tRole = GetSpecializationRoleByID(tTreeId);
+		tTreeId = VUHDO_getInspectSpecialization(aUnit);
+		tRole = VUHDO_getSpecializationRoleByID(tTreeId);
 	end
 
 	if (tTreeId or 0) == 0 then
@@ -234,7 +234,7 @@ function VUHDO_inspectLockRole()
 	end
 
 	if "player" == VUHDO_NEXT_INSPECT_UNIT then
-		tActiveTree = GetSpecialization();
+		tActiveTree = VUHDO_getSpecialization();
 
 		if not tActiveTree then
 			VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_ID_UNDEFINED;
@@ -242,9 +242,9 @@ function VUHDO_inspectLockRole()
 			return;
 		end
 
-		tTreeId = GetSpecializationInfo(tActiveTree, false, false);
+		tTreeId = VUHDO_getSpecializationInfo(tActiveTree, false, false);
 	else
-		tTreeId = GetInspectSpecialization(VUHDO_NEXT_INSPECT_UNIT);
+		tTreeId = VUHDO_getInspectSpecialization(VUHDO_NEXT_INSPECT_UNIT);
 	end
 
 	if (tTreeId or 0) == 0 then

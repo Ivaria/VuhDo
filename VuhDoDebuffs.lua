@@ -30,12 +30,12 @@ local VUHDO_DEBUFF_TYPES = {
 
 
 VUHDO_DEBUFF_BLACKLIST = {
-	[GetSpellName(69127)] = true, -- Chill of the Throne
+	--[GetSpellName(69127)] = true, -- Chill of the Throne
 	[GetSpellName(57724)] = true, -- Sated (Bloodlust)
-	[GetSpellName(71328)] = true, -- Dungeon Cooldown
+	--[GetSpellName(71328)] = true, -- Dungeon Cooldown
 	[GetSpellName(57723)] = true, -- Exhaustion (Heroism)
-	[GetSpellName(80354)] = true, -- Temporal Displacement (Time Warp)
-	[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true -- Fatigued (Primal Fury)
+	--[GetSpellName(80354)] = true, -- Temporal Displacement (Time Warp)
+	--[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true -- Fatigued (Primal Fury)
 };
 
 
@@ -1370,19 +1370,19 @@ do
 			);
 		end
 
-		VUHDO_updateHotPredicate(
-			sUnit,
-			sNow,
-			tAuraInstanceId,
-			tName,
-			tIcon,
-			tApplications,
-			tDuration,
-			tExpirationTime,
-			tSourceUnit,
-			tSpellId,
-			anIsUpdate
-		);
+	VUHDO_updateHotPredicate(
+		sUnit,
+		sNow,
+		tAuraInstanceId,
+		tName,
+		tIcon,
+		tApplications,
+		tDuration,
+		tExpirationTime,
+		tSourceUnit,
+		tSpellId,
+		anIsUpdate
+	);
 
 	end
 end
@@ -1663,6 +1663,7 @@ do
 			sUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
 
 			ForEachAura(aUnit, "HARMFUL", nil, VUHDO_determineAuraPredicate, true);
+
 			ForEachAura(aUnit, "HELPFUL", nil, VUHDO_determineAuraPredicate, true);
 		elseif aUpdateInfo then
 			sUnitDebuffInfo = (sCurIcons[aUnit] and sCurChosen[aUnit]) and VUHDO_UNIT_DEBUFF_INFOS[aUnit] or VUHDO_initDebuffInfos(aUnit);

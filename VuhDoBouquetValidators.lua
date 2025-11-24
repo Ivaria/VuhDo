@@ -538,8 +538,8 @@ end
 
 --
 local function VUHDO_hasSummonIconValidator(anInfo, _)
-	if C_IncomingSummon.HasIncomingSummon(anInfo["unit"]) then
-		local status = C_IncomingSummon.IncomingSummonStatus(anInfo["unit"]);
+	if VUHDO_hasIncomingSummon(anInfo["unit"]) then
+		local status = C_IncomingSummon and C_IncomingSummon.IncomingSummonStatus and C_IncomingSummon.IncomingSummonStatus(anInfo["unit"]) or nil;
 
 		if (status == Enum.SummonStatus.Pending) then
 			return true, "Raid-Icon-SummonPending", -1, -1, -1, nil, nil, 0, 1, 0, 1;

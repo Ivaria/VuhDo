@@ -1056,7 +1056,7 @@ do
 				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"] = aName, aSpellId, anIsBuff, anAuraInstanceId;
 
 				VUHDO_animateDebuffIcon(tButton, tIconInfoNew, GetTime(), tSlot + 39, true, aUnit);
-				end
+			end
 		end
 
 		tIconInfoNew[2] = GetTime();

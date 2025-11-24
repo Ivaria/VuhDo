@@ -5,7 +5,21 @@ local type = type;
 local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs;
 
 local VUHDO_SHIELDS = {
-	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD -- ok
+	[17] = 15, -- VUHDO_SPELL_ID.POWERWORD_SHIELD (rank 1)
+	[592] = 15, -- Power Word: Shield (rank 2)
+	[600] = 15, -- Power Word: Shield (rank 3)
+	[3747] = 15, -- Power Word: Shield (rank 4)
+	[6056] = 15, -- Power Word: Shield (rank 5)
+	[6066] = 15, -- Power Word: Shield (rank 6)
+	[10898] = 15, -- Power Word: Shield (rank 7)
+	[10899] = 15, -- Power Word: Shield (rank 8)
+	[10900] = 15, -- Power Word: Shield (rank 9)
+	[10901] = 15, -- Power Word: Shield (rank 10)
+	[25217] = 15, -- Power Word: Shield (rank 11)
+	[25218] = 15, -- Power Word: Shield (rank 12)
+	[48065] = 15, -- Power Word: Shield (rank 13)
+	[48066] = 15, -- Power Word: Shield (rank 14)
+	[56160] = 15, -- Glyph of Power Word: Shield
 	[123258] = 15, -- Power Word: Shield (Improved)
 	[11426] = 60, -- VUHDO_SPELL_ID.ICE_BARRIER -- ok
 	[116849] = 12, -- Life Cocoon
@@ -130,6 +144,8 @@ local sMissedEvents = {
 
 local VUHDO_SHIELD_LEFT = { };
 setmetatable(VUHDO_SHIELD_LEFT, VUHDO_META_NEW_ARRAY);
+local VUHDO_SHIELD_LEFT_TEMP = { };
+setmetatable(VUHDO_SHIELD_LEFT_TEMP, VUHDO_META_NEW_ARRAY);
 local VUHDO_SHIELD_SIZE = { };
 setmetatable(VUHDO_SHIELD_SIZE, VUHDO_META_NEW_ARRAY);
 local VUHDO_SHIELD_EXPIRY = { };
@@ -228,6 +244,7 @@ local function VUHDO_removeShield(aUnit, aShieldName)
 	VUHDO_SHIELD_LEFT[aUnit][aShieldName] = nil;
 	VUHDO_SHIELD_EXPIRY[aUnit][aShieldName] = nil;
 	VUHDO_SHIELD_LAST_SOURCE_GUID[aUnit][aShieldName] = nil;
+	VUHDO_SHIELD_LEFT_TEMP[aUnit][aShieldName] = nil;
 	--VUHDO_xMsg("Removed shield " .. aShieldName .. " from " .. aUnit);
 end
 
@@ -330,8 +347,25 @@ end
 
 
 --
+local tRemain;
 function VUHDO_getUnitOverallShieldRemain(aUnit)
-	return UnitGetTotalAbsorbs(aUnit) or 0;
+
+	tRemain = UnitGetTotalAbsorbs(aUnit) or 0;
+
+	if tRemain > 0 then
+		return tRemain;
+	end
+
+	if VUHDO_SHIELD_LEFT[aUnit] then
+		for _, tValue in pairs(VUHDO_SHIELD_LEFT[aUnit]) do
+			if tValue then
+				tRemain = tRemain + tValue;
+			end
+		end
+	end
+
+	return tRemain;
+
 end
 
 

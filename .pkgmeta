@@ -31,6 +31,7 @@ externals:
         url: https://www.townlong-yak.com/addons.git/taintless
         commit: default
     Libs/LibSpecialization: https://github.com/BigWigsMods/LibSpecialization.git/LibSpecialization
+    Libs/LibHealComm-4.0: https://github.com/Ivaria/LibHealComm-4.0.git
 
     VuhDoOptions/Libs/ChatThrottleLib: svn://svn.wowace.com/wow/chatthrottlelib/mainline/trunk
 	

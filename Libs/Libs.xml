@@ -23,5 +23,6 @@
 	<Include file="LibCustomGlow-1.0\LibCustomGlow-1.0.xml" />
 	<Include file="NickTag-1.0\NickTag-1.0.xml" />
 	<Script file="LibSpecialization\LibSpecialization.lua" />
+	<Include file="LibHealComm-4.0\LibHealComm-4.0.xml" />
 
 </Ui>

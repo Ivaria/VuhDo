@@ -786,6 +786,10 @@ end
 --
 function VUHDO_initTalentSpellCaches()
 
+	if not C_ClassTalents then
+		return;
+	end
+
 	if InCombatLockdown() then
 		-- avoid expensive malloc on talent re-scan during combat
 		-- SPELLS_CHANGED handler calls this on spell morph e.g. Priest 'Premonition'
@@ -892,7 +896,7 @@ end
 local tResurrectionSpells;
 local tKnownResurrectionSpells;
 function VUHDO_getResurrectionSpells()
-	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[GetSpecialization() or 0];
+	tResurrectionSpells = (VUHDO_RESURRECTION_SPELLS[VUHDO_PLAYER_CLASS] or sEmpty)[VUHDO_getSpecialization() or 0];
 
 	if tResurrectionSpells then
 		tKnownResurrectionSpells = { };
@@ -1376,18 +1380,19 @@ end
 
 
 
---
-local function VUHDO_isSpellIdMatch(aMatchSpellId, _, _, _, _, _, _, _, _, _, _, _, aSpellId)
+do
+	--
+	local function VUHDO_isSpellIdMatch(aMatchSpellId, _, _, _, _, _, _, _, _, _, _, _, aSpellId)
 
-	return aMatchSpellId == aSpellId;
+		return aMatchSpellId == aSpellId;
 
-end
+	end
 
 
 
---
-local tSpellId;
-function VUHDO_unitAura(aUnit, aSpell, aFilter)
+	--
+	local tSpellId;
+	function VUHDO_unitAura(aUnit, aSpell, aFilter)
 
 	if (aFilter == nil) then
 		aFilter = "HELPFUL";
@@ -1556,6 +1561,8 @@ function VUHDO_forEachAura(aUnit, aFilter, aMaxCnt, aPredicate, aUsePackedAura)
 			end
 		end
 
+	end
+
 end
 
 
@@ -1603,294 +1610,298 @@ end
 
 
 
---
-local tCnt;
-local tStringChar;
-local tPrefixChar;
-local tSubstring;
-local tPrefixSuffix;
-local tStringSuffix;
-local function VUHDO_radixTreePrefixSubstring(aPrefix, aString)
+do
+	--
+	local tCnt;
+	local tStringChar;
+	local tPrefixChar;
+	local tSubstring;
+	local tPrefixSuffix;
+	local tStringSuffix;
+	local function VUHDO_radixTreePrefixSubstring(aPrefix, aString)
 
-	if not aPrefix or not aString then
-		return;
-	end
-
-	tCnt = 1;
-
-	while tCnt <= strlen(aString) do
-		tStringChar = string.sub(aString, tCnt, tCnt);
-		tPrefixChar = string.sub(aPrefix, tCnt, tCnt);
-
-		if tStringChar ~= tPrefixChar then
-			break;
+		if not aPrefix or not aString then
+			return;
 		end
 
-		tCnt = tCnt + 1;
-	end
+		tCnt = 1;
 
-	if tCnt > 1 then
-		tSubstring = string.sub(aPrefix, 1, tCnt - 1);
+		while tCnt <= strlen(aString) do
+			tStringChar = string.sub(aString, tCnt, tCnt);
+			tPrefixChar = string.sub(aPrefix, tCnt, tCnt);
 
-		tPrefixSuffix = string.sub(aPrefix, tCnt, strlen(aPrefix));
-		tStringSuffix = string.sub(aString, tCnt, strlen(aString));
-
-		return tSubstring, tPrefixSuffix, tStringSuffix;
-	else
-		return nil, nil, nil;
-	end
-
-end
-
-
-
---
-function VUHDO_radixTreeCreate()
-
-	local tRootNode = {
-		["prefix"] = "",
-		["isLeaf"] = true,
-		["children"] = { },
-	};
-
-	return tRootNode;
-
-end
-
-
-
---
-local tChar;
-local tFound;
-local tNode;
-local tSubstringChar;
-local tNodeTemp;
-function VUHDO_radixTreeAdd(aTree, aString)
-
-	if not aTree or not aString then
-		return;
-	end
-
-	if aTree["prefix"] == aString and not aTree["isLeaf"] then
-		aTree["isLeaf"] = true;
-	else
-		tChar = string.sub(aString, 1, 1);
-
-		tFound = false;
-		for tChildChar, _ in pairs(aTree["children"]) do
-			if tChildChar == tChar then
-				tFound = true;
+			if tStringChar ~= tPrefixChar then
+				break;
 			end
+
+			tCnt = tCnt + 1;
 		end
 
-		if tChar and not tFound then
-			aTree["children"][tChar] = {
-				["prefix"] = aString,
-				["isLeaf"] = true,
-				["children"] = { },
-			};
-		elseif tChar then
-			tNode = aTree["children"][tChar];
+		if tCnt > 1 then
+			tSubstring = string.sub(aPrefix, 1, tCnt - 1);
 
-			tSubstring, tPrefixSuffix, tStringSuffix = VUHDO_radixTreePrefixSubstring(tNode["prefix"], aString);
-			tSubstringChar = string.sub(tSubstring, 1, 1);
+			tPrefixSuffix = string.sub(aPrefix, tCnt, strlen(aPrefix));
+			tStringSuffix = string.sub(aString, tCnt, strlen(aString));
 
-			if tSubstringChar and VUHDO_strempty(tPrefixSuffix) then
-				VUHDO_radixTreeAdd(aTree["children"][tSubstringChar], tStringSuffix);
-			elseif tSubstringChar then
-				tNode["prefix"] = tPrefixSuffix;
+			return tSubstring, tPrefixSuffix, tStringSuffix;
+		else
+			return nil, nil, nil;
+		end
 
-				tNodeTemp = aTree["children"][tSubstringChar];
+	end
 
-				aTree["children"][tSubstringChar] = {
-					["prefix"] = tSubstring,
-					["isLeaf"] = false,
-					["children"] = {
-						[tPrefixSuffix] = {
-							["prefix"] = tNodeTemp["prefix"],
-							["isLeaf"] = tNodeTemp["isLeaf"],
-							["children"] = tNodeTemp["children"],
-						},
-					},
+
+
+	--
+	function VUHDO_radixTreeCreate()
+
+		local tRootNode = {
+			["prefix"] = "",
+			["isLeaf"] = true,
+			["children"] = { },
+		};
+
+		return tRootNode;
+
+	end
+
+
+
+	--
+	local tChar;
+	local tFound;
+	local tNode;
+	local tSubstringChar;
+	local tNodeTemp;
+	function VUHDO_radixTreeAdd(aTree, aString)
+
+		if not aTree or not aString then
+			return;
+		end
+
+		if aTree["prefix"] == aString and not aTree["isLeaf"] then
+			aTree["isLeaf"] = true;
+		else
+			tChar = string.sub(aString, 1, 1);
+
+			tFound = false;
+			for tChildChar, _ in pairs(aTree["children"]) do
+				if tChildChar == tChar then
+					tFound = true;
+				end
+			end
+
+			if tChar and not tFound then
+				aTree["children"][tChar] = {
+					["prefix"] = aString,
+					["isLeaf"] = true,
+					["children"] = { },
 				};
+			elseif tChar then
+				tNode = aTree["children"][tChar];
 
-				if VUHDO_strempty(tStringSuffix) then
-					aTree["children"][tSubstringChar]["isLeaf"] = true;
-				else
+				tSubstring, tPrefixSuffix, tStringSuffix = VUHDO_radixTreePrefixSubstring(tNode["prefix"], aString);
+				tSubstringChar = string.sub(tSubstring, 1, 1);
+
+				if tSubstringChar and VUHDO_strempty(tPrefixSuffix) then
 					VUHDO_radixTreeAdd(aTree["children"][tSubstringChar], tStringSuffix);
+				elseif tSubstringChar then
+					tNode["prefix"] = tPrefixSuffix;
+
+					tNodeTemp = aTree["children"][tSubstringChar];
+
+					aTree["children"][tSubstringChar] = {
+						["prefix"] = tSubstring,
+						["isLeaf"] = false,
+						["children"] = {
+							[tPrefixSuffix] = {
+								["prefix"] = tNodeTemp["prefix"],
+								["isLeaf"] = tNodeTemp["isLeaf"],
+								["children"] = tNodeTemp["children"],
+							},
+						},
+					};
+
+					if VUHDO_strempty(tStringSuffix) then
+						aTree["children"][tSubstringChar]["isLeaf"] = true;
+					else
+						VUHDO_radixTreeAdd(aTree["children"][tSubstringChar], tStringSuffix);
+					end
 				end
 			end
 		end
+
 	end
 
-end
 
 
+	--
+	function VUHDO_radixTreeAddAll(aTree, ...)
 
---
-function VUHDO_radixTreeAddAll(aTree, ...)
-
-	if not aTree then
-		return;
-	end
-
-	for _, tString in pairs({ ... }) do
-		VUHDO_radixTreeAdd(aTree, tString);
-	end
-
-end
-
-
-
---
-function VUHDO_radixTreeContains(aTree, aString)
-
-	if not aTree or not aString then
-		return;
-	end
-
-	tChar = string.sub(aString, 1, 1);
-
-	if tChar then
-		tNode = aTree["children"][tChar];
-
-		if not tNode then
-			return false;
-		else
-			tSubstring, tPrefixSuffix, tStringSuffix = VUHDO_radixTreePrefixSubstring(tNode["prefix"], aString);
-
-			if not VUHDO_strempty(tPrefixSuffix) then
-				return false;
-			elseif VUHDO_strempty(tStringSuffix) then
-				return tNode["isLeaf"];
-			else
-				return VUHDO_radixTreeContains(tNode, tStringSuffix);
-			end
+		if not aTree then
+			return;
 		end
-	else
-		return false;
+
+		for _, tString in pairs({ ... }) do
+			VUHDO_radixTreeAdd(aTree, tString);
+		end
+
 	end
 
+
+
+	--
+	function VUHDO_radixTreeContains(aTree, aString)
+
+		if not aTree or not aString then
+			return;
+		end
+
+		tChar = string.sub(aString, 1, 1);
+
+		if tChar then
+			tNode = aTree["children"][tChar];
+
+			if not tNode then
+				return false;
+			else
+				tSubstring, tPrefixSuffix, tStringSuffix = VUHDO_radixTreePrefixSubstring(tNode["prefix"], aString);
+
+				if not VUHDO_strempty(tPrefixSuffix) then
+					return false;
+				elseif VUHDO_strempty(tStringSuffix) then
+					return tNode["isLeaf"];
+				else
+					return VUHDO_radixTreeContains(tNode, tStringSuffix);
+				end
+			end
+		else
+			return false;
+		end
+
+	end
 end
 
 
 
---
-local tTokens;
-local function VUHDO_tokenizeByWord(aString)
+do
+	--
+	local tTokens;
+	local function VUHDO_tokenizeByWord(aString)
 
-	if not aString then
-		return;
-	end
+		if not aString then
+			return;
+		end
 
-	tTokens = { };
+		tTokens = { };
 
-	-- first try to split on camel case
-	for tWord in string.gmatch(aString, "%u%U*") do
-		tinsert(tTokens, tWord);
-	end
-
-	-- fallback to split on whitespace
-	if #tTokens < 1 then
-		for tWord in string.gmatch(aString, "%S+") do
+		-- first try to split on camel case
+		for tWord in string.gmatch(aString, "%u%U*") do
 			tinsert(tTokens, tWord);
 		end
+
+		-- fallback to split on whitespace
+		if #tTokens < 1 then
+			for tWord in string.gmatch(aString, "%S+") do
+				tinsert(tTokens, tWord);
+			end
+		end
+
+		return tTokens;
+
 	end
 
-	return tTokens;
-
-end
 
 
+	--
+	local tNGrams;
+	local function VUHDO_tokenizeByNGram(aString, aLength)
 
---
-local tNGrams;
-local function VUHDO_tokenizeByNGram(aString, aLength)
+		if not aString or not aLength then
+			return;
+		end
 
-	if not aString or not aLength then
-		return;
-	end
+		tNGrams = { };
 
-	tNGrams = { };
+		if aLength > #aString then
+			tinsert(tNGrams, aString);
 
-	if aLength > #aString then
-		tinsert(tNGrams, aString);
+			return tNGrams;
+		end
+
+		for tCnt = 1, strlen(aString) - aLength + 1 do
+			tinsert(tNGrams, string.sub(aString, tCnt, tCnt + aLength - 1));
+		end
 
 		return tNGrams;
+
 	end
 
-	for tCnt = 1, strlen(aString) - aLength + 1 do
-		tinsert(tNGrams, string.sub(aString, tCnt, tCnt + aLength - 1));
-	end
-
-	return tNGrams;
-
-end
 
 
+	--
+	local tTriGramIndex;
+	local tTriGramCnt;
+	function VUHDO_createTriGramIndex(aString)
 
---
-local tTriGramIndex;
-local tTriGramCnt;
-function VUHDO_createTriGramIndex(aString)
-
-	if not aString then
-		return;
-	end
-
-	tTriGramIndex = { };
-	tTriGramCnt = 0;
-
-	for _, tWord in pairs(VUHDO_tokenizeByWord(aString)) do
-		for _, tGram in pairs(VUHDO_tokenizeByNGram(tWord, 3)) do
-			tTriGramIndex[tGram] = true;
-
-			tTriGramCnt = tTriGramCnt + 1;
+		if not aString then
+			return;
 		end
-	end
 
-	return tTriGramIndex, tTriGramCnt;
+		tTriGramIndex = { };
+		tTriGramCnt = 0;
 
-end
+		for _, tWord in pairs(VUHDO_tokenizeByWord(aString)) do
+			for _, tGram in pairs(VUHDO_tokenizeByNGram(tWord, 3)) do
+				tTriGramIndex[tGram] = true;
 
-
-
---
-local tIsMatch;
-function VUHDO_matchTriGramIndices(aTriGramIndexOne, aTriGramIndexTwo)
-
-	if not aTriGramIndexOne or not aTriGramIndexTwo then
-		return;
-	end
-
-	tIsMatch = false;
-
-	-- return true if the first tri gram index contains the second
-	for tGram in pairs(aTriGramIndexTwo) do
-		if aTriGramIndexOne[tGram] then
-			tIsMatch = true;
-		else
-			tIsMatch = false;
-
-			break;
+				tTriGramCnt = tTriGramCnt + 1;
+			end
 		end
+
+		return tTriGramIndex, tTriGramCnt;
+
 	end
 
-	return tIsMatch;
-
-end
 
 
+	--
+	local tIsMatch;
+	function VUHDO_matchTriGramIndices(aTriGramIndexOne, aTriGramIndexTwo)
 
---
-function VUHDO_matchTriGramIndex(aTriGramIndex, aString)
+		if not aTriGramIndexOne or not aTriGramIndexTwo then
+			return;
+		end
 
-	if not aTriGramIndex or not aString then
-		return;
+		tIsMatch = false;
+
+		-- return true if the first tri gram index contains the second
+		for tGram in pairs(aTriGramIndexTwo) do
+			if aTriGramIndexOne[tGram] then
+				tIsMatch = true;
+			else
+				tIsMatch = false;
+
+				break;
+			end
+		end
+
+		return tIsMatch;
+
 	end
 
-	return VUHDO_matchTriGramIndices(aTriGramIndex, VUHDO_createTriGramIndex(aString));
 
+
+	--
+	function VUHDO_matchTriGramIndex(aTriGramIndex, aString)
+
+		if not aTriGramIndex or not aString then
+			return;
+		end
+
+		return VUHDO_matchTriGramIndices(aTriGramIndex, VUHDO_createTriGramIndex(aString));
+
+	end
 end
 
 
@@ -1900,162 +1911,164 @@ local VUHDO_REGISTERED_TABLE_POOLS = { };
 
 
 
---
-function VUHDO_cleanupListNodeDelegate(aNode)
+do
+	--
+	function VUHDO_cleanupListNodeDelegate(aNode)
 
-	aNode["auraInstanceId"] = nil;
-	aNode["prev"] = nil;
-
-	return;
-
-end
-
-
-
---
-local tNode;
-function VUHDO_createListNodeDelegate()
-
-	tNode = tcreate(0, 2);
-
-	tNode["auraInstanceId"] = nil;
-	tNode["prev"] = nil;
-
-	return tNode;
-
-end
-
-
-
---
-local VUHDO_TABLE_POOL_PROFILING_ENABLED = false;
-local VUHDO_DEFAULT_MAX_POOL_SIZE = 200;
-local tMaxPoolSize;
-local tPool;
-function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
-
-	tMaxPoolSize = aMaxPoolSize or VUHDO_DEFAULT_MAX_POOL_SIZE;
-
-	tPool = {
-		["poolData"] = tcreate(tMaxPoolSize),
-		["maxSize"] = tMaxPoolSize,
-		["createDelegate"] = aCreateDelegate or function() return { }; end,
-		["cleanupDelegate"] = aCleanupDelegate,
-		["_twipe"] = twipe,
-		["metrics"] = {
-			["hits"] = 0,
-			["misses"] = 0,
-			["peakIdleCount"] = 0,
-			["rejectedReleases"] = 0,
-		},
-	};
-
-	local tIsProfile;
-	local tMetrics;
-	local tPoolSize;
-	local tObject;
-	function tPool:get()
-
-		tIsProfile = VUHDO_TABLE_POOL_PROFILING_ENABLED;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-		end
-
-		tPoolSize = #self["poolData"];
-
-		if tPoolSize > 0 then
-			tObject = self["poolData"][tPoolSize];
-			self["poolData"][tPoolSize] = nil;
-
-			if tIsProfile then
-				tMetrics["hits"] = tMetrics["hits"] + 1;
-			end
-
-			return tObject;
-		else
-			if tIsProfile then
-				tMetrics["misses"] = tMetrics["misses"] + 1;
-			end
-
-			return self["createDelegate"]();
-		end
-
-	end
-
-	local tIsProfile;
-	local tMetrics;
-	local tPoolSize;
-	function tPool:release(aObject)
-
-		tIsProfile = VUHDO_TABLE_POOL_PROFILING_ENABLED;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-		end
-
-		tPoolSize = #self["poolData"];
-
-		if aObject and tPoolSize < self["maxSize"] then
-			if self["cleanupDelegate"] then
-				self["cleanupDelegate"](aObject);
-			else
-				self["_twipe"](aObject);
-			end
-
-			tinsert(self["poolData"], aObject);
-
-			if tIsProfile then
-				tMetrics["peakIdleCount"] = max(tMetrics["peakIdleCount"], tPoolSize + 1);
-			end
-		elseif aObject and tIsProfile then
-			tMetrics["rejectedReleases"] = tMetrics["rejectedReleases"] + 1;
-		end
+		aNode["auraInstanceId"] = nil;
+		aNode["prev"] = nil;
 
 		return;
 
 	end
 
-	local tMetrics;
-	local tIdleCount;
-	function tPool:getMetrics()
 
-		tMetrics = self["metrics"];
-		tIdleCount = #self["poolData"];
 
-		return {
-			["hits"] = tMetrics["hits"],
-			["misses"] = tMetrics["misses"],
-			["peakIdleCount"] = tMetrics["peakIdleCount"],
-			["rejectedReleases"] = tMetrics["rejectedReleases"],
-			["currentIdle"] = tIdleCount,
-			["maxSize"] = self["maxSize"],
+	--
+	local tNode;
+	function VUHDO_createListNodeDelegate()
+
+		tNode = tcreate(0, 2);
+
+		tNode["auraInstanceId"] = nil;
+		tNode["prev"] = nil;
+
+		return tNode;
+
+	end
+
+
+
+	--
+	local VUHDO_TABLE_POOL_PROFILING_ENABLED = false;
+	local VUHDO_DEFAULT_MAX_POOL_SIZE = 200;
+	local tMaxPoolSize;
+	local tPool;
+	function VUHDO_createTablePool(aPoolName, aMaxPoolSize, aCreateDelegate, aCleanupDelegate)
+
+		tMaxPoolSize = aMaxPoolSize or VUHDO_DEFAULT_MAX_POOL_SIZE;
+
+		tPool = {
+			["poolData"] = tcreate(tMaxPoolSize),
+			["maxSize"] = tMaxPoolSize,
+			["createDelegate"] = aCreateDelegate or function() return { }; end,
+			["cleanupDelegate"] = aCleanupDelegate,
+			["_twipe"] = twipe,
+			["metrics"] = {
+				["hits"] = 0,
+				["misses"] = 0,
+				["peakIdleCount"] = 0,
+				["rejectedReleases"] = 0,
+			},
 		};
 
+		local tIsProfile;
+		local tMetrics;
+		local tPoolSize;
+		local tObject;
+		function tPool:get()
+
+			tIsProfile = VUHDO_TABLE_POOL_PROFILING_ENABLED;
+
+			if tIsProfile then
+				tMetrics = self["metrics"];
+			end
+
+			tPoolSize = #self["poolData"];
+
+			if tPoolSize > 0 then
+				tObject = self["poolData"][tPoolSize];
+				self["poolData"][tPoolSize] = nil;
+
+				if tIsProfile then
+					tMetrics["hits"] = tMetrics["hits"] + 1;
+				end
+
+				return tObject;
+			else
+				if tIsProfile then
+					tMetrics["misses"] = tMetrics["misses"] + 1;
+				end
+
+				return self["createDelegate"]();
+			end
+
+		end
+
+		local tIsProfile;
+		local tMetrics;
+		local tPoolSize;
+		function tPool:release(aObject)
+
+			tIsProfile = VUHDO_TABLE_POOL_PROFILING_ENABLED;
+
+			if tIsProfile then
+				tMetrics = self["metrics"];
+			end
+
+			tPoolSize = #self["poolData"];
+
+			if aObject and tPoolSize < self["maxSize"] then
+				if self["cleanupDelegate"] then
+					self["cleanupDelegate"](aObject);
+				else
+					self["_twipe"](aObject);
+				end
+
+				tinsert(self["poolData"], aObject);
+
+				if tIsProfile then
+					tMetrics["peakIdleCount"] = max(tMetrics["peakIdleCount"], tPoolSize + 1);
+				end
+			elseif aObject and tIsProfile then
+				tMetrics["rejectedReleases"] = tMetrics["rejectedReleases"] + 1;
+			end
+
+			return;
+
+		end
+
+		local tMetrics;
+		local tIdleCount;
+		function tPool:getMetrics()
+
+			tMetrics = self["metrics"];
+			tIdleCount = #self["poolData"];
+
+			return {
+				["hits"] = tMetrics["hits"],
+				["misses"] = tMetrics["misses"],
+				["peakIdleCount"] = tMetrics["peakIdleCount"],
+				["rejectedReleases"] = tMetrics["rejectedReleases"],
+				["currentIdle"] = tIdleCount,
+				["maxSize"] = self["maxSize"],
+			};
+
+		end
+
+		local tMetrics;
+		function tPool:resetMetrics()
+
+			tMetrics = self["metrics"];
+
+			tMetrics["hits"] = 0;
+			tMetrics["misses"] = 0;
+			tMetrics["peakIdleCount"] = #self["poolData"];
+			tMetrics["rejectedReleases"] = 0;
+
+			return;
+
+		end
+
+		if type(aPoolName) == "string" and aPoolName ~= "" then
+			VUHDO_REGISTERED_TABLE_POOLS[aPoolName] = tPool;
+		else
+			VUHDO_Msg("Warning: An unnamed table pool was created.");
+		end
+
+		return tPool;
+
 	end
-
-	local tMetrics;
-	function tPool:resetMetrics()
-
-		tMetrics = self["metrics"];
-
-		tMetrics["hits"] = 0;
-		tMetrics["misses"] = 0;
-		tMetrics["peakIdleCount"] = #self["poolData"];
-		tMetrics["rejectedReleases"] = 0;
-
-		return;
-
-	end
-
-	if type(aPoolName) == "string" and aPoolName ~= "" then
-		VUHDO_REGISTERED_TABLE_POOLS[aPoolName] = tPool;
-	else
-		VUHDO_Msg("Warning: An unnamed table pool was created.");
-	end
-
-	return tPool;
-
 end
 
 
@@ -2165,274 +2178,276 @@ local sSemaphoreId = 0;
 
 
 
---
-local tSemaphore;
-function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeoutMs)
+do
+	--
+	local tSemaphore;
+	function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeoutMs)
 
-	if not aSemaphoreName then
-		sSemaphoreId = sSemaphoreId + 1;
-		aSemaphoreName = "semaphore_" .. sSemaphoreId;
-	end
-
-	tSemaphore = {
-		["name"] = aSemaphoreName,
-		["count"] = aInitialCount or 0,
-		["maxCount"] = aMaxCount or 999999,
-		["timeoutMs"] = aTimeoutMs or VUHDO_SEMAPHORE_DEFAULT_TIMEOUT_MS,
-		["waitingTasks"] = { },
-		["metrics"] = {
-			["increments"] = 0,
-			["decrements"] = 0,
-			["timeouts"] = 0,
-			["peakWaitCount"] = 0,
-		},
-	};
-
-	local tIsProfile;
-	local tMetrics;
-	function tSemaphore:increment()
-
-		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-			tMetrics["increments"] = tMetrics["increments"] + 1;
+		if not aSemaphoreName then
+			sSemaphoreId = sSemaphoreId + 1;
+			aSemaphoreName = "semaphore_" .. sSemaphoreId;
 		end
 
-		if self["count"] < self["maxCount"] then
-			self["count"] = self["count"] + 1;
-
-			return true;
-		end
-
-		return false;
-
-	end
-
-	local tIsProfile;
-	local tMetrics;
-	local tTask;
-	local tAllDependenciesZero;
-	local tTasksToProcess;
-	local tIndex;
-	local tShouldProcess;
-	local tShouldMigrate;
-	local tMigrateToSemaphore;
-	function tSemaphore:decrement()
-
-		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-			tMetrics["decrements"] = tMetrics["decrements"] + 1;
-		end
-
-		if self["count"] > 0 then
-			self["count"] = self["count"] - 1;
-
-			if self["count"] == 0 then
-				tTasksToProcess = { };
-				tIndex = 1;
-
-				while tIndex <= #self["waitingTasks"] do
-					tTask = self["waitingTasks"][tIndex];
-
-					tShouldProcess = false;
-					tShouldMigrate = false;
-					tMigrateToSemaphore = nil;
-
-					if tTask["allDependencies"] then
-						tAllDependenciesZero = true;
-						tMigrateToSemaphore = nil;
-
-						for _, tDependency in ipairs(tTask["allDependencies"]) do
-							if tDependency and tDependency["count"] > 0 then
-								tAllDependenciesZero = false;
-
-								if not tMigrateToSemaphore then
-									tMigrateToSemaphore = tDependency;
-								end
-							end
-						end
-
-						if tAllDependenciesZero then
-							tShouldProcess = true;
-						else
-							tShouldMigrate = true;
-						end
-					else
-						tShouldProcess = true;
-					end
-
-					if tShouldProcess then
-						tremove(self["waitingTasks"], tIndex);
-
-						tinsert(tTasksToProcess, tTask);
-					elseif tShouldMigrate and tMigrateToSemaphore then
-						tremove(self["waitingTasks"], tIndex);
-
-						tinsert(tMigrateToSemaphore["waitingTasks"], tTask);
-					else
-						tIndex = tIndex + 1;
-					end
-				end
-
-				for _, tTask in ipairs(tTasksToProcess) do
-					VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
-				end
-			end
-		end
-
-		return true;
-
-	end
-
-	local tIsProfile;
-	local tMetrics;
-	local tTaskKey;
-	function tSemaphore:waitFor(aTaskType, aPriority, ...)
-
-		if not self then
-			return true;
-		end
-
-		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-
-			tMetrics["peakWaitCount"] = max(tMetrics["peakWaitCount"], #self["waitingTasks"] + 1);
-		end
-
-		if self["count"] == 0 then
-			return true;
-		end
-
-		tTaskKey = tostring(aTaskType);
-
-		for i = 1, select("#", ...) do
-			tTaskKey = tTaskKey .. "|" .. tostring(select(i, ...) or "");
-		end
-
-		for _, tExistingTask in ipairs(self["waitingTasks"]) do
-			if tExistingTask["taskKey"] == tTaskKey then
-				return false;
-			end
-		end
-
-		tinsert(self["waitingTasks"], {
-			["type"] = aTaskType,
-			["priority"] = aPriority,
-			["args"] = { ... },
-			["startTime"] = GetTime() * 1000,
-			["timeoutTime"] = GetTime() * 1000 + self["timeoutMs"],
-			["taskKey"] = tTaskKey,
-		});
-
-		return false;
-
-	end
-
-	local tIsProfile;
-	local tMetrics;
-	local tOrphanedIncrements;
-	function tSemaphore:validateAndRecoverState(aTimedOutCount)
-
-		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-		end
-
-		if #self["waitingTasks"] == 0 then
-			if self["count"] > 0 then
-				tOrphanedIncrements = self["count"];
-				self["count"] = 0;
-
-				if tIsProfile then
-					tMetrics["decrements"] = tMetrics["decrements"] + tOrphanedIncrements;
-				end
-			end
-		end
-
-		return;
-
-	end
-
-	local tCurrentTime;
-	local tIsProfile;
-	local tMetrics;
-	local tTask;
-	local tTimedOutCount;
-	function tSemaphore:checkTimeouts()
-
-		tCurrentTime = GetTime() * 1000;
-		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
-		tTimedOutCount = 0;
-
-		if tIsProfile then
-			tMetrics = self["metrics"];
-		end
-
-		for tIndex = #self["waitingTasks"], 1, -1 do
-			tTask = self["waitingTasks"][tIndex];
-
-			if tCurrentTime >= tTask["timeoutTime"] then
-				tTimedOutCount = tTimedOutCount + 1;
-
-				if VUHDO_SEMAPHORE_PROFILING_ENABLED then
-					tMetrics = self["metrics"];
-					tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
-				end
-
-				table.remove(self["waitingTasks"], tIndex);
-			end
-		end
-
-		if tTimedOutCount > 0 then
-			self:validateAndRecoverState(tTimedOutCount);
-		end
-
-		return;
-
-	end
-
-	local tMetrics;
-	function tSemaphore:getMetrics()
-
-		tMetrics = self["metrics"];
-
-		return {
-			["increments"] = tMetrics["increments"],
-			["decrements"] = tMetrics["decrements"],
-			["timeouts"] = tMetrics["timeouts"],
-			["peakWaitCount"] = tMetrics["peakWaitCount"],
-			["currentCount"] = self["count"],
-			["maxCount"] = self["maxCount"],
-			["waitingCount"] = #self["waitingTasks"],
-			["timeoutMs"] = self["timeoutMs"],
+		tSemaphore = {
+			["name"] = aSemaphoreName,
+			["count"] = aInitialCount or 0,
+			["maxCount"] = aMaxCount or 999999,
+			["timeoutMs"] = aTimeoutMs or VUHDO_SEMAPHORE_DEFAULT_TIMEOUT_MS,
+			["waitingTasks"] = { },
+			["metrics"] = {
+				["increments"] = 0,
+				["decrements"] = 0,
+				["timeouts"] = 0,
+				["peakWaitCount"] = 0,
+			},
 		};
 
+		local tIsProfile;
+		local tMetrics;
+		function tSemaphore:increment()
+
+			tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
+
+			if tIsProfile then
+				tMetrics = self["metrics"];
+				tMetrics["increments"] = tMetrics["increments"] + 1;
+			end
+
+			if self["count"] < self["maxCount"] then
+				self["count"] = self["count"] + 1;
+
+				return true;
+			end
+
+			return false;
+
+		end
+
+		local tIsProfile;
+		local tMetrics;
+		local tTask;
+		local tAllDependenciesZero;
+		local tTasksToProcess;
+		local tIndex;
+		local tShouldProcess;
+		local tShouldMigrate;
+		local tMigrateToSemaphore;
+		function tSemaphore:decrement()
+
+			tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
+
+			if tIsProfile then
+				tMetrics = self["metrics"];
+				tMetrics["decrements"] = tMetrics["decrements"] + 1;
+			end
+
+			if self["count"] > 0 then
+				self["count"] = self["count"] - 1;
+
+				if self["count"] == 0 then
+					tTasksToProcess = { };
+					tIndex = 1;
+
+					while tIndex <= #self["waitingTasks"] do
+						tTask = self["waitingTasks"][tIndex];
+
+						tShouldProcess = false;
+						tShouldMigrate = false;
+						tMigrateToSemaphore = nil;
+
+						if tTask["allDependencies"] then
+							tAllDependenciesZero = true;
+							tMigrateToSemaphore = nil;
+
+							for _, tDependency in ipairs(tTask["allDependencies"]) do
+								if tDependency and tDependency["count"] > 0 then
+									tAllDependenciesZero = false;
+
+									if not tMigrateToSemaphore then
+										tMigrateToSemaphore = tDependency;
+									end
+								end
+							end
+
+							if tAllDependenciesZero then
+								tShouldProcess = true;
+							else
+								tShouldMigrate = true;
+							end
+						else
+							tShouldProcess = true;
+						end
+
+						if tShouldProcess then
+							tremove(self["waitingTasks"], tIndex);
+
+							tinsert(tTasksToProcess, tTask);
+						elseif tShouldMigrate and tMigrateToSemaphore then
+							tremove(self["waitingTasks"], tIndex);
+
+							tinsert(tMigrateToSemaphore["waitingTasks"], tTask);
+						else
+							tIndex = tIndex + 1;
+						end
+					end
+
+					for _, tTask in ipairs(tTasksToProcess) do
+						VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
+					end
+				end
+			end
+
+			return true;
+
+		end
+
+		local tIsProfile;
+		local tMetrics;
+		local tTaskKey;
+		function tSemaphore:waitFor(aTaskType, aPriority, ...)
+
+			if not self then
+				return true;
+			end
+
+			tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
+
+			if tIsProfile then
+				tMetrics = self["metrics"];
+
+				tMetrics["peakWaitCount"] = max(tMetrics["peakWaitCount"], #self["waitingTasks"] + 1);
+			end
+
+			if self["count"] == 0 then
+				return true;
+			end
+
+			tTaskKey = tostring(aTaskType);
+
+			for i = 1, select("#", ...) do
+				tTaskKey = tTaskKey .. "|" .. tostring(select(i, ...) or "");
+			end
+
+			for _, tExistingTask in ipairs(self["waitingTasks"]) do
+				if tExistingTask["taskKey"] == tTaskKey then
+					return false;
+				end
+			end
+
+			tinsert(self["waitingTasks"], {
+				["type"] = aTaskType,
+				["priority"] = aPriority,
+				["args"] = { ... },
+				["startTime"] = GetTime() * 1000,
+				["timeoutTime"] = GetTime() * 1000 + self["timeoutMs"],
+				["taskKey"] = tTaskKey,
+			});
+
+			return false;
+
+		end
+
+		local tIsProfile;
+		local tMetrics;
+		local tOrphanedIncrements;
+		function tSemaphore:validateAndRecoverState(aTimedOutCount)
+
+			tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
+
+			if tIsProfile then
+				tMetrics = self["metrics"];
+			end
+
+			if #self["waitingTasks"] == 0 then
+				if self["count"] > 0 then
+					tOrphanedIncrements = self["count"];
+					self["count"] = 0;
+
+					if tIsProfile then
+						tMetrics["decrements"] = tMetrics["decrements"] + tOrphanedIncrements;
+					end
+				end
+			end
+
+			return;
+
+		end
+
+		local tCurrentTime;
+		local tIsProfile;
+		local tMetrics;
+		local tTask;
+		local tTimedOutCount;
+		function tSemaphore:checkTimeouts()
+
+			tCurrentTime = GetTime() * 1000;
+			tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
+			tTimedOutCount = 0;
+
+			if tIsProfile then
+				tMetrics = self["metrics"];
+			end
+
+			for tIndex = #self["waitingTasks"], 1, -1 do
+				tTask = self["waitingTasks"][tIndex];
+
+				if tCurrentTime >= tTask["timeoutTime"] then
+					tTimedOutCount = tTimedOutCount + 1;
+
+					if VUHDO_SEMAPHORE_PROFILING_ENABLED then
+						tMetrics = self["metrics"];
+						tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
+					end
+
+					table.remove(self["waitingTasks"], tIndex);
+				end
+			end
+
+			if tTimedOutCount > 0 then
+				self:validateAndRecoverState(tTimedOutCount);
+			end
+
+			return;
+
+		end
+
+		local tMetrics;
+		function tSemaphore:getMetrics()
+
+			tMetrics = self["metrics"];
+
+			return {
+				["increments"] = tMetrics["increments"],
+				["decrements"] = tMetrics["decrements"],
+				["timeouts"] = tMetrics["timeouts"],
+				["peakWaitCount"] = tMetrics["peakWaitCount"],
+				["currentCount"] = self["count"],
+				["maxCount"] = self["maxCount"],
+				["waitingCount"] = #self["waitingTasks"],
+				["timeoutMs"] = self["timeoutMs"],
+			};
+
+		end
+
+		local tMetrics;
+		function tSemaphore:resetMetrics()
+
+			tMetrics = self["metrics"];
+
+			tMetrics["increments"] = 0;
+			tMetrics["decrements"] = 0;
+			tMetrics["timeouts"] = 0;
+			tMetrics["peakWaitCount"] = 0;
+
+			return;
+
+		end
+
+		VUHDO_REGISTERED_SEMAPHORES[aSemaphoreName] = tSemaphore;
+
+		return tSemaphore;
+
 	end
-
-	local tMetrics;
-	function tSemaphore:resetMetrics()
-
-		tMetrics = self["metrics"];
-
-		tMetrics["increments"] = 0;
-		tMetrics["decrements"] = 0;
-		tMetrics["timeouts"] = 0;
-		tMetrics["peakWaitCount"] = 0;
-
-		return;
-
-	end
-
-	VUHDO_REGISTERED_SEMAPHORES[aSemaphoreName] = tSemaphore;
-
-	return tSemaphore;
-
 end
 
 
@@ -2814,4 +2829,214 @@ function VUHDO_generateCycleId(aCycleId, anIsFallback)
 		return GetTime() .. "_" .. math.random(1000, 9999);
 	end
 
+end
+
+
+
+---------------------------------
+-- CLASSIC COMPATIBILITY LAYER --
+---------------------------------
+do
+	--
+	function VUHDO_isTBCC()
+
+		return WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC;
+
+	end
+
+
+
+	--
+	function VUHDO_unitTargetsVehicleInRaidUI(...)
+
+		if not UnitTargetsVehicleInRaidUI then
+			return true;
+		else
+			return UnitTargetsVehicleInRaidUI(...);
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_unitHasVehicleUI(...)
+
+		if not UnitHasVehicleUI then
+			return false;
+		else
+			return UnitHasVehicleUI(...);
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_unitGroupRolesAssigned(...)
+
+		if not UnitGroupRolesAssigned then
+			return "NONE";
+		else
+			return UnitGroupRolesAssigned(...);
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_unitAlternatePowerInfo(...)
+
+		if not UnitAlternatePowerInfo then 
+			return false;
+		else
+			return UnitAlternatePowerInfo(...);
+		end
+
+	end
+
+
+
+	--
+	local tTargetGUID;
+	local tCasterGUID;
+	local tDefaultDirectIncAmount;
+	local tHealCommDirectIncAmount;
+	local tTotalIncAmount;
+	function VUHDO_unitGetIncomingHeals(aUnit, aCasterUnit)
+
+		if not aUnit then
+			return 0;
+		end
+
+		if VUHDO_LibHealComm and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_LIBHEALCOMM_INCOMING"] then
+			tTargetGUID = UnitGUID(aUnit);
+
+			tDefaultDirectIncAmount = UnitGetIncomingHeals and UnitGetIncomingHeals(aUnit, aCasterUnit) or 0;
+
+			if aCasterUnit then
+				tCasterGUID = UnitGUID(aCasterUnit);
+
+				tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + 4, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+				tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + 4, tCasterGUID) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+
+			else
+				tHealCommDirectIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.DIRECT_HEALS, GetTime() + 4) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+				tTotalIncAmount = (VUHDO_LibHealComm:GetHealAmount(tTargetGUID, VUHDO_LibHealComm.OVERTIME_AND_BOMB_HEALS, GetTime() + 4) or 0) * (VUHDO_LibHealComm:GetHealModifier(tTargetGUID) or 1);
+			end
+
+			if tDefaultDirectIncAmount > tHealCommDirectIncAmount then
+				tTotalIncAmount = tTotalIncAmount + tDefaultDirectIncAmount;
+			else
+				tTotalIncAmount = tTotalIncAmount + tHealCommDirectIncAmount;
+			end
+
+			return tTotalIncAmount;
+		elseif UnitGetIncomingHeals then
+			return UnitGetIncomingHeals(aUnit, aCasterUnit);
+		else
+			return 0;
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_unitGetTotalAbsorbs(...)
+
+		if not UnitGetTotalAbsorbs then
+			return 0;
+		else
+			return UnitGetTotalAbsorbs(...);
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_unitGetTotalHealAbsorbs(...)
+
+		if not UnitGetTotalHealAbsorbs then
+			return 0;
+		else
+			return UnitGetTotalHealAbsorbs(...);
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_hasIncomingSummon(aUnit)
+
+		if C_IncomingSummon and C_IncomingSummon.HasIncomingSummon then
+			return C_IncomingSummon.HasIncomingSummon(aUnit);
+		else
+			return false;
+		end
+
+	end
+
+
+
+	--
+	local tSpecNum;
+	function VUHDO_getSpecialization()
+
+		if GetSpecialization then
+			return GetSpecialization();
+		elseif GetActiveTalentGroup then
+			return GetActiveTalentGroup();
+		else
+			return 1;
+		end
+
+	end
+
+
+
+	--
+	local tSpecNum;
+	function VUHDO_getSpecializationInfo(aSpecNum, ...)
+
+		if GetSpecializationInfo then
+			return GetSpecializationInfo(aSpecNum, ...);
+		elseif GetActiveTalentGroup then
+			tSpecNum = aSpecNum or GetActiveTalentGroup();
+
+			return tSpecNum, tSpecNum == 1 and "Primary" or (tSpecNum == 2 and "Secondary" or "Unknown"), nil, nil, "NONE";
+		else
+			return nil;
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_getInspectSpecialization(aUnit)
+
+		if GetInspectSpecialization then
+			return GetInspectSpecialization(aUnit);
+		else
+			return nil;
+		end
+
+	end
+
+
+
+	--
+	function VUHDO_getSpecializationRoleByID(...)
+
+		if not GetSpecializationRoleByID then
+			return "NONE";
+		else
+			return GetSpecializationRoleByID(...);
+		end
+
+	end
 end

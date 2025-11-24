@@ -4,6 +4,7 @@ local VUHDO_INTERNAL_TOGGLES = { };
 
 local strsplit = strsplit;
 local pairs = pairs;
+local select = select;
 
 local VUHDO_updateHealth;
 local sCurrentTarget = nil;

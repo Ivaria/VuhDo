@@ -2,6 +2,9 @@ local GetSpellName = C_Spell.GetSpellName;
 local pairs = pairs;
 local _;
 
+local GetSpecialization = VUHDO_getSpecialization;
+local GetSpecializationInfo = VUHDO_getSpecializationInfo;
+
 VUHDO_GLOBAL_CONFIG = {
 	["PROFILES_VERSION"] = 1;
 };
@@ -643,6 +646,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["SHOW_SHIELD_BAR"] = true,
 	["SHOW_OVERSHIELD_BAR"] = false,
 	["SHOW_HEAL_ABSORB_BAR"] = true,
+	["SHOW_LIBHEALCOMM_INCOMING"] = false,
 
 	["RANGE_CHECK_DELAY"] = 260,
 

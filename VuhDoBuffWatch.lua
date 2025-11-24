@@ -230,7 +230,7 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 
 		end
 
-	elseif VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType then
+	elseif VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType or VUHDO_BUFF_TARGET_GROUP == tTargetType then
 		local tInfo;
 		local tText;
 		tInfo = UIDropDownMenu_CreateInfo();
@@ -469,6 +469,65 @@ end
 
 
 --
+local tUnitsByGroup = { };
+local tGroupTarget;
+local tUnitGroup;
+local tGroupInfo;
+local tGroupInRange;
+local function VUHDO_getGroupBuffTarget(aBuffInfo, tMissGroup, tLowGroup)
+
+	tGroupTarget = nil;
+	twipe(tUnitsByGroup);
+
+	for _, tUnit in pairs(tMissGroup) do
+		tUnitGroup = (VUHDO_RAID[tUnit] or {})["group"];
+
+		if tUnitGroup and tUnitGroup >= 1 and tUnitGroup <= 8 then
+			if not tUnitsByGroup[tUnitGroup] then
+				tUnitsByGroup[tUnitGroup] = { };
+			end
+
+			tUnitsByGroup[tUnitGroup][#tUnitsByGroup[tUnitGroup] + 1] = tUnit;
+		end
+	end
+
+	for _, tUnit in pairs(tLowGroup) do
+		tUnitGroup = (VUHDO_RAID[tUnit] or {})["group"];
+
+		if tUnitGroup and tUnitGroup >= 1 and tUnitGroup <= 8 then
+			if not tUnitsByGroup[tUnitGroup] then
+				tUnitsByGroup[tUnitGroup] = { };
+			end
+
+			tUnitsByGroup[tUnitGroup][#tUnitsByGroup[tUnitGroup] + 1] = tUnit;
+		end
+	end
+
+	for tGroupNum = 1, 8 do
+		if tUnitsByGroup[tGroupNum] then
+			for _, tUnit in pairs(tUnitsByGroup[tGroupNum]) do
+				tGroupInfo = VUHDO_RAID[tUnit];
+
+				if tGroupInfo and tGroupInfo["connected"] and not tGroupInfo["dead"] then
+					tGroupInRange = (IsSpellInRange(aBuffInfo[1], tUnit) == 1) or tGroupInfo["baseRange"];
+
+					if tGroupInRange then
+						tGroupTarget = tUnit;
+
+						return tGroupTarget;
+					end
+				end
+			end
+		end
+	end
+
+	return tGroupTarget;
+
+end
+
+
+
+--
 local tTexture, tStart, tRest;
 local tMissGroup = { };
 local tLowGroup = { };
@@ -511,6 +570,8 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 			tIsWatchUnit = false;
 		elseif "player" == tUnit then
 			tIsWatchUnit = true;
+		elseif tInfo["powertype"] ~= VUHDO_UNIT_POWER_MANA and (tCategName == VUHDO_SPELL_ID.BUFF_DIVINE_SPIRIT or tCategName == VUHDO_SPELL_ID.BUFF_ARCANE_BRILLIANCE or tCategName == VUHDO_SPELL_ID.BUFF_GREATER_BLESSING_OF_WISDOM) then
+			tIsWatchUnit = false; --don't track mana-related buffs on units without mana
 		elseif VUHDO_isInSameZone(tUnit) and (tInfo["visible"] or tIsNotInBattleground) then
 			tIsWatchUnit = true;
 		else
@@ -575,10 +636,19 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 				if 10 == aBuffInfo[2] then tGoodTarget = "player"; -- VUHDO_BUFF_TARGET_RAID
 				elseif 9 == aBuffInfo[2] then tGoodTarget = "target"; -- VUHDO_BUFF_TARGET_HOSTILE
 				elseif 3 == aBuffInfo[2] or tInRange then tGoodTarget = tUnit; -- VUHDO_BUFF_TARGET_UNIQUE
+				elseif 13 == aBuffInfo[2] then -- VUHDO_BUFF_TARGET_GROUP
+					tGroupTarget = VUHDO_getGroupBuffTarget(aBuffInfo, tMissGroup, tLowGroup);
+					if tGroupTarget then
+						tGoodTarget = tGroupTarget;
+					end
 				end
 			end
 
 		end
+	end
+
+	if 13 == aBuffInfo[2] then -- VUHDO_BUFF_TARGET_GROUP
+		tGoodTarget = VUHDO_getGroupBuffTarget(aBuffInfo, tMissGroup, tLowGroup);
 	end
 
 	return tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tMaxCount;

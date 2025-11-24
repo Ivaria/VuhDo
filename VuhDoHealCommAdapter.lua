@@ -1,5 +1,5 @@
 ----------------------------------------------------
-local UnitGetIncomingHeals = UnitGetIncomingHeals;
+local UnitGetIncomingHeals = VUHDO_unitGetIncomingHeals;
 local sIsOthers, sIsOwn, sIsNoInc;
 function VUHDO_healCommAdapterInitLocalOverrides()
 	sIsOthers = VUHDO_CONFIG["SHOW_INCOMING"];

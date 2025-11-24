@@ -42,7 +42,7 @@ local VUHDO_INTERNAL_TOGGLES;
 
 local strfind = strfind;
 local GetRaidTargetIndex = GetRaidTargetIndex;
-local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
+local UnitGetTotalHealAbsorbs = VUHDO_unitGetTotalHealAbsorbs;
 local pairs = pairs;
 local twipe = table.wipe;
 local format = format;

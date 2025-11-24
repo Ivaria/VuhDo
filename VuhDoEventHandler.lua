@@ -1015,7 +1015,7 @@ do
 				VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
 			end
 
-		elseif "UNIT_HEALTH" == anEvent then
+		elseif "UNIT_HEALTH" == anEvent or "UNIT_HEALTH_FREQUENT" == anEvent then
 			if anArg1 and ((VUHDO_RAID or tEmptyRaid)[anArg1] or VUHDO_isBossUnit(anArg1)) then
 				VUHDO_updateHealth(anArg1, 2);
 			end
@@ -1059,12 +1059,14 @@ do
 				end
 			end
 
+		--[[ TBCC: UNIT_ABSORB_AMOUNT_CHANGED not available in TBC Classic
 		elseif "UNIT_ABSORB_AMOUNT_CHANGED" == anEvent then
 			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
 				VUHDO_updateBouquetsForEvent(anArg1, 36); -- VUHDO_UPDATE_SHIELD
 
 				VUHDO_updateShieldBar(anArg1);
 			end
+		--]]
 
 		elseif "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" == anEvent then
 			if (VUHDO_RAID or tEmptyRaid)[anArg1] then
@@ -1373,27 +1375,50 @@ do
 		elseif "PET_BATTLE_CLOSE" == anEvent then
 			VUHDO_setPetBattle(false);
 
+		--[[ TBCC: INCOMING_SUMMON_CHANGED not available in TBC Classic
 		elseif "INCOMING_SUMMON_CHANGED" == anEvent then
 			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 				VUHDO_updateBouquetsForEvent(anArg1, 38); -- VUHDO_UPDATE_SUMMON
 			end
+		--]]
 
 		elseif "UNIT_PHASE" == anEvent then
 			if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 				VUHDO_updateBouquetsForEvent(anArg1, 39); -- VUHDO_UPDATE_PHASE
 			end
 
+		--[[ TBCC: RUNE_POWER_UPDATE not available in TBC Classic (but KEEP code per user instruction)
 		elseif "RUNE_POWER_UPDATE" == anEvent then
 			VUHDO_updateBouquetsForEvent("player", 42); -- VUHDO_UPDATE_RUNES
+		--]]
 
-		elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent or "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
+		--[[ TBCC: PLAYER_SPECIALIZATION_CHANGED not available in TBC Classic
+		elseif "PLAYER_SPECIALIZATION_CHANGED" == anEvent then
 			if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
-				if "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
-					anArg1 = "player";
-				end
-
 				if "player" == anArg1 then
 					tSpecNumber = tostring(GetSpecialization()) or "1";
+					tBestProfileName = VUHDO_getBestProfileAfterSpecChange();
+
+					-- event sometimes fires multiple times so we must de-dupe
+					if (not VUHDO_strempty(VUHDO_SPEC_LAYOUTS[tSpecNumber]) and (VUHDO_SPEC_LAYOUTS["selected"] ~= VUHDO_SPEC_LAYOUTS[tSpecNumber])) or
+						(not VUHDO_strempty(tBestProfileName) and (VUHDO_CONFIG["CURRENT_PROFILE"] ~= tBestProfileName)) then
+						VUHDO_activateSpecc(tSpecNumber);
+					end
+				end
+
+				if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
+					VUHDO_resetTalentScan(anArg1);
+					VUHDO_initDebuffs(); -- Talentabhngige Debuff-Fhigkeiten neu initialisieren.
+					VUHDO_timeReloadUI(1);
+				end
+			end
+		--]]
+		elseif "ACTIVE_TALENT_GROUP_CHANGED" == anEvent then
+			if VUHDO_VARIABLES_LOADED and not InCombatLockdown() then
+				anArg1 = "player";
+
+				if "player" == anArg1 then
+					tSpecNumber = tostring(VUHDO_getSpecialization()) or "1";
 					tBestProfileName = VUHDO_getBestProfileAfterSpecChange();
 
 					-- event sometimes fires multiple times so we must de-dupe
@@ -2722,7 +2747,7 @@ end
 --
 local VUHDO_ALL_EVENT_NAMES = {
 	"VARIABLES_LOADED", "PLAYER_ENTERING_WORLD", "SPELLS_CHANGED",
-	"UNIT_MAXHEALTH", "UNIT_HEALTH",
+	"UNIT_MAXHEALTH", "UNIT_HEALTH", "UNIT_HEALTH_FREQUENT",
 	"UNIT_AURA",
 	"UNIT_TARGET",
 	"GROUP_ROSTER_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "UPDATE_ACTIVE_BATTLEFIELD",
@@ -2733,7 +2758,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"LEARNED_SPELL_IN_SKILL_LINE", "TRAIT_CONFIG_UPDATED",
 	"PLAYER_FLAGS_CHANGED",
 	"PLAYER_LOGOUT",
-	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE",
+	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", -- "RUNE_POWER_UPDATE", -- TBCC: Not available in TBC Classic
 	"UNIT_SPELLCAST_SENT",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
 	"COMBAT_LOG_EVENT_UNFILTERED",
@@ -2756,10 +2781,11 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"INCOMING_RESURRECT_CHANGED",
 	"PET_BATTLE_CLOSE", "PET_BATTLE_OPENING_START",
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED",
-	"UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_HEAL_ABSORB_AMOUNT_CHANGED",
-	"INCOMING_SUMMON_CHANGED",
+	-- "UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_HEAL_ABSORB_AMOUNT_CHANGED", -- TBCC: Not available in TBC Classic
+	-- "INCOMING_SUMMON_CHANGED", -- TBCC: Not available in TBC Classic
 	"UNIT_PHASE",
-	"PLAYER_SPECIALIZATION_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED",
+	-- "PLAYER_SPECIALIZATION_CHANGED", -- TBCC: Not available in TBC Classic
+	"ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",
 	"NAME_PLATE_UNIT_REMOVED",
