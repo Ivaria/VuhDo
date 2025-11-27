@@ -3,8 +3,6 @@ local _;
 local tinsert = table.insert;
 local format = string.format;
 
-local VUHDO_PLAYER_UNIT = "player";
-
 local sManagerFrame;
 local sShadowHeader;
 local sLastSecurePlayerToken;
@@ -1225,27 +1223,6 @@ end
 
 
 --
-local function VUHDO_normalizeMappingUnit(aUnit)
-
-	if not aUnit then
-		return nil;
-	end
-
-	if aUnit == VUHDO_PLAYER_UNIT then
-		return VUHDO_PLAYER_UNIT;
-	end
-
-	if sLastSecurePlayerToken and aUnit == sLastSecurePlayerToken then
-		return VUHDO_PLAYER_UNIT;
-	end
-
-	return aUnit;
-
-end
-
-
-
---
 local tUnitMappings = { };
 local tFallbackPanels;
 local tModels;
@@ -1255,7 +1232,6 @@ local tButtonIndex;
 local tColIndex;
 local tGroupArray;
 local tUnitCount;
-local tNormalizedUnit;
 function VUHDO_computeAndPushSecureMappings()
 
 	if not sInitialized or InCombatLockdown() then
@@ -1284,13 +1260,13 @@ function VUHDO_computeAndPushSecureMappings()
 				tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, tPanelNum, tModelIndex);
 
 				for _, tUnit in ipairs(tGroupArray) do
-					tNormalizedUnit = VUHDO_normalizeMappingUnit(tUnit);
-
-					if tNormalizedUnit and not tUnitMappings[tNormalizedUnit] then
-						tUnitMappings[tNormalizedUnit] = { };
+					if tUnit and not tUnitMappings[tUnit] then
+						tUnitMappings[tUnit] = { };
 					end
 
-					tinsert(tUnitMappings[tNormalizedUnit], { tPanelNum, tButtonIndex });
+					if tUnit then
+						tinsert(tUnitMappings[tUnit], { tPanelNum, tButtonIndex });
+					end
 
 					tButtonIndex = tButtonIndex + 1;
 				end
