@@ -782,20 +782,24 @@ do
 	--
 	local tName, tEnchant;
 	function VUHDO_getWeaponEnchantName(aSlot)
+
 		VuhDoScanTooltip:SetOwner(VuhDo, "ANCHOR_NONE");
 		VuhDoScanTooltip:ClearLines();
 		VuhDoScanTooltip:SetInventoryItem("player", aSlot);
+
 		for tCnt = 1, VuhDoScanTooltip:NumLines() do
 			tName = strmatch(_G["VuhDoScanTooltipTextLeft" .. tCnt]:GetText(), "^.+ %(%d+%s+.+%)$");
+
 			if tName then
 				tEnchant = gsub(tName, " [0-9]+ %(.+%)", "");
 				tEnchant = gsub(tEnchant, "%s+%d+$", "");
-				tEnchant = tEnchant .. " Weapon";
+
 				return tEnchant;
 			end
 		end
 
 		return "*";
+
 	end
 end
 
