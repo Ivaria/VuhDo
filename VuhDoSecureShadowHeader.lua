@@ -5,7 +5,6 @@ local format = string.format;
 
 local sManagerFrame;
 local sShadowHeader;
-local sLastSecurePlayerToken;
 local sInitialized = false;
 
 
@@ -48,7 +47,7 @@ local tOnAttributeChanged = [=[
 			local tOldUnit = self:GetAttribute("vuhdo_last_unit");
 
 			if sIsDebugEnabled then
-				print("[VD:SecureShadow] Shadow button", tShadowButtonId, "unit changed: old=", tostring(tOldUnit), "new=", tostring(tUnit));
+				print("[VuhDo] Shadow button", tShadowButtonId, "unit changed: old=", tostring(tOldUnit), "new=", tostring(tUnit));
 			end
 
 			if not tUnit and tOldUnit then
@@ -56,7 +55,7 @@ local tOnAttributeChanged = [=[
 			elseif tUnit and tUnit ~= tOldUnit then
 				tManager:RunAttribute("vuhdo_process_unit_method", tUnit, tShadowButtonId, tOldUnit);
 			elseif sIsDebugEnabled then
-				print("[VD:SecureShadow] Shadow button", tShadowButtonId, "unit change skipped (no change or invalid)");
+				print("[VuhDo] Shadow button", tShadowButtonId, "unit change skipped (no change or invalid)");
 			end
 
 			self:SetAttribute("vuhdo_last_unit", tUnit);
@@ -94,6 +93,14 @@ function VUHDO_initSecureShadowHeader()
 
 	end
 
+	function sManagerFrame:UpdatePanelVisibility()
+
+		VUHDO_updatePanelVisibility();
+
+		return;
+
+	end
+
 	function sShadowHeader:Execute(aBody)
 
 		return SecureHandlerExecute(self, aBody);
@@ -106,10 +113,12 @@ function VUHDO_initSecureShadowHeader()
 
 	end
 
-	sLastSecurePlayerToken = nil;
+
+	sManagerFrame:SetFrameRef("sShadowHeader", sShadowHeader);
 
 	sManagerFrame:Execute([=[
 		sManager = self;
+		sShadowHeader = self:GetFrameRef("sShadowHeader");
 
 		sRealButtons = newtable();
 		sDebuffFrames = newtable();
@@ -144,7 +153,6 @@ function VUHDO_initSecureShadowHeader()
 		sShadowLastUnit = newtable();
 		sShadowClearedUnit = newtable();
 
-		sPlayerRaidToken = nil;
 		sPendingRefresh = false;
 
 		sMaxShadowButtons = 40;
@@ -190,7 +198,7 @@ function VUHDO_initSecureShadowHeader()
 		end
 
 		if sIsDebugEnabled then
-			print("[VD:SecureShadow] Queueing unit:", tUnit, "shadow:", tShadowButtonId, "oldUnit:", tostring(tOldUnit));
+			print("[VuhDo] Queueing unit:", tUnit, "shadow:", tShadowButtonId, "oldUnit:", tostring(tOldUnit));
 		end
 
 		local tQueueData = sProcessQueue[tShadowButtonId];
@@ -220,12 +228,6 @@ function VUHDO_initSecureShadowHeader()
 			tPrevUnit = tOldUnit;
 		end
 
-		if tOldUnit and sPlayerRaidToken and tOldUnit == sPlayerRaidToken then
-			if tUnit then
-				sPlayerRaidToken = tUnit;
-			end
-		end
-
 		tQueueData[1] = tUnit;
 		tQueueData[2] = tPrevUnit;
 
@@ -248,7 +250,7 @@ function VUHDO_initSecureShadowHeader()
 		end
 
 		if sIsDebugEnabled then
-			print("[VD:SecureShadow] Queueing clear for unit:", tUnit, "shadow:", tShadowButtonId);
+			print("[VuhDo] Queueing clear for unit:", tUnit, "shadow:", tShadowButtonId);
 		end
 
 		sShadowClearedUnit[tShadowButtonId] = tUnit;
@@ -261,189 +263,344 @@ function VUHDO_initSecureShadowHeader()
 		sManager:SetAttribute("state-vuhdo_batch_timer", "process");
 	]=]);
 
-	sManagerFrame:SetAttribute("_onstate-vuhdo_batch_timer", [=[
-		if newstate ~= "process" and sPendingRefresh then
+	sManagerFrame:SetAttribute("vuhdo_clear_button_unit_method", [=[
+		local tPanelNum, tButtonNum, tOldUnit, anIsHideFallback = ...;
+
+		local tPanelButtons = tPanelNum and sRealButtons[tPanelNum];
+		local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
+
+		if tRealButton then
+			tRealButton:SetAttribute("unit", nil);
+
+			local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
+			local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
+
+			if tDebuffFrames then
+				for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+					tDebuffFrame:SetAttribute("unit", nil);
+				end
+			end
+
+			if anIsHideFallback then
+				tRealButton:Hide();
+			end
+
 			if sIsDebugEnabled then
-				local tClearCount = 0;
-				local tProcessCount = 0;
-				for _ in pairs(sClearQueue) do
-					tClearCount = tClearCount + 1;
+				local tAfterUnit = tRealButton:GetAttribute("unit");
+				local tIsShown = tRealButton:IsShown();
+				local tParent = tRealButton:GetParent();
+				local tParentShown = tParent and tParent:IsShown();
+				local tParentName = tParent and tParent:GetName();
+
+				print("[VuhDo] Cleared button panel:", tPanelNum, "button:", tButtonNum, "unit:", tOldUnit, "afterUnit:", tostring(tAfterUnit), "isShown:", tIsShown, "parent:", tostring(tParentName), "parentShown:", tostring(tParentShown));
+			end
+		end
+	]=]);
+
+	sManagerFrame:SetAttribute("vuhdo_assign_unit_to_button_method", [=[
+		local tPanelNum, tButtonNum, tUnit, anIsShow = ...;
+
+		local tPanelButtons = tPanelNum and sRealButtons[tPanelNum];
+		local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
+
+		if tRealButton then
+			tRealButton:SetAttribute("unit", tUnit);
+
+			local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
+			local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
+
+			if tDebuffFrames then
+				for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+					tDebuffFrame:SetAttribute("unit", tUnit);
 				end
-				for _ in pairs(sProcessQueue) do
-					tProcessCount = tProcessCount + 1;
-				end
-				print("[VD:SecureShadow] Batch processing triggered, clear queue:", tClearCount, "process queue:", tProcessCount);
 			end
 
-			if not next(sClearQueue) and not next(sProcessQueue) then
+			if anIsShow then
+				tRealButton:Show();
+			end
+		end
+	]=]);
+
+	sManagerFrame:SetAttribute("vuhdo_release_pool_entry_method", [=[
+		local tUnit = ...;
+
+		if not tUnit then
+			return;
+		end
+
+		local tPoolIdx = sUnitToPoolIndex[tUnit];
+
+		if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
+			sFallbackMappingPool[tPoolIdx]["inUse"] = false;
+
+			if sIsDebugEnabled then
+				print("[VuhDo] Released pool entry:", tPoolIdx, "for unit:", tUnit);
+			end
+		end
+
+		sUnitToPoolIndex[tUnit] = nil;
+		sUnitMap[tUnit] = nil;
+	]=]);
+
+	sManagerFrame:SetAttribute("vuhdo_update_stale_mapping_method", [=[
+		local tShadowButtonId, tShadowButtonCurrentUnit = ...;
+
+		if not tShadowButtonId then
+			return;
+		end
+
+		if tShadowButtonCurrentUnit then
+			local tNewUnitMappings = sUnitMap[tShadowButtonCurrentUnit];
+
+			if tNewUnitMappings then
+				sShadowToRealMap[tShadowButtonId] = tNewUnitMappings;
+
 				if sIsDebugEnabled then
-					print("[VD:SecureShadow] Queues empty, skipping batch processing");
+					print("[VuhDo] Updated stale mapping - sShadowToRealMap[", tShadowButtonId, "] now points to fallback mappings for unit:", tShadowButtonCurrentUnit);
 				end
-				sPendingRefresh = false;
+			else
+				sShadowButtonHasMapping[tShadowButtonId] = false;
+				sShadowToRealMap[tShadowButtonId] = nil;
 
-				return;
+				if sIsDebugEnabled then
+					print("[VuhDo] Fixed stale mapping state - cleared sShadowButtonHasMapping[", tShadowButtonId, "] and sShadowToRealMap[", tShadowButtonId, "] (unit has no mappings)");
+				end
 			end
+		else
+			sShadowButtonHasMapping[tShadowButtonId] = false;
+			sShadowToRealMap[tShadowButtonId] = nil;
 
-			for tShadowButtonId, tOldUnit in pairs(sClearQueue) do
-				local tHasPreMapping = sShadowButtonHasMapping[tShadowButtonId];
+			if sIsDebugEnabled then
+				print("[VuhDo] Fixed stale mapping state - cleared sShadowButtonHasMapping[", tShadowButtonId, "] and sShadowToRealMap[", tShadowButtonId, "] (shadow button has no unit)");
+			end
+		end
+	]=]);
 
-				if tOldUnit and not (sPlayerRaidToken and tOldUnit == sPlayerRaidToken) then
-					if sIsDebugEnabled then
-						print("[VD:SecureShadow] Processing clear for unit:", tOldUnit, "shadow:", tShadowButtonId, "hasPreMapping:", tHasPreMapping);
-					end
+	sManagerFrame:SetAttribute("vuhdo_search_and_clear_unit_method", [=[
+		local tOldUnit, tHasPreMapping = ...;
 
-					local tMappings;
+		if not tOldUnit then
+			return false;
+		end
 
-					if tHasPreMapping then
-						tMappings = sShadowToRealMap[tShadowButtonId];
-					else
-						tMappings = sUnitMap[tOldUnit];
-					end
+		local tFoundButton = false;
 
-					if tMappings then
-						if sIsDebugEnabled then
-							print("[VD:SecureShadow] Found mappings for unit:", tOldUnit, "count:", #tMappings);
-						end
-						local tMappingsCount = #tMappings;
-						local tClearedAnyButton = false;
+		for tPanelNum = 1, 10 do
+			local tPanelButtons = sRealButtons[tPanelNum];
 
-						for tMappingIdx = 1, tMappingsCount do
-							local tMapping = tMappings[tMappingIdx];
-							local tPanelNum = tMapping[1];
-							local tButtonNum = tMapping[2];
+			if tPanelButtons then
+				for tButtonIndex, tCheckButton in pairs(tPanelButtons) do
+					if tCheckButton then
+						local tCurrentUnit = tCheckButton:GetAttribute("unit");
 
-							local tPanelButtons = tPanelNum and sRealButtons[tPanelNum];
-							local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
+						if tCurrentUnit == tOldUnit then
+							tFoundButton = true;
 
-							if tRealButton then
-								local tShouldClear = true;
-
-								if tHasPreMapping then
-									local tCurrentUnit = tRealButton:GetAttribute("unit");
-
-									tShouldClear = tCurrentUnit == tOldUnit;
-								end
-
-								if tShouldClear then
-									tClearedAnyButton = true;
-									tRealButton:SetAttribute("unit", nil);
-
-									local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-									local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
-
-									if tDebuffFrames then
-										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-											tDebuffFrame:SetAttribute("unit", nil);
-										end
-									end
-
-									if not tHasPreMapping then
-										tRealButton:Hide();
-									end
-
-									if sIsDebugEnabled then
-										print("[VD:SecureShadow] Cleared button panel:", tPanelNum, "button:", tButtonNum, "unit:", tOldUnit);
-									end
-								elseif sIsDebugEnabled and tHasPreMapping then
-									local tCurrentUnit = tRealButton:GetAttribute("unit");
-									print("[VD:SecureShadow] Skipped clearing pre-mapped button panel:", tPanelNum, "button:", tButtonNum, "current unit:", tCurrentUnit, "old unit:", tOldUnit);
-								end
-							end
-						end
-
-						if not tHasPreMapping and tClearedAnyButton then
-							local tPoolIdx = sUnitToPoolIndex[tOldUnit];
-
-							if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
-								sFallbackMappingPool[tPoolIdx]["inUse"] = false;
-
-								if sIsDebugEnabled then
-									print("[VD:SecureShadow] Released pool entry:", tPoolIdx, "for unit:", tOldUnit);
-								end
-							end
-
-							sUnitToPoolIndex[tOldUnit] = nil;
-							sUnitMap[tOldUnit] = nil;
-						end
-					elseif not tHasPreMapping then
-						if sIsDebugEnabled then
-							print("[VD:SecureShadow] No mapping found for fallback unit:", tOldUnit, "searching panels...");
-						end
-
-						local tFallbackPanelCount = #sFallbackPanels;
-						local tFoundButton = false;
-
-						for tFallbackIdx = 1, tFallbackPanelCount do
-							local tFallbackPanel = sFallbackPanels[tFallbackIdx];
-
-							if tFallbackPanel then
-								local tFallbackPanelButtons = sRealButtons[tFallbackPanel];
-
-								if tFallbackPanelButtons then
-									for tButtonIndex, tCheckButton in pairs(tFallbackPanelButtons) do
-										if tCheckButton then
-											local tCurrentUnit = tCheckButton:GetAttribute("unit");
-
-											if tCurrentUnit == tOldUnit then
-												tFoundButton = true;
-
-												if sIsDebugEnabled then
-													print("[VD:SecureShadow] Found and clearing fallback unit:", tOldUnit, "from button:", tButtonIndex, "panel:", tFallbackPanel);
-												end
-
-												tCheckButton:SetAttribute("unit", nil);
-
-												local tPanelDebuffFrames = tFallbackPanel and sDebuffFrames[tFallbackPanel];
-												local tDebuffFrames = tPanelDebuffFrames and tButtonIndex and tPanelDebuffFrames[tButtonIndex];
-
-												if tDebuffFrames then
-													for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-														tDebuffFrame:SetAttribute("unit", nil);
-													end
-												end
-
-												tCheckButton:Hide();
-											end
-										end
-									end
-								end
-							end
-						end
-
-						if tFoundButton then
-							if sUnitMap[tOldUnit] then
-								local tPoolIdx = sUnitToPoolIndex[tOldUnit];
-
-								if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
-									sFallbackMappingPool[tPoolIdx]["inUse"] = false;
-
-									if sIsDebugEnabled then
-										print("[VD:SecureShadow] Released pool entry:", tPoolIdx, "for unit:", tOldUnit);
-									end
-								end
-
-								sUnitToPoolIndex[tOldUnit] = nil;
-								sUnitMap[tOldUnit] = nil;
-							end
-						else
 							if sIsDebugEnabled then
-								print("[VD:SecureShadow] WARNING: Could not find button for fallback unit:", tOldUnit, "- mapping may have been cleared already");
+								print("[VuhDo] Found and clearing unit:", tOldUnit, "from button:", tButtonIndex, "panel:", tPanelNum, "preMapped:", tHasPreMapping);
+							end
+
+							tCheckButton:SetAttribute("unit", nil);
+
+							local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
+							local tDebuffFrames = tPanelDebuffFrames and tButtonIndex and tPanelDebuffFrames[tButtonIndex];
+
+							if tDebuffFrames then
+								for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+									tDebuffFrame:SetAttribute("unit", nil);
+								end
+							end
+
+							if not tHasPreMapping then
+								tCheckButton:Hide();
 							end
 						end
 					end
 				end
 			end
+		end
 
-			for tShadowButtonId, tQueueData in pairs(sProcessQueue) do
-				local tHasPreMapping = sShadowButtonHasMapping[tShadowButtonId];
+		return tFoundButton;
+	]=]);
+
+	sManagerFrame:SetAttribute("vuhdo_process_clear_queue_method", [=[
+		for tShadowButtonId, tOldUnit in pairs(sClearQueue) do
+			local tShadowButton = sShadowHeader and sShadowHeader:GetAttribute("child" .. tShadowButtonId);
+			local tShadowButtonCurrentUnit = tShadowButton and tShadowButton:GetAttribute("unit");
+
+			if sIsDebugEnabled then
+				print("[VuhDo] Clear queue entry: shadow:", tShadowButtonId, "oldUnit:", tostring(tOldUnit), "currentUnit:", tostring(tShadowButtonCurrentUnit));
+			end
+
+			local tHasPreMapping = sShadowButtonHasMapping[tShadowButtonId];
+
+			if tOldUnit then
+				if sIsDebugEnabled then
+					print("[VuhDo] Processing clear for unit:", tOldUnit, "shadow:", tShadowButtonId, "hasPreMapping:", tHasPreMapping);
+				end
+
+				local tMappings;
 
 				if tHasPreMapping then
-					local tUnit = tQueueData[1];
-					local tOldUnit = tQueueData[2];
+					tMappings = sShadowToRealMap[tShadowButtonId];
 
+					if sIsDebugEnabled and not tMappings then
+						print("[VuhDo] WARNING: sShadowToRealMap[", tShadowButtonId, "] is nil for unit:", tOldUnit, "- mapping may be stale or missing");
+					end
+				else
+					tMappings = sUnitMap[tOldUnit];
+
+					if sIsDebugEnabled and not tMappings then
+						print("[VuhDo] sUnitMap[", tOldUnit, "] is nil (fallback unit)");
+					end
+				end
+
+				if tMappings then
+					if sIsDebugEnabled then
+						print("[VuhDo] Found mappings for unit:", tOldUnit, "count:", #tMappings);
+					end
+
+					local tMappingsCount = #tMappings;
+					local tClearedAnyButton = false;
+
+					for tMappingIdx = 1, tMappingsCount do
+						local tMapping = tMappings[tMappingIdx];
+						local tPanelNum = tMapping[1];
+						local tButtonNum = tMapping[2];
+
+						local tPanelButtons = tPanelNum and sRealButtons[tPanelNum];
+						local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
+
+						if tRealButton then
+							local tShouldClear = true;
+
+							if tHasPreMapping then
+								local tCurrentUnit = tRealButton:GetAttribute("unit");
+
+								tShouldClear = tCurrentUnit == tOldUnit;
+							end
+
+							if tShouldClear then
+								tClearedAnyButton = true;
+
+								sManager:RunAttribute("vuhdo_clear_button_unit_method", tPanelNum, tButtonNum, tOldUnit, false);
+							elseif sIsDebugEnabled and tHasPreMapping then
+								local tCurrentUnit = tRealButton:GetAttribute("unit");
+
+								print("[VuhDo] Skipped clearing pre-mapped button panel:", tPanelNum, "button:", tButtonNum, "current unit:", tCurrentUnit, "old unit:", tOldUnit);
+							end
+						end
+					end
+
+					if not tHasPreMapping and tClearedAnyButton then
+						sManager:RunAttribute("vuhdo_release_pool_entry_method", tOldUnit);
+					end
+
+					if tHasPreMapping and sShadowClearedUnit[tShadowButtonId] == tOldUnit then
+						sShadowClearedUnit[tShadowButtonId] = nil;
+					end
+				else
+					if sIsDebugEnabled then
+						if tHasPreMapping then
+							print("[VuhDo] WARNING: No mapping found for pre-mapped unit:", tOldUnit, "shadow:", tShadowButtonId, "- mapping is stale, searching for buttons with this unit");
+						else
+							print("[VuhDo] No mapping found for fallback unit:", tOldUnit, "searching panels...");
+						end
+					end
+
+					local tFoundButton = sManager:RunAttribute("vuhdo_search_and_clear_unit_method", tOldUnit, tHasPreMapping);
+
+					if sShadowClearedUnit[tShadowButtonId] == tOldUnit then
+						sShadowClearedUnit[tShadowButtonId] = nil;
+					end
+
+					if tHasPreMapping then
+						local tShadowButton = sShadowHeader and sShadowHeader:GetAttribute("child" .. tShadowButtonId);
+						local tShadowButtonCurrentUnit = tShadowButton and tShadowButton:GetAttribute("unit");
+
+						sManager:RunAttribute("vuhdo_update_stale_mapping_method", tShadowButtonId, tShadowButtonCurrentUnit);
+					end
+
+					if tFoundButton then
+						if not tHasPreMapping and sUnitMap[tOldUnit] then
+							sManager:RunAttribute("vuhdo_release_pool_entry_method", tOldUnit);
+						end
+					else
+						if sIsDebugEnabled then
+							print("[VuhDo] WARNING: Could not find button for unit:", tOldUnit, "shadow:", tShadowButtonId, "preMapped:", tHasPreMapping, "- mapping may have been cleared already");
+						end
+					end
+				end
+			else
+				if sIsDebugEnabled then
+					if not tOldUnit then
+						print("[VuhDo] WARNING: Skipping clear queue entry - shadow:", tShadowButtonId, "oldUnit is nil or falsy");
+					else
+						print("[VuhDo] WARNING: Skipping clear queue entry - shadow:", tShadowButtonId, "oldUnit:", tostring(tOldUnit), "currentUnit:", tostring(tShadowButtonCurrentUnit), "unknown reason");
+					end
+				end
+			end
+		end
+	]=]);
+
+	sManagerFrame:SetAttribute("vuhdo_process_premapped_units_method", [=[
+		for tShadowButtonId, tQueueData in pairs(sProcessQueue) do
+			local tHasPreMapping = sShadowButtonHasMapping[tShadowButtonId];
+
+			if tHasPreMapping then
+				local tUnit = tQueueData[1];
+				local tOldUnit = tQueueData[2];
+
+				if sIsDebugEnabled then
+					print("[VuhDo] Phase 2 processing: shadow:", tShadowButtonId, "unit:", tUnit, "oldUnit:", tostring(tOldUnit));
+				end
+
+				local tShadowButton = sShadowHeader and sShadowHeader:GetAttribute("child" .. tShadowButtonId);
+				local tShadowButtonCurrentUnit = tShadowButton and tShadowButton:GetAttribute("unit");
+
+				if sIsDebugEnabled and tUnit == "player" then
+					print("[VuhDo] Phase 2: Queue entry says unit: player, shadow button current unit:", tostring(tShadowButtonCurrentUnit));
+				end
+
+				if not tShadowButtonCurrentUnit then
+					if tUnit == "player" then
+						if sIsDebugEnabled then
+							print("[VuhDo] Phase 2: Shadow button unit is nil but queue entry is 'player' - assigning to pre-mapped button (player left raid)");
+						end
+
+						tShadowButtonCurrentUnit = tUnit;
+					else
+						if sIsDebugEnabled then
+							print("[VuhDo] Phase 2: Shadow button unit is nil - unit likely left group, skipping assignment for:", tUnit);
+						end
+
+						sShadowButtonHasMapping[tShadowButtonId] = false;
+						sShadowToRealMap[tShadowButtonId] = nil;
+					end
+				end
+
+				if tShadowButtonCurrentUnit and tShadowButtonCurrentUnit ~= tUnit then
+					if sIsDebugEnabled then
+						print("[VuhDo] Phase 2 WARNING: Stale mapping detected - shadow:", tShadowButtonId, "expected unit:", tUnit, "actual unit:", tShadowButtonCurrentUnit, "- updating or fixing stale state");
+					end
+
+					sManager:RunAttribute("vuhdo_update_stale_mapping_method", tShadowButtonId, tShadowButtonCurrentUnit);
+
+					local tNewUnitMappings = sUnitMap[tShadowButtonCurrentUnit];
+
+					if not tNewUnitMappings then
+						-- FIXME: why is this empty?
+					else
+						-- FIXME: why is this empty?
+					end
+				elseif tShadowButtonCurrentUnit then
 					local tFallbackMappings = sUnitMap[tUnit];
 
 					if tFallbackMappings then
+						if sIsDebugEnabled then
+							print("[VuhDo] Phase 2: Unit has fallback mappings, clearing - unit:", tUnit, "count:", #tFallbackMappings);
+						end
+
 						local tFallbackMappingsCount = #tFallbackMappings;
 
 						for tMappingIdx = 1, tFallbackMappingsCount do
@@ -456,36 +613,16 @@ function VUHDO_initSecureShadowHeader()
 
 							if tFallbackButton then
 								local tCurrentUnit = tFallbackButton:GetAttribute("unit");
-								local tIsPlayerToken = sPlayerRaidToken and tCurrentUnit == sPlayerRaidToken;
 
-								if tCurrentUnit == tUnit and tCurrentUnit ~= "player" and not tIsPlayerToken then
-									tFallbackButton:SetAttribute("unit", nil);
-
-									local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-									local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
-
-									if tDebuffFrames then
-										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-											tDebuffFrame:SetAttribute("unit", nil);
-										end
-									end
-
-									tFallbackButton:Hide();
+								if tCurrentUnit == tUnit and tCurrentUnit ~= "player" then
+									sManager:RunAttribute("vuhdo_clear_button_unit_method", tPanelNum, tButtonNum, tUnit, true);
 								end
 							end
 						end
 					end
 
 					if tFallbackMappings then
-						local tPoolIdx = sUnitToPoolIndex[tUnit];
-						if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
-							sFallbackMappingPool[tPoolIdx]["inUse"] = false;
-							if sIsDebugEnabled then
-								print("[VD:SecureShadow] Released pool entry:", tPoolIdx, "for unit:", tUnit);
-							end
-						end
-						sUnitToPoolIndex[tUnit] = nil;
-						sUnitMap[tUnit] = nil;
+						sManager:RunAttribute("vuhdo_release_pool_entry_method", tUnit);
 					end
 
 					local tMappings = sShadowToRealMap[tShadowButtonId];
@@ -502,53 +639,96 @@ function VUHDO_initSecureShadowHeader()
 							local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
 
 							if tRealButton then
-								tRealButton:SetAttribute("unit", tUnit);
+								local tCurrentButtonUnit = tRealButton:GetAttribute("unit");
 
-								local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-								local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
-
-								if tDebuffFrames then
-									for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-										tDebuffFrame:SetAttribute("unit", tUnit);
+								if tCurrentButtonUnit == tUnit then
+									if sIsDebugEnabled then
+										print("[VuhDo] Phase 2: Button already has correct unit, skipping assignment - panel:", tPanelNum, "button:", tButtonNum, "unit:", tUnit);
 									end
-								end
+								else
+									if sIsDebugEnabled then
+										print("[VuhDo] Phase 2: Setting unit:", tUnit, "on panel:", tPanelNum, "button:", tButtonNum, "previous unit:", tostring(tCurrentButtonUnit));
+									end
 
-								tRealButton:Show();
+									sManager:RunAttribute("vuhdo_assign_unit_to_button_method", tPanelNum, tButtonNum, tUnit, true);
+								end
 							end
 						end
+					elseif sIsDebugEnabled then
+						print("[VuhDo] Phase 2: No mappings found for shadow:", tShadowButtonId);
 					end
 				end
 			end
+		end
+	]=]);
 
-			for tShadowButtonId, tQueueData in pairs(sProcessQueue) do
-				local tHasPreMapping = sShadowButtonHasMapping[tShadowButtonId];
+	sManagerFrame:SetAttribute("vuhdo_process_fallback_units_method", [=[
+		for tShadowButtonId, tQueueData in pairs(sProcessQueue) do
+			local tHasPreMapping = sShadowButtonHasMapping[tShadowButtonId];
+
+			if sIsDebugEnabled then
+				local tUnit = tQueueData[1];
+				local tOldUnit = tQueueData[2];
+
+				print("[VuhDo] Processing queue entry shadow:", tShadowButtonId, "unit:", tostring(tUnit), "oldUnit:", tostring(tOldUnit), "hasPreMapping:", tHasPreMapping);
+			end
+
+			if not tHasPreMapping then
+				local tUnit = tQueueData[1];
+				local tOldUnit = tQueueData[2];
 
 				if sIsDebugEnabled then
-					local tUnit = tQueueData[1];
-					local tOldUnit = tQueueData[2];
-					print("[VD:SecureShadow] Processing queue entry shadow:", tShadowButtonId, "unit:", tostring(tUnit), "oldUnit:", tostring(tOldUnit), "hasPreMapping:", tHasPreMapping);
+					print("[VuhDo] Phase 3 fallback processing for unit:", tUnit, "oldUnit:", tostring(tOldUnit));
 				end
 
-				if not tHasPreMapping then
-					local tUnit = tQueueData[1];
-					local tOldUnit = tQueueData[2];
+				if tUnit ~= "player" then
+					local tMappings = sUnitMap[tUnit];
 
 					if sIsDebugEnabled then
-						print("[VD:SecureShadow] Phase 3 fallback processing for unit:", tUnit, "oldUnit:", tostring(tOldUnit));
+						print("[VuhDo] Phase 3 Case 3A check: unit:", tUnit, "hasMapping:", tMappings ~= nil);
 					end
 
-					if tUnit ~= "player" then
-						local tMappings = sUnitMap[tUnit];
+					if tMappings then
+						local tMappingsCount = #tMappings;
 
+						for tMappingIdx = 1, tMappingsCount do
+							local tMapping = tMappings[tMappingIdx];
+							local tPanelNum = tMapping[1];
+							local tButtonNum = tMapping[2];
+
+							local tPanelButtons = tPanelNum and sRealButtons[tPanelNum];
+							local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
+
+							if tRealButton then
+								sManager:RunAttribute("vuhdo_assign_unit_to_button_method", tPanelNum, tButtonNum, tUnit, true);
+							end
+						end
+					elseif tOldUnit and tUnit ~= tOldUnit and sUnitMap[tOldUnit] then
 						if sIsDebugEnabled then
-							print("[VD:SecureShadow] Phase 3 Case 3A check: unit:", tUnit, "hasMapping:", tMappings ~= nil);
+							print("[VuhDo] Phase 3 Case 3B: Reusing old unit mapping for unit:", tUnit, "oldUnit:", tOldUnit);
 						end
 
-						if tMappings then
-							local tMappingsCount = #tMappings;
+						sUnitMap[tUnit] = sUnitMap[tOldUnit];
+						sUnitMap[tOldUnit] = nil;
 
-							for tMappingIdx = 1, tMappingsCount do
-								local tMapping = tMappings[tMappingIdx];
+						local tPoolIdx = sUnitToPoolIndex[tOldUnit];
+
+						if tPoolIdx then
+							sUnitToPoolIndex[tUnit] = tPoolIdx;
+							sUnitToPoolIndex[tOldUnit] = nil;
+
+							if sIsDebugEnabled then
+								print("[VuhDo] Transferred pool entry:", tPoolIdx, "from unit:", tOldUnit, "to unit:", tUnit);
+							end
+						end
+
+						local tReassignedMappings = sUnitMap[tUnit];
+
+						if tReassignedMappings then
+							local tReassignedMappingsCount = #tReassignedMappings;
+
+							for tMappingIdx = 1, tReassignedMappingsCount do
+								local tMapping = tReassignedMappings[tMappingIdx];
 								local tPanelNum = tMapping[1];
 								local tButtonNum = tMapping[2];
 
@@ -556,225 +736,240 @@ function VUHDO_initSecureShadowHeader()
 								local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
 
 								if tRealButton then
-									tRealButton:SetAttribute("unit", tUnit);
+									local tCurrentUnit = tRealButton:GetAttribute("unit");
 
-									local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-									local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
-
-									if tDebuffFrames then
-										for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-											tDebuffFrame:SetAttribute("unit", tUnit);
-										end
-									end
-
-									tRealButton:Show();
-								end
-							end
-elseif tOldUnit then
-							if sIsDebugEnabled then
-								print("[VD:SecureShadow] Phase 3 Case 3B check: unit:", tUnit, "oldUnit:", tOldUnit, "oldUnitHasMapping:", sUnitMap[tOldUnit] ~= nil);
-							end
-
-							if sUnitMap[tOldUnit] then
-								sUnitMap[tUnit] = sUnitMap[tOldUnit];
-								sUnitMap[tOldUnit] = nil;
-
-								local tReassignedMappings = sUnitMap[tUnit];
-
-								if tReassignedMappings then
-									local tReassignedMappingsCount = #tReassignedMappings;
-
-									for tMappingIdx = 1, tReassignedMappingsCount do
-										local tMapping = tReassignedMappings[tMappingIdx];
-										local tPanelNum = tMapping[1];
-										local tButtonNum = tMapping[2];
-
-										local tPanelButtons = tPanelNum and sRealButtons[tPanelNum];
-										local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
-
-										if tRealButton then
-											local tCurrentUnit = tRealButton:GetAttribute("unit");
-
-											if tCurrentUnit == tOldUnit or tCurrentUnit == tUnit then
-												tRealButton:SetAttribute("unit", tUnit);
-
-												local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-												local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
-
-												if tDebuffFrames then
-													for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-														tDebuffFrame:SetAttribute("unit", tUnit);
-													end
-												end
-
-												tRealButton:Show();
-											end
-										end
+									if tCurrentUnit == tOldUnit or tCurrentUnit == tUnit then
+										sManager:RunAttribute("vuhdo_assign_unit_to_button_method", tPanelNum, tButtonNum, tUnit, true);
 									end
 								end
 							end
-						else
+						end
+					else
+						if sIsDebugEnabled then
+							if tUnit == tOldUnit then
+								print("[VuhDo] Phase 3 Case 3C: Token reuse detected - unit:", tUnit, "oldUnit:", tOldUnit, "creating new mapping");
+							elseif tOldUnit and not sUnitMap[tOldUnit] then
+								print("[VuhDo] Phase 3 Case 3C: Old unit mapping was cleared - unit:", tUnit, "oldUnit:", tOldUnit, "creating new mapping");
+							end
+						end
+
+						if sIsDebugEnabled then
+							print("[VuhDo] Phase 3 Case 3C (new fallback): unit:", tUnit);
+						end
+
+						if tUnit and tUnit ~= "player" then
+							local tAssignedPanel = nil;
+							local tAssignedButtonIndex = nil;
+
+							local tFallbackPanelCount = #sFallbackPanels;
+
 							if sIsDebugEnabled then
-								print("[VD:SecureShadow] Phase 3 Case 3C (new fallback): unit:", tUnit, "isPlayerToken:", tUnit and sPlayerRaidToken and tUnit == sPlayerRaidToken);
+								print("[VuhDo] Searching", tFallbackPanelCount, "fallback panels for empty button");
 							end
 
-							if not (tUnit and sPlayerRaidToken and tUnit == sPlayerRaidToken) then
-								local tAssignedPanel = nil;
-								local tAssignedButtonIndex = nil;
+							for tFallbackIdx = 1, tFallbackPanelCount do
+								local tFallbackPanel = sFallbackPanels[tFallbackIdx];
 
-								local tFallbackPanelCount = #sFallbackPanels;
+								if tFallbackPanel then
+									local tFallbackButtonIndex = nil;
+									local tFallbackButton = nil;
 
-								if sIsDebugEnabled then
-									print("[VD:SecureShadow] Searching", tFallbackPanelCount, "fallback panels for empty button");
+									local tFallbackPanelButtons = sRealButtons[tFallbackPanel];
+
+									if tFallbackPanelButtons then
+										local tStartIndex = sFallbackButtonStart[tFallbackPanel];
+										local tCheckIndex = tStartIndex;
+
+										while (tCheckIndex - tStartIndex) < sMaxShadowButtons do
+											local tCheckButton = tFallbackPanelButtons[tCheckIndex];
+
+											if tCheckButton then
+												local tCheckUnit = tCheckButton:GetAttribute("unit");
+
+												if not tCheckUnit then
+													tFallbackButtonIndex = tCheckIndex;
+													tFallbackButton = tCheckButton;
+
+													break;
+												end
+											end
+
+											tCheckIndex = tCheckIndex + 1;
+										end
+									end
+
+									if not tFallbackButton then
+										tFallbackButtonIndex = sNextFallbackButton[tFallbackPanel];
+
+										if not tFallbackPanelButtons then
+											tFallbackPanelButtons = sRealButtons[tFallbackPanel];
+										end
+
+										tFallbackButton = tFallbackButtonIndex and tFallbackPanelButtons and tFallbackPanelButtons[tFallbackButtonIndex];
+
+										if sIsDebugEnabled then
+											if tFallbackButton then
+												print("[VuhDo] Using next fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
+											else
+												print("[VuhDo] No fallback button available at panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
+											end
+										end
+									end
+
+									if tFallbackButton then
+										local tCurrentUnit = tFallbackButton:GetAttribute("unit");
+
+										if sIsDebugEnabled then
+											print("[VuhDo] Found fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex, "currentUnit:", tostring(tCurrentUnit));
+										end
+
+										if not tCurrentUnit then
+											if sIsDebugEnabled then
+												print("[VuhDo] Assigning unit:", tUnit, "to fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
+											end
+
+											sManager:RunAttribute("vuhdo_assign_unit_to_button_method", tFallbackPanel, tFallbackButtonIndex, tUnit, true);
+
+											RegisterUnitWatch(tFallbackButton);
+
+											if sIsDebugEnabled then
+												local tButtonName = tFallbackButton:GetName();
+												local tAfterUnit = tFallbackButton:GetAttribute("unit");
+												local tIsShown = tFallbackButton:IsShown();
+
+												print("[VuhDo] After assignment - button:", tButtonName or "nil", "unit:", tostring(tAfterUnit), "isShown:", tIsShown);
+											end
+
+											if not sRealButtons[tFallbackPanel] then
+												sRealButtons[tFallbackPanel] = newtable();
+											end
+
+											if not sRealButtons[tFallbackPanel][tFallbackButtonIndex] then
+												sRealButtons[tFallbackPanel][tFallbackButtonIndex] = tFallbackButton;
+											end
+
+											if tFallbackButtonIndex >= sNextFallbackButton[tFallbackPanel] then
+												sNextFallbackButton[tFallbackPanel] = tFallbackButtonIndex + 1;
+											end
+
+											if not tAssignedPanel then
+												tAssignedPanel = tFallbackPanel;
+												tAssignedButtonIndex = tFallbackButtonIndex;
+											end
+										end
+									end
 								end
+							end
 
-								for tFallbackIdx = 1, tFallbackPanelCount do
-									local tFallbackPanel = sFallbackPanels[tFallbackIdx];
+							if sIsDebugEnabled then
+								print("[VuhDo] Case 3C result: assignedPanel:", tAssignedPanel, "assignedButtonIndex:", tAssignedButtonIndex, "fallbackPanelCount:", tFallbackPanelCount);
+							end
 
-									if tFallbackPanel then
-										local tFallbackButtonIndex = nil;
-										local tFallbackButton = nil;
+							if tAssignedPanel and tAssignedButtonIndex and tFallbackPanelCount > 0 then
+								local tPoolEntry = nil;
+								local tPoolIndex = nil;
+								local tPoolInUseCount = 0;
 
-										local tFallbackPanelButtons = sRealButtons[tFallbackPanel];
-
-										if tFallbackPanelButtons then
-											local tStartIndex = sFallbackButtonStart[tFallbackPanel];
-											local tCheckIndex = tStartIndex;
-
-											while (tCheckIndex - tStartIndex) < sMaxShadowButtons do
-												local tCheckButton = tFallbackPanelButtons[tCheckIndex];
-
-												if tCheckButton then
-													local tCheckUnit = tCheckButton:GetAttribute("unit");
-
-													if not tCheckUnit then
-														tFallbackButtonIndex = tCheckIndex;
-														tFallbackButton = tCheckButton;
-
-														break;
-													end
-												end
-
-												tCheckIndex = tCheckIndex + 1;
-											end
-										end
-
-										if not tFallbackButton then
-											tFallbackButtonIndex = sNextFallbackButton[tFallbackPanel];
-
-											if not tFallbackPanelButtons then
-												tFallbackPanelButtons = sRealButtons[tFallbackPanel];
-											end
-
-											tFallbackButton = tFallbackButtonIndex and tFallbackPanelButtons and tFallbackPanelButtons[tFallbackButtonIndex];
-
-											if sIsDebugEnabled then
-												if tFallbackButton then
-													print("[VD:SecureShadow] Using next fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
-												else
-													print("[VD:SecureShadow] No fallback button available at panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
-												end
-											end
-										end
-
-										if tFallbackButton then
-											local tCurrentUnit = tFallbackButton:GetAttribute("unit");
-
-											if sIsDebugEnabled then
-												print("[VD:SecureShadow] Found fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex, "currentUnit:", tostring(tCurrentUnit));
-											end
-
-											if not tCurrentUnit then
-												if sIsDebugEnabled then
-													print("[VD:SecureShadow] Assigning unit:", tUnit, "to fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
-												end
-
-												tFallbackButton:SetAttribute("unit", tUnit);
-
-												local tPanelDebuffFrames = tFallbackPanel and sDebuffFrames[tFallbackPanel];
-												local tDebuffFrames = tPanelDebuffFrames and tFallbackButtonIndex and tPanelDebuffFrames[tFallbackButtonIndex];
-
-												if tDebuffFrames then
-													for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-														tDebuffFrame:SetAttribute("unit", tUnit);
-													end
-												end
-
-												tFallbackButton:Show();
-
-												if not sRealButtons[tFallbackPanel] then
-													sRealButtons[tFallbackPanel] = newtable();
-												end
-
-												if not sRealButtons[tFallbackPanel][tFallbackButtonIndex] then
-													sRealButtons[tFallbackPanel][tFallbackButtonIndex] = tFallbackButton;
-												end
-
-												if tFallbackButtonIndex >= sNextFallbackButton[tFallbackPanel] then
-													sNextFallbackButton[tFallbackPanel] = tFallbackButtonIndex + 1;
-												end
-
-												if not tAssignedPanel then
-													tAssignedPanel = tFallbackPanel;
-													tAssignedButtonIndex = tFallbackButtonIndex;
-												end
-											end
+								for tIdx = 1, sMaxShadowButtons do
+									if sFallbackMappingPool[tIdx] then
+										if sFallbackMappingPool[tIdx]["inUse"] then
+											tPoolInUseCount = tPoolInUseCount + 1;
+										elseif not tPoolEntry then
+											tPoolEntry = sFallbackMappingPool[tIdx];
+											tPoolIndex = tIdx;
 										end
 									end
 								end
 
 								if sIsDebugEnabled then
-									print("[VD:SecureShadow] Case 3C result: assignedPanel:", tAssignedPanel, "assignedButtonIndex:", tAssignedButtonIndex, "fallbackPanelCount:", tFallbackPanelCount);
+									print("[VuhDo] Pool search: inUse=", tPoolInUseCount, "/", sMaxShadowButtons, "found=", tPoolEntry ~= nil);
 								end
 
-								if tAssignedPanel and tAssignedButtonIndex and tFallbackPanelCount > 0 then
-									local tPoolEntry = nil;
-									local tPoolIndex = nil;
-									local tPoolInUseCount = 0;
+								if not tPoolEntry then
+									local tTempMapping = newtable();
+									local tTempMappings = newtable();
 
-									for tIdx = 1, sMaxShadowButtons do
-										if sFallbackMappingPool[tIdx] then
-											if sFallbackMappingPool[tIdx]["inUse"] then
-												tPoolInUseCount = tPoolInUseCount + 1;
-											elseif not tPoolEntry then
-												tPoolEntry = sFallbackMappingPool[tIdx];
-												tPoolIndex = tIdx;
-											end
-										end
-									end
+									tTempMapping[1] = tAssignedPanel;
+									tTempMapping[2] = tAssignedButtonIndex;
+
+									tinsert(tTempMappings, tTempMapping);
+									sUnitMap[tUnit] = tTempMappings;
 
 									if sIsDebugEnabled then
-										print("[VD:SecureShadow] Pool search: inUse=", tPoolInUseCount, "/", sMaxShadowButtons, "found=", tPoolEntry ~= nil);
+										print("[VuhDo] Pool exhausted, created new mapping for unit:", tUnit, "panel:", tAssignedPanel, "button:", tAssignedButtonIndex);
 									end
+								else
+									tPoolEntry["inUse"] = true;
 
-									if not tPoolEntry then
-										local tTempMapping = newtable();
-										local tTempMappings = newtable();
-										tTempMapping[1] = tAssignedPanel;
-										tTempMapping[2] = tAssignedButtonIndex;
-										tinsert(tTempMappings, tTempMapping);
-										sUnitMap[tUnit] = tTempMappings;
-										if sIsDebugEnabled then
-											print("[VD:SecureShadow] Pool exhausted, created new mapping for unit:", tUnit, "panel:", tAssignedPanel, "button:", tAssignedButtonIndex);
-										end
-									else
-										tPoolEntry["inUse"] = true;
-										local tTempMapping = tPoolEntry[1];
-										local tTempMappings = tPoolEntry[2];
+									local tTempMapping = tPoolEntry[1];
+									local tTempMappings = tPoolEntry[2];
 
-										tTempMapping[1] = tAssignedPanel;
-										tTempMapping[2] = tAssignedButtonIndex;
+									tTempMapping[1] = tAssignedPanel;
+									tTempMapping[2] = tAssignedButtonIndex;
 
-										sUnitMap[tUnit] = tTempMappings;
-										sUnitToPoolIndex[tUnit] = tPoolIndex;
-										if sIsDebugEnabled then
-											print("[VD:SecureShadow] Allocated pool entry:", tPoolIndex, "for unit:", tUnit, "panel:", tAssignedPanel, "button:", tAssignedButtonIndex);
-										end
+									sUnitMap[tUnit] = tTempMappings;
+									sUnitToPoolIndex[tUnit] = tPoolIndex;
+
+									if sIsDebugEnabled then
+										print("[VuhDo] Allocated pool entry:", tPoolIndex, "for unit:", tUnit, "panel:", tAssignedPanel, "button:", tAssignedButtonIndex);
 									end
 								end
 							end
 						end
 					end
+				end
+			end
+		end
+	]=]);
+
+	sManagerFrame:SetAttribute("_onstate-vuhdo_batch_timer", [=[
+		if newstate ~= "process" and sPendingRefresh then
+			if sIsDebugEnabled then
+				local tClearCount = 0;
+				local tProcessCount = 0;
+
+				for _ in pairs(sClearQueue) do
+					tClearCount = tClearCount + 1;
+				end
+
+				for _ in pairs(sProcessQueue) do
+					tProcessCount = tProcessCount + 1;
+				end
+
+				print("[VuhDo] Batch processing triggered, clear queue:", tClearCount, "process queue:", tProcessCount);
+			end
+
+			if not next(sClearQueue) and not next(sProcessQueue) then
+				if sIsDebugEnabled then
+					print("[VuhDo] Queues empty, skipping batch processing");
+				end
+
+				sPendingRefresh = false;
+
+				return;
+			end
+
+			sManager:RunAttribute("vuhdo_process_clear_queue_method");
+
+			sManager:RunAttribute("vuhdo_process_premapped_units_method");
+
+			sManager:RunAttribute("vuhdo_process_fallback_units_method");
+
+			if sIsDebugEnabled then
+				local tProcessCountBefore = 0;
+
+				for _ in pairs(sProcessQueue) do
+					tProcessCountBefore = tProcessCountBefore + 1;
+				end
+
+				local tClearCountBefore = 0;
+
+				for _ in pairs(sClearQueue) do
+					tClearCountBefore = tClearCountBefore + 1;
+				end
+
+				if tProcessCountBefore > 0 or tClearCountBefore > 0 then
+					print("[VuhDo] Cleanup: clearing p:", tProcessCountBefore, "c:", tClearCountBefore);
 				end
 			end
 
@@ -789,6 +984,26 @@ elseif tOldUnit then
 			wipe(sClearQueue);
 
 			sPendingRefresh = false;
+
+			sManager:CallMethod("UpdatePanelVisibility");
+
+			if sIsDebugEnabled then
+				local tProcessCount = 0;
+
+				for _ in pairs(sProcessQueue) do
+					tProcessCount = tProcessCount + 1;
+				end
+
+				local tClearCount = 0;
+
+				for _ in pairs(sClearQueue) do
+					tClearCount = tClearCount + 1;
+				end
+
+				if tProcessCount > 0 or tClearCount > 0 or sPendingRefresh then
+					print("[VuhDo] WARNING: Cleanup failed: p:", tProcessCount, "c:", tClearCount, "pending:", sPendingRefresh);
+				end
+			end
 		end
 	]=]);
 
@@ -942,8 +1157,8 @@ function VUHDO_debugSecureEnvironment()
 			tFallbackMappingCount = tFallbackMappingCount + 1;
 		end
 
-		print(format("VuhDo: Secure environment: %d real frames, %d debuff frames, %d shadow-to-real mappings, %d fallback unit mappings, player token: %s",
-			tFrameCount, tDebuffFrameCount, tShadowMappingCount, tFallbackMappingCount, tostring(sPlayerRaidToken)));
+		print(format("[VuhDo] Secure environment: %d real frames, %d debuff frames, %d shadow-to-real mappings, %d fallback unit mappings",
+			tFrameCount, tDebuffFrameCount, tShadowMappingCount, tFallbackMappingCount));
 	]=]);
 
 	return;
@@ -1032,6 +1247,68 @@ end
 local function VUHDO_clearSecureMappings()
 
 	sManagerFrame:Execute([=[
+		local tReleasedCount = 0;
+
+		for tUnit, tPoolIdx in pairs(sUnitToPoolIndex) do
+			if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
+				sFallbackMappingPool[tPoolIdx]["inUse"] = false;
+				tReleasedCount = tReleasedCount + 1;
+			end
+		end
+
+		if sIsDebugEnabled and tReleasedCount > 0 then
+			print("[VuhDo] clearSecureMappings: Released", tReleasedCount, "pool entries");
+		end
+
+		local tClearedButtonCount = 0;
+
+		for tPanelIdx = 1, #sFallbackPanels do
+			local tPanelNum = sFallbackPanels[tPanelIdx];
+
+			if tPanelNum then
+				local tPanelButtons = sRealButtons[tPanelNum];
+				local tStartIndex = sFallbackButtonStart[tPanelNum];
+
+				if tPanelButtons and tStartIndex then
+					local tPanelClearedCount = 0;
+
+					for tButtonIdx = tStartIndex, tStartIndex + sMaxShadowButtons - 1 do
+						local tButton = tPanelButtons[tButtonIdx];
+
+						if tButton then
+							local tUnit = tButton:GetAttribute("unit");
+
+							if tUnit then
+								tButton:SetAttribute("unit", nil);
+
+								local tPanelDebuffFrames = sDebuffFrames[tPanelNum];
+								local tDebuffFrames = tPanelDebuffFrames and tPanelDebuffFrames[tButtonIdx];
+
+								if tDebuffFrames then
+									for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
+										tDebuffFrame:SetAttribute("unit", nil);
+									end
+								end
+
+								tPanelClearedCount = tPanelClearedCount + 1;
+							end
+						end
+					end
+
+					tClearedButtonCount = tClearedButtonCount + tPanelClearedCount;
+
+					if sIsDebugEnabled and tPanelClearedCount > 0 then
+						print("[VuhDo] clearSecureMappings: Cleared", tPanelClearedCount, "fallback buttons from panel", tPanelNum);
+					end
+				end
+			end
+		end
+
+		if sIsDebugEnabled and tClearedButtonCount > 0 then
+			print("[VuhDo] clearSecureMappings: Total cleared", tClearedButtonCount, "fallback buttons");
+		end
+
+		wipe(sUnitToPoolIndex);
 		wipe(sUnitMap);
 
 		for tPanelNum = 1, 10 do
@@ -1067,62 +1344,6 @@ end
 
 
 
---
-local function VUHDO_setSecurePlayerToken(aPlayerToken)
-
-	if aPlayerToken == sLastSecurePlayerToken then
-		return true;
-	end
-
-	if aPlayerToken then
-		sManagerFrame:Execute(format([=[
-			sPlayerRaidToken = %q;
-	]=], aPlayerToken));
-	else
-		sManagerFrame:Execute([=[
-			sPlayerRaidToken = nil;
-	]=]);
-	end
-
-	sLastSecurePlayerToken = aPlayerToken;
-
-	return true;
-
-end
-
-
-
---
-local tPlayerToken;
-local function VUHDO_updateSecurePlayerToken()
-
-	tPlayerToken = nil;
-
-	if IsInRaid() then
-		for tCnt = 1, 40 do
-			tPlayerToken = "raid" .. tCnt;
-
-			if UnitIsUnit("player", tPlayerToken) then
-				break;
-			end
-
-			tPlayerToken = nil;
-		end
-	elseif IsInGroup() then
-		for tCnt = 1, 4 do
-			tPlayerToken = "party" .. tCnt;
-
-			if UnitIsUnit("player", tPlayerToken) then
-				break;
-			end
-
-			tPlayerToken = nil;
-		end
-	end
-
-	return VUHDO_setSecurePlayerToken(tPlayerToken);
-
-end
 
 
 
@@ -1181,29 +1402,69 @@ local function VUHDO_initShadowToRealMappings()
 					local tUnit = %q;
 
 					if sShadowButtonHasMapping[tShadowId] then
-						local tQueueData = sProcessQueue[tShadowId];
+						local tMappings = sShadowToRealMap[tShadowId];
+						local tAlreadyAssigned = true;
 
-						if not tQueueData then
-							local tPoolSize = #sProcessQueuePool;
+						if tMappings then
+							local tMappingsCount = #tMappings;
 
-							if tPoolSize > 0 then
-								tQueueData = sProcessQueuePool[tPoolSize];
-								sProcessQueuePool[tPoolSize] = nil;
-							else
-								tQueueData = newtable();
+							for tMappingIdx = 1, tMappingsCount do
+								local tMapping = tMappings[tMappingIdx];
+								local tPanelNum = tMapping[1];
+								local tButtonNum = tMapping[2];
+
+								local tPanelButtons = tPanelNum and sRealButtons[tPanelNum];
+								local tRealButton = tPanelButtons and tButtonNum and tPanelButtons[tButtonNum];
+
+								if tRealButton then
+									local tCurrentUnit = tRealButton:GetAttribute("unit");
+
+									if tCurrentUnit ~= tUnit then
+										tAlreadyAssigned = false;
+
+										break;
+									end
+								else
+									tAlreadyAssigned = false;
+
+									break;
+								end
 							end
-
-							sProcessQueue[tShadowId] = tQueueData;
 						else
-							wipe(tQueueData);
+							tAlreadyAssigned = false;
 						end
 
-						tQueueData[1] = tUnit;
-						tQueueData[2] = nil;
+						if not tAlreadyAssigned then
+							local tQueueData = sProcessQueue[tShadowId];
 
-						sShadowLastUnit[tShadowId] = tUnit;
+							if not tQueueData then
+								local tPoolSize = #sProcessQueuePool;
 
-						sPendingRefresh = true;
+								if tPoolSize > 0 then
+									tQueueData = sProcessQueuePool[tPoolSize];
+									sProcessQueuePool[tPoolSize] = nil;
+								else
+									tQueueData = newtable();
+								end
+
+								sProcessQueue[tShadowId] = tQueueData;
+							else
+								wipe(tQueueData);
+							end
+
+							tQueueData[1] = tUnit;
+							tQueueData[2] = nil;
+
+							sShadowLastUnit[tShadowId] = tUnit;
+
+							if sIsDebugEnabled then
+								print("[VuhDo] initShadowToReal queued: shadow:", tShadowId, "unit:", tUnit);
+							end
+
+							sPendingRefresh = true;
+						elseif sIsDebugEnabled then
+							print("[VuhDo] initShadowToReal skipped: shadow:", tShadowId, "unit:", tUnit, "already assigned");
+						end
 					end
 				]=], tShadowId, tUnit));
 			end
@@ -1237,8 +1498,6 @@ function VUHDO_computeAndPushSecureMappings()
 	if not sInitialized or InCombatLockdown() then
 		return false;
 	end
-
-	VUHDO_updateSecurePlayerToken();
 
 	VUHDO_clearSecureMappings();
 
