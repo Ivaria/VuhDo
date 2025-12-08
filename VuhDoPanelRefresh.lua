@@ -99,8 +99,8 @@ local tX
 local tY;
 local tButton;
 local tGroupArray;
-local tFallbackPanels;
-local tIsFallbackPanel;
+local tFallbackPanel;
+local anIsFallbackPanel;
 local tFallbackStartIdx;
 local tUnitType;
 local tPetUnitType;
@@ -119,10 +119,7 @@ local tUnitPrefix;
 local tFallbackButtonIndex;
 local tFallbackCol;
 local tFallbackRow;
-local tCleanupButton;
-local tFallbackUnit;
 local tDebuffFrame;
-local tButtonUnit;
 local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 	if InCombatLockdown() then
@@ -176,17 +173,10 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 	end
 
 	if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
-		tFallbackPanels = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanels"] or { 1 };
-		tIsFallbackPanel = false;
+		tFallbackPanel = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanel"] or 1;
+		anIsFallbackPanel = (tFallbackPanel == aPanelNum);
 
-		for tFallbackIdx = 1, #tFallbackPanels do
-			if tFallbackPanels[tFallbackIdx] == aPanelNum then
-				tIsFallbackPanel = true;
-				break;
-			end
-		end
-
-		if tIsFallbackPanel then
+		if anIsFallbackPanel then
 			if not VUHDO_isSecureShadowHeaderReady() then
 				return;
 			end

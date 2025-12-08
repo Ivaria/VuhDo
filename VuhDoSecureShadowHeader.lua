@@ -19,6 +19,23 @@ end
 
 
 --
+local function VUHDO_setSecureFallbackPanel(aPanelNum)
+
+	if not sManagerFrame then
+		return false;
+	end
+
+	sManagerFrame:Execute(format([=[
+		sFallbackPanel = %d;
+	]=], aPanelNum));
+
+	return true;
+
+end
+
+
+
+--
 local tInitConfigFunc = [=[
 	tinsert(sShadowButtons, self);
 
@@ -63,6 +80,7 @@ local tOnAttributeChanged = [=[
 	end
 ]=];
 local tChild;
+local tFallbackPanel;
 function VUHDO_initSecureShadowHeader()
 
 	if InCombatLockdown() or not VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
@@ -113,7 +131,6 @@ function VUHDO_initSecureShadowHeader()
 
 	end
 
-
 	sManagerFrame:SetFrameRef("sShadowHeader", sShadowHeader);
 
 	sManagerFrame:Execute([=[
@@ -122,10 +139,12 @@ function VUHDO_initSecureShadowHeader()
 
 		sRealButtons = newtable();
 		sDebuffFrames = newtable();
+		sButtonToUnit = newtable();
 
 		for tPanelNum = 1, 10 do
 			sRealButtons[tPanelNum] = newtable();
 			sDebuffFrames[tPanelNum] = newtable();
+			sButtonToUnit[tPanelNum] = newtable();
 		end
 
 		sUnitMap = newtable();
@@ -136,16 +155,8 @@ function VUHDO_initSecureShadowHeader()
 			sShadowButtonHasMapping[tShadowId] = false;
 		end
 
-		sFallbackPanels = newtable();
-		tinsert(sFallbackPanels, 1);
-
 		sNextFallbackButton = newtable();
 		sFallbackButtonStart = newtable();
-
-		for tPanelNum = 1, 10 do
-			sNextFallbackButton[tPanelNum] = 1;
-			sFallbackButtonStart[tPanelNum] = 1;
-		end
 
 		sProcessQueue = newtable();
 		sClearQueue = newtable();
@@ -180,9 +191,23 @@ function VUHDO_initSecureShadowHeader()
 
 		sFallbackPoolIndex = 1;
 
+		sFreePoolIndices = newtable();
+
+		for tIdx = 1, sMaxShadowButtons do
+			tinsert(sFreePoolIndices, tIdx);
+		end
+
 		sIsDebugEnabled = false;
 		sUnitToPoolIndex = newtable();
 	]=]);
+
+	tFallbackPanel = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanel"] or 1;
+	VUHDO_setSecureFallbackPanel(tFallbackPanel);
+
+	sManagerFrame:Execute(format([=[
+		sNextFallbackButton[%d] = 1;
+		sFallbackButtonStart[%d] = 1;
+	]=], tFallbackPanel, tFallbackPanel));
 
 	if VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] then
 		sManagerFrame:Execute([=[
@@ -272,6 +297,10 @@ function VUHDO_initSecureShadowHeader()
 		if tRealButton then
 			tRealButton:SetAttribute("unit", nil);
 
+			if sButtonToUnit[tPanelNum] then
+				sButtonToUnit[tPanelNum][tButtonNum] = nil;
+			end
+
 			local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
 			local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
 
@@ -306,6 +335,8 @@ function VUHDO_initSecureShadowHeader()
 		if tRealButton then
 			tRealButton:SetAttribute("unit", tUnit);
 
+			sButtonToUnit[tPanelNum][tButtonNum] = tUnit;
+
 			local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
 			local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
 
@@ -332,6 +363,7 @@ function VUHDO_initSecureShadowHeader()
 
 		if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
 			sFallbackMappingPool[tPoolIdx]["inUse"] = false;
+			tinsert(sFreePoolIndices, tPoolIdx);
 
 			if sIsDebugEnabled then
 				print("[VuhDo] Released pool entry:", tPoolIdx, "for unit:", tUnit);
@@ -386,16 +418,15 @@ function VUHDO_initSecureShadowHeader()
 		local tFoundButton = false;
 
 		for tPanelNum = 1, 10 do
-			local tPanelButtons = sRealButtons[tPanelNum];
+			if sButtonToUnit[tPanelNum] then
+				for tButtonIndex, tMappedUnit in pairs(sButtonToUnit[tPanelNum]) do
+					if tMappedUnit == tOldUnit then
+						tFoundButton = true;
 
-			if tPanelButtons then
-				for tButtonIndex, tCheckButton in pairs(tPanelButtons) do
-					if tCheckButton then
-						local tCurrentUnit = tCheckButton:GetAttribute("unit");
+						local tPanelButtons = sRealButtons[tPanelNum];
+						local tCheckButton = tPanelButtons and tPanelButtons[tButtonIndex];
 
-						if tCurrentUnit == tOldUnit then
-							tFoundButton = true;
-
+						if tCheckButton then
 							if sIsDebugEnabled then
 								print("[VuhDo] Found and clearing unit:", tOldUnit, "from button:", tButtonIndex, "panel:", tPanelNum, "preMapped:", tHasPreMapping);
 							end
@@ -410,6 +441,8 @@ function VUHDO_initSecureShadowHeader()
 									tDebuffFrame:SetAttribute("unit", nil);
 								end
 							end
+
+							sButtonToUnit[tPanelNum][tButtonIndex] = nil;
 
 							if not tHasPreMapping then
 								tCheckButton:Hide();
@@ -761,128 +794,113 @@ function VUHDO_initSecureShadowHeader()
 							local tAssignedPanel = nil;
 							local tAssignedButtonIndex = nil;
 
-							local tFallbackPanelCount = #sFallbackPanels;
+							local tFallbackPanel = sFallbackPanel;
 
 							if sIsDebugEnabled then
-								print("[VuhDo] Searching", tFallbackPanelCount, "fallback panels for empty button");
+								print("[VuhDo] Searching fallback panel", tFallbackPanel, "for empty button");
 							end
 
-							for tFallbackIdx = 1, tFallbackPanelCount do
-								local tFallbackPanel = sFallbackPanels[tFallbackIdx];
+							if tFallbackPanel then
+								local tFallbackButtonIndex = nil;
+								local tFallbackButton = nil;
 
-								if tFallbackPanel then
-									local tFallbackButtonIndex = nil;
-									local tFallbackButton = nil;
+								local tFallbackPanelButtons = sRealButtons[tFallbackPanel];
 
-									local tFallbackPanelButtons = sRealButtons[tFallbackPanel];
+								if tFallbackPanelButtons then
+									local tStartIndex = sFallbackButtonStart[tFallbackPanel];
+									local tCheckIndex = tStartIndex;
 
-									if tFallbackPanelButtons then
-										local tStartIndex = sFallbackButtonStart[tFallbackPanel];
-										local tCheckIndex = tStartIndex;
+									while (tCheckIndex - tStartIndex) < sMaxShadowButtons do
+										local tCheckButton = tFallbackPanelButtons[tCheckIndex];
 
-										while (tCheckIndex - tStartIndex) < sMaxShadowButtons do
-											local tCheckButton = tFallbackPanelButtons[tCheckIndex];
+										if tCheckButton then
+											local tCheckUnit = tCheckButton:GetAttribute("unit");
 
-											if tCheckButton then
-												local tCheckUnit = tCheckButton:GetAttribute("unit");
+											if not tCheckUnit then
+												tFallbackButtonIndex = tCheckIndex;
+												tFallbackButton = tCheckButton;
 
-												if not tCheckUnit then
-													tFallbackButtonIndex = tCheckIndex;
-													tFallbackButton = tCheckButton;
-
-													break;
-												end
+												break;
 											end
-
-											tCheckIndex = tCheckIndex + 1;
 										end
+
+										tCheckIndex = tCheckIndex + 1;
+									end
+								end
+
+								if not tFallbackButton then
+									tFallbackButtonIndex = sNextFallbackButton[tFallbackPanel];
+
+									if not tFallbackPanelButtons then
+										tFallbackPanelButtons = sRealButtons[tFallbackPanel];
 									end
 
-									if not tFallbackButton then
-										tFallbackButtonIndex = sNextFallbackButton[tFallbackPanel];
+									tFallbackButton = tFallbackButtonIndex and tFallbackPanelButtons and tFallbackPanelButtons[tFallbackButtonIndex];
 
-										if not tFallbackPanelButtons then
-											tFallbackPanelButtons = sRealButtons[tFallbackPanel];
-										end
-
-										tFallbackButton = tFallbackButtonIndex and tFallbackPanelButtons and tFallbackPanelButtons[tFallbackButtonIndex];
-
-										if sIsDebugEnabled then
-											if tFallbackButton then
-												print("[VuhDo] Using next fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
-											else
-												print("[VuhDo] No fallback button available at panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
-											end
+									if sIsDebugEnabled then
+										if tFallbackButton then
+											print("[VuhDo] Using next fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
+										else
+											print("[VuhDo] No fallback button available at panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
 										end
 									end
+								end
 
-									if tFallbackButton then
-										local tCurrentUnit = tFallbackButton:GetAttribute("unit");
+								if tFallbackButton then
+									local tCurrentUnit = tFallbackButton:GetAttribute("unit");
+
+									if sIsDebugEnabled then
+										print("[VuhDo] Found fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex, "currentUnit:", tostring(tCurrentUnit));
+									end
+
+									if not tCurrentUnit then
+										if sIsDebugEnabled then
+											print("[VuhDo] Assigning unit:", tUnit, "to fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
+										end
+
+										sManager:RunAttribute("vuhdo_assign_unit_to_button_method", tFallbackPanel, tFallbackButtonIndex, tUnit, true);
+
+										RegisterUnitWatch(tFallbackButton);
 
 										if sIsDebugEnabled then
-											print("[VuhDo] Found fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex, "currentUnit:", tostring(tCurrentUnit));
+											local tButtonName = tFallbackButton:GetName();
+											local tAfterUnit = tFallbackButton:GetAttribute("unit");
+											local tIsShown = tFallbackButton:IsShown();
+
+											print("[VuhDo] After assignment - button:", tButtonName or "nil", "unit:", tostring(tAfterUnit), "isShown:", tIsShown);
 										end
 
-										if not tCurrentUnit then
-											if sIsDebugEnabled then
-												print("[VuhDo] Assigning unit:", tUnit, "to fallback button panel:", tFallbackPanel, "button:", tFallbackButtonIndex);
-											end
-
-											sManager:RunAttribute("vuhdo_assign_unit_to_button_method", tFallbackPanel, tFallbackButtonIndex, tUnit, true);
-
-											RegisterUnitWatch(tFallbackButton);
-
-											if sIsDebugEnabled then
-												local tButtonName = tFallbackButton:GetName();
-												local tAfterUnit = tFallbackButton:GetAttribute("unit");
-												local tIsShown = tFallbackButton:IsShown();
-
-												print("[VuhDo] After assignment - button:", tButtonName or "nil", "unit:", tostring(tAfterUnit), "isShown:", tIsShown);
-											end
-
-											if not sRealButtons[tFallbackPanel] then
-												sRealButtons[tFallbackPanel] = newtable();
-											end
-
-											if not sRealButtons[tFallbackPanel][tFallbackButtonIndex] then
-												sRealButtons[tFallbackPanel][tFallbackButtonIndex] = tFallbackButton;
-											end
-
-											if tFallbackButtonIndex >= sNextFallbackButton[tFallbackPanel] then
-												sNextFallbackButton[tFallbackPanel] = tFallbackButtonIndex + 1;
-											end
-
-											if not tAssignedPanel then
-												tAssignedPanel = tFallbackPanel;
-												tAssignedButtonIndex = tFallbackButtonIndex;
-											end
+										if not sRealButtons[tFallbackPanel][tFallbackButtonIndex] then
+											sRealButtons[tFallbackPanel][tFallbackButtonIndex] = tFallbackButton;
 										end
+
+										if tFallbackButtonIndex >= sNextFallbackButton[tFallbackPanel] then
+											sNextFallbackButton[tFallbackPanel] = tFallbackButtonIndex + 1;
+										end
+
+										tAssignedPanel = tFallbackPanel;
+										tAssignedButtonIndex = tFallbackButtonIndex;
 									end
 								end
 							end
 
 							if sIsDebugEnabled then
-								print("[VuhDo] Case 3C result: assignedPanel:", tAssignedPanel, "assignedButtonIndex:", tAssignedButtonIndex, "fallbackPanelCount:", tFallbackPanelCount);
+								print("[VuhDo] Case 3C result: assignedPanel:", tAssignedPanel, "assignedButtonIndex:", tAssignedButtonIndex);
 							end
 
-							if tAssignedPanel and tAssignedButtonIndex and tFallbackPanelCount > 0 then
+							if tAssignedPanel and tAssignedButtonIndex and tFallbackPanel then
 								local tPoolEntry = nil;
 								local tPoolIndex = nil;
-								local tPoolInUseCount = 0;
 
-								for tIdx = 1, sMaxShadowButtons do
-									if sFallbackMappingPool[tIdx] then
-										if sFallbackMappingPool[tIdx]["inUse"] then
-											tPoolInUseCount = tPoolInUseCount + 1;
-										elseif not tPoolEntry then
-											tPoolEntry = sFallbackMappingPool[tIdx];
-											tPoolIndex = tIdx;
-										end
-									end
+								local tFreeCount = #sFreePoolIndices;
+								if tFreeCount > 0 then
+									tPoolIndex = sFreePoolIndices[tFreeCount];
+									sFreePoolIndices[tFreeCount] = nil;
+									tPoolEntry = sFallbackMappingPool[tPoolIndex];
 								end
 
 								if sIsDebugEnabled then
-									print("[VuhDo] Pool search: inUse=", tPoolInUseCount, "/", sMaxShadowButtons, "found=", tPoolEntry ~= nil);
+									print("[VuhDo] Pool search: free=", tFreeCount, "allocated=", tPoolIndex or "none");
 								end
 
 								if not tPoolEntry then
@@ -1217,25 +1235,30 @@ end
 
 
 --
+local tCodeLines;
 local tMapping;
-local function VUHDO_pushSecureUnitMapping(aUnit, aMappings)
+local function VUHDO_pushAllSecureUnitMappings(aUnitMappings)
 
-	sManagerFrame:Execute(format([=[
-		sUnitMap[%q] = newtable();
-	]=], aUnit));
+	tCodeLines = { };
 
-	for tMappingIdx = 1, #aMappings do
-		tMapping = aMappings[tMappingIdx];
+	tinsert(tCodeLines, "local tEntry, tMappings;");
 
-		sManagerFrame:Execute(format([=[
-			local tEntry = newtable();
+	for tUnit, tMappings in pairs(aUnitMappings) do
+		tinsert(tCodeLines, format("tMappings = newtable();"));
 
-			tEntry[1] = %d;
-			tEntry[2] = %d;
+		for tMappingIdx = 1, #tMappings do
+			tMapping = tMappings[tMappingIdx];
 
-			tinsert(sUnitMap[%q], tEntry);
-		]=], tMapping[1], tMapping[2], aUnit));
+			tinsert(tCodeLines, format(
+				"tEntry = newtable(); tEntry[1] = %d; tEntry[2] = %d; tinsert(tMappings, tEntry);",
+				tMapping[1], tMapping[2]
+			));
+		end
+
+		tinsert(tCodeLines, format("sUnitMap[%q] = tMappings;", tUnit));
 	end
+
+	sManagerFrame:Execute(table.concat(tCodeLines, "\n"));
 
 	return true;
 
@@ -1262,10 +1285,9 @@ local function VUHDO_clearSecureMappings()
 
 		local tClearedButtonCount = 0;
 
-		for tPanelIdx = 1, #sFallbackPanels do
-			local tPanelNum = sFallbackPanels[tPanelIdx];
+		local tPanelNum = sFallbackPanel;
 
-			if tPanelNum then
+		if tPanelNum then
 				local tPanelButtons = sRealButtons[tPanelNum];
 				local tStartIndex = sFallbackButtonStart[tPanelNum];
 
@@ -1302,7 +1324,6 @@ local function VUHDO_clearSecureMappings()
 					end
 				end
 			end
-		end
 
 		if sIsDebugEnabled and tClearedButtonCount > 0 then
 			print("[VuhDo] clearSecureMappings: Total cleared", tClearedButtonCount, "fallback buttons");
@@ -1311,32 +1332,10 @@ local function VUHDO_clearSecureMappings()
 		wipe(sUnitToPoolIndex);
 		wipe(sUnitMap);
 
-		for tPanelNum = 1, 10 do
-			sNextFallbackButton[tPanelNum] = sFallbackButtonStart[tPanelNum];
+		if sFallbackPanel then
+			sNextFallbackButton[sFallbackPanel] = sFallbackButtonStart[sFallbackPanel];
 		end
 	]=]);
-
-	return true;
-
-end
-
-
-
---
-local tPanelNum;
-local function VUHDO_setSecureFallbackPanels(aPanelList)
-
-	sManagerFrame:Execute([=[
-		sFallbackPanels = newtable();
-	]=]);
-
-	for tPanelIdx = 1, #aPanelList do
-		tPanelNum = aPanelList[tPanelIdx];
-
-		sManagerFrame:Execute(format([=[
-			tinsert(sFallbackPanels, %d);
-		]=], tPanelNum));
-	end
 
 	return true;
 
@@ -1485,7 +1484,7 @@ end
 
 --
 local tUnitMappings = { };
-local tFallbackPanels;
+local tFallbackPanel;
 local tModels;
 local tSetup;
 local tSortBy;
@@ -1503,8 +1502,8 @@ function VUHDO_computeAndPushSecureMappings()
 
 	wipe(tUnitMappings);
 
-	tFallbackPanels = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanels"] or { 1 };
-	VUHDO_setSecureFallbackPanels(tFallbackPanels);
+	tFallbackPanel = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanel"] or 1;
+	VUHDO_setSecureFallbackPanel(tFallbackPanel);
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
 		if VUHDO_isPanelVisible(tPanelNum) then
@@ -1518,16 +1517,18 @@ function VUHDO_computeAndPushSecureMappings()
 			for tModelIndex, tModelId in ipairs(tModels) do
 				tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, tPanelNum, tModelIndex);
 
-				for _, tUnit in ipairs(tGroupArray) do
-					if tUnit and not tUnitMappings[tUnit] then
-						tUnitMappings[tUnit] = { };
-					end
+				if #tGroupArray > 0 then
+					for _, tUnit in ipairs(tGroupArray) do
+						if tUnit and not tUnitMappings[tUnit] then
+							tUnitMappings[tUnit] = { };
+						end
 
-					if tUnit then
-						tinsert(tUnitMappings[tUnit], { tPanelNum, tButtonIndex });
-					end
+						if tUnit then
+							tinsert(tUnitMappings[tUnit], { tPanelNum, tButtonIndex });
+						end
 
-					tButtonIndex = tButtonIndex + 1;
+						tButtonIndex = tButtonIndex + 1;
+					end
 				end
 
 				tColIndex = tColIndex + 1;
@@ -1538,10 +1539,14 @@ function VUHDO_computeAndPushSecureMappings()
 	tUnitCount = 0;
 
 	for tUnit, tMappings in pairs(tUnitMappings) do
-		VUHDO_pushSecureUnitMapping(tUnit, tMappings);
-
 		tUnitCount = tUnitCount + 1;
 	end
+
+	if tUnitCount == 0 then
+		return true;
+	end
+
+	VUHDO_pushAllSecureUnitMappings(tUnitMappings);
 
 	if VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] then
 		VUHDO_debugSecureEnvironment();

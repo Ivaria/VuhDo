@@ -109,7 +109,7 @@ local VUHDO_DEFAULT_PROFILES = {
 			["SHOW_TEXT_OVERHEAL"] = true,
 			["COMBAT_ROSTER"] = {
 				["enabled"] = true,
-				["fallbackPanels"] = { 1 },
+				["fallbackPanel"] = 1,
 				["debug"] = false,
 			},
 		},
@@ -802,7 +802,7 @@ local VUHDO_DEFAULT_PROFILES = {
 			["SHOW_TEXT_OVERHEAL"] = true,
 			["COMBAT_ROSTER"] = {
 				["enabled"] = true,
-				["fallbackPanels"] = { 1 },
+				["fallbackPanel"] = 1,
 				["debug"] = false,
 			},
 			["SPELL_TRACE"] = {
