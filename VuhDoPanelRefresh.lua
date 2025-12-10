@@ -1,13 +1,11 @@
 local _;
 
-local UnitIsUnit = UnitIsUnit;
-local IsInRaid = IsInRaid;
-
 -- BURST CACHE ---------------------------------------------------
 local _G = _G;
 local table = table;
 local ipairs = ipairs;
 local twipe = table.wipe;
+local floor = floor;
 
 local VUHDO_CONFIG;
 local VUHDO_PANEL_SETUP;
@@ -17,6 +15,7 @@ local VUHDO_getGroupMembersSorted;
 local VUHDO_getHealButton;
 local VUHDO_getHealButtonPos;
 local VUHDO_setupAllHealButtonAttributes;
+local VUHDO_isLooseOrderingShowing;
 local VUHDO_isDifferentButtonPoint;
 local VUHDO_addUnitButton;
 local VUHDO_getTargetButton;
@@ -67,6 +66,7 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_positionHealButton = _G["VUHDO_positionHealButton"];
 	VUHDO_positionTableHeaders = _G["VUHDO_positionTableHeaders"];
 	VUHDO_computeAndPushSecureMappings = _G["VUHDO_computeAndPushSecureMappings"];
+	VUHDO_isLooseOrderingShowing = _G["VUHDO_isLooseOrderingShowing"];
 
 	sShowPanels = VUHDO_CONFIG["SHOW_PANELS"];
 
@@ -105,7 +105,6 @@ local tFallbackStartIdx;
 local tUnitType;
 local tPetUnitType;
 local tMaxGroupMembers;
-local tMaxRows;
 local tLastModelIndex;
 local tLastModelId;
 local tLastGroupArray;
@@ -115,11 +114,14 @@ local tFallbackStartRow;
 local tTotalFallbackButtons;
 local tFallbackStart;
 local tFallbackCount;
-local tUnitPrefix;
 local tFallbackButtonIndex;
 local tFallbackCol;
 local tFallbackRow;
 local tDebuffFrame;
+local tIsLooseOrdering;
+local tFallbackPlaceNum;
+local tMaxRowsPerColumn;
+local tFallbackRowInColumn;
 local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 	if InCombatLockdown() then
@@ -193,30 +195,29 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 				tMaxGroupMembers = 0;
 			end
 
-			if VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["arrangeHorizontal"] then
-				tMaxRows = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["maxColumnsWhenStructured"];
+			tIsLooseOrdering = VUHDO_isLooseOrderingShowing(aPanelNum);
+
+			if tIsLooseOrdering then
+				tLastModelIndex = #tModels;
+				tLastModelId = tModels[tLastModelIndex];
+
+				tLastGroupArray = VUHDO_getGroupMembersSorted(tLastModelId, tSortBy, aPanelNum, tLastModelIndex);
+
+				tLastColumnUnits = #tLastGroupArray;
+
+				tFallbackStartCol = tColIdx - 1;
+				tFallbackStartRow = tLastColumnUnits + 1;
 			else
-				tMaxRows = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["maxRowsWhenLoose"];
+				tFallbackPlaceNum = #tModels + 1;
+				tFallbackStartRow = 1;
 			end
 
-			tLastModelIndex = #tModels;
-			tLastModelId = tModels[tLastModelIndex];
-			tLastGroupArray = VUHDO_getGroupMembersSorted(tLastModelId, tSortBy, aPanelNum, tLastModelIndex);
-			tLastColumnUnits = #tLastGroupArray;
-
-			tFallbackStartCol = tColIdx - 1;
-			tFallbackStartRow = tLastColumnUnits + 1;
-
-			tTotalFallbackButtons = 0;
 			tFallbackStart = tMaxGroupMembers + 1;
 			tFallbackCount = 40 - tMaxGroupMembers;
-			tUnitPrefix = (tUnitType == "raid") and "raid" or "party";
 
 			if tFallbackStart and tFallbackCount > 0 then
-				for tUnitIdx = tFallbackStart, tFallbackStart + tFallbackCount - 1 do
-					tFallbackUnit = tUnitPrefix .. tUnitIdx;
-					tButtonIdx = tFallbackStartIdx + tTotalFallbackButtons;
-					tTotalFallbackButtons = tTotalFallbackButtons + 1;
+				for tCnt = 1, tFallbackCount do
+					tButtonIdx = tFallbackStartIdx + tCnt - 1;
 
 					tButton = VUHDO_getOrCreateHealButton(tButtonIdx, aPanelNum);
 
@@ -227,11 +228,23 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 					tButton["raidid"] = nil;
 
-					tFallbackButtonIndex = tTotalFallbackButtons;
+					tFallbackButtonIndex = tCnt;
+
+				if tIsLooseOrdering then
 					tFallbackCol = tFallbackStartCol;
 					tFallbackRow = tFallbackStartRow + tFallbackButtonIndex - 1;
 
 					tX, tY = VUHDO_getHealButtonPos(tFallbackCol, tFallbackRow, aPanelNum);
+				else
+					tFallbackRow = tFallbackStartRow + tFallbackButtonIndex - 1;
+
+					tMaxRowsPerColumn = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["maxRowsWhenLoose"];
+
+					tFallbackCol = tFallbackPlaceNum + floor((tFallbackRow - 1) / tMaxRowsPerColumn);
+					tFallbackRowInColumn = ((tFallbackRow - 1) % tMaxRowsPerColumn) + 1;
+
+					tX, tY = VUHDO_getHealButtonPos(tFallbackCol, tFallbackRowInColumn, aPanelNum);
+				end
 
 					if VUHDO_isDifferentButtonPoint(tButton, tX, -tY) then
 						tButton:ClearAllPoints();
@@ -240,6 +253,10 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 					tButton:Hide();
 				end
+
+				tTotalFallbackButtons = tFallbackCount;
+			else
+				tTotalFallbackButtons = 0;
 			end
 
 			VUHDO_setSecureFallbackButtonStart(aPanelNum, tFallbackStartIdx);
@@ -255,8 +272,8 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			break;
 		end
 
-		tButton["raidid"] = nil;
 		VUHDO_safeSetAttribute(tButton, "unit", nil);
+		tButton["raidid"] = nil;
 
 		for tDebuffCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
 			tDebuffFrame = VUHDO_getBarIconFrame(tButton, tDebuffCnt);
@@ -268,6 +285,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 		end
 
 		VUHDO_PixelUtil.Hide(tButton);
+
 		tButtonIdx = tButtonIdx + 1;
 	end
 
