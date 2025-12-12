@@ -573,7 +573,12 @@ function VUHDO_deleteCustomDebuffOnClick(aButton)
 			VUHDO_Msg("[WARNING] " .. string.format(VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED, tDisplayName), 1, 0, 0);
 		end
 
-		tremove(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"], tIndex);
+		for tKey, tStoredValue in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
+			if tStoredValue == tValue then
+				VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"][tKey] = nil;
+			end
+		end
+
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"][tValue] = nil;
 		VUHDO_CONFIG["CUSTOM_DEBUFF"]["SELECTED"] = "";
 	else
