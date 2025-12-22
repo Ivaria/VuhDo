@@ -1116,6 +1116,41 @@ end
 
 
 --
+local tMaxDebuffs;
+local tIconFrame;
+local tPanelNum;
+local tButtonNum;
+local function VUHDO_initCustomDebuffIcons(aButton)
+
+	if not VUHDO_CONFIG or not VUHDO_CONFIG["CUSTOM_DEBUFF"] or not VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"]
+		or InCombatLockdown() or not VUHDO_isSecureShadowHeaderReady() then
+		return;
+	end
+
+	tMaxDebuffs = VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"];
+
+	for tIconNum = 40, tMaxDebuffs + 39 do
+		VUHDO_getOrCreateCuDeButton(aButton, tIconNum);
+
+		tIconFrame = VUHDO_getBarIconFrame(aButton, tIconNum);
+
+		if tIconFrame then
+			tPanelNum = aButton["panelNum"];
+			tButtonNum = aButton["buttonNum"];
+
+			if tPanelNum and tButtonNum then
+				VUHDO_registerSecureDebuffFrame(tPanelNum, tButtonNum, tIconNum, tIconFrame);
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local function VUHDO_initReadyCheckIcon(aButton)
 
 	VUHDO_PixelUtil.Hide(VUHDO_getBarRoleIcon(aButton, 20));
@@ -1308,6 +1343,7 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	VUHDO_initSwiftmendIndicator(aButton, sHealthBar, aPanelNum);
 	VUHDO_initFlashBar(aButton);
 	VUHDO_initReadyCheckIcon(aButton);
+	VUHDO_initCustomDebuffIcons(aButton);
 
 	if VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"] then
 		ClickCastFrames = ClickCastFrames or {};

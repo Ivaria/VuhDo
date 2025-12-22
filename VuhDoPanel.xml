@@ -634,5 +634,14 @@
 	<Frame name="VuhDoShadowGroupHeader" parent="UIParent" inherits="SecureGroupHeaderTemplate">
 	</Frame>
 
+	<Button name="VuhDoShadowPetButtonTemplate" virtual="true" inherits="SecureUnitButtonTemplate,SecureHandlerAttributeTemplate">
+		<Size>
+			<AbsDimension x="0" y="0"/>
+		</Size>
+	</Button>
+
+	<Frame name="VuhDoShadowPetHeader" parent="UIParent" inherits="SecureGroupPetHeaderTemplate">
+	</Frame>
+
 </Ui>
 
