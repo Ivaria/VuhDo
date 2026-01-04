@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed debuff icon tooltip display  
   
   
 Improvements:  

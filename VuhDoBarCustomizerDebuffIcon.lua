@@ -994,7 +994,7 @@ do
 	local tIconInfoOld;
 	local tIconInfoNew;
 	local tFrame;
-	function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aCnt)
+	function VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
 
 		if not VUHDO_DEBUFF_ICONS[aUnit] then
 			VUHDO_DEBUFF_ICONS[aUnit] = { };
@@ -1007,7 +1007,7 @@ do
 		tExistingSlot = VUHDO_DEBUFF_ICONS_MAP[aUnit][anAuraInstanceId];
 
 		if tExistingSlot then
-			VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aCnt);
+			VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId);
 
 			return;
 		end
@@ -1052,7 +1052,7 @@ do
 			tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
 
 			if tFrame then
-				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"], tFrame["debuffCnt"] = aName, aSpellId, anIsBuff, anAuraInstanceId, aCnt;
+				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"] = aName, aSpellId, anIsBuff, anAuraInstanceId;
 
 				VUHDO_animateDebuffIcon(tButton, tIconInfoNew, GetTime(), tSlot + 39, true, aUnit);
 			end
@@ -1074,7 +1074,7 @@ do
 	local tSlot;
 	local tIconInfo;
 	local tFrame;
-	function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aCnt)
+	function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
 
 		if not VUHDO_DEBUFF_ICONS[aUnit] then
 			VUHDO_DEBUFF_ICONS[aUnit] = { };
@@ -1095,10 +1095,10 @@ do
 			for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 				tFrame = VUHDO_getBarIconFrame(tButton, tSlot + 39);
 
-				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"], tFrame["debuffCnt"] = aName, aSpellId, anIsBuff, anAuraInstanceId, aCnt;
+				tFrame["debuffInfo"], tFrame["debuffSpellId"], tFrame["isBuff"], tFrame["debuffInstanceId"] = aName, aSpellId, anIsBuff, anAuraInstanceId;
 			end
 		else
-			VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId, aCnt);
+			VUHDO_addDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId);
 		end
 
 		return;
@@ -1162,7 +1162,6 @@ do
 					tFrame["debuffSpellId"] = nil;
 					tFrame["isBuff"] = nil;
 					tFrame["debuffInstanceId"] = nil;
-					tFrame["debuffCnt"] = nil;
 				end
 			end
 		end
@@ -1215,7 +1214,6 @@ do
 					tFrame["debuffSpellId"] = nil;
 					tFrame["isBuff"] = nil;
 					tFrame["debuffInstanceId"] = nil;
-					tFrame["debuffCnt"] = nil;
 				end
 			end
 		end

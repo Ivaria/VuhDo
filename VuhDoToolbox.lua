@@ -1574,6 +1574,87 @@ end
 
 
 
+do
+	--
+	local tIndex;
+	local tFilter;
+	local tMatchAuraInstanceId;
+	local tMatchSpellId;
+	local tMatchSpellName;
+	local tCurrentIndex;
+	local tAuraInfo;
+	local function VUHDO_getDebuffIndexByAuraInstanceIdPredicate(anAuraData)
+
+		if not anAuraData then
+			return;
+		end
+
+		tCurrentIndex = tCurrentIndex + 1;
+
+		if tMatchAuraInstanceId and anAuraData.auraInstanceID == tMatchAuraInstanceId then
+			tIndex = tCurrentIndex;
+
+			return true;
+		end
+
+		if tMatchSpellId and anAuraData.spellId == tMatchSpellId then
+			tIndex = tCurrentIndex;
+
+			return true;
+		end
+
+		if tMatchSpellName and anAuraData.name == tMatchSpellName then
+			tIndex = tCurrentIndex;
+
+			return true;
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_getDebuffIndexByAuraInstanceId(aUnit, anAuraInstanceId, anIsBuff, aSpellName, aSpellId)
+
+		if not aUnit then
+			return;
+		end
+
+		tFilter = anIsBuff and "HELPFUL" or "HARMFUL";
+		tMatchAuraInstanceId = anAuraInstanceId;
+		tMatchSpellId = aSpellId;
+		tMatchSpellName = aSpellName;
+		tIndex = nil;
+
+		if GetAuraSlots then
+			tCurrentIndex = 0;
+
+			VUHDO_forEachAura(aUnit, tFilter, nil, VUHDO_getDebuffIndexByAuraInstanceIdPredicate, true);
+		else
+			tCurrentIndex = 0;
+
+			for tLoopIndex = 1, huge do
+				tAuraInfo = VUHDO_getAuraDataByIndex(aUnit, tLoopIndex, tFilter);
+
+				if not tAuraInfo.icon then
+					return tIndex;
+				end
+
+				if VUHDO_getDebuffIndexByAuraInstanceIdPredicate(tAuraInfo) then
+					return tIndex;
+				end
+			end
+		end
+
+		return tIndex;
+
+	end
+end
+
+
+
 --
 local function VUHDO_packAuraDataHelper(aSpellName, anIcon, aCount, aDebuffType, aDuration, aExpirationTime, aSource, anIsStealable, aNameplateShowPersonal, aSpellId, aCanApplyAura, anIsBossDebuff, aNameplateShowAll, aTimeMod, ...)
 
