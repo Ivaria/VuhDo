@@ -35,6 +35,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to hide standard Blizzard boss frames  
   
   
 --------------------------------------------------------------  
