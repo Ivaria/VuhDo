@@ -79,6 +79,14 @@ end
 
 
 --
+-- Shadow Button ID Scheme:
+--
+-- Player shadow buttons: Internal IDs 1-40, child frames "child1" to "child40"
+-- Pet shadow buttons:    Internal IDs 41-80, child frames "child1" to "child40"
+--
+-- Pet buttons use IDs 41-80 (instead of 1-40) to prevent key collisions in shared data structures.
+-- Convert when accessing pet child frames: childFrame = GetAttribute("child" .. (shadowButtonId - 40))
+--
 local tInitConfigFunc = [=[
 	tinsert(sShadowButtons, self);
 
@@ -916,15 +924,6 @@ function VUHDO_initSecureShadowHeader()
 		end
 	]=]);
 
-	-- Shadow Button ID Scheme:
-	--
-	-- Player shadow buttons: Internal IDs 1-40, child frames "child1" to "child40"
-	-- Pet shadow buttons:    Internal IDs 41-80, child frames "child1" to "child40"
-	--
-	-- Pet buttons use IDs 41-80 (instead of 1-40) to prevent key collisions in shared
-	-- data structures.
-	--
-	-- When accessing pet child frames, convert: childFrame = GetAttribute("child" .. (shadowButtonId - 40))
 	sManagerFrame:SetAttribute("vuhdo_process_pet_clear_queue_method", [=[
 		if not sShadowPetHeader or not sPetClearQueue then
 			return;
