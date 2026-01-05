@@ -176,6 +176,7 @@ local tOnPetAttributeChanged = [=[
 ]=];
 local tChild;
 local tFallbackPanel;
+local tHasPetHeader;
 function VUHDO_initSecureShadowHeader()
 
 	if InCombatLockdown() or not VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
@@ -257,10 +258,17 @@ function VUHDO_initSecureShadowHeader()
 		sManagerFrame:SetFrameRef("sShadowPetHeader", sShadowPetHeader);
 	end
 
-	sManagerFrame:Execute([=[
+	tHasPetHeader = sShadowPetHeader ~= nil;
+
+	sManagerFrame:Execute(format([=[
 		sManager = self;
 		sShadowHeader = self:GetFrameRef("sShadowHeader");
-		sShadowPetHeader = self:GetFrameRef("sShadowPetHeader");
+
+		if %s then
+			sShadowPetHeader = self:GetFrameRef("sShadowPetHeader");
+		else
+			sShadowPetHeader = nil;
+		end
 
 		sRealButtons = newtable();
 		sDebuffFrames = newtable();
@@ -343,7 +351,7 @@ function VUHDO_initSecureShadowHeader()
 
 		sIsDebugEnabled = false;
 		sUnitToPoolIndex = newtable();
-	]=]);
+	]=], tostring(tHasPetHeader)));
 
 	VUHDO_updateSecureFallbackConfig();
 
