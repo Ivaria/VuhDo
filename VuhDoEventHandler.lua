@@ -1799,6 +1799,12 @@ do
 
 			if tSubCommand == "debug" then
 				VUHDO_setSecureDebugEnabled(not VUHDO_CONFIG["COMBAT_ROSTER"]["debug"]);
+			elseif tSubCommand == "toggle" then
+				VUHDO_setCombatRosterEnabled(not VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"]);
+
+				VUHDO_saveCurrentProfile();
+
+				ReloadUI();
 			else
 				VUHDO_debugSecureEnvironment();
 			end

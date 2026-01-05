@@ -2102,6 +2102,29 @@ end
 
 
 --
+function VUHDO_setCombatRosterEnabled(anIsEnabled)
+
+	if InCombatLockdown() then
+		VUHDO_Msg("Cannot modify combat roster setting during combat.");
+
+		return;
+	end
+
+	VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] = anIsEnabled;
+
+	if anIsEnabled then
+		VUHDO_Msg("Combat roster is now |cff00ff00enabled|r.");
+	else
+		VUHDO_Msg("Combat roster is now |cffff0000disabled|r.");
+	end
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_setSecureFallbackButtonStart(aPanelNum, aButtonStart)
 
 	if not sInitialized or InCombatLockdown() then
