@@ -49,6 +49,9 @@ local IsUsableSpell = IsUsableSpell or C_Spell.IsSpellUsable;
 local IsSpellInSpellBook = C_SpellBook and C_SpellBook.IsSpellInSpellBook;
 local IsSpellKnownNew = C_SpellBook and C_SpellBook.IsSpellKnown;
 local SpellBookSpellBank = Enum and Enum.SpellBookSpellBank;
+local issecretvalue = issecretvalue;
+
+local sSecretsEnabled = (issecretvalue ~= nil);
 
 -- talent cache maps for new large Dragonflight talent trees
 local VUHDO_TALENT_CACHE_SPELL_ID = {

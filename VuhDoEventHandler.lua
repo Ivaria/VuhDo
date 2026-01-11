@@ -17,6 +17,9 @@ local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
 local GetCurrentEventInfo = C_CombatLog and C_CombatLog.GetCurrentEventInfo or _G["CombatLogGetCurrentEventInfo"];
+local issecretvalue = issecretvalue;
+
+local sSecretsEnabled = (issecretvalue ~= nil);
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;

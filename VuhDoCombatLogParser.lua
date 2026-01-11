@@ -4,10 +4,12 @@ local VUHDO_INTERNAL_TOGGLES = { };
 
 local strsplit = strsplit;
 local pairs = pairs;
+local issecretvalue = issecretvalue;
 
 local VUHDO_updateHealth;
 local sCurrentTarget = nil;
 local sCurrentFocus = nil;
+local sSecretsEnabled = (issecretvalue ~= nil);
 
 
 
