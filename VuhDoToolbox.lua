@@ -46,6 +46,9 @@ local FindAura = AuraUtil.FindAura;
 local FindAuraByName = AuraUtil.FindAuraByName;
 local IsUsableItem = IsUsableItem or C_Item.IsUsableItem;
 local IsUsableSpell = IsUsableSpell or C_Spell.IsSpellUsable;
+local IsSpellInSpellBook = C_SpellBook and C_SpellBook.IsSpellInSpellBook;
+local IsSpellKnownNew = C_SpellBook and C_SpellBook.IsSpellKnown;
+local SpellBookSpellBank = Enum and Enum.SpellBookSpellBank;
 
 -- talent cache maps for new large Dragonflight talent trees
 local VUHDO_TALENT_CACHE_SPELL_ID = {
@@ -809,17 +812,31 @@ end
 local tSpellId;
 function VUHDO_isSpellKnown(aSpellName)
 
-	if (type(aSpellName) == "number" and IsSpellKnown(aSpellName))
-		or (type(aSpellName) == "number" and IsSpellKnownOrOverridesKnown(aSpellName))
-		or (type(aSpellName) == "number" and IsPlayerSpell(aSpellName)) then
-		return true;
+	if type(aSpellName) == "number" then
+		if IsSpellInSpellBook then
+			-- 12.0.0+ path
+			return IsSpellInSpellBook(aSpellName, SpellBookSpellBank.Player, true)
+				or (IsSpellKnownNew and IsSpellKnownNew(aSpellName, SpellBookSpellBank.Player));
+		else
+			-- 11.0.x fallback
+			return IsSpellKnown(aSpellName)
+				or IsSpellKnownOrOverridesKnown(aSpellName)
+				or IsPlayerSpell(aSpellName);
+		end
 	elseif type(aSpellName) ~= "number" then
 		aSpellName = VUHDO_NAME_TO_SPELL[aSpellName] or aSpellName;
 
 		_, _, _, _, _, _, tSpellId = VUHDO_getSpellInfo(aSpellName);
 
 		if tSpellId then
-			return IsSpellKnownOrOverridesKnown(tSpellId) or IsSpellKnown(tSpellId) or IsPlayerSpell(tSpellId);
+			if IsSpellInSpellBook then
+				-- 12.0.0+ path
+				return IsSpellInSpellBook(tSpellId, SpellBookSpellBank.Player, true)
+					or (IsSpellKnownNew and IsSpellKnownNew(tSpellId, SpellBookSpellBank.Player));
+			else
+				-- 11.0.x fallback
+				return IsSpellKnownOrOverridesKnown(tSpellId) or IsSpellKnown(tSpellId) or IsPlayerSpell(tSpellId);
+			end
 		end
 	end
 
