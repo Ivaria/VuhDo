@@ -16,6 +16,7 @@ local tinsert = table.insert;
 local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
+local GetCurrentEventInfo = C_CombatLog and C_CombatLog.GetCurrentEventInfo or _G["CombatLogGetCurrentEventInfo"];
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
@@ -979,7 +980,7 @@ do
 		if "COMBAT_LOG_EVENT_UNFILTERED" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
 				-- As of 8.x COMBAT_LOG_EVENT_UNFILTERED is now just an event with no arguments
-				anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19 = CombatLogGetCurrentEventInfo();
+				anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19 = GetCurrentEventInfo();
 
 				if sParseCombatLog then
 					-- SWING_DAMAGE - the amount of damage is the 12th arg
