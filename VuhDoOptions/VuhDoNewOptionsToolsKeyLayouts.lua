@@ -1,5 +1,7 @@
 local _;
 
+local GetSpecializationInfo = VUHDO_getSpecializationInfo;
+
 VUHDO_KEY_LAYOUT_SHARE_VERSION = 1;
 
 VUHDO_KEY_LAYOUT_COMBO_MODEL = { };

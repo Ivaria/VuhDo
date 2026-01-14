@@ -1,5 +1,7 @@
 local _;
 
+local GetSpecializationInfo = VUHDO_getSpecializationInfo;
+
 VUHDO_PROFILE_SHARE_VERSION = 1;
 
 VUHDO_IS_DEFAULT_PROFILE = false;
