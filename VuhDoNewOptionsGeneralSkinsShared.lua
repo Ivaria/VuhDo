@@ -1,4 +1,5 @@
 local GetNumGroupMembers = GetNumGroupMembers;
+local GetSpecialization = VUHDO_getSpecialization;
 local twipe = table.wipe;
 local tonumber = tonumber;
 local pairs = pairs;
