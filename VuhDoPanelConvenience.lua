@@ -117,6 +117,16 @@ local tDebuffOnEnterSnippet = [[
 		if tBody then
 			owner:RunFor(tFrame, tBody);
 		end
+
+		sCliqueHeader = owner:GetFrameRef("sCliqueHeader");
+
+		if sCliqueHeader then
+			tCliqueEnter = sCliqueHeader:GetAttribute("setup_onenter");
+
+			if tCliqueEnter then
+				sCliqueHeader:RunFor(tFrame, tCliqueEnter);
+			end
+		end
 	end
 ]]
 local tDebuffOnLeaveSnippet = [[
@@ -124,13 +134,22 @@ local tDebuffOnLeaveSnippet = [[
 
 	if tFrame then
 		tFrame:ClearBindings();
-
 		sHealButton = nil;
 
 		tBody = tFrame:GetAttribute("vuhdo_onleave_hook");
 
 		if tBody then
 			owner:RunFor(tFrame, tBody);
+		end
+
+		sCliqueHeader = owner:GetFrameRef("sCliqueHeader");
+
+		if sCliqueHeader then
+			tCliqueLeave = sCliqueHeader:GetAttribute("setup_onleave");
+
+			if tCliqueLeave then
+				sCliqueHeader:RunFor(tFrame, tCliqueLeave);
+			end
 		end
 	end
 ]]
