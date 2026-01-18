@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Shaman totem 'Fire Resistance Totem' in Buff Watch  
   
   
 Improvements:  
