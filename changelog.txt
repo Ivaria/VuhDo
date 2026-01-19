@@ -21,6 +21,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Mage armors to Buff Watch  
   
   
 --------------------------------------------------------------  
