@@ -17,6 +17,7 @@ local VUHDO_updateHealthBarsFor;
 local VUHDO_getUnitButtonsSafe;
 local VUHDO_getPlayerTargetFrame;
 local VUHDO_cleanupSpellTraceForUnit;
+local VUHDO_applyAllLayersToBorder;
 
 
 
@@ -36,6 +37,7 @@ function VUHDO_playerTargetEventHandlerInitLocalOverrides()
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getPlayerTargetFrame = _G["VUHDO_getPlayerTargetFrame"];
 	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
+	VUHDO_applyAllLayersToBorder = _G["VUHDO_applyAllLayersToBorder"];
 
 	return;
 
@@ -107,19 +109,28 @@ end
 
 --
 local tBorder;
-function VUHDO_barBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact)
+function VUHDO_barBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["BAR_BORDER"] == aBouquetName then
-			if aColor then
-				tBorder = VUHDO_getPlayerTargetFrame(tButton);
+			tBorder = VUHDO_getPlayerTargetFrame(tButton);
 
-				VUHDO_PixelUtil.SetFrameLevel(tBorder, tButton:GetFrameLevel() + (anImpact or 0) + 2);
-				tBorder:SetBackdropBorderColor(VUHDO_backColorWithFallback(aColor));
+			if tBorder then
+				if aLayerTemplate then
+					VUHDO_PixelUtil.SetFrameLevel(tBorder, tButton:GetFrameLevel() + (anImpact or 0) + 2);
+					VUHDO_applyAllLayersToBorder(tButton, tBorder, aLayerTemplate);
+					tBorder:Show();
+				elseif aColor then
+					VUHDO_PixelUtil.SetFrameLevel(tBorder, tButton:GetFrameLevel() + (anImpact or 0) + 2);
+					tBorder:SetBackdropBorderColor(VUHDO_backColorWithFallback(aColor));
+					tBorder:Show();
+				else
+					tBorder:Hide();
+				end
+			end
 
-				tBorder:Show();
-			else
-				VUHDO_getPlayerTargetFrame(tButton):Hide();
+			if VUHDO_SECRETS_ENABLED and VUHDO_updateIndicatorAlphaChain then
+				VUHDO_updateIndicatorAlphaChain(tButton, "BAR_BORDER", VUHDO_RAID[aUnit]);
 			end
 		end
 	end

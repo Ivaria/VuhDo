@@ -17,9 +17,7 @@ local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
 local GetCurrentEventInfo = C_CombatLog and C_CombatLog.GetCurrentEventInfo or _G["CombatLogGetCurrentEventInfo"];
-local issecretvalue = issecretvalue;
-
-local sSecretsEnabled = (issecretvalue ~= nil);
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
@@ -732,6 +730,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_combatLogInitLocalOverrides();
 	VUHDO_eventHandlerInitLocalOverrides();
 	VUHDO_customHealthInitLocalOverrides();
+	VUHDO_customHealthTextInitLocalOverrides();
 	VUHDO_customManaInitLocalOverrides();
 	VUHDO_customTargetInitLocalOverrides();
 	VUHDO_customClustersInitLocalOverrides();
@@ -751,6 +750,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_bouquetValidatorsStatusInitLocalOverrides();
 	VUHDO_bouquetValidatorsInitLocalOverrides();
 	VUHDO_bouquetsInitLocalOverrides();
+	VUHDO_bouquetLayersInitLocalOverrides();
 	VUHDO_textProvidersInitLocalOverrides();
 	VUHDO_textProviderHandlersInitLocalOverrides();
 	VUHDO_actionEventHandlerInitLocalOverrides();
@@ -980,38 +980,7 @@ do
 			tEventTotalStartTime = debugprofilestop();
 		end
 
-		if "COMBAT_LOG_EVENT_UNFILTERED" == anEvent then
-			if VUHDO_VARIABLES_LOADED then
-				-- As of 8.x COMBAT_LOG_EVENT_UNFILTERED is now just an event with no arguments
-				anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19 = GetCurrentEventInfo();
-
-				if sParseCombatLog then
-					-- SWING_DAMAGE - the amount of damage is the 12th arg
-					-- ENVIRONMENTAL_DAMAGE - the amount of damage is the 13th arg
-					-- for all other events with the _DAMAGE suffix the amount of damage is the 15th arg
-					VUHDO_parseCombatLogEvent(anArg2, anArg8, anArg12, anArg13, anArg15);
-				end
-
-				if VUHDO_INTERNAL_TOGGLES[36] then -- VUHDO_UPDATE_SHIELD
-					-- for SPELL events with _AURA suffixes the amount healed is the 16th arg
-					-- for SPELL_HEAL/SPELL_PERIODIC_HEAL the amount absorbed is the 17th arg
-					-- for SPELL_ABSORBED the absorb spell ID is either the 16th or 19th arg
-					VUHDO_parseCombatLogShieldAbsorb(anArg2, anArg4, anArg8, anArg13, anArg16, anArg12, anArg17, anArg19);
-				end
-
-				if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
-					VUHDO_parseCombatLogSpellTrace(
-						anArg2,  -- message/event
-						anArg4,  -- source GUID
-						anArg8,  -- dest GUID
-						anArg13, -- spell name
-						anArg12, -- spell ID
-						anArg16  -- amount
-					);
-				end
-			end
-
-		elseif "UNIT_AURA" == anEvent then
+		if "UNIT_AURA" == anEvent then
 			tUnitInfo = (VUHDO_RAID or tEmptyRaid)[anArg1];
 
 			if tUnitInfo then
@@ -1913,9 +1882,6 @@ function VUHDO_updateGlobalToggles()
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE] = VUHDO_CONFIG["SHOW_SPELL_TRACE"]
 		or VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_SPELL_TRACE);
 
-	VUHDO_UnRegisterEvent(sParseCombatLog or VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_SPELL_TRACE],
-		"COMBAT_LOG_EVENT_UNFILTERED");
-
 	return;
 
 end
@@ -2740,7 +2706,6 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE",
 	"UNIT_SPELLCAST_SENT",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
-	"COMBAT_LOG_EVENT_UNFILTERED",
 	"UNIT_THREAT_SITUATION_UPDATE",
 	"UPDATE_BINDINGS",
 	"PLAYER_TARGET_CHANGED", "PLAYER_FOCUS_CHANGED",

@@ -2,6 +2,9 @@ local _;
 
 local VUHDO_IS_SMART_CAST = false;
 
+local VUHDO_setStatusBarVuhDoColor;
+local VUHDO_applyAllLayersToBar;
+
 local SecureButton_GetButtonSuffix = SecureButton_GetButtonSuffix;
 local GetTexCoordsForRole = GetTexCoordsForRole or VUHDO_getTexCoordsForRole;
 local InCombatLockdown = InCombatLockdown;
@@ -20,6 +23,7 @@ local VUHDO_hideTooltip;
 local VUHDO_resetClusterUnit;
 local VUHDO_removeAllClusterHighlights;
 local VUHDO_getHealthBar;
+local VUHDO_findButtonFromChild;
 local VUHDO_setupSmartCast;
 local VUHDO_updateDirectionFrame;
 local VUHDO_getCurrentKeyModifierString;
@@ -42,10 +46,13 @@ function VUHDO_actionEventHandlerInitLocalOverrides()
 	VUHDO_resetClusterUnit = _G["VUHDO_resetClusterUnit"];
 	VUHDO_removeAllClusterHighlights = _G["VUHDO_removeAllClusterHighlights"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
+	VUHDO_findButtonFromChild = _G["VUHDO_findButtonFromChild"];
 	VUHDO_setupSmartCast = _G["VUHDO_setupSmartCast"];
 	VUHDO_updateDirectionFrame = _G["VUHDO_updateDirectionFrame"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getCurrentKeyModifierString = _G["VUHDO_getCurrentKeyModifierString"];
+	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
+	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
 
 	VUHDO_SPELL_CONFIG = _G["VUHDO_SPELL_CONFIG"];
 	VUHDO_SPELL_ASSIGNMENTS = _G["VUHDO_SPELL_ASSIGNMENTS"];
@@ -294,7 +301,7 @@ end
 
 --
 local tQuota, tHighlightBar;
-function VUHDO_highlighterBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName)
+function VUHDO_highlighterBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
 
 	tQuota = (anIsActive or (aMaxValue or 0) > 1) and 1 or 0;
 
@@ -302,11 +309,18 @@ function VUHDO_highlighterBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue,
 		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["MOUSEOVER_HIGHLIGHT"] == aBouquetName then
 			tHighlightBar = VUHDO_getHealthBar(tButton, 8);
 
-			if aColor then
-				tHighlightBar:SetVuhDoColor(aColor);
+			tHighlightBar:SetMinMaxValues(0, 1);
+			tHighlightBar:SetValue(tQuota);
+
+			if aLayerTemplate then
+				VUHDO_applyAllLayersToBar(tButton, tHighlightBar, aLayerTemplate);
+			elseif aColor then
+				VUHDO_setStatusBarVuhDoColor(tHighlightBar, aColor);
 			end
 
-			tHighlightBar:SetValue(tQuota);
+			if VUHDO_SECRETS_ENABLED and VUHDO_updateIndicatorAlphaChain then
+				VUHDO_updateIndicatorAlphaChain(tButton, "MOUSEOVER_HIGHLIGHT", VUHDO_RAID[aUnit]);
+			end
 		end
 	end
 
@@ -435,7 +449,7 @@ local sDebuffIcon = nil;
 function VUHDO_showDebuffTooltip(aDebuffIcon)
 	if not VUHDO_CONFIG["DEBUFF_TOOLTIP"] then return; end
 
-	tButton = aDebuffIcon:GetParent():GetParent():GetParent():GetParent();
+	tButton = VUHDO_findButtonFromChild(aDebuffIcon);
 
 	if not GameTooltip:IsForbidden() then
 		GameTooltip:SetOwner(aDebuffIcon, "ANCHOR_RIGHT", 0, 0);

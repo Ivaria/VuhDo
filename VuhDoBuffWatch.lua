@@ -74,6 +74,7 @@ local GetWeaponEnchantInfo = GetWeaponEnchantInfo;
 local UnitOnTaxi = UnitOnTaxi;
 local IsSpellInRange = IsSpellInRange or VUHDO_isSpellInRange;
 local GetShapeshiftFormInfo = GetShapeshiftFormInfo;
+local issecretvalue = issecretvalue;
 
 local pairs = pairs;
 local ipairs = ipairs;
@@ -518,7 +519,9 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 		end
 
 		if tIsWatchUnit then
-			tInRange = (IsSpellInRange(aBuffInfo[1], tUnit) == 1) or tInfo["baseRange"];
+			tInRange = (IsSpellInRange(aBuffInfo[1], tUnit) == 1) or tInfo["hasSecretRange"]
+				or (VUHDO_SECRETS_ENABLED and issecretvalue and issecretvalue(tInfo["baseRange"])) or tInfo["baseRange"];
+
 			tIsAvailable = tInfo["connected"] and not tInfo["dead"];
 
 			_, tTexture, tCount, _, tStart, tRest, _, _ = VUHDO_unitBuff(tUnit, aBuffInfo[1]);

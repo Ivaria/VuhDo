@@ -24,6 +24,8 @@ local GetRaidTargetIndex = GetRaidTargetIndex;
 local tonumber = tonumber;
 local pairs = pairs;
 local twipe = table.wipe;
+local issecretvalue = issecretvalue;
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local _;
 
 
@@ -44,7 +46,15 @@ local VUHDO_BUTTON_CACHE;
 local VUHDO_getDisplayUnit;
 local VUHDO_textColor;
 local VUHDO_isInRange;
+local VUHDO_unitIsUnit;
+local VUHDO_setStatusBarVuhDoColor;
+local VUHDO_applyAllLayersToBar;
+local VUHDO_getBarText;
+local VUHDO_getLifeText;
 
+
+
+--
 function VUHDO_customTargetInitLocalOverrides()
 
 	VUHDO_CUSTOM_INFO = _G["VUHDO_CUSTOM_INFO"];
@@ -64,9 +74,14 @@ function VUHDO_customTargetInitLocalOverrides()
 	VUHDO_getDisplayUnit = _G["VUHDO_getDisplayUnit"];
 	VUHDO_textColor = _G["VUHDO_textColor"];
 	VUHDO_isInRange = _G["VUHDO_isInRange"];
+	VUHDO_unitIsUnit = _G["VUHDO_unitIsUnit"];
+	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
+	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
+	VUHDO_getBarText = _G["VUHDO_getBarText"];
+	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
 
 end
-------------------------------------------------------------------
+
 
 
 --
@@ -78,11 +93,25 @@ local function VUHDO_customizeManaBar(aButton)
 
 	if tInfo and tInfo["connected"] then
 		tManaBar = VUHDO_getHealthBar(aButton, 2);
-		tManaBar:SetValue(tInfo["powermax"] < 2 and 0 or tInfo["power"] / tInfo["powermax"]); -- Some addons return 1 mana-max instead of zero
-		tManaBar:SetVuhDoColor(VUHDO_POWER_TYPE_COLORS[tInfo["powertype"]]);
+
+		if sSecretsEnabled and tInfo["hasSecretPower"] then
+			tManaBar:SetMinMaxValues(0, tInfo["powermax"]);
+			tManaBar:SetValue(tInfo["power"]);
+		elseif tInfo["powermax"] < 2 then
+			tManaBar:SetMinMaxValues(0, 1);
+			tManaBar:SetValue(0);
+		else
+			tManaBar:SetMinMaxValues(0, 1);
+			tManaBar:SetValue(tInfo["power"] / tInfo["powermax"]);
+		end
+
+		VUHDO_setStatusBarVuhDoColor(tManaBar, VUHDO_POWER_TYPE_COLORS[tInfo["powertype"]]);
 	else
 		VUHDO_getHealthBar(aButton, 2):SetValue(0);
 	end
+
+	return;
+
 end
 
 
@@ -126,21 +155,32 @@ end
 --
 local tBar;
 local tQuota;
-local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName)
+local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
 
-	tQuota = anIsActive and (aMaxValue or 0) > 0 and aCurrValue / aMaxValue or 0;
+	aMaxValue = aMaxValue or 1;
+	aCurrValue = aCurrValue or 0;
 
-	if tQuota > 0 then
-		tBar = VUHDO_getHealthBar(aButton, 1);
+	tBar = VUHDO_getHealthBar(aButton, 1);
 
-		tBar:SetValue(tQuota);
-		tBar:SetVuhDoColor(aColor);
+	if anIsActive then
+		tBar:SetMinMaxValues(0, aMaxValue);
+		tBar:SetValue(aCurrValue);
 
-		VUHDO_getBarText(tBar):SetTextColor(VUHDO_textColor(aColor));
-		VUHDO_getLifeText(tBar):SetTextColor(VUHDO_textColor(aColor));
+		if aLayerTemplate then
+			VUHDO_applyAllLayersToBar(aButton, tBar, aLayerTemplate);
+		elseif aColor then
+			VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+
+			if VUHDO_getBarText and VUHDO_getLifeText then
+				VUHDO_getBarText(tBar):SetTextColor(VUHDO_textColor(aColor));
+				VUHDO_getLifeText(tBar):SetTextColor(VUHDO_textColor(aColor));
+			end
+		end
 
 		aButton:SetAlpha(1);
 	else
+		tBar:SetMinMaxValues(0, 1);
+		tBar:SetValue(0);
 		aButton:SetAlpha(0);
 	end
 
@@ -176,12 +216,11 @@ local VUHDO_customizeTargetBar = VUHDO_customizeTargetBar;
 
 
 -- Wir merken uns die Target-Buttons, wenn das Ziel im Raid ist,
--- um Gesundheitsupdates mit dem regulären Mechanismus durchzuführen
 -- die Target-Buttons sind also durch den Target-Namen indiziert.
 local tName;
 local function VUHDO_rememberTargetButton(aTargetUnit, aButton)
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if UnitIsUnit(tUnit, aTargetUnit) then
+		if VUHDO_unitIsUnit(tUnit, aTargetUnit) then
 			tName = tInfo["name"];
 			if not VUHDO_IN_RAID_TARGET_BUTTONS[tName] then
 				VUHDO_IN_RAID_TARGET_BUTTONS[tName] = { };
@@ -313,11 +352,16 @@ end
 local tTotUnit, tGuid;
 local tAllButtons;
 local function VUHDO_updateTargetHealth(aUnit, aTargetUnit)
+
 	tAllButtons = VUHDO_getUnitButtons(aUnit);
-	if not tAllButtons then	return; end
+
+	if not tAllButtons then
+		return;
+	end
 
 	if not VUHDO_IN_RAID_TARGETS[aTargetUnit] then
 		VUHDO_fillCustomInfo(aTargetUnit);
+
 		for _, tButton in pairs(tAllButtons) do
 			VUHDO_customizeTargetBar(VUHDO_getTargetButton(tButton), aTargetUnit, VUHDO_isInRange(aTargetUnit));
 		end
@@ -326,18 +370,28 @@ local function VUHDO_updateTargetHealth(aUnit, aTargetUnit)
 	if not sUnitTotUnits[aTargetUnit] then
 		sUnitTotUnits[aTargetUnit] = aTargetUnit .. "target";
 	end
+
 	tTotUnit = sUnitTotUnits[tTarget];
 
 	tGuid = UnitGUID(tTotUnit);
-	if VUHDO_TOT_GUIDS[aUnit] ~= tGuid then
+
+	if tGuid and sSecretsEnabled and issecretvalue(tGuid) then
+		-- FIXME: target-of-target tracking updates every frame when GUID is secret
+		VUHDO_updateTargetBars(aUnit);
+		VUHDO_TOT_GUIDS[aUnit] = nil;
+	elseif VUHDO_TOT_GUIDS[aUnit] ~= tGuid then
 		VUHDO_updateTargetBars(aUnit);
 		VUHDO_TOT_GUIDS[aUnit] = tGuid;
 	elseif VUHDO_IN_RAID_TARGETS[tTotUnit] == nil and UnitExists(tTotUnit) then
 		VUHDO_fillCustomInfo(tTotUnit);
+
 		for _, tButton in pairs(tAllButtons) do
 			VUHDO_customizeTargetBar(VUHDO_getTotButton(tButton), tTotUnit, VUHDO_isInRange(tTotUnit));
 		end
 	end
+
+	return;
+
 end
 
 

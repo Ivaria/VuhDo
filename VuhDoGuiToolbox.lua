@@ -1135,6 +1135,23 @@ end
 
 
 --
+function VUHDO_copyColorTo(aSource, aDest)
+
+	if not aSource then
+		return aDest;
+	end
+
+	aDest["R"], aDest["G"], aDest["B"], aDest["O"] = aSource["R"], aSource["G"], aSource["B"], aSource["O"];
+	aDest["TR"], aDest["TG"], aDest["TB"], aDest["TO"] = aSource["TR"], aSource["TG"], aSource["TB"], aSource["TO"];
+	aDest["useBackground"], aDest["useText"], aDest["useOpacity"] = aSource["useBackground"], aSource["useText"], aSource["useOpacity"];
+
+	return aDest;
+
+end
+
+
+
+--
 local tSummand;
 function VUHDO_brightenColor(aColor, aFactor)
 	if not aColor then return; end
@@ -1222,13 +1239,13 @@ end
 
 --
 local tPanelNum;
-function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aText, aValue, anIndicatorName)
+function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aValue, anIndicatorName, ...)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
 		if VUHDO_INDICATOR_CONFIG[tPanelNum]["TEXT_INDICATORS"][anIndicatorName]["TEXT_PROVIDER"] == aProviderName then
-			VUHDO_getHealthBarText(tButton, aBarNum):SetText(aText);
+			VUHDO_getHealthBarText(tButton, aBarNum):SetText(format(...));
 		end
 	end
 

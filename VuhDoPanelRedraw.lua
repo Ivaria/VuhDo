@@ -7,6 +7,10 @@ local VUHDO_DESIGN_BACKDROP = nil;
 local VUHDO_CONFIG;
 local VUHDO_INDICATOR_CONFIG;
 
+local VUHDO_STATUSBAR_LEFT_TO_RIGHT;
+local VUHDO_STATUSBAR_RIGHT_TO_LEFT;
+local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
+local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
 
 local ipairs = ipairs;
 local pairs = pairs;
@@ -76,6 +80,11 @@ function VUHDO_panelRedrawInitLocalOverrides()
 
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_INDICATOR_CONFIG = _G["VUHDO_INDICATOR_CONFIG"];
+
+	VUHDO_STATUSBAR_LEFT_TO_RIGHT = _G["VUHDO_STATUSBAR_LEFT_TO_RIGHT"];
+	VUHDO_STATUSBAR_RIGHT_TO_LEFT = _G["VUHDO_STATUSBAR_RIGHT_TO_LEFT"];
+	VUHDO_STATUSBAR_BOTTOM_TO_TOP = _G["VUHDO_STATUSBAR_BOTTOM_TO_TOP"];
+	VUHDO_STATUSBAR_TOP_TO_BOTTOM = _G["VUHDO_STATUSBAR_TOP_TO_BOTTOM"];
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 		sIsManaBouquet[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] ~= "";
@@ -497,12 +506,10 @@ function VUHDO_positionHealButton(aButton, aPanelNum, aBarScaling)
 	VUHDO_PixelUtil.SetWidth(aButton, (aBarScaling or sPanelConfig[aPanelNum]["barScaling"])["barWidth"]);
 	VUHDO_PixelUtil.SetHeight(aButton, (aBarScaling or sPanelConfig[aPanelNum]["barScaling"])["barHeight"]);
 
-	-- Player Target
 	VUHDO_initPlayerTargetBorder(aButton, VUHDO_getPlayerTargetFrame(aButton), false, aPanelNum);
 	VUHDO_initPlayerTargetBorder(VUHDO_getTargetButton(aButton), VUHDO_getPlayerTargetFrameTarget(aButton), true, aPanelNum);
 	VUHDO_initPlayerTargetBorder(VUHDO_getTotButton(aButton), VUHDO_getPlayerTargetFrameToT(aButton), true, aPanelNum);
 
-	-- Cluster indicator
 	VUHDO_initClusterBorder(aButton, aPanelNum);
 
 	return;
@@ -514,7 +521,6 @@ end
 --
 local function VUHDO_initHealthBar(aButton, aPanelNum)
 
-	VUHDO_PixelUtil.SetPoint(sHealthBar, "TOPLEFT", VUHDO_getHealthBar(aButton, 6):GetName(), "TOPLEFT", 0, 0); -- incoming bar
 	VUHDO_PixelUtil.SetSize(sHealthBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
 
 	return;
@@ -707,9 +713,13 @@ local function VUHDO_initIncomingOrShieldBar(aButton, aBarNum, aPanelNum)
 
 	tBar = VUHDO_getHealthBar(aButton, aBarNum);
 
-	VUHDO_PixelUtil.SetPoint(tBar, "TOPLEFT", VUHDO_getHealthBar(aButton, 3):GetName(), "TOPLEFT", sPanelConfig[aPanelNum]["sideBarLeftWidth"], 0); -- Background bar
+	if not tBar then
+		return;
+	end
+
 	VUHDO_PixelUtil.SetSize(tBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
-	tBar:SetValueRange(0, 0);
+	tBar:SetMinMaxValues(0, 1);
+	tBar:SetValue(0);
 
 	return;
 
@@ -795,7 +805,7 @@ local function VUHDO_initBarTexts(aButton, aHealthBar, aWidth, aPanelNum)
 		VUHDO_PixelUtil.Show(tLifeText);
 	end
 
-	VUHDO_PixelUtil.SetHeight(tTextPanel, tNameText:GetHeight() + tAddHeight);
+	VUHDO_PixelUtil.SetHeight(tTextPanel, sPanelConfig[aPanelNum]["mainFontHeight"] + tAddHeight);
 	VUHDO_PixelUtil.SetWidth(tTextPanel, aWidth);
 
 	sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["_spacing"] = tTextPanel:GetHeight(); -- internal marker
@@ -1098,7 +1108,7 @@ end
 local tBar;
 local function VUHDO_initFlashBar(aButton)
 
-	tBar = _G[aButton:GetName() .. "BgBarIcBarHlBarFlBar"];
+	tBar = _G[aButton:GetName() .. "BgBarHlBarFlBar"];
 
 	tBar:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\white_square_16_16");
 	VUHDO_PixelUtil.ApplySettings(tBar:GetStatusBarTexture());
@@ -1119,6 +1129,144 @@ local function VUHDO_initReadyCheckIcon(aButton)
 
 	return;
 
+end
+
+
+
+--
+do
+	--
+	local tPredHealthBar;
+	local tPredIncBar;
+	local tPredShieldBar;
+	local tPredOvershieldBar;
+	local tPredHealAbsorbBar;
+	local tPredOrientation;
+	local tPredIsInverted;
+	function VUHDO_initPredictionBarAnchors(aButton, aPanelNum)
+
+		tPredHealthBar = VUHDO_getHealthBar(aButton, 1);
+		tPredIncBar = VUHDO_getHealthBar(aButton, 6);
+		tPredShieldBar = VUHDO_getHealthBar(aButton, 19);
+		tPredOvershieldBar = VUHDO_getHealthBar(aButton, 20);
+		tPredHealAbsorbBar = VUHDO_getHealthBar(aButton, 21);
+
+		if not tPredHealthBar or not tPredIncBar or not tPredShieldBar then
+			return;
+		end
+
+		tPredOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
+		tPredIsInverted = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
+
+		tPredHealthBar:SetMinMaxValues(0, 1);
+		tPredHealthBar:SetValue(0);
+
+		VUHDO_setStatusBarOrientation(tPredHealthBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
+		tPredHealthBar:SetReverseFill(tPredIsInverted);
+
+		tPredIncBar:ClearAllPoints();
+		VUHDO_PixelUtil.SetSize(tPredIncBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
+
+		tPredIncBar:SetMinMaxValues(0, 1);
+		tPredIncBar:SetValue(0);
+
+		VUHDO_setStatusBarOrientation(tPredIncBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
+		tPredIncBar:SetReverseFill(tPredIsInverted);
+
+		if tPredOrientation == "HORIZONTAL" then
+			if tPredIsInverted then
+				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
+			else
+				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
+				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			end
+		elseif tPredOrientation == "HORIZONTAL_INV" then
+			if tPredIsInverted then
+				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
+				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			else
+				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
+			end
+		elseif tPredOrientation == "VERTICAL" then
+			if tPredIsInverted then
+				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
+				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			else
+				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
+			end
+		else -- VERTICAL_INV
+			if tPredIsInverted then
+				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
+			else
+				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
+				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			end
+		end
+
+		tPredShieldBar:ClearAllPoints();
+		VUHDO_PixelUtil.SetSize(tPredShieldBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
+
+		tPredShieldBar:SetMinMaxValues(0, 1);
+		tPredShieldBar:SetValue(0);
+
+		VUHDO_setStatusBarOrientation(tPredShieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
+		tPredShieldBar:SetReverseFill(tPredIsInverted);
+
+		if tPredOrientation == "HORIZONTAL" then
+			if tPredIsInverted then
+				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
+			else
+				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
+				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			end
+		elseif tPredOrientation == "HORIZONTAL_INV" then
+			if tPredIsInverted then
+				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
+				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			else
+				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
+			end
+		elseif tPredOrientation == "VERTICAL" then
+			if tPredIsInverted then
+				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
+				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			else
+				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
+			end
+		else -- VERTICAL_INV
+			if tPredIsInverted then
+				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
+				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
+			else
+				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
+				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+			end
+		end
+
+		if tPredOvershieldBar then
+			tPredOvershieldBar:ClearAllPoints();
+			tPredOvershieldBar:SetAllPoints(tPredHealthBar);
+			VUHDO_setStatusBarOrientation(tPredOvershieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
+			tPredOvershieldBar:SetReverseFill(true);
+		end
+
+		if tPredHealAbsorbBar then
+			tPredHealAbsorbBar:ClearAllPoints();
+			tPredHealAbsorbBar:SetAllPoints(tPredHealthBar);
+			VUHDO_setStatusBarOrientation(tPredHealAbsorbBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
+			tPredHealAbsorbBar:SetReverseFill(true);
+		end
+
+		return;
+
+	end
 end
 
 
@@ -1223,6 +1371,21 @@ end
 
 
 --
+function VUHDO_getStatusbarOrientationNumber(anIndicatorName, aPanelNum)
+
+	if VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"][anIndicatorName]["vertical"] then
+		return VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"][anIndicatorName]["turnAxis"]
+			and VUHDO_STATUSBAR_TOP_TO_BOTTOM or VUHDO_STATUSBAR_BOTTOM_TO_TOP;
+	else
+		return VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"][anIndicatorName]["turnAxis"]
+			and VUHDO_STATUSBAR_RIGHT_TO_LEFT or VUHDO_STATUSBAR_LEFT_TO_RIGHT;
+	end
+
+end
+
+
+
+--
 local tIsInverted;
 local tOrientation;
 local tClickPar;
@@ -1231,57 +1394,53 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	tClickPar = VUHDO_CONFIG["ON_MOUSE_UP"] and "AnyUp" or "AnyDown";
 	aButton:RegisterForClicks(tClickPar);
 
-	-- Texture
 	if sPanelConfig[aPanelNum]["statusTexture"] then
 		for tCnt =  1, 19 do
-			VUHDO_getHealthBar(aButton, tCnt):SetStatusBarTexture(sPanelConfig[aPanelNum]["statusTexture"]);
-			VUHDO_PixelUtil.ApplySettings(VUHDO_getHealthBar(aButton, tCnt):GetStatusBarTexture());
+			tBar = VUHDO_getHealthBar(aButton, tCnt);
+			tBar:SetStatusBarTexture(sPanelConfig[aPanelNum]["statusTexture"]);
+			tBar.statusTexture = tBar:GetStatusBarTexture();
+			VUHDO_PixelUtil.ApplySettings(tBar.statusTexture);
 		end
 	end
 
-	-- Invert Growth
 	tIsInverted = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
-	VUHDO_getHealthBar(aButton, 1):SetIsInverted(tIsInverted);
-	VUHDO_getHealthBar(aButton, 5):SetIsInverted(tIsInverted);
-	VUHDO_getHealthBar(aButton, 6):SetIsInverted(tIsInverted);
-	VUHDO_getHealthBar(aButton, 14):SetIsInverted(tIsInverted);
-	VUHDO_getHealthBar(aButton, 19):SetIsInverted(tIsInverted);
+	VUHDO_getHealthBar(aButton, 1):SetReverseFill(tIsInverted);
+	VUHDO_getHealthBar(aButton, 5):SetReverseFill(tIsInverted);
+	VUHDO_getHealthBar(aButton, 6):SetReverseFill(tIsInverted);
+	VUHDO_getHealthBar(aButton, 14):SetReverseFill(tIsInverted);
+	VUHDO_getHealthBar(aButton, 19):SetReverseFill(tIsInverted);
 
 	tIsInverted = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["MANA_BAR"]["invertGrowth"];
-	VUHDO_getHealthBar(aButton, 2):SetIsInverted(tIsInverted);
-	VUHDO_getHealthBar(aButton, 13):SetIsInverted(tIsInverted);
-	VUHDO_getHealthBar(aButton, 16):SetIsInverted(tIsInverted);
+	VUHDO_getHealthBar(aButton, 2):SetReverseFill(tIsInverted);
+	VUHDO_getHealthBar(aButton, 13):SetReverseFill(tIsInverted);
+	VUHDO_getHealthBar(aButton, 16):SetReverseFill(tIsInverted);
 
-	VUHDO_getHealthBar(aButton, 7):SetIsInverted(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["THREAT_BAR"]["invertGrowth"]);
-	VUHDO_getHealthBar(aButton, 17):SetIsInverted(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_LEFT"]["invertGrowth"])
-	VUHDO_getHealthBar(aButton, 18):SetIsInverted(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_RIGHT"]["invertGrowth"]);
+	VUHDO_getHealthBar(aButton, 7):SetReverseFill(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["THREAT_BAR"]["invertGrowth"]);
+	VUHDO_getHealthBar(aButton, 17):SetReverseFill(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_LEFT"]["invertGrowth"])
+	VUHDO_getHealthBar(aButton, 18):SetReverseFill(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_RIGHT"]["invertGrowth"]);
 
-	-- Orient Health
-	tOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
-	VUHDO_getHealthBar(aButton, 1):SetOrientation(tOrientation);
-	VUHDO_getHealthBar(aButton, 5):SetOrientation(tOrientation);
-	VUHDO_getHealthBar(aButton, 6):SetOrientation(tOrientation);
-	VUHDO_getHealthBar(aButton, 14):SetOrientation(tOrientation);
-	VUHDO_getHealthBar(aButton, 19):SetOrientation(tOrientation);
+	tOrientation = VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 1), tOrientation);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 5), tOrientation);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 6), tOrientation);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 14), tOrientation);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 19), tOrientation);
 
-	-- Orient Mana
-	tOrientation = VUHDO_getStatusbarOrientationString("MANA_BAR", aPanelNum);
-	VUHDO_getHealthBar(aButton, 2):SetOrientation(tOrientation);
-	VUHDO_getHealthBar(aButton, 13):SetOrientation(tOrientation);
-	VUHDO_getHealthBar(aButton, 16):SetOrientation(tOrientation);
+	tOrientation = VUHDO_getStatusbarOrientationNumber("MANA_BAR", aPanelNum);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 2), tOrientation);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 13), tOrientation);
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 16), tOrientation);
 
-	-- Orient Threat
-	VUHDO_getHealthBar(aButton, 7):SetOrientation(VUHDO_getStatusbarOrientationString("THREAT_BAR", aPanelNum));
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 7), VUHDO_getStatusbarOrientationNumber("THREAT_BAR", aPanelNum));
 
-	-- Orient side bar left
-	VUHDO_getHealthBar(aButton, 17):SetOrientation(VUHDO_getStatusbarOrientationString("SIDE_LEFT", aPanelNum));
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 17), VUHDO_getStatusbarOrientationNumber("SIDE_LEFT", aPanelNum));
 
-	-- Orient side bar right
-	VUHDO_getHealthBar(aButton, 18):SetOrientation(VUHDO_getStatusbarOrientationString("SIDE_RIGHT", aPanelNum));
+	VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 18), VUHDO_getStatusbarOrientationNumber("SIDE_RIGHT", aPanelNum));
 
 	VUHDO_initButtonStatics(aButton, aPanelNum);
 
 	VUHDO_initBackgroundBar(VUHDO_getHealthBar(aButton, 3), aPanelNum);
+	VUHDO_initPredictionBarAnchors(aButton, aPanelNum);
 	VUHDO_initIncomingOrShieldBar(aButton, 6, aPanelNum);
 	VUHDO_initIncomingOrShieldBar(aButton, 19, aPanelNum);
 	VUHDO_initHealthBar(aButton, aPanelNum);
@@ -1311,6 +1470,12 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 		ClickCastFrames[aButton] = true;
 		ClickCastFrames[_G[aButton:GetName() .. "Tg"]] = true;
 		ClickCastFrames[_G[aButton:GetName() .. "Tot"]] = true;
+	end
+
+	if VUHDO_SECRETS_ENABLED then
+		VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
+
+		VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());
 	end
 
 	return;
@@ -1451,7 +1616,6 @@ local function VUHDO_initPanel(aPanel, aPanelNum)
 	aPanel.backdropInfo = VUHDO_STD_BACKDROP;
 	VUHDO_PixelUtil.ApplyBackdrop(aPanel, VUHDO_STD_BACKDROP);
 
-	-- Ensure proper border color with pixel-perfect alpha
 	tBorderR, tBorderG, tBorderB, tBorderO = VUHDO_backColor(tPanelColor["BORDER"]);
 	aPanel.backdropBorderColor = VUHDO_getOrCreateCachedColor(tBorderR, tBorderG, tBorderB, tBorderO);
 	aPanel.backdropBorderColorAlpha = tBorderO or tPanelColor["BORDER"]["O"] or 0.46;
@@ -2014,11 +2178,10 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 	VUHDO_setupAllButtonsUnitWatch(VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers());
 	VUHDO_updateAllRaidBars();
 
-	-- GCD bar
 	if VUHDO_isShowGcd() then
 		tGcdCol = VUHDO_PANEL_SETUP["BAR_COLORS"]["GCD_BAR"];
 
-		VuhDoGcdStatusBar:SetVuhDoColor(tGcdCol);
+		VUHDO_setStatusBarVuhDoColor(VuhDoGcdStatusBar, tGcdCol);
 		VuhDoGcdStatusBar:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\white_square_16_16");
 
 		VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture());
@@ -2029,7 +2192,6 @@ function VUHDO_redrawAllPanels(anIsFixAllFrameLevels)
 
 	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
 
-	-- Direction arrow
 	VUHDO_PixelUtil.ApplySettings(VuhDoDirectionFrameArrow);
 	VuhDoDirectionFrameArrow:SetVertexColor(VUHDO_backColor(VUHDO_PANEL_SETUP["BAR_COLORS"]["DIRECTION"]));
 	VUHDO_PixelUtil.SetPoint(VuhDoDirectionFrameText, "TOP", "VuhDoDirectionFrameArrow", "CENTER", 5,  -2);
@@ -2063,7 +2225,6 @@ function VUHDO_reloadUI(anIsFixAllFrameLevels)
 	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_IN_COMBAT_RELOG then
 		VUHDO_refreshRaidMembers();
 
-		-- force synchronous redraw on combat relog
 		_G["VUHDO_redrawAllPanels"](anIsFixAllFrameLevels);
 	else
 		VUHDO_redrawAllPanels(anIsFixAllFrameLevels);
@@ -2099,7 +2260,6 @@ function VUHDO_lnfReloadUI()
 	VUHDO_reloadRaidMembers();
 	VUHDO_updatePanelVisibility();
 
-	-- force synchronous redraw on config reload
 	_G["VUHDO_redrawAllPanels"](false);
 
 	VUHDO_buildGenericHealthBarBouquet();
@@ -2304,7 +2464,7 @@ function VUHDO_deferRedrawAllPanelsCompleteDelegate(anIsFixAllFrameLevels)
 	if VUHDO_isShowGcd() then
 		tGcdCol = VUHDO_PANEL_SETUP["BAR_COLORS"]["GCD_BAR"];
 
-		VuhDoGcdStatusBar:SetVuhDoColor(tGcdCol);
+		VUHDO_setStatusBarVuhDoColor(VuhDoGcdStatusBar, tGcdCol);
 		VuhDoGcdStatusBar:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\white_square_16_16");
 
 		VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture());

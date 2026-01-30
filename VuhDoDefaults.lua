@@ -2948,9 +2948,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["TARGET_NEUTRAL"] = VUHDO_makeFullColor(1, 1, 0, 1,   1, 1, 0, 1),
 		["TARGET_ENEMY"] = VUHDO_makeFullColor(1, 0, 0, 1,   1, 0, 0, 1),
 
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_NONE] =  {
-			["useText"] = false, ["useBackground"] = false, ["useOpacity"] = false,
-		},
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_NONE] = VUHDO_makeFullColor(0, 0, 0, 0,   0, 0, 0, 0),
 		["DEBUFF" .. VUHDO_DEBUFF_TYPE_POISON] = VUHDO_makeFullColor(0, 0.592, 0.8, 1,   0, 1, 0.686, 1),
 		["DEBUFF" .. VUHDO_DEBUFF_TYPE_DISEASE] = VUHDO_makeFullColor(0.8, 0.4, 0.4, 1,   1, 0, 0, 1),
 		["DEBUFF" .. VUHDO_DEBUFF_TYPE_CURSE] = VUHDO_makeFullColor(0.7, 0, 0.7, 1,   1, 0, 1, 1),

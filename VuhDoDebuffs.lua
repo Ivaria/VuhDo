@@ -1591,7 +1591,7 @@ local function VUHDO_updateDebuffs(aUnit)
 
 				tCurChosenInfo = tUnitCurChosenInfo[tAuraInstanceId];
 
-				if sStdDebuffSound and tCurChosenInfo and tInfo["range"] then
+				if sStdDebuffSound and tCurChosenInfo and (tInfo["hasSecretRange"] or tInfo["range"]) then
 					tType = tCurChosenInfo[1];
 
 					if sIsDebuffSoundRemovableOnly then
@@ -1935,6 +1935,33 @@ end
 --
 function VUHDO_getUnitDebuffSchoolInfos(aUnit, aDebuffSchool)
 	return VUHDO_UNIT_DEBUFF_INFOS[aUnit][aDebuffSchool];
+end
+
+
+
+--
+local tListHeads;
+local tListHead;
+function VUHDO_getDebuffTypeAuraInstanceId(aUnit, aDebuffType)
+
+	if not aUnit or not aDebuffType then
+		return nil;
+	end
+
+	tListHeads = VUHDO_UNIT_DEBUFF_INFOS[aUnit] and VUHDO_UNIT_DEBUFF_INFOS[aUnit]["listHeads"];
+
+	if not tListHeads then
+		return nil;
+	end
+
+	tListHead = tListHeads[aDebuffType];
+
+	if tListHead and tListHead["auraInstanceId"] then
+		return tListHead["auraInstanceId"];
+	end
+
+	return nil;
+
 end
 
 

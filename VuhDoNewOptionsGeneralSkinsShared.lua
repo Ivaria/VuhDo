@@ -680,6 +680,8 @@ local VUHDO_DEFAULT_PROFILES = {
 					["useOpacity"] = true,
 				},
 				["DEBUFF0"] = {
+					["R"] = 0, ["G"] = 0, ["B"] = 0, ["O"] = 0,
+					["TR"] = 0, ["TG"] = 0, ["TB"] = 0, ["TO"] = 0,
 					["useBackground"] = false,
 					["useText"] = false,
 					["useOpacity"] = false,
@@ -1982,6 +1984,8 @@ local VUHDO_DEFAULT_PROFILES = {
 					["useOpacity"] = true,
 				},
 				["DEBUFF0"] = {
+					["R"] = 0, ["G"] = 0, ["B"] = 0, ["O"] = 0,
+					["TR"] = 0, ["TG"] = 0, ["TB"] = 0, ["TO"] = 0,
 					["useBackground"] = false,
 					["useText"] = false,
 					["useOpacity"] = false,

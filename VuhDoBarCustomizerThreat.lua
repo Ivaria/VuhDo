@@ -1,10 +1,29 @@
 local _;
 
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+
+local VUHDO_setStatusBarVuhDoColor;
+local VUHDO_applyAllLayersToBar;
+local VUHDO_applyAllLayersToTexture;
+
+
+
+--
+function VUHDO_barCustomizerThreatInitLocalOverrides()
+
+	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
+	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
+	VUHDO_applyAllLayersToTexture = _G["VUHDO_applyAllLayersToTexture"];
+
+	return;
+
+end
+
 
 
 --
 local tTexture;
-function VUHDO_threatIndicatorsBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName)
+function VUHDO_threatIndicatorsBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["THREAT_MARK"] == aBouquetName then
@@ -16,7 +35,12 @@ function VUHDO_threatIndicatorsBouquetCallback(aUnit, anIsActive, anIcon, aTimer
 				VUHDO_PixelUtil.SetPoint(tTexture, "TOPRIGHT", tButton, "TOPRIGHT", 0, 0);
 				VUHDO_PixelUtil.SetPoint(tTexture, "BOTTOMLEFT", tButton, "BOTTOMLEFT", 0, 0);
 				VUHDO_PixelUtil.SetPoint(tTexture, "BOTTOMRIGHT", tButton, "BOTTOMRIGHT", 0, 0);
-				tTexture:SetVertexColor(VUHDO_backColorWithFallback(aColor));
+
+				if aLayerTemplate then
+					VUHDO_applyAllLayersToTexture(tButton, tTexture, aLayerTemplate);
+				elseif aColor then
+					tTexture:SetVertexColor(VUHDO_backColorWithFallback(aColor));
+				end
 
 				tTexture:Show();
 
@@ -36,19 +60,26 @@ end
 --
 local tBar;
 local tQuota;
-function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName)
+function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
 
-	tQuota = (aCurrValue == 0 and aMaxValue == 0) and 0 or (aMaxValue or 0) > 1 and aCurrValue / aMaxValue or 0;
+	aMaxValue = aMaxValue or 1;
+	aCurrValue = aCurrValue or 0;
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["THREAT_BAR"] == aBouquetName then
-			if tQuota > 0 then
-				tBar = VUHDO_getHealthBar(tButton, 7);
+			tBar = VUHDO_getHealthBar(tButton, 7);
 
-				tBar:SetValue(tQuota);
-				tBar:SetVuhDoColor(aColor);
-			else
-				VUHDO_getHealthBar(tButton, 7):SetValue(0);
+			tBar:SetMinMaxValues(0, aMaxValue);
+			tBar:SetValue(aCurrValue);
+
+			if aLayerTemplate then
+				VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);
+			elseif aColor then
+				VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+			end
+
+			if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+				VUHDO_updateIndicatorAlphaChain(tButton, "THREAT_BAR", VUHDO_RAID[aUnit]);
 			end
 		end
 	end
@@ -144,14 +175,29 @@ function VUHDO_updateUnitRange(aUnit, aMode)
 
 		tIsInRange = VUHDO_isInRange(aUnit);
 
-		if tUnitInfo["range"] ~= tIsInRange then
+		if sSecretsEnabled then
+			tUnitInfo["hasSecretRange"] = issecretvalue(tIsInRange);
+		end
+
+		if sSecretsEnabled and tUnitInfo["hasSecretRange"] then
 			tUnitInfo["range"] = tIsInRange;
 
 			VUHDO_updateHealthBarsFor(aUnit, 5);
 
 			if sIsDirectionArrow and VUHDO_getCurrentMouseOver() == aUnit
-				and (VuhDoDirectionFrame["shown"] or (not tIsInRange or VUHDO_CONFIG["DIRECTION"]["isAlways"])) then
+				and (VuhDoDirectionFrame["shown"] or VUHDO_CONFIG["DIRECTION"]["isAlways"]) then
 				VUHDO_updateDirectionFrame();
+			end
+		else
+			if tUnitInfo["range"] ~= tIsInRange then
+				tUnitInfo["range"] = tIsInRange;
+
+				VUHDO_updateHealthBarsFor(aUnit, 5);
+
+				if sIsDirectionArrow and VUHDO_getCurrentMouseOver() == aUnit
+					and (VuhDoDirectionFrame["shown"] or (not tIsInRange or VUHDO_CONFIG["DIRECTION"]["isAlways"])) then
+					VUHDO_updateDirectionFrame();
+				end
 			end
 		end
 	end
