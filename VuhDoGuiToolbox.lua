@@ -610,7 +610,7 @@ end
 --
 local function VUHDO_hideBlizzParty()
 
-	if not EditModeManagerFrame:UseRaidStylePartyFrames() then
+	if EditModeManagerFrame and not EditModeManagerFrame:UseRaidStylePartyFrames() then
 		local tPartyFrame = _G["PartyFrame"];
 
 		if not sIsPartyFrameHooked then
@@ -643,7 +643,7 @@ local function VUHDO_showBlizzParty()
 		return;
 	end
 
-	if not EditModeManagerFrame:UseRaidStylePartyFrames() then
+	if EditModeManagerFrame and not EditModeManagerFrame:UseRaidStylePartyFrames() then
 		local tPartyFrame = _G["PartyFrame"];
 
 		if not sIsPartyFrameHooked then
@@ -695,7 +695,12 @@ end
 local function VUHDO_hideBlizzTarget()
 
 	VUHDO_unregisterAndSaveEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
-	VUHDO_unregisterAndSaveEvents(false, TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, TargetFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+
+	if TargetFrame and TargetFrame.TargetFrameContent then
+		VUHDO_unregisterAndSaveEvents(false, TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, TargetFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+	else
+		VUHDO_unregisterAndSaveEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+	end
 
 	ComboFrame:ClearAllPoints();
 
@@ -707,7 +712,12 @@ end
 local function VUHDO_showBlizzTarget()
 
 	VUHDO_registerOriginalEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
-	VUHDO_registerOriginalEvents(false, TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, TargetFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+
+	if TargetFrame and TargetFrame.TargetFrameContent then
+		VUHDO_registerOriginalEvents(false, TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, TargetFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+	else
+		VUHDO_registerOriginalEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+	end
 
 	VUHDO_PixelUtil.SetPoint(ComboFrame, "TOPRIGHT", "TargetFrame", "TOPRIGHT", -44, -9);
 
@@ -736,7 +746,12 @@ end
 local function VUHDO_hideBlizzFocus()
 
 	VUHDO_unregisterAndSaveEvents(true, FocusFrame);
-	VUHDO_unregisterAndSaveEvents(false, FocusFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, FocusFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+
+	if FocusFrame and FocusFrame.TargetFrameContent then
+		VUHDO_unregisterAndSaveEvents(false, FocusFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, FocusFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+	else
+		VUHDO_unregisterAndSaveEvents(false, FocusFrameHealthBar, FocusFrameManaBar);
+	end
 
 end
 
@@ -746,7 +761,12 @@ end
 local function VUHDO_showBlizzFocus()
 
 	VUHDO_registerOriginalEvents(true, FocusFrame);
-	VUHDO_registerOriginalEvents(false, FocusFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, FocusFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+
+	if FocusFrame and FocusFrame.TargetFrameContent then
+		VUHDO_registerOriginalEvents(false, FocusFrame.TargetFrameContent.TargetFrameContentMain.HealthBar, FocusFrame.TargetFrameContent.TargetFrameContentMain.ManaBar);
+	else
+		VUHDO_registerOriginalEvents(false, FocusFrameHealthBar, FocusFrameManaBar);
+	end
 
 end
 

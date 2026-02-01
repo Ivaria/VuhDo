@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed hiding of Blizzard standard target and focus frames  
   
   
 Improvements:  
