@@ -12,9 +12,13 @@ local unpack = unpack;
 local select = select;
 local tostring = tostring;
 local type = type;
+local strsub = string.sub;
+local random = math.random;
 
 local GetTime = GetTime;
 local InCombatLockdown = InCombatLockdown;
+
+local sHexChars = "0123456789abcdef";
 
 
 
@@ -27,6 +31,29 @@ function VUHDO_tableCreate(...)
 
 end
 local tcreate = table.create or VUHDO_tableCreate;
+
+
+
+--
+local tId;
+local tRandom;
+local tChar;
+function VUHDO_generateUUID(aPrefix, aLength)
+
+	aLength = aLength or 12;
+	tId = aPrefix or "";
+
+	for tCnt = 1, aLength do
+		tRandom = random(1, 16);
+
+		tChar = strsub(sHexChars, tRandom, tRandom);
+
+		tId = tId .. tChar;
+	end
+
+	return tId;
+
+end
 
 
 

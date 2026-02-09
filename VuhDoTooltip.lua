@@ -23,6 +23,10 @@ local pairs = pairs;
 local ipairs = ipairs;
 local twipe = table.wipe;
 local format = format;
+local issecretvalue = issecretvalue;
+local AbbreviateNumbers = AbbreviateNumbers;
+
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sEmpty = { };
 
 
@@ -242,6 +246,10 @@ end
 
 --
 local function VUHDO_getKiloText(aNumber)
+
+	if sSecretsEnabled and issecretvalue and issecretvalue(aNumber) then
+		return AbbreviateNumbers(aNumber);
+	end
 
 	return aNumber >= 1000000 and format("%.2fM", aNumber * 0.000001) 
 		or aNumber > 99500 and format("%dk", aNumber * 0.001)

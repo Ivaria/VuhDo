@@ -835,6 +835,10 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BUTTON_CACHE[tTargetButton] = aPanelNum;
 	VUHDO_BUTTON_CACHE[tTotButton] = aPanelNum;
 
+	tButton:SetAttribute("vuhdo_button_marker", true);
+	tTargetButton:SetAttribute("vuhdo_button_marker", true);
+	tTotButton:SetAttribute("vuhdo_button_marker", true);
+
 	VUHDO_BAR_ICON_FRAMES[tButton] = { };
 	VUHDO_BAR_ICON_FRAME_BACKGROUNDS[tButton] = { };
 	VUHDO_BAR_ICON_BUTTONS[tButton] = { };

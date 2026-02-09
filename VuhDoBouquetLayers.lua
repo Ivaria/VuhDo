@@ -33,6 +33,8 @@ local VUHDO_INDICATOR_FRAME_GETTERS = {
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_getHealthBar;
 local VUHDO_getBarText;
+local VUHDO_getLifeText;
+local VUHDO_RAID;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
@@ -59,6 +61,8 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
+	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
+	VUHDO_RAID = _G["VUHDO_RAID"];
 
 	return;
 
@@ -630,6 +634,34 @@ local function VUHDO_applyDispelColorToBar(aBar, aLayerTemplate)
 			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
 
 			aBar:GetStatusBarTexture():SetVertexColor(tR, tG, tB, tA);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_applyDispelTextColor(aHealthBar, aLayerTemplate, aUnit)
+
+	if not aLayerTemplate["hasDispels"] then
+		return;
+	end
+
+	if not VUHDO_RAID[aUnit] or not VUHDO_RAID[aUnit]["debuffText"] then
+		return;
+	end
+
+	for tIdx = 1, #aLayerTemplate["dispelResults"] do
+		tResultSlot = aLayerTemplate["dispelResults"][tIdx];
+
+		if tResultSlot["isActive"] and tResultSlot["r"] then
+			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
+
+			VUHDO_getBarText(aHealthBar):SetTextColor(tR, tG, tB, tA);
+			VUHDO_getLifeText(aHealthBar):SetTextColor(tR, tG, tB, tA);
 		end
 	end
 

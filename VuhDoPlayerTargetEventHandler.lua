@@ -85,8 +85,11 @@ function VUHDO_updatePlayerTarget()
 		end
 
 		if UnitExists("target") then
+			VUHDO_fullAuraRefresh("target");
+
 			VUHDO_setHealth("target", 1); -- VUHDO_UPDATE_ALL
 		else
+			VUHDO_clearUnitAuraCache("target");
 			VUHDO_removeHots("target");
 			VUHDO_removeAllDebuffIcons("target");
 			VUHDO_resetDebuffsFor("target");

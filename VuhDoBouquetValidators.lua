@@ -470,7 +470,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 	if not sSecretsEnabled then
 		if anInfo["charmed"] then
 			return true, nil, -1, -1, -1, VUHDO_getDebuffColor(anInfo);
-		elseif anInfo["debuff"] and anInfo["debuff"] > 0 then
+		elseif anInfo["debuff"] then
 			tDebuffInfo = VUHDO_getChosenDebuffInfo(anInfo["unit"]);
 			return true, tDebuffInfo[1], -1, tDebuffInfo[3], -1, VUHDO_getDebuffColor(anInfo);
 		else
@@ -481,7 +481,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 	if not aSecretContext then
 		if anInfo["charmed"] then
 			return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, 6;
-		elseif anInfo["debuff"] and anInfo["debuff"] > 0 then
+		elseif anInfo["debuff"] then
 			return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, anInfo["debuff"];
 		else
 			return false, nil, -1, -1, -1;
@@ -498,7 +498,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 		end
 
 		return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, tAuraInstanceId, tSecretColor;
-	elseif anInfo["debuff"] and anInfo["debuff"] > 0 then
+	elseif anInfo["debuff"] then
 		tAuraInstanceId = anInfo["debuff"];
 		tCurve = aSecretContext["defaultDispelCurve"];
 		tSecretColor = nil;

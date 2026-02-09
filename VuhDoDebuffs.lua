@@ -23,7 +23,8 @@ local VUHDO_DEBUFF_TYPES = {
 	["Disease"] = VUHDO_DEBUFF_TYPE_DISEASE,
 	["Poison"] = VUHDO_DEBUFF_TYPE_POISON,
 	["Curse"] = VUHDO_DEBUFF_TYPE_CURSE,
-	[""] = VUHDO_DEBUFF_TYPE_ENRAGE,
+	["Bleed"] = VUHDO_DEBUFF_TYPE_BLEED,
+	["Enrage"] = VUHDO_DEBUFF_TYPE_ENRAGE,
 };
 
 
@@ -54,6 +55,8 @@ local VUHDO_DEBUFF_BLACKLIST = { };
 local UnitIsFriend = UnitIsFriend;
 local UnitIsEnemy = UnitIsEnemy;
 local table = table;
+local tinsert = table.insert;
+local tsort = table.sort;
 local GetTime = GetTime;
 local InCombatLockdown = InCombatLockdown;
 local twipe = table.wipe;
@@ -62,7 +65,13 @@ local _;
 local tostring = tostring;
 local ForEachAura = AuraUtil.ForEachAura or VUHDO_forEachAura;
 local GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID;
+local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local VUHDO_shouldScanUnit;
+local VUHDO_DEFAULT_AURA_GROUPS;
+
+local sUnitDispellableDebuffId = { };
+local sUnitDebuffColorText = { };
+local sCanColorBarGroups = { };
 
 
 local sIsNotRemovableOnly;
@@ -91,6 +100,7 @@ function VUHDO_debuffsInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_DEBUFF_BLACKLIST = _G["VUHDO_DEBUFF_BLACKLIST"];
+	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
 
 	sIsNotRemovableOnly = not VUHDO_CONFIG["DETECT_DEBUFFS_REMOVABLE_ONLY"];
 	sIsNotRemovableOnlyIcons = not VUHDO_CONFIG["DETECT_DEBUFFS_REMOVABLE_ONLY_ICONS"];
@@ -1186,7 +1196,7 @@ do
 			tIsShown = true;
 		end
 
-		tType = VUHDO_DEBUFF_BLEED_SPELLS[aSpellId] and VUHDO_DEBUFF_TYPE_BLEED or VUHDO_DEBUFF_TYPES[aTypeString];
+		tType = VUHDO_DEBUFF_TYPES[aTypeString];
 
 		tDebuffClassIgnoreList = VUHDO_IGNORE_DEBUFFS_BY_CLASS[tInfo["class"] or ""] or sEmpty;
 		tIsRelevant = not VUHDO_IGNORE_DEBUFF_NAMES[aName] and not tDebuffClassIgnoreList[aName];
@@ -1286,7 +1296,7 @@ do
 			tIsShown = true;
 		end
 
-		tType = VUHDO_DEBUFF_BLEED_SPELLS[aSpellId] and VUHDO_DEBUFF_TYPE_BLEED or VUHDO_DEBUFF_TYPES[aTypeString];
+		tType = VUHDO_DEBUFF_TYPES[aTypeString];
 
 		tFriend = UnitIsFriend("player", sUnit);
 		tHostile = not tFriend or UnitIsEnemy("player", sUnit);
@@ -1635,114 +1645,146 @@ end
 
 
 
-do
-	--
-	local tInfo;
-	local tAura;
-	local tDoUpdate;
-	local tDoUpdateIter;
-	local tDoUpdateDebuffType;
-	local tDoUpdateDebuffChosen;
-	local tDoUpdateUnitDebuffInfo = { };
-	local tUnitCustomDebuffs;
-	local tUnitCurIcons;
-	function VUHDO_determineDebuff(aUnit, aUpdateInfo)
+--
+function VUHDO_rebuildCanColorBarGroupsCache()
 
-		tInfo = (VUHDO_RAID or sEmpty)[aUnit];
+	twipe(sCanColorBarGroups);
 
-		if not tInfo then
-			return 0, ""; -- VUHDO_DEBUFF_TYPE_NONE
+	for tGroupId, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"] or sEmpty) do
+		if tGroup["canColorBar"] and tGroup["enabled"] ~= false then
+			tinsert(sCanColorBarGroups, {
+				["filter"] = tGroup["filter"],
+				["priority"] = tGroup["priority"] or 50,
+				["canColorText"] = tGroup["canColorText"],
+			});
 		end
-
-		sUnit = aUnit;
-		sNow = GetTime();
-
-		if (not aUpdateInfo and VUHDO_shouldScanUnit(aUnit)) or (aUpdateInfo and aUpdateInfo.isFullUpdate) then
-			VUHDO_initHots(aUnit);
-
-			sUnitDebuffInfo = VUHDO_initDebuffInfos(aUnit);
-
-			ForEachAura(aUnit, "HARMFUL", nil, VUHDO_determineAuraPredicate, true);
-			ForEachAura(aUnit, "HELPFUL", nil, VUHDO_determineAuraPredicate, true);
-		elseif aUpdateInfo then
-			sUnitDebuffInfo = (sCurIcons[aUnit] and sCurChosen[aUnit]) and VUHDO_UNIT_DEBUFF_INFOS[aUnit] or VUHDO_initDebuffInfos(aUnit);
-
-			if aUpdateInfo.addedAuras then
-				for _, tAuraData in pairs(aUpdateInfo.addedAuras) do
-					VUHDO_determineAuraPredicate(tAuraData);
-				end
-			end
-
-			if aUpdateInfo.updatedAuraInstanceIDs then
-				for _, tAuraInstanceId in pairs(aUpdateInfo.updatedAuraInstanceIDs) do
-					tAura = GetAuraDataByAuraInstanceID(aUnit, tAuraInstanceId);
-
-					if tAura then
-						VUHDO_determineAuraPredicate(tAura, true);
-					end
-				end
-			end
-
-			if aUpdateInfo.removedAuraInstanceIDs then
-				tDoUpdate = false;
-
-				tDoUpdateUnitDebuffInfo["CHOSEN"], tDoUpdateUnitDebuffInfo[1], tDoUpdateUnitDebuffInfo[2],
-				tDoUpdateUnitDebuffInfo[3], tDoUpdateUnitDebuffInfo[4], tDoUpdateUnitDebuffInfo[8], tDoUpdateUnitDebuffInfo[9] =
-					false, false, false, false, false, false, false;
-
-				tDoUpdateIter, tDoUpdateDebuffType, tDoUpdateDebuffChosen = false, nil, false;
-
-				for _, tAuraInstanceId in pairs(aUpdateInfo.removedAuraInstanceIDs) do
-					VUHDO_removeHot(aUnit, tAuraInstanceId);
-
-					tDoUpdateIter, tDoUpdateDebuffType, tDoUpdateDebuffChosen = VUHDO_removeDebuff(aUnit, tAuraInstanceId);
-
-					if tDoUpdateIter then
-						tDoUpdate = true;
-					end
-
-					if tDoUpdateDebuffType then
-						tDoUpdateUnitDebuffInfo[tDoUpdateDebuffType] = true;
-					end
-
-					if tDoUpdateDebuffChosen then
-						tDoUpdateUnitDebuffInfo["CHOSEN"] = true;
-					end
-				end
-
-				if tDoUpdate then
-					VUHDO_updateCurChosen(aUnit);
-				end
-
-				for tUpdateType, tDoUpdateType in pairs(tDoUpdateUnitDebuffInfo) do
-					if tDoUpdateType then
-						VUHDO_updateUnitDebuffInfo(aUnit, tUpdateType);
-					end
-				end
-			end
-		end
-
-		VUHDO_updateHots(aUnit, tInfo);
-
-		VUHDO_updateDebuffs(aUnit);
-
-		tUnitCustomDebuffs = VUHDO_UNIT_CUSTOM_DEBUFFS and VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit];
-
-		-- Lost old custom debuff?
-		tUnitCustomDebuffs = VUHDO_UNIT_CUSTOM_DEBUFFS[aUnit];
-		tUnitCurIcons = sCurIcons[aUnit];
-
-		if tUnitCustomDebuffs then
-			for tAuraInstanceId, tUnitCustomDebuff in pairs(tUnitCustomDebuffs) do
-				if tUnitCustomDebuff and (not tUnitCurIcons or not tUnitCurIcons[tAuraInstanceId]) then
-					VUHDO_removeDebuff(aUnit, tAuraInstanceId);
-				end
-			end
-		end
-
-		return VUHDO_getDeterminedDebuffInfo(aUnit);
-
 	end
+
+	for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
+		if not (VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][tGroupId]) and tGroup["canColorBar"] and
+			tGroup["enabled"] ~= false and not (VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][tGroupId]) and
+			not (VUHDO_DEFAULT_AURA_GROUPS[tGroupId] and VUHDO_DEFAULT_AURA_GROUPS[tGroupId]["enabled"] == false) then
+			tinsert(sCanColorBarGroups, {
+				["filter"] = tGroup["filter"],
+				["priority"] = tGroup["priority"] or 50,
+				["canColorText"] = tGroup["canColorText"],
+			});
+		end
+	end
+
+	tsort(sCanColorBarGroups, function(tSortA, tSortB)
+		return (tSortA["priority"] or 50) < (tSortB["priority"] or 50);
+	end);
+
+	return;
+
+end
+
+
+
+--
+local tAuras;
+local tAura;
+local tAuraInstanceId;
+local tCanColorGroup;
+function VUHDO_updateDispellableDebuffForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	if not GetUnitAuras then
+		sUnitDispellableDebuffId[aUnit] = nil;
+		sUnitDebuffColorText[aUnit] = nil;
+		return;
+	end
+
+	sUnitDispellableDebuffId[aUnit] = nil;
+	sUnitDebuffColorText[aUnit] = nil;
+
+	for tCnt = 1, #sCanColorBarGroups do
+		tCanColorGroup = sCanColorBarGroups[tCnt];
+		tAuras = GetUnitAuras(aUnit, tCanColorGroup["filter"], 1, (Enum and Enum.UnitAuraSortRule and Enum.UnitAuraSortRule.Default) or 0, 1);
+
+		if tAuras and #tAuras > 0 then
+			tAura = tAuras[1];
+			tAuraInstanceId = tAura["auraInstanceID"];
+			sUnitDispellableDebuffId[aUnit] = tAuraInstanceId;
+			sUnitDebuffColorText[aUnit] = tCanColorGroup["canColorText"];
+			return;
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_getDispellableDebuffId(aUnit)
+
+	return sUnitDispellableDebuffId[aUnit];
+
+end
+
+
+
+--
+function VUHDO_hasDispellableDebuff(aUnit)
+
+	return sUnitDispellableDebuffId[aUnit] ~= nil;
+
+end
+
+
+
+--
+function VUHDO_shouldColorTextForDebuff(aUnit)
+
+	return sUnitDebuffColorText[aUnit] == true;
+
+end
+
+
+
+--
+function VUHDO_clearDispellableDebuffCache(aUnit)
+
+	if aUnit then
+		sUnitDispellableDebuffId[aUnit] = nil;
+		sUnitDebuffColorText[aUnit] = nil;
+	else
+		twipe(sUnitDispellableDebuffId);
+		twipe(sUnitDebuffColorText);
+	end
+
+	return;
+
+end
+
+
+
+--
+local tInfo;
+function VUHDO_determineDebuff(aUnit, aUpdateInfo)
+
+	tInfo = (VUHDO_RAID or sEmpty)[aUnit];
+
+	if not tInfo then
+		return nil, nil;
+	end
+
+	VUHDO_updateDispellableDebuffForUnit(aUnit);
+
+	tInfo["debuffText"] = VUHDO_shouldColorTextForDebuff(aUnit);
+
+	if VUHDO_hasDispellableDebuff(aUnit) then
+		return VUHDO_getDispellableDebuffId(aUnit), nil;
+	end
+
+	return nil, nil;
+
 end
 local VUHDO_determineDebuff = VUHDO_determineDebuff;
 
@@ -1909,6 +1951,10 @@ function VUHDO_initDebuffs()
 	if VUHDO_CONFIG["DETECT_DEBUFFS_IGNORE_DURATION"] then
 		VUHDO_tableAddAllKeys(VUHDO_IGNORE_DEBUFF_NAMES, VUHDO_INIT_IGNORE_DEBUFFS_DURATION);
 	end
+
+	VUHDO_rebuildCanColorBarGroupsCache();
+
+	return;
 
 end
 

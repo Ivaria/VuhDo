@@ -16,8 +16,6 @@ local tinsert = table.insert;
 local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
-local GetCurrentEventInfo = C_CombatLog and C_CombatLog.GetCurrentEventInfo or _G["CombatLogGetCurrentEventInfo"];
-local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
@@ -96,6 +94,8 @@ local VUHDO_redrawPanel;
 local VUHDO_redrawAllPanels;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
+
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 
 
@@ -722,6 +722,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_tooltipInitLocalOverrides();
 	VUHDO_modelToolsInitLocalOverrides();
 	VUHDO_toolboxInitLocalOverrides();
+	VUHDO_aurasInitLocalOverrides();
 	VUHDO_guiToolboxInitLocalOverrides();
 	VUHDO_vuhdoInitLocalOverrides();
 	VUHDO_spellEventHandlerInitLocalOverrides();
@@ -740,6 +741,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_roleCheckerInitLocalOverrides();
 	VUHDO_sizeCalculatorInitLocalOverrides();
 	VUHDO_customHotsInitLocalOverrides();
+	VUHDO_barCustomizerAurasInitLocalOverrides();
 	VUHDO_customDebuffIconsInitLocalOverrides();
 	VUHDO_debuffsInitLocalOverrides();
 	VUHDO_healCommAdapterInitLocalOverrides();
@@ -984,8 +986,8 @@ do
 			tUnitInfo = (VUHDO_RAID or tEmptyRaid)[anArg1];
 
 			if tUnitInfo then
-				tUnitInfo["debuff"], tUnitInfo["debuffName"] = VUHDO_determineDebuff(anArg1, anArg2);
-				VUHDO_updateBouquetsForEvent(anArg1, 4); -- VUHDO_UPDATE_DEBUFF
+				VUHDO_onUnitAura(anArg1, anArg2);
+				VUHDO_updateBouquetsForEvent(anArg1, 4);
 			end
 
 		elseif "UNIT_HEALTH" == anEvent then
@@ -1175,8 +1177,11 @@ do
 					end
 
 					if UnitExists("focus") then
+						VUHDO_fullAuraRefresh("focus");
+
 						VUHDO_setHealth("focus", 1); -- VUHDO_UPDATE_ALL
 					else
+						VUHDO_clearUnitAuraCache("focus");
 						VUHDO_removeHots("focus");
 						VUHDO_removeAllDebuffIcons("focus");
 						VUHDO_resetDebuffsFor("focus");
@@ -1452,6 +1457,7 @@ do
 	local tSubCommand;
 	local tPanelNum;
 	local tHelpText;
+	local tCurrentValue;
 	function VUHDO_slashCmd(aCommand)
 
 		tParsedTexts = VUHDO_textParse(aCommand);
@@ -1522,6 +1528,13 @@ do
 				VUHDO_loadProfile(strtrim(tTokens[1]));
 			end
 
+		elseif "aura" == tCommandWord then
+			if "test" == tParsedTexts[2] then
+				VUHDO_testSpriteSheet(tParsedTexts[3] or 1);
+			elseif "hide" == tParsedTexts[2] then
+				VUHDO_hideSpriteSheetTest();
+			end
+
 		elseif strfind(tCommandWord, "res") then
 			for tPanelNum = 1, VUHDO_MAX_PANELS do
 				VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = nil;
@@ -1567,6 +1580,24 @@ do
 
 		elseif tCommandWord == "proff" then
 			SetCVar("scriptProfile", "0");
+			ReloadUI();
+
+		elseif tCommandWord == "secrets" then
+			tCurrentValue = GetCVar("secretCombatRestrictionsForced") or "0";
+
+			if tCurrentValue == "1" then
+				SetCVar("secretCombatRestrictionsForced", "0");
+				SetCVar("secretEncounterRestrictionsForced", "0");
+				SetCVar("secretChallengeModeRestrictionsForced", "0");
+				SetCVar("secretPvPMatchRestrictionsForced", "0");
+				SetCVar("secretMapRestrictionsForced", "0");
+				VUHDO_Msg("Secret restrictions DISABLED - reloading UI...");
+			else
+				SetCVar("secretCombatRestrictionsForced", "1");
+				SetCVar("secretEncounterRestrictionsForced", "1");
+				VUHDO_Msg("Secret restrictions ENABLED (combat+encounter) - reloading UI...");
+			end
+
 			ReloadUI();
 
 		elseif (strfind(tCommandWord, "chkvars")) then
@@ -2229,19 +2260,23 @@ do
 		if VUHDO_checkResetTimer("UPDATE_HOTS", sHotToggleUpdateSecs) then
 			if VUHDO_RAID then
 				if sHotDebuffToggle == 1 then
-					VUHDO_updateAllHoTs();
+					if not sSecretsEnabled then
+						VUHDO_updateAllHoTs();
+					end
 
-					if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
+					if not sSecretsEnabled and VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
 						VUHDO_updateClusterHighlights();
 					end
 
-					if VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
+					if not sSecretsEnabled and VUHDO_INTERNAL_TOGGLES[37] then -- VUHDO_UPDATE_SPELL_TRACE
 						VUHDO_updateSpellTrace();
 					end
 				elseif sHotDebuffToggle == 2 then
 					VUHDO_updateAllCyclicBouquets(false);
 				else
-					VUHDO_updateAllDebuffIcons(false);
+					if not sSecretsEnabled then
+						VUHDO_updateAllDebuffIcons(false);
+					end
 
 					-- Reload after played gained control
 					if not HasFullControl() then
@@ -2283,7 +2318,7 @@ do
 		end
 
 		-- Refresh custom debuff Tooltip
-		if VUHDO_checkResetTimer("REFRESH_CUDE_TOOLTIP", 1) then
+		if not sSecretsEnabled and VUHDO_checkResetTimer("REFRESH_CUDE_TOOLTIP", 1) then
 			VUHDO_updateCustomDebuffTooltip();
 		end
 
@@ -2324,12 +2359,12 @@ do
 		end
 
 		-- Refresh Cluster
-		if VUHDO_checkResetTimer("UPDATE_CLUSTERS", sClusterRefreshSecs) then
+		if not sSecretsEnabled and VUHDO_checkResetTimer("UPDATE_CLUSTERS", sClusterRefreshSecs) then
 			VUHDO_updateAllClusters();
 		end
 
 		-- AoE advice
-		if VUHDO_checkResetTimer("UPDATE_AOE", sAoeRefreshSecs) then
+		if not sSecretsEnabled and VUHDO_checkResetTimer("UPDATE_AOE", sAoeRefreshSecs) then
 			VUHDO_aoeUpdateAll();
 		end
 

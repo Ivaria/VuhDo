@@ -62,12 +62,14 @@ VuhDoNewOptionsPanelText.xml
 VuhDoNewOptionsPanelMisc.xml
 VuhDoNewOptionsPanelHotBars.xml
 VuhDoNewOptionsPanelHots.xml
+VuhDoNewOptionsPanelAuras.xml
 VuhDoNewOptionsPanelIndicators.xml
 VuhDoNewOptionsPanelPanel.xml
 VuhDoNewOptionsColorsClasses.xml
 VuhDoNewOptionsColorsClassGradients.xml
 VuhDoNewOptionsColorsHots.xml
 VuhDoNewOptionsColorsHotCharges.xml
+VuhDoNewOptionsColorsAuras.xml
 VuhDoNewOptionsColorsStates.xml
 VuhDoNewOptionsColorsModes.xml
 VuhDoNewOptionsColorsPowers.xml
@@ -83,6 +85,8 @@ VuhDoNewOptionsDebuffs.xml
 VuhDoNewOptionsDebuffsStandard.xml
 VuhDoNewOptionsDebuffsCustom.xml
 VuhDoNewOptionsDebuffsCustomVisuals.xml
+VuhDoNewOptionsAuraGroups.xml
+VuhDoNewOptionsAura.xml
 VuhDoNewOptionsTools.xml
 VuhDoNewOptionsToolsSkins.xml
 VuhDoNewOptionsToolsKeyLayouts.xml

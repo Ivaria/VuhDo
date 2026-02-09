@@ -917,6 +917,47 @@ end
 
 
 --
+local tUnitHotInfo;
+local tSpellName;
+local tSpellId;
+local tSpellIdStr;
+function VUHDO_removeHotByAuraInstanceId(aUnit, anAuraInstanceId)
+
+	if not aUnit or not anAuraInstanceId then
+		return;
+	end
+
+	tUnitHotInfo = VUHDO_getUnitHotInfo(aUnit, anAuraInstanceId);
+
+	if not tUnitHotInfo then
+		return;
+	end
+
+	tSpellName = tUnitHotInfo[6];
+	tSpellId = tUnitHotInfo[7];
+
+	if tSpellName then
+		VUHDO_removeUnitHot(aUnit, tSpellName, VUHDO_UNIT_HOT_TYPE_MINE, anAuraInstanceId);
+		VUHDO_removeUnitHot(aUnit, tSpellName, VUHDO_UNIT_HOT_TYPE_OTHERS, anAuraInstanceId);
+		VUHDO_removeUnitHot(aUnit, tSpellName, VUHDO_UNIT_HOT_TYPE_BOTH, anAuraInstanceId);
+	end
+
+	if tSpellId then
+		tSpellIdStr = tostring(tSpellId);
+		VUHDO_removeUnitHot(aUnit, tSpellIdStr, VUHDO_UNIT_HOT_TYPE_MINE, anAuraInstanceId);
+		VUHDO_removeUnitHot(aUnit, tSpellIdStr, VUHDO_UNIT_HOT_TYPE_OTHERS, anAuraInstanceId);
+		VUHDO_removeUnitHot(aUnit, tSpellIdStr, VUHDO_UNIT_HOT_TYPE_BOTH, anAuraInstanceId);
+	end
+
+	VUHDO_removeUnitHotInfo(aUnit, anAuraInstanceId);
+
+	return;
+
+end
+
+
+
+--
 local tUnitHotLists;
 local tUnitHotList;
 local tUnitHotListSource;

@@ -992,28 +992,37 @@ end
 --
 local tOutline, tShadowAlpha, tColor, tFactor;
 function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
+
 	tFactor = aHeight * 0.01;
+
 	aLabel:ClearAllPoints();
-	VUHDO_PixelUtil.SetPoint(aLabel, aSetup["ANCHOR"], aParent:GetName(), aSetup["ANCHOR"], tFactor * aSetup["X_ADJUST"], -tFactor * aSetup["Y_ADJUST"]);
+	VUHDO_PixelUtil.SetPoint(aLabel, aSetup["ANCHOR"], aParent, aSetup["ANCHOR"], tFactor * aSetup["X_ADJUST"], -tFactor * aSetup["Y_ADJUST"]);
+
 	tOutline = aSetup["USE_OUTLINE"] and "OUTLINE|" or "";
 	tOutline = tOutline .. (aSetup["USE_MONO"] and "OUTLINEMONOCHROME" or ""); -- Bugs out in MoP beta
 
 	tColor = aSetup["COLOR"];
+
 	if tColor then
 		tShadowAlpha = aSetup["USE_SHADOW"] and tColor["O"] or 0;
+
 		aLabel:SetTextColor(VUHDO_textColor(tColor));
 		aLabel:SetShadowColor(tColor["R"], tColor["G"], tColor["B"], tShadowAlpha);
 	else
 		tShadowAlpha = aSetup["USE_SHADOW"] and 1 or 0;
+
 		aLabel:SetTextColor(1, 1, 1, 1);
 		aLabel:SetShadowColor(0, 0, 0, tShadowAlpha);
 	end
 
 	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline or "");
-	
+
 	aLabel:SetShadowOffset(1, -1);
 
 	aLabel:SetText("");
+
+	return;
+
 end
 
 

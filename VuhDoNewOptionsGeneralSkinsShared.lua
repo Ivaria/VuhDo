@@ -1677,7 +1677,7 @@ local VUHDO_DEFAULT_PROFILES = {
 					["USE_OUTLINE"] = true,
 				},
 				["iconRadioValue"] = 2,
-				["radioValue"] = 20,
+				["radioValue"] = 17,
 				["COUNTER_TEXT"] = {
 					["X_ADJUST"] = -25,
 					["SCALE"] = 66,

@@ -299,6 +299,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF3.useText");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -314,6 +317,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF3.useBackground");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -344,6 +350,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF4.useText");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -359,6 +368,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF4.useBackground");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -389,6 +401,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF2.useText");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -404,6 +419,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF2.useBackground");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -434,6 +452,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF6.useText");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -449,6 +470,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF6.useBackground");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -479,6 +503,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8.useText");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -494,6 +521,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8.useBackground");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -539,6 +569,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF9.useText");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -554,6 +587,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF9.useBackground");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -584,6 +620,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF1.useText");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -599,6 +638,9 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF1.useBackground");
+								VUHDO_lnfSetTooltip(self, "Per-type filtering not available in 12.x");
+								self:Disable();
+								self:SetAlpha(0.5);
 							</OnLoad>
 						</Scripts>
 					</CheckButton>

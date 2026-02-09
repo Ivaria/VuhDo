@@ -6,6 +6,7 @@
 	<Script file="VuhDoBarCustomizerHealth.lua" />
 	<Script file="VuhDoBarCustomizerHealthText.lua" />
 	<Script file="VuhDoBarCustomizerHots.lua" />
+	<Script file="VuhDoBarCustomizerAuras.lua" />
 	<Script file="VuhDoBarCustomizerMana.lua" />
 	<Script file="VuhDoBarCustomizerTarget.lua" />
 	<Script file="VuhDoBarCustomizerThreat.lua" />
@@ -94,6 +95,79 @@
 		<Scripts>
 			<OnLoad>
 				self.addLevel = 9;
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="VuhDoAuraAnchorIconTemplate" virtual="true" inherits="SecureHandlerEnterLeaveTemplate">
+		<Frames>
+			<Frame name="$parentB" enableMouse="false" inherits="BackdropTemplate">
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentI"></Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<FontString name="$parentT" inherits="NumberFontNormalSmall"></FontString>
+						<FontString name="$parentC" inherits="NumberFontNormalSmall"></FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Cooldown name="$parentCd" inherits="CooldownFrameTemplate">
+					</Cooldown>
+					<Frame name="$parentChgFr" setAllPoints="true">
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture name="$parentTex" hidden="true" setAllPoints="true"></Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.addLevel = 1;
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.addLevel = 10;
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="VuhDoAuraAnchorBarTemplate" virtual="true" inherits="SecureHandlerEnterLeaveTemplate">
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentIcTex"></Texture>
+				<FontString name="$parentT" inherits="NumberFontNormalSmall"></FontString>
+				<FontString name="$parentC" inherits="NumberFontNormalSmall"></FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Cooldown name="$parentCd" inherits="CooldownFrameTemplate">
+				<Scripts>
+					<OnLoad>
+						self:SetHideCountdownNumbers(true);
+						self:SetReverse(true);
+						self:SetDrawSwipe(true);
+						self:SetDrawEdge(true);
+						self:SetDrawBling(false);
+					</OnLoad>
+				</Scripts>
+			</Cooldown>
+			<StatusBar name="$parentAuBar" inherits="VuhDoStatusBar" enableMouse="false">
+				<Scripts>
+					<OnLoad>
+						self.statusTexture = self:GetStatusBarTexture();
+						self.addLevel = 10;
+					</OnLoad>
+				</Scripts>
+			</StatusBar>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self.addLevel = 10;
 			</OnLoad>
 		</Scripts>
 	</Frame>

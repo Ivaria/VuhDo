@@ -485,10 +485,16 @@ do
 			tTableIndices = VUHDO_splitString(aModel, ".");
 			tGlobal = _G[tTableIndices[1]];
 			tLastField = tGlobal;
+
+			if not tGlobal then
+				return;
+			end
+
 			tEnd = #tTableIndices - 1;
 
 			for tCnt = 2, tEnd do
 				tIndex = tTableIndices[tCnt];
+
 				if VUHDO_NUM_TEMPLATE == tIndex then
 					tIndex = aPanelNum;
 					tPanelNum = aPanelNum;
@@ -497,8 +503,14 @@ do
 				end
 
 				tLastField = tLastField[tIndex];
+
+				if not tLastField then
+					return;
+				end
 			end
+
 			tLastIndex = tTableIndices[#tTableIndices];
+
 			if VUHDO_NUM_TEMPLATE == tLastIndex then
 				tLastIndex = aPanelNum;
 				tPanelNum = aPanelNum;
@@ -614,6 +626,10 @@ do
 			tGlobal = _G[tTableIndices[1]];
 			tLastField = tGlobal;
 
+			if not tGlobal then
+				return nil;
+			end
+
 			for tCnt = 2, #tTableIndices - 1 do
 				tIndex = tTableIndices[tCnt];
 
@@ -625,6 +641,10 @@ do
 				end
 
 				tLastField = tLastField[tIndex];
+
+				if not tLastField then
+					return nil;
+				end
 			end
 
 			tLastIndex = tTableIndices[#tTableIndices];
@@ -770,6 +790,10 @@ local function VUHDO_triStateSetSelected(aCheckButton)
 	local tTexture = _G[aCheckButton:GetName() .. "TextureCheckMark"];
 	local tLabel = _G[aCheckButton:GetName() .. "Label2"];
 
+	if not tValue then
+		tValue = 2;
+	end
+
 	tTexture:ClearAllPoints();
 
 	if 3 == tValue then
@@ -788,7 +812,7 @@ local function VUHDO_triStateSetSelected(aCheckButton)
 		tLabel:SetTextColor(0, 0.6, 0, 1);
 	end
 
-	tLabel:SetText(aCheckButton:GetAttribute("radio_value")[tValue]);
+	tLabel:SetText((aCheckButton:GetAttribute("radio_value") or { "", "", "" })[tValue] or "");
 end
 
 
@@ -1502,6 +1526,7 @@ do
 		["VuhDoNewOptionsBuffs"] = "VuhDoNewOptionsBuffsGeneric",
 		["VuhDoNewOptionsDebuffs"] = "VuhDoNewOptionsDebuffsStandard",
 		["VuhDoNewOptionsTools"] = "VuhDoNewOptionsToolsSkins",
+		["VuhDoNewOptionsAura"] = "VuhDoNewOptionsAuraGroups",
 	};
 	local tSearchPattern;
 	local tIndex;
@@ -1691,6 +1716,7 @@ do
 
 	local tModel;
 	local tConstraintsModel;
+	local tInnerSlider;
 	function VUHDO_lnfUpdateComponentsByConstraints(aChangedComponent)
 
 		if not VUHDO_lnfIsVisibleBySearch(aChangedComponent) then
@@ -1715,8 +1741,20 @@ do
 
 				if VUHDO_lnfIsDisabledByConstraint(tConstraint["COMPONENT"]) then
 					tConstraint["COMPONENT"]:SetAlpha(0.5);
+
+					tInnerSlider = _G[tConstraint["COMPONENT"]:GetName() .. "Slider"];
+
+					if tInnerSlider then
+						tInnerSlider:Disable();
+					end
 				else
 					tConstraint["COMPONENT"]:SetAlpha(1);
+
+					tInnerSlider = _G[tConstraint["COMPONENT"]:GetName() .. "Slider"];
+
+					if tInnerSlider then
+						tInnerSlider:Enable();
+					end
 				end
 			end
 		end

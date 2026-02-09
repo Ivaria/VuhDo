@@ -1459,6 +1459,7 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	VUHDO_initHotBars(aPanelNum);
 	VUHDO_initAllHotIcons(aPanelNum);
 	VUHDO_initCustomDebuffs(aPanelNum);
+	VUHDO_initAuraAnchorsForButton(aButton, aPanelNum);
 	VUHDO_initPrivateAuras(sHealthBar, aButton, aPanelNum);
 	VUHDO_initRaidIcon(sHealthBar, VUHDO_getBarRoleIcon(aButton, 50), sPanelConfig[aPanelNum]["barScaling"]["barWidth"], aPanelNum);
 	VUHDO_initSwiftmendIndicator(aButton, sHealthBar, aPanelNum);

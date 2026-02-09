@@ -1079,6 +1079,8 @@ do
 	local tFrame;
 	function VUHDO_updateDebuffIcon(aUnit, anIcon, aName, anExpiry, aStacks, aDuration, anIsBuff, aSpellId, anAuraInstanceId)
 
+		-- FIXME: cleanup dead code path that was used for custom debuffs
+
 		if not VUHDO_DEBUFF_ICONS[aUnit] then
 			VUHDO_DEBUFF_ICONS[aUnit] = { };
 		end

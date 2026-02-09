@@ -1042,6 +1042,8 @@ do
 
 				if aLayerTemplate then
 					VUHDO_applyAllLayersToBar(tButton, tHealthBar, aLayerTemplate);
+
+					VUHDO_applyDispelTextColor(tHealthBar, aLayerTemplate, aUnit);
 				elseif aColor then
 					VUHDO_setStatusBarVuhDoColor(tHealthBar, aColor, aMaxColor);
 
