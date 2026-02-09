@@ -344,6 +344,7 @@ function VUHDO_setHealth(aUnit, aMode)
 		if tIsDead then
 			VUHDO_removeHots(aUnit);
 			VUHDO_removeAllDebuffIcons(aUnit);
+			VUHDO_clearUnitAuraCache(aUnit);
 
 			if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
 				VUHDO_cleanupSpellTraceForUnit(aUnit);
@@ -968,6 +969,7 @@ function VUHDO_reloadRaidMembers()
 				-- FIXME: find a more efficient way to trigger boss removal
 				VUHDO_removeHots(tBossUnitId);
 				VUHDO_removeAllDebuffIcons(tBossUnitId);
+				VUHDO_clearUnitAuraCache(tBossUnitId);
 				VUHDO_resetDebuffsFor(tBossUnitId);
 
 				if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
@@ -1108,6 +1110,7 @@ function VUHDO_refreshRaidMembers()
 			-- FIXME: find a more efficient way to trigger boss removal
 			VUHDO_removeHots(tBossUnitId);
 			VUHDO_removeAllDebuffIcons(tBossUnitId);
+			VUHDO_clearUnitAuraCache(tBossUnitId);
 			VUHDO_resetDebuffsFor(tBossUnitId);
 
 			if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
