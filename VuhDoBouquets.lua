@@ -14,13 +14,11 @@ local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
 local UnitHealthPercent = UnitHealthPercent;
 local UnitPowerPercent = UnitPowerPercent;
 local CreateColor = CreateColor;
-local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
 local issecretvalue = issecretvalue
 
-local VUHDO_rebuildAllAlphaChains;
-local VUHDO_getDebuffTypeAuraInstanceId;
-local VUHDO_getChosenDebuffAuraInstanceId;
 local VUHDO_copyColorTo;
+local VUHDO_getDispelAbilities;
+local VUHDO_getPurgeAbilities;
 
 local VUHDO_BOUQUETS = { };
 local VUHDO_RAID = { };
@@ -62,9 +60,27 @@ local sPoisonDispelCurve;
 local sCurseDispelCurve;
 local sBleedDispelCurve;
 local sEnrageDispelCurve;
+local sFriendlyDispelCurve;
+local sHostilePurgeCurve;
 
 local sTransparentColor;
 local sWhiteColor;
+
+local VUHDO_BLIZZARD_DISPEL_TYPE_MAP = {
+	[1] = 4,
+	[2] = 3,
+	[3] = 1,
+	[4] = 2,
+	[9] = 9,
+};
+
+local VUHDO_DISPEL_TYPE_COLOR_KEY_MAP = {
+	[1] = "DEBUFF1",
+	[2] = "DEBUFF2",
+	[3] = "DEBUFF3",
+	[4] = "DEBUFF4",
+	[9] = "DEBUFF9",
+};
 
 
 
@@ -74,6 +90,8 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_rebuildAllAlphaChains = _G["VUHDO_rebuildAllAlphaChains"];
 	VUHDO_getChosenDebuffAuraInstanceId = _G["VUHDO_getChosenDebuffAuraInstanceId"];
 	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
+	VUHDO_getDispelAbilities = _G["VUHDO_getDispelAbilities"];
+	VUHDO_getPurgeAbilities = _G["VUHDO_getPurgeAbilities"];
 
 	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -497,10 +515,10 @@ do
 		end
 
 		sDispelTypeCurve:AddPoint(0, VUHDO_safeColorFromTable(tColors["DEBUFF0"], tDefaultColor));
-		sDispelTypeCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors["DEBUFF1"], tDefaultColor));
-		sDispelTypeCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors["DEBUFF2"], tDefaultColor));
-		sDispelTypeCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors["DEBUFF3"], tDefaultColor));
-		sDispelTypeCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors["DEBUFF4"], tDefaultColor));
+		sDispelTypeCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors["DEBUFF3"], tDefaultColor));
+		sDispelTypeCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors["DEBUFF4"], tDefaultColor));
+		sDispelTypeCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors["DEBUFF2"], tDefaultColor));
+		sDispelTypeCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors["DEBUFF1"], tDefaultColor));
 		sDispelTypeCurve:AddPoint(6, VUHDO_safeColorFromTable(tColors["DEBUFF6"], tDefaultColor));
 		sDispelTypeCurve:AddPoint(8, VUHDO_safeColorFromTable(tColors["DEBUFF8"], tDefaultColor));
 		sDispelTypeCurve:AddPoint(9, VUHDO_safeColorFromTable(tColors["DEBUFF9"], tDefaultColor));
@@ -517,6 +535,10 @@ end
 do
 	local tColors;
 	local tTransparent;
+	local tDispelAbilities;
+	local tPurgeAbilities;
+	local tBlizzType;
+	local tColorKey;
 	function VUHDO_buildSingleDispelTypeCurves()
 
 		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
@@ -526,22 +548,22 @@ do
 		sMagicDispelCurve = CreateColorCurve();
 		sMagicDispelCurve:SetType(Enum.LuaCurveType.Step);
 		sMagicDispelCurve:AddPoint(0, tTransparent);
-		sMagicDispelCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF1"], tTransparent));
+		sMagicDispelCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF3"], tTransparent));
 
 		sDiseaseDispelCurve = CreateColorCurve();
 		sDiseaseDispelCurve:SetType(Enum.LuaCurveType.Step);
 		sDiseaseDispelCurve:AddPoint(0, tTransparent);
-		sDiseaseDispelCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF3"], tTransparent));
+		sDiseaseDispelCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF2"], tTransparent));
 
 		sPoisonDispelCurve = CreateColorCurve();
 		sPoisonDispelCurve:SetType(Enum.LuaCurveType.Step);
 		sPoisonDispelCurve:AddPoint(0, tTransparent);
-		sPoisonDispelCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF4"], tTransparent));
+		sPoisonDispelCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF1"], tTransparent));
 
 		sCurseDispelCurve = CreateColorCurve();
 		sCurseDispelCurve:SetType(Enum.LuaCurveType.Step);
 		sCurseDispelCurve:AddPoint(0, tTransparent);
-		sCurseDispelCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF2"], tTransparent));
+		sCurseDispelCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors and tColors["DEBUFF4"], tTransparent));
 
 		sBleedDispelCurve = CreateColorCurve();
 		sBleedDispelCurve:SetType(Enum.LuaCurveType.Step);
@@ -561,6 +583,44 @@ do
 			[VUHDO_DEBUFF_TYPE_BLEED] = sBleedDispelCurve,
 			[VUHDO_DEBUFF_TYPE_ENRAGE] = sEnrageDispelCurve,
 		};
+
+		if VUHDO_getDispelAbilities then
+			tDispelAbilities = VUHDO_getDispelAbilities();
+
+			sFriendlyDispelCurve = CreateColorCurve();
+			sFriendlyDispelCurve:SetType(Enum.LuaCurveType.Step);
+			sFriendlyDispelCurve:AddPoint(0, tTransparent);
+
+			for tVuhDoType, tAbility in pairs(tDispelAbilities) do
+				if tAbility then
+					tBlizzType = VUHDO_BLIZZARD_DISPEL_TYPE_MAP[tVuhDoType];
+					tColorKey = VUHDO_DISPEL_TYPE_COLOR_KEY_MAP[tVuhDoType];
+
+					if tBlizzType and tColors and tColors[tColorKey] then
+						sFriendlyDispelCurve:AddPoint(tBlizzType, VUHDO_safeColorFromTable(tColors[tColorKey], tTransparent));
+					end
+				end
+			end
+		end
+
+		if VUHDO_getPurgeAbilities then
+			tPurgeAbilities = VUHDO_getPurgeAbilities();
+
+			sHostilePurgeCurve = CreateColorCurve();
+			sHostilePurgeCurve:SetType(Enum.LuaCurveType.Step);
+			sHostilePurgeCurve:AddPoint(0, tTransparent);
+
+			for tVuhDoType, tAbility in pairs(tPurgeAbilities) do
+				if tAbility then
+					tBlizzType = VUHDO_BLIZZARD_DISPEL_TYPE_MAP[tVuhDoType];
+					tColorKey = VUHDO_DISPEL_TYPE_COLOR_KEY_MAP[tVuhDoType];
+
+					if tBlizzType and tColors and tColors[tColorKey] then
+						sHostilePurgeCurve:AddPoint(tBlizzType, VUHDO_safeColorFromTable(tColors[tColorKey], tTransparent));
+					end
+				end
+			end
+		end
 
 		return;
 
@@ -618,6 +678,32 @@ end
 function VUHDO_getEnrageDispelCurve()
 
 	return sEnrageDispelCurve;
+
+end
+
+
+
+--
+local tIsFriendly;
+local tIsHostile;
+function VUHDO_getDispelCurveForUnit(aUnit, anIsHarmful)
+
+	if not aUnit then
+		return nil;
+	end
+
+	tIsFriendly = UnitIsFriend("player", aUnit);
+	tIsHostile = UnitIsEnemy("player", aUnit);
+
+	if tIsFriendly and not tIsHostile and anIsHarmful then
+		return sFriendlyDispelCurve;
+	end
+
+	if tIsHostile and not anIsHarmful then
+		return sHostilePurgeCurve;
+	end
+
+	return nil;
 
 end
 

@@ -5,6 +5,7 @@ local ipairs = ipairs;
 local tinsert = table.insert;
 local twipe = table.wipe;
 local floor = math.floor;
+local strfind = string.find;
 
 local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
@@ -124,6 +125,34 @@ function VUHDO_aurasInitLocalOverrides()
 
 	sAuraDataPool = VUHDO_createTablePool("AuraData", 500);
 	sSlotIndexPool = VUHDO_createTablePool("SlotIndex", 200);
+
+	VUHDO_initAuraGroupFilters();
+
+	return;
+
+end
+
+
+
+--
+local tFilter;
+function VUHDO_initAuraGroupFilters()
+
+	for _, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
+		tFilter = tGroup["filter"];
+
+		if tFilter then
+			tGroup["isHarmful"] = strfind(tFilter, "HARMFUL") ~= nil;
+		end
+	end
+
+	for _, tGroup in pairs(VUHDO_AURA_GROUPS or sEmpty) do
+		tFilter = tGroup["filter"];
+
+		if tFilter then
+			tGroup["isHarmful"] = strfind(tFilter, "HARMFUL") ~= nil;
+		end
+	end
 
 	return;
 

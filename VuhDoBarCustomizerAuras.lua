@@ -47,6 +47,8 @@ local VUHDO_getClassColor;
 local VUHDO_safeColorFromTable;
 local VUHDO_resolveAuraTriState;
 local VUHDO_getAnchorTriStateBool;
+local VUHDO_getAuraGroup;
+local VUHDO_getDispelCurveForUnit;
 
 VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES or { };
 local VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES;
@@ -399,6 +401,8 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_setAnchorSlotAuraId = _G["VUHDO_setAnchorSlotAuraId"];
 	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
 	VUHDO_getAnchorTriStateBool = _G["VUHDO_getAnchorTriStateBool"];
+	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
+	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 
 	VUHDO_initAuraDurationCurves();
 	VUHDO_initAuraTimer();
@@ -557,6 +561,10 @@ end
 --
 local tColors;
 local tTransparent;
+local tDispelAbilities;
+local tPurgeAbilities;
+local tBlizzType;
+local tColorKey;
 function VUHDO_initAuraDurationCurves()
 
 	if not CreateCurve then
@@ -595,26 +603,26 @@ function VUHDO_initAuraDurationCurves()
 		sAuraDispelCurve:SetType(Enum.LuaCurveType.Step);
 		sAuraDispelCurve:AddPoint(0, tTransparent);
 
-		if tColors and tColors["DEBUFF1"] and tColors["DEBUFF1"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors["DEBUFF1"], tTransparent));
+		if tColors and tColors["DEBUFF3"] and tColors["DEBUFF3"]["useBorder"] then
+			sAuraDispelCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors["DEBUFF3"], tTransparent));
 		else
 			sAuraDispelCurve:AddPoint(1, tTransparent);
 		end
 
-		if tColors and tColors["DEBUFF2"] and tColors["DEBUFF2"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors["DEBUFF2"], tTransparent));
+		if tColors and tColors["DEBUFF4"] and tColors["DEBUFF4"]["useBorder"] then
+			sAuraDispelCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors["DEBUFF4"], tTransparent));
 		else
 			sAuraDispelCurve:AddPoint(2, tTransparent);
 		end
 
-		if tColors and tColors["DEBUFF3"] and tColors["DEBUFF3"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors["DEBUFF3"], tTransparent));
+		if tColors and tColors["DEBUFF2"] and tColors["DEBUFF2"]["useBorder"] then
+			sAuraDispelCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors["DEBUFF2"], tTransparent));
 		else
 			sAuraDispelCurve:AddPoint(3, tTransparent);
 		end
 
-		if tColors and tColors["DEBUFF4"] and tColors["DEBUFF4"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors["DEBUFF4"], tTransparent));
+		if tColors and tColors["DEBUFF1"] and tColors["DEBUFF1"]["useBorder"] then
+			sAuraDispelCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors["DEBUFF1"], tTransparent));
 		else
 			sAuraDispelCurve:AddPoint(4, tTransparent);
 		end
@@ -633,6 +641,26 @@ function VUHDO_initAuraDurationCurves()
 	end
 
 	return;
+
+end
+
+
+
+--
+local tGroup;
+function VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig)
+
+	if not aUnit or not anAnchorConfig then
+		return nil;
+	end
+
+	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+
+	if not tGroup then
+		return nil;
+	end
+
+	return VUHDO_getDispelCurveForUnit(aUnit, tGroup["isHarmful"]);
 
 end
 
@@ -1922,6 +1950,7 @@ do
 	local tDispelG;
 	local tDispelB;
 	local tDispelA;
+	local tDispelCurve;
 	local tColorMode;
 	local tClassColor;
 	local tIconColor;
@@ -1938,10 +1967,16 @@ do
 				tColorMode = anAnchorConfig["colorMode"] or "default";
 
 				if "debuff" == tColorMode then
-					tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], sAuraDispelCurve);
+					tDispelCurve = VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig);
 
-					if tColorMixin then
-						aIconTexture:SetVertexColor(tColorMixin:GetRGBA());
+					if tDispelCurve then
+						tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
+
+						if tColorMixin then
+							aIconTexture:SetVertexColor(tColorMixin:GetRGBA());
+						else
+							aIconTexture:SetVertexColor(1, 1, 1);
+						end
 					else
 						aIconTexture:SetVertexColor(1, 1, 1);
 					end
@@ -1970,10 +2005,16 @@ do
 				tColorMode = anAnchorConfig["colorMode"] or "default";
 
 				if "debuff" == tColorMode then
-					tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], sAuraDispelCurve);
+					tDispelCurve = VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig);
 
-					if tColorMixin then
-						aIconTexture:SetVertexColor(tColorMixin:GetRGBA());
+					if tDispelCurve then
+						tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
+
+						if tColorMixin then
+							aIconTexture:SetVertexColor(tColorMixin:GetRGBA());
+						else
+							aIconTexture:SetVertexColor(1, 1, 1);
+						end
 					else
 						aIconTexture:SetVertexColor(1, 1, 1);
 					end
@@ -2028,8 +2069,10 @@ do
 		tDispelBorder = VUHDO_resolveAuraTriState(anAnchorConfig["dispelBorder"], "dispelBorder");
 
 		if aBackdropFrame and aBackdropFrame.SetBackdropBorderColor then
-			if tDispelBorder and aUnit and sAuraDispelCurve then
-				tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], sAuraDispelCurve);
+			tDispelCurve = VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig);
+
+			if tDispelBorder and aUnit and tDispelCurve then
+				tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
 
 				if tColorMixin then
 					tDispelR, tDispelG, tDispelB, tDispelA = tColorMixin:GetRGBA();
@@ -2242,6 +2285,7 @@ do
 	local tColorMixin;
 	local tClassColor;
 	local tBarColor;
+	local tDispelCurve;
 	function VUHDO_displayAuraAsBar(aButton, aPanelNum, anAnchorIndex, aSlotIndex, anAuraData, anAnchorConfig)
 
 		if not aButton or not anAnchorIndex or not aSlotIndex or not anAuraData or not anAnchorConfig then
@@ -2281,10 +2325,16 @@ do
 		tColorMode = anAnchorConfig["colorMode"] or "default";
 
 		if "debuff" == tColorMode then
-			tColorMixin = GetAuraDispelTypeColor(tUnit, anAuraData["auraInstanceID"], sAuraDispelCurve);
+			tDispelCurve = VUHDO_getDispelCurveForContext(tUnit, anAnchorConfig);
 
-			if tColorMixin then
-				tBar:GetStatusBarTexture():SetVertexColor(tColorMixin:GetRGBA());
+			if tDispelCurve then
+				tColorMixin = GetAuraDispelTypeColor(tUnit, anAuraData["auraInstanceID"], tDispelCurve);
+
+				if tColorMixin then
+					tBar:GetStatusBarTexture():SetVertexColor(tColorMixin:GetRGBA());
+				else
+					tBar:GetStatusBarTexture():SetVertexColor(0.2, 0.6, 0.2, 1);
+				end
 			else
 				tBar:GetStatusBarTexture():SetVertexColor(0.2, 0.6, 0.2, 1);
 			end
@@ -2353,6 +2403,62 @@ do
 		return;
 
 	end
+end
+
+
+
+do
+	--
+	local tFrameName;
+	local tFrame;
+	function VUHDO_hideAuraSlot(aButton, anAnchorIndex, aSlotIndex, anIsBar)
+
+		if not aButton or not anAnchorIndex or not aSlotIndex then
+			return;
+		end
+
+		tFrameName = aButton:GetName();
+
+		tFrame = VUHDO_AURA_FRAMES[tFrameName] and VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex] and VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex][aSlotIndex];
+
+		if tFrame then
+			if tFrame.childB and tFrame.childB["timerText"] then
+				VUHDO_unregisterAuraTimerText(tFrame.childB["timerText"]);
+			elseif tFrame["timerText"] then
+				VUHDO_unregisterAuraTimerText(tFrame["timerText"]);
+			end
+
+			if VUHDO_UIFrameFlashStop then
+				VUHDO_UIFrameFlashStop(tFrame);
+			end
+
+			if tFrame.childIcon then
+				tFrame.childIcon:Hide();
+			end
+
+			tFrame:SetAlpha(0);
+		end
+
+		return;
+
+	end
+end
+
+
+
+--
+function VUHDO_updateAuraDisplaysForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	for tPanelNum = 1, 10 do
+		VUHDO_updateAurasForAnchors(aUnit, tPanelNum);
+	end
+
+	return;
+
 end
 
 

@@ -4,7 +4,7 @@ local pairs = pairs;
 local ipairs = ipairs;
 local tinsert = table.insert;
 local tsort = table.sort;
-local format = string.format;
+local strfind = string.find;
 
 VUHDO_AURA_GROUPS_SELECTED = VUHDO_AURA_GROUPS_SELECTED or nil;
 VUHDO_AURA_GROUPS_COMBO_MODEL = VUHDO_AURA_GROUPS_COMBO_MODEL or { };
@@ -345,6 +345,7 @@ function VUHDO_auraGroupsOnNewGroup()
 		["canColorText"] = false,
 		["enabled"] = true,
 		["displayName"] = "New Group",
+		["isHarmful"] = false,
 	};
 
 	sSelectedGroupId = tNewId;
@@ -394,6 +395,7 @@ function VUHDO_auraGroupsOnDeleteGroup(aGroupId)
 	VUHDO_CONFIG["AURA_GROUPS"][aGroupId] = nil;
 	sSelectedGroupId = nil;
 	VUHDO_AURA_GROUPS_SELECTED = nil;
+
 	VUHDO_auraGroupsRefreshList();
 	VUHDO_auraGroupsRefreshRightPanel();
 
@@ -408,11 +410,11 @@ function VUHDO_auraGroupsFilterChanged(aComboBox, aValue, anArrayModel)
 
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["filter"] = aValue or "";
+
+		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["isHarmful"] = (aValue and strfind(aValue, "HARMFUL")) and true or false;
 	end
 
-	if _G["VUHDO_rebuildCanColorBarGroupsCache"] then
-		_G["VUHDO_rebuildCanColorBarGroupsCache"]();
-	end
+	VUHDO_rebuildCanColorBarGroupsCache();
 
 	return;
 

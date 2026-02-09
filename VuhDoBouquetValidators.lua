@@ -38,6 +38,7 @@ local VUHDO_getUnitGroupPrivileges;
 local VUHDO_getLatestCustomDebuff;
 local VUHDO_getUnitHot;
 local VUHDO_getUnitHotInfo;
+local VUHDO_getDispelCurveForUnit;
 
 local sBarColors;
 local sIsDistance;
@@ -126,6 +127,7 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getRaidTargetIconTexture = _G["VUHDO_getRaidTargetIconTexture"];
 	VUHDO_getUnitGroupPrivileges = _G["VUHDO_getUnitGroupPrivileges"];
 	VUHDO_getLatestCustomDebuff = _G["VUHDO_getLatestCustomDebuff"];
+	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 	VUHDO_getUnitHot = _G["VUHDO_getUnitHot"];
 	VUHDO_getUnitHotInfo = _G["VUHDO_getUnitHotInfo"];
 
@@ -305,7 +307,7 @@ local function VUHDO_debuffMagicValidator(anInfo, _, aSecretContext)
 
 	tAuraInstanceId = VUHDO_getDebuffTypeAuraInstanceId(anInfo["unit"], VUHDO_DEBUFF_TYPE_MAGIC);
 	tSecretColor = nil;
-	tCurve = aSecretContext["dispelCurves"] and aSecretContext["dispelCurves"][VUHDO_DEBUFF_TYPE_MAGIC];
+	tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 
 	if tAuraInstanceId and tCurve then
 		tSecretColor = GetAuraDispelTypeColor(anInfo["unit"], tAuraInstanceId, tCurve);
@@ -334,7 +336,7 @@ local function VUHDO_debuffDiseaseValidator(anInfo, _, aSecretContext)
 
 	tAuraInstanceId = VUHDO_getDebuffTypeAuraInstanceId(anInfo["unit"], VUHDO_DEBUFF_TYPE_DISEASE);
 	tSecretColor = nil;
-	tCurve = aSecretContext["dispelCurves"] and aSecretContext["dispelCurves"][VUHDO_DEBUFF_TYPE_DISEASE];
+	tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 
 	if tAuraInstanceId and tCurve then
 		tSecretColor = GetAuraDispelTypeColor(anInfo["unit"], tAuraInstanceId, tCurve);
@@ -363,7 +365,7 @@ local function VUHDO_debuffPoisonValidator(anInfo, _, aSecretContext)
 
 	tAuraInstanceId = VUHDO_getDebuffTypeAuraInstanceId(anInfo["unit"], VUHDO_DEBUFF_TYPE_POISON);
 	tSecretColor = nil;
-	tCurve = aSecretContext["dispelCurves"] and aSecretContext["dispelCurves"][VUHDO_DEBUFF_TYPE_POISON];
+	tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 
 	if tAuraInstanceId and tCurve then
 		tSecretColor = GetAuraDispelTypeColor(anInfo["unit"], tAuraInstanceId, tCurve);
@@ -392,7 +394,7 @@ local function VUHDO_debuffCurseValidator(anInfo, _, aSecretContext)
 
 	tAuraInstanceId = VUHDO_getDebuffTypeAuraInstanceId(anInfo["unit"], VUHDO_DEBUFF_TYPE_CURSE);
 	tSecretColor = nil;
-	tCurve = aSecretContext["dispelCurves"] and aSecretContext["dispelCurves"][VUHDO_DEBUFF_TYPE_CURSE];
+	tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 
 	if tAuraInstanceId and tCurve then
 		tSecretColor = GetAuraDispelTypeColor(anInfo["unit"], tAuraInstanceId, tCurve);
@@ -421,7 +423,7 @@ local function VUHDO_debuffBleedValidator(anInfo, _, aSecretContext)
 
 	tAuraInstanceId = VUHDO_getDebuffTypeAuraInstanceId(anInfo["unit"], VUHDO_DEBUFF_TYPE_BLEED);
 	tSecretColor = nil;
-	tCurve = aSecretContext["dispelCurves"] and aSecretContext["dispelCurves"][VUHDO_DEBUFF_TYPE_BLEED];
+	tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 
 	if tAuraInstanceId and tCurve then
 		tSecretColor = GetAuraDispelTypeColor(anInfo["unit"], tAuraInstanceId, tCurve);
@@ -450,7 +452,7 @@ local function VUHDO_debuffEnrageValidator(anInfo, _, aSecretContext)
 
 	tAuraInstanceId = VUHDO_getDebuffTypeAuraInstanceId(anInfo["unit"], VUHDO_DEBUFF_TYPE_ENRAGE);
 	tSecretColor = nil;
-	tCurve = aSecretContext["dispelCurves"] and aSecretContext["dispelCurves"][VUHDO_DEBUFF_TYPE_ENRAGE];
+	tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 
 	if tAuraInstanceId and tCurve then
 		tSecretColor = GetAuraDispelTypeColor(anInfo["unit"], tAuraInstanceId, tCurve);
@@ -490,7 +492,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 
 	if anInfo["charmed"] then
 		tAuraInstanceId = 6;
-		tCurve = aSecretContext["defaultDispelCurve"];
+		tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 		tSecretColor = nil;
 
 		if tAuraInstanceId and tCurve then
@@ -500,7 +502,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 		return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, tAuraInstanceId, tSecretColor;
 	elseif anInfo["debuff"] then
 		tAuraInstanceId = anInfo["debuff"];
-		tCurve = aSecretContext["defaultDispelCurve"];
+		tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 		tSecretColor = nil;
 
 		if tAuraInstanceId and tCurve then
