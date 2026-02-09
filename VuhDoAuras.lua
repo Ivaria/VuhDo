@@ -612,8 +612,6 @@ function VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, aSlotIndex, 
 			if tPanelIndex then
 				tPanelIndex[anAnchorIndex] = nil;
 
-				VUHDO_xMsg("[DEBUG] INDEX: removed old aura", tOldAuraId, "from panel", aPanelNum, "anchor", anAnchorIndex);
-
 				if not next(tPanelIndex) then
 					tAuraIndex[aPanelNum] = nil;
 				end
@@ -641,8 +639,6 @@ function VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, aSlotIndex, 
 		end
 
 		VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId][aPanelNum][anAnchorIndex] = aSlotIndex;
-
-		VUHDO_xMsg("[DEBUG] INDEX: added aura", anAuraInstanceId, "panel", aPanelNum, "anchor", anAnchorIndex, "slot", aSlotIndex);
 	end
 
 	return;
@@ -664,8 +660,6 @@ function VUHDO_findAllAnchorSlotsByAuraId(aUnit, anAuraInstanceId)
 	end
 
 	tAuraIndex = VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId];
-
-	VUHDO_xMsg("[DEBUG] INDEX: lookup aura", anAuraInstanceId, "found=", tAuraIndex and "yes" or "no");
 
 	if not tAuraIndex or not next(tAuraIndex) then
 		return nil;
@@ -875,11 +869,7 @@ function VUHDO_incrementalAuraUpdate(aUnit, aUpdateInfo)
 
 	if aUpdateInfo["removedAuraInstanceIDs"] then
 		for _, tAuraInstanceId in pairs(aUpdateInfo["removedAuraInstanceIDs"]) do
-			VUHDO_xMsg("[DEBUG] Removing aura", tAuraInstanceId, "from", aUnit);
-
 			VUHDO_uncacheAuraData(aUnit, tAuraInstanceId);
-
-			VUHDO_xMsg("[DEBUG] Aura", tAuraInstanceId, "uncached, calling onAuraRemoved");
 
 			VUHDO_onAuraRemoved(aUnit, tAuraInstanceId);
 		end
@@ -940,8 +930,6 @@ function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId)
 		return;
 	end
 
-	VUHDO_xMsg("[DEBUG] onAuraRemoved:", aUnit, "aura", anAuraInstanceId);
-
 	tAuraIndex = VUHDO_findAllAnchorSlotsByAuraId(aUnit, anAuraInstanceId);
 
 	if tAuraIndex then
@@ -962,8 +950,6 @@ function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId)
 			tPanelNum = sSlotsToClear[tIdx * 3 - 2];
 			tAnchorIndex = sSlotsToClear[tIdx * 3 - 1];
 			tSlotIndex = sSlotsToClear[tIdx * 3];
-
-			VUHDO_xMsg("[DEBUG] Clearing panel", tPanelNum, "anchor", tAnchorIndex, "slot", tSlotIndex);
 
 			VUHDO_setAnchorSlotAuraId(aUnit, tPanelNum, tAnchorIndex, tSlotIndex, nil);
 
@@ -1027,14 +1013,10 @@ function VUHDO_tryAddAuraToAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfi
 	tMaxSlots = anAnchorConfig["maxDisplay"] or 5;
 	tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex];
 
-	VUHDO_xMsg("[DEBUG] tryAddAura:", aUnit, "aura", anAuraData["auraInstanceID"], "panel", aPanelNum, "anchor", anAnchorIndex);
-
 	for tSlotIndex = 1, tMaxSlots do
 		tOccupied = (tAnchorSlots and tAnchorSlots[tSlotIndex]);
-		VUHDO_xMsg("[DEBUG] Slot", tSlotIndex, "occupied:", tOccupied or "NO");
 
 		if not tOccupied then
-			VUHDO_xMsg("[DEBUG] Assigning to slot", tSlotIndex);
 			VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIndex, anAuraData["auraInstanceID"]);
 
 			break;
@@ -1144,8 +1126,6 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 	tMaxSlots = anAnchorConfig["maxDisplay"] or 5;
 	tUnitCache = VUHDO_UNIT_AURA_CACHE[aUnit];
 
-	VUHDO_xMsg("[DEBUG] rebuildSlotAssignments:", aUnit, "panel", aPanelNum, "anchor", anAnchorIndex, "fixedSlots=", anAnchorConfig["fixedSlots"]);
-
 	if anAnchorConfig["fixedSlots"] then
 		tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex];
 
@@ -1197,8 +1177,6 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 	else
 		tSlotIndex = 0;
 
-		VUHDO_xMsg("[DEBUG] COMPACT MODE - cache has", tUnitCache and VUHDO_tableCount(tUnitCache) or 0, "auras");
-
 		for tClearIdx = 1, tMaxSlots do
 			VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tClearIdx, nil);
 		end
@@ -1210,15 +1188,12 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 						tSlotIndex = tSlotIndex + 1;
 
 						if tSlotIndex <= tMaxSlots then
-							VUHDO_xMsg("[DEBUG] COMPACT: assigning aura", tInstanceId, "to slot", tSlotIndex);
 							VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIndex, tInstanceId);
 						end
 					end
 				end
 			end
 		end
-
-		VUHDO_xMsg("[DEBUG] COMPACT: assigned", tSlotIndex, "auras");
 	end
 
 	return;
