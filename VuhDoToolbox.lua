@@ -1192,7 +1192,7 @@ function VUHDO_replaceMacroTemplates(aText, aUnit)
 		tInfo = VUHDO_RAID[aUnit];
 
 		if tInfo then
-			if tInfo["name"] then
+			if tInfo["name"] and not tInfo["hasSecretName"] then
 				aText = gsub(aText, "[Vv][Dd][Nn][Aa][Mm][Ee]", tInfo["name"]);
 			end
 
