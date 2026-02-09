@@ -261,7 +261,9 @@ end
 
 
 --
-local tUnit, tInfo;
+local tUnit;
+local tInfo;
+local tName;
 local tClassColor;
 local tLeftText;
 local tRightText;
@@ -270,9 +272,19 @@ local tGuildName, tGuildRank;
 local tBinding;
 local tClassName, tClassNameLoc;
 function VUHDO_updateTooltip()
-	if not UnitExists(VUHDO_TT_UNIT) then	return;	end
 
-	tInfo = VUHDO_RAID[VUHDO_RAID_NAMES[UnitName(VUHDO_TT_UNIT)]] or VUHDO_RAID[VUHDO_TT_UNIT];
+	if not UnitExists(VUHDO_TT_UNIT) then
+		return;
+	end
+
+	tName = UnitName(VUHDO_TT_UNIT);
+
+	if sSecretsEnabled and issecretvalue(tName) then
+		tInfo = VUHDO_RAID[VUHDO_TT_UNIT];
+	else
+		tInfo = VUHDO_RAID[VUHDO_RAID_NAMES[tName]] or VUHDO_RAID[VUHDO_TT_UNIT];
+	end
+
 	if not tInfo then
 		tUnit = VUHDO_TT_UNIT;
 		tInfo = sEmpty;
@@ -285,6 +297,7 @@ function VUHDO_updateTooltip()
 	-- Name, Role
 	tClassNameLoc, tClassName = UnitClass(tUnit);
 	tClassColor = VUHDO_getClassColorByModelId(VUHDO_CLASS_IDS[tClassName] or "*");
+
 	if not tClassColor then
 		-- FIXME: bar text color is not per panel
 		tClassColor = VUHDO_PANEL_SETUP["PANEL_COLOR"]["TEXT"];
@@ -340,6 +353,7 @@ function VUHDO_updateTooltip()
 
 		for tIndex, tButtonName in ipairs(VUHDO_MOUSE_BUTTONS) do
 			tBinding = VUHDO_getSpellTooltip(tModifier, tIndex, tUnit);
+
 			if #tBinding ~= 0 then
 				VUHDO_addTooltipLineLeft(format("%s%s%s", tModifier, tButtonName, tBinding), VUHDO_VALUE_COLOR, 8);
 			end
@@ -347,6 +361,9 @@ function VUHDO_updateTooltip()
 	end
 
 	VUHDO_finishTooltip();
+
+	return;
+
 end
 
 

@@ -5,6 +5,7 @@ local smatch = string.match;
 local InCombatLockdown = InCombatLockdown;
 local GetSpellName = C_Spell.GetSpellName;
 local SendChatMessage = C_ChatInfo and C_ChatInfo.SendChatMessage or _G["SendChatMessage"];
+local issecretvalue = issecretvalue;
 
 local VUHDO_initGcd;
 local VUHDO_strempty;
@@ -16,8 +17,11 @@ local sIsShowGcd;
 local sUniqueSpells = { };
 local sFirstRes, sSecondRes, sThirdRes;
 local sEmpty = { };
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 
+
+--
 function VUHDO_spellEventHandlerInitLocalOverrides()
 	VUHDO_initGcd = _G["VUHDO_initGcd"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
@@ -82,7 +86,11 @@ function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
 
 	-- Resurrection?
 	if tSpellName == sFirstRes or tSpellName == sSecondRes or tSpellName == sThirdRes then
-		if aTargetName and not VUHDO_strempty(aTargetName) then 
+		if aTargetName and not VUHDO_strempty(aTargetName) then
+			if sSecretsEnabled and issecretvalue(aTargetName) then
+				return;
+			end
+
 			aTargetName = smatch(aTargetName, "^[^-]*");
 
 			if not VUHDO_RAID_NAMES[aTargetName] then
@@ -103,6 +111,10 @@ function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
 	end
 
 	if not aTargetName then return; end
+
+	if sSecretsEnabled and issecretvalue(aTargetName) then
+		return;
+	end
 
 	aTargetName = smatch(aTargetName, "^[^-]*");
 	tTargetUnit = VUHDO_RAID_NAMES[aTargetName];
