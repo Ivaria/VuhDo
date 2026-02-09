@@ -387,6 +387,13 @@ function VUHDO_setHealth(aUnit, aMode)
 			end
 
 			tInfo["name"] = tName;
+
+			if sSecretsEnabled then
+				tInfo["hasSecretName"] = issecretvalue(tName);
+			else
+				tInfo["hasSecretName"] = false;
+			end
+
 			tInfo["number"] = VUHDO_getUnitNo(aUnit);
 			tInfo["unit"] = aUnit;
 			tInfo["class"] = tClassName;
@@ -440,7 +447,9 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["mibucateg"] = nil;
 			tInfo["mibuvariants"] = nil;]]
 
-			if tLocalClass == tName then
+			if tInfo["hasSecretName"] then
+				tInfo["className"] = "";
+			elseif tLocalClass == tName then
 				tInfo["className"] = UnitCreatureType(aUnit) or "";
 			else
 				tInfo["className"] = tLocalClass or "";

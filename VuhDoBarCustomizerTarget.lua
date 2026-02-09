@@ -221,13 +221,19 @@ local tName;
 local function VUHDO_rememberTargetButton(aTargetUnit, aButton)
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if VUHDO_unitIsUnit(tUnit, aTargetUnit) then
+			if tInfo["hasSecretName"] then
+				break;
+			end
+
 			tName = tInfo["name"];
+
 			if not VUHDO_IN_RAID_TARGET_BUTTONS[tName] then
 				VUHDO_IN_RAID_TARGET_BUTTONS[tName] = { };
 			end
 
 			VUHDO_IN_RAID_TARGET_BUTTONS[tName][aButton] = aButton;
 			VUHDO_IN_RAID_TARGETS[aTargetUnit] = tName;
+
 			break;
 		end
 	end

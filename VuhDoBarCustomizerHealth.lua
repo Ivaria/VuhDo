@@ -1084,6 +1084,10 @@ do
 			return;
 		end
 
+		if tInfo["hasSecretName"] then
+			return;
+		end
+
 		tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[tInfo["name"]];
 
 		if not tAllButtons then

@@ -185,6 +185,10 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 		return;
 	end
 
+	if VUHDO_RAID[aUnit]["hasSecretName"] then
+		return;
+	end
+
 	-- Targets und targets-of-target, die im Raid sind
 	tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[VUHDO_RAID[aUnit]["name"]];
 

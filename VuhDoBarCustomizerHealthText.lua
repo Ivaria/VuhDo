@@ -160,7 +160,7 @@ local function VUHDO_buildNameText(aUnit, anInfo, aSetup, aPanelNum, anIsTarget)
 		tNickname = anInfo["name"];
 	end
 
-	if not VUHDO_NAME_TEXTS[tIndex] or anInfo["name"] ~= tNickname then
+	if anInfo["hasSecretName"] or not VUHDO_NAME_TEXTS[tIndex] or anInfo["name"] ~= tNickname then
 		if aSetup["ID_TEXT"]["showName"] then
 			tNameText = (aSetup["ID_TEXT"]["showClass"] and not anInfo["isPet"] and anInfo["className"]) 
 				and anInfo["className"] .. ": " or "";
@@ -178,11 +178,17 @@ local function VUHDO_buildNameText(aUnit, anInfo, aSetup, aPanelNum, anIsTarget)
 
 		tMaxChars = aSetup["PANEL_COLOR"]["TEXT"]["maxChars"];
 
-		if tMaxChars > 0 and #tNameText > tMaxChars then
-			tNameText = VUHDO_utf8Cut(tNameText, tMaxChars);
+		if tMaxChars > 0 then
+			if anInfo["hasSecretName"] then
+				tNameText = format("%." .. tMaxChars .. "s", tNameText);
+			elseif #tNameText > tMaxChars then
+				tNameText = VUHDO_utf8Cut(tNameText, tMaxChars);
+			end
 		end
 
-		VUHDO_NAME_TEXTS[tIndex] = tNameText;
+		if not anInfo["hasSecretName"] then
+			VUHDO_NAME_TEXTS[tIndex] = tNameText;
+		end
 	else
 		tNameText = VUHDO_NAME_TEXTS[tIndex];
 	end

@@ -350,6 +350,10 @@ function VUHDO_determineRole(aUnit)
 		return nil;
 	end
 
+	if tInfo["hasSecretName"] then
+		return nil;
+	end
+
 	-- Manual role override oder dungeon finder role?
 	tFixRole = VUHDO_MANUAL_ROLES[tName] or VUHDO_determineDfToolRole(tInfo);
 
