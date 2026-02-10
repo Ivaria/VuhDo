@@ -2,6 +2,8 @@ local _;
 local format = format;
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
+local sIsSpecialDotSuspended = false;
+
 local sIsFade;
 local sIsFlashWhenLow;
 local sIsWarnColor;
@@ -1486,6 +1488,10 @@ local tIcon;
 local tPanelNum;
 function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
+	if sIsSpecialDotSuspended then
+		return;
+	end
+
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
@@ -1559,6 +1565,17 @@ function VUHDO_swiftmendIndicatorBouquetCallback(aUnit, anIsActive, anIcon, aTim
 			end
 		end
 	end
+
+end
+
+
+
+--
+function VUHDO_suspendSpecialDot(aSuspend)
+
+	sIsSpecialDotSuspended = aSuspend;
+
+	return;
 
 end
 

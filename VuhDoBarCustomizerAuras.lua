@@ -1121,6 +1121,137 @@ end
 
 
 --
+local tIconFrame;
+local tChild;
+local tTexture;
+local tPosX;
+local tPosY;
+local tAnchor;
+local tRelPoint;
+function VUHDO_displayPlayerIcon(aButton, aSlotIndex, aTexture, aTexCoords, aWidth, aHeight, aPositionIndex)
+
+	if not aButton or not aSlotIndex or not aTexture then
+		return;
+	end
+
+	tIconFrame = VUHDO_acquireAuraIconFrame(aButton, VUHDO_AURA_ANCHOR_PLAYER_ICONS, aSlotIndex);
+
+	if not tIconFrame then
+		return;
+	end
+
+	tChild = tIconFrame.childB;
+
+	if not tChild then
+		return;
+	end
+
+	if tChild.timerText then
+		tChild.timerText:SetText("");
+	end
+
+	if tChild.countText then
+		tChild.countText:SetText("");
+	end
+
+	if tChild.cooldownFrame then
+		tChild.cooldownFrame:SetAlpha(0);
+	end
+
+	if tChild.chargeTexture then
+		tChild.chargeTexture:SetTexture(nil);
+		tChild.chargeTexture:Hide();
+	end
+
+	tTexture = tChild.textureI or VUHDO_getAuraIconTexture(tChild);
+
+	if tTexture then
+		tTexture:SetTexture(aTexture);
+		tTexture:SetVertexColor(1, 1, 1);
+		tTexture:SetAlpha(1);
+
+		if aTexCoords then
+			tTexture:SetTexCoord(unpack(aTexCoords));
+		else
+			tTexture:SetTexCoord(0, 1, 0, 1);
+		end
+
+		tTexture:Show();
+	end
+
+	tChild:SetAllPoints(tIconFrame);
+	tChild:SetAlpha(1);
+
+	if aPositionIndex == 2 then
+		tAnchor = "TOPRIGHT";
+		tRelPoint = "TOPRIGHT";
+		tPosX = -5;
+		tPosY = -10;
+	else
+		tAnchor = "TOPLEFT";
+		tRelPoint = "TOPLEFT";
+
+		if aPositionIndex == 0 then
+			tPosX = 0;
+			tPosY = 0;
+		elseif aPositionIndex == 1 then
+			tPosX = 0;
+			tPosY = -14;
+		elseif aPositionIndex == 3 then
+			tPosX = 14;
+			tPosY = 0;
+		else
+			tPosX = 28;
+			tPosY = 0;
+		end
+	end
+
+	tIconFrame:ClearAllPoints();
+	VUHDO_PixelUtil.SetPoint(tIconFrame, tAnchor, aButton, tRelPoint, tPosX, tPosY);
+	VUHDO_PixelUtil.SetSize(tIconFrame, aWidth or 16, aHeight or 16);
+	tIconFrame:SetAlpha(1);
+	tIconFrame:Show();
+
+	return;
+
+end
+
+
+
+--
+local tButtonName;
+local tAnchorFrames;
+function VUHDO_hidePlayerIconsForButton(aButton)
+
+	if not aButton then
+		return;
+	end
+
+	tButtonName = aButton:GetName();
+
+	if not tButtonName or not VUHDO_AURA_FRAMES[tButtonName] then
+		return;
+	end
+
+	tAnchorFrames = VUHDO_AURA_FRAMES[tButtonName][VUHDO_AURA_ANCHOR_PLAYER_ICONS];
+
+	if not tAnchorFrames then
+		return;
+	end
+
+	for _, tFrame in pairs(tAnchorFrames) do
+		if tFrame then
+			tFrame:SetAlpha(0);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tFrameName;
 local tButtonFrames;
 function VUHDO_releaseAllAuraFramesForButton(aButton)
@@ -1206,7 +1337,7 @@ function VUHDO_hideAllAuras()
 		for tAnchorIndex, tAnchorFrames in pairs(tButtonFrames) do
 			for tSlotIndex, tFrame in pairs(tAnchorFrames) do
 				if tFrame then
-					tFrame:Hide();
+					tFrame:SetAlpha(0);
 				end
 			end
 		end
@@ -1233,7 +1364,7 @@ function VUHDO_hideAurasForUnit(aUnit)
 			for tAnchorIndex, tAnchorFrames in pairs(VUHDO_AURA_FRAMES[tButtonName]) do
 				for tSlotIndex, tFrame in pairs(tAnchorFrames) do
 					if tFrame then
-						tFrame:Hide();
+						tFrame:SetAlpha(0);
 					end
 				end
 			end
@@ -1545,7 +1676,8 @@ do
 			tBaseAnchor, tLayerIndex = VUHDO_getFixedOverflowAssignment(aButton, anAnchorIndex, aSlotIndex, anAnchorConfig);
 
 			if not tBaseAnchor then
-				aFrame:Hide();
+				aFrame:SetAlpha(0);
+
 				return;
 			end
 

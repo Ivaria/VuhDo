@@ -16,7 +16,6 @@ local GameTooltip = GameTooltip;
 local sMouseoverUnit = nil;
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
-
 local VUHDO_updateBouquetsForEvent;
 local VUHDO_highlightClusterFor;
 local VUHDO_showTooltip;
@@ -29,8 +28,10 @@ local VUHDO_setupSmartCast;
 local VUHDO_updateDirectionFrame;
 local VUHDO_getCurrentKeyModifierString;
 local VUHDO_redrawAllPanels;
-
-
+local VUHDO_displayPlayerIcon;
+local VUHDO_hidePlayerIconsForButton;
+local VUHDO_getBarRoleIcon;
+local VUHDO_suspendSpecialDot;
 
 local VUHDO_SPELL_CONFIG;
 local VUHDO_SPELL_ASSIGNMENTS;
@@ -38,6 +39,10 @@ local VUHDO_getUnitButtonsSafe;
 local VUHDO_CONFIG;
 local VUHDO_INTERNAL_TOGGLES;
 local VUHDO_RAID;
+
+
+
+--
 function VUHDO_actionEventHandlerInitLocalOverrides()
 
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
@@ -54,6 +59,10 @@ function VUHDO_actionEventHandlerInitLocalOverrides()
 	VUHDO_getCurrentKeyModifierString = _G["VUHDO_getCurrentKeyModifierString"];
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
+	VUHDO_displayPlayerIcon = _G["VUHDO_displayPlayerIcon"];
+	VUHDO_hidePlayerIconsForButton = _G["VUHDO_hidePlayerIconsForButton"];
+	VUHDO_getBarRoleIcon = _G["VUHDO_getBarRoleIcon"];
+	VUHDO_suspendSpecialDot = _G["VUHDO_suspendSpecialDot"];
 
 	VUHDO_SPELL_CONFIG = _G["VUHDO_SPELL_CONFIG"];
 	VUHDO_SPELL_ASSIGNMENTS = _G["VUHDO_SPELL_ASSIGNMENTS"];
@@ -135,55 +144,96 @@ end
 
 
 --
+local tIcon;
 local function VUHDO_showPlayerIcons(aButton, aPanelNum)
 	local tUnit = aButton:GetAttribute("unit");
 	local tInfo = VUHDO_RAID[tUnit];
 	if not tInfo then	return; end
 
 	local tIsLeader, tIsAssist, tIsMasterLooter = VUHDO_getUnitGroupPrivileges(tUnit);
-	if tIsLeader or tIsAssist then
-		VUHDO_getOrCreateHotIcon(aButton, 1):SetTexture(
-			"Interface\\groupframe\\ui-group-" .. (tIsLeader and "leader" or "assistant") .. "icon");
-		VUHDO_PixelUtil.ApplySettings(VUHDO_getOrCreateHotIcon(aButton, 1));
-		VUHDO_placePlayerIcon(aButton, 1, 0);
+
+	if sSecretsEnabled then
+		if tIsLeader or tIsAssist then
+			VUHDO_displayPlayerIcon(aButton, 1,
+				"Interface\\groupframe\\ui-group-" .. (tIsLeader and "leader" or "assistant") .. "icon",
+				nil, 16, 16, 0);
+		end
+
+		if tIsMasterLooter then
+			VUHDO_displayPlayerIcon(aButton, 2, "Interface\\groupframe\\ui-group-masterlooter", nil, 16, 16, 1);
+		end
+
+		if UnitIsPVP(tUnit) and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barWidth"] > 54 then
+			VUHDO_displayPlayerIcon(aButton, 3,
+				"Interface\\groupframe\\ui-group-pvp-"
+					.. ("Alliance" == (UnitFactionGroup(tUnit)) and "alliance" or "horde"),
+				nil, 32, 32, 2);
+		end
+
+		if tInfo["class"] then
+			VUHDO_displayPlayerIcon(aButton, 4, "Interface\\TargetingFrame\\UI-Classes-Circles",
+				CLASS_ICON_TCOORDS[tInfo["class"]], 16, 16, 3);
+		end
+
+		if tInfo["role"] then
+			VUHDO_displayPlayerIcon(aButton, 5, "Interface\\LFGFrame\\UI-LFG-ICON-ROLES",
+				{ GetTexCoordsForRole(
+					VUHDO_ID_MELEE_TANK == tInfo["role"] and "TANK"
+					or VUHDO_ID_RANGED_HEAL == tInfo["role"] and "HEALER" or "DAMAGER") },
+				16, 16, 5);
+		end
+	else
+		if tIsLeader or tIsAssist then
+			tIcon = VUHDO_getOrCreateHotIcon(aButton, 1);
+
+			tIcon:SetTexture(
+				"Interface\\groupframe\\ui-group-" .. (tIsLeader and "leader" or "assistant") .. "icon");
+			VUHDO_PixelUtil.ApplySettings(tIcon);
+			VUHDO_placePlayerIcon(aButton, 1, 0);
+		end
+
+		if tIsMasterLooter then
+			tIcon = VUHDO_getOrCreateHotIcon(aButton, 2);
+
+			tIcon:SetTexture("Interface\\groupframe\\ui-group-masterlooter");
+			VUHDO_PixelUtil.ApplySettings(tIcon);
+			VUHDO_placePlayerIcon(aButton, 2, 1);
+		end
+
+		if UnitIsPVP(tUnit) and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barWidth"] > 54 then
+			tIcon = VUHDO_getOrCreateHotIcon(aButton, 3);
+
+			tIcon:SetTexture("Interface\\groupframe\\ui-group-pvp-"
+				.. ("Alliance" == (UnitFactionGroup(tUnit)) and "alliance" or "horde"));
+			VUHDO_PixelUtil.ApplySettings(tIcon);
+			VUHDO_placePlayerIcon(aButton, 3, 2);
+			VUHDO_PixelUtil.SetWidth(tIcon, 32);
+			VUHDO_PixelUtil.SetHeight(tIcon, 32);
+		end
+
+		if tInfo["class"] then
+			tIcon = VUHDO_getOrCreateHotIcon(aButton, 4);
+
+			tIcon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles");
+			VUHDO_PixelUtil.ApplySettings(tIcon);
+			tIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[tInfo["class"]]));
+			VUHDO_placePlayerIcon(aButton, 4, 3);
+		end
+
+		if tInfo["role"] then
+			tIcon = VUHDO_getOrCreateHotIcon(aButton, 5);
+
+			tIcon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-ROLES");
+			VUHDO_PixelUtil.ApplySettings(tIcon);
+			tIcon:SetTexCoord(GetTexCoordsForRole(
+				VUHDO_ID_MELEE_TANK == tInfo["role"] and "TANK"
+				or VUHDO_ID_RANGED_HEAL == tInfo["role"] and "HEALER"	or "DAMAGER"));
+			VUHDO_placePlayerIcon(aButton, 5, 5);
+		end
 	end
 
-	if tIsMasterLooter then
-		VUHDO_getOrCreateHotIcon(aButton, 2):SetTexture("Interface\\groupframe\\ui-group-masterlooter");
-		VUHDO_PixelUtil.ApplySettings(VUHDO_getOrCreateHotIcon(aButton, 2));
-		VUHDO_placePlayerIcon(aButton, 2, 1);
-	end
+	return;
 
-	local tIcon;
-	if UnitIsPVP(tUnit) and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["barWidth"] > 54 then
-		tIcon = VUHDO_getOrCreateHotIcon(aButton, 3);
-
-		tIcon:SetTexture("Interface\\groupframe\\ui-group-pvp-"
-			.. ("Alliance" == (UnitFactionGroup(tUnit)) and "alliance" or "horde"));
-		VUHDO_PixelUtil.ApplySettings(tIcon);
-
-		VUHDO_placePlayerIcon(aButton, 3, 2);
-		VUHDO_PixelUtil.SetWidth(tIcon, 32);
-		VUHDO_PixelUtil.SetHeight(tIcon, 32);
-	end
-
-	if tInfo["class"] then
-		tIcon = VUHDO_getOrCreateHotIcon(aButton, 4);
-		tIcon:SetTexture("Interface\\TargetingFrame\\UI-Classes-Circles");
-		VUHDO_PixelUtil.ApplySettings(tIcon);
-		tIcon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[tInfo["class"]]));
-		VUHDO_placePlayerIcon(aButton, 4, 3);
-	end
-
-	if tInfo["role"] then
-		tIcon = VUHDO_getOrCreateHotIcon(aButton, 5);
-		tIcon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-ROLES");
-		VUHDO_PixelUtil.ApplySettings(tIcon);
-		tIcon:SetTexCoord(GetTexCoordsForRole(
-			VUHDO_ID_MELEE_TANK == tInfo["role"] and "TANK"
-			or VUHDO_ID_RANGED_HEAL == tInfo["role"] and "HEALER"	or "DAMAGER"));
-		VUHDO_placePlayerIcon(aButton, 5, 5);
-	end
 end
 
 
@@ -196,9 +246,10 @@ function VUHDO_hideAllPlayerIcons()
 
 		for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
 			if tButton:IsShown() then
-				VUHDO_initButtonStatics(tButton, tPanelNum);
-
-				if not sSecretsEnabled then
+				if sSecretsEnabled then
+					VUHDO_hidePlayerIconsForButton(tButton);
+				else
+					VUHDO_initButtonStatics(tButton, tPanelNum);
 					VUHDO_initAllHotIcons(tPanelNum);
 				end
 			end
@@ -208,6 +259,7 @@ function VUHDO_hideAllPlayerIcons()
 	if sSecretsEnabled then
 		VUHDO_suspendAuras(false);
 		VUHDO_showAllAuras();
+		VUHDO_suspendSpecialDot(false);
 	else
 		VUHDO_removeAllHots();
 		VUHDO_suspendHoTs(false);
@@ -225,20 +277,23 @@ local function VUHDO_showAllPlayerIcons(aPanel)
 	if sSecretsEnabled then
 		VUHDO_suspendAuras(true);
 		VUHDO_hideAllAuras();
+		VUHDO_suspendSpecialDot(true);
 	else
 		VUHDO_suspendHoTs(true);
 		VUHDO_removeAllHots();
 	end
 
-	local tPanelNum = VUHDO_getPanelNum(aPanel);
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
+			if tButton:IsShown() then
+				VUHDO_showPlayerIcons(tButton, tPanelNum);
 
-	for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
-		if tButton:IsShown() then
-			VUHDO_showPlayerIcons(tButton, tPanelNum);
+				VUHDO_getBarRoleIcon(tButton, 51):Hide();
+			end
 		end
 	end
 
-return;
+	return;
 
 end
 

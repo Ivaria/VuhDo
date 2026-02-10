@@ -1535,13 +1535,6 @@ do
 				VUHDO_loadProfile(strtrim(tTokens[1]));
 			end
 
-		elseif "aura" == tCommandWord then
-			if "test" == tParsedTexts[2] then
-				VUHDO_testSpriteSheet(tParsedTexts[3] or 1);
-			elseif "hide" == tParsedTexts[2] then
-				VUHDO_hideSpriteSheetTest();
-			end
-
 		elseif strfind(tCommandWord, "res") then
 			for tPanelNum = 1, VUHDO_MAX_PANELS do
 				VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = nil;
