@@ -1845,7 +1845,7 @@ function VUHDO_loadDefaultConfig()
 ----		250191, -- Conflagration
 ----		254181, -- Seared Skin
 ----		248255, -- Infernal Rockets
---		-- Kin’garoth
+--		-- Kin?garoth
 ----		254919, -- Forging Strike
 --		249535, -- Demolished (M)
 --		246706, -- Demolish
@@ -1877,7 +1877,7 @@ function VUHDO_loadDefaultConfig()
 ----		250757, -- Cosmic Glare (M)
 --		-- Aggramar
 ----		244291, -- Foe Breaker
-----		245990, -- Taeschalach’s Reach
+----		245990, -- Taeschalach?s Reach
 --		245994, -- Scorching Blaze
 ----		246014, -- Searing Tempest
 ----		244736, -- Wake of Flame
@@ -1898,7 +1898,7 @@ function VUHDO_loadDefaultConfig()
 ----		258646, -- Gift of the Sky
 ----		255199, -- Avatar of Aggramar
 --		250669, -- Soulburst
-----		255200, -- Aggramar’s Boon
+----		255200, -- Aggramar?s Boon
 ----		257299, -- Ember of Rage
 ----		252729, -- Cosmic Ray
 ----		252634, -- Cosmic Smash
@@ -3102,6 +3102,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|PLAYER|RAID_IN_COMBAT",
 		["excludeFilter"] = nil,
 		["priority"] = 10,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3110,6 +3111,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|RAID_IN_COMBAT",
 		["excludeFilter"] = "PLAYER",
 		["priority"] = 11,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3118,6 +3120,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|RAID_IN_COMBAT",
 		["excludeFilter"] = nil,
 		["priority"] = 12,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3126,6 +3129,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HARMFUL|RAID_PLAYER_DISPELLABLE",
 		["excludeFilter"] = nil,
 		["priority"] = 1,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_DISPEL,
 		["canColorBar"] = true,
 		["canColorText"] = true,
 		["enabled"] = true,
@@ -3134,14 +3138,21 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HARMFUL|CROWD_CONTROL",
 		["excludeFilter"] = nil,
 		["priority"] = 2,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_CUSTOM,
 		["canColorBar"] = true,
 		["canColorText"] = true,
+		["customColor"] = {
+			["R"] = 0.51, ["G"] = 0.082, ["B"] = 0.263, ["O"] = 1,
+			["TR"] = 1, ["TG"] = 0.31, ["TB"] = 0.31, ["TO"] = 1,
+			["useBackground"] = true, ["useText"] = true, ["useOpacity"] = true,
+		},
 		["enabled"] = true,
 	},
 	["BIG_DEFENSIVES"] = {
 		["filter"] = "HELPFUL|BIG_DEFENSIVE",
 		["excludeFilter"] = nil,
 		["priority"] = 5,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3150,6 +3161,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HARMFUL",
 		["excludeFilter"] = nil,
 		["priority"] = 20,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3158,6 +3170,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL",
 		["excludeFilter"] = nil,
 		["priority"] = 21,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3166,6 +3179,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|RAID|PLAYER",
 		["excludeFilter"] = nil,
 		["priority"] = 13,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3174,6 +3188,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|RAID",
 		["excludeFilter"] = "PLAYER",
 		["priority"] = 14,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3182,6 +3197,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|RAID",
 		["excludeFilter"] = nil,
 		["priority"] = 15,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3190,14 +3206,16 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HARMFUL|RAID",
 		["excludeFilter"] = nil,
 		["priority"] = 3,
-		["canColorBar"] = true,
-		["canColorText"] = true,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+		["canColorBar"] = false,
+		["canColorText"] = false,
 		["enabled"] = true,
 	},
 	["IMPORTANT_BUFFS"] = {
 		["filter"] = "HELPFUL|IMPORTANT",
 		["excludeFilter"] = nil,
 		["priority"] = 6,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3206,14 +3224,16 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HARMFUL|IMPORTANT",
 		["excludeFilter"] = nil,
 		["priority"] = 4,
-		["canColorBar"] = true,
-		["canColorText"] = true,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+		["canColorBar"] = false,
+		["canColorText"] = false,
 		["enabled"] = true,
 	},
 	["MY_NAMEPLATE_DEBUFFS"] = {
 		["filter"] = "HARMFUL|INCLUDE_NAME_PLATE_ONLY|PLAYER",
 		["excludeFilter"] = nil,
 		["priority"] = 17,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3222,6 +3242,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HARMFUL|INCLUDE_NAME_PLATE_ONLY",
 		["excludeFilter"] = "PLAYER",
 		["priority"] = 18,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3230,6 +3251,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HARMFUL|INCLUDE_NAME_PLATE_ONLY",
 		["excludeFilter"] = nil,
 		["priority"] = 19,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3238,6 +3260,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|CANCELABLE",
 		["excludeFilter"] = nil,
 		["priority"] = 23,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3246,6 +3269,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|NOT_CANCELABLE",
 		["excludeFilter"] = nil,
 		["priority"] = 24,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
@@ -3254,6 +3278,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["filter"] = "HELPFUL|MAW",
 		["excludeFilter"] = nil,
 		["priority"] = 30,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,

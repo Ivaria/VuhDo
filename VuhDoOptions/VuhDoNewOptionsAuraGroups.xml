@@ -117,14 +117,32 @@
 						</Scripts>
 					</Button>
 
+					<CheckButton name="$parentEnabledCheckButton" text="VUHDO_I18N_ENABLE" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="12" y="-72" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_ENABLED");
+								VUHDO_lnfCheckButtonOnLoad(self);
+
+								self:SetAttribute("custom_function_post", VUHDO_auraGroupsEnabledChanged);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 					<Frame name="$parentNameLabel" inherits="VuhDoLabelFrameTemplate">
 						<Size>
 							<AbsDimension x="80" y="18" />
 						</Size>
 						<Anchors>
-							<Anchor point="TOPLEFT">
+							<Anchor point="TOPLEFT" relativeTo="$parentEnabledCheckButton" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="12" y="-75" />
+									<AbsDimension x="4" y="6" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -175,6 +193,25 @@
 						</Layers>
 					</Frame>
 
+					<Frame name="$parentExcludeFilterLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="120" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentFilterLabel" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="42" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_AURA_EXCLUDE" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
 					<Button name="$parentFilterCombo" inherits="VuhDoComboBoxTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentFilterLabel" relativePoint="BOTTOMLEFT">
@@ -195,25 +232,6 @@
 							</OnShow>
 						</Scripts>
 					</Button>
-
-					<Frame name="$parentExcludeFilterLabel" inherits="VuhDoLabelFrameTemplate">
-						<Size>
-							<AbsDimension x="120" y="18" />
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentFilterCombo" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="-12" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer>
-								<FontString name="$parentLabel" text="VUHDO_I18N_AURA_EXCLUDE" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
-								</FontString>
-							</Layer>
-						</Layers>
-					</Frame>
 
 					<Button name="$parentExcludeFilterCombo" inherits="VuhDoComboBoxTemplate">
 						<Anchors>
@@ -236,14 +254,90 @@
 						</Scripts>
 					</Button>
 
+					<Frame name="$parentColorTypeLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="120" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentFilterCombo" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-8" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_AURA_COLOR_TYPE" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Button name="$parentColorTypeCombo" inherits="VuhDoComboBoxTemplate">
+						<Size>
+							<AbsDimension x="120" y="24" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentColorTypeLabel" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-2" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_COLOR_TYPE", VUHDO_AURA_GROUPS_COLOR_TYPE_OPTIONS, VUHDO_I18N_AURA_COLOR_TYPE);
+								self:SetAttribute("custom_function", VUHDO_auraGroupsColorTypeChanged);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K615);
+							</OnLoad>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Text");
+							</OnShow>
+						</Scripts>
+					</Button>
+
+					<CheckButton name="$parentCanColorBarCheckButton" text="VUHDO_I18N_AURA_COLOR_BAR" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentColorTypeCombo" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-2" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_CAN_COLOR_BAR");
+								VUHDO_lnfCheckButtonOnLoad(self);
+								self:SetAttribute("custom_function_post", VUHDO_auraGroupsCanColorBarChanged);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentCanColorTextCheckButton" text="VUHDO_I18N_AURA_COLOR_TEXT" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentCanColorBarCheckButton" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="4" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_CAN_COLOR_TEXT");
+								VUHDO_lnfCheckButtonOnLoad(self);
+								self:SetAttribute("custom_function_post", VUHDO_auraGroupsCanColorTextChanged);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 					<Frame name="$parentPrioritySlider" inherits="VuhDoHSliderTemplate">
 						<Size>
 							<AbsDimension x="200" y="50" />
 						</Size>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentExcludeFilterCombo" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="$parentCanColorBarCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="0" y="-12" />
+									<AbsDimension x="0" y="-2" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -257,59 +351,18 @@
 						</Scripts>
 					</Frame>
 
-					<CheckButton name="$parentCanColorBarCheckButton" text="VUHDO_I18N_AURA_COLOR_BAR" inherits="VuhDoCheckButtonTemplate">
+					<Frame name="$parentCustomColorTexture" inherits="VuhDoColorSwatchTexture">
+						<Size>
+							<AbsDimension x="120" y="32" />
+						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentPrioritySlider" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="0" y="-12" />
+									<AbsDimension x="0" y="-2" />
 								</Offset>
 							</Anchor>
 						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_CAN_COLOR_BAR");
-								VUHDO_lnfCheckButtonOnLoad(self);
-								self:SetAttribute("custom_function_post", VUHDO_auraGroupsCanColorBarChanged);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K615);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<CheckButton name="$parentCanColorTextCheckButton" text="VUHDO_I18N_AURA_COLOR_TEXT" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCanColorBarCheckButton" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="-4" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_CAN_COLOR_TEXT");
-								VUHDO_lnfCheckButtonOnLoad(self);
-								self:SetAttribute("custom_function_post", VUHDO_auraGroupsCanColorTextChanged);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K616);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
-					<CheckButton name="$parentEnabledCheckButton" text="VUHDO_I18N_ENABLE" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentCanColorTextCheckButton" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="-4" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_ENABLED");
-								VUHDO_lnfCheckButtonOnLoad(self);
-
-								self:SetAttribute("custom_function_post", VUHDO_auraGroupsEnabledChanged);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
+					</Frame>
 
 				</Frames>
 			</Frame>

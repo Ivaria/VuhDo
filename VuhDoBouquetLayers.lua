@@ -34,7 +34,13 @@ local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_getHealthBar;
 local VUHDO_getBarText;
 local VUHDO_getLifeText;
+local VUHDO_getDebuffColorType;
+local VUHDO_getDebuffCustomColor;
+local VUHDO_getDebuffCanColorBar;
+local VUHDO_getDebuffCanColorText;
+
 local VUHDO_RAID;
+local VUHDO_AURA_GROUP_COLOR_CUSTOM;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
@@ -57,12 +63,17 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_INDICATOR_CONFIG = _G["VUHDO_INDICATOR_CONFIG"];
 	VUHDO_SECRET_TYPE_NONE = _G["VUHDO_SECRET_TYPE_NONE"];
 	VUHDO_SECRET_TYPE_BOOLEAN = _G["VUHDO_SECRET_TYPE_BOOLEAN"];
+	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_AURA_GROUP_COLOR_CUSTOM = _G["VUHDO_AURA_GROUP_COLOR_CUSTOM"];
 
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
 	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
-	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_getDebuffColorType = _G["VUHDO_getDebuffColorType"];
+	VUHDO_getDebuffCustomColor = _G["VUHDO_getDebuffCustomColor"];
+	VUHDO_getDebuffCanColorBar = _G["VUHDO_getDebuffCanColorBar"];
+	VUHDO_getDebuffCanColorText = _G["VUHDO_getDebuffCanColorText"];
 
 	return;
 
@@ -477,6 +488,8 @@ local tR;
 local tG;
 local tB;
 local tA;
+local tColorType;
+local tCustomColor;
 local tOverlay;
 local function VUHDO_applyCurveColorToBar(aBar, aLayerTemplate)
 
@@ -621,9 +634,30 @@ end
 
 
 --
-local function VUHDO_applyDispelColorToBar(aBar, aLayerTemplate)
+local function VUHDO_applyDispelColorToBar(aBar, aLayerTemplate, aUnit)
 
 	if not aLayerTemplate["hasDispels"] then
+		return;
+	end
+
+	if not VUHDO_getDebuffCanColorBar(aUnit) then
+		return;
+	end
+
+	tColorType = VUHDO_getDebuffColorType(aUnit);
+
+	if tColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM then
+		tCustomColor = VUHDO_getDebuffCustomColor(aUnit);
+
+		if tCustomColor then
+			aBar:GetStatusBarTexture():SetVertexColor(
+				tCustomColor["R"] or 1,
+				tCustomColor["G"] or 1,
+				tCustomColor["B"] or 1,
+				tCustomColor["O"] or 1
+			);
+		end
+
 		return;
 	end
 
@@ -650,7 +684,34 @@ function VUHDO_applyDispelTextColor(aHealthBar, aLayerTemplate, aUnit)
 		return;
 	end
 
+	if not VUHDO_getDebuffCanColorText(aUnit) then
+		return;
+	end
+
 	if not VUHDO_RAID[aUnit] or not VUHDO_RAID[aUnit]["debuffText"] then
+		return;
+	end
+
+	tColorType = VUHDO_getDebuffColorType(aUnit);
+
+	if tColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM then
+		tCustomColor = VUHDO_getDebuffCustomColor(aUnit);
+
+		if tCustomColor then
+			VUHDO_getBarText(aHealthBar):SetTextColor(
+				tCustomColor["TR"] or 1,
+				tCustomColor["TG"] or 1,
+				tCustomColor["TB"] or 1,
+				tCustomColor["TO"] or 1
+			);
+			VUHDO_getLifeText(aHealthBar):SetTextColor(
+				tCustomColor["TR"] or 1,
+				tCustomColor["TG"] or 1,
+				tCustomColor["TB"] or 1,
+				tCustomColor["TO"] or 1
+			);
+		end
+
 		return;
 	end
 
@@ -721,6 +782,8 @@ end
 local tResultSlot;
 local tNonSecretColor;
 local tNonSecretMaxColor;
+local tBarText;
+local tLifeText;
 function VUHDO_applyNonSecretColorsToBar(aBar, aLayerTemplate)
 
 	if not aBar or not aLayerTemplate then
@@ -759,6 +822,26 @@ function VUHDO_applyNonSecretColorsToBar(aBar, aLayerTemplate)
 
 	if tNonSecretColor then
 		VUHDO_setStatusBarVuhDoColor(aBar, tNonSecretColor, tNonSecretMaxColor);
+
+		if tNonSecretColor["useText"] then
+			tBarText = VUHDO_getBarText(aBar);
+
+			if tBarText then
+				tBarText:SetTextColor(
+					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
+					tNonSecretColor["TB"] or 1, tNonSecretColor["TO"] or 1
+				);
+			end
+
+			tLifeText = VUHDO_getLifeText(aBar);
+
+			if tLifeText then
+				tLifeText:SetTextColor(
+					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
+					tNonSecretColor["TB"] or 1, tNonSecretColor["TO"] or 1
+				);
+			end
+		end
 	end
 
 	return;
@@ -778,7 +861,7 @@ function VUHDO_applyAllLayersToBar(aButton, aBar, aLayerTemplate)
 
 	VUHDO_applyCurveColorToBar(aBar, aLayerTemplate);
 	VUHDO_applyBooleanLayers(aButton, aBar, aLayerTemplate);
-	VUHDO_applyDispelColorToBar(aBar, aLayerTemplate);
+	VUHDO_applyDispelColorToBar(aBar, aLayerTemplate, aButton["raidid"]);
 
 	return;
 

@@ -12,33 +12,45 @@ VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL = VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL or { }
 VUHDO_AURA_GROUPS_FILTER_SELECTED = VUHDO_AURA_GROUPS_FILTER_SELECTED or "";
 VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = VUHDO_AURA_GROUPS_EXCLUDE_SELECTED or "";
 VUHDO_AURA_GROUPS_PRIORITY = VUHDO_AURA_GROUPS_PRIORITY or 50;
+VUHDO_AURA_GROUPS_COLOR_TYPE = VUHDO_AURA_GROUPS_COLOR_TYPE or 1;
+VUHDO_AURA_GROUPS_CUSTOM_COLOR = VUHDO_AURA_GROUPS_CUSTOM_COLOR or {
+	["R"] = 0.6, ["G"] = 0.3, ["B"] = 0, ["O"] = 1,
+	["TR"] = 0.8, ["TG"] = 0.5, ["TB"] = 0, ["TO"] = 1,
+	["useBackground"] = true, ["useText"] = true, ["useOpacity"] = true,
+};
 VUHDO_AURA_GROUPS_CAN_COLOR_BAR = VUHDO_AURA_GROUPS_CAN_COLOR_BAR or false;
 VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = VUHDO_AURA_GROUPS_CAN_COLOR_TEXT or false;
 VUHDO_AURA_GROUPS_ENABLED = VUHDO_AURA_GROUPS_ENABLED or true;
 
 VUHDO_AURA_FILTER_OPTIONS = {
-	{ "HELPFUL", _G["VUHDO_I18N_AURA_GROUP_ALL_BUFFS"] or "All Buffs" },
-	{ "HARMFUL", _G["VUHDO_I18N_AURA_GROUP_ALL_DEBUFFS"] or "All Debuffs" },
-	{ "HELPFUL|PLAYER|RAID_IN_COMBAT", _G["VUHDO_I18N_AURA_GROUP_MY_HOTS"] or "My HoTs" },
-	{ "HELPFUL|RAID_IN_COMBAT", _G["VUHDO_I18N_AURA_GROUP_ALL_HOTS"] or "All HoTs" },
-	{ "HARMFUL|RAID_PLAYER_DISPELLABLE", _G["VUHDO_I18N_AURA_FILTER_HARMFUL_DISPELLABLE"] or "Dispellable" },
-	{ "HARMFUL|CROWD_CONTROL", _G["VUHDO_I18N_AURA_GROUP_CC"] or "CC Effects" },
-	{ "HELPFUL|BIG_DEFENSIVE", _G["VUHDO_I18N_AURA_GROUP_BIG_DEF"] or "Big Defensives" },
-	{ "HELPFUL|RAID|PLAYER", _G["VUHDO_I18N_AURA_GROUP_MY_BUFFS"] or "My Raid Buffs" },
-	{ "HELPFUL|RAID", _G["VUHDO_I18N_AURA_GROUP_ALL_RAID_BUFFS"] or "All Raid Buffs" },
-	{ "HARMFUL|RAID", _G["VUHDO_I18N_AURA_GROUP_RAID_DEBUFFS"] or "Raid Debuffs" },
-	{ "HELPFUL|IMPORTANT", _G["VUHDO_I18N_AURA_GROUP_IMPORTANT_BUFFS"] or "Important Buffs" },
-	{ "HARMFUL|IMPORTANT", _G["VUHDO_I18N_AURA_GROUP_IMPORTANT_DEBUFFS"] or "Important Debuffs" },
-	{ "HELPFUL|CANCELABLE", _G["VUHDO_I18N_AURA_GROUP_CANCELABLE"] or "Cancelable Buffs" },
-	{ "HELPFUL|NOT_CANCELABLE", _G["VUHDO_I18N_AURA_GROUP_NOT_CANCELABLE"] or "Not Cancelable Buffs" },
-	{ "HELPFUL|MAW", _G["VUHDO_I18N_AURA_GROUP_TORGHAST_ANIMA"] or "Torghast Anima Powers" },
-	{ "HARMFUL|INCLUDE_NAME_PLATE_ONLY|PLAYER", _G["VUHDO_I18N_AURA_GROUP_MY_NAMEPLATE"] or "My Nameplate Debuffs" },
-	{ "HARMFUL|INCLUDE_NAME_PLATE_ONLY", _G["VUHDO_I18N_AURA_GROUP_ALL_NAMEPLATE"] or "All Nameplate Debuffs" },
+	{ "HELPFUL", VUHDO_I18N_AURA_GROUP_ALL_BUFFS or "All Buffs" },
+	{ "HARMFUL", VUHDO_I18N_AURA_GROUP_ALL_DEBUFFS or "All Debuffs" },
+	{ "HELPFUL|PLAYER|RAID_IN_COMBAT", VUHDO_I18N_AURA_GROUP_MY_HOTS or "My HoTs" },
+	{ "HELPFUL|RAID_IN_COMBAT", VUHDO_I18N_AURA_GROUP_ALL_HOTS or "All HoTs" },
+	{ "HARMFUL|RAID_PLAYER_DISPELLABLE", VUHDO_I18N_AURA_FILTER_HARMFUL_DISPELLABLE or "Dispellable" },
+	{ "HARMFUL|CROWD_CONTROL", VUHDO_I18N_AURA_GROUP_CC or "CC Effects" },
+	{ "HELPFUL|BIG_DEFENSIVE", VUHDO_I18N_AURA_GROUP_BIG_DEF or "Big Defensives" },
+	{ "HELPFUL|RAID|PLAYER", VUHDO_I18N_AURA_GROUP_MY_BUFFS or "My Raid Buffs" },
+	{ "HELPFUL|RAID", VUHDO_I18N_AURA_GROUP_ALL_RAID_BUFFS or "All Raid Buffs" },
+	{ "HARMFUL|RAID", VUHDO_I18N_AURA_GROUP_RAID_DEBUFFS or "Raid Debuffs" },
+	{ "HELPFUL|IMPORTANT", VUHDO_I18N_AURA_GROUP_IMPORTANT_BUFFS or "Important Buffs" },
+	{ "HARMFUL|IMPORTANT", VUHDO_I18N_AURA_GROUP_IMPORTANT_DEBUFFS or "Important Debuffs" },
+	{ "HELPFUL|CANCELABLE", VUHDO_I18N_AURA_GROUP_CANCELABLE or "Cancelable Buffs" },
+	{ "HELPFUL|NOT_CANCELABLE", VUHDO_I18N_AURA_GROUP_NOT_CANCELABLE or "Not Cancelable Buffs" },
+	{ "HELPFUL|MAW", VUHDO_I18N_AURA_GROUP_TORGHAST_ANIMA or "Torghast Anima Powers" },
+	{ "HARMFUL|INCLUDE_NAME_PLATE_ONLY|PLAYER", VUHDO_I18N_AURA_GROUP_MY_NAMEPLATE or "My Nameplate Debuffs" },
+	{ "HARMFUL|INCLUDE_NAME_PLATE_ONLY", VUHDO_I18N_AURA_GROUP_ALL_NAMEPLATE or "All Nameplate Debuffs" },
 };
 
 VUHDO_AURA_EXCLUDE_FILTER_OPTIONS = {
-	{ "", _G["VUHDO_I18N_AURA_FILTER_NONE"] or "(None)" },
-	{ "PLAYER", _G["VUHDO_I18N_PLAYER"] or "Player" },
+	{ "", VUHDO_I18N_AURA_FILTER_NONE or "(None)" },
+	{ "PLAYER", VUHDO_I18N_PLAYER or "Player" },
+};
+
+VUHDO_AURA_GROUPS_COLOR_TYPE_OPTIONS = {
+	{ VUHDO_AURA_GROUP_COLOR_OFF or 1, VUHDO_I18N_AURA_COLOR_OFF or "Off" },
+	{ VUHDO_AURA_GROUP_COLOR_DISPEL or 2, VUHDO_I18N_AURA_COLOR_DISPEL or "Dispel" },
+	{ VUHDO_AURA_GROUP_COLOR_CUSTOM or 3, VUHDO_I18N_AURA_COLOR_CUSTOM or "Custom" },
 };
 
 local sSelectedGroupId = nil;
@@ -175,8 +187,10 @@ local tNameEditBox;
 local tFilterCombo;
 local tExcludeFilterCombo;
 local tPrioritySlider;
+local tColorTypeCombo;
 local tCanColorBarCheck;
 local tCanColorTextCheck;
+local tCustomColorSwatch;
 local tEnabledCheck;
 local tDeleteButton;
 local tIsBuiltIn;
@@ -189,8 +203,10 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	tFilterCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelFilterCombo"];
 	tExcludeFilterCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelExcludeFilterCombo"];
 	tPrioritySlider = _G["VuhDoNewOptionsAuraGroupsStorePanelPrioritySlider"];
+	tColorTypeCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelColorTypeCombo"];
 	tCanColorBarCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelCanColorBarCheckButton"];
 	tCanColorTextCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelCanColorTextCheckButton"];
+	tCustomColorSwatch = _G["VuhDoNewOptionsAuraGroupsStorePanelCustomColorTexture"];
 	tDeleteButton = _G["VuhDoNewOptionsAuraGroupsStorePanelDeleteButton"];
 
 	if tDeleteButton then
@@ -258,12 +274,34 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		end
 	end
 
+	if tColorTypeCombo and tGroup then
+		tColorTypeCombo:SetShown(true);
+
+		VUHDO_AURA_GROUPS_COLOR_TYPE = tGroup["colorType"] or ((tGroup["canColorBar"] or tGroup["canColorText"]) and (_G["VUHDO_AURA_GROUP_COLOR_DISPEL"] or 2) or (_G["VUHDO_AURA_GROUP_COLOR_OFF"] or 1));
+
+		VUHDO_lnfComboBoxInitFromModel(tColorTypeCombo);
+		tColorTypeCombo:Enable();
+		tColorTypeCombo:SetAlpha(1);
+
+		if tIsBuiltIn then
+			tColorTypeCombo:Disable();
+			tColorTypeCombo:SetAlpha(0.5);
+		end
+	end
+
 	if tCanColorBarCheck and tGroup then
 		tCanColorBarCheck:SetShown(true);
 		VUHDO_AURA_GROUPS_CAN_COLOR_BAR = tGroup["canColorBar"];
 		VUHDO_lnfCheckButtonInitFromModel(tCanColorBarCheck);
-		tCanColorBarCheck:Enable();
-		tCanColorBarCheck:SetAlpha(1);
+
+		if VUHDO_AURA_GROUPS_COLOR_TYPE == (VUHDO_AURA_GROUP_COLOR_OFF or 1) then
+			tCanColorBarCheck:Disable();
+			tCanColorBarCheck:SetAlpha(0.5);
+		else
+			tCanColorBarCheck:Enable();
+			tCanColorBarCheck:SetAlpha(1);
+		end
+
 		if tIsBuiltIn then
 			tCanColorBarCheck:Disable();
 			tCanColorBarCheck:SetAlpha(0.5);
@@ -274,11 +312,47 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		tCanColorTextCheck:SetShown(true);
 		VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = tGroup["canColorText"];
 		VUHDO_lnfCheckButtonInitFromModel(tCanColorTextCheck);
-		tCanColorTextCheck:Enable();
-		tCanColorTextCheck:SetAlpha(1);
+
+		if VUHDO_AURA_GROUPS_COLOR_TYPE == (VUHDO_AURA_GROUP_COLOR_OFF or 1) then
+			tCanColorTextCheck:Disable();
+			tCanColorTextCheck:SetAlpha(0.5);
+		else
+			tCanColorTextCheck:Enable();
+			tCanColorTextCheck:SetAlpha(1);
+		end
+
 		if tIsBuiltIn then
 			tCanColorTextCheck:Disable();
 			tCanColorTextCheck:SetAlpha(0.5);
+		end
+	end
+
+	if tCustomColorSwatch and tGroup then
+		if VUHDO_AURA_GROUPS_COLOR_TYPE == (VUHDO_AURA_GROUP_COLOR_CUSTOM or 3) then
+			tCustomColorSwatch:SetShown(true);
+
+			VUHDO_CONFIG["AURA_GROUPS"] = VUHDO_CONFIG["AURA_GROUPS"] or { };
+
+			if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+				VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] = { };
+			end
+
+			if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["customColor"] then
+				VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["customColor"] = tGroup["customColor"] and VUHDO_deepCopyTable(tGroup["customColor"]) or {
+					["R"] = 0.6, ["G"] = 0.3, ["B"] = 0, ["O"] = 1,
+					["TR"] = 0.8, ["TG"] = 0.5, ["TB"] = 0, ["TO"] = 1,
+					["useBackground"] = true, ["useText"] = true, ["useOpacity"] = true,
+				};
+			end
+
+			VUHDO_lnfSetModel(tCustomColorSwatch, "VUHDO_CONFIG.AURA_GROUPS." .. sSelectedGroupId .. ".customColor");
+
+			VUHDO_lnfInitColorSwatch(tCustomColorSwatch, VUHDO_I18N_AURA_GROUP_CUSTOM_COLOR, VUHDO_I18N_AURA_GROUP_CUSTOM_COLOR);
+			VUHDO_lnfSetTooltip(tCustomColorSwatch, VUHDO_I18N_TT.K616);
+			tCustomColorSwatch:SetAttribute("custom_function_post", VUHDO_auraGroupsCustomColorChanged);
+			VUHDO_lnfColorSwatchInitFromModel(tCustomColorSwatch);
+		else
+			tCustomColorSwatch:SetShown(false);
 		end
 	end
 
@@ -312,12 +386,20 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tPrioritySlider:Hide();
 		end
 
+		if tColorTypeCombo then
+			tColorTypeCombo:Hide();
+		end
+
 		if tCanColorBarCheck then
 			tCanColorBarCheck:Hide();
 		end
 
 		if tCanColorTextCheck then
 			tCanColorTextCheck:Hide();
+		end
+
+		if tCustomColorSwatch then
+			tCustomColorSwatch:Hide();
 		end
 
 		if _G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"] then
@@ -341,8 +423,9 @@ function VUHDO_auraGroupsOnNewGroup()
 		["filter"] = "HELPFUL|PLAYER",
 		["excludeFilter"] = nil,
 		["priority"] = 50,
-		["canColorBar"] = false,
-		["canColorText"] = false,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF or 1,
+		["canColorBar"] = true,
+		["canColorText"] = true,
 		["enabled"] = true,
 		["displayName"] = "New Group",
 		["isHarmful"] = false,
@@ -453,15 +536,14 @@ end
 
 
 --
-function VUHDO_auraGroupsCanColorBarChanged(aCheckButton)
+function VUHDO_auraGroupsColorTypeChanged(aComboBox, aValue, anArrayModel)
 
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
-		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canColorBar"] = aCheckButton:GetChecked();
+		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["colorType"] = aValue or (_G["VUHDO_AURA_GROUP_COLOR_OFF"] or 1);
 	end
 
-	if _G["VUHDO_rebuildCanColorBarGroupsCache"] then
-		_G["VUHDO_rebuildCanColorBarGroupsCache"]();
-	end
+	VUHDO_auraGroupsRefreshRightPanel();
+	VUHDO_rebuildCanColorBarGroupsCache();
 
 	return;
 
@@ -470,15 +552,39 @@ end
 
 
 --
-function VUHDO_auraGroupsCanColorTextChanged(aCheckButton)
+function VUHDO_auraGroupsCustomColorChanged(aColorSwatch)
+
+	VUHDO_rebuildCanColorBarGroupsCache();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsCanColorBarChanged(aParent, aValue)
 
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
-		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canColorText"] = aCheckButton:GetChecked();
+		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canColorBar"] = aValue;
 	end
 
-	if _G["VUHDO_rebuildCanColorBarGroupsCache"] then
-		_G["VUHDO_rebuildCanColorBarGroupsCache"]();
+	VUHDO_rebuildCanColorBarGroupsCache();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsCanColorTextChanged(aParent, aValue)
+
+	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canColorText"] = aValue;
 	end
+
+	VUHDO_rebuildCanColorBarGroupsCache();
 
 	return;
 
