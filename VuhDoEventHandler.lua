@@ -22,6 +22,8 @@ local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
 
 local VUHDO_INSTANCE = nil;
 
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+
 -- BURST CACHE ---------------------------------------------------
 
 local VUHDO_RAID;
@@ -1182,9 +1184,14 @@ do
 						VUHDO_setHealth("focus", 1); -- VUHDO_UPDATE_ALL
 					else
 						VUHDO_clearUnitAuraCache("focus");
-						VUHDO_removeHots("focus");
-						VUHDO_removeAllDebuffIcons("focus");
-						VUHDO_resetDebuffsFor("focus");
+
+						if sSecretsEnabled then
+							VUHDO_hideAurasForUnit("focus");
+						else
+							VUHDO_removeHots("focus");
+							VUHDO_removeAllDebuffIcons("focus");
+							VUHDO_resetDebuffsFor("focus");
+						end
 
 						if VUHDO_RAID["focus"] then
 							table.wipe(VUHDO_RAID["focus"]);

@@ -1,8 +1,8 @@
+local _;
+
 local pairs = pairs;
 local UnitExists = UnitExists;
 local UnitIsUnit = UnitIsUnit;
-local _;
-
 
 local VUHDO_RAID = { };
 local VUHDO_INTERNAL_TOGGLES = { };
@@ -18,6 +18,8 @@ local VUHDO_getUnitButtonsSafe;
 local VUHDO_getPlayerTargetFrame;
 local VUHDO_cleanupSpellTraceForUnit;
 local VUHDO_applyAllLayersToBorder;
+
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 
 
@@ -90,9 +92,14 @@ function VUHDO_updatePlayerTarget()
 			VUHDO_setHealth("target", 1); -- VUHDO_UPDATE_ALL
 		else
 			VUHDO_clearUnitAuraCache("target");
-			VUHDO_removeHots("target");
-			VUHDO_removeAllDebuffIcons("target");
-			VUHDO_resetDebuffsFor("target");
+
+			if sSecretsEnabled then
+				VUHDO_hideAurasForUnit("target");
+			else
+				VUHDO_removeHots("target");
+				VUHDO_removeAllDebuffIcons("target");
+				VUHDO_resetDebuffsFor("target");
+			end
 
 			VUHDO_updateTargetBars("target");
 

@@ -1403,7 +1403,11 @@ function VUHDO_updateHots(aUnit, anInfo, aSpellName, aSpellId)
 
 	-- FIXME: should only do this once on vehicle entrance
 	if anInfo["isVehicle"] then
-		VUHDO_removeHots(aUnit);
+		if sSecretsEnabled then
+			VUHDO_hideAurasForUnit(aUnit);
+		else
+			VUHDO_removeHots(aUnit);
+		end
 
 		aUnit = anInfo["petUnit"];
 

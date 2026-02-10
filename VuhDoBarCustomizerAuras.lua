@@ -364,6 +364,8 @@ local sAuraBackdropInfo = {
 	},
 };
 
+local sAurasSuspended = false;
+
 
 
 --
@@ -1179,6 +1181,77 @@ function VUHDO_releaseAllAuraFrames()
 	end
 
 	twipe(VUHDO_AURA_FRAMES);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_suspendAuras(aSuspend)
+
+	sAurasSuspended = aSuspend;
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_hideAllAuras()
+
+	for tButtonName, tButtonFrames in pairs(VUHDO_AURA_FRAMES) do
+		for tAnchorIndex, tAnchorFrames in pairs(tButtonFrames) do
+			for tSlotIndex, tFrame in pairs(tAnchorFrames) do
+				if tFrame then
+					tFrame:Hide();
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local tButtonName;
+function VUHDO_hideAurasForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+		tButtonName = tButton:GetName();
+
+		if VUHDO_AURA_FRAMES[tButtonName] then
+			for tAnchorIndex, tAnchorFrames in pairs(VUHDO_AURA_FRAMES[tButtonName]) do
+				for tSlotIndex, tFrame in pairs(tAnchorFrames) do
+					if tFrame then
+						tFrame:Hide();
+					end
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_showAllAuras()
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_updateAuraDisplaysForUnit(tUnit);
+	end
 
 	return;
 
@@ -2449,6 +2522,10 @@ end
 --
 function VUHDO_updateAuraDisplaysForUnit(aUnit)
 
+	if sAurasSuspended then
+		return;
+	end
+
 	if not aUnit then
 		return;
 	end
@@ -2504,6 +2581,10 @@ end
 
 --
 function VUHDO_updateAuraDisplaysForUnit(aUnit)
+
+	if sAurasSuspended then
+		return;
+	end
 
 	if not aUnit then
 		return;

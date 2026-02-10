@@ -25,6 +25,8 @@ local VUHDO_determineDebuff;
 local VUHDO_updateHotPredicate;
 local VUHDO_removeHots;
 
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
 
@@ -836,8 +838,6 @@ function VUHDO_fullAuraRefresh(aUnit)
 	end
 
 	VUHDO_clearUnitAuraCache(aUnit);
-
-	VUHDO_removeHots(aUnit);
 
 	tAuras = GetUnitAuras(aUnit, "HELPFUL|HARMFUL", 80, 0, 0);
 

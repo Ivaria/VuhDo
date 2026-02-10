@@ -466,10 +466,11 @@
 							</Scripts>
 						</Frame>
 
-						-- HotBar 1-3
+						<!-- HotBar 1-3						
 						<StatusBar name="$parentHotBar1" inherits="VuhDoHotBarTemplate"> </StatusBar>
 						<StatusBar name="$parentHotBar2" inherits="VuhDoHotBarTemplate"> </StatusBar>
 						<StatusBar name="$parentHotBar3" inherits="VuhDoHotBarTemplate"> </StatusBar>
+ 						-->
 
 						-- HOTs Ic1-5, 9, 10 muss Button sein fuer Masque
 						-- Custom debuffs 40 - 44

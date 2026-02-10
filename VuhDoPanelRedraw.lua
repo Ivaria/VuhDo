@@ -32,6 +32,7 @@ local sWaitingIndividualRedraws = { };
 local sQueuedAllPanelsRequests = { };
 local sQueuedIndividualRequests = { };
 local sIsManaBouquet = { };
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 local VUHDO_SEMAPHORE_CONFIG = {
 	["BUTTON_INIT_TIME_US"] = 1200,
@@ -1397,9 +1398,12 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	if sPanelConfig[aPanelNum]["statusTexture"] then
 		for tCnt =  1, 19 do
 			tBar = VUHDO_getHealthBar(aButton, tCnt);
-			tBar:SetStatusBarTexture(sPanelConfig[aPanelNum]["statusTexture"]);
-			tBar.statusTexture = tBar:GetStatusBarTexture();
-			VUHDO_PixelUtil.ApplySettings(tBar.statusTexture);
+
+			if tBar then
+				tBar:SetStatusBarTexture(sPanelConfig[aPanelNum]["statusTexture"]);
+				tBar.statusTexture = tBar:GetStatusBarTexture();
+				VUHDO_PixelUtil.ApplySettings(tBar.statusTexture);
+			end
 		end
 	end
 
@@ -1456,9 +1460,13 @@ function VUHDO_initHealButton(aButton, aPanelNum)
 	VUHDO_initSideBarRight(aButton, sHealthBar, aPanelNum);
 
 	VUHDO_initAggroBar(aButton, sHealthBar, aPanelNum);
-	VUHDO_initHotBars(aPanelNum);
-	VUHDO_initAllHotIcons(aPanelNum);
-	VUHDO_initCustomDebuffs(aPanelNum);
+
+	if not sSecretsEnabled then
+		VUHDO_initHotBars(aPanelNum);
+		VUHDO_initAllHotIcons(aPanelNum);
+		VUHDO_initCustomDebuffs(aPanelNum);
+	end
+
 	VUHDO_initAuraAnchorsForButton(aButton, aPanelNum);
 	VUHDO_initPrivateAuras(sHealthBar, aButton, aPanelNum);
 	VUHDO_initRaidIcon(sHealthBar, VUHDO_getBarRoleIcon(aButton, 50), sPanelConfig[aPanelNum]["barScaling"]["barWidth"], aPanelNum);

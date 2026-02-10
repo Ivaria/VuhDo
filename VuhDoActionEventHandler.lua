@@ -14,6 +14,7 @@ local pairs = pairs;
 local GameTooltip = GameTooltip;
 
 local sMouseoverUnit = nil;
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 
 local VUHDO_updateBouquetsForEvent;
@@ -196,26 +197,49 @@ function VUHDO_hideAllPlayerIcons()
 		for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
 			if tButton:IsShown() then
 				VUHDO_initButtonStatics(tButton, tPanelNum);
-				VUHDO_initAllHotIcons(tPanelNum);
+
+				if not sSecretsEnabled then
+					VUHDO_initAllHotIcons(tPanelNum);
+				end
 			end
 		end
 	end
 
-	VUHDO_removeAllHots();
-	VUHDO_suspendHoTs(false);
+	if sSecretsEnabled then
+		VUHDO_suspendAuras(false);
+		VUHDO_showAllAuras();
+	else
+		VUHDO_removeAllHots();
+		VUHDO_suspendHoTs(false);
+	end
+
+	return;
+
 end
 
 
 
 --
 local function VUHDO_showAllPlayerIcons(aPanel)
-	VUHDO_suspendHoTs(true);
-	VUHDO_removeAllHots();
+
+	if sSecretsEnabled then
+		VUHDO_suspendAuras(true);
+		VUHDO_hideAllAuras();
+	else
+		VUHDO_suspendHoTs(true);
+		VUHDO_removeAllHots();
+	end
+
 	local tPanelNum = VUHDO_getPanelNum(aPanel);
 
 	for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
-		if tButton:IsShown() then VUHDO_showPlayerIcons(tButton, tPanelNum); end
+		if tButton:IsShown() then
+			VUHDO_showPlayerIcons(tButton, tPanelNum);
+		end
 	end
+
+return;
+
 end
 
 

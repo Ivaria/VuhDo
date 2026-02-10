@@ -189,7 +189,7 @@ function VUHDO_updateUnitRange(aUnit, aMode)
 				VUHDO_updateDirectionFrame();
 			end
 		else
-			if tUnitInfo["range"] ~= tIsInRange then
+			if issecretvalue(tUnitInfo["range"]) or tUnitInfo["range"] ~= tIsInRange then
 				tUnitInfo["range"] = tIsInRange;
 
 				VUHDO_updateHealthBarsFor(aUnit, 5);

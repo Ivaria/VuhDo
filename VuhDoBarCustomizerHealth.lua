@@ -1352,8 +1352,12 @@ function VUHDO_updateAllRaidBars()
 	end
 
 	if VUHDO_REMOVE_HOTS then
-		VUHDO_removeAllHots();
-		VUHDO_updateAllHoTs();
+		if sSecretsEnabled then
+			VUHDO_showAllAuras();
+		else
+			VUHDO_removeAllHots();
+			VUHDO_updateAllHoTs();
+		end
 
 		if VUHDO_INTERNAL_TOGGLES[18] then -- VUHDO_UPDATE_MOUSEOVER_CLUSTER
 			VUHDO_updateClusterHighlights();

@@ -1,4 +1,5 @@
 local sIsRestoredAfterDc = false;
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 VUHDO_IN_COMBAT_RELOG = false;
 
@@ -342,8 +343,13 @@ function VUHDO_setHealth(aUnit, aMode)
 		tIsDead = UnitIsDeadOrGhost(aUnit) and not UnitIsFeignDeath(aUnit);
 
 		if tIsDead then
-			VUHDO_removeHots(aUnit);
-			VUHDO_removeAllDebuffIcons(aUnit);
+			if sSecretsEnabled then
+				VUHDO_hideAurasForUnit(aUnit);
+			else
+				VUHDO_removeHots(aUnit);
+				VUHDO_removeAllDebuffIcons(aUnit);
+			end
+
 			VUHDO_clearUnitAuraCache(aUnit);
 
 			if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
@@ -967,10 +973,15 @@ function VUHDO_reloadRaidMembers()
 				VUHDO_setHealth(tBossUnitId, 1); -- VUHDO_UPDATE_ALL
 			else
 				-- FIXME: find a more efficient way to trigger boss removal
-				VUHDO_removeHots(tBossUnitId);
-				VUHDO_removeAllDebuffIcons(tBossUnitId);
+				if sSecretsEnabled then
+					VUHDO_hideAurasForUnit(tBossUnitId);
+				else
+					VUHDO_removeHots(tBossUnitId);
+					VUHDO_removeAllDebuffIcons(tBossUnitId);
+					VUHDO_resetDebuffsFor(tBossUnitId);
+				end
+
 				VUHDO_clearUnitAuraCache(tBossUnitId);
-				VUHDO_resetDebuffsFor(tBossUnitId);
 
 				if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
 					VUHDO_cleanupSpellTraceForUnit(tBossUnitId);
@@ -1108,10 +1119,15 @@ function VUHDO_refreshRaidMembers()
 			end
 		else
 			-- FIXME: find a more efficient way to trigger boss removal
-			VUHDO_removeHots(tBossUnitId);
-			VUHDO_removeAllDebuffIcons(tBossUnitId);
+			if sSecretsEnabled then
+				VUHDO_hideAurasForUnit(tBossUnitId);
+			else
+				VUHDO_removeHots(tBossUnitId);
+				VUHDO_removeAllDebuffIcons(tBossUnitId);
+				VUHDO_resetDebuffsFor(tBossUnitId);
+			end
+
 			VUHDO_clearUnitAuraCache(tBossUnitId);
-			VUHDO_resetDebuffsFor(tBossUnitId);
 
 			if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
 				VUHDO_cleanupSpellTraceForUnit(tBossUnitId);
