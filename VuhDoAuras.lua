@@ -19,7 +19,6 @@ local VUHDO_RAID;
 local VUHDO_I18N_AURA_GROUP_NAMES;
 local VUHDO_ACTIVE_HOTS;
 
-local VUHDO_deepCopyTable;
 local VUHDO_generateUUID;
 local VUHDO_determineDebuff;
 local VUHDO_updateHotPredicate;
@@ -123,7 +122,6 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_I18N_AURA_GROUP_NAMES = _G["VUHDO_I18N_AURA_GROUP_NAMES"];
 	VUHDO_ACTIVE_HOTS = _G["VUHDO_ACTIVE_HOTS"];
 
-	VUHDO_deepCopyTable = _G["VUHDO_deepCopyTable"];
 	VUHDO_generateUUID = _G["VUHDO_generateUUID"];
 	VUHDO_determineDebuff = _G["VUHDO_determineDebuff"];
 	VUHDO_updateHotPredicate = _G["VUHDO_updateHotPredicate"];
@@ -1399,12 +1397,20 @@ do
 		tAuraAnchors["1"]["maxColumns"] = 9;
 		tAuraAnchors["1"]["maxRows"] = 1;
 
-		if tHots["TIMER_TEXT"] and VUHDO_deepCopyTable then
+		if tHots["TIMER_TEXT"] then
 			tAuraAnchors["1"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tHots["TIMER_TEXT"]);
+
+			if not tAuraAnchors["1"]["TIMER_TEXT"]["COLOR"] then
+				tAuraAnchors["1"]["TIMER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1);
+			end
 		end
 
-		if tHots["COUNTER_TEXT"] and VUHDO_deepCopyTable then
+		if tHots["COUNTER_TEXT"] then
 			tAuraAnchors["1"]["COUNTER_TEXT"] = VUHDO_deepCopyTable(tHots["COUNTER_TEXT"]);
+
+			if not tAuraAnchors["1"]["COUNTER_TEXT"]["COLOR"] then
+				tAuraAnchors["1"]["COUNTER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1);
+			end
 		end
 
 		tIconRadioValue = tHots["iconRadioValue"];
@@ -1424,10 +1430,15 @@ do
 		tStacksRadioValue = tHots["stacksRadioValue"];
 
 		if tStacksRadioValue then
-			if tStacksRadioValue == 3 then
-				tAuraAnchors["1"]["stackType"] = 2;
-			else
+			if tStacksRadioValue == 1 then
+				tAuraAnchors["1"]["showStacks"] = 3;
 				tAuraAnchors["1"]["stackType"] = 1;
+			elseif tStacksRadioValue == 2 then
+				tAuraAnchors["1"]["showStacks"] = 1;
+				tAuraAnchors["1"]["stackType"] = 1;
+			elseif tStacksRadioValue == 3 then
+				tAuraAnchors["1"]["showStacks"] = 1;
+				tAuraAnchors["1"]["stackType"] = 2;
 			end
 		end
 
@@ -1436,15 +1447,15 @@ do
 
 		if tHotsColors then
 			if tHotsColors["isFadeOut"] == true then
-				tAuraAnchors["1"]["fadeOnLow"] = 2;
-			elseif tHotsColors["isFadeOut"] == false then
 				tAuraAnchors["1"]["fadeOnLow"] = 1;
+			elseif tHotsColors["isFadeOut"] == false then
+				tAuraAnchors["1"]["fadeOnLow"] = 3;
 			end
 
 			if tHotsColors["isFlashWhenLow"] == true then
-				tAuraAnchors["1"]["flashOnLow"] = 2;
-			elseif tHotsColors["isFlashWhenLow"] == false then
 				tAuraAnchors["1"]["flashOnLow"] = 1;
+			elseif tHotsColors["isFlashWhenLow"] == false then
+				tAuraAnchors["1"]["flashOnLow"] = 3;
 			end
 		end
 
@@ -1537,6 +1548,7 @@ do
 	local tWrapDir;
 	local tConfig;
 	local tPanelSetup;
+	local tBarHeight;
 	function VUHDO_migrateCustomDebuffsToAuraAnchors(aPanelNum)
 
 		tConfig = _G["VUHDO_CONFIG"];
@@ -1555,7 +1567,10 @@ do
 
 		tAuraAnchors["2"]["radioValue"] = VUHDO_POINT_TO_RADIOVALUE[tPoint];
 		tAuraAnchors["2"]["fixedSlots"] = true;
-		tAuraAnchors["2"]["size"] = tDebuff["scale"] and (tDebuff["scale"] * 100) or 20;
+
+		tBarHeight = tPanelSetup[aPanelNum]["SCALING"] and tPanelSetup[aPanelNum]["SCALING"]["barHeight"] or 40;
+		tAuraAnchors["2"]["size"] = tDebuff["scale"] and floor(tBarHeight * tDebuff["scale"] * 0.7) or 20;
+
 		tAuraAnchors["2"]["offsetX"] = tDebuff["xAdjust"] or -2;
 		tAuraAnchors["2"]["offsetY"] = tDebuff["yAdjust"] or -34;
 		tAuraAnchors["2"]["maxDisplay"] = tDebuff["max_num"] or 3;
@@ -1564,12 +1579,20 @@ do
 		tAuraAnchors["2"]["maxColumns"] = tDebuff["max_num"] or 3;
 		tAuraAnchors["2"]["maxRows"] = 1;
 
-		if tDebuff["TIMER_TEXT"] and VUHDO_deepCopyTable then
+		if tDebuff["TIMER_TEXT"] then
 			tAuraAnchors["2"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tDebuff["TIMER_TEXT"]);
+
+			if not tAuraAnchors["2"]["TIMER_TEXT"]["COLOR"] then
+				tAuraAnchors["2"]["TIMER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1);
+			end
 		end
 
-		if tDebuff["COUNTER_TEXT"] and VUHDO_deepCopyTable then
+		if tDebuff["COUNTER_TEXT"] then
 			tAuraAnchors["2"]["COUNTER_TEXT"] = VUHDO_deepCopyTable(tDebuff["COUNTER_TEXT"]);
+
+			if not tAuraAnchors["2"]["COUNTER_TEXT"]["COLOR"] then
+				tAuraAnchors["2"]["COUNTER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1);
+			end
 		end
 
 		return;

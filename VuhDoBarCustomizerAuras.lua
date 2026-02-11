@@ -577,7 +577,7 @@ function VUHDO_initAuraDurationCurves()
 	sCurveTimerVisible:SetType(Enum.LuaCurveType.Step);
 	sCurveTimerVisible:AddPoint(0, 0);
 	sCurveTimerVisible:AddPoint(0.1, 1);
-	sCurveTimerVisible:AddPoint(9.8, 0);
+	sCurveTimerVisible:AddPoint(9.99, 0);
 
 	sCurveFlashZone = CreateCurve();
 	sCurveFlashZone:SetType(Enum.LuaCurveType.Step);
@@ -679,23 +679,16 @@ local function VUHDO_auraTimerOnLoop()
 		if tDurationObj and sCurveTimerVisible then
 			tRemainingSeconds = tDurationObj:GetRemainingDuration();
 
-			if AbbreviateNumbers then
-				tDurationText = AbbreviateNumbers(tRemainingSeconds, sTimeAbbrevData);
-				tFontString:SetText(tDurationText or "");
-			elseif tDurationObj.HasSecretValues and not tDurationObj:HasSecretValues() then
-				tDurationText = format("%.0f", tRemainingSeconds);
-				tFontString:SetText(tDurationText);
-			else
-				tFontString:SetText("");
-			end
-
-			tTimerVisibility = tDurationObj:EvaluateRemainingDuration(sCurveTimerVisible);
-			tFontString:SetAlpha(tTimerVisibility);
+			tDurationText = AbbreviateNumbers(tRemainingSeconds, sTimeAbbrevData);
+			tFontString:SetText(tDurationText or "");
 
 			if sCurveTimerColor then
 				tTimerColorMixin = tDurationObj:EvaluateRemainingDuration(sCurveTimerColor);
 				tFontString:SetTextColor(tTimerColorMixin:GetRGBA());
 			end
+
+			tTimerVisibility = tDurationObj:EvaluateRemainingDuration(sCurveTimerVisible);
+			tFontString:SetAlpha(tTimerVisibility);
 		end
 	end
 
@@ -2353,18 +2346,8 @@ do
 			if tShowTimer and aDurationObj and sCurveTimerVisible then
 				tRemainingSeconds = aDurationObj:GetRemainingDuration();
 
-				if AbbreviateNumbers then
-					tDurationText = AbbreviateNumbers(tRemainingSeconds, sTimeAbbrevData);
-					aTimerText:SetText(tDurationText or "");
-				elseif aDurationObj.HasSecretValues and not aDurationObj:HasSecretValues() then
-					tDurationText = format("%.0f", tRemainingSeconds);
-					aTimerText:SetText(tDurationText);
-				else
-					aTimerText:SetText("");
-				end
-
-				tTimerVisibility = aDurationObj:EvaluateRemainingDuration(sCurveTimerVisible);
-				aTimerText:SetAlpha(tTimerVisibility);
+				tDurationText = AbbreviateNumbers(tRemainingSeconds, sTimeAbbrevData);
+				aTimerText:SetText(tDurationText or "");
 
 				if sCurveTimerColor then
 					tTimerColorMixin = aDurationObj:EvaluateRemainingDuration(sCurveTimerColor);
@@ -2375,9 +2358,13 @@ do
 					aTimerText:SetTextColor(1, 1, 1, 1);
 				end
 
+				tTimerVisibility = aDurationObj:EvaluateRemainingDuration(sCurveTimerVisible);
+				aTimerText:SetAlpha(tTimerVisibility);
+
 				VUHDO_registerAuraTimerText(aTimerText, aDurationObj);
 			else
 				VUHDO_unregisterAuraTimerText(aTimerText);
+
 				aTimerText:SetText("");
 				aTimerText:SetTextColor(1, 1, 1, 1);
 				aTimerText:SetAlpha(1);
