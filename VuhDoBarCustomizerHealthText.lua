@@ -408,7 +408,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 			tLifeString = "";
 			tHasLifeText = false;
 		else
-			if sSecretsEnabled and tInfo["hasSecretHealth"] then
+			if sSecretsEnabled and (tInfo["hasSecretHealth"] or tLifeConfig["showEffectiveHp"]) then
 				tLifeString, tHasLifeText = VUHDO_buildLifeTextSecret(tUnit, tLifeConfig, anIsTarget);
 			else
 				tLifeString, tHasLifeText = VUHDO_buildLifeTextClassic(tUnit, tInfo, tSetup, tLifeConfig, anIsTarget);
