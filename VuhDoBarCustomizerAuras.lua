@@ -3,7 +3,7 @@ local _;
 local pairs = pairs;
 local twipe = table.wipe;
 local floor = math.floor;
-local format = string.format;
+local max = math.max;
 
 local InCombatLockdown = InCombatLockdown;
 local CreateFrame = CreateFrame;
@@ -412,6 +412,49 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	sBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
 
 	return;
+
+end
+
+
+
+--
+local tPanelNum;
+local tBarHeight;
+local function VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig)
+
+	tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+	tBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+
+	return tBarHeight * (anAnchorConfig["size"] or 40) * 0.01;
+
+end
+
+
+
+--
+local tPanelNum;
+local tBarHeight;
+local function VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig)
+
+	tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+	tBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+
+	return tBarHeight * (anAnchorConfig["barHeight"] or 30) * 0.01;
+
+end
+
+
+
+--
+local tBarWidth;
+local tAvailableWidth;
+local function VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig)
+
+	tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+	tBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
+	tAvailableWidth = max(0, tBarWidth - VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig));
+
+	return tAvailableWidth * (anAnchorConfig["barWidth"] or 100) * 0.01;
 
 end
 
@@ -1612,15 +1655,13 @@ do
 
 		tGrowthDir = sGrowthOffsets[anAnchorConfig["growthDir"]] or sGrowthOffsets["RIGHT"];
 		tWrapDir = sGrowthOffsets[anAnchorConfig["wrapDir"]] or sGrowthOffsets["DOWN"];
-		tSize = anAnchorConfig["size"] or 16;
+		tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 		tSpacing = anAnchorConfig["spacing"] or 2;
 		tMaxCols = anAnchorConfig["maxColumns"] or 5;
 
 		if aFrame.childBar then
-			tAuraDefaults = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["AURA_DEFAULTS"];
-
-			tBarWidth = anAnchorConfig["barWidth"] or (tAuraDefaults and tAuraDefaults["barWidth"]) or 100;
-			tBarHeight = anAnchorConfig["barHeight"] or (tAuraDefaults and tAuraDefaults["barHeight"]) or 12;
+			tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
+			tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
 
 			tIconSize = tBarHeight;
 			tTotalWidth = tIconSize + tBarWidth;
@@ -1740,7 +1781,7 @@ do
 		tXOff = (tSlotPos["xPercent"] or 0) * tBarWidth;
 		tYOff = (tSlotPos["yPercent"] or 0) * tBarHeight;
 
-		tSize = anAnchorConfig["size"] or 16;
+		tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 
 		if tLayerIndex and tLayerIndex > 0 then
 			tGrowthDir = sGrowthOffsets[anAnchorConfig["growthDir"]] or sGrowthOffsets["RIGHT"];
@@ -1807,10 +1848,10 @@ do
 
 		tRadioValue = anAnchorConfig["radioValue"];
 
-		tSize = anAnchorConfig["size"] or 16;
+		tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 		tAuraDefaults = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["AURA_DEFAULTS"];
-		tBarWidth = anAnchorConfig["barWidth"] or (tAuraDefaults and tAuraDefaults["barWidth"]) or 100;
-		tBarHeight = anAnchorConfig["barHeight"] or (tAuraDefaults and tAuraDefaults["barHeight"]) or 12;
+		tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
+		tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
 		tIconSize = tBarHeight;
 
 		if tRadioValue and tRadioValue <= 17 then
@@ -1824,15 +1865,13 @@ do
 			tGrowthDir = sGrowthOffsets[anAnchorConfig["growthDir"]] or sGrowthOffsets["LEFT"];
 			tWrapDir = sGrowthOffsets[anAnchorConfig["wrapDir"]] or sGrowthOffsets["DOWN"];
 
-			tSize = anAnchorConfig["size"] or 16;
+			tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 			tSpacing = anAnchorConfig["spacing"] or 2;
 			tMaxCols = anAnchorConfig["maxColumns"] or 5;
 
 			if aFrame.childBar then
-				tAuraDefaults = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["AURA_DEFAULTS"];
-
-				tBarWidth = anAnchorConfig["barWidth"] or (tAuraDefaults and tAuraDefaults["barWidth"]) or 100;
-				tBarHeight = anAnchorConfig["barHeight"] or (tAuraDefaults and tAuraDefaults["barHeight"]) or 12;
+				tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
+				tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
 
 				tIconSize = tBarHeight;
 				tTotalWidth = tIconSize + tBarWidth;
@@ -1880,7 +1919,7 @@ do
 				VUHDO_PixelUtil.SetPoint(tChild, "LEFT", aFrame.childIcon, "RIGHT", 0, 0);
 				VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
 
-				tSize = anAnchorConfig["size"] or 16;
+				tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 
 				if aFrame.timerText and anAnchorConfig["TIMER_TEXT"] and VUHDO_customizeIconText then
 					VUHDO_customizeIconText(aFrame.childIcon, tSize, aFrame.timerText, anAnchorConfig["TIMER_TEXT"]);
@@ -1901,7 +1940,7 @@ do
 
 			tChild:SetAlpha(1);
 
-			tSize = anAnchorConfig["size"] or 16;
+			tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 
 			if tChild.timerText and anAnchorConfig["TIMER_TEXT"] and VUHDO_customizeIconText then
 				VUHDO_customizeIconText(tChild, tSize, tChild.timerText, anAnchorConfig["TIMER_TEXT"]);

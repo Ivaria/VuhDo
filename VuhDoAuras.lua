@@ -1339,16 +1339,13 @@ do
 	local tAuraAnchors;
 	local tRadioValue;
 	local tPanelSetup;
-	local tBarHeight;
-	local tBaseSize;
 	local tOriginalRadioValue;
 	local tMostCommonScale;
+	local tSizePct;
 	local tIconSlotCount;
 	local tBarSlotCount;
 	local tSlots;
 	local tBarsConfig;
-	local tBarWidth;
-	local tScaling;
 	local tIconRadioValue;
 	local tStacksRadioValue;
 	local tBarColors;
@@ -1378,16 +1375,15 @@ do
 		tAuraAnchors["1"]["radioValue"] = tRadioValue;
 		tAuraAnchors["1"]["fixedSlots"] = true;
 
-		tBarHeight = tPanelSetup[aPanelNum]["SCALING"] and tPanelSetup[aPanelNum]["SCALING"]["barHeight"] or 40;
-		tBaseSize = tBarHeight * (tHots["size"] or 40) * 0.01;
 		tOriginalRadioValue = tHots["radioValue"];
+		tMostCommonScale = VUHDO_getMostCommonSlotScale(tHots);
+		tSizePct = (tHots["size"] or 40) * tMostCommonScale;
 
 		if 20 == tOriginalRadioValue or 21 == tOriginalRadioValue then
-			tBaseSize = tBaseSize * 0.5;
+			tSizePct = tSizePct * 0.5;
 		end
 
-		tMostCommonScale = VUHDO_getMostCommonSlotScale(tHots);
-		tAuraAnchors["1"]["size"] = floor(tBaseSize * tMostCommonScale);
+		tAuraAnchors["1"]["size"] = floor(tSizePct);
 
 		if tRadioValue <= 14 then
 			tAuraAnchors["1"]["growthDir"] = VUHDO_HOTS_RADIOVALUE_GROWTH[tRadioValue] or "RIGHT";
@@ -1481,14 +1477,10 @@ do
 			tAuraAnchors["1"]["style"] = "bars";
 
 			tBarsConfig = tHots["BARS"];
-			tScaling = tPanelSetup[aPanelNum]["SCALING"];
 
-			if tBarsConfig and tScaling then
-				tBarWidth = (tScaling["barWidth"] or 80);
-				tBarHeight = floor((tScaling["barHeight"] or 40) * (tBarsConfig["width"] or 25) * 0.01);
-
-				tAuraAnchors["1"]["barWidth"] = tBarWidth;
-				tAuraAnchors["1"]["barHeight"] = tBarHeight;
+			if tBarsConfig then
+				tAuraAnchors["1"]["barWidth"] = 100;
+				tAuraAnchors["1"]["barHeight"] = tBarsConfig["width"] or 25;
 			end
 
 			tHotBarsConfig = VUHDO_INDICATOR_CONFIG and
@@ -1548,7 +1540,6 @@ do
 	local tWrapDir;
 	local tConfig;
 	local tPanelSetup;
-	local tBarHeight;
 	function VUHDO_migrateCustomDebuffsToAuraAnchors(aPanelNum)
 
 		tConfig = _G["VUHDO_CONFIG"];
@@ -1568,8 +1559,7 @@ do
 		tAuraAnchors["2"]["radioValue"] = VUHDO_POINT_TO_RADIOVALUE[tPoint];
 		tAuraAnchors["2"]["fixedSlots"] = true;
 
-		tBarHeight = tPanelSetup[aPanelNum]["SCALING"] and tPanelSetup[aPanelNum]["SCALING"]["barHeight"] or 40;
-		tAuraAnchors["2"]["size"] = tDebuff["scale"] and floor(tBarHeight * tDebuff["scale"] * 0.7) or 20;
+		tAuraAnchors["2"]["size"] = tDebuff["scale"] and floor(tDebuff["scale"] * 70) or 40;
 
 		tAuraAnchors["2"]["offsetX"] = tDebuff["xAdjust"] or -2;
 		tAuraAnchors["2"]["offsetY"] = tDebuff["yAdjust"] or -34;

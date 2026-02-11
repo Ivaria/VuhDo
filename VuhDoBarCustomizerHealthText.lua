@@ -45,6 +45,7 @@ local sLifeColor;
 local sIsNoRangeFade;
 local sHealPredictionCalculator;
 local sHideIrrelevantCurve;
+local sHideMissingZeroCurve;
 
 
 
@@ -64,6 +65,26 @@ local function VUHDO_buildHideIrrelevantCurve()
 
 	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
 	tCurve:AddPoint(tThresholdDecimal, CreateColor(1, 1, 1, 0));
+	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
+
+	return tCurve;
+
+end
+
+
+
+--
+local function VUHDO_buildHideMissingZeroCurve()
+
+	if not sSecretsEnabled then
+		return nil;
+	end
+
+	tCurve = CreateColorCurve();
+	tCurve:SetType(Enum.LuaCurveType.Step);
+
+	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
+	tCurve:AddPoint(0.9999, CreateColor(1, 1, 1, 1));
 	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
 
 	return tCurve;
@@ -106,6 +127,7 @@ function VUHDO_customHealthTextInitLocalOverrides()
 
 	sHealPredictionCalculator = VUHDO_getHealPredictionCalculator();
 	sHideIrrelevantCurve = VUHDO_buildHideIrrelevantCurve();
+	sHideMissingZeroCurve = VUHDO_buildHideMissingZeroCurve();
 
 	return;
 
@@ -420,11 +442,18 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 		if not tIsLifeInName then
 			VUHDO_getLifeText(tHealthBar):SetText(tTagText ~= "" and tTagText or tLifeString);
 
-			if sSecretsEnabled and tInfo["hasSecretHealth"] and tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
-				tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
+			if sSecretsEnabled and tInfo["hasSecretHealth"] then
+				tAlphaColor = nil;
+				if tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
+					tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
+				elseif 3 == tLifeConfig["mode"] and sHideMissingZeroCurve then
+					tAlphaColor = UnitHealthPercent(tUnit, true, sHideMissingZeroCurve);
+				end
 
 				if tAlphaColor then
 					VUHDO_getLifeText(tHealthBar):SetAlpha(tAlphaColor:GetAlpha());
+				else
+					VUHDO_getLifeText(tHealthBar):SetAlpha(1);
 				end
 			else
 				VUHDO_getLifeText(tHealthBar):SetAlpha(1);
@@ -440,11 +469,18 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 				tTextString = format("%s%s %s", tTagText, tTextString, tLifeString);
 			end
 
-			if sSecretsEnabled and tInfo["hasSecretHealth"] and tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
-				tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
+			if sSecretsEnabled and tInfo["hasSecretHealth"] then
+				tAlphaColor = nil;
+				if tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
+					tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
+				elseif 3 == tLifeConfig["mode"] and sHideMissingZeroCurve then
+					tAlphaColor = UnitHealthPercent(tUnit, true, sHideMissingZeroCurve);
+				end
 
 				if tAlphaColor then
 					VUHDO_getLifeText(tHealthBar):SetAlpha(tAlphaColor:GetAlpha());
+				else
+					VUHDO_getLifeText(tHealthBar):SetAlpha(1);
 				end
 			else
 				VUHDO_getLifeText(tHealthBar):SetAlpha(1);

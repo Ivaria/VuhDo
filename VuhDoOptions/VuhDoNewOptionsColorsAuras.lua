@@ -11,13 +11,13 @@ function VUHDO_colorsAurasOnShow()
 
 	if not VUHDO_PANEL_SETUP["AURA_DEFAULTS"] then
 		VUHDO_PANEL_SETUP["AURA_DEFAULTS"] = {
-			["iconSize"] = 20,
+			["iconSize"] = 40,
 			["iconSpacing"] = 2,
 			["showTimer"] = true,
 			["showStacks"] = true,
 			["showClock"] = true,
 			["barWidth"] = 100,
-			["barHeight"] = 12,
+			["barHeight"] = 30,
 			["showBarIcon"] = true,
 			["fadeOnLow"] = true,
 			["fadeThreshold"] = 3,

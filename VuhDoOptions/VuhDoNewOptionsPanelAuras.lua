@@ -641,7 +641,7 @@ function VUHDO_panelAurasRebindContentPanel()
 
 					if tDefaultVal then
 						if tEntry[2] == "size" then
-							tDefaultVal = tDefaultVal["iconSize"] or 20;
+							tDefaultVal = tDefaultVal["iconSize"] or 40;
 						else
 							tDefaultVal = tDefaultVal["iconSpacing"] or 2;
 						end
@@ -720,16 +720,22 @@ function VUHDO_panelAurasRebindContentPanel()
 	tBarInvertCheck = _G[tContentPanel:GetName() .. "TriStateRow3BarInvertCheck"];
 
 	if tBarVerticalCheck then
+		tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.barVertical", tAnchorKey);
+		VUHDO_lnfSetModel(tBarVerticalCheck, tModel);
 		VUHDO_lnfCheckButtonInitFromModel(tBarVerticalCheck);
 		VUHDO_setControlEnabled(tBarVerticalCheck:GetParent(), "BarVerticalCheck", tStyle == "bars");
 	end
 
 	if tBarTurnAxisCheck then
+		tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.barTurnAxis", tAnchorKey);
+		VUHDO_lnfSetModel(tBarTurnAxisCheck, tModel);
 		VUHDO_lnfCheckButtonInitFromModel(tBarTurnAxisCheck);
 		VUHDO_setControlEnabled(tBarTurnAxisCheck:GetParent(), "BarTurnAxisCheck", tStyle == "bars");
 	end
 
 	if tBarInvertCheck then
+		tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.barInvertGrowth", tAnchorKey);
+		VUHDO_lnfSetModel(tBarInvertCheck, tModel);
 		VUHDO_lnfCheckButtonInitFromModel(tBarInvertCheck);
 		VUHDO_setControlEnabled(tBarInvertCheck:GetParent(), "BarInvertCheck", tStyle == "bars");
 	end
@@ -737,6 +743,8 @@ function VUHDO_panelAurasRebindContentPanel()
 	tFixedSlotsCheck = _G[tContentPanel:GetName() .. "TriStateRow4FixedSlotsCheck"];
 
 	if tFixedSlotsCheck then
+		tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.fixedSlots", tAnchorKey);
+		VUHDO_lnfSetModel(tFixedSlotsCheck, tModel);
 		VUHDO_lnfCheckButtonInitFromModel(tFixedSlotsCheck);
 	end
 
