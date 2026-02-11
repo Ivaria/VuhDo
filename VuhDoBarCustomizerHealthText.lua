@@ -444,6 +444,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 			if sSecretsEnabled and tInfo["hasSecretHealth"] then
 				tAlphaColor = nil;
+
 				if tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
 					tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
 				elseif 3 == tLifeConfig["mode"] and sHideMissingZeroCurve then
@@ -471,6 +472,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 			if sSecretsEnabled and tInfo["hasSecretHealth"] then
 				tAlphaColor = nil;
+
 				if tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
 					tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
 				elseif 3 == tLifeConfig["mode"] and sHideMissingZeroCurve then
