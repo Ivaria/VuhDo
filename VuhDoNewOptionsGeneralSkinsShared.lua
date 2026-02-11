@@ -4,6 +4,7 @@ local tonumber = tonumber;
 local pairs = pairs;
 local ipairs = ipairs;
 local _;
+
 VUHDO_GROUP_SIZE = 1;
 
 VUHDO_PROFILES = { };
@@ -2756,7 +2757,7 @@ function VUHDO_loadProfile(aName)
 	VUHDO_initBlizzFrames();
 	VUHDO_bouqetsChanged();
 
-	if (VUHDO_initCustomDebuffComboModel ~= nil) then
+	if not VUHDO_SECRETS_ENABLED and (VUHDO_initCustomDebuffComboModel ~= nil) then
 		VUHDO_initCustomDebuffComboModel();
 
 		VuhDoNewOptionsDebuffsCustomStorePanelEditBox:SetText("");

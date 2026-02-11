@@ -1531,6 +1531,8 @@ local function VUHDO_initAllHealButtons(aPanel, aPanelNum)
 				end
 			end
 
+			VUHDO_clearUnitAuraFrames(tHealButton);
+
 			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 			VUHDO_PixelUtil.Hide(tHealButton);
 		else
@@ -2076,6 +2078,8 @@ function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
 					tDebuffFrame["raidid"] = nil;
 				end
 			end
+
+			VUHDO_clearUnitAuraFrames(tHealButton);
 
 			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 			VUHDO_PixelUtil.Hide(tHealButton);

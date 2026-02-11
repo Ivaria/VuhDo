@@ -889,11 +889,16 @@ local function VUHDO_initAuraFrameSecureHandlers(aFrame, aButton)
 		return;
 	end
 
+	VUHDO_safeSetAttribute(aFrame, "vuhdo_button", aButton);
+
+	if aButton["raidid"] then
+		VUHDO_safeSetAttribute(aFrame, "unit", aButton["raidid"]);
+		aFrame["raidid"] = aButton["raidid"];
+	end
+
 	if aFrame:GetAttribute("vuhdo_aura_secure_init") then
 		return;
 	end
-
-	VUHDO_safeSetAttribute(aFrame, "vuhdo_button", aButton);
 
 	if not aFrame:GetAttribute("vd_tt_hook") then
 		aFrame:SetScript("OnEnter", function(self)
@@ -1242,6 +1247,37 @@ function VUHDO_hidePlayerIconsForButton(aButton)
 	for _, tFrame in pairs(tAnchorFrames) do
 		if tFrame then
 			tFrame:SetAlpha(0);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local tButtonName;
+local tButtonAuras;
+function VUHDO_clearUnitAuraFrames(aButton)
+
+	if not aButton then
+		return;
+	end
+
+	tButtonName = aButton:GetName();
+	tButtonAuras = VUHDO_AURA_FRAMES[tButtonName];
+
+	if not tButtonAuras then
+		return;
+	end
+
+	for tAnchorIndex, tAnchorFrames in pairs(tButtonAuras) do
+		for tSlotIndex, tAuraFrame in pairs(tAnchorFrames) do
+			if tAuraFrame then
+				VUHDO_safeSetAttribute(tAuraFrame, "unit", nil);
+				tAuraFrame["raidid"] = nil;
+			end
 		end
 	end
 

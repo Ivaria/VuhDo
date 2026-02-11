@@ -155,6 +155,8 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			end
 		end
 
+		VUHDO_clearUnitAuraFrames(tButton);
+
 		VUHDO_PixelUtil.Hide(tButton);
 		tButtonIdx = tButtonIdx + 1;
 	end

@@ -1211,6 +1211,25 @@ end
 
 
 --
+function VUHDO_safeSetFrameRef(aFrame, aRefName, aTargetFrame)
+
+	if not aFrame then
+		return;
+	end
+
+	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
+		if aFrame.SetFrameRef then
+			aFrame:SetFrameRef(aRefName, aTargetFrame);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_safeWrapScript(aHeaderFrame, aButton, aScriptType, aScriptBody)
 
 	if not aHeaderFrame or not aButton then
