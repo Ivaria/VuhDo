@@ -50,6 +50,7 @@ local VUHDO_unitIsUnit;
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
 local VUHDO_getBarText;
+local VUHDO_getBarTextSolo;
 local VUHDO_getLifeText;
 
 
@@ -78,6 +79,7 @@ function VUHDO_customTargetInitLocalOverrides()
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
+	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
 	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
 
 end
@@ -172,7 +174,8 @@ local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anI
 			VUHDO_setStatusBarVuhDoColor(tBar, aColor);
 
 			if VUHDO_getBarText and VUHDO_getLifeText then
-				VUHDO_getBarText(tBar):SetTextColor(VUHDO_textColor(aColor));
+				VUHDO_getBarText(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
+				VUHDO_getBarTextSolo(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
 				VUHDO_getLifeText(tBar):SetTextColor(VUHDO_textColor(aColor));
 			end
 		end
@@ -241,7 +244,7 @@ end
 
 
 
--- Lösche alle Target-Buttons der Person, deren Ziel sich geändert hat
+-- L?sche alle Target-Buttons der Person, deren Ziel sich ge?ndert hat
 -- Wobei die Buttons mit dem Namen des TARGETS indiziert sind, welchen
 -- wir uns VUHDO_IN_RAID_TARGETS aber gemerkt haben
 local tName;

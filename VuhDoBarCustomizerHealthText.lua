@@ -16,6 +16,7 @@ local UnitIsGhost = UnitIsGhost;
 
 local VUHDO_getHealthBar;
 local VUHDO_getBarText;
+local VUHDO_getBarTextSolo;
 local VUHDO_getLifeText;
 local VUHDO_getUnitHealthPercent;
 local VUHDO_getUnitHealthModiPercent;
@@ -46,6 +47,7 @@ local sIsNoRangeFade;
 local sHealPredictionCalculator;
 local sHideIrrelevantCurve;
 local sHideMissingZeroCurve;
+local sShowWhenFullCurve;
 
 
 
@@ -84,8 +86,26 @@ local function VUHDO_buildHideMissingZeroCurve()
 	tCurve:SetType(Enum.LuaCurveType.Step);
 
 	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
-	tCurve:AddPoint(0.9999, CreateColor(1, 1, 1, 1));
 	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
+
+	return tCurve;
+
+end
+
+
+
+--
+local function VUHDO_buildShowWhenFullCurve()
+
+	if not sSecretsEnabled then
+		return nil;
+	end
+
+	tCurve = CreateColorCurve();
+	tCurve:SetType(Enum.LuaCurveType.Step);
+
+	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 0));
+	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 1));
 
 	return tCurve;
 
@@ -107,6 +127,7 @@ function VUHDO_customHealthTextInitLocalOverrides()
 
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
+	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
 	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
 	VUHDO_getUnitHealthPercent = _G["VUHDO_getUnitHealthPercent"];
 	VUHDO_getUnitHealthModiPercent = _G["VUHDO_getUnitHealthModiPercent"];
@@ -128,6 +149,7 @@ function VUHDO_customHealthTextInitLocalOverrides()
 	sHealPredictionCalculator = VUHDO_getHealPredictionCalculator();
 	sHideIrrelevantCurve = VUHDO_buildHideIrrelevantCurve();
 	sHideMissingZeroCurve = VUHDO_buildHideMissingZeroCurve();
+	sShowWhenFullCurve = VUHDO_buildShowWhenFullCurve();
 
 	return;
 
@@ -364,6 +386,55 @@ end
 
 
 --
+local tAlphaColor;
+local tSoloAlphaColor;
+local function VUHDO_applyLifeTextAlpha(aHealthBar, aUnit, aInfo, aLifeConfig)
+
+	if not sSecretsEnabled or not aInfo["hasSecretHealth"] then
+		VUHDO_getLifeText(aHealthBar):SetAlpha(1);
+		VUHDO_getBarText(aHealthBar):SetAlpha(1);
+		VUHDO_getBarTextSolo(aHealthBar):SetAlpha(0);
+
+		return;
+	end
+
+	tAlphaColor = nil;
+
+	if aLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
+		tAlphaColor = UnitHealthPercent(aUnit, true, sHideIrrelevantCurve);
+	elseif 3 == aLifeConfig["mode"] and sHideMissingZeroCurve then
+		tAlphaColor = UnitHealthPercent(aUnit, true, sHideMissingZeroCurve);
+	end
+
+	if tAlphaColor then
+		VUHDO_getLifeText(aHealthBar):SetAlpha(tAlphaColor["a"] or 1);
+		if 1 == aLifeConfig["position"] or 2 == aLifeConfig["position"] then
+			VUHDO_getBarText(aHealthBar):SetAlpha(tAlphaColor["a"] or 1);
+
+			if sShowWhenFullCurve then
+				tSoloAlphaColor = UnitHealthPercent(aUnit, true, sShowWhenFullCurve);
+
+				VUHDO_getBarTextSolo(aHealthBar):SetAlpha(tSoloAlphaColor["a"] or 0);
+			else
+				VUHDO_getBarTextSolo(aHealthBar):SetAlpha(0);
+			end
+		else
+			VUHDO_getBarText(aHealthBar):SetAlpha(1);
+			VUHDO_getBarTextSolo(aHealthBar):SetAlpha(0);
+		end
+	else
+		VUHDO_getLifeText(aHealthBar):SetAlpha(1);
+		VUHDO_getBarText(aHealthBar):SetAlpha(1);
+		VUHDO_getBarTextSolo(aHealthBar):SetAlpha(0);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tIsName, tIsLife, tIsLifeInName;
 local tTextString;
 local tHealthBar;
@@ -377,19 +448,20 @@ local tIsHideIrrel;
 local tTagText;
 local tIsLifeLeftOrRight;
 local tPanelNum;
-local tAlphaColor;
+local tIsLifeTextAlpha;
+local tIsLifeTextSeparate;
 function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 	tUnit, tInfo = VUHDO_getDisplayUnit(aButton);
 	tHealthBar = VUHDO_getHealthBar(aButton, 1);
 
 	if not tInfo or not tInfo["name"] then
-		VUHDO_getBarText(tHealthBar):SetText(
-			   (tUnit and "focus" == tUnit) and VUHDO_I18N_NO_FOCUS
+		tTextString = (tUnit and "focus" == tUnit) and VUHDO_I18N_NO_FOCUS
 			or (tUnit and "target" == tUnit) and VUHDO_I18N_NO_TARGET
 			or (tUnit and VUHDO_isBossUnit(tUnit)) and VUHDO_I18N_NO_BOSS
-			or VUHDO_I18N_NOT_AVAILABLE);
-
+			or VUHDO_I18N_NOT_AVAILABLE;
+		VUHDO_getBarText(tHealthBar):SetText(tTextString);
+		VUHDO_getBarTextSolo(tHealthBar):SetText(tTextString);
 		VUHDO_getLifeText(tHealthBar):SetText("");
 
 		return;
@@ -412,6 +484,12 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 		or 2 == tLifeConfig["position"];
 
 	tIsLifeInName = tLifeConfig["show"] and tIsLifeLeftOrRight;
+
+	tIsLifeTextAlpha = sSecretsEnabled
+		and tInfo["hasSecretHealth"]
+		and (tLifeConfig["hideIrrelevant"] or 3 == tLifeConfig["mode"]);
+
+	tIsLifeTextSeparate = not tIsLifeLeftOrRight or tIsLifeTextAlpha;
 
 	tIsName = aMode ~= 2 or tIsLifeInName;
 	tIsLife = aMode ~= 7 or tIsLifeInName;
@@ -439,26 +517,9 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 		tLifeString = VUHDO_getColoredString(tLifeString, sLifeColor);
 
-		if not tIsLifeInName then
+		if tIsLifeTextSeparate then
 			VUHDO_getLifeText(tHealthBar):SetText(tTagText ~= "" and tTagText or tLifeString);
-
-			if sSecretsEnabled and tInfo["hasSecretHealth"] then
-				tAlphaColor = nil;
-
-				if tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
-					tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
-				elseif 3 == tLifeConfig["mode"] and sHideMissingZeroCurve then
-					tAlphaColor = UnitHealthPercent(tUnit, true, sHideMissingZeroCurve);
-				end
-
-				if tAlphaColor then
-					VUHDO_getLifeText(tHealthBar):SetAlpha(tAlphaColor:GetAlpha());
-				else
-					VUHDO_getLifeText(tHealthBar):SetAlpha(1);
-				end
-			else
-				VUHDO_getLifeText(tHealthBar):SetAlpha(1);
-			end
+			VUHDO_applyLifeTextAlpha(tHealthBar, tUnit, tInfo, tLifeConfig);
 		else
 			if tTagText ~= "" then tTagText = tTagText .. "-"; end
 
@@ -470,23 +531,8 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 				tTextString = format("%s%s %s", tTagText, tTextString, tLifeString);
 			end
 
-			if sSecretsEnabled and tInfo["hasSecretHealth"] then
-				tAlphaColor = nil;
-
-				if tLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
-					tAlphaColor = UnitHealthPercent(tUnit, true, sHideIrrelevantCurve);
-				elseif 3 == tLifeConfig["mode"] and sHideMissingZeroCurve then
-					tAlphaColor = UnitHealthPercent(tUnit, true, sHideMissingZeroCurve);
-				end
-
-				if tAlphaColor then
-					VUHDO_getLifeText(tHealthBar):SetAlpha(tAlphaColor:GetAlpha());
-				else
-					VUHDO_getLifeText(tHealthBar):SetAlpha(1);
-				end
-			else
-				VUHDO_getLifeText(tHealthBar):SetAlpha(1);
-			end
+			VUHDO_getLifeText(tHealthBar):SetText("");
+			VUHDO_getLifeText(tHealthBar):SetAlpha(1);
 		end
 	elseif tIsLife then
 		if tIsLifeLeftOrRight then
@@ -500,13 +546,14 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 		end
 	end
 
-	if tIsName then 
+	if tIsName then
 		if tInfo["aggro"] and sIsAggroText then
-			tTextString = format("|cffff2020%s|r%s|cffff2020%s|r", 
+			tTextString = format("|cffff2020%s|r%s|cffff2020%s|r",
 				VUHDO_THREAT_CFG["AGGRO_TEXT_LEFT"], tTextString, VUHDO_THREAT_CFG["AGGRO_TEXT_RIGHT"]);
 		end
 
 		VUHDO_getBarText(tHealthBar):SetText(tTextString);
+		VUHDO_getBarTextSolo(tHealthBar):SetText(tTextString);
 	end
 
 	return;

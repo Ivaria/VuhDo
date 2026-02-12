@@ -8,6 +8,7 @@ local VUHDO_NAME_TEXTS = VUHDO_NAME_TEXTS;
 
 local VUHDO_getHealthBar;
 local VUHDO_getBarText;
+local VUHDO_getBarTextSolo;
 local VUHDO_getIncHealOnUnit;
 local VUHDO_getDiffColor;
 local VUHDO_isPanelVisible;
@@ -87,6 +88,7 @@ function VUHDO_customHealthInitLocalOverrides()
 	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
+	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
 	VUHDO_getIncHealOnUnit = _G["VUHDO_getIncHealOnUnit"];
 	VUHDO_getDiffColor = _G["VUHDO_getDiffColor"];
 	VUHDO_isPanelVisible = _G["VUHDO_isPanelVisible"];
@@ -1048,8 +1050,9 @@ do
 					VUHDO_setStatusBarVuhDoColor(tHealthBar, aColor, aMaxColor);
 
 					if aColor["useText"] then
-						VUHDO_getBarText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
-						VUHDO_getLifeText(tHealthBar):SetTextColor(VUHDO_textColor(aColor));
+						VUHDO_getBarText(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
+						VUHDO_getBarTextSolo(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
+						VUHDO_getLifeText(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
 					end
 				end
 			end

@@ -456,6 +456,13 @@ end
 
 
 --
+function VUHDO_getBarTextSolo(aBar)
+	return _G[aBar:GetName() .. "TxPnlUnNSolo"];
+end
+
+
+
+--
 function VUHDO_getHeaderTextId(aHeader)
 	return _G[aHeader:GetName() .. "BarUnN"];
 end

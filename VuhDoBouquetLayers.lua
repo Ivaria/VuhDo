@@ -33,6 +33,7 @@ local VUHDO_INDICATOR_FRAME_GETTERS = {
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_getHealthBar;
 local VUHDO_getBarText;
+local VUHDO_getBarTextSolo;
 local VUHDO_getLifeText;
 local VUHDO_getDebuffColorType;
 local VUHDO_getDebuffCustomColor;
@@ -69,6 +70,7 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
+	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
 	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
 	VUHDO_getDebuffColorType = _G["VUHDO_getDebuffColorType"];
 	VUHDO_getDebuffCustomColor = _G["VUHDO_getDebuffCustomColor"];
@@ -701,14 +703,19 @@ function VUHDO_applyDispelTextColor(aHealthBar, aLayerTemplate, aUnit)
 			VUHDO_getBarText(aHealthBar):SetTextColor(
 				tCustomColor["TR"] or 1,
 				tCustomColor["TG"] or 1,
-				tCustomColor["TB"] or 1,
-				tCustomColor["TO"] or 1
+				tCustomColor["TB"] or 1
 			);
+
+			VUHDO_getBarTextSolo(aHealthBar):SetTextColor(
+				tCustomColor["TR"] or 1,
+				tCustomColor["TG"] or 1,
+				tCustomColor["TB"] or 1
+			);
+
 			VUHDO_getLifeText(aHealthBar):SetTextColor(
 				tCustomColor["TR"] or 1,
 				tCustomColor["TG"] or 1,
-				tCustomColor["TB"] or 1,
-				tCustomColor["TO"] or 1
+				tCustomColor["TB"] or 1
 			);
 		end
 
@@ -721,8 +728,9 @@ function VUHDO_applyDispelTextColor(aHealthBar, aLayerTemplate, aUnit)
 		if tResultSlot["isActive"] and tResultSlot["r"] then
 			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
 
-			VUHDO_getBarText(aHealthBar):SetTextColor(tR, tG, tB, tA);
-			VUHDO_getLifeText(aHealthBar):SetTextColor(tR, tG, tB, tA);
+			VUHDO_getBarText(aHealthBar):SetTextColor(tR, tG, tB);
+			VUHDO_getBarTextSolo(aHealthBar):SetTextColor(tR, tG, tB);
+			VUHDO_getLifeText(aHealthBar):SetTextColor(tR, tG, tB);
 		end
 	end
 
@@ -783,6 +791,7 @@ local tResultSlot;
 local tNonSecretColor;
 local tNonSecretMaxColor;
 local tBarText;
+local tBarTextSolo;
 local tLifeText;
 function VUHDO_applyNonSecretColorsToBar(aBar, aLayerTemplate)
 
@@ -829,7 +838,16 @@ function VUHDO_applyNonSecretColorsToBar(aBar, aLayerTemplate)
 			if tBarText then
 				tBarText:SetTextColor(
 					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
-					tNonSecretColor["TB"] or 1, tNonSecretColor["TO"] or 1
+					tNonSecretColor["TB"] or 1
+				);
+			end
+
+			tBarTextSolo = VUHDO_getBarTextSolo(aBar);
+
+			if tBarTextSolo then
+				tBarTextSolo:SetTextColor(
+					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
+					tNonSecretColor["TB"] or 1
 				);
 			end
 
@@ -838,7 +856,7 @@ function VUHDO_applyNonSecretColorsToBar(aBar, aLayerTemplate)
 			if tLifeText then
 				tLifeText:SetTextColor(
 					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
-					tNonSecretColor["TB"] or 1, tNonSecretColor["TO"] or 1
+					tNonSecretColor["TB"] or 1
 				);
 			end
 		end

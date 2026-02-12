@@ -22,7 +22,6 @@ local VUHDO_ACTIVE_HOTS;
 local VUHDO_generateUUID;
 local VUHDO_determineDebuff;
 local VUHDO_updateHotPredicate;
-local VUHDO_removeHots;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 

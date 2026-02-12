@@ -249,6 +249,12 @@
 											</FontHeight>
 										</FontString>
 
+										<FontString name="$parentUnNSolo" inherits="GameFontNormalSmall">
+											<FontHeight>
+												<AbsValue val="9" />
+											</FontHeight>
+										</FontString>
+
 										<FontString name="$parentLife" inherits="GameFontNormalSmall">
 											<FontHeight>
 												<AbsValue val="9" />
@@ -442,6 +448,14 @@
 								<Layer>
 
 									<FontString name="$parentUnN">
+										<Shadow>
+											<Offset>
+												<AbsDimension x="1" y="-1" />
+											</Offset>
+										</Shadow>
+									</FontString>
+
+									<FontString name="$parentUnNSolo">
 										<Shadow>
 											<Offset>
 												<AbsDimension x="1" y="-1" />
