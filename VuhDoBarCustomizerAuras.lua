@@ -1606,6 +1606,9 @@ do
 	local tRelFrame;
 	local tBaseX;
 	local tBaseY;
+	local tPanelNum;
+	local tHealthBarWidth;
+	local tHealthBarHeight;
 	local tGrowthDir;
 	local tWrapDir;
 	local tSize;
@@ -1642,13 +1645,13 @@ do
 			return;
 		end
 
-		tBaseX = anAnchorConfig["offsetX"] or 0;
-		tBaseY = anAnchorConfig["offsetY"] or 0;
+		tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+		tHealthBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
+		tHealthBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+		tBaseX = (anAnchorConfig["offsetX"] or 0) * tHealthBarWidth * 0.01;
+		tBaseY = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeight * 0.01;
 
-		if aRadioValue == 17 then
-			tBaseX = anAnchorConfig["offsetX"] or 0;
-			tBaseY = anAnchorConfig["offsetY"] or 0;
-		else
+		if aRadioValue ~= 17 then
 			tBaseX = (tPos["xOffset"] or 0) + tBaseX;
 			tBaseY = (tPos["yOffset"] or 0) + tBaseY;
 		end
@@ -1828,6 +1831,11 @@ do
 	local tRow;
 	local tXOff;
 	local tYOff;
+	local tPanelNum;
+	local tHealthBarWidth;
+	local tHealthBarHeight;
+	local tOffsetXPixels;
+	local tOffsetYPixels;
 	local tGrowX;
 	local tGrowY;
 	local tWrapX;
@@ -1891,8 +1899,13 @@ do
 			tWrapX = tWrapDir[1];
 			tWrapY = tWrapDir[2];
 
-			tXOff = (anAnchorConfig["offsetX"] or 0) + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
-			tYOff = (anAnchorConfig["offsetY"] or 0) + (tCol * (tBarHeight + tSpacing) * tGrowY) + (tRow * (tBarHeight + tSpacing) * tWrapY);
+			tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+			tHealthBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
+			tHealthBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+			tOffsetXPixels = (anAnchorConfig["offsetX"] or 0) * tHealthBarWidth * 0.01;
+			tOffsetYPixels = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeight * 0.01;
+			tXOff = tOffsetXPixels + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
+			tYOff = tOffsetYPixels + (tCol * (tBarHeight + tSpacing) * tGrowY) + (tRow * (tBarHeight + tSpacing) * tWrapY);
 
 			aFrame:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(aFrame, tAnchorPoint[1], aButton, tAnchorPoint[1], tXOff, tYOff);

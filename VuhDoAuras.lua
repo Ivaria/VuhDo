@@ -82,6 +82,13 @@ local VUHDO_POINT_TO_RADIOVALUE = {
 	["BOTTOMRIGHT"] = 14,
 };
 
+local VUHDO_DEBUFF_OFFSET_TRANSLATION = {
+	["TOPLEFT"] = { ["x"] = 0, ["y"] = 0 },
+	["TOPRIGHT"] = { ["x"] = 2, ["y"] = 34 },
+	["BOTTOMLEFT"] = { ["x"] = 2, ["y"] = -34 },
+	["BOTTOMRIGHT"] = { ["x"] = 2, ["y"] = -34 },
+};
+
 local sEmpty = { };
 local sAssignedAuras = { };
 local sSlotsToClear = { };
@@ -1537,6 +1544,7 @@ do
 	local tPoint;
 	local tGrowthDir;
 	local tWrapDir;
+	local tTranslation;
 	local tConfig;
 	local tPanelSetup;
 	function VUHDO_migrateCustomDebuffsToAuraAnchors(aPanelNum)
@@ -1560,8 +1568,10 @@ do
 
 		tAuraAnchors["2"]["size"] = tDebuff["scale"] and floor(tDebuff["scale"] * 70) or 40;
 
-		tAuraAnchors["2"]["offsetX"] = tDebuff["xAdjust"] or -2;
-		tAuraAnchors["2"]["offsetY"] = tDebuff["yAdjust"] or -34;
+		tTranslation = VUHDO_DEBUFF_OFFSET_TRANSLATION[tPoint] or sEmpty;
+		tAuraAnchors["2"]["offsetX"] = (tDebuff["xAdjust"] or -2) + (tTranslation["x"] or 0);
+		tAuraAnchors["2"]["offsetY"] = (tDebuff["yAdjust"] or -34) + (tTranslation["y"] or 0);
+
 		tAuraAnchors["2"]["maxDisplay"] = tDebuff["max_num"] or 3;
 		tAuraAnchors["2"]["growthDir"] = tGrowthDir;
 		tAuraAnchors["2"]["wrapDir"] = tWrapDir;
