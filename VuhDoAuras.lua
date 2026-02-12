@@ -83,10 +83,22 @@ local VUHDO_POINT_TO_RADIOVALUE = {
 };
 
 local VUHDO_DEBUFF_OFFSET_TRANSLATION = {
-	["TOPLEFT"] = { ["x"] = 0, ["y"] = 0 },
-	["TOPRIGHT"] = { ["x"] = 2, ["y"] = 34 },
-	["BOTTOMLEFT"] = { ["x"] = 2, ["y"] = -34 },
-	["BOTTOMRIGHT"] = { ["x"] = 2, ["y"] = -34 },
+	["TOPLEFT"] = {
+		["x"] = 0,
+		["y"] = 0,
+	},
+	["TOPRIGHT"] = {
+		["x"] = 2,
+		["y"] = 34,
+	},
+	["BOTTOMLEFT"] = {
+		["x"] = -2,
+		["y"] = -34,
+	},
+	["BOTTOMRIGHT"] = {
+		["x"] = 2,
+		["y"] = -34,
+	},
 };
 
 local sEmpty = { };

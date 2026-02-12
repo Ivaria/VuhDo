@@ -566,6 +566,10 @@ end
 local tScaling;
 function VUHDO_customizeDamageFlash(aButton, anInfo)
 
+	if sSecretsEnabled then
+		return;
+	end
+
 	tScaling = VUHDO_PANEL_SETUP[VUHDO_BUTTON_CACHE[aButton]]["SCALING"];
 
 	if tScaling["isDamFlash"] and tScaling["damFlashFactor"] >= (anInfo["lifeLossPerc"] or -1) then
