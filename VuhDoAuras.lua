@@ -1591,12 +1591,12 @@ do
 
 
 	--
-	local tConfig;
+	local tPanelSetup;
 	function VUHDO_migrateOldConfigsToAuraAnchors()
 
-		tConfig = _G["VUHDO_CONFIG"];
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
 
-		if (tConfig["AURA_MIGRATION_VERSION"] or 0) >= VUHDO_AURA_MIGRATION_VERSION then
+		if (tPanelSetup["AURA_MIGRATION_VERSION"] or 0) >= VUHDO_AURA_MIGRATION_VERSION then
 			return;
 		end
 
@@ -1605,7 +1605,7 @@ do
 			VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum);
 		end
 
-		tConfig["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
+		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
 
 		return;
 
