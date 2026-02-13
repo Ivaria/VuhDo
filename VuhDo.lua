@@ -1,5 +1,4 @@
 local sIsRestoredAfterDc = false;
-local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 VUHDO_IN_COMBAT_RELOG = false;
 

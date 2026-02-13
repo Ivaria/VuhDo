@@ -1496,9 +1496,6 @@ do
 	local tNonSecretResultSlot;
 	local tAuraResultSlot;
 	local tSecretBool;
-	local tCurveColor;
-	local tPowerCurveTable;
-	local tPowerCurve;
 	local tWorkingColor = { };
 	local tSecretContext;
 	local tSecretColor;

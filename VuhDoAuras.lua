@@ -23,8 +23,6 @@ local VUHDO_generateUUID;
 local VUHDO_determineDebuff;
 local VUHDO_updateHotPredicate;
 
-local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
-
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
 
