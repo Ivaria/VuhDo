@@ -1251,10 +1251,20 @@ end
 
 --
 function VUHDO_lnfColorSwatchShowColorPicker(aColorSwatch, aMouseButton)
-	if not aColorSwatch:GetAttribute("model") then return; end
+
+	if not aColorSwatch:GetAttribute("model") then
+		return;
+	end
+
+	if aColorSwatch:GetAttribute("disabled") then
+		return;
+	end
 
 	VuhDoNewColorPicker:SetAttribute("swatch", aColorSwatch);
 	VuhDoNewColorPicker:Show();
+
+	return;
+
 end
 
 

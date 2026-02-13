@@ -148,6 +148,7 @@ function VUHDO_auraGroupsRefreshList()
 	VUHDO_initAuraGroupsComboModel();
 
 	tGroupCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelGroupCombo"];
+
 	if tGroupCombo then
 		VUHDO_lnfComboBoxInitFromModel(tGroupCombo);
 	end
@@ -194,6 +195,7 @@ local tCustomColorSwatch;
 local tEnabledCheck;
 local tDeleteButton;
 local tIsBuiltIn;
+local tInnerSlider;
 function VUHDO_auraGroupsRefreshRightPanel()
 
 	tGroup = sSelectedGroupId and VUHDO_getAuraGroupRaw(sSelectedGroupId) or nil;
@@ -208,6 +210,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	tCanColorTextCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelCanColorTextCheckButton"];
 	tCustomColorSwatch = _G["VuhDoNewOptionsAuraGroupsStorePanelCustomColorTexture"];
 	tDeleteButton = _G["VuhDoNewOptionsAuraGroupsStorePanelDeleteButton"];
+	tEnabledCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"];
 
 	if tDeleteButton then
 		if tGroup and not tIsBuiltIn then
@@ -239,10 +242,13 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 	if tFilterCombo and tGroup then
 		tFilterCombo:SetShown(true);
+
 		VUHDO_AURA_GROUPS_FILTER_SELECTED = tGroup["filter"] or "";
+
 		VUHDO_lnfComboBoxInitFromModel(tFilterCombo);
 		tFilterCombo:Enable();
 		tFilterCombo:SetAlpha(1);
+
 		if tIsBuiltIn then
 			tFilterCombo:Disable();
 			tFilterCombo:SetAlpha(0.5);
@@ -251,10 +257,13 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 	if tExcludeFilterCombo and tGroup then
 		tExcludeFilterCombo:SetShown(true);
+
 		VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = tGroup["excludeFilter"] or "";
+
 		VUHDO_lnfComboBoxInitFromModel(tExcludeFilterCombo);
 		tExcludeFilterCombo:Enable();
 		tExcludeFilterCombo:SetAlpha(1);
+
 		if tIsBuiltIn then
 			tExcludeFilterCombo:Disable();
 			tExcludeFilterCombo:SetAlpha(0.5);
@@ -263,14 +272,17 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 	if tPrioritySlider and tGroup then
 		tPrioritySlider:SetShown(true);
+		tPrioritySlider:SetAlpha(1);
+
 		VUHDO_AURA_GROUPS_PRIORITY = tGroup["priority"] or 50;
-		local tInnerSlider = _G[tPrioritySlider:GetName() .. "Slider"];
+
+		tInnerSlider = _G[tPrioritySlider:GetName() .. "Slider"];
 		VUHDO_lnfSliderInitFromModel(tInnerSlider);
 		tInnerSlider:Enable();
-		tPrioritySlider:SetAlpha(1);
+
 		if tIsBuiltIn then
-			tInnerSlider:Disable();
 			tPrioritySlider:SetAlpha(0.5);
+			tInnerSlider:Disable();
 		end
 	end
 
@@ -291,7 +303,9 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 	if tCanColorBarCheck and tGroup then
 		tCanColorBarCheck:SetShown(true);
+
 		VUHDO_AURA_GROUPS_CAN_COLOR_BAR = tGroup["canColorBar"];
+
 		VUHDO_lnfCheckButtonInitFromModel(tCanColorBarCheck);
 
 		if VUHDO_AURA_GROUPS_COLOR_TYPE == (VUHDO_AURA_GROUP_COLOR_OFF or 1) then
@@ -310,7 +324,9 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 	if tCanColorTextCheck and tGroup then
 		tCanColorTextCheck:SetShown(true);
+
 		VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = tGroup["canColorText"];
+
 		VUHDO_lnfCheckButtonInitFromModel(tCanColorTextCheck);
 
 		if VUHDO_AURA_GROUPS_COLOR_TYPE == (VUHDO_AURA_GROUP_COLOR_OFF or 1) then
@@ -331,32 +347,38 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		if VUHDO_AURA_GROUPS_COLOR_TYPE == (VUHDO_AURA_GROUP_COLOR_CUSTOM or 3) then
 			tCustomColorSwatch:SetShown(true);
 
-			VUHDO_CONFIG["AURA_GROUPS"] = VUHDO_CONFIG["AURA_GROUPS"] or { };
+			if not tIsBuiltIn then
+				VUHDO_CONFIG["AURA_GROUPS"] = VUHDO_CONFIG["AURA_GROUPS"] or { };
 
-			if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
-				VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] = { };
+				if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+					VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] = { };
+				end
+
+				if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["customColor"] then
+					VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["customColor"] = tGroup["customColor"] and VUHDO_deepCopyTable(tGroup["customColor"]) or {
+						["R"] = 0.6, ["G"] = 0.3, ["B"] = 0, ["O"] = 1,
+						["TR"] = 0.8, ["TG"] = 0.5, ["TB"] = 0, ["TO"] = 1,
+						["useBackground"] = true, ["useText"] = true, ["useOpacity"] = true,
+					};
+				end
+
+				VUHDO_lnfSetModel(tCustomColorSwatch, "VUHDO_CONFIG.AURA_GROUPS." .. sSelectedGroupId .. ".customColor");
+				tCustomColorSwatch:SetAttribute("custom_function_post", VUHDO_auraGroupsCustomColorChanged);
+				tCustomColorSwatch:SetAttribute("disabled", nil);
+				tCustomColorSwatch:SetAlpha(1);
+			else
+				VUHDO_lnfSetModel(tCustomColorSwatch, "VUHDO_DEFAULT_AURA_GROUPS." .. sSelectedGroupId .. ".customColor");
+				tCustomColorSwatch:SetAttribute("disabled", true);
+				tCustomColorSwatch:SetAlpha(0.5);
 			end
-
-			if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["customColor"] then
-				VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["customColor"] = tGroup["customColor"] and VUHDO_deepCopyTable(tGroup["customColor"]) or {
-					["R"] = 0.6, ["G"] = 0.3, ["B"] = 0, ["O"] = 1,
-					["TR"] = 0.8, ["TG"] = 0.5, ["TB"] = 0, ["TO"] = 1,
-					["useBackground"] = true, ["useText"] = true, ["useOpacity"] = true,
-				};
-			end
-
-			VUHDO_lnfSetModel(tCustomColorSwatch, "VUHDO_CONFIG.AURA_GROUPS." .. sSelectedGroupId .. ".customColor");
 
 			VUHDO_lnfInitColorSwatch(tCustomColorSwatch, VUHDO_I18N_AURA_GROUP_CUSTOM_COLOR, VUHDO_I18N_AURA_GROUP_CUSTOM_COLOR);
 			VUHDO_lnfSetTooltip(tCustomColorSwatch, VUHDO_I18N_TT.K616);
-			tCustomColorSwatch:SetAttribute("custom_function_post", VUHDO_auraGroupsCustomColorChanged);
 			VUHDO_lnfColorSwatchInitFromModel(tCustomColorSwatch);
 		else
 			tCustomColorSwatch:SetShown(false);
 		end
 	end
-
-	tEnabledCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"];
 
 	if tEnabledCheck and tGroup then
 		tEnabledCheck:SetShown(true);
@@ -402,8 +424,8 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tCustomColorSwatch:Hide();
 		end
 
-		if _G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"] then
-			_G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"]:Hide();
+		if tEnabledCheck then
+			tEnabledCheck:Hide();
 		end
 	end
 
@@ -423,7 +445,7 @@ function VUHDO_auraGroupsOnNewGroup()
 		["filter"] = "HELPFUL|PLAYER",
 		["excludeFilter"] = nil,
 		["priority"] = 50,
-		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF or 1,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = true,
 		["canColorText"] = true,
 		["enabled"] = true,
@@ -433,6 +455,7 @@ function VUHDO_auraGroupsOnNewGroup()
 
 	sSelectedGroupId = tNewId;
 	VUHDO_AURA_GROUPS_SELECTED = tNewId;
+
 	VUHDO_auraGroupsRefreshList();
 	VUHDO_auraGroupsRefreshRightPanel();
 
@@ -458,6 +481,7 @@ function VUHDO_auraGroupsOnCloneGroup(aSourceId)
 	if tNewId then
 		sSelectedGroupId = tNewId;
 		VUHDO_AURA_GROUPS_SELECTED = tNewId;
+
 		VUHDO_auraGroupsRefreshList();
 		VUHDO_auraGroupsRefreshRightPanel();
 	end
