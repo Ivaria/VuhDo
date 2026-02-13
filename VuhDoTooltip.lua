@@ -14,6 +14,7 @@ local UnitHealthMax = UnitHealthMax;
 local UnitIsConnected = UnitIsConnected;
 local UnitIsAFK = UnitIsAFK;
 local UnitIsDND = UnitIsDND;
+local InChatMessagingLockdown = C_ChatInfo and C_ChatInfo.InChatMessagingLockdown;
 local GetRealZoneText = GetRealZoneText;
 local UnitExists = UnitExists;
 local UnitClass = UnitClass;
@@ -267,6 +268,9 @@ local tName;
 local tClassColor;
 local tLeftText;
 local tRightText;
+local tInChatLockdown;
+local tIsAfk;
+local tIsDnd;
 local tModifier;
 local tGuildName, tGuildRank;
 local tBinding;
@@ -328,10 +332,15 @@ function VUHDO_updateTooltip()
 		UnitIsGhost(tUnit) and VUHDO_I18N_TT_GHOST
 		or UnitIsDead(tUnit) and VUHDO_I18N_TT_DEAD or " ";
 
+	tInChatLockdown = InChatMessagingLockdown and InChatMessagingLockdown();
+
+	tIsAfk = not tInChatLockdown and UnitIsAFK(tUnit);
+	tIsDnd = not tInChatLockdown and UnitIsDND(tUnit);
+
 	tRightText =
 		not UnitIsConnected(tUnit) and VUHDO_getDurationTextSince(VUHDO_getAfkDcTime(tUnit))
-		or UnitIsAFK(tUnit) and format("%s %s", VUHDO_I18N_TT_AFK, VUHDO_getDurationTextSince(VUHDO_getAfkDcTime(tUnit)))
-		or UnitIsDND(tUnit) and VUHDO_I18N_TT_DND or " ";
+		or tIsAfk and format("%s %s", VUHDO_I18N_TT_AFK, VUHDO_getDurationTextSince(VUHDO_getAfkDcTime(tUnit)))
+		or tIsDnd and VUHDO_I18N_TT_DND or " ";
 
 	if tLeftText ~= " " or tRightText ~= " " then
 		VUHDO_addTooltipLineLeft(tLeftText, VUHDO_VALUE_COLOR);

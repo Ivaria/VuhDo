@@ -100,6 +100,7 @@ local UnitHealth = UnitHealth;
 --local UnitHealthMax = UnitHealthMax; 
 local UnitIsAFK = UnitIsAFK;
 local UnitIsConnected = UnitIsConnected;
+local InChatMessagingLockdown = C_ChatInfo and C_ChatInfo.InChatMessagingLockdown;
 local UnitIsCharmed = UnitIsCharmed;
 local UnitInRaid = UnitInRaid;
 local UnitHasVehicleUI = UnitHasVehicleUI;
@@ -296,9 +297,18 @@ end
 --
 local tIsAfk;
 local tIsConnected;
+local tInChatLockdown;
 local function VUHDO_updateAfkDc(aUnit)
-	tIsAfk = UnitIsAFK(aUnit);
 	tIsConnected = UnitIsConnected(aUnit);
+
+	tInChatLockdown = InChatMessagingLockdown and InChatMessagingLockdown();
+
+	if tInChatLockdown then
+		tIsAfk = false;
+	else
+		tIsAfk = UnitIsAFK(aUnit);
+	end
+
 	if tIsAfk or not tIsConnected then
 		if not VUHDO_UNIT_AFK_DC[aUnit] then VUHDO_UNIT_AFK_DC[aUnit] = GetTime(); end
 	else
