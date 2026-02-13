@@ -22,8 +22,6 @@ local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
 
 local VUHDO_INSTANCE = nil;
 
-local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
-
 -- BURST CACHE ---------------------------------------------------
 
 local VUHDO_RAID;
@@ -61,7 +59,6 @@ local VUHDO_HANDLER_EVENT_SNAPSHOTS = {
 
 local VUHDO_parseAddonMessage;
 local VUHDO_spellcastSent;
-local VUHDO_parseCombatLogEvent;
 local VUHDO_updateAllOutRaidTargetButtons;
 local VUHDO_updateAllRaidTargetIndices;
 local VUHDO_updateDirectionFrame;
@@ -77,8 +74,6 @@ local VUHDO_updateBouquetsForEvent;
 local VUHDO_updateAllHoTs;
 local VUHDO_updateAllCyclicBouquets;
 local VUHDO_updateAllDebuffIcons;
-local VUHDO_createDebuffIconAnimation;
-local VUHDO_cleanupDebuffIconAnimation;
 local VUHDO_updateAllAggro;
 local VUHDO_updateUnitAggro;
 local VUHDO_updateAllRange;
@@ -539,6 +534,9 @@ local sParseCombatLog;
 local VuhDoGcdStatusBar;
 local VuhDoDirectionFrame;
 
+
+
+--
 local function VUHDO_eventHandlerInitLocalOverrides()
 
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -2026,9 +2024,21 @@ end
 
 
 --
+local tIsOnGCD;
+local tDuration;
 function VUHDO_initGcd()
 
-	VUHDO_GCD_UPDATE = true;
+	if not sSecretsEnabled then
+		VUHDO_GCD_UPDATE = true;
+
+		return;
+	end
+
+	_, _, _, _, tIsOnGCD, tDuration = GetSpellCooldown(VUHDO_SPELL_ID.GLOBAL_COOLDOWN);
+
+	if tIsOnGCD == true and tDuration then
+		VuhDoGcdStatusBar:SetTimerDuration(tDuration, Enum.StatusBarInterpolation.Immediate, Enum.StatusBarTimerDirection.RemainingTime);
+	end
 
 	return;
 
@@ -2154,19 +2164,19 @@ do
 
 	--
 	local tGcdStart;
-	local tGcdDuration;
+	local tGcdDurationRemaining;
 	local function VUHDO_handleSegment1A(aTimeDelta)
 
 		-- Update GCD-Bar
 		if VUHDO_GCD_UPDATE then
-			tGcdStart, tGcdDuration = GetSpellCooldown(VUHDO_SPELL_ID.GLOBAL_COOLDOWN);
+			tGcdStart, tGcdDurationRemaining = GetSpellCooldown(VUHDO_SPELL_ID.GLOBAL_COOLDOWN);
 
-			if (tGcdDuration or 0) == 0 then
+			if (tGcdDurationRemaining or 0) == 0 then
 				VuhDoGcdStatusBar:SetValue(0);
-
 				VUHDO_GCD_UPDATE = false;
 			else
-				VuhDoGcdStatusBar:SetValue((tGcdDuration - (GetTime() - tGcdStart)) / tGcdDuration);
+				VuhDoGcdStatusBar:SetMinMaxValues(0, 1);
+				VuhDoGcdStatusBar:SetValue((tGcdDurationRemaining - (GetTime() - tGcdStart)) / tGcdDurationRemaining);
 			end
 		end
 

@@ -47,6 +47,7 @@ local FindAura = AuraUtil.FindAura;
 local FindAuraByName = AuraUtil.FindAuraByName;
 local IsUsableItem = IsUsableItem or C_Item.IsUsableItem;
 local IsUsableSpell = IsUsableSpell or C_Spell.IsSpellUsable;
+local GetSpellCooldownDuration = C_Spell and C_Spell.GetSpellCooldownDuration;
 local IsSpellInSpellBook = C_SpellBook and C_SpellBook.IsSpellInSpellBook;
 local IsSpellKnownNew = C_SpellBook and C_SpellBook.IsSpellKnown;
 local SpellBookSpellBank = Enum and Enum.SpellBookSpellBank;
@@ -157,6 +158,7 @@ end
 
 --
 local tSpellCooldown;
+local tDuration;
 function VUHDO_getSpellCooldown(aSpellId)
 
 	if not aSpellId then
@@ -171,6 +173,12 @@ function VUHDO_getSpellCooldown(aSpellId)
 
 	if not tSpellCooldown then
 		return;
+	end
+
+if sSecretsEnabled then
+		tDuration = GetSpellCooldownDuration(aSpellId);
+
+		return tSpellCooldown.startTime, tSpellCooldown.duration, tSpellCooldown.isEnabled, tSpellCooldown.modRate, tSpellCooldown.isOnGCD, tDuration;
 	end
 
 	return tSpellCooldown.startTime, tSpellCooldown.duration, tSpellCooldown.isEnabled, tSpellCooldown.modRate;

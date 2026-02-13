@@ -2294,6 +2294,7 @@ do
 
 			VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture());
 
+			VuhDoGcdStatusBar:SetMinMaxValues(0, 1);
 			VuhDoGcdStatusBar:SetValue(0);
 			VUHDO_PixelUtil.SetFrameStrata(VuhDoGcdStatusBar, "TOOLTIP");
 		end
@@ -2579,6 +2580,7 @@ do
 
 			VUHDO_PixelUtil.ApplySettings(VuhDoGcdStatusBar:GetStatusBarTexture());
 
+			VuhDoGcdStatusBar:SetMinMaxValues(0, 1);
 			VuhDoGcdStatusBar:SetValue(0);
 			VUHDO_PixelUtil.SetFrameStrata(VuhDoGcdStatusBar, "TOOLTIP");
 		end
