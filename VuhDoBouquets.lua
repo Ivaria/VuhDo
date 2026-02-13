@@ -1956,7 +1956,11 @@ do
 				end
 			end
 
-			if tLayerTemplate["hasBools"] then
+			if tLayerTemplate["hasBools"]
+				and not tLayerTemplate["hasCurves"]
+				and not tLayerTemplate["hasDispels"]
+				and not tLayerTemplate["hasNonSecrets"]
+				and not tLayerTemplate["hasAuras"] then
 				txState["active"] = true;
 			end
 		end
