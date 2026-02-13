@@ -48,6 +48,7 @@ local sHealPredictionCalculator;
 local sHideIrrelevantCurve;
 local sHideMissingZeroCurve;
 local sShowWhenFullCurve;
+local sShowWhenIrrelevantCurve;
 
 
 
@@ -114,6 +115,28 @@ end
 
 
 --
+local function VUHDO_buildShowWhenIrrelevantCurve()
+
+	if not sSecretsEnabled then
+		return nil;
+	end
+
+	tCurve = CreateColorCurve();
+	tCurve:SetType(Enum.LuaCurveType.Step);
+
+	tThresholdDecimal = VUHDO_CONFIG["EMERGENCY_TRIGGER"] / 100;
+
+	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 0));
+	tCurve:AddPoint(tThresholdDecimal, CreateColor(1, 1, 1, 1));
+	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 1));
+
+	return tCurve;
+
+end
+
+
+
+--
 function VUHDO_customHealthTextInitLocalOverrides()
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -150,6 +173,7 @@ function VUHDO_customHealthTextInitLocalOverrides()
 	sHideIrrelevantCurve = VUHDO_buildHideIrrelevantCurve();
 	sHideMissingZeroCurve = VUHDO_buildHideMissingZeroCurve();
 	sShowWhenFullCurve = VUHDO_buildShowWhenFullCurve();
+	sShowWhenIrrelevantCurve = VUHDO_buildShowWhenIrrelevantCurve();
 
 	return;
 
@@ -399,26 +423,22 @@ local function VUHDO_applyLifeTextAlpha(aHealthBar, aUnit, aInfo, aLifeConfig)
 	end
 
 	tAlphaColor = nil;
+	tSoloAlphaColor = nil;
 
 	if aLifeConfig["hideIrrelevant"] and sHideIrrelevantCurve then
 		tAlphaColor = UnitHealthPercent(aUnit, true, sHideIrrelevantCurve);
+		tSoloAlphaColor = sShowWhenIrrelevantCurve and UnitHealthPercent(aUnit, true, sShowWhenIrrelevantCurve);
 	elseif 3 == aLifeConfig["mode"] and sHideMissingZeroCurve then
 		tAlphaColor = UnitHealthPercent(aUnit, true, sHideMissingZeroCurve);
+		tSoloAlphaColor = sShowWhenFullCurve and UnitHealthPercent(aUnit, true, sShowWhenFullCurve);
 	end
 
 	if tAlphaColor then
-		VUHDO_getLifeText(aHealthBar):SetAlpha(tAlphaColor["a"] or 1);
 		if 1 == aLifeConfig["position"] or 2 == aLifeConfig["position"] then
 			VUHDO_getBarText(aHealthBar):SetAlpha(tAlphaColor["a"] or 1);
-
-			if sShowWhenFullCurve then
-				tSoloAlphaColor = UnitHealthPercent(aUnit, true, sShowWhenFullCurve);
-
-				VUHDO_getBarTextSolo(aHealthBar):SetAlpha(tSoloAlphaColor["a"] or 0);
-			else
-				VUHDO_getBarTextSolo(aHealthBar):SetAlpha(0);
-			end
+			VUHDO_getBarTextSolo(aHealthBar):SetAlpha(tSoloAlphaColor and tSoloAlphaColor["a"] or 0);
 		else
+			VUHDO_getLifeText(aHealthBar):SetAlpha(tAlphaColor["a"] or 1);
 			VUHDO_getBarText(aHealthBar):SetAlpha(1);
 			VUHDO_getBarTextSolo(aHealthBar):SetAlpha(0);
 		end
@@ -435,7 +455,9 @@ end
 
 
 --
-local tIsName, tIsLife, tIsLifeInName;
+local tIsName;
+local tIsLife;
+local tIsLifeInName;
 local tTextString;
 local tHealthBar;
 local tSetup;
@@ -450,6 +472,9 @@ local tIsLifeLeftOrRight;
 local tPanelNum;
 local tIsLifeTextAlpha;
 local tIsLifeTextSeparate;
+local tNameWithTag;
+local tSoloPart;
+local tDisplayLifeForSplit;
 function VUHDO_customizeText(aButton, aMode, anIsTarget)
 
 	tUnit, tInfo = VUHDO_getDisplayUnit(aButton);
@@ -460,9 +485,12 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 			or (tUnit and "target" == tUnit) and VUHDO_I18N_NO_TARGET
 			or (tUnit and VUHDO_isBossUnit(tUnit)) and VUHDO_I18N_NO_BOSS
 			or VUHDO_I18N_NOT_AVAILABLE;
-		VUHDO_getBarText(tHealthBar):SetText(tTextString);
+		VUHDO_getBarText(tHealthBar):SetText("");
+		VUHDO_getBarText(tHealthBar):SetAlpha(0);
 		VUHDO_getBarTextSolo(tHealthBar):SetText(tTextString);
+		VUHDO_getBarTextSolo(tHealthBar):SetAlpha(1);
 		VUHDO_getLifeText(tHealthBar):SetText("");
+		VUHDO_getLifeText(tHealthBar):SetAlpha(0);
 
 		return;
 	end
@@ -518,8 +546,10 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 		tLifeString = VUHDO_getColoredString(tLifeString, sLifeColor);
 
 		if tIsLifeTextSeparate then
-			VUHDO_getLifeText(tHealthBar):SetText(tTagText ~= "" and tTagText or tLifeString);
-			VUHDO_applyLifeTextAlpha(tHealthBar, tUnit, tInfo, tLifeConfig);
+			if not tIsLifeLeftOrRight then
+				VUHDO_getLifeText(tHealthBar):SetText(tTagText ~= "" and tTagText or tLifeString);
+				VUHDO_applyLifeTextAlpha(tHealthBar, tUnit, tInfo, tLifeConfig);
+			end
 		else
 			if tTagText ~= "" then tTagText = tTagText .. "-"; end
 
@@ -536,7 +566,7 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 		end
 	elseif tIsLife then
 		if tIsLifeLeftOrRight then
-			if tTagText ~= "" then
+			if not tIsLifeTextSeparate and tTagText ~= "" then
 				tTextString = tTagText .. "-" .. tTextString;
 			end
 
@@ -547,13 +577,36 @@ function VUHDO_customizeText(aButton, aMode, anIsTarget)
 	end
 
 	if tIsName then
-		if tInfo["aggro"] and sIsAggroText then
-			tTextString = format("|cffff2020%s|r%s|cffff2020%s|r",
-				VUHDO_THREAT_CFG["AGGRO_TEXT_LEFT"], tTextString, VUHDO_THREAT_CFG["AGGRO_TEXT_RIGHT"]);
-		end
+		if tIsLifeTextSeparate and tIsLifeLeftOrRight then
+			tNameWithTag = (tTagText ~= "" and tTagText .. "-" .. tTextString or tTextString);
+			tDisplayLifeForSplit = (tIsLife and tIsShowLife) and (tLifeString or "") or "";
 
-		VUHDO_getBarText(tHealthBar):SetText(tTextString);
-		VUHDO_getBarTextSolo(tHealthBar):SetText(tTextString);
+			tTextString = tNameWithTag .. " " .. tDisplayLifeForSplit;
+
+			if tInfo["aggro"] and sIsAggroText then
+				tTextString = format("|cffff2020%s|r%s|cffff2020%s|r",
+					VUHDO_THREAT_CFG["AGGRO_TEXT_LEFT"], tTextString, VUHDO_THREAT_CFG["AGGRO_TEXT_RIGHT"]);
+				tSoloPart = format("|cffff2020%s|r%s|cffff2020%s|r", VUHDO_THREAT_CFG["AGGRO_TEXT_LEFT"], tNameWithTag, VUHDO_THREAT_CFG["AGGRO_TEXT_RIGHT"]);
+			else
+				tSoloPart = tNameWithTag;
+			end
+
+			VUHDO_getBarText(tHealthBar):SetText(tTextString);
+			VUHDO_getBarTextSolo(tHealthBar):SetText(tSoloPart);
+
+			VUHDO_applyLifeTextAlpha(tHealthBar, tUnit, tInfo, tLifeConfig);
+		else
+			if tInfo["aggro"] and sIsAggroText then
+				tTextString = format("|cffff2020%s|r%s|cffff2020%s|r",
+					VUHDO_THREAT_CFG["AGGRO_TEXT_LEFT"], tTextString, VUHDO_THREAT_CFG["AGGRO_TEXT_RIGHT"]);
+			end
+
+			VUHDO_getBarText(tHealthBar):SetText(tTextString);
+			VUHDO_getBarText(tHealthBar):SetAlpha(1);
+
+			VUHDO_getBarTextSolo(tHealthBar):SetText(tTextString);
+			VUHDO_getBarTextSolo(tHealthBar):SetAlpha(0);
+		end
 	end
 
 	return;

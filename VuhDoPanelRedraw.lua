@@ -31,6 +31,7 @@ local sWaitingIndividualRedraws = { };
 local sQueuedAllPanelsRequests = { };
 local sQueuedIndividualRequests = { };
 local sIsManaBouquet = { };
+
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 local VUHDO_SEMAPHORE_CONFIG = {
@@ -743,174 +744,136 @@ do
 	local tLifeText;
 	local tAddHeight;
 	local tAnchorObject;
-	local tNameWidth;
-	local tLifeWidth;
 	local tIsLifeHorizontal;
 	local tIsLifeHidden;
-	local tHorizontalAnchor;
-	local tSpacing;
 	local tNameTextSolo;
 	function VUHDO_initBarTexts(aButton, aHealthBar, aWidth, aPanelNum)
 
-	tTextPanel  = VUHDO_getTextPanel(aHealthBar);
-	tNameText = VUHDO_getBarText(aHealthBar);
-	tNameTextSolo = VUHDO_getBarTextSolo(aHealthBar);
-	tLifeText = VUHDO_getLifeText(aHealthBar);
+		tTextPanel  = VUHDO_getTextPanel(aHealthBar);
+		tNameText = VUHDO_getBarText(aHealthBar);
+		tNameTextSolo = VUHDO_getBarTextSolo(aHealthBar);
+		tLifeText = VUHDO_getLifeText(aHealthBar);
 
-	VUHDO_PixelUtil.SetWidth(tNameText, aWidth);
-	VUHDO_PixelUtil.SetHeight(tNameText, sPanelConfig[aPanelNum]["mainFontHeight"]);
-	tNameText:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
-	tNameText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
+		VUHDO_PixelUtil.SetWidth(tNameText, aWidth);
+		VUHDO_PixelUtil.SetHeight(tNameText, sPanelConfig[aPanelNum]["mainFontHeight"]);
 
-	tNameTextSolo:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
-	tNameTextSolo:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
-	tNameTextSolo:SetText("");
+		tNameText:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		tNameText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
 
-	tLifeText:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["lifeFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
-	tLifeText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
-	tLifeText:SetText("");
+		tNameTextSolo:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["mainFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		tNameTextSolo:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
+		tNameTextSolo:SetText("");
 
-	VUHDO_PixelUtil.ClearAllPoints(tNameText);
-	VUHDO_PixelUtil.ClearAllPoints(tNameTextSolo);
-	tAddHeight = 0;
+		tLifeText:SetFont(sPanelConfig[aPanelNum]["mainFont"], sPanelConfig[aPanelNum]["lifeFontHeight"], sPanelConfig[aPanelNum]["outlineText"] or "");
+		tLifeText:SetShadowColor(0, 0, 0, sPanelConfig[aPanelNum]["shadowAlpha"]);
+		tLifeText:SetText("");
 
-	tIsLifeHorizontal = VUHDO_LT_POS_RIGHT == sPanelConfig[aPanelNum]["lifeText"]["position"]
-		or VUHDO_LT_POS_LEFT == sPanelConfig[aPanelNum]["lifeText"]["position"];
+		VUHDO_PixelUtil.ClearAllPoints(tNameText);
+		VUHDO_PixelUtil.ClearAllPoints(tNameTextSolo);
 
-	tIsLifeHidden = not sPanelConfig[aPanelNum]["lifeText"]["show"]
-		and not sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["showTags"];
+		tAddHeight = 0;
 
-	if tIsLifeHidden then
-		VUHDO_PixelUtil.SetWidth(tLifeText, 0);
-		VUHDO_PixelUtil.SetHeight(tLifeText, 0);
-		VUHDO_PixelUtil.SetPoint(tNameText, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
-		VUHDO_PixelUtil.Hide(tLifeText);
-		VUHDO_PixelUtil.SetWidth(tNameTextSolo, 0);
-		VUHDO_PixelUtil.SetHeight(tNameTextSolo, 0);
-		VUHDO_PixelUtil.Hide(tNameTextSolo);
-	elseif tIsLifeHorizontal and sSecretsEnabled then
-		tNameWidth = aWidth * 0.6;
-		tLifeWidth = aWidth * 0.4;
+		tIsLifeHorizontal = VUHDO_LT_POS_RIGHT == sPanelConfig[aPanelNum]["lifeText"]["position"]
+			or VUHDO_LT_POS_LEFT == sPanelConfig[aPanelNum]["lifeText"]["position"];
 
-		VUHDO_PixelUtil.ClearAllPoints(tLifeText);
-		VUHDO_PixelUtil.SetWidth(tNameText, tNameWidth);
-		VUHDO_PixelUtil.SetWidth(tLifeText, tLifeWidth);
-		VUHDO_PixelUtil.SetHeight(tLifeText, sPanelConfig[aPanelNum]["mainFontHeight"]);
-		tSpacing = sPanelConfig[aPanelNum]["mainFontHeight"] * 0.25;
+		tIsLifeHidden = not sPanelConfig[aPanelNum]["lifeText"]["show"]
+			and not sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["showTags"];
 
-		if strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "LEFT", 1, true) then
-			tHorizontalAnchor = "LEFT";
-		elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "RIGHT", 1, true) then
-			tHorizontalAnchor = "RIGHT";
+		if tIsLifeHidden then
+			VUHDO_PixelUtil.Hide(VUHDO_getTextHorizontalContainer(aHealthBar));
+
+			VUHDO_PixelUtil.SetWidth(tLifeText, 0);
+			VUHDO_PixelUtil.SetHeight(tLifeText, 0);
+			VUHDO_PixelUtil.Hide(tLifeText);
+
+			VUHDO_PixelUtil.SetPoint(tNameText, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
+			VUHDO_PixelUtil.Show(tNameText);
+
+			VUHDO_PixelUtil.SetWidth(tNameTextSolo, 0);
+			VUHDO_PixelUtil.SetHeight(tNameTextSolo, 0);
+			VUHDO_PixelUtil.Hide(tNameTextSolo);
+		elseif tIsLifeHorizontal then
+			VUHDO_PixelUtil.SetWidth(tLifeText, 0);
+			VUHDO_PixelUtil.SetHeight(tLifeText, 0);
+			VUHDO_PixelUtil.Hide(tLifeText);
+
+			VUHDO_PixelUtil.SetWidth(tNameText, aWidth);
+			VUHDO_PixelUtil.SetHeight(tNameText, sPanelConfig[aPanelNum]["mainFontHeight"]);
+			VUHDO_PixelUtil.ClearAllPoints(tNameText);
+			VUHDO_PixelUtil.SetPoint(tNameText, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
+			VUHDO_PixelUtil.Show(tNameText);
+
+			VUHDO_PixelUtil.SetWidth(tNameTextSolo, aWidth);
+			VUHDO_PixelUtil.SetHeight(tNameTextSolo, sPanelConfig[aPanelNum]["mainFontHeight"]);
+			VUHDO_PixelUtil.ClearAllPoints(tNameTextSolo);
+			VUHDO_PixelUtil.SetPoint(tNameTextSolo, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
+			VUHDO_PixelUtil.Show(tNameTextSolo);
 		else
-			tHorizontalAnchor = "CENTER";
-		end
+			VUHDO_PixelUtil.ClearAllPoints(tLifeText);
+			VUHDO_PixelUtil.SetWidth(tLifeText, aWidth);
+			VUHDO_PixelUtil.SetHeight(tLifeText, sPanelConfig[aPanelNum]["lifeFontHeight"]);
 
-		if VUHDO_LT_POS_LEFT == sPanelConfig[aPanelNum]["lifeText"]["position"] then
-			if "LEFT" == tHorizontalAnchor then
-				VUHDO_PixelUtil.SetPoint(tLifeText, "LEFT", tTextPanel:GetName(), "LEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tNameText, "LEFT", tLifeText:GetName(), "RIGHT", tSpacing, 0);
-			elseif "RIGHT" == tHorizontalAnchor then
-				VUHDO_PixelUtil.SetPoint(tNameText, "RIGHT", tTextPanel:GetName(), "RIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tLifeText, "RIGHT", tNameText:GetName(), "LEFT", -tSpacing, 0);
+			tAddHeight = sPanelConfig[aPanelNum]["lifeFontHeight"];
+
+			VUHDO_PixelUtil.Show(tNameText);
+			VUHDO_PixelUtil.Show(tLifeText);
+
+			if (VUHDO_LT_POS_BELOW == sPanelConfig[aPanelNum]["lifeText"]["position"]) then
+				VUHDO_PixelUtil.SetPoint(tNameText, "TOP", tTextPanel:GetName(), "TOP", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tLifeText, "TOP", tNameText:GetName(), "BOTTOM", 0, 0);
 			else
-				VUHDO_PixelUtil.SetPoint(tLifeText, "RIGHT", tTextPanel:GetName(), "CENTER", -tSpacing / 2, 0);
-				VUHDO_PixelUtil.SetPoint(tNameText, "LEFT", tTextPanel:GetName(), "CENTER", tSpacing / 2, 0);
+				VUHDO_PixelUtil.SetPoint(tNameText, "BOTTOM", tTextPanel:GetName(), "BOTTOM", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tLifeText, "BOTTOM", tNameText:GetName(), "TOP", 0, 0);
 			end
-		else
-			if "LEFT" == tHorizontalAnchor then
-				VUHDO_PixelUtil.SetPoint(tNameText, "LEFT", tTextPanel:GetName(), "LEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tLifeText, "LEFT", tNameText:GetName(), "RIGHT", tSpacing, 0);
-			elseif "RIGHT" == tHorizontalAnchor then
-				VUHDO_PixelUtil.SetPoint(tLifeText, "RIGHT", tTextPanel:GetName(), "RIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tNameText, "RIGHT", tLifeText:GetName(), "LEFT", -tSpacing, 0);
+
+			VUHDO_PixelUtil.SetWidth(tNameTextSolo, 0);
+			VUHDO_PixelUtil.SetHeight(tNameTextSolo, 0);
+			VUHDO_PixelUtil.Hide(tNameTextSolo);
+
+			VUHDO_PixelUtil.Show(tLifeText);
+		end
+
+		VUHDO_PixelUtil.SetHeight(tTextPanel, sPanelConfig[aPanelNum]["mainFontHeight"] + tAddHeight);
+		VUHDO_PixelUtil.SetWidth(tTextPanel, aWidth);
+
+		sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["_spacing"] = tTextPanel:GetHeight(); -- internal marker
+
+		if tIsLifeHorizontal then
+			if strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "LEFT", 1, true) then
+				tNameText:SetJustifyH("LEFT");
+				tNameTextSolo:SetJustifyH("LEFT");
+			elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "RIGHT", 1, true) then
+				tNameText:SetJustifyH("RIGHT");
+				tNameTextSolo:SetJustifyH("RIGHT");
 			else
-				VUHDO_PixelUtil.SetPoint(tNameText, "RIGHT", tTextPanel:GetName(), "CENTER", -tSpacing / 2, 0);
-				VUHDO_PixelUtil.SetPoint(tLifeText, "LEFT", tTextPanel:GetName(), "CENTER", tSpacing / 2, 0);
+				tNameText:SetJustifyH("CENTER");
+				tNameTextSolo:SetJustifyH("CENTER");
 			end
-		end
-
-		VUHDO_PixelUtil.SetWidth(tNameTextSolo, aWidth);
-		VUHDO_PixelUtil.SetHeight(tNameTextSolo, sPanelConfig[aPanelNum]["mainFontHeight"]);
-		VUHDO_PixelUtil.SetPoint(tNameTextSolo, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
-		VUHDO_PixelUtil.Show(tNameTextSolo);
-		VUHDO_PixelUtil.Show(tLifeText);
-	elseif tIsLifeHorizontal then
-		VUHDO_PixelUtil.SetWidth(tLifeText, 0);
-		VUHDO_PixelUtil.SetHeight(tLifeText, 0);
-		VUHDO_PixelUtil.SetPoint(tNameText, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
-		VUHDO_PixelUtil.Hide(tLifeText);
-		VUHDO_PixelUtil.SetWidth(tNameTextSolo, 0);
-		VUHDO_PixelUtil.SetHeight(tNameTextSolo, 0);
-		VUHDO_PixelUtil.Hide(tNameTextSolo);
-	else
-		VUHDO_PixelUtil.ClearAllPoints(tLifeText);
-
-		VUHDO_PixelUtil.SetWidth(tLifeText, aWidth);
-		VUHDO_PixelUtil.SetHeight(tLifeText, sPanelConfig[aPanelNum]["lifeFontHeight"]);
-
-		tAddHeight = sPanelConfig[aPanelNum]["lifeFontHeight"];
-
-		if (VUHDO_LT_POS_BELOW == sPanelConfig[aPanelNum]["lifeText"]["position"]) then
-			VUHDO_PixelUtil.SetPoint(tNameText, "TOP", tTextPanel:GetName(), "TOP", 0, 0);
-			VUHDO_PixelUtil.SetPoint(tLifeText, "TOP", tNameText:GetName(), "BOTTOM", 0, 0);
-		else
-			VUHDO_PixelUtil.SetPoint(tNameText, "BOTTOM", tTextPanel:GetName(), "BOTTOM", 0, 0);
-			VUHDO_PixelUtil.SetPoint(tLifeText, "BOTTOM", tNameText:GetName(), "TOP", 0, 0);
-		end
-
-		VUHDO_PixelUtil.SetWidth(tNameTextSolo, 0);
-		VUHDO_PixelUtil.SetHeight(tNameTextSolo, 0);
-		VUHDO_PixelUtil.Hide(tNameTextSolo);
-		VUHDO_PixelUtil.Show(tLifeText);
-	end
-
-	VUHDO_PixelUtil.SetHeight(tTextPanel, sPanelConfig[aPanelNum]["mainFontHeight"] + tAddHeight);
-	VUHDO_PixelUtil.SetWidth(tTextPanel, aWidth);
-
-	sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["_spacing"] = tTextPanel:GetHeight(); -- internal marker
-
-	if tIsLifeHorizontal and sSecretsEnabled then
-		if VUHDO_LT_POS_LEFT == sPanelConfig[aPanelNum]["lifeText"]["position"] then
+		elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "LEFT", 1, true) then
 			tNameText:SetJustifyH("LEFT");
+			tLifeText:SetJustifyH("LEFT");
+		elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "RIGHT", 1, true) then
+			tNameText:SetJustifyH("RIGHT");
 			tLifeText:SetJustifyH("RIGHT");
 		else
-			tNameText:SetJustifyH("RIGHT");
-			tLifeText:SetJustifyH("LEFT");
+			tNameText:SetJustifyH("CENTER");
+			tLifeText:SetJustifyH("CENTER");
 		end
 
-		if strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "LEFT", 1, true) then
-			tNameTextSolo:SetJustifyH("LEFT");
-		elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "RIGHT", 1, true) then
-			tNameTextSolo:SetJustifyH("RIGHT");
+		if strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "BOTTOM", 1, true) and strfind(sPanelConfig[aPanelNum]["textAnchors"][2], "TOP", 1, true) -- �ber Button
+			and sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["THREAT_BAR"] ~= "" then
+			tAnchorObject = VUHDO_getHealthBar(aButton, 7) or aButton; -- Target und Tot hat keinen Threat bar
+		elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][2], "BOTTOM", 1, true) and strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "TOP", 1, true) then
+			tAnchorObject = aButton;
 		else
-			tNameTextSolo:SetJustifyH("CENTER");
+			tAnchorObject = aHealthBar;
 		end
-	elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "LEFT", 1, true) then
-		tNameText:SetJustifyH("LEFT");
-		tLifeText:SetJustifyH("LEFT");
-	elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "RIGHT", 1, true) then
-		tNameText:SetJustifyH("RIGHT");
-		tLifeText:SetJustifyH("RIGHT");
-	else
-		tNameText:SetJustifyH("CENTER");
-		tLifeText:SetJustifyH("CENTER");
-	end
 
-	if strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "BOTTOM", 1, true) and strfind(sPanelConfig[aPanelNum]["textAnchors"][2], "TOP", 1, true) -- �ber Button
-		and sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["THREAT_BAR"] ~= "" then
-		tAnchorObject = VUHDO_getHealthBar(aButton, 7) or aButton; -- Target und Tot hat keinen Threat bar
-	elseif strfind(sPanelConfig[aPanelNum]["textAnchors"][2], "BOTTOM", 1, true) and strfind(sPanelConfig[aPanelNum]["textAnchors"][1], "TOP", 1, true) then
-		tAnchorObject = aButton;
-	else
-		tAnchorObject = aHealthBar;
-	end
+		VUHDO_PixelUtil.ClearAllPoints(tTextPanel);
 
-	VUHDO_PixelUtil.ClearAllPoints(tTextPanel);
+		VUHDO_PixelUtil.SetPoint(tTextPanel, sPanelConfig[aPanelNum]["textAnchors"][1], tAnchorObject:GetName(), sPanelConfig[aPanelNum]["textAnchors"][2], sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["xAdjust"], -sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["yAdjust"]);
 
-	VUHDO_PixelUtil.SetPoint(tTextPanel, sPanelConfig[aPanelNum]["textAnchors"][1], tAnchorObject:GetName(), sPanelConfig[aPanelNum]["textAnchors"][2], sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["xAdjust"], -sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["yAdjust"]);
-
-	return;
+		return;
 
 	end
 end
