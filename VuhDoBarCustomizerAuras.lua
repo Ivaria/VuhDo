@@ -2047,7 +2047,7 @@ do
 					VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
 				end
 
-				tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
+				tSize = tIconSize;
 
 				if aFrame.timerText and anAnchorConfig["TIMER_TEXT"] and VUHDO_customizeIconText then
 					VUHDO_customizeIconText(aFrame.childIcon, tSize, aFrame.timerText, anAnchorConfig["TIMER_TEXT"]);
