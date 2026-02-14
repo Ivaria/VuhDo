@@ -1233,7 +1233,6 @@ do
 		tPredHealthBar:SetValue(0);
 
 		VUHDO_setStatusBarOrientation(tPredHealthBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
-		tPredHealthBar:SetReverseFill(tPredIsInverted);
 
 		tPredIncBar:ClearAllPoints();
 		VUHDO_PixelUtil.SetSize(tPredIncBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
@@ -1242,43 +1241,6 @@ do
 		tPredIncBar:SetValue(0);
 
 		VUHDO_setStatusBarOrientation(tPredIncBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
-		tPredIncBar:SetReverseFill(tPredIsInverted);
-
-		if tPredOrientation == "HORIZONTAL" then
-			if tPredIsInverted then
-				tAnchorFrom = "RIGHT";
-				tAnchorTo = "LEFT";
-			else
-				tAnchorFrom = "LEFT";
-				tAnchorTo = "RIGHT";
-			end
-		elseif tPredOrientation == "HORIZONTAL_INV" then
-			if tPredIsInverted then
-				tAnchorFrom = "LEFT";
-				tAnchorTo = "RIGHT";
-			else
-				tAnchorFrom = "RIGHT";
-				tAnchorTo = "LEFT";
-			end
-		elseif tPredOrientation == "VERTICAL" then
-			if tPredIsInverted then
-				tAnchorFrom = "TOP";
-				tAnchorTo = "BOTTOM";
-			else
-				tAnchorFrom = "BOTTOM";
-				tAnchorTo = "TOP";
-			end
-		else
-			if tPredIsInverted then
-				tAnchorFrom = "BOTTOM";
-				tAnchorTo = "TOP";
-			else
-				tAnchorFrom = "TOP";
-				tAnchorTo = "BOTTOM";
-			end
-		end
-
-		tPredIncBar:SetPoint(tAnchorFrom, tPredHealthBar:GetStatusBarTexture(), tAnchorTo);
 
 		tPredShieldBar:ClearAllPoints();
 		VUHDO_PixelUtil.SetSize(tPredShieldBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
@@ -1287,15 +1249,29 @@ do
 		tPredShieldBar:SetValue(0);
 
 		VUHDO_setStatusBarOrientation(tPredShieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
-		tPredShieldBar:SetReverseFill(tPredIsInverted);
 
+		if tPredOrientation == "HORIZONTAL" then
+			tAnchorFrom = "LEFT";
+			tAnchorTo = "RIGHT";
+		elseif tPredOrientation == "HORIZONTAL_INV" then
+			tAnchorFrom = "RIGHT";
+			tAnchorTo = "LEFT";
+		elseif tPredOrientation == "VERTICAL" then
+			tAnchorFrom = "BOTTOM";
+			tAnchorTo = "TOP";
+		else
+			tAnchorFrom = "TOP";
+			tAnchorTo = "BOTTOM";
+		end
+
+		tPredIncBar:SetPoint(tAnchorFrom, tPredHealthBar:GetStatusBarTexture(), tAnchorTo);
 		tPredShieldBar:SetPoint(tAnchorFrom, tPredIncBar:GetStatusBarTexture(), tAnchorTo);
 
 		if tPredOvershieldBar then
 			tPredOvershieldBar:ClearAllPoints();
 			tPredOvershieldBar:SetAllPoints(tPredHealthBar);
 			VUHDO_setStatusBarOrientation(tPredOvershieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
-			tPredOvershieldBar:SetReverseFill(true);
+			tPredOvershieldBar:SetReverseFill(tPredIsInverted == (tPredOrientation == "HORIZONTAL_INV" or tPredOrientation == "VERTICAL_INV"));
 		end
 
 		if tPredHealAbsorbBar then

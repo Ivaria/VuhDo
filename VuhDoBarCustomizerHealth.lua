@@ -25,7 +25,6 @@ local VUHDO_getUnitButtonsSafe;
 local VUHDO_getBarRoleIcon;
 local VUHDO_updateClusterHighlights;
 local VUHDO_customizeTargetBar;
-local VUHDO_textColor;
 local VUHDO_getUnitOverallShieldRemain;
 local VUHDO_getHealAbsorbBar;
 local VUHDO_setStatusBarVuhDoColor;
@@ -47,9 +46,10 @@ local strfind = strfind;
 local GetRaidTargetIndex = GetRaidTargetIndex;
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
 local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
-local UnitHealthMissing = UnitHealthMissing;
 local UnitHealthPercent = UnitHealthPercent;
 local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
+local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
+local CreateColor = CreateColor;
 local pairs = pairs;
 local twipe = table.wipe;
 local format = format;
@@ -60,6 +60,7 @@ local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sHealPredictionCalculator;
 local sOvershieldCalculator;
 local sOvershieldAlphaCurve;
+local sHideWhenFullHealthCurve;
 local sIsOverhealText;
 local sIsAggroText;
 local sIsInvertGrowth = { };
@@ -108,7 +109,6 @@ function VUHDO_customHealthInitLocalOverrides()
 	VUHDO_updateClusterHighlights = _G["VUHDO_updateClusterHighlights"];
 	VUHDO_customizeTargetBar = _G["VUHDO_customizeTargetBar"];
 	VUHDO_getColoredString = _G["VUHDO_getColoredString"];
-	VUHDO_textColor = _G["VUHDO_textColor"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getUnitOverallShieldRemain = _G["VUHDO_getUnitOverallShieldRemain"];
 	VUHDO_getHealAbsorbBar = _G["VUHDO_getHealAbsorbBar"];
@@ -135,6 +135,7 @@ function VUHDO_customHealthInitLocalOverrides()
 	end
 
 	sOvershieldAlphaCurve = VUHDO_buildOvershieldAlphaCurve();
+	sHideWhenFullHealthCurve = VUHDO_buildHideWhenFullHealthCurve();
 
 	twipe(VUHDO_NAME_TEXTS);
 
@@ -156,6 +157,25 @@ function VUHDO_buildOvershieldAlphaCurve()
 	tOvershieldAlphaCurve:AddPoint(0.9999, 1);
 
 	return tOvershieldAlphaCurve;
+
+end
+
+
+
+--
+local tCurve;
+function VUHDO_buildHideWhenFullHealthCurve()
+
+	if not sSecretsEnabled then
+		return nil;
+	end
+
+	tCurve = CreateColorCurve();
+	tCurve:SetType(Enum.LuaCurveType.Step);
+	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
+	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
+
+	return tCurve;
 
 end
 
@@ -392,7 +412,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 			tOvershieldBar = VUHDO_getHealthBar(tButton, 20);
 
 			tShieldBar:SetMinMaxValues(0, tHealthMax);
-			tShieldBar:SetValue((tShieldBar["isInverted"] and not sSecretsEnabled) and (tHealthMax - tShieldInBar) or tShieldInBar);
+			tShieldBar:SetValue(tShieldInBar);
 
 			if sSecretsEnabled and tHealthBar["secretCurveColor"] then
 				sConfigShieldColor = VUHDO_getStatusBarColor("SHIELD", aUnit);
@@ -422,6 +442,11 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 			end
 
 			tShieldBar:Show();
+
+			if sSecretsEnabled and tHealthBar["isInverted"] and sHideWhenFullHealthCurve then
+				tAlpha = UnitHealthPercent(aUnit, true, sHideWhenFullHealthCurve);
+				tShieldBar:SetAlpha(tAlpha and tAlpha["a"] or 1);
+			end
 
 			if VUHDO_CONFIG["SHOW_OVERSHIELD_BAR"] then
 				tOvershieldBar:SetMinMaxValues(0, tHealthMax);
@@ -505,7 +530,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 
 			if tAbsorbAmount > 0 then
 				tShieldBar:SetMinMaxValues(aHealthPlusIncQuota, aHealthPlusIncQuota + tAbsorbAmount);
-				tShieldBar:SetValue((tShieldBar["isInverted"] and not sSecretsEnabled) and aHealthPlusIncQuota or (aHealthPlusIncQuota + tAbsorbAmount));
+				tShieldBar:SetValue(aHealthPlusIncQuota + tAbsorbAmount);
 
 				tShieldColor["R"], tShieldColor["G"], tShieldColor["B"], tShieldOpacity = tHealthBar:GetStatusBarColor();
 				tShieldColor = VUHDO_getDiffColor(tShieldColor, VUHDO_getStatusBarColor("SHIELD", aUnit));
@@ -519,7 +544,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 				tShieldBar:Show();
 			else
 				tShieldBar:SetMinMaxValues(0, 1);
-				tShieldBar:SetValue(tShieldBar["isInverted"] and 1 or 0);
+				tShieldBar:SetValue(0);
 				tShieldBar:Hide();
 			end
 
@@ -896,11 +921,7 @@ local function VUHDO_updateIncHeal(aUnit)
 
 		if tIncHealAmount and tInfo["healthmax"] and (not sSecretsEnabled or issecretvalue(tIncHealAmount) or tIncHealAmount > 0) and (not sSecretsEnabled or tInfo["hasSecretHealthMax"] or tInfo["healthmax"] > 0) then
 			tIncBar:SetMinMaxValues(0, tInfo["healthmax"]);
-			if tIncBar["isInverted"] and not sSecretsEnabled then
-				tIncBar:SetValue(tInfo["healthmax"] - tIncHealAmount);
-			else
-				tIncBar:SetValue(tIncHealAmount);
-			end
+			tIncBar:SetValue(tIncHealAmount);
 
 			if sSecretsEnabled and tHealthBar["secretCurveColor"] then
 				sConfigIncColor = VUHDO_getStatusBarColor("INCOMING", aUnit);
