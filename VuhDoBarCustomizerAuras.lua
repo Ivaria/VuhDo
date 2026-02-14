@@ -461,6 +461,37 @@ end
 
 
 --
+local function VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig)
+
+	tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+
+	tBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
+
+	return tBarWidth * (anAnchorConfig["barWidth"] or 30) * 0.01;
+
+end
+
+
+
+--
+local tAvailableHeight;
+local tIconSize;
+local function VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig)
+
+	tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+
+	tBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+	tIconSize = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+
+	tAvailableHeight = max(0, tBarHeight - tIconSize);
+
+	return tAvailableHeight * (anAnchorConfig["barHeight"] or 100) * 0.01;
+
+end
+
+
+
+--
 local tChild;
 local function VUHDO_getAuraIconBackdrop(aFrame)
 
@@ -606,10 +637,6 @@ end
 --
 local tColors;
 local tTransparent;
-local tDispelAbilities;
-local tPurgeAbilities;
-local tBlizzType;
-local tColorKey;
 function VUHDO_initAuraDurationCurves()
 
 	if not CreateCurve then
@@ -1626,7 +1653,8 @@ do
 	local tBarHeight;
 	local tIconSize;
 	local tTotalWidth;
-	local tAuraDefaults;
+	local tTotalHeight;
+	local tBarVertical;
 	function VUHDO_positionAuraFrameDynamic(aFrame, aSlotIndex, anAnchorConfig, aButton, aRadioValue)
 
 		tPos = VUHDO_AURA_RADIOVALUE_POSITIONS[aRadioValue];
@@ -1663,11 +1691,24 @@ do
 		tMaxCols = anAnchorConfig["maxColumns"] or 5;
 
 		if aFrame.childBar then
-			tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
-			tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
+			tBarVertical = anAnchorConfig["barVertical"] or false;
 
-			tIconSize = tBarHeight;
-			tTotalWidth = tIconSize + tBarWidth;
+			if tBarVertical then
+				tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+				tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
+
+				tIconSize = tBarWidth;
+
+				tTotalHeight = tIconSize + tBarHeight;
+				tTotalWidth = tIconSize;
+			else
+				tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
+				tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
+
+				tIconSize = tBarHeight;
+
+				tTotalWidth = tIconSize + tBarWidth;
+			end
 		else
 			tBarWidth = tSize;
 			tBarHeight = tSize;
@@ -1683,27 +1724,52 @@ do
 		tWrapX = tWrapDir[1];
 		tWrapY = tWrapDir[2];
 
-		tXOff = tBaseX + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
-		tYOff = tBaseY + (tCol * (tBarHeight + tSpacing) * tGrowY) + (tRow * (tBarHeight + tSpacing) * tWrapY);
+		if aFrame.childBar and tBarVertical then
+			tXOff = tBaseX + (tCol * (tIconSize + tSpacing) * tGrowX) + (tRow * (tIconSize + tSpacing) * tWrapX);
+			tYOff = tBaseY + (tCol * (tTotalHeight + tSpacing) * tGrowY) + (tRow * (tTotalHeight + tSpacing) * tWrapY);
+		else
+			tXOff = tBaseX + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
+			tYOff = tBaseY + (tCol * (tBarHeight + tSpacing) * tGrowY) + (tRow * (tBarHeight + tSpacing) * tWrapY);
+		end
 
 		aFrame:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(aFrame, tPos["anchor"], tRelFrame, tPos["relPoint"], tXOff, tYOff);
-		VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tBarHeight);
+
+		if aFrame.childBar and tBarVertical then
+			VUHDO_PixelUtil.SetSize(aFrame, tIconSize, tTotalHeight);
+		else
+			VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tBarHeight);
+		end
 
 		if aFrame.childIcon and aFrame.childBar then
 			aFrame.childIcon:ClearAllPoints();
-			VUHDO_PixelUtil.SetPoint(aFrame.childIcon, "LEFT", aFrame, "LEFT", 0, 0);
-			VUHDO_PixelUtil.SetSize(aFrame.childIcon, tIconSize, tIconSize);
-			aFrame.childIcon:Show();
+			if tBarVertical then
+				VUHDO_PixelUtil.SetPoint(aFrame.childIcon, "BOTTOM", aFrame, "BOTTOM", 0, 0);
+				VUHDO_PixelUtil.SetSize(aFrame.childIcon, tIconSize, tIconSize);
+				aFrame.childIcon:Show();
 
-			if aFrame.cooldownFrame and aFrame.childIcon then
-				aFrame.cooldownFrame:ClearAllPoints();
-				aFrame.cooldownFrame:SetAllPoints(aFrame.childIcon);
+				if aFrame.cooldownFrame and aFrame.childIcon then
+					aFrame.cooldownFrame:ClearAllPoints();
+					aFrame.cooldownFrame:SetAllPoints(aFrame.childIcon);
+				end
+
+				aFrame.childBar:ClearAllPoints();
+				VUHDO_PixelUtil.SetPoint(aFrame.childBar, "BOTTOM", aFrame.childIcon, "TOP", 0, 0);
+				VUHDO_PixelUtil.SetSize(aFrame.childBar, tIconSize, tBarHeight);
+			else
+				VUHDO_PixelUtil.SetPoint(aFrame.childIcon, "LEFT", aFrame, "LEFT", 0, 0);
+				VUHDO_PixelUtil.SetSize(aFrame.childIcon, tIconSize, tIconSize);
+				aFrame.childIcon:Show();
+
+				if aFrame.cooldownFrame and aFrame.childIcon then
+					aFrame.cooldownFrame:ClearAllPoints();
+					aFrame.cooldownFrame:SetAllPoints(aFrame.childIcon);
+				end
+
+				aFrame.childBar:ClearAllPoints();
+				VUHDO_PixelUtil.SetPoint(aFrame.childBar, "LEFT", aFrame.childIcon, "RIGHT", 0, 0);
+				VUHDO_PixelUtil.SetSize(aFrame.childBar, tBarWidth, tBarHeight);
 			end
-
-			aFrame.childBar:ClearAllPoints();
-			VUHDO_PixelUtil.SetPoint(aFrame.childBar, "LEFT", aFrame.childIcon, "RIGHT", 0, 0);
-			VUHDO_PixelUtil.SetSize(aFrame.childBar, tBarWidth, tBarHeight);
 		end
 
 		return;
@@ -1845,9 +1911,10 @@ do
 	local tTexture;
 	local tBarWidth;
 	local tBarHeight;
-	local tAuraDefaults;
 	local tIconSize;
 	local tTotalWidth;
+	local tTotalHeight;
+	local tBarVertical;
 	function VUHDO_positionAuraFrame(aFrame, aButton, anAnchorConfig, aSlotIndex, anAnchorIndex)
 
 		if not aFrame or not aButton or not anAnchorConfig then
@@ -1877,13 +1944,26 @@ do
 			tSpacing = anAnchorConfig["spacing"] or 2;
 			tMaxCols = anAnchorConfig["maxColumns"] or 5;
 
-			if aFrame.childBar then
+		if aFrame.childBar then
+			tBarVertical = anAnchorConfig["barVertical"] or false;
+
+			if tBarVertical then
+				tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+				tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
+
+				tIconSize = tBarWidth;
+
+				tTotalHeight = tIconSize + tBarHeight;
+				tTotalWidth = tIconSize;
+			else
 				tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
 				tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
 
 				tIconSize = tBarHeight;
+
 				tTotalWidth = tIconSize + tBarWidth;
-			else
+			end
+		else
 				tBarWidth = tSize;
 				tBarHeight = tSize;
 
@@ -1900,16 +1980,28 @@ do
 			tWrapY = tWrapDir[2];
 
 			tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
+
 			tHealthBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
 			tHealthBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
 			tOffsetXPixels = (anAnchorConfig["offsetX"] or 0) * tHealthBarWidth * 0.01;
 			tOffsetYPixels = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeight * 0.01;
-			tXOff = tOffsetXPixels + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
-			tYOff = tOffsetYPixels + (tCol * (tBarHeight + tSpacing) * tGrowY) + (tRow * (tBarHeight + tSpacing) * tWrapY);
+
+			if aFrame.childBar and tBarVertical then
+				tXOff = tOffsetXPixels + (tCol * (tIconSize + tSpacing) * tGrowX) + (tRow * (tIconSize + tSpacing) * tWrapX);
+				tYOff = tOffsetYPixels + (tCol * (tTotalHeight + tSpacing) * tGrowY) + (tRow * (tTotalHeight + tSpacing) * tWrapY);
+			else
+				tXOff = tOffsetXPixels + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
+				tYOff = tOffsetYPixels + (tCol * (tBarHeight + tSpacing) * tGrowY) + (tRow * (tBarHeight + tSpacing) * tWrapY);
+			end
 
 			aFrame:ClearAllPoints();
 			VUHDO_PixelUtil.SetPoint(aFrame, tAnchorPoint[1], aButton, tAnchorPoint[1], tXOff, tYOff);
-			VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tBarHeight);
+
+			if aFrame.childBar and tBarVertical then
+				VUHDO_PixelUtil.SetSize(aFrame, tIconSize, tTotalHeight);
+			else
+				VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tBarHeight);
+			end
 		end
 
 		tChild = aFrame.childB or aFrame.childBar or VUHDO_getAuraIconBackdrop(aFrame) or VUHDO_getAuraBarStatusBar(aFrame);
@@ -1918,19 +2010,42 @@ do
 			tChild:ClearAllPoints();
 
 			if aFrame.childIcon and aFrame.childBar then
-				aFrame.childIcon:ClearAllPoints();
-				VUHDO_PixelUtil.SetPoint(aFrame.childIcon, "LEFT", aFrame, "LEFT", 0, 0);
-				VUHDO_PixelUtil.SetSize(aFrame.childIcon, tIconSize, tIconSize);
-				aFrame.childIcon:Show();
+				tBarVertical = anAnchorConfig["barVertical"] or false;
 
-				if aFrame.cooldownFrame and aFrame.childIcon then
-					aFrame.cooldownFrame:ClearAllPoints();
-					aFrame.cooldownFrame:SetAllPoints(aFrame.childIcon);
+				if tBarVertical then
+					tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+					tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
+
+					tIconSize = tBarWidth;
+
+					aFrame.childIcon:ClearAllPoints();
+					VUHDO_PixelUtil.SetPoint(aFrame.childIcon, "BOTTOM", aFrame, "BOTTOM", 0, 0);
+					VUHDO_PixelUtil.SetSize(aFrame.childIcon, tIconSize, tIconSize);
+					aFrame.childIcon:Show();
+
+					if aFrame.cooldownFrame and aFrame.childIcon then
+						aFrame.cooldownFrame:ClearAllPoints();
+						aFrame.cooldownFrame:SetAllPoints(aFrame.childIcon);
+					end
+
+					tChild:ClearAllPoints();
+					VUHDO_PixelUtil.SetPoint(tChild, "BOTTOM", aFrame.childIcon, "TOP", 0, 0);
+					VUHDO_PixelUtil.SetSize(tChild, tIconSize, tBarHeight);
+				else
+					aFrame.childIcon:ClearAllPoints();
+					VUHDO_PixelUtil.SetPoint(aFrame.childIcon, "LEFT", aFrame, "LEFT", 0, 0);
+					VUHDO_PixelUtil.SetSize(aFrame.childIcon, tIconSize, tIconSize);
+					aFrame.childIcon:Show();
+
+					if aFrame.cooldownFrame and aFrame.childIcon then
+						aFrame.cooldownFrame:ClearAllPoints();
+						aFrame.cooldownFrame:SetAllPoints(aFrame.childIcon);
+					end
+
+					tChild:ClearAllPoints();
+					VUHDO_PixelUtil.SetPoint(tChild, "LEFT", aFrame.childIcon, "RIGHT", 0, 0);
+					VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
 				end
-
-				tChild:ClearAllPoints();
-				VUHDO_PixelUtil.SetPoint(tChild, "LEFT", aFrame.childIcon, "RIGHT", 0, 0);
-				VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
 
 				tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 

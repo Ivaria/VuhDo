@@ -113,7 +113,6 @@ local sDefaultAnchorEntry = {
 
 --
 local tAnchors;
-local tKey;
 function VUHDO_initPanelAurasAnchorComboModel()
 
 	twipe(VUHDO_PANEL_AURAS_ANCHOR_COMBO_MODEL);
@@ -369,10 +368,72 @@ function VUHDO_panelAurasSyncSizeWithBarHeight(aParent, aValue)
 	tSyncAnchorData = VUHDO_PANEL_SETUP[DESIGN_MISC_PANEL_NUM]["AURA_ANCHORS"];
 	tSyncAnchorData = tSyncAnchorData and tSyncAnchorData[tSyncAnchorKey];
 
-	if tSyncAnchorData and "bars" == tSyncAnchorData["style"] then
+	if tSyncAnchorData and "bars" == tSyncAnchorData["style"] and not tSyncAnchorData["barVertical"] then
 		tSyncSizeModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.size", tSyncAnchorKey);
 
 		VUHDO_lnfUpdateVar(tSyncSizeModel, aValue, DESIGN_MISC_PANEL_NUM);
+
+		tSyncSizeSlider = _G["VuhDoNewOptionsPanelAurasMainPanelAnchorContentPanelSizeSlider"];
+
+		if tSyncSizeSlider then
+			VUHDO_lnfSliderInitFromModel(_G[tSyncSizeSlider:GetName() .. "Slider"]);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local tSyncAnchorKey;
+local tSyncAnchorData;
+local tSyncSizeModel;
+local tSyncSizeSlider;
+function VUHDO_panelAurasSyncSizeWithBarWidth(aParent, aValue)
+
+	tSyncAnchorKey = tostring(VUHDO_PANEL_AURAS_SELECTED_ANCHOR);
+	tSyncAnchorData = VUHDO_PANEL_SETUP[DESIGN_MISC_PANEL_NUM]["AURA_ANCHORS"];
+	tSyncAnchorData = tSyncAnchorData and tSyncAnchorData[tSyncAnchorKey];
+
+	if tSyncAnchorData and "bars" == tSyncAnchorData["style"] and tSyncAnchorData["barVertical"] then
+		tSyncSizeModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.size", tSyncAnchorKey);
+
+		VUHDO_lnfUpdateVar(tSyncSizeModel, aValue, DESIGN_MISC_PANEL_NUM);
+
+		tSyncSizeSlider = _G["VuhDoNewOptionsPanelAurasMainPanelAnchorContentPanelSizeSlider"];
+
+		if tSyncSizeSlider then
+			VUHDO_lnfSliderInitFromModel(_G[tSyncSizeSlider:GetName() .. "Slider"]);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local tSyncAnchorKey;
+local tSyncAnchorData;
+local tSyncSizeModel;
+local tSyncSizeSlider;
+function VUHDO_panelAurasBarVerticalChanged(aParent, aValue)
+
+	tSyncAnchorKey = tostring(VUHDO_PANEL_AURAS_SELECTED_ANCHOR);
+	tSyncAnchorData = VUHDO_PANEL_SETUP[DESIGN_MISC_PANEL_NUM]["AURA_ANCHORS"];
+	tSyncAnchorData = tSyncAnchorData and tSyncAnchorData[tSyncAnchorKey];
+
+	if tSyncAnchorData and "bars" == tSyncAnchorData["style"] then
+		tSyncSizeModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.size", tSyncAnchorKey);
+
+		if aValue then
+			VUHDO_lnfUpdateVar(tSyncSizeModel, tSyncAnchorData["barWidth"] or 30, DESIGN_MISC_PANEL_NUM);
+		else
+			VUHDO_lnfUpdateVar(tSyncSizeModel, tSyncAnchorData["barHeight"] or 30, DESIGN_MISC_PANEL_NUM);
+		end
 
 		tSyncSizeSlider = _G["VuhDoNewOptionsPanelAurasMainPanelAnchorContentPanelSizeSlider"];
 
@@ -413,17 +474,18 @@ end
 local tMainPanel;
 local tAnchorCombo;
 local tAnchors;
-local tKey;
 function VUHDO_panelAurasOnShow()
 
 	if not VUHDO_PANEL_SETUP or not DESIGN_MISC_PANEL_NUM then
 		return;
 	end
 
-	tAnchors = VUHDO_PANEL_SETUP[DESIGN_MISC_PANEL_NUM]["AURA_ANCHORS"] or {};
+	tAnchors = VUHDO_PANEL_SETUP[DESIGN_MISC_PANEL_NUM]["AURA_ANCHORS"] or { };
+
 	if VUHDO_PANEL_AURAS_SELECTED_ANCHOR and not tAnchors[tostring(VUHDO_PANEL_AURAS_SELECTED_ANCHOR)] then
 		VUHDO_PANEL_AURAS_SELECTED_ANCHOR = nil;
 	end
+
 	if not VUHDO_PANEL_AURAS_SELECTED_ANCHOR then
 		for tKey, _ in pairs(tAnchors) do
 			VUHDO_PANEL_AURAS_SELECTED_ANCHOR = tonumber(tKey);
@@ -434,8 +496,10 @@ function VUHDO_panelAurasOnShow()
 	VUHDO_initPanelAurasAnchorComboModel();
 
 	tMainPanel = _G["VuhDoNewOptionsPanelAurasMainPanel"];
+
 	if tMainPanel then
 		tAnchorCombo = _G[tMainPanel:GetName() .. "AnchorCombo"];
+
 		if tAnchorCombo then
 			VUHDO_lnfComboBoxInitFromModel(tAnchorCombo);
 		end
@@ -452,7 +516,6 @@ end
 --
 local tMainPanel;
 local tContentPanel;
-local tNewButton;
 local tCopyButton;
 local tDeleteButton;
 function VUHDO_panelAurasAnchorSelectionChanged(aCombo, aNewValue)
@@ -462,6 +525,7 @@ function VUHDO_panelAurasAnchorSelectionChanged(aCombo, aNewValue)
 	end
 
 	tMainPanel = _G["VuhDoNewOptionsPanelAurasMainPanel"];
+
 	if not tMainPanel then
 		return;
 	end
@@ -476,10 +540,12 @@ function VUHDO_panelAurasAnchorSelectionChanged(aCombo, aNewValue)
 			tContentPanel:Show();
 			VUHDO_panelAurasRebindContentPanel();
 		end
+
 		if tCopyButton then
 			tCopyButton:Enable();
 			tCopyButton:SetAlpha(1);
 		end
+
 		if tDeleteButton then
 			tDeleteButton:Enable();
 			tDeleteButton:SetAlpha(1);
@@ -488,10 +554,12 @@ function VUHDO_panelAurasAnchorSelectionChanged(aCombo, aNewValue)
 		if tContentPanel then
 			tContentPanel:Hide();
 		end
+
 		if tCopyButton then
 			tCopyButton:Disable();
 			tCopyButton:SetAlpha(0.5);
 		end
+
 		if tDeleteButton then
 			tDeleteButton:Disable();
 			tDeleteButton:SetAlpha(0.5);
@@ -534,6 +602,8 @@ local tBarHeightSlider;
 local tStyle;
 local tSizeSlider;
 local tBarHeight;
+local tBarWidth;
+local tBarVertical;
 local tSizeModel;
 function VUHDO_panelAurasRebindContentPanel()
 
@@ -549,6 +619,7 @@ function VUHDO_panelAurasRebindContentPanel()
 
 	tSlider = _G[tContentPanel:GetName() .. "OffsetXSlider"];
 	tDeleteButton = _G[tContentPanel:GetParent():GetName() .. "DeleteButton"];
+
 	if tSlider and tDeleteButton and VUHDO_PixelUtil then
 		tSlider:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tSlider, "TOPRIGHT", tDeleteButton, "BOTTOMRIGHT", 0, -8);
@@ -688,6 +759,8 @@ function VUHDO_panelAurasRebindContentPanel()
 
 		VUHDO_lnfSliderInitFromModel(_G[tBarWidthSlider:GetName() .. "Slider"]);
 		VUHDO_setControlEnabled(tContentPanel, "BarWidthSlider", tStyle == "bars");
+
+		tBarWidthSlider:SetAttribute("custom_function_post", VUHDO_panelAurasSyncSizeWithBarWidth);
 	end
 
 	if tBarHeightSlider then
@@ -706,12 +779,24 @@ function VUHDO_panelAurasRebindContentPanel()
 	end
 
 	if tSizeSlider and "bars" == tStyle then
-		tBarHeight = tAnchorData and tAnchorData["barHeight"];
+		tBarVertical = tAnchorData and tAnchorData["barVertical"];
 
-		if tBarHeight then
-			tSizeModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.size", tAnchorKey);
+		if tBarVertical then
+			tBarWidth = tAnchorData and tAnchorData["barWidth"];
 
-			VUHDO_lnfUpdateVar(tSizeModel, tBarHeight, DESIGN_MISC_PANEL_NUM);
+			if tBarWidth then
+				tSizeModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.size", tAnchorKey);
+
+				VUHDO_lnfUpdateVar(tSizeModel, tBarWidth, DESIGN_MISC_PANEL_NUM);
+			end
+		else
+			tBarHeight = tAnchorData and tAnchorData["barHeight"];
+
+			if tBarHeight then
+				tSizeModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.size", tAnchorKey);
+
+				VUHDO_lnfUpdateVar(tSizeModel, tBarHeight, DESIGN_MISC_PANEL_NUM);
+			end
 		end
 	end
 
@@ -724,6 +809,8 @@ function VUHDO_panelAurasRebindContentPanel()
 		VUHDO_lnfSetModel(tBarVerticalCheck, tModel);
 		VUHDO_lnfCheckButtonInitFromModel(tBarVerticalCheck);
 		VUHDO_setControlEnabled(tBarVerticalCheck:GetParent(), "BarVerticalCheck", tStyle == "bars");
+
+		tBarVerticalCheck:SetAttribute("custom_function_post", VUHDO_panelAurasBarVerticalChanged);
 	end
 
 	if tBarTurnAxisCheck then
@@ -777,6 +864,7 @@ function VUHDO_panelAurasRebindContentPanel()
 	VUHDO_lnfComboBoxInitFromModel(_G[tContentPanel:GetName() .. "GroupCombo"]);
 
 	tEnabledCheck = _G[tContentPanel:GetName() .. "EnabledCheckButton"];
+
 	if tEnabledCheck then
 		tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.enabled", tAnchorKey);
 
@@ -877,6 +965,7 @@ function VUHDO_panelAurasOnDeleteAnchor()
 
 	for tRemaining, _ in pairs(tAnchors) do
 		VUHDO_PANEL_AURAS_SELECTED_ANCHOR = tonumber(tRemaining);
+
 		break;
 	end
 
@@ -896,8 +985,10 @@ function VUHDO_panelAurasRefreshUI()
 	VUHDO_initPanelAurasAnchorComboModel();
 
 	tMainPanel = _G["VuhDoNewOptionsPanelAurasMainPanel"];
+
 	if tMainPanel then
 		tAnchorCombo = _G[tMainPanel:GetName() .. "AnchorCombo"];
+
 		if tAnchorCombo then
 			VUHDO_lnfComboBoxInitFromModel(tAnchorCombo);
 		end
