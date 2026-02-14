@@ -1408,6 +1408,7 @@ do
 
 		tAuraAnchors["1"]["maxColumns"] = 9;
 		tAuraAnchors["1"]["maxRows"] = 1;
+		tAuraAnchors["1"]["spacing"] = 0;
 
 		if tHots["TIMER_TEXT"] then
 			tAuraAnchors["1"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tHots["TIMER_TEXT"]);
@@ -1587,6 +1588,7 @@ do
 		tAuraAnchors["2"]["wrapDir"] = tWrapDir;
 		tAuraAnchors["2"]["maxColumns"] = tDebuff["max_num"] or 3;
 		tAuraAnchors["2"]["maxRows"] = 1;
+		tAuraAnchors["2"]["spacing"] = 0;
 
 		if tDebuff["TIMER_TEXT"] then
 			tAuraAnchors["2"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tDebuff["TIMER_TEXT"]);
