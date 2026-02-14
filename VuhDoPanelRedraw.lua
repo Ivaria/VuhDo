@@ -1067,7 +1067,9 @@ do
 			VUHDO_PixelUtil.Show(tTgButton);
 
 			tTgHealthBar = VUHDO_getHealthBar(aButton, 5);
-			tTgHealthBar:SetValue(1);
+
+			tTgHealthBar:SetValue(tTgHealthBar["isInverted"] and 0 or 1);
+
 			VUHDO_PixelUtil.SetHeight(tTgHealthBar, sPanelConfig[aPanelNum]["barHeight"]);
 
 			VUHDO_initBackgroundBar(VUHDO_getHealthBar(aButton, 12), aPanelNum);
@@ -1122,7 +1124,9 @@ do
 			VUHDO_PixelUtil.Show(tTotButton);
 
 			tTgHealthBar = VUHDO_getHealthBar(aButton, 14);
-			tTgHealthBar:SetValue(1);
+
+			tTgHealthBar:SetValue(tTgHealthBar["isInverted"] and 0 or 1);
+
 			VUHDO_PixelUtil.SetHeight(tTgHealthBar, sPanelConfig[aPanelNum]["barHeight"]);
 
 			VUHDO_initBackgroundBar(VUHDO_getHealthBar(aButton, 15), aPanelNum);
@@ -1208,6 +1212,8 @@ do
 	local tPredHealAbsorbBar;
 	local tPredOrientation;
 	local tPredIsInverted;
+	local tAnchorFrom;
+	local tAnchorTo;
 	function VUHDO_initPredictionBarAnchors(aButton, aPanelNum)
 
 		tPredHealthBar = VUHDO_getHealthBar(aButton, 1);
@@ -1240,37 +1246,39 @@ do
 
 		if tPredOrientation == "HORIZONTAL" then
 			if tPredIsInverted then
-				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
+				tAnchorFrom = "RIGHT";
+				tAnchorTo = "LEFT";
 			else
-				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
-				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+				tAnchorFrom = "LEFT";
+				tAnchorTo = "RIGHT";
 			end
 		elseif tPredOrientation == "HORIZONTAL_INV" then
 			if tPredIsInverted then
-				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
-				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+				tAnchorFrom = "LEFT";
+				tAnchorTo = "RIGHT";
 			else
-				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
+				tAnchorFrom = "RIGHT";
+				tAnchorTo = "LEFT";
 			end
 		elseif tPredOrientation == "VERTICAL" then
 			if tPredIsInverted then
-				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
-				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+				tAnchorFrom = "TOP";
+				tAnchorTo = "BOTTOM";
 			else
-				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
+				tAnchorFrom = "BOTTOM";
+				tAnchorTo = "TOP";
 			end
-		else -- VERTICAL_INV
+		else
 			if tPredIsInverted then
-				tPredIncBar:SetPoint("BOTTOMLEFT", tPredHealthBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredIncBar:SetPoint("BOTTOMRIGHT", tPredHealthBar:GetStatusBarTexture(), "TOPRIGHT");
+				tAnchorFrom = "BOTTOM";
+				tAnchorTo = "TOP";
 			else
-				tPredIncBar:SetPoint("TOPLEFT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMLEFT");
-				tPredIncBar:SetPoint("TOPRIGHT", tPredHealthBar:GetStatusBarTexture(), "BOTTOMRIGHT");
+				tAnchorFrom = "TOP";
+				tAnchorTo = "BOTTOM";
 			end
 		end
+
+		tPredIncBar:SetPoint(tAnchorFrom, tPredHealthBar:GetStatusBarTexture(), tAnchorTo);
 
 		tPredShieldBar:ClearAllPoints();
 		VUHDO_PixelUtil.SetSize(tPredShieldBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
@@ -1281,39 +1289,7 @@ do
 		VUHDO_setStatusBarOrientation(tPredShieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 		tPredShieldBar:SetReverseFill(tPredIsInverted);
 
-		if tPredOrientation == "HORIZONTAL" then
-			if tPredIsInverted then
-				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
-			else
-				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
-				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
-			end
-		elseif tPredOrientation == "HORIZONTAL_INV" then
-			if tPredIsInverted then
-				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
-				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
-			else
-				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
-			end
-		elseif tPredOrientation == "VERTICAL" then
-			if tPredIsInverted then
-				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
-				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
-			else
-				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
-			end
-		else -- VERTICAL_INV
-			if tPredIsInverted then
-				tPredShieldBar:SetPoint("BOTTOMLEFT", tPredIncBar:GetStatusBarTexture(), "TOPLEFT");
-				tPredShieldBar:SetPoint("BOTTOMRIGHT", tPredIncBar:GetStatusBarTexture(), "TOPRIGHT");
-			else
-				tPredShieldBar:SetPoint("TOPLEFT", tPredIncBar:GetStatusBarTexture(), "BOTTOMLEFT");
-				tPredShieldBar:SetPoint("TOPRIGHT", tPredIncBar:GetStatusBarTexture(), "BOTTOMRIGHT");
-			end
-		end
+		tPredShieldBar:SetPoint(tAnchorFrom, tPredIncBar:GetStatusBarTexture(), tAnchorTo);
 
 		if tPredOvershieldBar then
 			tPredOvershieldBar:ClearAllPoints();
@@ -1457,20 +1433,20 @@ do
 		end
 
 		tIsInverted = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
-		VUHDO_getHealthBar(aButton, 1):SetReverseFill(tIsInverted);
-		VUHDO_getHealthBar(aButton, 5):SetReverseFill(tIsInverted);
-		VUHDO_getHealthBar(aButton, 6):SetReverseFill(tIsInverted);
-		VUHDO_getHealthBar(aButton, 14):SetReverseFill(tIsInverted);
-		VUHDO_getHealthBar(aButton, 19):SetReverseFill(tIsInverted);
+		VUHDO_getHealthBar(aButton, 1)["isInverted"] = tIsInverted;
+		VUHDO_getHealthBar(aButton, 5)["isInverted"] = tIsInverted;
+		VUHDO_getHealthBar(aButton, 6)["isInverted"] = tIsInverted;
+		VUHDO_getHealthBar(aButton, 14)["isInverted"] = tIsInverted;
+		VUHDO_getHealthBar(aButton, 19)["isInverted"] = tIsInverted;
 
 		tIsInverted = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["MANA_BAR"]["invertGrowth"];
-		VUHDO_getHealthBar(aButton, 2):SetReverseFill(tIsInverted);
-		VUHDO_getHealthBar(aButton, 13):SetReverseFill(tIsInverted);
-		VUHDO_getHealthBar(aButton, 16):SetReverseFill(tIsInverted);
+		VUHDO_getHealthBar(aButton, 2)["isInverted"] = tIsInverted;
+		VUHDO_getHealthBar(aButton, 13)["isInverted"] = tIsInverted;
+		VUHDO_getHealthBar(aButton, 16)["isInverted"] = tIsInverted;
 
-		VUHDO_getHealthBar(aButton, 7):SetReverseFill(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["THREAT_BAR"]["invertGrowth"]);
-		VUHDO_getHealthBar(aButton, 17):SetReverseFill(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_LEFT"]["invertGrowth"])
-		VUHDO_getHealthBar(aButton, 18):SetReverseFill(VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_RIGHT"]["invertGrowth"]);
+		VUHDO_getHealthBar(aButton, 7)["isInverted"] = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["THREAT_BAR"]["invertGrowth"];
+		VUHDO_getHealthBar(aButton, 17)["isInverted"] = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_LEFT"]["invertGrowth"];
+		VUHDO_getHealthBar(aButton, 18)["isInverted"] = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["SIDE_RIGHT"]["invertGrowth"];
 
 		tOrientation = VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum);
 		VUHDO_setStatusBarOrientation(VUHDO_getHealthBar(aButton, 1), tOrientation);

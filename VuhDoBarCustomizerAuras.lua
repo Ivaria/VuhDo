@@ -2561,6 +2561,7 @@ do
 	local tBarTurnAxis;
 	local tBarInvertGrowth;
 	local tBarOrientation;
+	local tTimerDirection;
 	local tColorMode;
 	local tColorMixin;
 	local tClassColor;
@@ -2647,13 +2648,15 @@ do
 		end
 
 		VUHDO_setStatusBarOrientation(tBar, tBarOrientation);
-		tBar:SetReverseFill(tBarInvertGrowth);
 
 		if tDurationObj then
-			tBar:SetTimerDuration(tDurationObj, Enum.StatusBarInterpolation.Immediate, Enum.StatusBarTimerDirection.RemainingTime);
+			tTimerDirection = tBarInvertGrowth and Enum.StatusBarTimerDirection.ElapsedTime or Enum.StatusBarTimerDirection.RemainingTime;
+
+			tBar:SetTimerDuration(tDurationObj, Enum.StatusBarInterpolation.Immediate, tTimerDirection);
 		else
 			tBar:SetMinMaxValues(0, 1);
-			tBar:SetValue(1);
+
+			tBar:SetValue(tBarInvertGrowth and 0 or 1);
 		end
 
 		VUHDO_updateAuraIconDisplay(tBarFrame.childIcon, tBarFrame.cooldownFrame, nil, anAnchorConfig, anAuraData, tDurationObj, tUnit);

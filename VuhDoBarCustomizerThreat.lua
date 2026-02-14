@@ -70,7 +70,12 @@ function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 			tBar = VUHDO_getHealthBar(tButton, 7);
 
 			tBar:SetMinMaxValues(0, aMaxValue);
-			tBar:SetValue(aCurrValue);
+
+			if tBar["isInverted"] then
+				tBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue));
+			else
+				tBar:SetValue(aCurrValue);
+			end
 
 			if aLayerTemplate then
 				VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);

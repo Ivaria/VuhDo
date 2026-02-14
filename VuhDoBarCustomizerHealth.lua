@@ -47,6 +47,7 @@ local strfind = strfind;
 local GetRaidTargetIndex = GetRaidTargetIndex;
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
 local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
+local UnitHealthMissing = UnitHealthMissing;
 local UnitHealthPercent = UnitHealthPercent;
 local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
 local pairs = pairs;
@@ -391,7 +392,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 			tOvershieldBar = VUHDO_getHealthBar(tButton, 20);
 
 			tShieldBar:SetMinMaxValues(0, tHealthMax);
-			tShieldBar:SetValue(tShieldInBar);
+			tShieldBar:SetValue((tShieldBar["isInverted"] and not sSecretsEnabled) and (tHealthMax - tShieldInBar) or tShieldInBar);
 
 			if sSecretsEnabled and tHealthBar["secretCurveColor"] then
 				sConfigShieldColor = VUHDO_getStatusBarColor("SHIELD", aUnit);
@@ -504,7 +505,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 
 			if tAbsorbAmount > 0 then
 				tShieldBar:SetMinMaxValues(aHealthPlusIncQuota, aHealthPlusIncQuota + tAbsorbAmount);
-				tShieldBar:SetValue(aHealthPlusIncQuota + tAbsorbAmount);
+				tShieldBar:SetValue((tShieldBar["isInverted"] and not sSecretsEnabled) and aHealthPlusIncQuota or (aHealthPlusIncQuota + tAbsorbAmount));
 
 				tShieldColor["R"], tShieldColor["G"], tShieldColor["B"], tShieldOpacity = tHealthBar:GetStatusBarColor();
 				tShieldColor = VUHDO_getDiffColor(tShieldColor, VUHDO_getStatusBarColor("SHIELD", aUnit));
@@ -518,7 +519,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 				tShieldBar:Show();
 			else
 				tShieldBar:SetMinMaxValues(0, 1);
-				tShieldBar:SetValue(0);
+				tShieldBar:SetValue(tShieldBar["isInverted"] and 1 or 0);
 				tShieldBar:Hide();
 			end
 
@@ -895,7 +896,11 @@ local function VUHDO_updateIncHeal(aUnit)
 
 		if tIncHealAmount and tInfo["healthmax"] and (not sSecretsEnabled or issecretvalue(tIncHealAmount) or tIncHealAmount > 0) and (not sSecretsEnabled or tInfo["hasSecretHealthMax"] or tInfo["healthmax"] > 0) then
 			tIncBar:SetMinMaxValues(0, tInfo["healthmax"]);
-			tIncBar:SetValue(tIncHealAmount);
+			if tIncBar["isInverted"] and not sSecretsEnabled then
+				tIncBar:SetValue(tInfo["healthmax"] - tIncHealAmount);
+			else
+				tIncBar:SetValue(tIncHealAmount);
+			end
 
 			if sSecretsEnabled and tHealthBar["secretCurveColor"] then
 				sConfigIncColor = VUHDO_getStatusBarColor("INCOMING", aUnit);
@@ -1031,7 +1036,7 @@ do
 	local tHealthBar;
 	local tPanelNum;
 	local tQuota;
-	local function VUHDO_updateHealthBarValueForUnit(aUnit, aCurrValue, aMaxValue, aColor, aMaxColor, aBouquetName, aLayerTemplate)
+	local function VUHDO_updateHealthBarValueForUnit(aUnit, aCurrValue, aMaxValue, aColor, aMaxColor, aBouquetName, aLayerTemplate, aCurrValue2)
 
 		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 			tPanelNum = VUHDO_BUTTON_CACHE[tButton];
@@ -1040,7 +1045,14 @@ do
 				tHealthBar = VUHDO_getHealthBar(tButton, 1);
 
 				tHealthBar:SetMinMaxValues(0, aMaxValue);
-				tHealthBar:SetValue(aCurrValue);
+
+				if tHealthBar["isInverted"] then
+					tQuota = sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue);
+				else
+					tQuota = aCurrValue;
+				end
+
+				tHealthBar:SetValue(tQuota);
 
 				if aLayerTemplate then
 					VUHDO_applyAllLayersToBar(tButton, tHealthBar, aLayerTemplate);
@@ -1067,19 +1079,11 @@ do
 	local tInfo;
 	function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
 
-		if aLayerTemplate and aLayerTemplate["hasCurves"] and aLayerTemplate["curveResults"] and #aLayerTemplate["curveResults"] > 0 then
-			tInfo = VUHDO_RAID[aUnit];
-
-			if tInfo then
-				aCurrValue = tInfo["health"] or 0;
-				aMaxValue = tInfo["healthmax"] or 0;
-			end
-		end
-
 		aMaxValue = aMaxValue or 0;
 		aCurrValue = aCurrValue or 0;
+		aCurrValue2 = aCurrValue2 or 0;
 
-		VUHDO_updateHealthBarValueForUnit(aUnit, aCurrValue, aMaxValue, aColor, aMaxColor, aBouquetName, aLayerTemplate);
+		VUHDO_updateHealthBarValueForUnit(aUnit, aCurrValue, aMaxValue, aColor, aMaxColor, aBouquetName, aLayerTemplate, aCurrValue2);
 
 		tInfo = VUHDO_RAID[aUnit]
 

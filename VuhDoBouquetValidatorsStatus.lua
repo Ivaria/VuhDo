@@ -15,7 +15,9 @@ local VUHDO_UNIT_POWER_SOUL_SHARDS = VUHDO_UNIT_POWER_SOUL_SHARDS;
 local VUHDO_UNIT_POWER_RUNES = VUHDO_UNIT_POWER_RUNES;
 local VUHDO_UNIT_POWER_ARCANE_CHARGES = VUHDO_UNIT_POWER_ARCANE_CHARGES;
 
+local UnitHealthMissing = UnitHealthMissing;
 local UnitHealthPercent = UnitHealthPercent;
+local UnitPowerMissing = UnitPowerMissing;
 local UnitPowerPercent = UnitPowerPercent;
 local CreateUnitHealPredictionCalculator = CreateUnitHealPredictionCalculator;
 local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
@@ -461,7 +463,7 @@ local function VUHDO_statusHealthValidator(anInfo, _, aSecretContext)
 			tSecretColor = UnitHealthPercent(anInfo["unit"], true, aSecretContext["healthCurve"]);
 		end
 
-		return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, nil, tSecretColor;
+		return true, nil, anInfo["health"], -1, anInfo["healthmax"], nil, UnitHealthMissing(anInfo["unit"]), nil, nil, nil, nil, nil, tSecretColor;
 	end
 
 	return true, nil, anInfo["health"], -1, anInfo["healthmax"], nil, anInfo["health"];
@@ -485,7 +487,7 @@ local function VUHDO_statusManaValidator(anInfo, _, aSecretContext)
 			tSecretColor = UnitPowerPercent(anInfo["unit"], 0, false, tPowerCurve);
 		end
 
-		return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, nil, tSecretColor;
+		return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]), UnitPowerMissing(anInfo["unit"], 0), nil, nil, nil, nil, nil, tSecretColor;
 	end
 
 	return true, nil, anInfo["power"], -1,
@@ -510,7 +512,7 @@ local function VUHDO_statusManaHealerOnlyValidator(anInfo, _, aSecretContext)
 			tSecretColor = UnitPowerPercent(anInfo["unit"], 0, false, tPowerCurve);
 		end
 
-		return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, nil, tSecretColor;
+		return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[0]), UnitPowerMissing(anInfo["unit"], 0), nil, nil, nil, nil, nil, tSecretColor;
 	end
 
 	return true, nil, anInfo["power"], -1,
@@ -528,8 +530,9 @@ local function VUHDO_statusPowerTankOnlyValidator(anInfo, _, aSecretContext)
 		return false, nil, -1, -1, -1;
 	end
 
+	tPowerType = anInfo["powertype"];
+
 	if aSecretContext then
-		tPowerType = anInfo["powertype"];
 		tPowerCurve = aSecretContext["powerCurves"] and aSecretContext["powerCurves"][tPowerType];
 		tSecretColor = nil;
 
@@ -537,11 +540,11 @@ local function VUHDO_statusPowerTankOnlyValidator(anInfo, _, aSecretContext)
 			tSecretColor = UnitPowerPercent(anInfo["unit"], tPowerType, false, tPowerCurve);
 		end
 
-		return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, nil, tSecretColor;
+		return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType]), UnitPowerMissing(anInfo["unit"], tPowerType), nil, nil, nil, nil, nil, tSecretColor;
 	end
 
 	return true, nil, anInfo["power"], -1,
-		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[anInfo["powertype"] or 0]);
+		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType or 0]);
 
 end
 
@@ -554,8 +557,9 @@ local function VUHDO_statusOtherPowersValidator(anInfo, _, aSecretContext)
 		return false, nil, -1, -1, -1;
 	end
 
+	tPowerType = anInfo["powertype"];
+
 	if aSecretContext then
-		tPowerType = anInfo["powertype"];
 		tPowerCurve = aSecretContext["powerCurves"] and aSecretContext["powerCurves"][tPowerType];
 		tSecretColor = nil;
 
@@ -563,11 +567,11 @@ local function VUHDO_statusOtherPowersValidator(anInfo, _, aSecretContext)
 			tSecretColor = UnitPowerPercent(anInfo["unit"], tPowerType, false, tPowerCurve);
 		end
 
-		return true, nil, -1, -1, -1, nil, nil, nil, nil, nil, nil, nil, tSecretColor;
+		return true, nil, anInfo["power"], -1, anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType or 0]), UnitPowerMissing(anInfo["unit"], tPowerType), nil, nil, nil, nil, nil, tSecretColor;
 	end
 
 	return true, nil, anInfo["power"], -1,
-		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[anInfo["powertype"] or 0]);
+		anInfo["powermax"], VUHDO_copyColor(VUHDO_POWER_TYPE_COLORS[tPowerType or 0]);
 
 end
 

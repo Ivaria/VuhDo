@@ -8,6 +8,7 @@ local VUHDO_PANEL_SETUP;
 local VUHDO_BUTTON_CACHE;
 local UnitPowerType = UnitPowerType;
 local UnitPower = UnitPower;
+local UnitPowerMissing = UnitPowerMissing;
 local UnitPowerMax = UnitPowerMax;
 local InCombatLockdown = InCombatLockdown;
 local pairs = pairs;
@@ -120,14 +121,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 	aMaxValue = aMaxValue or 0;
 	aCurrValue = aCurrValue or 0;
-
-	if aLayerTemplate and aLayerTemplate["hasCurves"] and aLayerTemplate["curveResults"] and #aLayerTemplate["curveResults"] > 0 then
-		tInfo = VUHDO_RAID[aUnit];
-		if tInfo then
-			aCurrValue = tInfo["power"] or 0;
-			aMaxValue = tInfo["powermax"] or 0;
-		end
-	end
+	aCurrValue2 = aCurrValue2 or 0;
 
 	tManaBarHeight = 0;
 
@@ -143,7 +137,12 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 			if anIsActive and tManaBarHeight > 0 then
 				tManaBar:SetMinMaxValues(0, aMaxValue);
-				tManaBar:SetValue(aCurrValue);
+
+				if tManaBar["isInverted"] then
+					tManaBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue));
+				else
+					tManaBar:SetValue(aCurrValue);
+				end
 
 				if aLayerTemplate then
 					VUHDO_applyAllLayersToBar(tButton, tManaBar, aLayerTemplate);
@@ -152,7 +151,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 				end
 			else
 				tManaBar:SetMinMaxValues(0, 1);
-				tManaBar:SetValue((not anIsActive and sIsInverted[tPanelNum]) and 1 or 0);
+				tManaBar:SetValue((not anIsActive and tManaBar["isInverted"]) and 1 or 0);
 			end
 
 			if not InCombatLockdown() then
@@ -206,7 +205,12 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 			if anIsActive and tManaBarHeight > 0 then
 				tManaBar:SetMinMaxValues(0, aMaxValue);
-				tManaBar:SetValue(aCurrValue);
+
+				if tManaBar["isInverted"] then
+					tManaBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue));
+				else
+					tManaBar:SetValue(aCurrValue);
+				end
 
 				if aLayerTemplate then
 					VUHDO_applyAllLayersToBar(tButton, tManaBar, aLayerTemplate);
@@ -215,7 +219,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 				end
 			else
 				tManaBar:SetMinMaxValues(0, 1);
-				tManaBar:SetValue((not anIsActive and sIsInverted[tPanelNum]) and 1 or 0);
+				tManaBar:SetValue((not anIsActive and tManaBar["isInverted"]) and 1 or 0);
 			end
 
 			if not InCombatLockdown() then
@@ -275,7 +279,12 @@ local function VUHDO_sideBarBouquetCallback(aBarNum, aUnit, anIsActive, anIcon, 
 			tBar = VUHDO_getHealthBar(tButton, aBarNum);
 
 			tBar:SetMinMaxValues(0, aMaxValue);
-			tBar:SetValue(aCurrValue);
+
+			if tBar["isInverted"] then
+				tBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue));
+			else
+				tBar:SetValue(aCurrValue);
+			end
 
 			if aLayerTemplate then
 				VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);

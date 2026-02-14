@@ -166,7 +166,12 @@ local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anI
 
 	if anIsActive then
 		tBar:SetMinMaxValues(0, aMaxValue);
-		tBar:SetValue(aCurrValue);
+
+		if tBar["isInverted"] then
+			tBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue));
+		else
+			tBar:SetValue(aCurrValue);
+		end
 
 		if aLayerTemplate then
 			VUHDO_applyAllLayersToBar(aButton, tBar, aLayerTemplate);
@@ -183,7 +188,7 @@ local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anI
 		aButton:SetAlpha(1);
 	else
 		tBar:SetMinMaxValues(0, 1);
-		tBar:SetValue(0);
+		tBar:SetValue(tBar["isInverted"] and 1 or 0);
 		aButton:SetAlpha(0);
 	end
 

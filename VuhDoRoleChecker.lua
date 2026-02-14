@@ -115,6 +115,10 @@ local function VUHDO_shouldBeInspected(aUnit)
 		return false;
 	end
 
+	if tInfo["hasSecretName"] then
+		return false;
+	end
+
 	-- Already inspected or manually overridden?
 	-- or assigned tank or heal via dungeon finder? (in case of DPS inspect anyway)
 	tName = tInfo["name"];

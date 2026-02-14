@@ -946,6 +946,9 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 					["a"] = nil,
 					["value"] = nil,
 					["maxValue"] = 100,
+					["timer"] = 0,
+					["duration"] = 0,
+					["timer2"] = 0,
 				};
 
 				if not tTemplate["baseType"] then
@@ -1497,19 +1500,17 @@ do
 	local tAuraResultSlot;
 	local tSecretBool;
 	local tWorkingColor = { };
-	local tSecretContext;
+	local tSecretContext = { };
 	local tSecretColor;
 	function VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, tInfo, tUnit, tBouquet, tAnzInfos, tLayerTemplate)
 
 		txState["activeAuras"] = 0;
 
 		if sSecretsEnabled then
-			tSecretContext = {
-				["powerCurves"] = sBouquetCurves[aBouquetName] and sBouquetCurves[aBouquetName]["power"],
-				["healthCurve"] = VUHDO_getHealthCurve(aBouquetName, tInfo["classId"]),
-				["dispelCurves"] = sDebuffTypeCurves,
-				["defaultDispelCurve"] = VUHDO_getDispelTypeCurve(),
-			};
+			tSecretContext["powerCurves"] = sBouquetCurves[aBouquetName] and sBouquetCurves[aBouquetName]["power"];
+			tSecretContext["healthCurve"] = VUHDO_getHealthCurve(aBouquetName, tInfo["classId"]);
+			tSecretContext["dispelCurves"] = sDebuffTypeCurves;
+			tSecretContext["defaultDispelCurve"] = VUHDO_getDispelTypeCurve();
 		else
 			tSecretContext = nil;
 		end
@@ -1529,6 +1530,9 @@ do
 				tLayerTemplate["curveResults"][tIdx]["g"] = nil;
 				tLayerTemplate["curveResults"][tIdx]["b"] = nil;
 				tLayerTemplate["curveResults"][tIdx]["a"] = nil;
+				tLayerTemplate["curveResults"][tIdx]["timer"] = 0;
+				tLayerTemplate["curveResults"][tIdx]["duration"] = 0;
+				tLayerTemplate["curveResults"][tIdx]["timer2"] = 0;
 			end
 
 			for tIdx = 1, #tLayerTemplate["booleanResults"] do
@@ -1677,23 +1681,27 @@ do
 						tCurveResultSlot = VUHDO_findCurveResultSlot(tLayerTemplate, tCnt);
 
 						if tCurveResultSlot then
-							tIsActive, _, _, _, _, _, _, _, _, _, _, _, tSecretColor = tSpecial["validator"](tInfo, tInfos, tSecretContext);
+							tIsActive, _, tTimer, _, tDuration, _, tTimer2, _, _, _, _, _, tSecretColor = tSpecial["validator"](tInfo, tInfos, tSecretContext);
+
 							tCurveResultSlot["isActive"] = tIsActive;
 
 							if tIsActive then
 								if tSecretColor and not issecretvalue(tSecretColor) then
-									tCurveResultSlot["r"], tCurveResultSlot["g"], tCurveResultSlot["b"], tCurveResultSlot["a"] =
-										tSecretColor:GetRGBA();
+									tCurveResultSlot["r"], tCurveResultSlot["g"], tCurveResultSlot["b"], tCurveResultSlot["a"] = tSecretColor:GetRGBA();
 								end
 
 								tCurveResultSlot["value"] = UnitHealthPercent(tUnit);
+								tCurveResultSlot["timer"] = tTimer or 0;
+								tCurveResultSlot["duration"] = tDuration or 0;
+								tCurveResultSlot["timer2"] = tTimer2 or 0;
 							end
 						end
 					elseif tSecretType == VUHDO_SECRET_TYPE_POWER_PERCENT then
 						tCurveResultSlot = VUHDO_findCurveResultSlot(tLayerTemplate, tCnt);
 
 						if tCurveResultSlot then
-							tIsActive, _, _, _, _, _, _, _, _, _, _, _, tSecretColor = tSpecial["validator"](tInfo, tInfos, tSecretContext);
+							tIsActive, _, tTimer, _, tDuration, _, tTimer2, _, _, _, _, _, tSecretColor = tSpecial["validator"](tInfo, tInfos, tSecretContext);
+
 							tCurveResultSlot["isActive"] = tIsActive;
 
 							if tIsActive then
@@ -1703,6 +1711,9 @@ do
 								end
 
 								tCurveResultSlot["value"] = UnitPowerPercent(tUnit, tInfo["powertype"]);
+								tCurveResultSlot["timer"] = tTimer or 0;
+								tCurveResultSlot["duration"] = tDuration or 0;
+								tCurveResultSlot["timer2"] = tTimer2 or 0;
 							end
 						end
 					elseif tSecretType == VUHDO_SECRET_TYPE_BOOLEAN then
@@ -1710,6 +1721,7 @@ do
 
 						if tBoolResultSlot then
 							_, _, _, _, _, _, _, _, _, _, _, tSecretBool = tSpecial["validator"](tInfo, tInfos, tSecretContext);
+
 							tBoolResultSlot["secretBool"] = tSecretBool;
 						end
 					elseif tSecretType == VUHDO_SECRET_TYPE_DISPEL then
@@ -1717,13 +1729,13 @@ do
 
 						if tDispelResultSlot then
 							tIsActive, _, _, _, _, _, _, _, _, _, _, tAuraInstanceId, tSecretColor = tSpecial["validator"](tInfo, tInfos, tSecretContext);
+
 							tDispelResultSlot["isActive"] = tIsActive;
 							tDispelResultSlot["auraInstanceId"] = tAuraInstanceId;
 
 							if tIsActive and tAuraInstanceId then
 								if tSecretColor and not issecretvalue(tSecretColor) then
-									tDispelResultSlot["r"], tDispelResultSlot["g"], tDispelResultSlot["b"], tDispelResultSlot["a"] =
-										tSecretColor:GetRGBA();
+									tDispelResultSlot["r"], tDispelResultSlot["g"], tDispelResultSlot["b"], tDispelResultSlot["a"] = tSecretColor:GetRGBA();
 								end
 							else
 								tDispelResultSlot["r"] = nil;
@@ -1937,8 +1949,15 @@ do
 
 			if tLayerTemplate["hasCurves"] then
 				for tIdx = 1, #tLayerTemplate["curveResults"] do
-					if tLayerTemplate["curveResults"][tIdx]["isActive"] then
+					tResultSlot = tLayerTemplate["curveResults"][tIdx];
+
+					if tResultSlot["isActive"] then
 						txState["active"] = true;
+
+						txState["timer"] = tResultSlot["timer"] or 0;
+						txState["duration"] = tResultSlot["duration"] or 0;
+						txState["timer2"] = tResultSlot["timer2"] or 0;
+
 						break;
 					end
 				end
@@ -1948,16 +1967,14 @@ do
 				for tIdx = 1, #tLayerTemplate["dispelResults"] do
 					if tLayerTemplate["dispelResults"][tIdx]["isActive"] then
 						txState["active"] = true;
+
 						break;
 					end
 				end
 			end
 
-			if tLayerTemplate["hasBools"]
-				and not tLayerTemplate["hasCurves"]
-				and not tLayerTemplate["hasDispels"]
-				and not tLayerTemplate["hasNonSecrets"]
-				and not tLayerTemplate["hasAuras"] then
+			if tLayerTemplate["hasBools"] and not tLayerTemplate["hasCurves"] and not tLayerTemplate["hasDispels"]
+				and not tLayerTemplate["hasNonSecrets"] and not tLayerTemplate["hasAuras"] then
 				txState["active"] = true;
 			end
 		end
