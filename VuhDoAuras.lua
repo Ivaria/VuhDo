@@ -308,6 +308,8 @@ function VUHDO_cloneAuraGroup(aSourceGroupId, aNewDisplayName)
 	tNewGroup = VUHDO_deepCopyTable(tSourceGroup);
 	tNewGroup["displayName"] = aNewDisplayName;
 
+	tNewGroup["priority"] = VUHDO_getNextAuraGroupPriority();
+
 	VUHDO_AURA_GROUPS[tNewId] = tNewGroup;
 
 	return tNewId;
@@ -333,6 +335,29 @@ function VUHDO_getAllAuraGroups()
 	end
 
 	return tAllGroups;
+
+end
+
+
+
+--
+local tMaxPriority;
+local tPriority;
+function VUHDO_getNextAuraGroupPriority()
+
+	tAllGroups = VUHDO_getAllAuraGroups();
+
+	tMaxPriority = 0;
+
+	for _, tGroup in pairs(tAllGroups) do
+		tPriority = tGroup["priority"] or 0;
+
+		if tPriority > tMaxPriority then
+			tMaxPriority = tPriority;
+		end
+	end
+
+	return tMaxPriority + 1;
 
 end
 

@@ -455,7 +455,7 @@ function VUHDO_auraGroupsOnNewGroup()
 	VUHDO_CONFIG["AURA_GROUPS"][tNewId] = {
 		["filter"] = "HELPFUL|PLAYER",
 		["excludeFilter"] = nil,
-		["priority"] = 50,
+		["priority"] = VUHDO_getNextAuraGroupPriority(),
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = true,
 		["canColorText"] = true,
