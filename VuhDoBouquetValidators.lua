@@ -530,7 +530,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 		tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 		tSecretColor = nil;
 
-		if tAuraInstanceId and tCurve then
+		if tAuraInstanceId and tAuraInstanceId >= 0 and tCurve then
 			tSecretColor = GetAuraDispelTypeColor(anInfo["unit"], tAuraInstanceId, tCurve);
 		end
 

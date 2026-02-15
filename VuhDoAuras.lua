@@ -233,6 +233,10 @@ function VUHDO_getAuraGroup(aGroupId)
 		return nil;
 	end
 
+	if tGroup["playerClassRequired"] and tGroup["playerClassRequired"] ~= VUHDO_PLAYER_CLASS then
+		return nil;
+	end
+
 	return tGroup;
 
 end
@@ -319,7 +323,9 @@ function VUHDO_getAllAuraGroups()
 	tAllGroups = { };
 
 	for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
-		tAllGroups[tGroupId] = tGroup;
+		if not tGroup["playerClassRequired"] or tGroup["playerClassRequired"] == VUHDO_PLAYER_CLASS then
+			tAllGroups[tGroupId] = tGroup;
+		end
 	end
 
 	for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or sEmpty) do
@@ -381,6 +387,10 @@ function VUHDO_auraMatchesFilter(aUnit, anAuraInstanceId, aFilter)
 	end
 
 	if not aUnit or not anAuraInstanceId or not aFilter then
+		return false;
+	end
+
+	if anAuraInstanceId < 0 then
 		return false;
 	end
 
@@ -1160,6 +1170,7 @@ local tMaxSlots;
 local tAnchorSlots;
 local tInstanceId;
 local tClearIdx;
+local tInferredAura;
 function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig)
 
 	if not aUnit or not aPanelNum or not anAnchorIndex or not anAnchorConfig then
@@ -1174,6 +1185,22 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 
 	tMaxSlots = anAnchorConfig["maxDisplay"] or 5;
 	tUnitCache = VUHDO_UNIT_AURA_CACHE[aUnit];
+
+	if tGroup["isInferred"] then
+		for tClearIdx = 1, tMaxSlots do
+			VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tClearIdx, nil);
+		end
+
+		if VUHDO_getInferredAura then
+			tInferredAura = VUHDO_getInferredAura(aUnit, anAnchorConfig["groupId"]);
+
+			if tInferredAura then
+				VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, 1, tInferredAura["auraInstanceID"]);
+			end
+		end
+
+		return;
+	end
 
 	if anAnchorConfig["fixedSlots"] then
 		tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex];

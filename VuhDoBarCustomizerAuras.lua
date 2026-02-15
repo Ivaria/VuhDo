@@ -9,6 +9,7 @@ local InCombatLockdown = InCombatLockdown;
 local CreateFrame = CreateFrame;
 local CreateFramePool = CreateFramePool;
 local GetAuraDuration = C_UnitAuras and C_UnitAuras.GetAuraDuration;
+local CreateDuration = C_DurationUtil and C_DurationUtil.CreateDuration;
 local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplicationDisplayCount;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
 local issecretvalue = issecretvalue;
@@ -2193,7 +2194,7 @@ function VUHDO_showAuraTooltip(aAuraFrame)
 
 	GameTooltip:SetOwner(aAuraFrame, "ANCHOR_RIGHT", 0, 0);
 
-	if aAuraFrame["auraInstanceId"] and tButton["raidid"] then
+	if aAuraFrame["auraInstanceId"] and aAuraFrame["auraInstanceId"] >= 0 and tButton["raidid"] then
 		GameTooltip:SetUnitAuraByAuraInstanceID(tButton["raidid"], aAuraFrame["auraInstanceId"]);
 	end
 
@@ -2238,6 +2239,52 @@ function VUHDO_updateAurasForAnchors(aUnit, aPanelNum)
 		if tAnchorConfig then
 			tMaxSlots = tAnchorConfig["maxDisplay"] or 5;
 			VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig, tSlots, tMaxSlots);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local tPanelNum;
+local tPanelAnchors;
+local tAnchorIndex;
+local tAnchorConfig;
+local tGroup;
+local tAnchorSlots;
+local tSlots;
+local tMaxSlots;
+function VUHDO_updateInferredAuraDisplaysForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+		if tPanelAnchors then
+			for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
+				if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
+					tGroup = VUHDO_getAuraGroup(tAnchorConfig["groupId"]);
+
+					if tGroup and tGroup["isInferred"] then
+						VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+
+						tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum];
+
+						if tAnchorSlots then
+							tSlots = tAnchorSlots[tAnchorIndex];
+							tMaxSlots = tAnchorConfig["maxDisplay"] or 5;
+
+							VUHDO_displayAurasAtAnchorFromCache(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig, tSlots, tMaxSlots);
+						end
+					end
+				end
+			end
 		end
 	end
 
@@ -2568,7 +2615,7 @@ do
 					aChargeTexture:Hide();
 				end
 
-				if tShowStacks and GetAuraApplicationDisplayCount and aUnit then
+				if tShowStacks and aUnit and anAuraData["auraInstanceID"] >= 0 then
 					tCountStr = GetAuraApplicationDisplayCount(aUnit, anAuraData["auraInstanceID"], 2, 999);
 					aCountText:SetText(tCountStr or "");
 
@@ -2619,8 +2666,12 @@ do
 
 		tDurationObj = nil;
 
-		if tUnit and GetAuraDuration then
+		if tUnit and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
+		elseif CreateDuration and anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
+			tDurationObj = CreateDuration();
+
+			tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 		end
 
 		tChild = tIconFrame["childB"] or VUHDO_getAuraIconBackdrop(tIconFrame);
@@ -2702,8 +2753,12 @@ do
 
 		tDurationObj = nil;
 
-		if tUnit and GetAuraDuration then
+		if tUnit and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
+		elseif CreateDuration and anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
+			tDurationObj = CreateDuration();
+
+			tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 		end
 
 		tBar = tBarFrame["childBar"];
@@ -2714,7 +2769,7 @@ do
 
 		tBarTexName = VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"] and VUHDO_PANEL_SETUP[aPanelNum]["PANEL_COLOR"]["barTexture"];
 
-		if tBarTexName and VUHDO_setLlcStatusBarTexture then
+		if tBarTexName then
 			VUHDO_setLlcStatusBarTexture(tBar, tBarTexName);
 		end
 

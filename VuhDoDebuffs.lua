@@ -1673,20 +1673,22 @@ do
 		end
 
 		for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
-			tEffectiveColorType = tGroup["colorType"] or ((tGroup["canColorBar"] or tGroup["canColorText"]) and VUHDO_AURA_GROUP_COLOR_DISPEL or VUHDO_AURA_GROUP_COLOR_OFF);
+			if not tGroup["isInferred"] and (not tGroup["playerClassRequired"] or tGroup["playerClassRequired"] == VUHDO_PLAYER_CLASS) then
+				tEffectiveColorType = tGroup["colorType"] or ((tGroup["canColorBar"] or tGroup["canColorText"]) and VUHDO_AURA_GROUP_COLOR_DISPEL or VUHDO_AURA_GROUP_COLOR_OFF);
 
-			if not (VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][tGroupId]) and
-				tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL and
-				tGroup["enabled"] ~= false and not (VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][tGroupId]) and
-				not (VUHDO_DEFAULT_AURA_GROUPS[tGroupId] and VUHDO_DEFAULT_AURA_GROUPS[tGroupId]["enabled"] == false) then
-				tinsert(sCanColorBarGroups, {
-					["filter"] = tGroup["filter"],
-					["priority"] = tGroup["priority"] or 50,
-					["colorType"] = tGroup["colorType"] or tEffectiveColorType,
-					["customColor"] = tGroup["customColor"],
-					["canColorBar"] = tGroup["canColorBar"] ~= false,
-					["canColorText"] = tGroup["canColorText"] ~= false,
-				});
+				if not (VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][tGroupId]) and
+					tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL and
+					tGroup["enabled"] ~= false and not (VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][tGroupId]) and
+					not (VUHDO_DEFAULT_AURA_GROUPS[tGroupId] and VUHDO_DEFAULT_AURA_GROUPS[tGroupId]["enabled"] == false) then
+					tinsert(sCanColorBarGroups, {
+						["filter"] = tGroup["filter"],
+						["priority"] = tGroup["priority"] or 50,
+						["colorType"] = tGroup["colorType"] or tEffectiveColorType,
+						["customColor"] = tGroup["customColor"],
+						["canColorBar"] = tGroup["canColorBar"] ~= false,
+						["canColorText"] = tGroup["canColorText"] ~= false,
+					});
+				end
 			end
 		end
 
@@ -1726,6 +1728,20 @@ do
 		sUnitDebuffCanColorBar[aUnit] = nil;
 		sUnitDebuffColorType[aUnit] = nil;
 		sUnitDebuffCustomColor[aUnit] = nil;
+
+		if VUHDO_hasInferredAura and VUHDO_hasInferredAura(aUnit) then
+			tCanColorGroup = VUHDO_getInferredAuraGroup and VUHDO_getInferredAuraGroup(aUnit);
+
+			if tCanColorGroup and tCanColorGroup["canColorBar"] then
+				sUnitDispellableDebuffId[aUnit] = VUHDO_INFERRED_AURA_SYNTHETIC_IDS and VUHDO_INFERRED_AURA_SYNTHETIC_IDS[tCanColorGroup["inferredType"]] or -1;
+				sUnitDebuffColorType[aUnit] = tCanColorGroup["colorType"];
+				sUnitDebuffCustomColor[aUnit] = tCanColorGroup["customColor"];
+				sUnitDebuffCanColorBar[aUnit] = tCanColorGroup["canColorBar"];
+				sUnitDebuffColorText[aUnit] = tCanColorGroup["canColorText"];
+
+				return;
+			end
+		end
 
 		for tCnt = 1, #sCanColorBarGroups do
 			tCanColorGroup = sCanColorBarGroups[tCnt];

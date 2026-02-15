@@ -260,7 +260,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		tFilterCombo:Enable();
 		tFilterCombo:SetAlpha(1);
 
-		if tIsBuiltIn then
+		if tIsBuiltIn or tGroup["isInferred"] then
 			tFilterCombo:Disable();
 			tFilterCombo:SetAlpha(0.5);
 		end
@@ -275,7 +275,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		tExcludeFilterCombo:Enable();
 		tExcludeFilterCombo:SetAlpha(1);
 
-		if tIsBuiltIn then
+		if tIsBuiltIn or tGroup["isInferred"] then
 			tExcludeFilterCombo:Disable();
 			tExcludeFilterCombo:SetAlpha(0.5);
 		end

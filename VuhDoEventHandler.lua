@@ -723,6 +723,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_modelToolsInitLocalOverrides();
 	VUHDO_toolboxInitLocalOverrides();
 	VUHDO_aurasInitLocalOverrides();
+	VUHDO_auraInferenceInitLocalOverrides();
 	VUHDO_guiToolboxInitLocalOverrides();
 	VUHDO_vuhdoInitLocalOverrides();
 	VUHDO_spellEventHandlerInitLocalOverrides();
@@ -988,6 +989,14 @@ do
 			if tUnitInfo then
 				VUHDO_onUnitAura(anArg1, anArg2);
 				VUHDO_updateBouquetsForEvent(anArg1, 4);
+
+				if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] then
+					if VUHDO_onUnitAuraInference(anArg1, anArg2) then
+						VUHDO_determineDebuff(anArg1);
+						VUHDO_updateBouquetsForEvent(anArg1, 4);
+						VUHDO_updateInferredAuraDisplaysForUnit(anArg1);
+					end
+				end
 			end
 
 		elseif "UNIT_HEALTH" == anEvent then
@@ -1067,6 +1076,17 @@ do
 				((VUHDO_CONFIG["SPELL_TRACE"]["showIncomingEnemy"] and UnitIsEnemy(anArg1, "player")) or
 					(VUHDO_CONFIG["SPELL_TRACE"]["showIncomingFriendly"] and UnitIsFriend(anArg1, "player"))) then
 				VUHDO_removeIncomingSpellTrace(anArg1, anArg2, anArg3);
+			end
+
+		elseif "UNIT_SPELLCAST_SUCCEEDED" == anEvent then
+			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] and VUHDO_onSpellcastSucceeded then
+				VUHDO_onSpellcastSucceeded(anArg1, anArg2, anArg3);
+			end
+
+		elseif "UNIT_SPELLCAST_EMPOWER_STOP" == anEvent then
+			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE]
+				and "EVOKER" == _G["VUHDO_PLAYER_CLASS"] and VUHDO_onSpellcastEmpoweredStop then
+				VUHDO_onSpellcastEmpoweredStop(anArg1, anArg2, anArg3, anArg4);
 			end
 
 		elseif "NAME_PLATE_UNIT_REMOVED" == anEvent then
@@ -1885,6 +1905,14 @@ function VUHDO_updateGlobalToggles()
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PLAYER_TARGET]
 		= (VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_TARGET"])
 		or VUHDO_isModelConfigured(VUHDO_ID_TARGET);
+
+	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] = "SHAMAN" == VUHDO_PLAYER_CLASS or "EVOKER" == VUHDO_PLAYER_CLASS or "PRIEST" == VUHDO_PLAYER_CLASS;
+
+	VUHDO_UnRegisterEvent(VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE],
+		"UNIT_SPELLCAST_SUCCEEDED");
+
+	VUHDO_UnRegisterEvent("EVOKER" == VUHDO_PLAYER_CLASS and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE],
+		"UNIT_SPELLCAST_EMPOWER_STOP");
 
 	VUHDO_UnRegisterEvent(VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"],
 		"UNIT_HEAL_PREDICTION");
@@ -2777,6 +2805,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"PLAYER_SPECIALIZATION_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",
+	"UNIT_SPELLCAST_SUCCEEDED", "UNIT_SPELLCAST_EMPOWER_STOP",
 	"NAME_PLATE_UNIT_REMOVED",
 	"UI_SCALE_CHANGED", "DISPLAY_SIZE_CHANGED",
 };
