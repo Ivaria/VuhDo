@@ -2964,10 +2964,16 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["DEBUFF_ICON_GLOW"] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["CHARMED"] = VUHDO_makeFullColor(0.51, 0.082, 0.263, 1,   1, 0.31, 0.31, 1),
 
-["AURA_BAR_DEFAULT"] = {
-			["R"] = 0.2, ["G"] = 0.6, ["B"] = 0.2, ["O"] = 1,
+		["AURA_BAR_DEFAULT"] = {
+			["R"] = 0.7098, ["G"] = 0.7294, ["B"] = 0.7412, ["O"] = 0.5,
 			["TR"] = 1, ["TG"] = 1, ["TB"] = 1, ["TO"] = 1,
 			["useText"] = false, ["useBackground"] = true, ["useOpacity"] = true,
+		},
+
+		["AURA_STACK_TRIANGLE"] = {
+			["R"] = 0.180, ["G"] = 0.937, ["B"] = 0.169, ["O"] = 1,
+			["TR"] = 1, ["TG"] = 1, ["TB"] = 1, ["TO"] = 1,
+			["useText"] = true, ["useBackground"] = true, ["useOpacity"] = false,
 		},
 
 		["BAR_FRAMES"] = {
@@ -3024,7 +3030,6 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["HOT_CHARGE_2"] = VUHDO_makeFullColorWoOpacity(1, 1, 0.3, 1,   1, 1, 0.6, 1),
 		["HOT_CHARGE_3"] = VUHDO_makeFullColorWoOpacity(0.3, 1, 0.3, 1,   0.6, 1, 0.6, 1),
 		["HOT_CHARGE_4"] = VUHDO_makeFullColorWoOpacity(0.8, 0.8, 0.8, 1,   1, 1, 1, 1),
-		["AURA_STACK_TRIANGLE"] = VUHDO_makeFullColorWoOpacity(1, 1, 1, 1,   1, 1, 1, 1),
 
 		["useDebuffIcon"] = false,
 		["useDebuffIconBossOnly"] = true,

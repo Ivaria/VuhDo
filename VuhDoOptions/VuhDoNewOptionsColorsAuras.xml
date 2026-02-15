@@ -129,7 +129,7 @@
 
 					<CheckButton name="$parentShowTooltipCheck" text="VUHDO_I18N_SHOW_TOOLTIP" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowClockCheck" relativePoint="TOPRIGHT">
+							<Anchor point="TOPLEFT" relativeTo="$parentDispelBorderCheck" relativePoint="TOPRIGHT">
 								<Offset>
 									<AbsDimension x="20" y="0" />
 								</Offset>
