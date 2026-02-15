@@ -108,6 +108,7 @@ local sEmpty = { };
 local sAssignedAuras = { };
 local sSlotsToClear = { };
 local sSlotsToClearCount = 0;
+local sFilteredAuras = { };
 
 local sAuraDataPool;
 local sSlotIndexPool;
@@ -615,6 +616,48 @@ end
 
 
 --
+local tPanelAnchors;
+function VUHDO_initUnitAuraSlots(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	if not VUHDO_UNIT_AURA_SLOTS[aUnit] then
+		VUHDO_UNIT_AURA_SLOTS[aUnit] = { };
+	end
+
+	if not VUHDO_UNIT_AURA_SLOT_INDEX[aUnit] then
+		VUHDO_UNIT_AURA_SLOT_INDEX[aUnit] = { };
+	end
+
+	if not VUHDO_UNIT_AURA_CACHE[aUnit] then
+		VUHDO_UNIT_AURA_CACHE[aUnit] = { };
+	end
+
+	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		if not VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum] then
+			VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum] = { };
+		end
+
+		tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+		if tPanelAnchors then
+			for tAnchorKey, _ in pairs(tPanelAnchors) do
+				if not VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum][tAnchorKey] then
+					VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum][tAnchorKey] = { };
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tPanelSlots;
 local tAnchorSlots;
 function VUHDO_getAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, aSlotIndex)
@@ -657,22 +700,14 @@ function VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, aSlotIndex, 
 		return;
 	end
 
-	if not VUHDO_UNIT_AURA_SLOTS[aUnit] then
-		VUHDO_UNIT_AURA_SLOTS[aUnit] = { };
-	end
-
-	if not VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] then
-		VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] = { };
-	end
-
-	if not VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex] then
-		VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex] = { };
+	if not VUHDO_UNIT_AURA_SLOTS[aUnit] or not VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] or not VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex] then
+		return;
 	end
 
 	tOldAuraId = VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex][aSlotIndex];
 
 	if tOldAuraId and tOldAuraId ~= anAuraInstanceId then
-		tAuraIndex = VUHDO_UNIT_AURA_SLOT_INDEX[aUnit] and VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][tOldAuraId];
+		tAuraIndex = VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][tOldAuraId];
 
 		if tAuraIndex then
 			tPanelIndex = tAuraIndex[aPanelNum];
@@ -694,10 +729,6 @@ function VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, aSlotIndex, 
 	VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex][aSlotIndex] = anAuraInstanceId;
 
 	if anAuraInstanceId then
-		if not VUHDO_UNIT_AURA_SLOT_INDEX[aUnit] then
-			VUHDO_UNIT_AURA_SLOT_INDEX[aUnit] = { };
-		end
-
 		if not VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId] then
 			VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId] = { };
 		end
@@ -1317,15 +1348,15 @@ function VUHDO_queryAndCacheAurasForAnchor(aUnit, aPanelNum, anAnchorIndex)
 	tAuras = VUHDO_getFilteredAuras(aUnit, tGroup["filter"], tAnchorConfig["maxDisplay"], tAnchorConfig["sortRule"], tAnchorConfig["sortDir"]);
 
 	if tGroup["excludeFilter"] then
-		tFilteredAuras = { };
+		twipe(sFilteredAuras);
 
 		for _, tAura in ipairs(tAuras) do
 			if not VUHDO_auraMatchesFilter(aUnit, tAura["auraInstanceID"], tGroup["excludeFilter"]) then
-				tinsert(tFilteredAuras, tAura);
+				tinsert(sFilteredAuras, tAura);
 			end
 		end
 
-		tAuras = tFilteredAuras;
+		tAuras = sFilteredAuras;
 	end
 
 	tSlotIndex = 0;

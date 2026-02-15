@@ -25,6 +25,30 @@ local sEmpty = { };
 local sBuffFilter = "PLAYER|HELPFUL|RAID_IN_COMBAT";
 local sTimestampTolerance = 0.25;
 
+local sSyntheticAuraPool;
+
+
+
+--
+local function VUHDO_cleanupSyntheticAura(aTable)
+
+	aTable["auraInstanceID"] = nil;
+	aTable["icon"] = nil;
+	aTable["name"] = nil;
+	aTable["spellId"] = nil;
+	aTable["applications"] = nil;
+	aTable["duration"] = nil;
+	aTable["expirationTime"] = nil;
+	aTable["sourceUnit"] = nil;
+	aTable["isHarmful"] = nil;
+	aTable["dispelName"] = nil;
+
+	return;
+
+end
+
+
+
 VUHDO_INFERRED_AURA_SYNTHETIC_IDS = {
 	["SHAMAN_RIPTIDE"] = -1001,
 	["EVOKER_ECHO"] = -1002,
@@ -88,21 +112,30 @@ VUHDO_AURA_INFERENCE_STATE = {
 		["activeAuras"] = { },
 		["filteredAuras"] = { },
 		["lastCastTime"] = nil,
-		["excludeUnit"] = nil,
+		["excludeUnit"] = {
+			["unit"] = nil,
+			["auraInstanceID"] = nil,
+		},
 		["empoweredPending"] = false,
 	},
 	["EVOKER_ECHO"] = {
 		["activeAuras"] = { },
 		["filteredAuras"] = { },
 		["lastCastTime"] = nil,
-		["excludeUnit"] = nil,
+		["excludeUnit"] = {
+			["unit"] = nil,
+			["auraInstanceID"] = nil,
+		},
 		["empoweredPending"] = false,
 	},
 	["PRIEST_ATONEMENT"] = {
 		["activeAuras"] = { },
 		["filteredAuras"] = { },
 		["lastCastTime"] = nil,
-		["excludeUnit"] = nil,
+		["excludeUnit"] = {
+			["unit"] = nil,
+			["auraInstanceID"] = nil,
+		},
 		["empoweredPending"] = false,
 	},
 };
@@ -120,6 +153,8 @@ function VUHDO_auraInferenceInitLocalOverrides()
 	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
 	VUHDO_UNIT_AURA_CACHE = _G["VUHDO_UNIT_AURA_CACHE"];
 	VUHDO_SPELL_ID = _G["VUHDO_SPELL_ID"];
+
+	sSyntheticAuraPool = VUHDO_createTablePool("SyntheticAura", 50, nil, VUHDO_cleanupSyntheticAura);
 
 	return;
 
@@ -179,6 +214,7 @@ local tSynthetic;
 local tIcon;
 local tName;
 local tChanged;
+local tOldSynthetic;
 function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 	if not aUnit then
@@ -212,6 +248,8 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 					if tState["activeAuras"][aUnit] == tAuraId then
 						tState["activeAuras"][aUnit] = nil;
 
+						tOldSynthetic = VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tInferredType];
+
 						if VUHDO_INFERRED_AURAS[aUnit] then
 							VUHDO_INFERRED_AURAS[aUnit][tInferredType] = nil;
 						end
@@ -220,6 +258,10 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 						if VUHDO_UNIT_AURA_CACHE[aUnit] then
 							VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = nil;
+						end
+
+						if tOldSynthetic then
+							sSyntheticAuraPool:release(tOldSynthetic);
 						end
 
 						VUHDO_onAuraRemoved(aUnit, tSyntheticId);
@@ -235,28 +277,30 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 		if tExcludeUnit and tExcludeUnit["unit"] == aUnit and aUpdateInfo and aUpdateInfo["removedAuraInstanceIDs"] then
 			for _, tAuraId in ipairs(aUpdateInfo["removedAuraInstanceIDs"]) do
 				if tExcludeUnit["auraInstanceID"] == tAuraId then
-					tState["excludeUnit"] = nil;
+					tState["excludeUnit"]["unit"] = nil;
+					tState["excludeUnit"]["auraInstanceID"] = nil;
 
 					break;
 				end
 			end
 		end
 
-		if not tState["activeAuras"][aUnit] or not tState["excludeUnit"] then
+		if not tState["activeAuras"][aUnit] or not tState["excludeUnit"]["unit"] then
 			tAuras = GetUnitAuras(aUnit, sBuffFilter, 2, tSortRule, tSortDir);
 
 			if tAuras and #tAuras == 2 then
 				tState["activeAuras"][aUnit] = tAuras[1]["auraInstanceID"];
 
 				if not tIsPlayer then
-					tState["excludeUnit"] = { ["unit"] = aUnit, ["auraInstanceID"] = tAuras[2]["auraInstanceID"] };
+					tState["excludeUnit"]["unit"] = aUnit;
+					tState["excludeUnit"]["auraInstanceID"] = tAuras[2]["auraInstanceID"];
 				end
 
 				tAura = tAuras[1];
 			elseif tAuras and #tAuras == 1 and not tIsPlayer then
 				tExcludeUnit = tState["excludeUnit"];
 
-				if not tExcludeUnit or tExcludeUnit["unit"] ~= aUnit then
+				if tExcludeUnit["unit"] ~= aUnit then
 					tState["activeAuras"][aUnit] = tAuras[1]["auraInstanceID"];
 
 					tAura = tAuras[1];
@@ -288,6 +332,8 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 							tState["filteredAuras"][aUnit][tAuraId] = nil;
 						end
 
+						tOldSynthetic = VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tInferredType];
+
 						if VUHDO_INFERRED_AURAS[aUnit] then
 							VUHDO_INFERRED_AURAS[aUnit][tInferredType] = nil;
 						end
@@ -296,6 +342,10 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 						if VUHDO_UNIT_AURA_CACHE[aUnit] then
 							VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = nil;
+						end
+
+						if tOldSynthetic then
+							sSyntheticAuraPool:release(tOldSynthetic);
 						end
 
 						VUHDO_onAuraRemoved(aUnit, tSyntheticId);
@@ -334,6 +384,8 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 					if tState["activeAuras"][aUnit] == tAuraId then
 						tState["activeAuras"][aUnit] = nil;
 
+						tOldSynthetic = VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tInferredType];
+
 						if VUHDO_INFERRED_AURAS[aUnit] then
 							VUHDO_INFERRED_AURAS[aUnit][tInferredType] = nil;
 						end
@@ -342,6 +394,10 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 						if VUHDO_UNIT_AURA_CACHE[aUnit] then
 							VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = nil;
+						end
+
+						if tOldSynthetic then
+							sSyntheticAuraPool:release(tOldSynthetic);
 						end
 
 						VUHDO_onAuraRemoved(aUnit, tSyntheticId);
@@ -386,18 +442,18 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 			tName = tAura["name"] or tName;
 		end
 
-		tSynthetic = {
-			["auraInstanceID"] = tSyntheticId,
-			["icon"] = tIcon or tAura["icon"],
-			["name"] = tName,
-			["spellId"] = tConfig["spellId"],
-			["applications"] = tAura["applications"] or 1,
-			["duration"] = tAura["duration"] or 0,
-			["expirationTime"] = tAura["expirationTime"] or 0,
-			["sourceUnit"] = tAura["sourceUnit"],
-			["isHarmful"] = false,
-			["dispelName"] = nil,
-		};
+		tSynthetic = sSyntheticAuraPool:get();
+
+		tSynthetic["auraInstanceID"] = tSyntheticId;
+		tSynthetic["icon"] = tIcon or tAura["icon"];
+		tSynthetic["name"] = tName;
+		tSynthetic["spellId"] = tConfig["spellId"];
+		tSynthetic["applications"] = tAura["applications"] or 1;
+		tSynthetic["duration"] = tAura["duration"] or 0;
+		tSynthetic["expirationTime"] = tAura["expirationTime"] or 0;
+		tSynthetic["sourceUnit"] = tAura["sourceUnit"];
+		tSynthetic["isHarmful"] = false;
+		tSynthetic["dispelName"] = nil;
 
 		if not VUHDO_INFERRED_AURAS[aUnit] then
 			VUHDO_INFERRED_AURAS[aUnit] = { };

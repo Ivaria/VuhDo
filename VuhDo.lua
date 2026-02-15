@@ -8,6 +8,31 @@ VUHDO_DEBUG = { };
 VUHDO_RAID = { };
 local VUHDO_RAID;
 
+
+
+--
+local tUnitInfo;
+function VUHDO_getOrCreateUnitInfo(aUnit)
+
+	if not aUnit then
+		return nil;
+	end
+
+	tUnitInfo = VUHDO_RAID[aUnit];
+
+	if not tUnitInfo then
+		tUnitInfo = { };
+		VUHDO_RAID[aUnit] = tUnitInfo;
+
+		VUHDO_initUnitAuraSlots(aUnit);
+	end
+
+	return tUnitInfo;
+
+end
+
+
+
 VUHDO_RAID_NAMES = { };
 local VUHDO_RAID_NAMES = VUHDO_RAID_NAMES;
 
@@ -167,6 +192,7 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_resetClusterCoordDeltas = _G["VUHDO_resetClusterCoordDeltas"];
 	VUHDO_getUnitZoneName = _G["VUHDO_getUnitZoneName"];
 	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
+	VUHDO_initUnitAuraSlots = _G["VUHDO_initUnitAuraSlots"];
 
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_PANEL_UNITS = _G["VUHDO_PANEL_UNITS"];
@@ -373,11 +399,8 @@ function VUHDO_setHealth(aUnit, aMode)
 			tPowerType = UnitPowerType(aUnit);
 			tIsAfk, tIsConnected, _ = VUHDO_updateAfkDc(aUnit);
 
-			if not VUHDO_RAID[aUnit] then
-				VUHDO_RAID[aUnit] = { };
-			end
+			tInfo = VUHDO_getOrCreateUnitInfo(aUnit);
 
-			tInfo = VUHDO_RAID[aUnit];
 			tInfo["ownerUnit"] = tOwner;
 
 			if tIsPet and tClassId then

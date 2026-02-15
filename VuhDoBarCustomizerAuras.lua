@@ -366,7 +366,28 @@ local sAuraBackdropInfo = {
 	},
 };
 
+local sDurationCache = { };
+
 local sAurasSuspended = false;
+
+
+
+--
+local tCacheKey;
+local tCachedDuration;
+function VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex)
+
+	tCacheKey = anAnchorIndex * 100 + aSlotIndex;
+	tCachedDuration = sDurationCache[tCacheKey];
+
+	if not tCachedDuration then
+		tCachedDuration = CreateDuration();
+		sDurationCache[tCacheKey] = tCachedDuration;
+	end
+
+	return tCachedDuration;
+
+end
 
 
 
@@ -2658,7 +2679,7 @@ do
 		if tUnit and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
 		elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
-			tDurationObj = CreateDuration();
+			tDurationObj = VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex);
 
 			tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 		end
@@ -2743,7 +2764,7 @@ do
 		if tUnit and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
 		elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
-			tDurationObj = CreateDuration();
+			tDurationObj = VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex);
 
 			tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 		end
