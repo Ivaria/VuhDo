@@ -958,9 +958,9 @@ local function VUHDO_initAuraFrameSecureHandlers(aFrame, aButton)
 
 	if not aFrame:GetAttribute("vd_tt_hook") then
 		aFrame:SetScript("OnEnter", function(self)
-			VUHDO_showAuraTooltip(self);
-
-			VuhDoActionOnEnter(VUHDO_findButtonFromChild(self));
+			if not VUHDO_showAuraTooltip(self) then
+				VuhDoActionOnEnter(VUHDO_findButtonFromChild(self));
+			end
 		end);
 
 		aFrame:SetScript("OnLeave", function(self)
@@ -2154,7 +2154,7 @@ local tShowTooltip;
 function VUHDO_showAuraTooltip(aAuraFrame)
 
 	if not aAuraFrame then
-		return;
+		return false;
 	end
 
 	tPanelNum = aAuraFrame["panelNum"];
@@ -2164,29 +2164,30 @@ function VUHDO_showAuraTooltip(aAuraFrame)
 		tAnchorConfig = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"][aAuraFrame["anchorIndex"]];
 	end
 
-	tShowTooltip = VUHDO_getAnchorTriStateBool(tAnchorConfig, "showTooltip", VUHDO_CONFIG and VUHDO_CONFIG["DEBUFF_TOOLTIP"]);
+	tShowTooltip = VUHDO_resolveAuraTriState(tAnchorConfig and tAnchorConfig["showTooltip"], "showTooltip");
 
 	if not tShowTooltip then
-		return;
+		return false;
 	end
 
 	tButton = VUHDO_findButtonFromChild(aAuraFrame);
 
 	if not tButton then
-		return;
+		return false;
 	end
 
 	if GameTooltip:IsForbidden() then
-		return;
+		return false;
 	end
 
 	GameTooltip:SetOwner(aAuraFrame, "ANCHOR_RIGHT", 0, 0);
 
 	if aAuraFrame["auraInstanceId"] and aAuraFrame["auraInstanceId"] >= 0 and tButton["raidid"] then
 		GameTooltip:SetUnitAuraByAuraInstanceID(tButton["raidid"], aAuraFrame["auraInstanceId"]);
+		return true;
 	end
 
-	return;
+	return false;
 
 end
 

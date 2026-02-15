@@ -3092,6 +3092,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["flashOnLow"] = false,
 		["flashThreshold"] = 2,
 		["dispelBorder"] = false,
+		["showTooltip"] = true,
 	},
 };
 

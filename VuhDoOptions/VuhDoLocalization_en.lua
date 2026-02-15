@@ -689,6 +689,7 @@ VUHDO_I18N_TT.K630 = "Flash auras when duration is low";
 VUHDO_I18N_TT.K631 = "Seconds remaining before fade starts";
 VUHDO_I18N_TT.K632 = "Seconds remaining before flash starts";
 VUHDO_I18N_TT.K633 = "Show dispel border on dispellable auras";
+VUHDO_I18N_TT.K634 = "Show aura tooltips";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1321,7 +1322,7 @@ VUHDO_I18N_ICON_DEFAULTS = "Icon Defaults";
 VUHDO_I18N_BAR_DEFAULTS = "Bar Defaults";
 VUHDO_I18N_WARNING_SETTINGS = "Warning Settings";
 VUHDO_I18N_DEFAULT_SIZE = "Default Size";
-VUHDO_I18N_SHOW_BAR_ICON = "Show Icon on Bar";
+VUHDO_I18N_SHOW_BAR_ICON = "Show Bar Icon";
 VUHDO_I18N_DEFAULT = "Default";
 VUHDO_I18N_DEBUFF = "Debuff";
 VUHDO_I18N_ISIDESI = "|cffffffffSides|r";

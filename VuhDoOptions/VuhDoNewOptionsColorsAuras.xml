@@ -127,6 +127,23 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentShowTooltipCheck" text="VUHDO_I18N_SHOW_TOOLTIP" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentShowClockCheck" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="20" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.AURA_DEFAULTS.showTooltip");
+								VUHDO_lnfCheckButtonOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K634);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 					<Frame name="$parentAuraBarDefaultTexture" inherits="VuhDoColorSwatchTexture">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentShowBarIconCheck" relativePoint="BOTTOMLEFT">
@@ -172,7 +189,7 @@
 						</Anchors>
 						<Layers>
 							<Layer>
-								<FontString name="$parentLabel" text="VUHDO_I18N_WARNING_SETTINGS" inherits="VuDoDefaultFontTemplate">
+								<FontString name="$parentLabel" text="VUHDO_I18N_WARNING_SETTINGS" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>
