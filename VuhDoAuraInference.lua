@@ -4,6 +4,7 @@ local pairs = pairs;
 local ipairs = ipairs;
 local tinsert = table.insert;
 local twipe = table.wipe;
+local issecretvalue = issecretvalue;
 local GetTime = GetTime;
 
 local UnitIsUnit = UnitIsUnit;
@@ -429,6 +430,10 @@ function VUHDO_onSpellcastSucceeded(aUnit, aCastGUID, aSpellId)
 		return;
 	end
 
+	if issecretvalue(aSpellId) then
+		return;
+	end
+
 	tInferredType = VUHDO_getCurrentInferredType();
 
 	if not tInferredType then
@@ -464,6 +469,10 @@ local tConfig;
 function VUHDO_onSpellcastEmpoweredStop(aUnit, aCastGUID, aSpellId, anEmpoweredSuccess)
 
 	if not anEmpoweredSuccess or not aSpellId then
+		return;
+	end
+
+	if issecretvalue(aSpellId) then
 		return;
 	end
 
