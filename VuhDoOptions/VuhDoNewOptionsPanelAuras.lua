@@ -712,9 +712,9 @@ function VUHDO_panelAurasRebindContentPanel()
 
 					if tDefaultVal then
 						if tEntry[2] == "size" then
-							tDefaultVal = tDefaultVal["iconSize"] or 40;
+							tDefaultVal = tDefaultVal["iconSize"];
 						else
-							tDefaultVal = tDefaultVal["iconSpacing"] or 2;
+							tDefaultVal = tDefaultVal["iconSpacing"];
 						end
 
 						_G[tSlider:GetName() .. "Slider"]:SetValue(tDefaultVal);

@@ -3079,6 +3079,10 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 	}, -- BAR_COLORS
 
 	["AURA_DEFAULTS"] = {
+		["iconSize"] = 40,
+		["iconSpacing"] = 2,
+		["barWidth"] = 100,
+		["barHeight"] = 30,
 		["showTimer"] = true,
 		["showStacks"] = true,
 		["showClock"] = false,
