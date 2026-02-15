@@ -18,7 +18,6 @@ local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
 local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
 local CreateColor = CreateColor;
 
-local VUHDO_CONFIG;
 local VUHDO_PANEL_SETUP;
 local VUHDO_RAID;
 local VUHDO_BUTTON_CACHE;
@@ -47,7 +46,6 @@ local VUHDO_setStatusBarOrientation;
 local VUHDO_getClassColor;
 local VUHDO_safeColorFromTable;
 local VUHDO_resolveAuraTriState;
-local VUHDO_getAnchorTriStateBool;
 local VUHDO_getAuraGroup;
 local VUHDO_getDispelCurveForUnit;
 local VUHDO_setAnchorSlotAuraId;
@@ -394,7 +392,6 @@ end
 --
 function VUHDO_barCustomizerAurasInitLocalOverrides()
 
-	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
@@ -424,7 +421,6 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_safeColorFromTable = _G["VUHDO_safeColorFromTable"];
 	VUHDO_setAnchorSlotAuraId = _G["VUHDO_setAnchorSlotAuraId"];
 	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
-	VUHDO_getAnchorTriStateBool = _G["VUHDO_getAnchorTriStateBool"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 

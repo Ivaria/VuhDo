@@ -168,7 +168,6 @@ end
 
 
 --
-local tBouquet;
 local tItem;
 local tSpecial;
 local tWrapper;
@@ -253,7 +252,7 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 
 				tWrapper = CreateFrame("Frame", tOriginalParent:GetName() .. "AlpWr" .. sWrapperNameCounter, tOriginalParent);
 
-tWrapper:SetAllPoints(tOriginalParent);
+				tWrapper:SetAllPoints(tOriginalParent);
 				tWrapper["addLevel"] = tIndicatorAddLevel;
 				tWrapper:SetFrameLevel(tOriginalParent:GetFrameLevel());
 				tWrapper:SetAlpha(1);
