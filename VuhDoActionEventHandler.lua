@@ -397,7 +397,7 @@ function VUHDO_highlighterBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue,
 				VUHDO_setStatusBarVuhDoColor(tHighlightBar, aColor);
 			end
 
-			if VUHDO_SECRETS_ENABLED and VUHDO_updateIndicatorAlphaChain then
+			if sSecretsEnabled then
 				VUHDO_updateIndicatorAlphaChain(tButton, "MOUSEOVER_HIGHLIGHT", VUHDO_RAID[aUnit]);
 			end
 		end

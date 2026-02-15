@@ -174,7 +174,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 				end
 			end
 
-			if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+			if sSecretsEnabled then
 				VUHDO_updateIndicatorAlphaChain(tButton, "MANA_BAR", VUHDO_RAID[aUnit]);
 			end
 		end
@@ -292,7 +292,7 @@ local function VUHDO_sideBarBouquetCallback(aBarNum, aUnit, anIsActive, anIcon, 
 				VUHDO_setStatusBarVuhDoColor(tBar, aColor);
 			end
 
-			if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+			if sSecretsEnabled then
 				tIndicatorName = (aBarNum == 17) and "SIDE_LEFT" or "SIDE_RIGHT";
 
 				VUHDO_updateIndicatorAlphaChain(tButton, tIndicatorName, VUHDO_RAID[aUnit]);

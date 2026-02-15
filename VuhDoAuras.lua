@@ -342,10 +342,6 @@ end
 local tDuration;
 function VUHDO_getAuraDuration(aUnit, anAuraInstanceId)
 
-	if not GetAuraDuration then
-		return nil;
-	end
-
 	if not aUnit or not anAuraInstanceId then
 		return nil;
 	end
@@ -362,10 +358,6 @@ end
 local tAuras;
 function VUHDO_getFilteredAuras(aUnit, aFilter, aMaxCount, aSortRule, aSortDir)
 
-	if not GetUnitAuras then
-		return { };
-	end
-
 	if not aUnit or not aFilter then
 		return { };
 	end
@@ -381,10 +373,6 @@ end
 --
 local tMatches;
 function VUHDO_auraMatchesFilter(aUnit, anAuraInstanceId, aFilter)
-
-	if not IsAuraFilteredOutByInstanceID then
-		return true;
-	end
 
 	if not aUnit or not anAuraInstanceId or not aFilter then
 		return false;
@@ -406,10 +394,6 @@ end
 local tAuraData;
 function VUHDO_getAuraDataByInstanceId(aUnit, anAuraInstanceId)
 
-	if not GetAuraDataByAuraInstanceID then
-		return nil;
-	end
-
 	if not aUnit or not anAuraInstanceId then
 		return nil;
 	end
@@ -425,10 +409,6 @@ end
 --
 local tCountText;
 function VUHDO_getAuraStackDisplay(aUnit, anAuraInstanceId, aMinCount, aMaxCount)
-
-	if not GetAuraApplicationDisplayCount then
-		return "";
-	end
 
 	if not aUnit or not anAuraInstanceId then
 		return "";

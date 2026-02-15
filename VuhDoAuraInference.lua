@@ -178,7 +178,7 @@ local tName;
 local tChanged;
 function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
-	if not aUnit or not GetUnitAuras then
+	if not aUnit then
 		return false;
 	end
 
@@ -215,7 +215,7 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 						tSyntheticId = sSyntheticIdByType[tInferredType];
 
-						if VUHDO_UNIT_AURA_CACHE and VUHDO_UNIT_AURA_CACHE[aUnit] then
+						if VUHDO_UNIT_AURA_CACHE[aUnit] then
 							VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = nil;
 						end
 
@@ -263,15 +263,13 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 	elseif "EVOKER_ECHO" == tInferredType then
 		if aUpdateInfo and aUpdateInfo["addedAuras"] and tState["lastCastTime"] then
 			if GetTime() - tState["lastCastTime"] <= sTimestampTolerance then
-				if IsAuraFilteredOutByInstanceID then
-					for _, tAdded in ipairs(aUpdateInfo["addedAuras"]) do
-						if not IsAuraFilteredOutByInstanceID(aUnit, tAdded["auraInstanceID"], "PLAYER") then
-							if not tState["filteredAuras"][aUnit] then
-								tState["filteredAuras"][aUnit] = { };
-							end
-
-							tState["filteredAuras"][aUnit][tAdded["auraInstanceID"]] = true;
+				for _, tAdded in ipairs(aUpdateInfo["addedAuras"]) do
+					if not IsAuraFilteredOutByInstanceID(aUnit, tAdded["auraInstanceID"], "PLAYER") then
+						if not tState["filteredAuras"][aUnit] then
+							tState["filteredAuras"][aUnit] = { };
 						end
+
+						tState["filteredAuras"][aUnit][tAdded["auraInstanceID"]] = true;
 					end
 				end
 			end
@@ -293,7 +291,7 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 						tSyntheticId = sSyntheticIdByType[tInferredType];
 
-						if VUHDO_UNIT_AURA_CACHE and VUHDO_UNIT_AURA_CACHE[aUnit] then
+						if VUHDO_UNIT_AURA_CACHE[aUnit] then
 							VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = nil;
 						end
 
@@ -339,7 +337,7 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 						tSyntheticId = sSyntheticIdByType[tInferredType];
 
-						if VUHDO_UNIT_AURA_CACHE and VUHDO_UNIT_AURA_CACHE[aUnit] then
+						if VUHDO_UNIT_AURA_CACHE[aUnit] then
 							VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = nil;
 						end
 
@@ -404,15 +402,13 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 		VUHDO_INFERRED_AURAS[aUnit][tInferredType] = tSynthetic;
 
-		if VUHDO_UNIT_AURA_CACHE then
-			if not VUHDO_UNIT_AURA_CACHE[aUnit] then
-				VUHDO_UNIT_AURA_CACHE[aUnit] = { };
-			end
-
-			VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = tSynthetic;
-
-			tChanged = true;
+		if not VUHDO_UNIT_AURA_CACHE[aUnit] then
+			VUHDO_UNIT_AURA_CACHE[aUnit] = { };
 		end
+
+		VUHDO_UNIT_AURA_CACHE[aUnit][tSyntheticId] = tSynthetic;
+
+		tChanged = true;
 	end
 
 	return tChanged;

@@ -1713,16 +1713,6 @@ do
 			return;
 		end
 
-		if not GetUnitAuras then
-			sUnitDispellableDebuffId[aUnit] = nil;
-			sUnitDebuffColorText[aUnit] = nil;
-			sUnitDebuffCanColorBar[aUnit] = nil;
-			sUnitDebuffColorType[aUnit] = nil;
-			sUnitDebuffCustomColor[aUnit] = nil;
-
-			return;
-		end
-
 		sUnitDispellableDebuffId[aUnit] = nil;
 		sUnitDebuffColorText[aUnit] = nil;
 		sUnitDebuffCanColorBar[aUnit] = nil;

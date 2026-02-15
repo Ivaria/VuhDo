@@ -83,7 +83,7 @@ function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 				VUHDO_setStatusBarVuhDoColor(tBar, aColor);
 			end
 
-			if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+			if sSecretsEnabled then
 				VUHDO_updateIndicatorAlphaChain(tButton, "THREAT_BAR", VUHDO_RAID[aUnit]);
 			end
 		end

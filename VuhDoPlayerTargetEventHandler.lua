@@ -139,7 +139,7 @@ function VUHDO_barBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCoun
 				end
 			end
 
-			if VUHDO_SECRETS_ENABLED and VUHDO_updateIndicatorAlphaChain then
+			if sSecretsEnabled then
 				VUHDO_updateIndicatorAlphaChain(tButton, "BAR_BORDER", VUHDO_RAID[aUnit]);
 			end
 		end

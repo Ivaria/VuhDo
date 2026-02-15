@@ -640,10 +640,6 @@ local tColors;
 local tTransparent;
 function VUHDO_initAuraDurationCurves()
 
-	if not CreateCurve then
-		return;
-	end
-
 	sCurveTimerVisible = CreateCurve();
 	sCurveTimerVisible:SetType(Enum.LuaCurveType.Step);
 	sCurveTimerVisible:AddPoint(0, 0);
@@ -661,56 +657,52 @@ function VUHDO_initAuraDurationCurves()
 	sCurveFadeAlpha:AddPoint(0, 0);
 	sCurveFadeAlpha:AddPoint(10, 1);
 
-	if CreateColorCurve and CreateColor then
-		sCurveTimerColor = CreateColorCurve();
-		sCurveTimerColor:SetType(Enum.LuaCurveType.Step);
-		sCurveTimerColor:AddPoint(0, CreateColor(1, 1, 1, 1));
-		sCurveTimerColor:AddPoint(0.1, CreateColor(1, 0.2, 0.2, 1));
-		sCurveTimerColor:AddPoint(4.9, CreateColor(1, 1, 1, 1));
+	sCurveTimerColor = CreateColorCurve();
+	sCurveTimerColor:SetType(Enum.LuaCurveType.Step);
+	sCurveTimerColor:AddPoint(0, CreateColor(1, 1, 1, 1));
+	sCurveTimerColor:AddPoint(0.1, CreateColor(1, 0.2, 0.2, 1));
+	sCurveTimerColor:AddPoint(4.9, CreateColor(1, 1, 1, 1));
+
+	tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+	tTransparent = CreateColor(0, 0, 0, 0);
+	sAuraDispelCurve = CreateColorCurve();
+	sAuraDispelCurve:SetType(Enum.LuaCurveType.Step);
+	sAuraDispelCurve:AddPoint(0, tTransparent);
+
+	if tColors and tColors["DEBUFF3"] and tColors["DEBUFF3"]["useBorder"] then
+		sAuraDispelCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors["DEBUFF3"], tTransparent));
+	else
+		sAuraDispelCurve:AddPoint(1, tTransparent);
 	end
 
-	if CreateColorCurve and VUHDO_safeColorFromTable then
-		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
-		tTransparent = CreateColor(0, 0, 0, 0);
-		sAuraDispelCurve = CreateColorCurve();
-		sAuraDispelCurve:SetType(Enum.LuaCurveType.Step);
-		sAuraDispelCurve:AddPoint(0, tTransparent);
+	if tColors and tColors["DEBUFF4"] and tColors["DEBUFF4"]["useBorder"] then
+		sAuraDispelCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors["DEBUFF4"], tTransparent));
+	else
+		sAuraDispelCurve:AddPoint(2, tTransparent);
+	end
 
-		if tColors and tColors["DEBUFF3"] and tColors["DEBUFF3"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors["DEBUFF3"], tTransparent));
-		else
-			sAuraDispelCurve:AddPoint(1, tTransparent);
-		end
+	if tColors and tColors["DEBUFF2"] and tColors["DEBUFF2"]["useBorder"] then
+		sAuraDispelCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors["DEBUFF2"], tTransparent));
+	else
+		sAuraDispelCurve:AddPoint(3, tTransparent);
+	end
 
-		if tColors and tColors["DEBUFF4"] and tColors["DEBUFF4"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors["DEBUFF4"], tTransparent));
-		else
-			sAuraDispelCurve:AddPoint(2, tTransparent);
-		end
+	if tColors and tColors["DEBUFF1"] and tColors["DEBUFF1"]["useBorder"] then
+		sAuraDispelCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors["DEBUFF1"], tTransparent));
+	else
+		sAuraDispelCurve:AddPoint(4, tTransparent);
+	end
 
-		if tColors and tColors["DEBUFF2"] and tColors["DEBUFF2"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors["DEBUFF2"], tTransparent));
-		else
-			sAuraDispelCurve:AddPoint(3, tTransparent);
-		end
+	if tColors and tColors["DEBUFF9"] and tColors["DEBUFF9"]["useBorder"] then
+		sAuraDispelCurve:AddPoint(9, VUHDO_safeColorFromTable(tColors["DEBUFF9"], tTransparent));
+	else
+		sAuraDispelCurve:AddPoint(9, tTransparent);
+	end
 
-		if tColors and tColors["DEBUFF1"] and tColors["DEBUFF1"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors["DEBUFF1"], tTransparent));
-		else
-			sAuraDispelCurve:AddPoint(4, tTransparent);
-		end
-
-		if tColors and tColors["DEBUFF9"] and tColors["DEBUFF9"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(9, VUHDO_safeColorFromTable(tColors["DEBUFF9"], tTransparent));
-		else
-			sAuraDispelCurve:AddPoint(9, tTransparent);
-		end
-
-		if tColors and tColors["DEBUFF8"] and tColors["DEBUFF8"]["useBorder"] then
-			sAuraDispelCurve:AddPoint(11, VUHDO_safeColorFromTable(tColors["DEBUFF8"], tTransparent));
-		else
-			sAuraDispelCurve:AddPoint(11, tTransparent);
-		end
+	if tColors and tColors["DEBUFF8"] and tColors["DEBUFF8"]["useBorder"] then
+		sAuraDispelCurve:AddPoint(11, VUHDO_safeColorFromTable(tColors["DEBUFF8"], tTransparent));
+	else
+		sAuraDispelCurve:AddPoint(11, tTransparent);
 	end
 
 	return;
@@ -1664,7 +1656,7 @@ do
 			return;
 		end
 
-		if "HealthBar" == tPos["relFrame"] and VUHDO_getHealthBar then
+		if "HealthBar" == tPos["relFrame"] then
 			tRelFrame = VUHDO_getHealthBar(aButton, 1);
 		else
 			tRelFrame = aButton;
@@ -1828,10 +1820,6 @@ do
 			return;
 		end
 
-		if not VUHDO_getHealthBar or not VUHDO_BUTTON_CACHE then
-			return;
-		end
-
 		tRelFrame = VUHDO_getHealthBar(aButton, 1);
 
 		if not tRelFrame then
@@ -1840,7 +1828,7 @@ do
 
 		tPanelNum = VUHDO_BUTTON_CACHE[aButton];
 
-		if not tPanelNum or not VUHDO_getHealthBarWidth or not VUHDO_getHealthBarHeight then
+		if not tPanelNum then
 			tBarWidth = 0;
 			tBarHeight = 0;
 		else
@@ -2668,7 +2656,7 @@ do
 
 		if tUnit and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
-		elseif CreateDuration and anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
+		elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
 			tDurationObj = CreateDuration();
 
 			tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
@@ -2690,18 +2678,16 @@ do
 
 			tFlashOnLow = VUHDO_resolveAuraTriState(anAnchorConfig["flashOnLow"], "flashOnLow");
 
-			if VUHDO_UIFrameFlashStop and VUHDO_UIFrameFlash then
-				if tFlashOnLow and tDurationObj and sCurveFlashZone and not tDurationObj:HasSecretValues() then
-					tFlashZone = tDurationObj:EvaluateRemainingDuration(sCurveFlashZone);
+			if tFlashOnLow and tDurationObj and sCurveFlashZone and not tDurationObj:HasSecretValues() then
+				tFlashZone = tDurationObj:EvaluateRemainingDuration(sCurveFlashZone);
 
-					if tFlashZone > 0.5 then
-						VUHDO_UIFrameFlash(tIconFrame, 0.2, 0.1, 5, true, 0, 0.1);
-					else
-						VUHDO_UIFrameFlashStop(tIconFrame);
-					end
+				if tFlashZone > 0.5 then
+					VUHDO_UIFrameFlash(tIconFrame, 0.2, 0.1, 5, true, 0, 0.1);
 				else
 					VUHDO_UIFrameFlashStop(tIconFrame);
 				end
+			else
+				VUHDO_UIFrameFlashStop(tIconFrame);
 			end
 		end
 
@@ -2755,7 +2741,7 @@ do
 
 		if tUnit and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
-		elseif CreateDuration and anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
+		elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
 			tDurationObj = CreateDuration();
 
 			tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
@@ -2837,18 +2823,16 @@ do
 
 		tFlashOnLow = VUHDO_resolveAuraTriState(anAnchorConfig["flashOnLow"], "flashOnLow");
 
-		if VUHDO_UIFrameFlashStop and VUHDO_UIFrameFlash then
-			if tFlashOnLow and tDurationObj and sCurveFlashZone and not tDurationObj:HasSecretValues() then
-				tFlashZone = tDurationObj:EvaluateRemainingDuration(sCurveFlashZone);
+		if tFlashOnLow and tDurationObj and sCurveFlashZone and not tDurationObj:HasSecretValues() then
+			tFlashZone = tDurationObj:EvaluateRemainingDuration(sCurveFlashZone);
 
-				if tFlashZone > 0.5 then
-					VUHDO_UIFrameFlash(tBarFrame, 0.2, 0.1, 5, true, 0, 0.1);
-				else
-					VUHDO_UIFrameFlashStop(tBarFrame);
-				end
+			if tFlashZone > 0.5 then
+				VUHDO_UIFrameFlash(tBarFrame, 0.2, 0.1, 5, true, 0, 0.1);
 			else
 				VUHDO_UIFrameFlashStop(tBarFrame);
 			end
+		else
+			VUHDO_UIFrameFlashStop(tBarFrame);
 		end
 
 		tBarFrame:SetAlpha(1);

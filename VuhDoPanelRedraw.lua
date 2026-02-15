@@ -1483,7 +1483,7 @@ do
 			ClickCastFrames[_G[aButton:GetName() .. "Tot"]] = true;
 		end
 
-		if VUHDO_SECRETS_ENABLED then
+		if sSecretsEnabled then
 			VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
 
 			VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());

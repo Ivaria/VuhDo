@@ -1128,7 +1128,7 @@ do
 			VUHDO_customizeTargetBar(tButton, aUnit, tInfo["range"]);
 		end
 
-		if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+		if sSecretsEnabled then
 			for _, tButton in pairs(tAllButtons) do
 				VUHDO_updateIndicatorAlphaChain(tButton, "HEALTH_BAR", tInfo);
 			end
@@ -1161,7 +1161,7 @@ do
 					tAggroBar:Hide();
 				end
 
-				if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+				if sSecretsEnabled then
 					VUHDO_updateIndicatorAlphaChain(tButton, "AGGRO_BAR", VUHDO_RAID[aUnit]);
 				end
 			end
@@ -1190,7 +1190,7 @@ do
 					VUHDO_setStatusBarVuhDoColor(tBar, aColor);
 				end
 
-				if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+				if sSecretsEnabled then
 					VUHDO_updateIndicatorAlphaChain(tButton, "BACKGROUND_BAR", VUHDO_RAID[aUnit]);
 				end
 			end

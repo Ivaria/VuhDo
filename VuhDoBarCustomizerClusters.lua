@@ -310,7 +310,7 @@ function VUHDO_clusterBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, a
 				end
 			end
 
-			if sSecretsEnabled and VUHDO_updateIndicatorAlphaChain then
+			if sSecretsEnabled then
 				VUHDO_updateIndicatorAlphaChain(tButton, "CLUSTER_BORDER", VUHDO_RAID[aUnit]);
 			end
 		end
