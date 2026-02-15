@@ -2,6 +2,8 @@ local _;
 
 local pairs = pairs;
 local ipairs = ipairs;
+local tinsert = table.insert;
+local twipe = table.wipe;
 local GetTime = GetTime;
 
 local UnitIsUnit = UnitIsUnit;
@@ -556,6 +558,10 @@ end
 
 --
 local tInferredType;
+local tCandidates = { };
+local tBestGroup;
+local tBestPriority;
+local tPriority;
 function VUHDO_getInferredAuraGroup(aUnit)
 
 	if not aUnit then
@@ -572,26 +578,46 @@ function VUHDO_getInferredAuraGroup(aUnit)
 		return nil;
 	end
 
+	twipe(tCandidates);
+
+	for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or sEmpty) do
+		if tGroup["isInferred"] and tGroup["inferredType"] == tInferredType then
+			if tGroup["enabled"] ~= false and tGroup["canColorBar"] then
+				tinsert(tCandidates, tGroup);
+			end
+		end
+	end
+
 	for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
 		if tGroup["isInferred"] and tGroup["inferredType"] == tInferredType then
 			if not tGroup["playerClassRequired"] or tGroup["playerClassRequired"] == VUHDO_PLAYER_CLASS then
 				if tGroup["enabled"] ~= false then
 					if not (VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][tGroupId]) then
-						return tGroup;
+						if tGroup["canColorBar"] then
+							tinsert(tCandidates, tGroup);
+						end
 					end
 				end
 			end
 		end
 	end
 
-	for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or sEmpty) do
-		if tGroup["isInferred"] and tGroup["inferredType"] == tInferredType then
-			if tGroup["enabled"] ~= false then
-				return tGroup;
-			end
+	if #tCandidates == 0 then
+		return nil;
+	end
+
+	tBestGroup = tCandidates[1];
+	tBestPriority = tBestGroup["priority"] or 50;
+
+	for tCnt = 2, #tCandidates do
+		tPriority = tCandidates[tCnt]["priority"] or 50;
+
+		if tPriority < tBestPriority then
+			tBestGroup = tCandidates[tCnt];
+			tBestPriority = tPriority;
 		end
 	end
 
-	return nil;
+	return tBestGroup;
 
 end

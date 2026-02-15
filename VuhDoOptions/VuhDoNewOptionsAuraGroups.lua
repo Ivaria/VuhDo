@@ -233,21 +233,16 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		end
 	end
 
-	if tNameEditBox then
-		if tGroup then
-			tNameEditBox:Show();
-			if tIsBuiltIn then
-				tNameEditBox:SetText(VUHDO_getAuraGroupDisplayName(sSelectedGroupId) or "");
-				tNameEditBox:Disable();
-				tNameEditBox:SetAlpha(0.5);
-			else
-				tNameEditBox:SetText(tGroup["displayName"] or "");
-				tNameEditBox:Enable();
-				tNameEditBox:SetAlpha(1);
-			end
+	if tNameEditBox and tGroup then
+		tNameEditBox:Show();
+		if tIsBuiltIn then
+			tNameEditBox:SetText(VUHDO_getAuraGroupDisplayName(sSelectedGroupId) or "");
+			tNameEditBox:Disable();
+			tNameEditBox:SetAlpha(0.5);
 		else
-			tNameEditBox:SetText("");
-			tNameEditBox:Hide();
+			tNameEditBox:SetText(tGroup["displayName"] or "");
+			tNameEditBox:Enable();
+			tNameEditBox:SetAlpha(1);
 		end
 	end
 
@@ -407,36 +402,61 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	end
 
 	if not tGroup then
+		if tNameEditBox then
+			tNameEditBox:Show();
+			tNameEditBox:SetText("");
+			tNameEditBox:Disable();
+			tNameEditBox:SetAlpha(0.5);
+		end
+
 		if tFilterCombo then
-			tFilterCombo:Hide();
+			tFilterCombo:Show();
+			tFilterCombo:Disable();
+			tFilterCombo:SetAlpha(0.5);
 		end
 
 		if tExcludeFilterCombo then
-			tExcludeFilterCombo:Hide();
+			tExcludeFilterCombo:Show();
+			tExcludeFilterCombo:Disable();
+			tExcludeFilterCombo:SetAlpha(0.5);
 		end
 
 		if tPrioritySlider then
-			tPrioritySlider:Hide();
+			tPrioritySlider:Show();
+			tInnerSlider = _G[tPrioritySlider:GetName() .. "Slider"];
+			if tInnerSlider then
+				tInnerSlider:Disable();
+			end
+			tPrioritySlider:SetAlpha(0.5);
 		end
 
 		if tColorTypeCombo then
-			tColorTypeCombo:Hide();
+			tColorTypeCombo:Show();
+			tColorTypeCombo:Disable();
+			tColorTypeCombo:SetAlpha(0.5);
 		end
 
 		if tCanColorBarCheck then
-			tCanColorBarCheck:Hide();
+			tCanColorBarCheck:Show();
+			tCanColorBarCheck:Disable();
+			tCanColorBarCheck:SetAlpha(0.5);
 		end
 
 		if tCanColorTextCheck then
-			tCanColorTextCheck:Hide();
+			tCanColorTextCheck:Show();
+			tCanColorTextCheck:Disable();
+			tCanColorTextCheck:SetAlpha(0.5);
 		end
 
 		if tCustomColorSwatch then
-			tCustomColorSwatch:Hide();
+			tCustomColorSwatch:Show();
+			tCustomColorSwatch:SetAlpha(0.5);
 		end
 
 		if tEnabledCheck then
-			tEnabledCheck:Hide();
+			tEnabledCheck:Show();
+			tEnabledCheck:Disable();
+			tEnabledCheck:SetAlpha(0.5);
 		end
 	end
 

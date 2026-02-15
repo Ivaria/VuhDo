@@ -7,7 +7,7 @@
 
 			<Frame name="$parentStorePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="400" y="400" />
+					<AbsDimension x="380" y="320" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -38,6 +38,9 @@
 					</Frame>
 
 					<Button name="$parentGroupCombo" inherits="VuhDoComboBoxTemplate">
+						<Size>
+							<AbsDimension x="180" y="24" />
+						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
@@ -61,12 +64,12 @@
 
 					<Button name="$parentNewButton" inherits="VuhDoButtonTemplate" text="VUHDO_I18N_NEW">
 						<Size>
-							<AbsDimension x="60" y="32" />
+							<AbsDimension x="50" y="24" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentGroupCombo" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="8" y="1" />
+									<AbsDimension x="18" y="1" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -79,7 +82,7 @@
 
 					<Button name="$parentCloneButton" inherits="VuhDoButtonTemplate" text="VUHDO_I18N_COPY">
 						<Size>
-							<AbsDimension x="60" y="32" />
+							<AbsDimension x="50" y="24" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentNewButton" relativePoint="TOPRIGHT">
@@ -99,7 +102,7 @@
 
 					<Button name="$parentDeleteButton" inherits="VuhDoButtonTemplate" text="VUHDO_I18N_DELETE">
 						<Size>
-							<AbsDimension x="60" y="32" />
+							<AbsDimension x="50" y="24" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentCloneButton" relativePoint="TOPRIGHT">
@@ -140,9 +143,9 @@
 							<AbsDimension x="80" y="18" />
 						</Size>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentEnabledCheckButton" relativePoint="TOPRIGHT">
+							<Anchor point="TOPLEFT" relativeTo="$parentEnabledCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="4" y="6" />
+									<AbsDimension x="0" y="-8" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -156,12 +159,12 @@
 
 					<EditBox name="$parentNameEditBox" inherits="VuhDoEditBoxTemplate" autoFocus="false">
 						<Size>
-							<AbsDimension x="180" y="22" />
+							<AbsDimension x="200" y="22" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentNameLabel" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="8" y="-2" />
+									<AbsDimension x="4" y="-2" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -179,9 +182,9 @@
 							<AbsDimension x="120" y="18" />
 						</Size>
 						<Anchors>
-							<Anchor point="TOPLEFT">
+							<Anchor point="TOPLEFT" relativeTo="$parentNameLabel" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="12" y="-110" />
+									<AbsDimension x="0" y="-8" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -300,7 +303,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentColorTypeCombo" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="0" y="-2" />
+									<AbsDimension x="0" y="-4" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -330,6 +333,19 @@
 						</Scripts>
 					</CheckButton>
 
+					<Frame name="$parentCustomColorTexture" inherits="VuhDoColorSwatchTexture">
+						<Size>
+							<AbsDimension x="120" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentCanColorTextCheckButton" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="8" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Frame>
+
 					<Frame name="$parentPrioritySlider" inherits="VuhDoHSliderTemplate">
 						<Size>
 							<AbsDimension x="200" y="50" />
@@ -349,19 +365,6 @@
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K614);
 							</OnLoad>
 						</Scripts>
-					</Frame>
-
-					<Frame name="$parentCustomColorTexture" inherits="VuhDoColorSwatchTexture">
-						<Size>
-							<AbsDimension x="120" y="32" />
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentPrioritySlider" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="-2" />
-								</Offset>
-							</Anchor>
-						</Anchors>
 					</Frame>
 
 				</Frames>
