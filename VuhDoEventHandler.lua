@@ -1787,6 +1787,15 @@ do
 				VUHDO_animHelp();
 			end
 
+		elseif tCommandWord == "aura" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if strfind(tSubCommand, "mig") then
+				VUHDO_resetAndRemigrateAuras();
+			else
+				VUHDO_auraHelp();
+			end
+
 		elseif tCommandWord == "ab" or tCommandWord == "about" then
 			VUHDO_printAbout();
 

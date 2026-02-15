@@ -1666,4 +1666,40 @@ do
 		return;
 
 	end
+
+
+
+	--
+	function VUHDO_resetAndRemigrateAuras()
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			tPanelSetup[tPanelNum]["AURA_ANCHORS"] = nil;
+		end
+
+		tPanelSetup["AURA_MIGRATION_VERSION"] = nil;
+
+		VUHDO_loadDefaultPanelSetup();
+		VUHDO_reloadUI(false);
+
+		VUHDO_Msg("Aura migration complete.");
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_auraHelp()
+
+		VUHDO_Msg("|cffFFD100--- Aura Commands ---|r");
+		VUHDO_Msg("  |cffB0E0E6/vd aura migrate|r - Re-run aura configuration migration");
+		VUHDO_Msg("  |cffB0E0E6/vd aura|r - Show this help");
+		VUHDO_Msg("|cffFFD100--- End of Aura Commands ---|r");
+
+		return;
+
+	end
 end
