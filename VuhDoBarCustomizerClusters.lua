@@ -292,7 +292,7 @@ end
 
 --
 local tBorder;
-function VUHDO_clusterBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+function VUHDO_clusterBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["CLUSTER_BORDER"] == aBouquetName then

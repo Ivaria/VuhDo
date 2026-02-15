@@ -49,6 +49,7 @@ local VUHDO_resolveAuraTriState;
 local VUHDO_getAnchorTriStateBool;
 local VUHDO_getAuraGroup;
 local VUHDO_getDispelCurveForUnit;
+local VUHDO_setAnchorSlotAuraId;
 
 VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES or { };
 local VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES;
@@ -399,7 +400,6 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_setStatusBarOrientation = _G["VUHDO_setStatusBarOrientation"];
 	VUHDO_getClassColor = _G["VUHDO_getClassColor"];
 	VUHDO_safeColorFromTable = _G["VUHDO_safeColorFromTable"];
-	VUHDO_getAnchorSlotAuraId = _G["VUHDO_getAnchorSlotAuraId"];
 	VUHDO_setAnchorSlotAuraId = _G["VUHDO_setAnchorSlotAuraId"];
 	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
 	VUHDO_getAnchorTriStateBool = _G["VUHDO_getAnchorTriStateBool"];
@@ -2826,9 +2826,7 @@ do
 				VUHDO_unregisterAuraTimerText(tFrame["timerText"]);
 			end
 
-			if VUHDO_UIFrameFlashStop then
-				VUHDO_UIFrameFlashStop(tFrame);
-			end
+			VUHDO_UIFrameFlashStop(tFrame);
 
 			if tFrame["childIcon"] then
 				tFrame["childIcon"]:Hide();
@@ -2855,67 +2853,7 @@ function VUHDO_updateAuraDisplaysForUnit(aUnit)
 		return;
 	end
 
-	for tPanelNum = 1, 10 do
-		VUHDO_updateAurasForAnchors(aUnit, tPanelNum);
-	end
-
-	return;
-
-end
-
-
-
-do
-	--
-	local tFrameName;
-	local tFrame;
-	function VUHDO_hideAuraSlot(aButton, anAnchorIndex, aSlotIndex, anIsBar)
-
-		if not aButton or not anAnchorIndex or not aSlotIndex then
-			return;
-		end
-
-		tFrameName = aButton:GetName();
-
-		tFrame = VUHDO_AURA_FRAMES[tFrameName] and VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex] and VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex][aSlotIndex];
-
-		if tFrame then
-			if tFrame["childB"] and tFrame["childB"]["timerText"] then
-				VUHDO_unregisterAuraTimerText(tFrame["childB"]["timerText"]);
-			elseif tFrame["timerText"] then
-				VUHDO_unregisterAuraTimerText(tFrame["timerText"]);
-			end
-
-			if VUHDO_UIFrameFlashStop then
-				VUHDO_UIFrameFlashStop(tFrame);
-			end
-
-			if tFrame["childIcon"] then
-				tFrame["childIcon"]:Hide();
-			end
-
-			tFrame:SetAlpha(0);
-		end
-
-		return;
-
-	end
-end
-
-
-
---
-function VUHDO_updateAuraDisplaysForUnit(aUnit)
-
-	if sAurasSuspended then
-		return;
-	end
-
-	if not aUnit then
-		return;
-	end
-
-	for tPanelNum = 1, 10 do
+	for tPanelNum = 1, VUHDO_MAX_PANELS do
 		VUHDO_updateAurasForAnchors(aUnit, tPanelNum);
 	end
 

@@ -157,7 +157,7 @@ end
 --
 local tBar;
 local tQuota;
-local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	aMaxValue = aMaxValue or 1;
 	aCurrValue = aCurrValue or 0;

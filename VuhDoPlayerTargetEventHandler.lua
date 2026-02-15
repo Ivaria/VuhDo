@@ -119,7 +119,7 @@ end
 
 --
 local tBorder;
-function VUHDO_barBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+function VUHDO_barBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["BAR_BORDER"] == aBouquetName then

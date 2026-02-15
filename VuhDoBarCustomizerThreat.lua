@@ -23,7 +23,7 @@ end
 
 --
 local tTexture;
-function VUHDO_threatIndicatorsBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+function VUHDO_threatIndicatorsBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		if VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["THREAT_MARK"] == aBouquetName then
@@ -60,7 +60,7 @@ end
 --
 local tBar;
 local tQuota;
-function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	aMaxValue = aMaxValue or 1;
 	aCurrValue = aCurrValue or 0;

@@ -7,49 +7,49 @@ local pairs = pairs;
 local ipairs = ipairs;
 local format = string.format;
 
-VUHDO_PANEL_AURAS_SELECTED_ANCHOR = VUHDO_PANEL_AURAS_SELECTED_ANCHOR or nil;
-VUHDO_PANEL_AURAS_ANCHOR_COMBO_MODEL = VUHDO_PANEL_AURAS_ANCHOR_COMBO_MODEL or { };
+VUHDO_PANEL_AURAS_SELECTED_ANCHOR = nil;
+VUHDO_PANEL_AURAS_ANCHOR_COMBO_MODEL = { };
 
 VUHDO_AURA_GROWTH_DIR_OPTIONS = {
-	{ "LEFT", _G["VUHDO_I18N_LEFT"] or "Left" },
-	{ "RIGHT", _G["VUHDO_I18N_RIGHT"] or "Right" },
-	{ "UP", _G["VUHDO_I18N_UP"] or "Up" },
-	{ "DOWN", _G["VUHDO_I18N_DOWN"] or "Down" },
+	{ "LEFT", VUHDO_I18N_LEFT },
+	{ "RIGHT", VUHDO_I18N_RIGHT },
+	{ "UP", VUHDO_I18N_UP },
+	{ "DOWN", VUHDO_I18N_DOWN },
 };
 
 VUHDO_AURA_SORT_RULE_OPTIONS = {
-	{ 0, _G["VUHDO_I18N_INDEX"] or "Index" },
-	{ 1, _G["VUHDO_I18N_NAME"] or "Name" },
-	{ 2, _G["VUHDO_I18N_TIME"] or "Time" },
-	{ 3, _G["VUHDO_I18N_EXPIRATION"] or "Expiration" },
+	{ 0, VUHDO_I18N_INDEX },
+	{ 1, VUHDO_I18N_NAME },
+	{ 2, VUHDO_I18N_TIME },
+	{ 3, VUHDO_I18N_EXPIRATION },
 };
 
 VUHDO_AURA_SORT_DIR_OPTIONS = {
-	{ 0, _G["VUHDO_I18N_ASCENDING"] or "Ascending" },
-	{ 1, _G["VUHDO_I18N_DESCENDING"] or "Descending" },
+	{ 0, VUHDO_I18N_ASCENDING },
+	{ 1, VUHDO_I18N_DESCENDING },
 };
 
 VUHDO_AURA_STYLE_OPTIONS = {
-	{ "icons", _G["VUHDO_I18N_ICONS"] or "Icons" },
-	{ "bars", _G["VUHDO_I18N_BARS"] or "Bars" },
+	{ "icons", VUHDO_I18N_ICONS },
+	{ "bars", VUHDO_I18N_BARS },
 };
 
 VUHDO_AURA_COLOR_MODE_OPTIONS = {
-	{ "default", _G["VUHDO_I18N_DEFAULT"] or "Default" },
-	{ "class", _G["VUHDO_I18N_BY_CLASS"] or "Class" },
-	{ "debuff", _G["VUHDO_I18N_DEBUFF"] or "Debuff" },
+	{ "default", VUHDO_I18N_DEFAULT },
+	{ "class", VUHDO_I18N_BY_CLASS },
+	{ "debuff", VUHDO_I18N_DEBUFF },
 };
 
 VUHDO_AURA_ICON_TYPE_OPTIONS = {
-	{ 1, _G["VUHDO_I18N_ICONS"] or "Icons" },
-	{ 2, _G["VUHDO_I18N_GLOSSY"] or "Glossy" },
-	{ 3, _G["VUHDO_I18N_FLAT_TEXTURE"] or "Flat" },
-	{ 4, _G["VUHDO_I18N_TEXT_ONLY"] or "Text Only" },
+	{ 1, VUHDO_I18N_ICONS },
+	{ 2, VUHDO_I18N_GLOSSY },
+	{ 3, VUHDO_I18N_FLAT_TEXTURE },
+	{ 4, VUHDO_I18N_TEXT_ONLY },
 };
 
 VUHDO_AURA_STACK_TYPE_OPTIONS = {
-	{ 1, _G["VUHDO_I18N_NUMBER_STACKS"] or "Text" },
-	{ 2, _G["VUHDO_I18N_TRIANGLE_STACKS"] or "Triangles" },
+	{ 1, VUHDO_I18N_NUMBER_STACKS },
+	{ 2, VUHDO_I18N_TRIANGLE_STACKS },
 };
 
 local sDefaultAnchorEntry = {
@@ -125,7 +125,7 @@ function VUHDO_initPanelAurasAnchorComboModel()
 
 	for tKey, _ in pairs(tAnchors) do
 		tinsert(VUHDO_PANEL_AURAS_ANCHOR_COMBO_MODEL,
-			{ tonumber(tKey), format("%s %s", _G["VUHDO_I18N_ANCHOR"] or "Anchor", tKey) });
+			{ tonumber(tKey), format("%s %s", VUHDO_I18N_ANCHOR, tKey) });
 	end
 
 	tsort(VUHDO_PANEL_AURAS_ANCHOR_COMBO_MODEL, function(anA, anotherA) return anA[1] < anotherA[1]; end);
@@ -204,7 +204,7 @@ function VUHDO_panelAurasAnchorGroupComboOnLoad(aCombo)
 	tAnchorKey = tostring(VUHDO_PANEL_AURAS_SELECTED_ANCHOR or 1);
 	tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.groupId", tAnchorKey);
 
-	VUHDO_setComboModel(aCombo, tModel, VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL, _G["VUHDO_I18N_SELECT"] or "Select");
+	VUHDO_setComboModel(aCombo, tModel, VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL, VUHDO_I18N_SELECT);
 
 	return;
 
@@ -224,7 +224,7 @@ function VUHDO_panelAurasAnchorFieldComboOnLoad(aCombo, aField, anOptionsArray, 
 	tAnchorKey = tostring(VUHDO_PANEL_AURAS_SELECTED_ANCHOR);
 	tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.%s", tAnchorKey, aField);
 
-	VUHDO_setComboModel(aCombo, tModel, anOptionsArray, aTitle or _G["VUHDO_I18N_SELECT"] or "Select");
+	VUHDO_setComboModel(aCombo, tModel, anOptionsArray, aTitle or VUHDO_I18N_SELECT);
 
 	return;
 
@@ -725,14 +725,14 @@ function VUHDO_panelAurasRebindContentPanel()
 	end
 
 	tComboNames = {
-		{ "GrowthDirCombo", "growthDir", VUHDO_AURA_GROWTH_DIR_OPTIONS, _G["VUHDO_I18N_GROWTH_DIRECTION"] or "Growth" },
-		{ "WrapDirCombo", "wrapDir", VUHDO_AURA_GROWTH_DIR_OPTIONS, _G["VUHDO_I18N_WRAP_DIRECTION"] or "Wrap" },
-		{ "SortRuleCombo", "sortRule", VUHDO_AURA_SORT_RULE_OPTIONS, _G["VUHDO_I18N_SORT_BY"] or "Sort" },
-		{ "SortDirCombo", "sortDir", VUHDO_AURA_SORT_DIR_OPTIONS, _G["VUHDO_I18N_ORDER"] or "Order" },
-		{ "StyleCombo", "style", VUHDO_AURA_STYLE_OPTIONS, _G["VUHDO_I18N_DISPLAY_STYLE"] or "Style", VUHDO_panelAurasUpdateStyleControlsEnabled },
-		{ "ColorModeCombo", "colorMode", VUHDO_AURA_COLOR_MODE_OPTIONS, _G["VUHDO_I18N_COLOR"] or "Color" },
-		{ "IconTypeCombo", "iconType", VUHDO_AURA_ICON_TYPE_OPTIONS, _G["VUHDO_I18N_ICON_TYPE"] or "Icon Type" },
-		{ "StackTypeCombo", "stackType", VUHDO_AURA_STACK_TYPE_OPTIONS, _G["VUHDO_I18N_STACK_TYPE"] or "Stack Type" },
+		{ "GrowthDirCombo", "growthDir", VUHDO_AURA_GROWTH_DIR_OPTIONS, VUHDO_I18N_GROWTH_DIRECTION },
+		{ "WrapDirCombo", "wrapDir", VUHDO_AURA_GROWTH_DIR_OPTIONS, VUHDO_I18N_WRAP_DIRECTION },
+		{ "SortRuleCombo", "sortRule", VUHDO_AURA_SORT_RULE_OPTIONS, VUHDO_I18N_SORT_BY },
+		{ "SortDirCombo", "sortDir", VUHDO_AURA_SORT_DIR_OPTIONS, VUHDO_I18N_ORDER },
+		{ "StyleCombo", "style", VUHDO_AURA_STYLE_OPTIONS, VUHDO_I18N_DISPLAY_STYLE, VUHDO_panelAurasUpdateStyleControlsEnabled },
+		{ "ColorModeCombo", "colorMode", VUHDO_AURA_COLOR_MODE_OPTIONS, VUHDO_I18N_COLOR },
+		{ "IconTypeCombo", "iconType", VUHDO_AURA_ICON_TYPE_OPTIONS, VUHDO_I18N_ICON_TYPE },
+		{ "StackTypeCombo", "stackType", VUHDO_AURA_STACK_TYPE_OPTIONS, VUHDO_I18N_STACK_TYPE },
 	};
 
 	for _, tEntry in ipairs(tComboNames) do
@@ -850,16 +850,14 @@ function VUHDO_panelAurasRebindContentPanel()
 
 		if tTriState then
 			tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.%s", tAnchorKey, tEntry[2]);
-			VUHDO_lnfSetRadioModel(tTriState, tModel, { _G["VUHDO_I18N_ON"] or "On", _G["VUHDO_I18N_GLOBAL"] or "Global", _G["VUHDO_I18N_OFF"] or "Off" });
+			VUHDO_lnfSetRadioModel(tTriState, tModel, { VUHDO_I18N_ON, VUHDO_I18N_GLOBAL, VUHDO_I18N_OFF });
 			VUHDO_lnfTriStateCheckButtonInitFromModel(tTriState);
 		end
 	end
 
 	VUHDO_panelAurasAnchorGroupComboOnLoad(_G[tContentPanel:GetName() .. "GroupCombo"]);
 
-	if VUHDO_initPanelAuraGroupsComboModel then
-		VUHDO_initPanelAuraGroupsComboModel();
-	end
+	VUHDO_initPanelAuraGroupsComboModel();
 
 	VUHDO_lnfComboBoxInitFromModel(_G[tContentPanel:GetName() .. "GroupCombo"]);
 

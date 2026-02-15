@@ -1098,7 +1098,7 @@ do
 	--
 	local tAllButtons;
 	local tInfo;
-	function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+	function VUHDO_healthBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 		aMaxValue = aMaxValue or 0;
 		aCurrValue = aCurrValue or 0;
@@ -1140,7 +1140,7 @@ do
 
 	--
 	local tAggroBar;
-	function VUHDO_aggroBarBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+	function VUHDO_aggroBarBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 			if aBouquetName == nil or VUHDO_INDICATOR_CONFIG[VUHDO_BUTTON_CACHE[tButton]]["BOUQUETS"]["AGGRO_BAR"] == aBouquetName then
@@ -1173,7 +1173,7 @@ do
 
 	--
 	local tBar, tQuota;
-	function VUHDO_backgroundBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aCLipT, aClipB, aMaxColor, aLayerTemplate)
+	function VUHDO_backgroundBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 		tQuota = (anIsActive or (aMaxValue or 0) > 1) and 1 or 0;
 

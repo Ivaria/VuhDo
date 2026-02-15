@@ -10,6 +10,11 @@ local strfind = string.find;
 local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
 local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFilteredOutByInstanceID;
+local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplicationDisplayCount;
+local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
+local GetTime = GetTime;
+local issecretvalue = issecretvalue;
+local next = next;
 
 local VUHDO_CONFIG;
 local VUHDO_AURA_GROUPS;
@@ -141,7 +146,6 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_generateUUID = _G["VUHDO_generateUUID"];
 	VUHDO_determineDebuff = _G["VUHDO_determineDebuff"];
 	VUHDO_updateHotPredicate = _G["VUHDO_updateHotPredicate"];
-	VUHDO_removeHots = _G["VUHDO_removeHots"];
 
 	sAuraDataPool = VUHDO_createTablePool("AuraData", 500);
 	sSlotIndexPool = VUHDO_createTablePool("SlotIndex", 200);
@@ -717,8 +721,6 @@ function VUHDO_findAllAnchorSlotsByAuraId(aUnit, anAuraInstanceId)
 	return tAuraIndex;
 
 end
-
-
 
 
 

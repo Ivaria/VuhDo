@@ -19,6 +19,7 @@ local tinsert = table.insert;
 local InCombatLockdown = InCombatLockdown;
 
 
+
 --
 local sPanelConfig = { };
 local sButtonInitSemaphores = { };
@@ -455,7 +456,7 @@ do
 
 		VUHDO_PixelUtil.SetPoint(tClusterFrame, "TOPLEFT", aButton:GetName(), "TOPLEFT", 0, 0);
 		VUHDO_PixelUtil.SetPoint(tClusterFrame, "BOTTOMRIGHT", aButton:GetName(), "BOTTOMRIGHT", 0, 0);
-		
+
 		tBackdropCluster = tClusterFrame:GetBackdrop() or {};
 
 		tBackdropCluster["edgeSize"] = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["CLUSTER_BORDER"]["WIDTH"];
@@ -465,7 +466,7 @@ do
 		tBackdropCluster["insets"]["right"] = 0;
 		tBackdropCluster["insets"]["top"] = 0;
 		tBackdropCluster["insets"]["bottom"] = 0;
-		
+
 		tClusterFrame.backdropInfo = tBackdropCluster;
 		VUHDO_PixelUtil.ApplyBackdrop(tClusterFrame, tBackdropCluster);
 
@@ -1132,7 +1133,7 @@ do
 			VUHDO_initBackgroundBar(VUHDO_getHealthBar(aButton, 15), aPanelNum);
 			VUHDO_initManaBar(tTotButton, VUHDO_getHealthBar(aButton, 16), sPanelConfig[aPanelNum]["barScaling"]["totWidth"], true, aPanelNum);
 			VUHDO_initRaidIcon(tTgHealthBar, VUHDO_getTargetBarRoleIcon(tTotButton, 50), sPanelConfig[aPanelNum]["barScaling"]["totWidth"], aPanelNum);
-			VUHDO_initBarTexts(tTgButton, tTgHealthBar, sPanelConfig[aPanelNum]["barScaling"]["totWidth"], aPanelNum);
+			VUHDO_initBarTexts(tTotButton, tTgHealthBar, sPanelConfig[aPanelNum]["barScaling"]["totWidth"], aPanelNum);
 			VUHDO_initOverhealText(tTgHealthBar, sPanelConfig[aPanelNum]["barScaling"]["totWidth"], aPanelNum);
 
 			if sPanelConfig[aPanelNum]["indicatorConfig"]["BOUQUETS"]["BACKGROUND_BAR"] ~= "" then
@@ -1402,8 +1403,8 @@ do
 
 				if tBar then
 					tBar:SetStatusBarTexture(sPanelConfig[aPanelNum]["statusTexture"]);
-					tBar.statusTexture = tBar:GetStatusBarTexture();
-					VUHDO_PixelUtil.ApplySettings(tBar.statusTexture);
+					tBar["statusTexture"] = tBar:GetStatusBarTexture();
+					VUHDO_PixelUtil.ApplySettings(tBar["statusTexture"]);
 				end
 			end
 		end
@@ -1655,7 +1656,7 @@ do
 			else
 				aPanel.backdropInfo = VUHDO_STD_BACKDROP;
 				VUHDO_PixelUtil.ApplyBackdrop(aPanel, VUHDO_STD_BACKDROP);
-				
+
 				aPanel.backdropBorderColor = VUHDO_getOrCreateCachedColor(VUHDO_backColor(tPanelColor["BORDER"]));
 				aPanel.backdropBorderColorAlpha = tPanelColor["BORDER"]["O"] or 1;
 				aPanel:SetBackdropBorderColor(VUHDO_backColor(tPanelColor["BORDER"]));
@@ -2191,9 +2192,6 @@ do
 		twipe(VUHDO_UNIT_BUTTONS);
 		twipe(VUHDO_UNIT_BUTTONS_PANEL);
 
-		tBackdrop = nil;
-		tBackdropCluster = nil;
-
 		for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 			_G["VUHDO_redrawPanel"](tPanelNum, anIsFixAllFrameLevels);
 		end
@@ -2391,9 +2389,6 @@ do
 		VUHDO_clearBackdropCache();
 		twipe(VUHDO_UNIT_BUTTONS);
 		twipe(VUHDO_UNIT_BUTTONS_PANEL);
-
-		tBackdrop = nil;
-		tBackdropCluster = nil;
 
 		VUHDO_calculateSemaphoreTimeouts();
 
