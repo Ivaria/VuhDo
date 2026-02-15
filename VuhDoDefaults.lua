@@ -3091,7 +3091,6 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["showTimer"] = true,
 		["showStacks"] = true,
 		["showClock"] = false,
-		["showBarIcon"] = true,
 		["fadeOnLow"] = false,
 		["fadeThreshold"] = 3,
 		["flashOnLow"] = false,

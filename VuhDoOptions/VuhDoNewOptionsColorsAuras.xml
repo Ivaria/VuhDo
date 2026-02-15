@@ -76,23 +76,6 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentShowBarIconCheck" text="VUHDO_I18N_SHOW_BAR_ICON" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowTimerCheck" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="-8" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.AURA_DEFAULTS.showBarIcon");
-								VUHDO_lnfCheckButtonOnLoad(self);
-								VUHDO_lnfSetTooltip(self, nil);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
 					<CheckButton name="$parentShowClockCheck" text="VUHDO_I18N_SHOW_CLOCK" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentShowStacksCheck" relativePoint="TOPRIGHT">
@@ -110,9 +93,26 @@
 						</Scripts>
 					</CheckButton>
 
+					<CheckButton name="$parentShowTooltipCheck" text="VUHDO_I18N_SHOW_TOOLTIP" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentShowTimerCheck" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-8" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.AURA_DEFAULTS.showTooltip");
+								VUHDO_lnfCheckButtonOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K634);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
 					<CheckButton name="$parentDispelBorderCheck" text="VUHDO_I18N_DISPEL_BORDER" inherits="VuhDoCheckButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowBarIconCheck" relativePoint="TOPRIGHT">
+							<Anchor point="TOPLEFT" relativeTo="$parentShowTooltipCheck" relativePoint="TOPRIGHT">
 								<Offset>
 									<AbsDimension x="20" y="0" />
 								</Offset>
@@ -127,26 +127,9 @@
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="$parentShowTooltipCheck" text="VUHDO_I18N_SHOW_TOOLTIP" inherits="VuhDoCheckButtonTemplate">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentDispelBorderCheck" relativePoint="TOPRIGHT">
-								<Offset>
-									<AbsDimension x="20" y="0" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.AURA_DEFAULTS.showTooltip");
-								VUHDO_lnfCheckButtonOnLoad(self);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K634);
-							</OnLoad>
-						</Scripts>
-					</CheckButton>
-
 					<Frame name="$parentAuraBarDefaultTexture" inherits="VuhDoColorSwatchTexture">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="$parentShowBarIconCheck" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="$parentShowTooltipCheck" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="-8" />
 								</Offset>

@@ -1322,7 +1322,6 @@ VUHDO_I18N_ICON_DEFAULTS = "Icon Defaults";
 VUHDO_I18N_BAR_DEFAULTS = "Bar Defaults";
 VUHDO_I18N_WARNING_SETTINGS = "Warning Settings";
 VUHDO_I18N_DEFAULT_SIZE = "Default Size";
-VUHDO_I18N_SHOW_BAR_ICON = "Show Bar Icon";
 VUHDO_I18N_DEFAULT = "Default";
 VUHDO_I18N_DEBUFF = "Debuff";
 VUHDO_I18N_ISIDESI = "|cffffffffSides|r";
