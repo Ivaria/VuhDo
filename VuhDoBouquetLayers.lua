@@ -14,6 +14,9 @@ local VUHDO_INDICATOR_CONFIG;
 local VUHDO_SECRET_TYPE_NONE;
 local VUHDO_SECRET_TYPE_BOOLEAN;
 
+local VUHDO_RAID_TARGET_TEXTURE_ROWS = 4;
+local VUHDO_RAID_TARGET_TEXTURE_COLUMNS = 4;
+
 local VUHDO_INDICATOR_BAR_MAP = {
 	["BACKGROUND_BAR"] = 3,
 	["HEALTH_BAR"] = 1,
@@ -763,6 +766,31 @@ end
 
 
 --
+local tResultSlot;
+function VUHDO_applySpriteCellToTexture(aTexture, aLayerTemplate)
+
+	if not aLayerTemplate or not aLayerTemplate["hasSpriteCells"] then
+		return;
+	end
+
+	for tIdx = 1, #aLayerTemplate["spriteCellResults"] do
+		tResultSlot = aLayerTemplate["spriteCellResults"][tIdx];
+
+		if tResultSlot["isActive"] and tResultSlot["spriteCell"] then
+			aTexture:SetTexture(tResultSlot["icon"]);
+			aTexture:SetSpriteSheetCell(tResultSlot["spriteCell"], VUHDO_RAID_TARGET_TEXTURE_ROWS, VUHDO_RAID_TARGET_TEXTURE_COLUMNS);
+
+			return;
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local function VUHDO_applyDispelColorToBorder(aBorder, aLayerTemplate)
 
 	if not aLayerTemplate["hasDispels"] then
@@ -896,6 +924,7 @@ function VUHDO_applyAllLayersToTexture(aButton, aTexture, aLayerTemplate)
 	VUHDO_applyCurveColorToTexture(aTexture, aLayerTemplate);
 	VUHDO_applyBooleanLayers(aButton, aTexture, aLayerTemplate);
 	VUHDO_applyDispelColorToTexture(aTexture, aLayerTemplate);
+	VUHDO_applySpriteCellToTexture(aTexture, aLayerTemplate);
 
 	return;
 

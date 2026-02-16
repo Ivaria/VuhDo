@@ -150,6 +150,7 @@ local function VUHDO_fillCustomInfo(aUnit)
 	tInfo["fixResolveId"] = nil;
 
 	tInfo["raidIcon"] = GetRaidTargetIndex(aUnit);
+	tInfo["hasSecretRaidIcon"] = sSecretsEnabled and issecretvalue(tInfo["raidIcon"]);
 end
 
 
@@ -200,21 +201,31 @@ end
 local tTexture;
 local tIconIdx;
 function VUHDO_customizeTargetBar(aButton, aUnit, anIsInRange)
+
 	VUHDO_CUSTOM_INFO["range"] = anIsInRange;
 	VUHDO_invokeCustomBouquet(aButton, aUnit, VUHDO_RAID[aUnit] or VUHDO_CUSTOM_INFO, VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH, VUHDO_targetHealthBouquetCallback);
 	VUHDO_customizeText(aButton, 1, true); -- VUHDO_UPDATE_ALL
 	VUHDO_customizeManaBar(aButton, true);
 
 	tIconIdx = GetRaidTargetIndex(aUnit);
-	if not VUHDO_PANEL_SETUP[VUHDO_BUTTON_CACHE[aButton]]["RAID_ICON"]["show"]
-		or not VUHDO_PANEL_SETUP["RAID_ICON_FILTER"][tIconIdx] then
-		tIconIdx = nil;
-	end
+	if not VUHDO_PANEL_SETUP[VUHDO_BUTTON_CACHE[aButton]]["RAID_ICON"]["show"] then
+		VUHDO_getTargetBarRoleIcon(aButton, 50):Hide();
+	elseif tIconIdx then
+		if sSecretsEnabled and issecretvalue(tIconIdx) then
+			tTexture = VUHDO_getTargetBarRoleIcon(aButton, 50);
 
-	if tIconIdx then
-		tTexture = VUHDO_getTargetBarRoleIcon(aButton, 50);
-		VUHDO_setRaidTargetIconTexture(tTexture, tIconIdx);
-		tTexture:Show();
+			VUHDO_setRaidTargetIconTexture(tTexture, tIconIdx);
+
+			tTexture:Show();
+		elseif VUHDO_PANEL_SETUP["RAID_ICON_FILTER"][tIconIdx] then
+			tTexture = VUHDO_getTargetBarRoleIcon(aButton, 50);
+
+			VUHDO_setRaidTargetIconTexture(tTexture, tIconIdx);
+
+			tTexture:Show();
+		else
+			VUHDO_getTargetBarRoleIcon(aButton, 50):Hide();
+		end
 	else
 		VUHDO_getTargetBarRoleIcon(aButton, 50):Hide();
 	end

@@ -10,6 +10,10 @@ local format = format;
 local GetLocale = GetLocale;
 local InCombatLockdown = InCombatLockdown;
 local UnitExists = UnitExists;
+
+local VUHDO_RAID_TARGET_TEXTURE_ROWS = 4;
+local VUHDO_RAID_TARGET_TEXTURE_COLUMNS = 4;
+
 local sIsNotInChina = GetLocale() ~= "zhCN" and GetLocale() ~= "zhTW" and GetLocale() ~= "koKR";
 local sIsManaBar = { };
 local sIsSideBarLeft = { };
@@ -326,7 +330,14 @@ end
 
 --
 function VUHDO_setRaidTargetIconTexture(aTexture, anIndex)
-	aTexture:SetTexCoord(VUHDO_getRaidTargetIconTexture(anIndex));
+
+	if anIndex then
+		aTexture:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons");
+		aTexture:SetSpriteSheetCell(anIndex, VUHDO_RAID_TARGET_TEXTURE_ROWS, VUHDO_RAID_TARGET_TEXTURE_COLUMNS);
+	end
+
+	return;
+
 end
 
 

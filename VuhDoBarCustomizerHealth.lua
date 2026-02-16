@@ -1216,10 +1216,22 @@ function VUHDO_customizeHealButton(aButton)
 	if VUHDO_PANEL_SETUP[VUHDO_BUTTON_CACHE[aButton]]["RAID_ICON"]["show"] and tUnit then
 		tIcon = GetRaidTargetIndex(tUnit);
 
-		if tIcon and VUHDO_PANEL_SETUP["RAID_ICON_FILTER"][tIcon] then
-			tTexture = VUHDO_getBarRoleIcon(aButton, 50);
-			VUHDO_setRaidTargetIconTexture(tTexture, tIcon);
-			tTexture:Show();
+		if tIcon then
+			if sSecretsEnabled and issecretvalue(tIcon) then
+				tTexture = VUHDO_getBarRoleIcon(aButton, 50);
+
+				VUHDO_setRaidTargetIconTexture(tTexture, tIcon);
+
+				tTexture:Show();
+			elseif VUHDO_PANEL_SETUP["RAID_ICON_FILTER"][tIcon] then
+				tTexture = VUHDO_getBarRoleIcon(aButton, 50);
+
+				VUHDO_setRaidTargetIconTexture(tTexture, tIcon);
+
+				tTexture:Show();
+			else
+				VUHDO_getBarRoleIcon(aButton, 50):Hide();
+			end
 		else
 			VUHDO_getBarRoleIcon(aButton, 50):Hide();
 		end

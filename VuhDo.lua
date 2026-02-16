@@ -472,6 +472,13 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["role"] = VUHDO_determineRole(aUnit);
 			tInfo["fullName"] = (tRealm or "") ~= "" and (tName .. "-" .. tRealm) or tName;
 			tInfo["raidIcon"] = GetRaidTargetIndex(aUnit);
+
+			if sSecretsEnabled then
+				tInfo["hasSecretRaidIcon"] = issecretvalue(tInfo["raidIcon"]);
+			else
+				tInfo["hasSecretRaidIcon"] = false;
+			end
+
 			tInfo["visible"] = UnitIsVisible(aUnit); -- Reihenfolge beachten
 			tInfo["zone"], tInfo["map"] = VUHDO_getUnitZoneName(aUnit); -- ^^
 
@@ -641,8 +648,14 @@ function VUHDO_updateAllRaidTargetIndices()
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		tIcon = GetRaidTargetIndex(tUnit);
 
-		if tInfo["raidIcon"] ~= tIcon then
+		if sSecretsEnabled and (issecretvalue(tIcon) or issecretvalue(tInfo["raidIcon"])) then
 			tInfo["raidIcon"] = tIcon;
+			tInfo["hasSecretRaidIcon"] = issecretvalue(tIcon);
+
+			VUHDO_updateBouquetsForEvent(tUnit, 24); -- VUHDO_UPDATE_RAID_TARGET
+		elseif tInfo["raidIcon"] ~= tIcon then
+			tInfo["raidIcon"] = tIcon;
+			tInfo["hasSecretRaidIcon"] = false;
 
 			VUHDO_updateBouquetsForEvent(tUnit, 24); -- VUHDO_UPDATE_RAID_TARGET
 		end

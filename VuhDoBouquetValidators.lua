@@ -54,6 +54,7 @@ local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColo
 local GetAuraDuration = C_UnitAuras and C_UnitAuras.GetAuraDuration;
 local CreateColor = CreateColor;
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+local issecretvalue = issecretvalue;
 local tSecretColor;
 local tCurve;
 
@@ -652,7 +653,12 @@ end
 local tIsRaidIconColor;
 local tColor, tIcon;
 local function VUHDO_raidTargetValidator(anInfo, _)
+
 	if anInfo["raidIcon"] then
+		if anInfo["hasSecretRaidIcon"] then
+			return true, nil, -1, -1, -1, sBarColors["RAID_ICONS"]["1"];
+		end
+
 		tIcon = tostring(anInfo["raidIcon"]);
 		tIsRaidIconColor = not sBarColors["RAID_ICONS"]["filterOnly"] or VUHDO_PANEL_SETUP["RAID_ICON_FILTER"][tIcon];
 
@@ -748,13 +754,15 @@ end
 --
 local tIndex;
 local function VUHDO_raidIconValidator(anInfo, _)
+
 	tIndex = GetRaidTargetIndex(anInfo["unit"]);
 
 	if tIndex then
-		return true, "interface\\targetingframe\\ui-raidtargetingicons", -1, -1, -1, nil, nil, VUHDO_getRaidTargetIconTexture(tIndex);
-	else
-		return false, nil, -1, -1, -1;
+		return true, "interface\\targetingframe\\ui-raidtargetingicons", -1, -1, -1, nil, nil, nil, nil, nil, nil, tIndex;
 	end
+
+	return false, nil, -1, -1, -1;
+
 end
 
 
@@ -762,13 +770,15 @@ end
 --
 local tIndex;
 local function VUHDO_raidIconTargetValidator(anInfo, _)
+
 	tIndex = UnitExists(anInfo["targetUnit"] or "foo") and GetRaidTargetIndex(anInfo["targetUnit"]);
 
 	if tIndex then
-		return true, "interface\\targetingframe\\ui-raidtargetingicons", -1, -1, -1, nil, nil, VUHDO_getRaidTargetIconTexture(tIndex);
-	else
-		return false, nil, -1, -1, -1;
+		return true, "interface\\targetingframe\\ui-raidtargetingicons", -1, -1, -1, nil, nil, nil, nil, nil, nil, tIndex;
 	end
+
+	return false, nil, -1, -1, -1;
+
 end
 
 
@@ -1700,7 +1710,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_raidIconValidator,
 		["no_color"] = true,
 		["interests"] = { },
-		["secretType"] = VUHDO_SECRET_TYPE_NONE,
+		["secretType"] = VUHDO_SECRET_TYPE_SPRITE_CELL,
 		["hasValue"] = false,
 		["isGlobal"] = false,
 	},
@@ -1710,7 +1720,7 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["validator"] = VUHDO_raidIconTargetValidator,
 		["no_color"] = true,
 		["interests"] = { },
-		["secretType"] = VUHDO_SECRET_TYPE_NONE,
+		["secretType"] = VUHDO_SECRET_TYPE_SPRITE_CELL,
 		["hasValue"] = false,
 		["isGlobal"] = false,
 	},

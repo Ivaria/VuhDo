@@ -875,12 +875,14 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 		["curveValidators"] = { },
 		["booleanValidators"] = { },
 		["dispelValidators"] = { },
+		["spriteCellValidators"] = { },
 		["nonSecretValidators"] = { },
 		["auraValidators"] = { },
 		["alphaValidators"] = { },
 		["curveResults"] = { },
 		["booleanResults"] = { },
 		["dispelResults"] = { },
+		["spriteCellResults"] = { },
 		["nonSecretResults"] = { },
 		["auraResults"] = { },
 		["alphaResults"] = { },
@@ -889,6 +891,7 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 	tCurveIdx = 0;
 	tBoolIdx = 0;
 	tDispelIdx = 0;
+	tSpriteCellIdx = 0;
 	tAlphaIdx = 0;
 	tNonSecretIdx = 0;
 	tAuraIdx = 0;
@@ -1042,6 +1045,22 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 					["a"] = nil,
 					["auraInstanceId"] = nil,
 				};
+			elseif tSecretType == VUHDO_SECRET_TYPE_SPRITE_CELL then
+				tSpriteCellIdx = tSpriteCellIdx + 1;
+
+				tTemplate["hasSpriteCells"] = true;
+
+				tTemplate["spriteCellValidators"][tSpriteCellIdx] = {
+					["item"] = tItem,
+					["special"] = tSpecial,
+					["index"] = tCnt,
+				};
+
+				tTemplate["spriteCellResults"][tSpriteCellIdx] = {
+					["isActive"] = false,
+					["icon"] = nil,
+					["spriteCell"] = nil,
+				};
 			elseif tSecretType == VUHDO_SECRET_TYPE_NONE then
 				tNonSecretIdx = tNonSecretIdx + 1;
 
@@ -1163,6 +1182,15 @@ end
 local function VUHDO_findDispelResultSlot(aLayerTemplate, aPriorityIndex)
 
 	return VUHDO_findResultSlot(aLayerTemplate, "dispelValidators", "dispelResults", aPriorityIndex);
+
+end
+
+
+
+--
+local function VUHDO_findSpriteCellResultSlot(aLayerTemplate, aPriorityIndex)
+
+	return VUHDO_findResultSlot(aLayerTemplate, "spriteCellValidators", "spriteCellResults", aPriorityIndex);
 
 end
 
@@ -1492,6 +1520,8 @@ do
 	local tCurveResultSlot;
 	local tBoolResultSlot;
 	local tDispelResultSlot;
+	local tSpriteCellResultSlot;
+	local tSpriteCell;
 	local tNonSecretResultSlot;
 	local tAuraResultSlot;
 	local tSecretBool;
@@ -1542,6 +1572,12 @@ do
 				aLayerTemplate["dispelResults"][tIdx]["b"] = nil;
 				aLayerTemplate["dispelResults"][tIdx]["a"] = nil;
 				aLayerTemplate["dispelResults"][tIdx]["auraInstanceId"] = nil;
+			end
+
+			for tIdx = 1, #aLayerTemplate["spriteCellResults"] do
+				aLayerTemplate["spriteCellResults"][tIdx]["isActive"] = false;
+				aLayerTemplate["spriteCellResults"][tIdx]["icon"] = nil;
+				aLayerTemplate["spriteCellResults"][tIdx]["spriteCell"] = nil;
 			end
 
 			for tCnt = aAnzInfos, 1, -1 do
@@ -1738,6 +1774,19 @@ do
 								tDispelResultSlot["g"] = nil;
 								tDispelResultSlot["b"] = nil;
 								tDispelResultSlot["a"] = nil;
+							end
+						end
+					elseif tSecretType == VUHDO_SECRET_TYPE_SPRITE_CELL then
+						tSpriteCellResultSlot = VUHDO_findSpriteCellResultSlot(aLayerTemplate, tCnt);
+
+						if tSpriteCellResultSlot then
+							tIsActive, tIcon, _, _, _, _, _, _, _, _, _, tSpriteCell = tSpecial["validator"](aInfo, tInfos, tSecretContext);
+
+							tSpriteCellResultSlot["isActive"] = tIsActive;
+
+							if tIsActive then
+								tSpriteCellResultSlot["icon"] = tIcon;
+								tSpriteCellResultSlot["spriteCell"] = tSpriteCell;
 							end
 						end
 					end
@@ -1963,6 +2012,17 @@ do
 				for tIdx = 1, #aLayerTemplate["dispelResults"] do
 					if aLayerTemplate["dispelResults"][tIdx]["isActive"] then
 						txState["active"] = true;
+
+						break;
+					end
+				end
+			end
+
+			if aLayerTemplate["hasSpriteCells"] then
+				for tIdx = 1, #aLayerTemplate["spriteCellResults"] do
+					if aLayerTemplate["spriteCellResults"][tIdx]["isActive"] then
+						txState["active"] = true;
+						txState["icon"] = aLayerTemplate["spriteCellResults"][tIdx]["icon"];
 
 						break;
 					end
