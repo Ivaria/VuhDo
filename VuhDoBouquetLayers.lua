@@ -56,6 +56,10 @@ setmetatable(sGlobalAlphaChains, VUHDO_META_NEW_ARRAY);
 
 local sWrapperNameCounter = 0;
 
+local VUHDO_TARGET_TYPE_BAR = 1;
+local VUHDO_TARGET_TYPE_TEXTURE = 2;
+local VUHDO_TARGET_TYPE_BORDER = 3;
+
 
 
 --
@@ -495,120 +499,6 @@ local tA;
 local tColorType;
 local tCustomColor;
 local tOverlay;
-local function VUHDO_applyCurveColorToBar(aBar, aLayerTemplate)
-
-	if not aLayerTemplate["hasCurves"] or #aLayerTemplate["curveResults"] == 0 then
-		aBar["secretCurveColor"] = nil;
-
-		return;
-	end
-
-	tResultSlot = nil;
-
-	for tIdx = 1, #aLayerTemplate["curveResults"] do
-		if aLayerTemplate["curveResults"][tIdx]["isActive"] then
-			tResultSlot = aLayerTemplate["curveResults"][tIdx];
-
-			break;
-		end
-	end
-
-	if not tResultSlot then
-		aBar["secretCurveColor"] = nil;
-
-		return;
-	end
-
-	if tResultSlot["r"] then
-		tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
-
-		if sSecretsEnabled then
-			aBar["secretCurveColor"] = aBar["secretCurveColor"] or { };
-
-			aBar["secretCurveColor"]["R"] = tR;
-			aBar["secretCurveColor"]["G"] = tG;
-			aBar["secretCurveColor"]["B"] = tB;
-			aBar["secretCurveColor"]["O"] = tA;
-		else
-			aBar["secretCurveColor"] = nil;
-		end
-
-		if aLayerTemplate["useBackground"] then
-			aBar:GetStatusBarTexture():SetVertexColor(tR, tG, tB,
-				aLayerTemplate["useOpacity"] and tA or 1);
-		end
-
-		if aLayerTemplate["useOpacity"] and not aLayerTemplate["useBackground"] then
-			aBar:SetAlpha(tA);
-		end
-	else
-		aBar["secretCurveColor"] = nil;
-	end
-
-	return;
-
-end
-
-
-
---
-local function VUHDO_applyCurveColorToTexture(aTexture, aLayerTemplate)
-
-	if not aLayerTemplate["hasCurves"] or #aLayerTemplate["curveResults"] == 0 then
-		return;
-	end
-
-	tResultSlot = nil;
-
-	for tIdx = 1, #aLayerTemplate["curveResults"] do
-		if aLayerTemplate["curveResults"][tIdx]["isActive"] then
-			tResultSlot = aLayerTemplate["curveResults"][tIdx];
-
-			break;
-		end
-	end
-
-	if tResultSlot and tResultSlot["r"] then
-		tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
-
-		aTexture:SetVertexColor(tR, tG, tB, tA);
-	end
-
-	return;
-
-end
-
-
-
---
-local function VUHDO_applyCurveColorToBorder(aBorder, aLayerTemplate)
-
-	if not aLayerTemplate["hasCurves"] or #aLayerTemplate["curveResults"] == 0 then
-		return;
-	end
-
-	tResultSlot = nil;
-
-	for tIdx = 1, #aLayerTemplate["curveResults"] do
-		if aLayerTemplate["curveResults"][tIdx]["isActive"] then
-			tResultSlot = aLayerTemplate["curveResults"][tIdx];
-
-			break;
-		end
-	end
-
-	if tResultSlot and tResultSlot["r"] then
-		tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
-
-		aBorder:SetBackdropBorderColor(tR, tG, tB, tA);
-	end
-
-	return;
-
-end
-
-
-
 --
 local function VUHDO_applyBooleanLayers(aButton, aTarget, aLayerTemplate)
 
@@ -638,40 +528,29 @@ end
 
 
 --
-local function VUHDO_applyDispelColorToBar(aBar, aLayerTemplate, aUnit)
+local function VUHDO_applyBackgroundColorToTarget(aTarget, aTargetType, aColor)
 
-	if not aLayerTemplate["hasDispels"] then
+	if not aColor or not aColor["useBackground"] then
 		return;
 	end
 
-	if not VUHDO_getDebuffCanColorBar(aUnit) then
-		return;
-	end
-
-	tColorType = VUHDO_getDebuffColorType(aUnit);
-
-	if tColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM then
-		tCustomColor = VUHDO_getDebuffCustomColor(aUnit);
-
-		if tCustomColor then
-			aBar:GetStatusBarTexture():SetVertexColor(
-				tCustomColor["R"] or 1,
-				tCustomColor["G"] or 1,
-				tCustomColor["B"] or 1,
-				tCustomColor["O"] or 1
-			);
+	if aTargetType == VUHDO_TARGET_TYPE_BAR then
+		if aColor["useOpacity"] then
+			aTarget:GetStatusBarTexture():SetVertexColor(aColor["R"], aColor["G"], aColor["B"], aColor["O"]);
+		else
+			aTarget:GetStatusBarTexture():SetVertexColor(aColor["R"], aColor["G"], aColor["B"]);
 		end
-
-		return;
-	end
-
-	for tIdx = 1, #aLayerTemplate["dispelResults"] do
-		tResultSlot = aLayerTemplate["dispelResults"][tIdx];
-
-		if tResultSlot["isActive"] and tResultSlot["r"] then
-			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
-
-			aBar:GetStatusBarTexture():SetVertexColor(tR, tG, tB, tA);
+	elseif aTargetType == VUHDO_TARGET_TYPE_TEXTURE then
+		if aColor["useOpacity"] then
+			aTarget:SetVertexColor(aColor["R"], aColor["G"], aColor["B"], aColor["O"]);
+		else
+			aTarget:SetVertexColor(aColor["R"], aColor["G"], aColor["B"]);
+		end
+	elseif aTargetType == VUHDO_TARGET_TYPE_BORDER then
+		if aColor["useOpacity"] then
+			aTarget:SetBackdropBorderColor(aColor["R"], aColor["G"], aColor["B"], aColor["O"]);
+		else
+			aTarget:SetBackdropBorderColor(aColor["R"], aColor["G"], aColor["B"]);
 		end
 	end
 
@@ -682,57 +561,29 @@ end
 
 
 --
-function VUHDO_applyDispelTextColor(aHealthBar, aLayerTemplate, aUnit)
+local function VUHDO_applyRawColorToTarget(aTarget, aTargetType, aR, aG, aB, aA, aLayerTemplate)
 
-	if not aLayerTemplate["hasDispels"] then
+	if not aLayerTemplate["useBackground"] then
 		return;
 	end
 
-	if not VUHDO_getDebuffCanColorText(aUnit) then
-		return;
-	end
-
-	if not VUHDO_RAID[aUnit] or not VUHDO_RAID[aUnit]["debuffText"] then
-		return;
-	end
-
-	tColorType = VUHDO_getDebuffColorType(aUnit);
-
-	if tColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM then
-		tCustomColor = VUHDO_getDebuffCustomColor(aUnit);
-
-		if tCustomColor then
-			VUHDO_getBarText(aHealthBar):SetTextColor(
-				tCustomColor["TR"] or 1,
-				tCustomColor["TG"] or 1,
-				tCustomColor["TB"] or 1
-			);
-
-			VUHDO_getBarTextSolo(aHealthBar):SetTextColor(
-				tCustomColor["TR"] or 1,
-				tCustomColor["TG"] or 1,
-				tCustomColor["TB"] or 1
-			);
-
-			VUHDO_getLifeText(aHealthBar):SetTextColor(
-				tCustomColor["TR"] or 1,
-				tCustomColor["TG"] or 1,
-				tCustomColor["TB"] or 1
-			);
+	if aTargetType == VUHDO_TARGET_TYPE_BAR then
+		if aLayerTemplate["useOpacity"] then
+			aTarget:GetStatusBarTexture():SetVertexColor(aR, aG, aB, aA);
+		else
+			aTarget:GetStatusBarTexture():SetVertexColor(aR, aG, aB);
 		end
-
-		return;
-	end
-
-	for tIdx = 1, #aLayerTemplate["dispelResults"] do
-		tResultSlot = aLayerTemplate["dispelResults"][tIdx];
-
-		if tResultSlot["isActive"] and tResultSlot["r"] then
-			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
-
-			VUHDO_getBarText(aHealthBar):SetTextColor(tR, tG, tB);
-			VUHDO_getBarTextSolo(aHealthBar):SetTextColor(tR, tG, tB);
-			VUHDO_getLifeText(aHealthBar):SetTextColor(tR, tG, tB);
+	elseif aTargetType == VUHDO_TARGET_TYPE_TEXTURE then
+		if aLayerTemplate["useOpacity"] then
+			aTarget:SetVertexColor(aR, aG, aB, aA);
+		else
+			aTarget:SetVertexColor(aR, aG, aB);
+		end
+	elseif aTargetType == VUHDO_TARGET_TYPE_BORDER then
+		if aLayerTemplate["useOpacity"] then
+			aTarget:SetBackdropBorderColor(aR, aG, aB, aA);
+		else
+			aTarget:SetBackdropBorderColor(aR, aG, aB);
 		end
 	end
 
@@ -743,20 +594,27 @@ end
 
 
 --
-local function VUHDO_applyDispelColorToTexture(aTexture, aLayerTemplate)
+local tBarText;
+local tBarTextSolo;
+local tLifeText;
+local function VUHDO_applyTextColorToBar(aBar, aR, aG, aB)
 
-	if not aLayerTemplate["hasDispels"] then
-		return;
+	tBarText = VUHDO_getBarText(aBar);
+
+	if tBarText then
+		tBarText:SetTextColor(aR or 1, aG or 1, aB or 1);
 	end
 
-	for tIdx = 1, #aLayerTemplate["dispelResults"] do
-		tResultSlot = aLayerTemplate["dispelResults"][tIdx];
+	tBarTextSolo = VUHDO_getBarTextSolo(aBar);
 
-		if tResultSlot["r"] then
-			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
+	if tBarTextSolo then
+		tBarTextSolo:SetTextColor(aR or 1, aG or 1, aB or 1);
+	end
 
-			aTexture:SetVertexColor(tR, tG, tB, tA);
-		end
+	tLifeText = VUHDO_getLifeText(aBar);
+
+	if tLifeText then
+		tLifeText:SetTextColor(aR or 1, aG or 1, aB or 1);
 	end
 
 	return;
@@ -791,101 +649,115 @@ end
 
 
 --
-local function VUHDO_applyDispelColorToBorder(aBorder, aLayerTemplate)
-
-	if not aLayerTemplate["hasDispels"] then
-		return;
-	end
-
-	for tIdx = 1, #aLayerTemplate["dispelResults"] do
-		tResultSlot = aLayerTemplate["dispelResults"][tIdx];
-
-		if tResultSlot["r"] then
-			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
-
-			aBorder:SetBackdropBorderColor(tR, tG, tB, tA);
-		end
-	end
-
-	return;
-
-end
-
-
-
---
 local tResultSlot;
-local tNonSecretColor;
-local tNonSecretMaxColor;
-local tBarText;
-local tBarTextSolo;
-local tLifeText;
-function VUHDO_applyNonSecretColorsToBar(aBar, aLayerTemplate)
+local tColor;
+local tEntry;
+local tType;
+local tResultIdx;
+local tResult;
+local tR;
+local tG;
+local tB;
+local tA;
+local tColorType;
+local tCustomColor;
+local function VUHDO_applyNonSecretColorByIndex(aTarget, aTargetType, aLayerTemplate, aResultIdx)
 
-	if not aBar or not aLayerTemplate then
+	tResultSlot = aLayerTemplate["nonSecretResults"][aResultIdx];
+
+	if not tResultSlot or not tResultSlot["color"] then
 		return;
 	end
 
-	if not aLayerTemplate["hasNonSecrets"] and not aLayerTemplate["hasAuras"] then
+	tColor = tResultSlot["color"];
+
+	VUHDO_applyBackgroundColorToTarget(aTarget, aTargetType, tColor);
+
+	if aTargetType == VUHDO_TARGET_TYPE_BAR and tColor["useText"] then
+		VUHDO_applyTextColorToBar(aTarget, tColor["TR"], tColor["TG"], tColor["TB"]);
+	end
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate, aResultIdx)
+
+	tResultSlot = aLayerTemplate["curveResults"][aResultIdx];
+
+	if not tResultSlot or not tResultSlot["r"] then
 		return;
 	end
 
-	tNonSecretColor = nil;
-	tNonSecretMaxColor = nil;
+	tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
 
-	for tIdx = #aLayerTemplate["nonSecretResults"], 1, -1 do
-		tResultSlot = aLayerTemplate["nonSecretResults"][tIdx];
+	if aTargetType == VUHDO_TARGET_TYPE_BAR and sSecretsEnabled then
+		aTarget["secretCurveColor"] = aTarget["secretCurveColor"] or { };
 
-		if tResultSlot["isActive"] and tResultSlot["color"] then
-			tNonSecretColor = tResultSlot["color"];
-			tNonSecretMaxColor = tResultSlot["maxColor"];
-
-			break;
-		end
+		aTarget["secretCurveColor"]["R"] = tR;
+		aTarget["secretCurveColor"]["G"] = tG;
+		aTarget["secretCurveColor"]["B"] = tB;
+		aTarget["secretCurveColor"]["O"] = tA;
 	end
 
-	if not tNonSecretColor then
-		for tIdx = #aLayerTemplate["auraResults"], 1, -1 do
-			tResultSlot = aLayerTemplate["auraResults"][tIdx];
+	VUHDO_applyRawColorToTarget(aTarget, aTargetType, tR, tG, tB, tA, aLayerTemplate);
 
-			if tResultSlot["isActive"] and tResultSlot["color"] then
-				tNonSecretColor = tResultSlot["color"];
-
-				break;
-			end
-		end
+	if aTargetType == VUHDO_TARGET_TYPE_BAR and aLayerTemplate["useText"] then
+		VUHDO_applyTextColorToBar(aTarget, tR, tG, tB);
 	end
 
-	if tNonSecretColor then
-		VUHDO_setStatusBarVuhDoColor(aBar, tNonSecretColor, tNonSecretMaxColor);
+	return;
 
-		if tNonSecretColor["useText"] then
-			tBarText = VUHDO_getBarText(aBar);
+end
 
-			if tBarText then
-				tBarText:SetTextColor(
-					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
-					tNonSecretColor["TB"] or 1
-				);
+
+
+--
+local function VUHDO_applyDispelColorByIndex(aTarget, aTargetType, aLayerTemplate, aUnit, aResultIdx)
+
+	if not VUHDO_getDebuffCanColorBar(aUnit) then
+		return;
+	end
+
+	tColorType = VUHDO_getDebuffColorType(aUnit);
+
+	if tColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM then
+		tCustomColor = VUHDO_getDebuffCustomColor(aUnit);
+
+		if tCustomColor then
+			if aLayerTemplate["useBackground"] and tCustomColor["useBackground"] then
+				VUHDO_applyBackgroundColorToTarget(aTarget, aTargetType, tCustomColor);
 			end
 
-			tBarTextSolo = VUHDO_getBarTextSolo(aBar);
-
-			if tBarTextSolo then
-				tBarTextSolo:SetTextColor(
-					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
-					tNonSecretColor["TB"] or 1
-				);
+			if aTargetType == VUHDO_TARGET_TYPE_BAR and aLayerTemplate["useText"] and tCustomColor["useText"] then
+				VUHDO_applyTextColorToBar(aTarget, tCustomColor["TR"], tCustomColor["TG"], tCustomColor["TB"]);
 			end
+		end
 
-			tLifeText = VUHDO_getLifeText(aBar);
+		return;
+	end
 
-			if tLifeText then
-				tLifeText:SetTextColor(
-					tNonSecretColor["TR"] or 1, tNonSecretColor["TG"] or 1,
-					tNonSecretColor["TB"] or 1
-				);
-			end
+	tResultSlot = aLayerTemplate["dispelResults"][aResultIdx];
+
+	if tResultSlot and tResultSlot["r"] then
+		tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
+
+		if aTargetType == VUHDO_TARGET_TYPE_BAR and sSecretsEnabled then
+			aTarget["secretCurveColor"] = aTarget["secretCurveColor"] or { };
+
+			aTarget["secretCurveColor"]["R"] = tR;
+			aTarget["secretCurveColor"]["G"] = tG;
+			aTarget["secretCurveColor"]["B"] = tB;
+			aTarget["secretCurveColor"]["O"] = tA;
+		end
+
+		VUHDO_applyRawColorToTarget(aTarget, aTargetType, tR, tG, tB, tA, aLayerTemplate);
+
+		if aTargetType == VUHDO_TARGET_TYPE_BAR and aLayerTemplate["useText"] then
+			VUHDO_applyTextColorToBar(aTarget, tR, tG, tB);
 		end
 	end
 
@@ -896,17 +768,33 @@ end
 
 
 --
-function VUHDO_applyAllLayersToBar(aButton, aBar, aLayerTemplate)
+local function VUHDO_applySortedValidatorsToTarget(aButton, aTarget, aTargetType, aLayerTemplate)
 
-	if not aButton or not aBar or not aLayerTemplate then
+	if not aLayerTemplate["sortedValidators"] then
 		return;
 	end
 
-	VUHDO_applyNonSecretColorsToBar(aBar, aLayerTemplate);
+	for tIdx = 1, #aLayerTemplate["sortedValidators"] do
+		tEntry = aLayerTemplate["sortedValidators"][tIdx];
+		tType = tEntry["type"];
+		tResultIdx = tEntry["resultIdx"];
 
-	VUHDO_applyCurveColorToBar(aBar, aLayerTemplate);
-	VUHDO_applyBooleanLayers(aButton, aBar, aLayerTemplate);
-	VUHDO_applyDispelColorToBar(aBar, aLayerTemplate, aButton["raidid"]);
+		if tType == "nonsecret" then
+			tResult = aLayerTemplate["nonSecretResults"][tResultIdx];
+
+			if tResult["isActive"] then
+				VUHDO_applyNonSecretColorByIndex(aTarget, aTargetType, aLayerTemplate, tResultIdx);
+			end
+		elseif tType == "curve" then
+			VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate, tResultIdx);
+		elseif tType == "dispel" then
+			tResult = aLayerTemplate["dispelResults"][tResultIdx];
+
+			if tResult["isActive"] then
+				VUHDO_applyDispelColorByIndex(aTarget, aTargetType, aLayerTemplate, aButton["raidid"], tResultIdx);
+			end
+		end
+	end
 
 	return;
 
@@ -921,9 +809,8 @@ function VUHDO_applyAllLayersToTexture(aButton, aTexture, aLayerTemplate)
 		return;
 	end
 
-	VUHDO_applyCurveColorToTexture(aTexture, aLayerTemplate);
+	VUHDO_applySortedValidatorsToTarget(aButton, aTexture, VUHDO_TARGET_TYPE_TEXTURE, aLayerTemplate);
 	VUHDO_applyBooleanLayers(aButton, aTexture, aLayerTemplate);
-	VUHDO_applyDispelColorToTexture(aTexture, aLayerTemplate);
 	VUHDO_applySpriteCellToTexture(aTexture, aLayerTemplate);
 
 	return;
@@ -939,9 +826,26 @@ function VUHDO_applyAllLayersToBorder(aButton, aBorder, aLayerTemplate)
 		return;
 	end
 
-	VUHDO_applyCurveColorToBorder(aBorder, aLayerTemplate);
+	VUHDO_applySortedValidatorsToTarget(aButton, aBorder, VUHDO_TARGET_TYPE_BORDER, aLayerTemplate);
 	VUHDO_applyBooleanLayers(aButton, aBorder, aLayerTemplate);
-	VUHDO_applyDispelColorToBorder(aBorder, aLayerTemplate);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_applyAllLayersToBar(aButton, aBar, aLayerTemplate)
+
+	if not aButton or not aBar or not aLayerTemplate then
+		return;
+	end
+
+	aBar["secretCurveColor"] = nil;
+
+	VUHDO_applySortedValidatorsToTarget(aButton, aBar, VUHDO_TARGET_TYPE_BAR, aLayerTemplate);
+	VUHDO_applyBooleanLayers(aButton, aBar, aLayerTemplate);
 
 	return;
 

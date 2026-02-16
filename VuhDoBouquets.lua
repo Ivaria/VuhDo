@@ -853,6 +853,8 @@ local tNonSecretIdx;
 local tAuraIdx;
 local tTrueColor;
 local tBouquet;
+local tAllValidators;
+local tEntry;
 function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 
 	tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
@@ -1045,6 +1047,20 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 					["a"] = nil,
 					["auraInstanceId"] = nil,
 				};
+
+				if tItem["color"] then
+					if tItem["color"]["useBackground"] then
+						tTemplate["useBackground"] = true;
+					end
+
+					if tItem["color"]["useText"] then
+						tTemplate["useText"] = true;
+					end
+
+					if tItem["color"]["useOpacity"] then
+						tTemplate["useOpacity"] = true;
+					end
+				end
 			elseif tSecretType == VUHDO_SECRET_TYPE_SPRITE_CELL then
 				tSpriteCellIdx = tSpriteCellIdx + 1;
 
@@ -1078,17 +1094,61 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 					["timer"] = 0,
 					["counter"] = 0,
 					["duration"] = 0,
-					["color"] = nil,
+					["color"] = { },
 					["timer2"] = 0,
 					["clipL"] = nil,
 					["clipR"] = nil,
 					["clipT"] = nil,
 					["clipB"] = nil,
-					["maxColor"] = nil,
+					["maxColor"] = { },
 				};
 			end
 		end
 	end
+
+	tAllValidators = { };
+
+	if tTemplate["hasNonSecrets"] then
+		for tIdx = 1, #tTemplate["nonSecretValidators"] do
+			tEntry = {
+				["type"] = "nonsecret",
+				["resultIdx"] = tIdx,
+				["bouquetIdx"] = tTemplate["nonSecretValidators"][tIdx]["index"],
+			};
+
+			tinsert(tAllValidators, tEntry);
+		end
+	end
+
+	if tTemplate["hasCurves"] then
+		for tIdx = 1, #tTemplate["curveValidators"] do
+			tEntry = {
+				["type"] = "curve",
+				["resultIdx"] = tIdx,
+				["bouquetIdx"] = tTemplate["curveValidators"][tIdx]["index"],
+			};
+
+			tinsert(tAllValidators, tEntry);
+		end
+	end
+
+	if tTemplate["hasDispels"] then
+		for tIdx = 1, #tTemplate["dispelValidators"] do
+			tEntry = {
+				["type"] = "dispel",
+				["resultIdx"] = tIdx,
+				["bouquetIdx"] = tTemplate["dispelValidators"][tIdx]["index"],
+			};
+
+			tinsert(tAllValidators, tEntry);
+		end
+	end
+
+	tsort(tAllValidators, function(a, b)
+		return a["bouquetIdx"] > b["bouquetIdx"];
+	end);
+
+	tTemplate["sortedValidators"] = tAllValidators;
 
 	sBouquetLayerTemplates[aBouquetName] = tTemplate;
 
@@ -1700,13 +1760,20 @@ do
 								tNonSecretResultSlot["timer"] = tTimer or 0;
 								tNonSecretResultSlot["counter"] = tCounter or 0;
 								tNonSecretResultSlot["duration"] = tDuration or 0;
-								tNonSecretResultSlot["color"] = tColor;
+
+								if tColor then
+									VUHDO_copyColorTo(tColor, tNonSecretResultSlot["color"]);
+								end
+
 								tNonSecretResultSlot["timer2"] = tTimer2 or 0;
 								tNonSecretResultSlot["clipL"] = tClipL;
 								tNonSecretResultSlot["clipR"] = tClipR;
 								tNonSecretResultSlot["clipT"] = tClipT;
 								tNonSecretResultSlot["clipB"] = tClipB;
-								tNonSecretResultSlot["maxColor"] = tMaxColor;
+
+								if tMaxColor then
+									VUHDO_copyColorTo(tMaxColor, tNonSecretResultSlot["maxColor"]);
+								end
 							end
 						end
 					elseif tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT then
