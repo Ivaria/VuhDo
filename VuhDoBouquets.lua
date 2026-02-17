@@ -2643,6 +2643,8 @@ function VUHDO_registerAllBouquets(aDoCompress)
 
 	for _, tBouquetName in pairs(VUHDO_CUSTOM_BOUQUETS) do
 		VUHDO_BOUQUETS["STORED"][tBouquetName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][tBouquetName]);
+
+		VUHDO_buildCurvesForBouquet(tBouquetName);
 	end
 
 	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);

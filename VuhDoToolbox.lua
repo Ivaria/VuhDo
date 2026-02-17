@@ -102,33 +102,32 @@ local tcreate = table.create or VUHDO_tableCreate;
 local tResult;
 local tGuid;
 local tOtherGuid;
-local function VUHDO_unitIsUnit(aUnit, anotherUnit)
+function VUHDO_unitIsUnit(aUnit, anotherUnit)
 
 	tResult = UnitIsUnit(aUnit, anotherUnit);
-	
-	if tResult ~= nil then
+
+	if tResult ~= nil and (not sSecretsEnabled or not issecretvalue(tResult)) then
 		return tResult;
 	end
-	
+
 	if not sSecretsEnabled then
 		return false;
 	end
-	
+
 	tGuid = UnitGUID(aUnit);
 	tOtherGuid = UnitGUID(anotherUnit);
-	
+
 	if not tGuid or not tOtherGuid then
 		return false;
 	end
-	
+
 	if issecretvalue(tGuid) or issecretvalue(tOtherGuid) then
 		return false;
 	end
-	
+
 	return tGuid == tOtherGuid;
 
 end
-VUHDO_unitIsUnit = VUHDO_unitIsUnit;
 
 
 
@@ -621,7 +620,7 @@ function VUHDO_isInRange(aUnit)
 		return nil;
 	end
 
-	if "player" == aUnit or UnitIsUnit(aUnit, "player") then
+	if "player" == aUnit or VUHDO_unitIsUnit(aUnit, "player") then
 		return true;
 	end
 
@@ -800,7 +799,7 @@ function VUHDO_getPlayerRaidUnit()
 	if VUHDO_GROUP_TYPE_RAID == VUHDO_getCurrentGroupType() then
 		for tCnt = 1, 40 do
 			tRaidUnit = "raid" .. tCnt;
-			if UnitIsUnit("player", tRaidUnit) then return tRaidUnit; end
+			if VUHDO_unitIsUnit("player", tRaidUnit) then return tRaidUnit; end
 		end
 	end
 	return "player";

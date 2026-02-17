@@ -15,7 +15,6 @@ local UnitPower = UnitPower;
 local UnitPowerMax = UnitPowerMax;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local UnitIsConnected = UnitIsConnected;
-local UnitIsUnit = UnitIsUnit;
 local UnitExists = UnitExists;
 local UnitCreatureType = UnitCreatureType;
 local strfind = strfind;
@@ -124,22 +123,44 @@ local tLocalClass, tClassName;
 local tPowerType;
 local tName;
 local function VUHDO_fillCustomInfo(aUnit)
+
 	tLocalClass, tClassName = UnitClass(aUnit);
 	tPowerType = UnitPowerType(aUnit);
 	tName = UnitName(aUnit);
 
 	tInfo = VUHDO_CUSTOM_INFO;
+
 	tInfo["healthmax"] = UnitHealthMax(aUnit);
 	tInfo["health"] = UnitHealth(aUnit);
 	tInfo["name"] = tName;
+
+	if sSecretsEnabled then
+		tInfo["hasSecretName"] = issecretvalue(tName);
+	else
+		tInfo["hasSecretName"] = false;
+	end
+
 	tInfo["unit"] = aUnit;
 	tInfo["class"] = tClassName;
 	tInfo["powertype"] = tonumber(tPowerType);
 	tInfo["power"] = UnitPower(aUnit);
 	tInfo["powermax"] = UnitPowerMax(aUnit);
+
+	if sSecretsEnabled then
+		tInfo["hasSecretPower"] = issecretvalue(tInfo["power"]) or issecretvalue(tInfo["powermax"]);
+		tInfo["hasSecretHealth"] = issecretvalue(tInfo["health"]);
+		tInfo["hasSecretHealthMax"] = issecretvalue(tInfo["healthmax"]);
+	else
+		tInfo["hasSecretPower"] = false;
+		tInfo["hasSecretHealth"] = false;
+		tInfo["hasSecretHealthMax"] = false;
+	end
+
 	tInfo["dead"] = UnitIsDeadOrGhost(aUnit);
 	tInfo["connected"] = UnitIsConnected(aUnit);
-	if tLocalClass == tName then
+	if tInfo["hasSecretName"] then
+		tInfo["className"] = "";
+	elseif tLocalClass == tName then
 		tInfo["className"] = UnitCreatureType(aUnit) or "";
 	else
 		tInfo["className"] = tLocalClass or "";
@@ -151,6 +172,9 @@ local function VUHDO_fillCustomInfo(aUnit)
 
 	tInfo["raidIcon"] = GetRaidTargetIndex(aUnit);
 	tInfo["hasSecretRaidIcon"] = sSecretsEnabled and issecretvalue(tInfo["raidIcon"]);
+
+	return;
+
 end
 
 
@@ -203,6 +227,13 @@ local tIconIdx;
 function VUHDO_customizeTargetBar(aButton, aUnit, anIsInRange)
 
 	VUHDO_CUSTOM_INFO["range"] = anIsInRange;
+
+	if sSecretsEnabled then
+		VUHDO_CUSTOM_INFO["hasSecretRange"] = issecretvalue(anIsInRange);
+	else
+		VUHDO_CUSTOM_INFO["hasSecretRange"] = false;
+	end
+
 	VUHDO_invokeCustomBouquet(aButton, aUnit, VUHDO_RAID[aUnit] or VUHDO_CUSTOM_INFO, VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH, VUHDO_targetHealthBouquetCallback);
 	VUHDO_customizeText(aButton, 1, true); -- VUHDO_UPDATE_ALL
 	VUHDO_customizeManaBar(aButton, true);
