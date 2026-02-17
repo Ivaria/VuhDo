@@ -228,24 +228,24 @@ function VUHDO_isSpellInRange(aSpell, aUnit, aUnitReaction)
 		tIsSpellInRange = C_Spell.IsSpellInRange(aSpell, aUnit);
 	end
 
-	if sSecretsEnabled then
-		return tIsSpellInRange;
-	end
-
 	if tIsSpellInRange == nil and aUnitReaction and
 		VUHDO_RANGE_SPELLS_REMAP[aUnitReaction] and VUHDO_RANGE_SPELLS_REMAP[aUnitReaction][aSpell] then
 		for _, tRangeSpell in pairs(VUHDO_RANGE_SPELLS_REMAP[aUnitReaction][aSpell]) do
 			tIsSpellInRange = C_Spell.IsSpellInRange(tRangeSpell, aUnit);
 
-			if tIsSpellInRange == true then
-				return 1;
-			elseif tIsSpellInRange == false then
-				return 0;
+			if tIsSpellInRange ~= nil then
+				break;
 			end
 		end
 	end
 
-	return tIsSpellInRange and 1 or 0;
+	if tIsSpellInRange == true or tIsSpellInRange == 1 then
+		return true;
+	elseif tIsSpellInRange == false or tIsSpellInRange == 0 then
+		return false;
+	end
+
+	return;
 
 end
 
@@ -569,9 +569,9 @@ function VUHDO_checkInteractDistance(aUnit, aDistIndex)
 		return CheckInteractDistance(aUnit, aDistIndex);
 	else
 		if not sIsHarmfulGuessRange and UnitCanAttack("player", aUnit) then
-			return (VUHDO_isSpellInRange(sRangeSpell["HARMFUL"], aUnit, "HARMFUL") == 1) and true or false;
+			return (VUHDO_isSpellInRange(sRangeSpell["HARMFUL"], aUnit, "HARMFUL") == true) and true or false;
 		elseif not sIsHelpfulGuessRange then
-			return (VUHDO_isSpellInRange(sRangeSpell["HELPFUL"], aUnit, "HELPFUL") == 1) and true or false;
+			return (VUHDO_isSpellInRange(sRangeSpell["HELPFUL"], aUnit, "HELPFUL") == true) and true or false;
 		else
 			tIsInRange, tIsChecked = UnitInRange(aUnit);
 
@@ -631,12 +631,12 @@ function VUHDO_isInRange(aUnit)
 	if UnitPlayerOrPetInParty(aUnit) or UnitPlayerOrPetInRaid(aUnit) then
 		if sSecretsEnabled then
 			return UnitInRange(aUnit);
-		else
-			tIsInRange, tIsChecked = UnitInRange(aUnit);
+		end
 
-			if tIsChecked then
-				return tIsInRange;
-			end
+		tIsInRange, tIsChecked = UnitInRange(aUnit);
+
+		if tIsChecked then
+			return tIsInRange;
 		end
 	end
 
@@ -653,30 +653,24 @@ function VUHDO_isInRange(aUnit)
 	if tRangeSpell and not tIsGuessRange then
 		tIsSpellInRange = VUHDO_isSpellInRange(tRangeSpell, aUnit, tUnitReaction);
 
-		if sSecretsEnabled then
-			if tIsSpellInRange ~= nil then
-				return tIsSpellInRange;
-			end
-
-			return true;
-		end
-
 		if tIsSpellInRange ~= nil then
-			return (tIsSpellInRange == 1) and true or false;
+			return tIsSpellInRange;
 		end
 	end
 
-	if sSecretsEnabled then
-		return true;
+	if not sSecretsEnabled then
+		tIsInRange, tIsChecked = UnitInRange(aUnit);
+
+		if tIsChecked then
+			return tIsInRange;
+		end
 	end
 
-	tIsInRange, tIsChecked = UnitInRange(aUnit);
-
-	if tIsChecked and not tIsInRange then
-		return false;
-	else
-		return true;
+	if not InCombatLockdown() then
+		return CheckInteractDistance(aUnit, 4);
 	end
+
+	return false;
 
 end
 

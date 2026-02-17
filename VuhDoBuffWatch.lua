@@ -514,6 +514,7 @@ local tCategName;
 local tIsAvailable;
 local tIsNotInBattleground;
 local tBuffGroup;
+local tSpellInRange;
 local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 	tCategName = aCategSpec;
 	twipe(tMissGroup);
@@ -545,7 +546,9 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 		end
 
 		if tIsWatchUnit then
-			tInRange = (IsSpellInRange(aBuffInfo[1], tUnit) == 1) or tInfo["hasSecretRange"]
+			tSpellInRange = IsSpellInRange(aBuffInfo[1], tUnit);
+
+			tInRange = (tSpellInRange == 1 or tSpellInRange == true) or tInfo["hasSecretRange"]
 				or (VUHDO_SECRETS_ENABLED and issecretvalue and issecretvalue(tInfo["baseRange"])) or tInfo["baseRange"];
 
 			tIsAvailable = tInfo["connected"] and not tInfo["dead"];
