@@ -407,8 +407,8 @@ local tTotal;
 local tClamped;
 local function VUHDO_overhealHighlightValidator(anInfo, _)
 
-	if sSecretsEnabled and anInfo["hasSecretHealth"] then
-		-- FIXME: tClamped is secret boolean?
+	-- FIXME: restore this feature using calculator API (clamped secret bool) and conditional color curve
+	if sSecretsEnabled then
 		return false, nil, -1, -1, -1;
 	end
 
