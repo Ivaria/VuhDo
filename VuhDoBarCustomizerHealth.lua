@@ -430,7 +430,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 						tShieldBar:SetAlpha(sConfigShieldColor["O"] or 1);
 					end
 				end
-			else
+			elseif not sSecretsEnabled then
 				tShieldColor["R"], tShieldColor["G"], tShieldColor["B"], tShieldOpacity = tHealthBar:GetStatusBarColor();
 				tShieldColor = VUHDO_getDiffColor(tShieldColor, VUHDO_getStatusBarColor("SHIELD", aUnit));
 
@@ -439,6 +439,12 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 				end
 
 				VUHDO_setStatusBarVuhDoColor(tShieldBar, tShieldColor);
+			else
+				sConfigShieldColor = VUHDO_getStatusBarColor("SHIELD", aUnit);
+
+				if sConfigShieldColor then
+					VUHDO_setStatusBarVuhDoColor(tShieldBar, sConfigShieldColor);
+				end
 			end
 
 			tShieldBar:Show();
@@ -748,7 +754,7 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 						tHealAbsorbBar:SetAlpha(sConfigHealAbsorbColor["O"] or 1);
 					end
 				end
-			else
+			elseif not sSecretsEnabled then
 				tHealAbsorbColor["R"], tHealAbsorbColor["G"], tHealAbsorbColor["B"], tHealAbsorbOpacity = tHealthBar:GetStatusBarColor();
 				tHealAbsorbColor = VUHDO_getDiffColor(tHealAbsorbColor, VUHDO_getStatusBarColor("HEAL_ABSORB", aUnit));
 
@@ -757,6 +763,12 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 				end
 
 				VUHDO_setStatusBarVuhDoColor(tHealAbsorbBar, tHealAbsorbColor);
+			else
+				sConfigHealAbsorbColor = VUHDO_getStatusBarColor("HEAL_ABSORB", aUnit);
+
+				if sConfigHealAbsorbColor then
+					VUHDO_setStatusBarVuhDoColor(tHealAbsorbBar, sConfigHealAbsorbColor);
+				end
 			end
 
 			tHealAbsorbBar:Show();
@@ -939,7 +951,7 @@ local function VUHDO_updateIncHeal(aUnit)
 						tIncBar:SetAlpha(sConfigIncColor["O"] or 1);
 					end
 				end
-			else
+			elseif not sSecretsEnabled then
 				tIncColor["R"], tIncColor["G"], tIncColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
 				tIncColor = VUHDO_getDiffColor(tIncColor, VUHDO_getStatusBarColor("INCOMING", aUnit));
 
@@ -948,6 +960,12 @@ local function VUHDO_updateIncHeal(aUnit)
 				end
 
 				VUHDO_setStatusBarColor(tIncBar, tIncColor);
+			else
+				sConfigIncColor = VUHDO_getStatusBarColor("INCOMING", aUnit);
+
+				if sConfigIncColor then
+					VUHDO_setStatusBarColor(tIncBar, sConfigIncColor);
+				end
 			end
 
 			tIncBar:Show();
