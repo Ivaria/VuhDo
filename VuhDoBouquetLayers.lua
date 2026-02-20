@@ -514,7 +514,7 @@ local function VUHDO_applyBooleanLayers(aButton, aTarget, aLayerTemplate)
 			tOverlay = VUHDO_getOrCreateBooleanOverlay(aButton,
 				aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTarget);
 
-			if tOverlay and tResultSlot["trueColorMixin"] and tResultSlot["secretBool"] ~= nil then
+			if tOverlay and tResultSlot["trueColorMixin"] and tResultSlot["falseColorMixin"] and tResultSlot["secretBool"] ~= nil then
 				VUHDO_applyBooleanOverlay(tOverlay, tResultSlot["secretBool"],
 					tResultSlot["color"], tResultSlot["trueColorMixin"], tResultSlot["falseColorMixin"]);
 			end
