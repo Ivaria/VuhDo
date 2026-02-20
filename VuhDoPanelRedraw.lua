@@ -781,8 +781,6 @@ do
 			and not sPanelConfig[aPanelNum]["panelSetup"]["ID_TEXT"]["showTags"];
 
 		if tIsLifeHidden then
-			VUHDO_PixelUtil.Hide(VUHDO_getTextHorizontalContainer(aHealthBar));
-
 			VUHDO_PixelUtil.SetWidth(tLifeText, 0);
 			VUHDO_PixelUtil.SetHeight(tLifeText, 0);
 			VUHDO_PixelUtil.Hide(tLifeText);
