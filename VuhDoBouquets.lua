@@ -1428,7 +1428,7 @@ local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue
 
 			return tDestColor, nil;
 		end
-	elseif aMaxValue ~= 0 then -- 3 == gradient
+	elseif not issecretvalue(aValue) and not issecretvalue(aMaxValue) and aMaxValue ~= 0 then -- 3 == gradient
 		tModi = ((aValue / aMaxValue) ^ 1.7) * 2;
 		tFair = anEntry["custom"]["grad_med"];
 
@@ -1969,7 +1969,7 @@ do
 
 					tCounter = tResultSlot["counter"] or 0;
 
-					if tCounter >= 0 then
+					if issecretvalue(tCounter) or tCounter >= 0 then
 						txState["counter"] = tCounter;
 					end
 
@@ -1977,13 +1977,13 @@ do
 					tTimer2 = tResultSlot["timer2"] or 0;
 					tDuration = tResultSlot["duration"] or 0;
 
-					if tDuration >= 0 then
-						if tTimer >= 0 then
+					if issecretvalue(tDuration) or tDuration >= 0 then
+						if issecretvalue(tTimer) or tTimer >= 0 then
 							txState["timer"] = tTimer;
 							txState["duration"] = tDuration;
 						end
 
-						if tTimer2 >= 0 then
+						if issecretvalue(tTimer2) or tTimer2 >= 0 then
 							txState["timer2"] = tTimer2;
 						end
 					end

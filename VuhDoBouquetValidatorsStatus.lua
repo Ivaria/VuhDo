@@ -771,14 +771,26 @@ end
 --
 local tShieldLeft, tHealthMax;
 local function VUHDO_statusShieldFromHealthValidator(anInfo, _)
-	tHealthMax = anInfo["healthmax"];
-	tShieldLeft = VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
 
-	if sSecretsEnabled and anInfo["hasSecretHealthMax"] then
+	if sSecretsEnabled then
+		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+			return false, nil, -1, -1, -1;
+		end
+
+		sHealPredictionCalculator:ResetPredictedValues();
+		UnitGetDetailedHealPrediction(anInfo["unit"], "player", sHealPredictionCalculator);
+
+		tShieldLeft = sHealPredictionCalculator:GetTotalDamageAbsorbs();
+		tHealthMax = sHealPredictionCalculator:GetMaximumHealth();
+
 		return true, nil, tShieldLeft, -1, tHealthMax;
 	end
 
+	tHealthMax = anInfo["healthmax"];
+	tShieldLeft = VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
+
 	return true, nil, tShieldLeft < tHealthMax and tShieldLeft or tHealthMax, -1, tHealthMax;
+
 end
 
 
@@ -786,8 +798,24 @@ end
 --
 local tShieldLeft;
 local function VUHDO_healAbsorbCountValidator(anInfo, _)
+
+	if sSecretsEnabled then
+		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+			return false, nil, -1, -1, -1;
+		end
+
+		sHealPredictionCalculator:ResetPredictedValues();
+		UnitGetDetailedHealPrediction(anInfo["unit"], "player", sHealPredictionCalculator);
+
+		tShieldLeft = sHealPredictionCalculator:GetTotalHealAbsorbs();
+
+		return true, nil, -1, tShieldLeft, -1;
+	end
+
 	tShieldLeft = UnitGetTotalHealAbsorbs(anInfo["unit"]) or 0;
+
 	return tShieldLeft >= 1000, nil, -1, floor(tShieldLeft * 0.001 + 0.5), -1;
+
 end
 
 
@@ -795,14 +823,26 @@ end
 --
 local tShieldLeft, tHealthMax;
 local function VUHDO_statusHealAbsorbFromHealthValidator(anInfo, _)
-	tHealthMax = anInfo["healthmax"];
-	tShieldLeft = UnitGetTotalHealAbsorbs(anInfo["unit"]) or 0;
 
-	if sSecretsEnabled and anInfo["hasSecretHealthMax"] then
+	if sSecretsEnabled then
+		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+			return false, nil, -1, -1, -1;
+		end
+
+		sHealPredictionCalculator:ResetPredictedValues();
+		UnitGetDetailedHealPrediction(anInfo["unit"], "player", sHealPredictionCalculator);
+
+		tShieldLeft = sHealPredictionCalculator:GetTotalHealAbsorbs();
+		tHealthMax = sHealPredictionCalculator:GetMaximumHealth();
+
 		return true, nil, tShieldLeft, -1, tHealthMax;
 	end
 
+	tHealthMax = anInfo["healthmax"];
+	tShieldLeft = UnitGetTotalHealAbsorbs(anInfo["unit"]) or 0;
+
 	return true, nil, tShieldLeft < tHealthMax and tShieldLeft or tHealthMax, -1, tHealthMax;
+
 end
 
 
@@ -811,14 +851,26 @@ end
 local tShieldLeft, tHealthMax, tHealth;
 local function VUHDO_statusShieldOvershieldValidator(anInfo, _)
 
-	if sSecretsEnabled and (anInfo["hasSecretHealth"] or anInfo["hasSecretHealthMax"]) then
-		return false, nil, -1, -1, -1;
+	if sSecretsEnabled then
+		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+			return false, nil, -1, -1, -1;
+		end
+
+		sHealPredictionCalculator:ResetPredictedValues();
+		UnitGetDetailedHealPrediction(anInfo["unit"], "player", sHealPredictionCalculator);
+
+		tShieldLeft = sHealPredictionCalculator:GetTotalDamageAbsorbs();
+		tHealthMax = sHealPredictionCalculator:GetMaximumHealth();
+
+		return true, nil, tShieldLeft, -1, tHealthMax;
 	end
 
 	tHealthMax = anInfo["healthmax"];
 	tHealth = anInfo["health"];
 	tShieldLeft = VUHDO_getUnitOverallShieldRemain(anInfo["unit"]);
+
 	return tHealth + tShieldLeft > tHealthMax, nil, tShieldLeft - tHealthMax + tHealth, -1, tHealthMax;
+
 end
 
 
