@@ -1626,6 +1626,11 @@ local function VUHDO_updateSwiftmendCooldown()
 		return;
 	end
 
+	-- FIXME: need to migrate for Midnight secrets
+	if sSecretsEnabled then
+		return;
+	end
+
 	tChargeInfo = GetSpellCharges(VUHDO_SPELL_ID.SWIFTMEND);
 
 	if tChargeInfo then
