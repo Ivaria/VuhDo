@@ -989,15 +989,15 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 				if tSpecial and tSpecial["isInverted"] then
 					tTemplate["booleanResults"][tBoolIdx] = {
 						["secretBool"] = nil,
-						["trueColorMixin"] = CreateColor(0, 0, 0, 0),
-						["falseColorMixin"] = tTrueColor and CreateColor(tTrueColor["R"], tTrueColor["G"], tTrueColor["B"], tTrueColor["O"] or 1) or nil,
+						["trueColorMixin"] = sTransparentColor,
+						["falseColorMixin"] = tTrueColor,
 						["color"] = tItem["color"],
 					};
 				else
 					tTemplate["booleanResults"][tBoolIdx] = {
 						["secretBool"] = nil,
-						["trueColorMixin"] = tTrueColor and CreateColor(tTrueColor["R"], tTrueColor["G"], tTrueColor["B"], tTrueColor["O"] or 1) or nil,
-						["falseColorMixin"] = CreateColor(0, 0, 0, 0),
+						["trueColorMixin"] = tTrueColor,
+						["falseColorMixin"] = sTransparentColor,
 						["color"] = tItem["color"],
 					};
 				end
