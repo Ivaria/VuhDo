@@ -2621,7 +2621,7 @@ do
 					aChargeTexture:Hide();
 				end
 
-				if tShowStacks and aUnit and anAuraData["auraInstanceID"] >= 0 then
+				if tShowStacks and aUnit and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 					tCountStr = GetAuraApplicationDisplayCount(aUnit, anAuraData["auraInstanceID"], 2, 999);
 					aCountText:SetText(tCountStr or "");
 
@@ -2672,7 +2672,7 @@ do
 
 		tDurationObj = nil;
 
-		if tUnit and anAuraData["auraInstanceID"] >= 0 then
+		if tUnit and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
 		elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
 			tDurationObj = VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex);
@@ -2757,7 +2757,7 @@ do
 
 		tDurationObj = nil;
 
-		if tUnit and anAuraData["auraInstanceID"] >= 0 then
+		if tUnit and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
 		elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
 			tDurationObj = VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex);
