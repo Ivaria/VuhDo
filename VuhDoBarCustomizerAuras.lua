@@ -6,6 +6,7 @@ local floor = math.floor;
 local max = math.max;
 
 local InCombatLockdown = InCombatLockdown;
+local UnitCanAttack = UnitCanAttack;
 local CreateFrame = CreateFrame;
 local CreateFramePool = CreateFramePool;
 local GetAuraDuration = C_UnitAuras and C_UnitAuras.GetAuraDuration;
@@ -723,6 +724,42 @@ function VUHDO_initAuraDurationCurves()
 	end
 
 	return;
+
+end
+
+
+
+--
+function VUHDO_getAuraDispelCurve()
+
+	return sAuraDispelCurve;
+
+end
+
+
+
+--
+local tGroup;
+local tCanAttack;
+function VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig)
+
+	if not aUnit or not anAnchorConfig then
+		return nil;
+	end
+
+	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+
+	if not tGroup then
+		return nil;
+	end
+
+	tCanAttack = UnitCanAttack("player", aUnit);
+
+	if tGroup["isHarmful"] ~= tCanAttack then
+		return sAuraDispelCurve;
+	end
+
+	return nil;
 
 end
 
@@ -2420,8 +2457,8 @@ do
 
 				tColorMode = anAnchorConfig["colorMode"] or "default";
 
-				if "debuff" == tColorMode then
-					tDispelCurve = VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig);
+				if "debuff" == tColorMode and anAuraData["dispelName"] then
+					tDispelCurve = VUHDO_getDispelTypeCurve();
 
 					if tDispelCurve then
 						tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
@@ -2458,8 +2495,8 @@ do
 
 				tColorMode = anAnchorConfig["colorMode"] or "default";
 
-				if "debuff" == tColorMode then
-					tDispelCurve = VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig);
+				if "debuff" == tColorMode and anAuraData["dispelName"] then
+					tDispelCurve = VUHDO_getDispelTypeCurve();
 
 					if tDispelCurve then
 						tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
@@ -2523,7 +2560,7 @@ do
 		tDispelBorder = VUHDO_resolveAuraTriState(anAnchorConfig["dispelBorder"], "dispelBorder");
 
 		if aBackdropFrame and aBackdropFrame.SetBackdropBorderColor then
-			tDispelCurve = VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig);
+			tDispelCurve = VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig);
 
 			if tDispelBorder and aUnit and tDispelCurve then
 				tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
@@ -2779,8 +2816,8 @@ do
 
 		tColorMode = anAnchorConfig["colorMode"] or "default";
 
-		if "debuff" == tColorMode then
-			tDispelCurve = VUHDO_getDispelCurveForContext(tUnit, anAnchorConfig);
+		if "debuff" == tColorMode and anAuraData["dispelName"] then
+			tDispelCurve = VUHDO_getDispelTypeCurve();
 
 			if tDispelCurve then
 				tColorMixin = GetAuraDispelTypeColor(tUnit, anAuraData["auraInstanceID"], tDispelCurve);
