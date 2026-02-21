@@ -75,6 +75,7 @@ local VUHDO_getGroupMembersSorted;
 local VUHDO_getGroupMembers;
 local VUHDO_redrawPanel;
 local VUHDO_redrawAllPanels;
+local VUHDO_refreshAllUnitAuras;
 
 
 --
@@ -111,6 +112,8 @@ function VUHDO_panelRedrawInitLocalOverrides()
 		VUHDO_redrawPanel = _G["VUHDO_redrawPanel"];
 		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
 	end
+
+	VUHDO_refreshAllUnitAuras = _G["VUHDO_refreshAllUnitAuras"];
 
 	return;
 
@@ -2253,6 +2256,7 @@ do
 		end
 
 		VUHDO_updateAllCustomDebuffs(true);
+		VUHDO_refreshAllUnitAuras();
 		VUHDO_rebuildTargets();
 		VUHDO_updatePanelVisibility();
 

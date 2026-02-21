@@ -2345,7 +2345,7 @@ function VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, an
 
 	tPanelUnitButtons = VUHDO_getUnitButtonsPanel(aUnit, aPanelNum);
 
-	if not tPanelUnitButtons then
+	if not tPanelUnitButtons or next(tPanelUnitButtons) == nil then
 		return;
 	end
 

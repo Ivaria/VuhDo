@@ -616,6 +616,23 @@ end
 
 
 --
+function VUHDO_refreshAllUnitAuras()
+
+	if not VUHDO_RAID then
+		return;
+	end
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_fullAuraRefresh(tUnit);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tPanelAnchors;
 function VUHDO_initUnitAuraSlots(aUnit)
 
@@ -905,12 +922,20 @@ function VUHDO_fullAuraRefresh(aUnit)
 
 	VUHDO_clearUnitAuraCache(aUnit);
 
-	tAuras = GetUnitAuras(aUnit, "HELPFUL|HARMFUL", 80, 0, 0);
+	tAuras = GetUnitAuras(aUnit, "HELPFUL", 40, 0, 0);
 
 	if tAuras then
 		for _, tAura in ipairs(tAuras) do
 			VUHDO_cacheAuraData(aUnit, tAura);
+			VUHDO_updateHotPredicateFromAura(aUnit, tAura, false);
+		end
+	end
 
+	tAuras = GetUnitAuras(aUnit, "HARMFUL", 40, 0, 0);
+
+	if tAuras then
+		for _, tAura in ipairs(tAuras) do
+			VUHDO_cacheAuraData(aUnit, tAura);
 			VUHDO_updateHotPredicateFromAura(aUnit, tAura, false);
 		end
 	end
