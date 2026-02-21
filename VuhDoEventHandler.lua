@@ -530,6 +530,7 @@ local sClusterRefreshSecs = 1.2;
 local sAoeRefreshSecs = 1.3;
 local sBuffsRefreshSecs;
 local sParseCombatLog;
+local sLastShapeshiftTime = 0;
 
 local VuhDoGcdStatusBar;
 local VuhDoDirectionFrame;
@@ -1251,8 +1252,15 @@ do
 				VUHDO_updateBouquetsForEvent(anArg1, 30); -- VUHDO_UPDATE_ALT_POWER
 			end
 
+		elseif "UPDATE_SHAPESHIFT_FORM" == anEvent then
+			sLastShapeshiftTime = GetTime();
+
 		elseif "LEARNED_SPELL_IN_SKILL_LINE" == anEvent or "TRAIT_CONFIG_UPDATED" == anEvent or "SPELLS_CHANGED" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
+				if "SPELLS_CHANGED" == anEvent and (GetTime() - sLastShapeshiftTime) < 0.5 then
+					return;
+				end
+
 				VUHDO_initFromSpellbook();
 				VUHDO_registerAllBouquets(false);
 				VUHDO_initBuffs();
@@ -2784,6 +2792,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"CHAT_MSG_ADDON",
 	"RAID_TARGET_UPDATE",
 	"LEARNED_SPELL_IN_SKILL_LINE", "TRAIT_CONFIG_UPDATED",
+	"UPDATE_SHAPESHIFT_FORM",
 	"PLAYER_FLAGS_CHANGED",
 	"PLAYER_LOGOUT",
 	"UNIT_DISPLAYPOWER", "UNIT_MAXPOWER", "UNIT_POWER_UPDATE", "RUNE_POWER_UPDATE",

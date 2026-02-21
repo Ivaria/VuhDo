@@ -595,11 +595,18 @@ do
 				end
 
 				tXPos, tYPos = VUHDO_getHealButtonPos(tColumnIndex, tGroupIndex, aPanelNum);
-				VUHDO_PixelUtil.Hide(tHealButton);
-				VUHDO_PixelUtil.ClearAllPoints(tHealButton);
-				VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanelName, "TOPLEFT", tXPos, -tYPos);
+
+				if VUHDO_isDifferentButtonPoint(tHealButton, tXPos, -tYPos) then
+					VUHDO_PixelUtil.Hide(tHealButton);
+					VUHDO_PixelUtil.ClearAllPoints(tHealButton);
+					VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanelName, "TOPLEFT", tXPos, -tYPos);
+				end
+
 				VUHDO_addUnitButton(tHealButton, aPanelNum);
-				VUHDO_PixelUtil.Show(tHealButton);
+
+				if not tHealButton:IsShown() then
+					VUHDO_PixelUtil.Show(tHealButton);
+				end
 			end
 
 			tColumnIndex = tColumnIndex + 1;
@@ -1947,17 +1954,21 @@ do
 
 		tXPos, tYPos = VUHDO_getHealButtonPos(aColumnIndex, aGroupIndex, aPanelNum);
 
-		VUHDO_PixelUtil.Hide(tHealButton);
-		VUHDO_PixelUtil.ClearAllPoints(tHealButton);
+		if VUHDO_isDifferentButtonPoint(tHealButton, tXPos, -tYPos) then
+			VUHDO_PixelUtil.Hide(tHealButton);
+			VUHDO_PixelUtil.ClearAllPoints(tHealButton);
 
-		tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
-		VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanel:GetName(), "TOPLEFT", tXPos, -tYPos);
+			tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
+			VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanel:GetName(), "TOPLEFT", tXPos, -tYPos);
+		end
 
 		if tHealButton:GetAttribute("unit") then
 			VUHDO_addUnitButton(tHealButton, aPanelNum);
 		end
 
-		VUHDO_PixelUtil.Show(tHealButton);
+		if not tHealButton:IsShown() then
+			VUHDO_PixelUtil.Show(tHealButton);
+		end
 
 		if sButtonPositionSemaphores[aPanelNum] then
 			sButtonPositionSemaphores[aPanelNum]:decrement();
