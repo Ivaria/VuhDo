@@ -427,7 +427,7 @@ local function VUHDO_updateTargetHealth(aUnit, aTargetUnit)
 		sUnitTotUnits[aTargetUnit] = aTargetUnit .. "target";
 	end
 
-	tTotUnit = sUnitTotUnits[tTarget];
+	tTotUnit = sUnitTotUnits[aTargetUnit];
 
 	tGuid = UnitGUID(tTotUnit);
 
