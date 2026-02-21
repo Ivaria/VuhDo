@@ -2077,6 +2077,8 @@ function VUHDO_initDebuffs()
 
 	VUHDO_rebuildCanColorBarGroupsCache();
 
+	VUHDO_buildSingleDispelTypeCurves();
+
 	return;
 
 end
