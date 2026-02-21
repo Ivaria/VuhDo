@@ -2530,16 +2530,18 @@ function VUHDO_registerAllBouquets(aDoCompress)
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 		if VUHDO_PANEL_MODELS[tPanelNum] then
 			-- Hot Icons+Bars
-			tHotSlots = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTS"];
+			if not sSecretsEnabled then
+				tHotSlots = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTS"];
 
-			for _, tHotName in pairs(tHotSlots) do
-				if tHotName and "BOUQUET_" == strsub(tHotName, 1, 8) then
-					VUHDO_registerForBouquetUnique(
-						strsub(tHotName, 9),
-						"HoT",
-						VUHDO_hotBouquetCallback,
-						tAlreadyRegistered
-					);
+				for _, tHotName in pairs(tHotSlots) do
+					if tHotName and "BOUQUET_" == strsub(tHotName, 1, 8) then
+						VUHDO_registerForBouquetUnique(
+							strsub(tHotName, 9),
+							"HoT",
+							VUHDO_hotBouquetCallback,
+							tAlreadyRegistered
+						);
+					end
 				end
 			end
 
