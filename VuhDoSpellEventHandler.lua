@@ -68,12 +68,13 @@ local tTargetUnit;
 local tCateg;
 local tSpellName;
 function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
-	if "player" ~= aUnit then 
+
+	if "player" ~= aUnit then
 		return;
 	end
 
-	if sIsShowGcd then 
-		VUHDO_initGcd(); 
+	if sIsShowGcd then
+		VUHDO_initGcd();
 	end
 
 	if aSpellId then
@@ -85,12 +86,8 @@ function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
 	end
 
 	-- Resurrection?
-	if tSpellName == sFirstRes or tSpellName == sSecondRes or tSpellName == sThirdRes then
+	if not sSecretsEnabled and tSpellName == sFirstRes or tSpellName == sSecondRes or tSpellName == sThirdRes then
 		if aTargetName and not VUHDO_strempty(aTargetName) then
-			if sSecretsEnabled and issecretvalue(aTargetName) then
-				return;
-			end
-
 			aTargetName = smatch(aTargetName, "^[^-]*");
 
 			if not VUHDO_RAID_NAMES[aTargetName] then
@@ -110,7 +107,9 @@ function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
 		return;
 	end
 
-	if not aTargetName then return; end
+	if not aTargetName then
+		return;
+	end
 
 	if sSecretsEnabled and issecretvalue(aTargetName) then
 		return;
@@ -119,13 +118,19 @@ function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
 	aTargetName = smatch(aTargetName, "^[^-]*");
 	tTargetUnit = VUHDO_RAID_NAMES[aTargetName];
 
-	if not tTargetUnit then return; end
+	if not tTargetUnit then
+		return;
+	end
 
 	tCateg = sUniqueSpells[tSpellName];
+
 	if tCateg and not InCombatLockdown()
 		and (VUHDO_BUFF_SETTINGS or sEmpty)[tCateg] and aTargetName ~= VUHDO_BUFF_SETTINGS[tCateg]["name"] then
-
 		VUHDO_BUFF_SETTINGS[tCateg]["name"] = aTargetName;
+
 		VUHDO_reloadBuffPanel();
 	end
+
+	return;
+
 end
