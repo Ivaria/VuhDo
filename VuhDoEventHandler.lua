@@ -745,6 +745,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_customHotsInitLocalOverrides();
 	VUHDO_debuffsInitLocalOverrides();
 	VUHDO_barCustomizerAurasInitLocalOverrides();
+	VUHDO_barCustomizerThreatInitLocalOverrides();
 	VUHDO_customDebuffIconsInitLocalOverrides();
 	VUHDO_healCommAdapterInitLocalOverrides();
 	VUHDO_buffWatchInitLocalOverrides();
