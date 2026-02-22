@@ -237,6 +237,7 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 	sGlobalAlphaChains[aButton][anIndicatorName] = {
 		["steps"] = { },
 		["nonSecretSteps"] = { },
+		["overrideValidators"] = { },
 		["head"] = nil,
 		["tail"] = nil,
 		["originalParent"] = tOriginalParent,
@@ -269,6 +270,7 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 					["frame"] = tWrapper,
 					["item"] = tItem,
 					["special"] = tSpecial,
+					["index"] = tCnt,
 					["trueAlpha"] = tSpecial["isInverted"] and 1 or (tItem["color"]["O"] or 1),
 					["falseAlpha"] = tSpecial["isInverted"] and (tItem["color"]["O"] or 1) or 1,
 				});
@@ -276,9 +278,23 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 				tinsert(tChain["nonSecretSteps"], {
 					["item"] = tItem,
 					["special"] = tSpecial,
+					["index"] = tCnt,
 					["alpha"] = tItem["color"]["O"] or 1,
 				});
 			end
+		end
+	end
+
+	for tCnt = 1, #aBouquet do
+		tItem = aBouquet[tCnt];
+		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
+
+		if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useBackground"] then
+			tinsert(tChain["overrideValidators"], {
+				["item"] = tItem,
+				["special"] = tSpecial,
+				["index"] = tCnt,
+			});
 		end
 	end
 
@@ -373,6 +389,8 @@ local tNonSecretAlpha;
 local tIsActive;
 local tIndicatorBar;
 local tFrameGetter;
+local tMinOverrideIndex;
+local tOverride;
 function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 
 	if not anInfo then
@@ -403,14 +421,30 @@ function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 		return;
 	end
 
+	tMinOverrideIndex = nil;
+
+	if tChain["overrideValidators"] then
+		for tIdx = 1, #tChain["overrideValidators"] do
+			tOverride = tChain["overrideValidators"][tIdx];
+
+			if tOverride["special"]["validator"](anInfo, tOverride["item"]) then
+				if not tMinOverrideIndex or tOverride["index"] < tMinOverrideIndex then
+					tMinOverrideIndex = tOverride["index"];
+				end
+			end
+		end
+	end
+
 	tNonSecretAlpha = 1.0;
 	for tIdx = 1, #tChain["nonSecretSteps"] do
 		tStep = tChain["nonSecretSteps"][tIdx];
 
-		tIsActive = tStep["special"]["validator"](anInfo, tStep["item"]);
+		if not tMinOverrideIndex or tStep["index"] <= tMinOverrideIndex then
+			tIsActive = tStep["special"]["validator"](anInfo, tStep["item"]);
 
-		if tIsActive then
-			tNonSecretAlpha = tNonSecretAlpha * tStep["alpha"];
+			if tIsActive then
+				tNonSecretAlpha = tNonSecretAlpha * tStep["alpha"];
+			end
 		end
 	end
 
@@ -419,12 +453,16 @@ function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 	for tIdx = 1, #tChain["steps"] do
 		tStep = tChain["steps"][tIdx];
 
-		tIsActive, _, _, _, _, _, _, _, _, _, _, tSecretBool = tStep["special"]["validator"](anInfo, tStep["item"]);
-
-		if tSecretBool ~= nil then
-			tStep["frame"]:SetAlphaFromBoolean(tSecretBool, tStep["trueAlpha"], tStep["falseAlpha"]);
+		if tMinOverrideIndex and tStep["index"] > tMinOverrideIndex then
+			tStep["frame"]:SetAlpha(1);
 		else
-			tStep["frame"]:SetAlpha(tIsActive and tStep["falseAlpha"] or tStep["trueAlpha"]);
+			tIsActive, _, _, _, _, _, _, _, _, _, _, tSecretBool = tStep["special"]["validator"](anInfo, tStep["item"]);
+
+			if tSecretBool ~= nil then
+				tStep["frame"]:SetAlphaFromBoolean(tSecretBool, tStep["trueAlpha"], tStep["falseAlpha"]);
+			else
+				tStep["frame"]:SetAlpha(tIsActive and tStep["falseAlpha"] or tStep["trueAlpha"]);
+			end
 		end
 	end
 
@@ -528,27 +566,34 @@ end
 
 
 --
+local tO;
 local function VUHDO_applyBackgroundColorToTarget(aTarget, aTargetType, aColor)
 
 	if not aColor or not aColor["useBackground"] then
 		return;
 	end
 
+	tO = aColor["O"] or 1;
+
+	if aColor["useOpacity"] and aColor["O"] then
+		tO = tO * aColor["O"];
+	end
+
 	if aTargetType == VUHDO_TARGET_TYPE_BAR then
 		if aColor["useOpacity"] then
-			aTarget:GetStatusBarTexture():SetVertexColor(aColor["R"], aColor["G"], aColor["B"], aColor["O"]);
+			aTarget:GetStatusBarTexture():SetVertexColor(aColor["R"], aColor["G"], aColor["B"], tO);
 		else
 			aTarget:GetStatusBarTexture():SetVertexColor(aColor["R"], aColor["G"], aColor["B"]);
 		end
 	elseif aTargetType == VUHDO_TARGET_TYPE_TEXTURE then
 		if aColor["useOpacity"] then
-			aTarget:SetVertexColor(aColor["R"], aColor["G"], aColor["B"], aColor["O"]);
+			aTarget:SetVertexColor(aColor["R"], aColor["G"], aColor["B"], tO);
 		else
 			aTarget:SetVertexColor(aColor["R"], aColor["G"], aColor["B"]);
 		end
 	elseif aTargetType == VUHDO_TARGET_TYPE_BORDER then
 		if aColor["useOpacity"] then
-			aTarget:SetBackdropBorderColor(aColor["R"], aColor["G"], aColor["B"], aColor["O"]);
+			aTarget:SetBackdropBorderColor(aColor["R"], aColor["G"], aColor["B"], tO);
 		else
 			aTarget:SetBackdropBorderColor(aColor["R"], aColor["G"], aColor["B"]);
 		end
