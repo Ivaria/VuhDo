@@ -218,7 +218,7 @@ local function VUHDO_updateAllRaidNames()
 	twipe(VUHDO_RAID_NAMES);
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if not VUHDO_isSpecialUnit(tUnit) then
+		if not VUHDO_isSpecialUnit(tUnit) and not tInfo["hasSecretName"] then
 			-- ensure not to overwrite a player name with a pet's identical name
 			if not VUHDO_RAID_NAMES[tInfo["name"]] or not tInfo["isPet"] then
 				VUHDO_RAID_NAMES[tInfo["name"]] = tUnit;
@@ -501,7 +501,7 @@ function VUHDO_setHealth(aUnit, aMode)
 				tInfo["className"] = tLocalClass or "";
 			end
 
-			if not VUHDO_isSpecialUnit(aUnit) then
+			if not VUHDO_isSpecialUnit(aUnit) and not tInfo["hasSecretName"] then
 				if not tIsPet and tInfo["fullName"] == tName and VUHDO_RAID_NAMES[tName] then
 					VUHDO_IS_SUSPICIOUS_ROSTER = true;
 				end
