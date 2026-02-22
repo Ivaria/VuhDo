@@ -741,6 +741,7 @@ end
 --
 local tGroup;
 local tCanAttack;
+local tInfo;
 function VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig)
 
 	if not aUnit or not anAnchorConfig then
@@ -753,7 +754,13 @@ function VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig)
 		return nil;
 	end
 
-	tCanAttack = UnitCanAttack("player", aUnit);
+	tInfo = VUHDO_RAID[aUnit];
+
+	if not tInfo then
+		return nil;
+	end
+
+	tCanAttack = tInfo["canAttack"];
 
 	if tGroup["isHarmful"] ~= tCanAttack then
 		return sAuraDispelCurve;

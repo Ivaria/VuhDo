@@ -51,6 +51,7 @@ local sBouquetLayerTemplates = { };
 local sBouquetCurves = { };
 local sBouquetColors = { };
 local sCurveCache = { };
+local sBrightnessCurveCache = { };
 
 local sDispelTypeCurve;
 local sDebuffDurationCurve;
@@ -132,6 +133,91 @@ function VUHDO_safeColorFromTable(aColorTable, aFallback)
 
 	return aFallback or sTransparentColor;
 
+end
+
+
+
+do
+	--
+	local tBrightCacheKey;
+	local tColors;
+	local tTransparent;
+	local tNewCurve;
+	local tDispelAbilities;
+	local tPurgeAbilities;
+	local tBlizzType;
+	local tColorKey;
+	local tCt;
+	local tR;
+	local tG;
+	local tB;
+	local tO;
+	function VUHDO_getOrBuildBrightnessCurve(aBaseCurve, aBrightness, aCurveType)
+
+		if not aBrightness or aBrightness >= 1 then
+			return aBaseCurve;
+		end
+
+		tBrightCacheKey = aCurveType .. "_" .. tostring(aBrightness);
+
+		if sBrightnessCurveCache[tBrightCacheKey] then
+			return sBrightnessCurveCache[tBrightCacheKey];
+		end
+
+		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+		tTransparent = CreateColor(0, 0, 0, 0);
+
+		tNewCurve = CreateColorCurve();
+		tNewCurve:SetType(Enum.LuaCurveType.Step);
+		tNewCurve:AddPoint(0, tTransparent);
+
+		if "friendly" == aCurveType then
+			tDispelAbilities = VUHDO_getDispelAbilities();
+
+			for tVuhDoType, tAbility in pairs(tDispelAbilities) do
+				if tAbility then
+					tBlizzType = VUHDO_BLIZZARD_DISPEL_TYPE_MAP[tVuhDoType];
+					tColorKey = VUHDO_DISPEL_TYPE_COLOR_KEY_MAP[tVuhDoType];
+
+					if tBlizzType and tColors and tColors[tColorKey] then
+						tCt = tColors[tColorKey];
+
+						tR = (tCt["R"] or 0) * aBrightness;
+						tG = (tCt["G"] or 0) * aBrightness;
+						tB = (tCt["B"] or 0) * aBrightness;
+						tO = tCt["O"] or 1;
+
+						tNewCurve:AddPoint(tBlizzType, CreateColor(tR, tG, tB, tO));
+					end
+				end
+			end
+		elseif "hostile" == aCurveType then
+			tPurgeAbilities = VUHDO_getPurgeAbilities();
+
+			for tVuhDoType, tAbility in pairs(tPurgeAbilities) do
+				if tAbility then
+					tBlizzType = VUHDO_BLIZZARD_DISPEL_TYPE_MAP[tVuhDoType];
+					tColorKey = VUHDO_DISPEL_TYPE_COLOR_KEY_MAP[tVuhDoType];
+
+					if tBlizzType and tColors and tColors[tColorKey] then
+						tCt = tColors[tColorKey];
+
+						tR = (tCt["R"] or 0) * aBrightness;
+						tG = (tCt["G"] or 0) * aBrightness;
+						tB = (tCt["B"] or 0) * aBrightness;
+						tO = tCt["O"] or 1;
+
+						tNewCurve:AddPoint(tBlizzType, CreateColor(tR, tG, tB, tO));
+					end
+				end
+			end
+		end
+
+		sBrightnessCurveCache[tBrightCacheKey] = tNewCurve;
+
+		return tNewCurve;
+
+	end
 end
 
 
@@ -408,6 +494,7 @@ end
 
 
 do
+	--
 	local VUHDO_ALL_CLASS_IDS = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };
 	local tMockInfo;
 	local tItem;
@@ -447,6 +534,7 @@ end
 
 
 do
+	--
 	local tPowerCurve;
 	local tThreshold;
 	local tPowerBaseColor;
@@ -498,6 +586,7 @@ end
 
 
 do
+	--
 	local tColors;
 	local tDefaultColor;
 	function VUHDO_buildDispelTypeCurve()
@@ -531,8 +620,8 @@ end
 
 
 
---
 do
+	--
 	local tColors;
 	local tTransparent;
 	local tDispelAbilities;
@@ -618,6 +707,8 @@ do
 			end
 		end
 
+		twipe(sBrightnessCurveCache);
+
 		return;
 
 	end
@@ -680,32 +771,58 @@ end
 
 
 --
-local tIsFriendly;
-local tIsHostile;
-function VUHDO_getDispelCurveForUnit(aUnit, anIsHarmful)
+function VUHDO_getFriendlyDispelCurve()
 
-	if not aUnit then
-		return nil;
-	end
+	return sFriendlyDispelCurve;
 
-	tIsFriendly = UnitIsFriend("player", aUnit);
-	tIsHostile = UnitIsEnemy("player", aUnit);
+end
 
-	if tIsFriendly and not tIsHostile and anIsHarmful then
-		return sFriendlyDispelCurve;
-	end
 
-	if tIsHostile and not anIsHarmful then
-		return sHostilePurgeCurve;
-	end
 
-	return nil;
+--
+function VUHDO_getHostilePurgeCurve()
+
+	return sHostilePurgeCurve;
 
 end
 
 
 
 do
+	--
+	local tInfo;
+	local tCanAttack;
+	function VUHDO_getDispelCurveForUnit(aUnit, anIsHarmful)
+
+		if not aUnit then
+			return nil;
+		end
+
+		tInfo = VUHDO_RAID[aUnit];
+
+		if not tInfo then
+			return nil;
+		end
+
+		tCanAttack = tInfo["canAttack"];
+
+		if not tCanAttack and anIsHarmful then
+			return sFriendlyDispelCurve;
+		end
+
+		if tCanAttack and not anIsHarmful then
+			return sHostilePurgeCurve;
+		end
+
+		return nil;
+
+	end
+end
+
+
+
+do
+	--
 	local tDurationCurve;
 	local tDurationColorMixin;
 	function VUHDO_buildDurationThresholdCurve(aKey, aThresholdSeconds, aActiveColor, anIsBelow)
@@ -762,6 +879,7 @@ end
 
 
 do
+	--
 	local tBouquet;
 	local tSpecial;
 	local tHasHealthValidator;
@@ -1039,6 +1157,10 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 					["debuffType"] = tSpecial["debuffType"],
 				};
 
+				if tSpecial["buildCurves"] and tItem["custom"] and tItem["custom"]["bright"] then
+					tTemplate["dispelValidators"][tDispelIdx]["curves"] = tSpecial["buildCurves"](tItem["custom"]["bright"]);
+				end
+
 				tTemplate["dispelResults"][tDispelIdx] = {
 					["isActive"] = false,
 					["r"] = nil,
@@ -1247,6 +1369,29 @@ end
 
 
 
+do
+	--
+	local tValidators;
+	local tValidatorEntry;
+	function VUHDO_findDispelValidatorEntry(aLayerTemplate, aPriorityIndex)
+
+		tValidators = aLayerTemplate["dispelValidators"];
+
+		for tIdx = 1, #tValidators do
+			tValidatorEntry = tValidators[tIdx];
+
+			if tValidatorEntry["index"] == aPriorityIndex then
+				return tValidatorEntry;
+			end
+		end
+
+		return nil;
+
+	end
+end
+
+
+
 --
 local function VUHDO_findSpriteCellResultSlot(aLayerTemplate, aPriorityIndex)
 
@@ -1334,22 +1479,6 @@ end
 
 
 --
-local tColor;
-local tFactor;
-local tModi, tInvModi;
-local tR1, tG1, tB1, tO1;
-local tR2, tG2, tB2, tO2;
-local tGood, tFair, tLow;
-local tDestColor = { ["useBackground"] = true, ["useOpacity"] = true };
-local tRadio;
-local tIsGradient;
-local tClassId;
-local tMaxColor;
-local tDestMaxColor = { ["useBackground"] = true, ["useOpacity"] = true };
-
-
-
---
 local function VUHDO_ensureClassColorsInitialized()
 
 	if not VUHDO_USER_CLASS_COLORS or not VUHDO_USER_CLASS_GRADIENT_COLORS then
@@ -1363,6 +1492,18 @@ end
 
 
 --
+local tColor;
+local tFactor;
+local tModi, tInvModi;
+local tR1, tG1, tB1, tO1;
+local tR2, tG2, tB2, tO2;
+local tGood, tFair, tLow;
+local tDestColor = { ["useBackground"] = true, ["useOpacity"] = true };
+local tRadio;
+local tIsGradient;
+local tClassId;
+local tMaxColor;
+local tDestMaxColor = { ["useBackground"] = true, ["useOpacity"] = true };
 local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue)
 
 	VUHDO_ensureClassColorsInitialized();
@@ -1827,6 +1968,14 @@ do
 						tDispelResultSlot = VUHDO_findDispelResultSlot(aLayerTemplate, tCnt);
 
 						if tDispelResultSlot then
+							tValidatorEntry = VUHDO_findDispelValidatorEntry(aLayerTemplate, tCnt);
+
+							if tValidatorEntry and tValidatorEntry["curves"] and tValidatorEntry["special"]["getCurve"] then
+								tSecretContext["dispelCurve"] = tValidatorEntry["special"]["getCurve"](tValidatorEntry["curves"], aUnit, true);
+							else
+								tSecretContext["dispelCurve"] = nil;
+							end
+
 							tIsActive, _, _, _, _, _, _, _, _, _, _, tAuraInstanceId, tSecretColor = tSpecial["validator"](aInfo, tInfos, tSecretContext);
 
 							tDispelResultSlot["isActive"] = tIsActive;
@@ -2105,7 +2254,6 @@ do
 		return;
 
 	end
-
 end
 
 
@@ -2336,7 +2484,6 @@ do
 		return;
 
 	end
-
 end
 
 
@@ -2419,6 +2566,7 @@ end
 local tBouquet;
 local tName;
 local function VUHDO_activateBuffsInScanner(aBouquetName)
+
 	tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
 
 	for _, tInfos in pairs(tBouquet) do
@@ -2484,6 +2632,8 @@ local function VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction)
 		VUHDO_CYCLIC_BOUQUETS[aBouquetName] = true;
 	end
 
+	return;
+
 end
 
 
@@ -2500,6 +2650,8 @@ function VUHDO_registerForBouquetUnique(aBouquetName, anOwnerName, aFunction, an
 
 		anAlreadyRegistered[aBouquetName .. anOwnerName] = true;
 	end
+
+	return;
 
 end
 
@@ -2815,11 +2967,13 @@ end
 
 --
 local function VUHDO_isAnyBouquetInterestedIn(anUpdateMode)
+
 	for tName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
 		if VUHDO_isBouquetInterestedInEvent(tName, anUpdateMode) then return true; end
 	end
 
 	return false;
+
 end
 
 

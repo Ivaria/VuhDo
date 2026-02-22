@@ -35,7 +35,6 @@ local VUHDO_getDebuffColor;
 local VUHDO_getIsCurrentBouquetActive;
 local VUHDO_getUnitDebuffSchoolInfos;
 local VUHDO_getDebuffTypeAuraInstanceId;
-local VUHDO_getRaidTargetIconTexture;
 local VUHDO_getUnitGroupPrivileges;
 local VUHDO_getLatestCustomDebuff;
 local VUHDO_getUnitHot;
@@ -43,6 +42,9 @@ local VUHDO_getUnitHotInfo;
 local VUHDO_getDispelCurveForUnit;
 local VUHDO_getDebuffColorType;
 local VUHDO_getDebuffCustomColor;
+local VUHDO_getFriendlyDispelCurve;
+local VUHDO_getHostilePurgeCurve;
+local VUHDO_getOrBuildBrightnessCurve;
 
 local sBarColors;
 local sIsDistance;
@@ -51,10 +53,7 @@ local sCustomFlagCache = { };
 local sCustomFlagErrorHandler;
 
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
-local GetAuraDuration = C_UnitAuras and C_UnitAuras.GetAuraDuration;
-local CreateColor = CreateColor;
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
-local issecretvalue = issecretvalue;
 local tSecretColor;
 local tCurve;
 
@@ -131,7 +130,6 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getDebuffTypeAuraInstanceId = _G["VUHDO_getDebuffTypeAuraInstanceId"];
 	VUHDO_getIsCurrentBouquetActive = _G["VUHDO_getIsCurrentBouquetActive"];
 
-	VUHDO_getRaidTargetIconTexture = _G["VUHDO_getRaidTargetIconTexture"];
 	VUHDO_getUnitGroupPrivileges = _G["VUHDO_getUnitGroupPrivileges"];
 	VUHDO_getLatestCustomDebuff = _G["VUHDO_getLatestCustomDebuff"];
 	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
@@ -139,6 +137,9 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getDebuffCustomColor = _G["VUHDO_getDebuffCustomColor"];
 	VUHDO_getUnitHot = _G["VUHDO_getUnitHot"];
 	VUHDO_getUnitHotInfo = _G["VUHDO_getUnitHotInfo"];
+	VUHDO_getFriendlyDispelCurve = _G["VUHDO_getFriendlyDispelCurve"];
+	VUHDO_getHostilePurgeCurve = _G["VUHDO_getHostilePurgeCurve"];
+	VUHDO_getOrBuildBrightnessCurve = _G["VUHDO_getOrBuildBrightnessCurve"];
 
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
 	sIsDistance = VUHDO_CONFIG["DIRECTION"]["isDistanceText"];
@@ -154,6 +155,48 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	end
 
 	return;
+
+end
+
+
+
+--
+local tBrightCurves;
+function VUHDO_buildDispelBrightnessCurves(aBrightness)
+
+	tBrightCurves = {
+		["friendly"] = VUHDO_getOrBuildBrightnessCurve(VUHDO_getFriendlyDispelCurve(), aBrightness, "friendly"),
+		["hostile"] = VUHDO_getOrBuildBrightnessCurve(VUHDO_getHostilePurgeCurve(), aBrightness, "hostile"),
+	};
+
+	return tBrightCurves;
+
+end
+
+
+
+--
+local tInfo;
+local tCanAttack;
+function VUHDO_getDispelBrightnessCurve(aCurves, aUnit, anIsHarmful)
+
+	tInfo = VUHDO_RAID[aUnit];
+
+	if not tInfo then
+		return nil;
+	end
+
+	tCanAttack = tInfo["canAttack"];
+
+	if not tCanAttack and anIsHarmful then
+		return aCurves["friendly"];
+	end
+
+	if tCanAttack and not anIsHarmful then
+		return aCurves["hostile"];
+	end
+
+	return nil;
 
 end
 
@@ -512,7 +555,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 
 	if anInfo["charmed"] then
 		tAuraInstanceId = 6;
-		tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
+		tCurve = aSecretContext["dispelCurve"] or VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 		tSecretColor = nil;
 
 		if tAuraInstanceId and tCurve then
@@ -528,7 +571,7 @@ local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
 		end
 
 		tAuraInstanceId = anInfo["debuff"];
-		tCurve = VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
+		tCurve = aSecretContext["dispelCurve"] or VUHDO_getDispelCurveForUnit(anInfo["unit"], true);
 		tSecretColor = nil;
 
 		if tAuraInstanceId and tAuraInstanceId >= 0 and tCurve then
@@ -1527,6 +1570,8 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["secretType"] = VUHDO_SECRET_TYPE_DISPEL,
 		["hasValue"] = false,
 		["isGlobal"] = false,
+		["buildCurves"] = VUHDO_buildDispelBrightnessCurves,
+		["getCurve"] = VUHDO_getDispelBrightnessCurve,
 	},
 
 	["DEAD"] = {
@@ -1591,8 +1636,6 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["hasValue"] = false,
 		["isGlobal"] = false,
 	},
-
-
 
 	["NUM_CLUSTER"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_NUM_IN_CLUSTER,
@@ -1670,8 +1713,6 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["isGlobal"] = false,
 	},
 
-
-
 	["STATUS_CC_ACTIVE"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_STATUS_CLASS_COLOR_IF_ACTIVE,
 		["validator"] = VUHDO_classColorIfActiveValidator,
@@ -1682,8 +1723,6 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["hasValue"] = false,
 		["isGlobal"] = false,
 	},
-
-
 
 	["HAS_SUMMON_ICON"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_HAS_SUMMON_ICON,
@@ -1859,8 +1898,6 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["isGlobal"] = false,
 	},
 
-
-
 	["LEADER"] = {
 		["displayName"] = VUHDO_I18N_DEF_RAID_LEADER,
 		["validator"] = VUHDO_leaderIconValidator,
@@ -1914,8 +1951,6 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["hasValue"] = false,
 		["isGlobal"] = false,
 	},
-
-
 
 	["CLASS_COLOR"] = {
 		["displayName"] = VUHDO_I18N_BOUQUET_CLASS_COLOR,

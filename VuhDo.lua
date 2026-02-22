@@ -456,7 +456,8 @@ function VUHDO_setHealth(aUnit, aMode)
 				tInfo["hasSecretPower"] = false;
 			end
 
-			tInfo["charmed"] = UnitIsCharmed(aUnit) and UnitCanAttack("player", aUnit);
+			tInfo["canAttack"] = UnitCanAttack("player", aUnit);
+			tInfo["charmed"] = UnitIsCharmed(aUnit) and tInfo["canAttack"];
 			tInfo["aggro"] = false;
 			tInfo["group"] = VUHDO_getUnitGroup(aUnit, tIsPet);
 			tInfo["dead"] = tIsDead;
