@@ -476,9 +476,17 @@ end
 --
 local tInfo;
 local function VUHDO_setUnitMissBuff(aUnit, aCategSpec, someVariants, aCategName)
-	if not (VUHDO_BUFF_SETTINGS[aCategName]["missingColor"] or sEmpty)["show"] then return; end
+
+	if sSecretsEnabled then
+		return;
+	end
+
+	if not (VUHDO_BUFF_SETTINGS[aCategName]["missingColor"] or sEmpty)["show"] then
+		return;
+	end
 
 	tInfo = VUHDO_RAID[aUnit];
+
 	if tInfo then
 		-- Don't show missing buffs on vehicles
 		if tInfo["isPet"] and VUHDO_RAID[tInfo["ownerUnit"]] and VUHDO_RAID[tInfo["ownerUnit"]]["isVehicle"] then
@@ -491,6 +499,9 @@ local function VUHDO_setUnitMissBuff(aUnit, aCategSpec, someVariants, aCategName
 			tInfo["mibuvariants"] = someVariants;
 		end
 	end
+
+	return;
+
 end
 
 
