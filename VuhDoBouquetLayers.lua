@@ -249,9 +249,7 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 		tItem = aBouquet[tCnt];
 		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
 
-		if tSpecial and tSpecial["isGlobal"] and
-		   tItem["color"] and tItem["color"]["useOpacity"] then
-
+		if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] and not tItem["color"]["useBackground"] then
 			tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
 			if tSecretType == VUHDO_SECRET_TYPE_BOOLEAN then
@@ -260,8 +258,10 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 				tWrapper = CreateFrame("Frame", tOriginalParent:GetName() .. "AlpWr" .. sWrapperNameCounter, tOriginalParent);
 
 				tWrapper:SetAllPoints(tOriginalParent);
+
 				tWrapper["addLevel"] = tIndicatorAddLevel;
 				tWrapper:SetFrameLevel(tOriginalParent:GetFrameLevel());
+
 				tWrapper:SetAlpha(1);
 				tWrapper:Show();
 
