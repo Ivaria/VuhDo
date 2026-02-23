@@ -44,6 +44,7 @@ local VUHDO_getDebuffColorType;
 local VUHDO_getDebuffCustomColor;
 local VUHDO_getFriendlyDispelCurve;
 local VUHDO_getHostilePurgeCurve;
+local VUHDO_getDispelTypeCurve;
 local VUHDO_getOrBuildBrightnessCurve;
 
 local sBarColors;
@@ -139,6 +140,7 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getUnitHotInfo = _G["VUHDO_getUnitHotInfo"];
 	VUHDO_getFriendlyDispelCurve = _G["VUHDO_getFriendlyDispelCurve"];
 	VUHDO_getHostilePurgeCurve = _G["VUHDO_getHostilePurgeCurve"];
+	VUHDO_getDispelTypeCurve = _G["VUHDO_getDispelTypeCurve"];
 	VUHDO_getOrBuildBrightnessCurve = _G["VUHDO_getOrBuildBrightnessCurve"];
 
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
@@ -165,8 +167,8 @@ local tBrightCurves;
 function VUHDO_buildDispelBrightnessCurves(aBrightness)
 
 	tBrightCurves = {
-		["friendly"] = VUHDO_getOrBuildBrightnessCurve(VUHDO_getFriendlyDispelCurve(), aBrightness, "friendly"),
-		["hostile"] = VUHDO_getOrBuildBrightnessCurve(VUHDO_getHostilePurgeCurve(), aBrightness, "hostile"),
+		["friendly"] = VUHDO_getOrBuildBrightnessCurve(VUHDO_getDispelTypeCurve(), aBrightness, "friendly"),
+		["hostile"] = VUHDO_getOrBuildBrightnessCurve(VUHDO_getDispelTypeCurve(), aBrightness, "hostile"),
 	};
 
 	return tBrightCurves;
