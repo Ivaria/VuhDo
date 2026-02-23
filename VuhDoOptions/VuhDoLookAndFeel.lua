@@ -1189,7 +1189,7 @@ do
 
 		if not tValue then return; end
 
-		if tValue.R and tValue.useBackground then
+		if tValue.R and (tValue.useBackground or aColorSwatch:GetAttribute("forceShowColors")) then
 			_G[aColorSwatch:GetName() .. "Texture"]:SetVertexColor(tValue["R"], tValue["G"], tValue["B"]);
 		else
 			_G[aColorSwatch:GetName() .. "Texture"]:SetVertexColor(1, 1, 1);
@@ -1201,7 +1201,7 @@ do
 			_G[aColorSwatch:GetName() .. "Texture"]:SetAlpha(1);
 		end
 
-		if tValue.TR and tValue.useText then
+		if tValue.TR and (tValue.useText or aColorSwatch:GetAttribute("forceShowColors")) then
 			_G[aColorSwatch:GetName() .. "TitleString"]:SetTextColor(tValue["TR"], tValue["TG"], tValue["TB"]);
 		else
 			_G[aColorSwatch:GetName() .. "TitleString"]:SetTextColor(1, 1, 1);
