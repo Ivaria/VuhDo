@@ -30,6 +30,7 @@ local VUHDO_getActionPanelOrStub;
 local VUHDO_getPanelButtons;
 local VUHDO_getHealthBarText;
 local VUHDO_getUnitButtonsSafe;
+local VUHDO_isModelInPanel;
 
 -----------------------------------------------------------------------
 --local VUHDO_getNumbersFromString;
@@ -49,6 +50,7 @@ function VUHDO_guiToolboxInitLocalOverrides()
 	VUHDO_getPanelButtons = _G["VUHDO_getPanelButtons"];
 	VUHDO_getHealthBarText = _G["VUHDO_getHealthBarText"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
+	VUHDO_isModelInPanel = _G["VUHDO_isModelInPanel"];
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 		sIsManaBar[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] ~= "";
@@ -84,12 +86,31 @@ local function VUHDO_hasPanelVisibleButtons(aPanelNum)
 		return true;
 
 	else
+		if VUHDO_isModelInPanel(aPanelNum, 42) and
+			((not VUHDO_CONFIG["OMIT_TARGET"] and UnitExists("target")) or (not VUHDO_CONFIG["OMIT_FOCUS"] and UnitExists("focus"))) then
+			return true;
+		end
+
+		if VUHDO_isModelInPanel(aPanelNum, 82) and UnitExists("target") then
+			return true;
+		end
+
+		if VUHDO_isModelInPanel(aPanelNum, 83) and UnitExists("focus") then
+			return true;
+		end
+
+		if VUHDO_isModelInPanel(aPanelNum, 44) then
+			for tCnt = 1, 8 do
+				if UnitExists("boss" .. tCnt) then
+					return true;
+				end
+			end
+		end
+
 		for _, tButton in pairs(VUHDO_getPanelButtons(aPanelNum)) do
 			tUnit = tButton:GetAttribute("unit");
-			
-			if not tUnit then
-				return false;
-			elseif UnitExists(tUnit) then
+
+			if tUnit and UnitExists(tUnit) then
 				return true;
 			end
 		end
