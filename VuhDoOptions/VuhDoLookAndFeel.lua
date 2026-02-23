@@ -348,31 +348,61 @@ end
 
 
 --
+local tComboBox;
+local tTooltip;
 function VUHDO_lnfComboItemOnEnter(aComboItem)
-	local tComboBox = aComboItem.parentCombo;
+
+	tComboBox = aComboItem["parentCombo"];
+
 	if IsMouseButtonDown() and not tComboBox["isMulti"] then
 		VUHDO_lnfComboSetSelectedValue(tComboBox, aComboItem:GetAttribute("value"));
 	end
+
 	aComboItem:SetBackdropColor(0.8, 0.8, 1, 1);
 
 	if not tComboBox["isMulti"] then
 		_G[aComboItem:GetName() .. "Icon"]:SetScale(2);
+
 		VUHDO_PixelUtil.SetPoint(_G[aComboItem:GetName() .. "Icon"], "RIGHT", aComboItem:GetName(), "RIGHT", -10, 0);
 	end
+
+	tTooltip = aComboItem:GetAttribute("tooltip");
+
+	if tTooltip then
+		VuhDoOptionsTooltipTextText:SetText(tTooltip);
+
+		VUHDO_PixelUtil.SetHeight(VuhDoOptionsTooltip, VuhDoOptionsTooltipTextText:GetHeight() + 10);
+		VuhDoOptionsTooltip:ClearAllPoints();
+		VUHDO_PixelUtil.SetPoint(VuhDoOptionsTooltip, "TOPLEFT", aComboItem:GetName(), "TOPRIGHT", 3, 0);
+		VuhDoOptionsTooltip:Show();
+	end
+
+	return;
+
 end
 
 
 
 --
+local tComboBox;
 function VUHDO_lnfComboItemOnLeave(aComboItem)
-	if aComboItem.parentCombo["isScrollable"] then aComboItem:SetBackdropColor(0, 0, 0, 0);
-	else aComboItem:SetBackdropColor(1, 1, 1, 1); end
 
-	local tComboBox = aComboItem.parentCombo;
+	if aComboItem["parentCombo"]["isScrollable"] then
+		aComboItem:SetBackdropColor(0, 0, 0, 0);
+	else
+		aComboItem:SetBackdropColor(1, 1, 1, 1);
+	end
+
+	tComboBox = aComboItem["parentCombo"];
 	if not tComboBox["isMulti"] then
 		_G[aComboItem:GetName() .. "Icon"]:SetScale(1);
 		VUHDO_PixelUtil.SetPoint(_G[aComboItem:GetName() .. "Icon"], "RIGHT", aComboItem:GetName(), "RIGHT", -6, 0);
 	end
+
+	VuhDoOptionsTooltip:Hide();
+
+	return;
+
 end
 
 
@@ -915,7 +945,12 @@ end
 
 -- ComboBox
 --
--- tInfo = { Value, Text/Texture }
+-- combo_table entry position meanings:
+-- 1: value (required) - the data value stored when this item is selected
+-- 2: label (required) - display text shown in the dropdown
+-- 3: (reserved/unused)
+-- 4: iconSource (optional) - icon texture source, falls back to label if not provided
+-- 5: tooltip (optional) - tooltip text shown when hovering over this item
 local VUHDO_COMBO_ITEM_WIDTH;
 local VUHDO_COMBO_ITEM_HEIGHT;
 local VUHDO_COMBO_ITEMS_PER_COL;
@@ -1012,7 +1047,13 @@ function VUHDO_lnfComboInitItems(aComboBox)
 
 		tItemPanel:SetAttribute("value", tInfo[1]);
 
-		if (aComboBox.isScrollable) then
+		if tInfo[5] and "string" == type(tInfo[5]) then
+			tItemPanel:SetAttribute("tooltip", tInfo[5]);
+		else
+			tItemPanel:SetAttribute("tooltip", nil);
+		end
+
+		if aComboBox["isScrollable"] then
 			tItemPanel:SetBackdropColor(0, 0, 0, 0);
 		end
 

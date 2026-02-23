@@ -18,10 +18,13 @@ VUHDO_AURA_GROWTH_DIR_OPTIONS = {
 };
 
 VUHDO_AURA_SORT_RULE_OPTIONS = {
-	{ 0, VUHDO_I18N_INDEX },
-	{ 1, VUHDO_I18N_NAME },
-	{ 2, VUHDO_I18N_TIME },
-	{ 3, VUHDO_I18N_EXPIRATION },
+	{ 0, VUHDO_I18N_SORT_UNSORTED, nil, nil, VUHDO_I18N_TT.K653 },
+	{ 1, VUHDO_I18N_SORT_DEFAULT, nil, nil, VUHDO_I18N_TT.K654 },
+	{ 2, VUHDO_I18N_SORT_BIG_DEFENSIVE, nil, nil, VUHDO_I18N_TT.K655 },
+	{ 3, VUHDO_I18N_SORT_EXPIRATION, nil, nil, VUHDO_I18N_TT.K656 },
+	{ 4, VUHDO_I18N_SORT_EXPIRATION_ONLY, nil, nil, VUHDO_I18N_TT.K657 },
+	{ 5, VUHDO_I18N_SORT_NAME, nil, nil, VUHDO_I18N_TT.K658 },
+	{ 6, VUHDO_I18N_SORT_NAME_ONLY, nil, nil, VUHDO_I18N_TT.K659 },
 };
 
 VUHDO_AURA_SORT_DIR_OPTIONS = {
@@ -62,7 +65,7 @@ local sDefaultAnchorEntry = {
 	["maxDisplay"] = 5,
 	["maxColumns"] = 5,
 	["maxRows"] = 1,
-	["sortRule"] = 3,
+	["sortRule"] = 4,
 	["sortDir"] = 0,
 	["size"] = nil,
 	["barWidth"] = nil,
