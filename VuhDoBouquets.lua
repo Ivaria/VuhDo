@@ -807,11 +807,11 @@ do
 		tCanAttack = tInfo["canAttack"];
 
 		if not tCanAttack and anIsHarmful then
-			return sFriendlyDispelCurve;
+			return sDispelTypeCurve;
 		end
 
 		if tCanAttack and not anIsHarmful then
-			return sHostilePurgeCurve;
+			return sDispelTypeCurve;
 		end
 
 		return nil;

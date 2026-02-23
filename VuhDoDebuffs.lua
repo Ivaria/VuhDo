@@ -8,6 +8,9 @@ local VUHDO_LAST_UNIT_DEBUFFS = { };
 local VUHDO_PLAYER_DISPEL_ABILITIES = { };
 local VUHDO_PLAYER_PURGE_ABILITIES = { };
 
+VUHDO_PLAYER_HAS_DISPEL = false;
+VUHDO_PLAYER_HAS_PURGE = false;
+
 local VUHDO_IGNORE_DEBUFFS_BY_CLASS = { };
 local VUHDO_IGNORE_DEBUFF_NAMES = { };
 
@@ -1815,42 +1818,37 @@ do
 		for tCnt = 1, #sCanColorBarGroups do
 			tCanColorGroup = sCanColorBarGroups[tCnt];
 
-			if tCanColorGroup["isInferred"] then
-				if VUHDO_hasInferredAura and VUHDO_hasInferredAura(aUnit) then
-					if VUHDO_INFERRED_AURAS and VUHDO_INFERRED_AURAS[aUnit] and
-					   VUHDO_INFERRED_AURAS[aUnit][tCanColorGroup["inferredType"]] then
-						sUnitDispellableDebuffId[aUnit] = VUHDO_INFERRED_AURA_SYNTHETIC_IDS and VUHDO_INFERRED_AURA_SYNTHETIC_IDS[tCanColorGroup["inferredType"]] or -1;
+			if tCanColorGroup["isInferred"] and VUHDO_hasInferredAura and VUHDO_hasInferredAura(aUnit) and VUHDO_INFERRED_AURAS and
+				VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tCanColorGroup["inferredType"]] then
+				sUnitDispellableDebuffId[aUnit] = VUHDO_INFERRED_AURA_SYNTHETIC_IDS and VUHDO_INFERRED_AURA_SYNTHETIC_IDS[tCanColorGroup["inferredType"]] or -1;
 
-						sUnitDebuffColorType[aUnit] = tCanColorGroup["colorType"];
-						sUnitDebuffCustomColor[aUnit] = tCanColorGroup["customColor"];
-						sUnitDebuffCanColorBar[aUnit] = tCanColorGroup["canColorBar"];
-						sUnitDebuffColorText[aUnit] = tCanColorGroup["canColorText"];
+				sUnitDebuffColorType[aUnit] = tCanColorGroup["colorType"];
+				sUnitDebuffCustomColor[aUnit] = tCanColorGroup["customColor"];
+				sUnitDebuffCanColorBar[aUnit] = tCanColorGroup["canColorBar"];
+				sUnitDebuffColorText[aUnit] = tCanColorGroup["canColorText"];
 
-						return;
-					end
-				end
-			elseif tCanColorGroup["dispelCheckFilter"] then
-				if (tCanColorGroup["isHelpful"] and UnitCanAttack("player", aUnit)) or (not tCanColorGroup["isHelpful"] and not UnitCanAttack("player", aUnit)) then
-					tAuras = GetUnitAuras(aUnit, tCanColorGroup["filter"], 40, Enum.UnitAuraSortRule.Default, 1);
+				return;
+			elseif tCanColorGroup["dispelCheckFilter"] and ((tCanColorGroup["isHelpful"] and VUHDO_PLAYER_HAS_PURGE and UnitCanAttack("player", aUnit)) or
+				(not tCanColorGroup["isHelpful"] and VUHDO_PLAYER_HAS_DISPEL and not UnitCanAttack("player", aUnit))) then
+				tAuras = GetUnitAuras(aUnit, tCanColorGroup["filter"], 40, Enum.UnitAuraSortRule.Default, 1);
 
-					if tAuras then
-						for tIdx = 1, #tAuras do
-							tAura = tAuras[tIdx];
-							tAuraInstanceId = tAura["auraInstanceID"];
+				if tAuras then
+					for tIdx = 1, #tAuras do
+						tAura = tAuras[tIdx];
+						tAuraInstanceId = tAura["auraInstanceID"];
 
-							if not C_UnitAuras.IsAuraFilteredOutByInstanceID(aUnit, tAuraInstanceId, tCanColorGroup["dispelCheckFilter"]) then
-								sUnitDispellableDebuffId[aUnit] = tAuraInstanceId;
-								sUnitDebuffColorType[aUnit] = tCanColorGroup["colorType"];
-								sUnitDebuffCustomColor[aUnit] = tCanColorGroup["customColor"];
-								sUnitDebuffCanColorBar[aUnit] = tCanColorGroup["canColorBar"];
-								sUnitDebuffColorText[aUnit] = tCanColorGroup["canColorText"];
+						if not C_UnitAuras.IsAuraFilteredOutByInstanceID(aUnit, tAuraInstanceId, tCanColorGroup["dispelCheckFilter"]) then
+							sUnitDispellableDebuffId[aUnit] = tAuraInstanceId;
+							sUnitDebuffColorType[aUnit] = tCanColorGroup["colorType"];
+							sUnitDebuffCustomColor[aUnit] = tCanColorGroup["customColor"];
+							sUnitDebuffCanColorBar[aUnit] = tCanColorGroup["canColorBar"];
+							sUnitDebuffColorText[aUnit] = tCanColorGroup["canColorText"];
 
-								return;
-							end
+							return;
 						end
 					end
 				end
-			else
+			elseif not tCanColorGroup["isInferred"] and not tCanColorGroup["dispelCheckFilter"] then
 				tAuras = GetUnitAuras(aUnit, tCanColorGroup["filter"], 1, Enum.UnitAuraSortRule.Default, 1);
 
 				if tAuras and #tAuras > 0 then
@@ -2095,6 +2093,9 @@ function VUHDO_initDebuffs()
 			end
 		end
 	end
+
+	VUHDO_PLAYER_HAS_DISPEL = next(VUHDO_PLAYER_DISPEL_ABILITIES) ~= nil;
+	VUHDO_PLAYER_HAS_PURGE = next(VUHDO_PLAYER_PURGE_ABILITIES) ~= nil;
 
 	if not VUHDO_CONFIG then
 		VUHDO_CONFIG = _G["VUHDO_CONFIG"];
