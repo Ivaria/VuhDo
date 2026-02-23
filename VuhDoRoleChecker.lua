@@ -171,7 +171,7 @@ function VUHDO_inspectRole(aUnit)
 		if not tActiveTree then
 			return VUHDO_ID_UNDEFINED;
 		end
-		
+
 		tTreeId, _, _, _, tRole = GetSpecializationInfo(tActiveTree, false, false);
 	else
 		tTreeId = GetInspectSpecialization(aUnit);
@@ -253,7 +253,7 @@ function VUHDO_inspectLockRole()
 
 	if (tTreeId or 0) == 0 then
 		ClearInspectPlayer();
-		
+
 		VUHDO_NEXT_INSPECT_UNIT = nil;
 		VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_ID_UNDEFINED;
 
@@ -340,6 +340,7 @@ local tFixRole;
 local tIntellect, tStrength, tAgility;
 local tClassId, tClassRole, tName;
 local tRole;
+local tDfRole;
 function VUHDO_determineRole(aUnit)
 
 	tInfo = VUHDO_RAID[aUnit];
@@ -355,6 +356,39 @@ function VUHDO_determineRole(aUnit)
 	end
 
 	if tInfo["hasSecretName"] then
+		tDfRole = UnitGroupRolesAssigned(tInfo["unit"]);
+
+		if "TANK" == tDfRole then
+			return 60;
+		elseif "HEALER" == tDfRole then
+			return 63;
+		elseif "DAMAGER" == tDfRole then
+			tClassId = tInfo["classId"];
+
+			if tClassId == VUHDO_ID_WARRIORS
+				or tClassId == VUHDO_ID_PALADINS
+				or tClassId == VUHDO_ID_DEATH_KNIGHT
+				or tClassId == VUHDO_ID_MONKS
+				or tClassId == VUHDO_ID_DEMON_HUNTERS
+				or tClassId == VUHDO_ID_ROGUES then
+				return 61;
+			elseif tClassId == VUHDO_ID_PRIESTS
+				or tClassId == VUHDO_ID_WARLOCKS
+				or tClassId == VUHDO_ID_MAGES
+				or tClassId == VUHDO_ID_EVOKERS then
+				return 62;
+			elseif tClassId == VUHDO_ID_HUNTERS
+				or tClassId == VUHDO_ID_SHAMANS then
+				return 62;
+			elseif tClassId == VUHDO_ID_DRUIDS then
+				if UnitPowerType(tInfo["unit"]) == VUHDO_UNIT_POWER_LUNAR_POWER then
+					return 62;
+				else
+					return 61;
+				end
+			end
+		end
+
 		return nil;
 	end
 
