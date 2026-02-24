@@ -77,10 +77,12 @@ function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 				tBar:SetValue(aCurrValue);
 			end
 
-			if aLayerTemplate then
-				VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);
-			elseif aColor then
-				VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+			if anIsActive then
+				if aLayerTemplate then
+					VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);
+				elseif aColor then
+					VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+				end
 			end
 
 			if sSecretsEnabled then

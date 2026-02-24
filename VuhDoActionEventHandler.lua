@@ -391,10 +391,12 @@ function VUHDO_highlighterBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue,
 			tHighlightBar:SetMinMaxValues(0, 1);
 			tHighlightBar:SetValue(tQuota);
 
-			if aLayerTemplate then
-				VUHDO_applyAllLayersToBar(tButton, tHighlightBar, aLayerTemplate);
-			elseif aColor then
-				VUHDO_setStatusBarVuhDoColor(tHighlightBar, aColor);
+			if anIsActive then
+				if aLayerTemplate then
+					VUHDO_applyAllLayersToBar(tButton, tHighlightBar, aLayerTemplate);
+				elseif aColor then
+					VUHDO_setStatusBarVuhDoColor(tHighlightBar, aColor);
+				end
 			end
 
 			if sSecretsEnabled then

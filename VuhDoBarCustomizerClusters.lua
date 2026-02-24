@@ -299,11 +299,13 @@ function VUHDO_clusterBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, a
 			tBorder = VUHDO_getClusterBorderFrame(tButton);
 
 			if tBorder then
-				if aLayerTemplate then
-					VUHDO_applyAllLayersToBorder(tButton, tBorder, aLayerTemplate);
-					tBorder:Show();
-				elseif aColor then
-					tBorder:SetBackdropBorderColor(VUHDO_backColorWithFallback(aColor));
+				if anIsActive then
+					if aLayerTemplate then
+						VUHDO_applyAllLayersToBorder(tButton, tBorder, aLayerTemplate);
+					elseif aColor then
+						tBorder:SetBackdropBorderColor(VUHDO_backColorWithFallback(aColor));
+					end
+
 					tBorder:Show();
 				else
 					tBorder:Hide();

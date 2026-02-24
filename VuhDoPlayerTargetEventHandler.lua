@@ -126,13 +126,15 @@ function VUHDO_barBorderBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCoun
 			tBorder = VUHDO_getPlayerTargetFrame(tButton);
 
 			if tBorder then
-				if aLayerTemplate then
-					VUHDO_PixelUtil.SetFrameLevel(tBorder, tButton:GetFrameLevel() + (anImpact or 0) + 2);
-					VUHDO_applyAllLayersToBorder(tButton, tBorder, aLayerTemplate);
-					tBorder:Show();
-				elseif aColor then
-					VUHDO_PixelUtil.SetFrameLevel(tBorder, tButton:GetFrameLevel() + (anImpact or 0) + 2);
-					tBorder:SetBackdropBorderColor(VUHDO_backColorWithFallback(aColor));
+				if anIsActive then
+					if aLayerTemplate then
+						VUHDO_PixelUtil.SetFrameLevel(tBorder, tButton:GetFrameLevel() + (anImpact or 0) + 2);
+						VUHDO_applyAllLayersToBorder(tButton, tBorder, aLayerTemplate);
+					elseif aColor then
+						VUHDO_PixelUtil.SetFrameLevel(tBorder, tButton:GetFrameLevel() + (anImpact or 0) + 2);
+						tBorder:SetBackdropBorderColor(VUHDO_backColorWithFallback(aColor));
+					end
+
 					tBorder:Show();
 				else
 					tBorder:Hide();

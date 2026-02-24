@@ -1200,10 +1200,12 @@ do
 				tBar:SetMinMaxValues(0, 1);
 				tBar:SetValue(tQuota);
 
-				if aLayerTemplate then
-					VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);
-				elseif aColor then
-					VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+				if anIsActive then
+					if aLayerTemplate then
+						VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);
+					elseif aColor then
+						VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+					end
 				end
 
 				if sSecretsEnabled then

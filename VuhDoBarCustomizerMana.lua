@@ -286,10 +286,12 @@ local function VUHDO_sideBarBouquetCallback(aBarNum, aUnit, anIsActive, anIcon, 
 				tBar:SetValue(aCurrValue);
 			end
 
-			if aLayerTemplate then
-				VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);
-			elseif aColor then
-				VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+			if anIsActive then
+				if aLayerTemplate then
+					VUHDO_applyAllLayersToBar(tButton, tBar, aLayerTemplate);
+				elseif aColor then
+					VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+				end
 			end
 
 			if sSecretsEnabled then
