@@ -1499,6 +1499,7 @@ do
 		tAuraAnchors["1"]["maxColumns"] = 9;
 		tAuraAnchors["1"]["maxRows"] = 1;
 		tAuraAnchors["1"]["spacing"] = 0;
+		tAuraAnchors["1"]["sortRule"] = 3;
 
 		if tHots["TIMER_TEXT"] then
 			tAuraAnchors["1"]["TIMER_TEXT"] = VUHDO_deepCopyTable(tHots["TIMER_TEXT"]);
