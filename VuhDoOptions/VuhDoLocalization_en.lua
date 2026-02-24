@@ -718,6 +718,9 @@ VUHDO_I18N_TT.K659 = "Sorted purely alphabetically by spell name, regardless of 
 VUHDO_I18N_TT.K660 = "Shows healing-over-time effects cast by other players on the unit, excluding your own HoTs.";
 VUHDO_I18N_TT.K661 = "Shows class-specific buffs cast by other players on the unit, excluding your own buffs.";
 VUHDO_I18N_TT.K662 = "Shows nameplate debuffs applied by other players to the unit, excluding your own.";
+VUHDO_I18N_TT.K663 = "Shows debuffs you applied to the unit.";
+VUHDO_I18N_TT.K664 = "Shows defensive buffs you applied to other players, like Pain Suppression, Ironbark, or Blessing of Sacrifice.";
+VUHDO_I18N_TT.K665 = "Shows debuffs you applied that Blizzard considers important for raid encounters.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
