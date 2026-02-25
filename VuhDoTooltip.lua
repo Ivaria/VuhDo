@@ -248,7 +248,7 @@ end
 --
 local function VUHDO_getKiloText(aNumber)
 
-	if sSecretsEnabled and issecretvalue and issecretvalue(aNumber) then
+	if sSecretsEnabled and issecretvalue(aNumber) then
 		return AbbreviateNumbers(aNumber);
 	end
 

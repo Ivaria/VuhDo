@@ -560,7 +560,7 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 			tSpellInRange = IsSpellInRange(aBuffInfo[1], tUnit);
 
 			tInRange = (tSpellInRange == 1 or tSpellInRange == true) or tInfo["hasSecretRange"]
-				or (VUHDO_SECRETS_ENABLED and issecretvalue and issecretvalue(tInfo["baseRange"])) or tInfo["baseRange"];
+				or (VUHDO_SECRETS_ENABLED and issecretvalue(tInfo["baseRange"])) or tInfo["baseRange"];
 
 			tIsAvailable = tInfo["connected"] and not tInfo["dead"];
 

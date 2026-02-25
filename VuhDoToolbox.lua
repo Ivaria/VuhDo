@@ -1098,7 +1098,7 @@ function VUHDO_shouldScanUnit(aUnit)
 	elseif sScanRange == 2 then
 		return tInfo["visible"];
 	elseif sScanRange == 3 then
-		if tInfo["hasSecretRange"] or (sSecretsEnabled and issecretvalue and issecretvalue(tInfo["baseRange"])) then
+		if tInfo["hasSecretRange"] or (sSecretsEnabled and issecretvalue(tInfo["baseRange"])) then
 			return true;
 		end
 
