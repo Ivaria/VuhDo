@@ -1499,6 +1499,10 @@ do
 		if sSecretsEnabled then
 			VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
 
+			-- FIXME: alpha chains need fixed for target and target-of-target frames (e.g. range opacity not working)
+			--VUHDO_buildAllIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum);
+			--VUHDO_buildAllIndicatorAlphaChains(VUHDO_getTotButton(aButton), aPanelNum);
+
 			VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());
 		end
 

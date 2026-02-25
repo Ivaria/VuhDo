@@ -1075,6 +1075,7 @@ do
 	local tHealthBar;
 	local tPanelNum;
 	local tQuota;
+	local tBackgroundBouquet;
 	local function VUHDO_updateHealthBarValueForUnit(aUnit, aCurrValue, aMaxValue, aColor, aMaxColor, aBouquetName, aLayerTemplate, aCurrValue2)
 
 		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
@@ -1102,6 +1103,14 @@ do
 						VUHDO_getBarText(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
 						VUHDO_getBarTextSolo(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
 						VUHDO_getLifeText(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
+					end
+				end
+
+				if sSecretsEnabled then
+					tBackgroundBouquet = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BACKGROUND_BAR"];
+
+					if not tBackgroundBouquet or tBackgroundBouquet == "" then
+						VUHDO_updateIndicatorAlphaChain(tButton, "HEALTH_BAR", VUHDO_RAID[aUnit]);
 					end
 				end
 			end

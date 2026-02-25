@@ -33,7 +33,6 @@ local VUHDO_INDICATOR_FRAME_GETTERS = {
 	["CLUSTER_BORDER"] = "VUHDO_getClusterBorderFrame",
 };
 
-local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_getHealthBar;
 local VUHDO_getBarText;
 local VUHDO_getBarTextSolo;
@@ -41,9 +40,7 @@ local VUHDO_getLifeText;
 local VUHDO_getDebuffColorType;
 local VUHDO_getDebuffCustomColor;
 local VUHDO_getDebuffCanColorBar;
-local VUHDO_getDebuffCanColorText;
 
-local VUHDO_RAID;
 local VUHDO_AURA_GROUP_COLOR_CUSTOM;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
@@ -71,10 +68,8 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_INDICATOR_CONFIG = _G["VUHDO_INDICATOR_CONFIG"];
 	VUHDO_SECRET_TYPE_NONE = _G["VUHDO_SECRET_TYPE_NONE"];
 	VUHDO_SECRET_TYPE_BOOLEAN = _G["VUHDO_SECRET_TYPE_BOOLEAN"];
-	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_AURA_GROUP_COLOR_CUSTOM = _G["VUHDO_AURA_GROUP_COLOR_CUSTOM"];
 
-	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
 	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
@@ -82,7 +77,6 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_getDebuffColorType = _G["VUHDO_getDebuffColorType"];
 	VUHDO_getDebuffCustomColor = _G["VUHDO_getDebuffCustomColor"];
 	VUHDO_getDebuffCanColorBar = _G["VUHDO_getDebuffCanColorBar"];
-	VUHDO_getDebuffCanColorText = _G["VUHDO_getDebuffCanColorText"];
 
 	return;
 
@@ -163,6 +157,7 @@ function VUHDO_clearBooleanOverlays(aButton)
 
 	for _, tOverlay in pairs(sBooleanOverlayLayers[aButton]) do
 		tOverlay["texture"]:SetAlpha(0);
+
 		if tOverlay["fontString"] then
 			tOverlay["fontString"]:SetAlpha(0);
 		end
@@ -193,10 +188,12 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 	end
 
 	tBarIndex = VUHDO_INDICATOR_BAR_MAP[anIndicatorName];
+
 	if tBarIndex then
 		tIndicatorBar = VUHDO_getHealthBar(aButton, tBarIndex);
 	else
 		tFrameGetter = VUHDO_INDICATOR_FRAME_GETTERS[anIndicatorName];
+
 		if tFrameGetter then
 			tIndicatorBar = _G[tFrameGetter](aButton);
 		end
@@ -353,6 +350,7 @@ function VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum)
 	end
 
 	tIndicatorConfig = VUHDO_INDICATOR_CONFIG[aPanelNum];
+
 	if not tIndicatorConfig then
 		return;
 	end
@@ -436,6 +434,7 @@ function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 	end
 
 	tNonSecretAlpha = 1.0;
+
 	for tIdx = 1, #tChain["nonSecretSteps"] do
 		tStep = tChain["nonSecretSteps"][tIdx];
 
@@ -530,14 +529,7 @@ end
 
 --
 local tResultSlot;
-local tR;
-local tG;
-local tB;
-local tA;
-local tColorType;
-local tCustomColor;
 local tOverlay;
---
 local function VUHDO_applyBooleanLayers(aButton, aTarget, aLayerTemplate)
 
 	if not aLayerTemplate["hasBools"] then
@@ -696,16 +688,6 @@ end
 --
 local tResultSlot;
 local tColor;
-local tEntry;
-local tType;
-local tResultIdx;
-local tResult;
-local tR;
-local tG;
-local tB;
-local tA;
-local tColorType;
-local tCustomColor;
 local function VUHDO_applyNonSecretColorByIndex(aTarget, aTargetType, aLayerTemplate, aResultIdx)
 
 	tResultSlot = aLayerTemplate["nonSecretResults"][aResultIdx];
@@ -729,6 +711,11 @@ end
 
 
 --
+local tResultSlot;
+local tR;
+local tG;
+local tB;
+local tA;
 local function VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate, aResultIdx)
 
 	tResultSlot = aLayerTemplate["curveResults"][aResultIdx];
@@ -761,6 +748,13 @@ end
 
 
 --
+local tColorType;
+local tCustomColor;
+local tResultSlot;
+local tR;
+local tG;
+local tB;
+local tA;
 local function VUHDO_applyDispelColorByIndex(aTarget, aTargetType, aLayerTemplate, aUnit, aResultIdx)
 
 	if not VUHDO_getDebuffCanColorBar(aUnit) then
@@ -813,6 +807,10 @@ end
 
 
 --
+local tEntry;
+local tType;
+local tResultIdx;
+local tResult;
 local function VUHDO_applySortedValidatorsToTarget(aButton, aTarget, aTargetType, aLayerTemplate)
 
 	if not aLayerTemplate["sortedValidators"] then
