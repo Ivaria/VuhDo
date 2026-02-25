@@ -301,13 +301,14 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 					offsetY = 0,
 				},
 			},
-			durationAnchor = {
+			-- FIXME: make configurable in VuhDo Options
+			--[[durationAnchor = {
 				point = "TOP",
 				relativeTo = tPrivateAura,
 				relativePoint = "BOTTOM",
 				offsetX = 0,
 				offsetY = 0,
-			},
+			},]]
 		};
 
 		tPrivateAura["anchorId"] = C_UnitAuras.AddPrivateAuraAnchor(tPrivateAuraAnchor);

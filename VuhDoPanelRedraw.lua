@@ -973,6 +973,11 @@ do
 			return;
 		end
 
+		if tPrivateAura["anchorId"] then
+			C_UnitAuras.RemovePrivateAuraAnchor(tPrivateAura["anchorId"]);
+			tPrivateAura["anchorId"] = nil;
+		end
+
 		VUHDO_PixelUtil.Hide(tPrivateAura);
 		VUHDO_PixelUtil.ClearAllPoints(tPrivateAura);
 		VUHDO_PixelUtil.SetFrameStrata(tPrivateAura, aHealthBar:GetFrameStrata());
