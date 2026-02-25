@@ -24,10 +24,11 @@ local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
 
 local VUHDO_PANEL_SETUP;
 local VUHDO_POWER_TYPE_COLORS;
-local VUHDO_copyColor;
 local VUHDO_ID_RANGED_HEAL;
 local VUHDO_ID_MELEE_TANK;
+local VUHDO_SPELL_ID;
 
+local VUHDO_copyColor;
 local VUHDO_getCurrentBouquetColor;
 local VUHDO_getIncHealOnUnit;
 local VUHDO_getCurrentBouquetStacks;
@@ -35,7 +36,6 @@ local VUHDO_getIsCurrentBouquetActive;
 local VUHDO_getCurrentBouquetTimer;
 local VUHDO_getUnitOverallShieldRemain;
 local VUHDO_unitDebuff;
-local VUHDO_SPELL_ID;
 
 local sBarColors;
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
@@ -50,10 +50,11 @@ function VUHDO_bouquetValidatorsStatusInitLocalOverrides()
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_POWER_TYPE_COLORS = _G["VUHDO_POWER_TYPE_COLORS"];
-	VUHDO_copyColor = _G["VUHDO_copyColor"];
 	VUHDO_ID_RANGED_HEAL = _G["VUHDO_ID_RANGED_HEAL"];
 	VUHDO_ID_MELEE_TANK = _G["VUHDO_ID_MELEE_TANK"];
+	VUHDO_SPELL_ID = _G["VUHDO_SPELL_ID"];
 
+	VUHDO_copyColor = _G["VUHDO_copyColor"];
 	VUHDO_getCurrentBouquetColor = _G["VUHDO_getCurrentBouquetColor"];
 	VUHDO_getIncHealOnUnit = _G["VUHDO_getIncHealOnUnit"];
 	VUHDO_getCurrentBouquetStacks = _G["VUHDO_getCurrentBouquetStacks"];
@@ -61,8 +62,6 @@ function VUHDO_bouquetValidatorsStatusInitLocalOverrides()
 	VUHDO_getCurrentBouquetTimer = _G["VUHDO_getCurrentBouquetTimer"];
 	VUHDO_getUnitOverallShieldRemain = _G["VUHDO_getUnitOverallShieldRemain"];
 	VUHDO_unitDebuff = _G["VUHDO_unitDebuff"];
-	VUHDO_SPELL_ID = _G["VUHDO_SPELL_ID"];
-	VUHDO_SHIELD_COUNTER_OPTIONS = _G["VUHDO_SHIELD_COUNTER_OPTIONS"];
 
 	sBarColors = VUHDO_PANEL_SETUP["BAR_COLORS"];
 
