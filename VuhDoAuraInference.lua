@@ -22,6 +22,7 @@ local VUHDO_UNIT_AURA_CACHE;
 local VUHDO_SPELL_ID;
 
 local sEmpty = { };
+local sDisabled = true;
 local sBuffFilter = "PLAYER|HELPFUL|RAID_IN_COMBAT";
 local sTimestampTolerance = 0.25;
 
@@ -216,6 +217,10 @@ local tName;
 local tChanged;
 local tOldSynthetic;
 function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
+
+	if sDisabled then
+		return false;
+	end
 
 	if not aUnit then
 		return false;
@@ -482,6 +487,10 @@ local tConfig;
 local tInferredType;
 function VUHDO_onSpellcastSucceeded(aUnit, aCastGUID, aSpellId)
 
+	if sDisabled then
+		return;
+	end
+
 	if not aUnit or not aSpellId then
 		return;
 	end
@@ -524,6 +533,10 @@ local tState;
 local tConfig;
 function VUHDO_onSpellcastEmpoweredStop(aUnit, aCastGUID, aSpellId, anEmpoweredSuccess)
 
+	if sDisabled then
+		return;
+	end
+
 	if not anEmpoweredSuccess or not aSpellId then
 		return;
 	end
@@ -555,6 +568,10 @@ end
 local tInferredType;
 local tGroup;
 function VUHDO_hasInferredAura(aUnit, aGroupId)
+
+	if sDisabled then
+		return false;
+	end
 
 	if not aUnit then
 		return false;
@@ -595,6 +612,10 @@ local tInferredType;
 local tGroup;
 function VUHDO_getInferredAura(aUnit, aGroupId)
 
+	if sDisabled then
+		return nil;
+	end
+
 	if not aUnit or not aGroupId then
 		return nil;
 	end
@@ -628,6 +649,10 @@ local tBestGroup;
 local tBestPriority;
 local tPriority;
 function VUHDO_getInferredAuraGroup(aUnit)
+
+	if sDisabled then
+		return nil;
+	end
 
 	if not aUnit then
 		return nil;
