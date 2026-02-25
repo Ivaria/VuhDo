@@ -878,18 +878,20 @@ local tPercent;
 function VUHDO_getUnitHealthPercent(anInfo)
 
 	if sSecretsEnabled and anInfo["hasSecretHealth"] then
-		if UnitHealthPercent and CurveConstants then
-			tPercent = UnitHealthPercent(anInfo["unit"], true, CurveConstants.ScaleTo100);
-			if tPercent then
-				return tPercent;
-			end
+		tPercent = UnitHealthPercent(anInfo["unit"], true, CurveConstants.ScaleTo100);
+
+		if tPercent then
+			return tPercent;
 		end
+
 		return 100;
 	end
 
 	tHealthMax = anInfo["healthmax"];
+
 	return tHealthMax == 0 and 0
 		or anInfo["health"] < tHealthMax and 100 * anInfo["health"] / tHealthMax or 100;
+
 end
 
 

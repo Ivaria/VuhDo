@@ -326,7 +326,7 @@ local tInChatLockdown;
 local function VUHDO_updateAfkDc(aUnit)
 	tIsConnected = UnitIsConnected(aUnit);
 
-	tInChatLockdown = InChatMessagingLockdown and InChatMessagingLockdown();
+	tInChatLockdown = InChatMessagingLockdown();
 
 	if tInChatLockdown then
 		tIsAfk = false;

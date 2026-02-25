@@ -1818,9 +1818,9 @@ do
 		for tCnt = 1, #sCanColorBarGroups do
 			tCanColorGroup = sCanColorBarGroups[tCnt];
 
-			if tCanColorGroup["isInferred"] and VUHDO_hasInferredAura and VUHDO_hasInferredAura(aUnit) and VUHDO_INFERRED_AURAS and
+			if tCanColorGroup["isInferred"] and VUHDO_hasInferredAura(aUnit) and
 				VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tCanColorGroup["inferredType"]] then
-				sUnitDispellableDebuffId[aUnit] = VUHDO_INFERRED_AURA_SYNTHETIC_IDS and VUHDO_INFERRED_AURA_SYNTHETIC_IDS[tCanColorGroup["inferredType"]] or -1;
+				sUnitDispellableDebuffId[aUnit] = VUHDO_INFERRED_AURA_SYNTHETIC_IDS[tCanColorGroup["inferredType"]] or -1;
 
 				sUnitDebuffColorType[aUnit] = tCanColorGroup["colorType"];
 				sUnitDebuffCustomColor[aUnit] = tCanColorGroup["customColor"];

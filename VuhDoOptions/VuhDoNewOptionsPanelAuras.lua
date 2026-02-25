@@ -623,7 +623,7 @@ function VUHDO_panelAurasRebindContentPanel()
 	tSlider = _G[tContentPanel:GetName() .. "OffsetXSlider"];
 	tDeleteButton = _G[tContentPanel:GetParent():GetName() .. "DeleteButton"];
 
-	if tSlider and tDeleteButton and VUHDO_PixelUtil then
+	if tSlider and tDeleteButton then
 		tSlider:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tSlider, "TOPRIGHT", tDeleteButton, "BOTTOMRIGHT", 0, -8);
 	end

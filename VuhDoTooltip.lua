@@ -332,7 +332,7 @@ function VUHDO_updateTooltip()
 		UnitIsGhost(tUnit) and VUHDO_I18N_TT_GHOST
 		or UnitIsDead(tUnit) and VUHDO_I18N_TT_DEAD or " ";
 
-	tInChatLockdown = InChatMessagingLockdown and InChatMessagingLockdown();
+	tInChatLockdown = InChatMessagingLockdown();
 
 	tIsAfk = not tInChatLockdown and UnitIsAFK(tUnit);
 	tIsDnd = not tInChatLockdown and UnitIsDND(tUnit);

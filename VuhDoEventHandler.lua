@@ -1081,13 +1081,13 @@ do
 			end
 
 		elseif "UNIT_SPELLCAST_SUCCEEDED" == anEvent then
-			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] and VUHDO_onSpellcastSucceeded then
+			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] then
 				VUHDO_onSpellcastSucceeded(anArg1, anArg2, anArg3);
 			end
 
 		elseif "UNIT_SPELLCAST_EMPOWER_STOP" == anEvent then
 			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE]
-				and "EVOKER" == _G["VUHDO_PLAYER_CLASS"] and VUHDO_onSpellcastEmpoweredStop then
+				and "EVOKER" == VUHDO_PLAYER_CLASS then
 				VUHDO_onSpellcastEmpoweredStop(anArg1, anArg2, anArg3, anArg4);
 			end
 

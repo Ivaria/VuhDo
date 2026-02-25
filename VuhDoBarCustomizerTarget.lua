@@ -203,11 +203,9 @@ local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anI
 		elseif aColor then
 			VUHDO_setStatusBarVuhDoColor(tBar, aColor);
 
-			if VUHDO_getBarText and VUHDO_getLifeText then
-				VUHDO_getBarText(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
-				VUHDO_getBarTextSolo(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
-				VUHDO_getLifeText(tBar):SetTextColor(VUHDO_textColor(aColor));
-			end
+			VUHDO_getBarText(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
+			VUHDO_getBarTextSolo(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
+			VUHDO_getLifeText(tBar):SetTextColor(VUHDO_textColor(aColor));
 		end
 
 		aButton:SetAlpha(1);

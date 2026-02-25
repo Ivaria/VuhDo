@@ -1252,12 +1252,10 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 			VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tClearIdx, nil);
 		end
 
-		if VUHDO_getInferredAura then
-			tInferredAura = VUHDO_getInferredAura(aUnit, anAnchorConfig["groupId"]);
+		tInferredAura = VUHDO_getInferredAura(aUnit, anAnchorConfig["groupId"]);
 
-			if tInferredAura then
-				VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, 1, tInferredAura["auraInstanceID"]);
-			end
+		if tInferredAura then
+			VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, 1, tInferredAura["auraInstanceID"]);
 		end
 
 		return;

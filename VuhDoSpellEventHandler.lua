@@ -4,7 +4,7 @@ local smatch = string.match;
 
 local InCombatLockdown = InCombatLockdown;
 local GetSpellName = C_Spell.GetSpellName;
-local SendChatMessage = C_ChatInfo and C_ChatInfo.SendChatMessage or _G["SendChatMessage"];
+local SendChatMessage = C_ChatInfo.SendChatMessage;
 local issecretvalue = issecretvalue;
 
 local VUHDO_initGcd;

@@ -2099,11 +2099,11 @@ do
 
 				tSize = tIconSize;
 
-				if aFrame["timerText"] and anAnchorConfig["TIMER_TEXT"] and VUHDO_customizeIconText then
+				if aFrame["timerText"] and anAnchorConfig["TIMER_TEXT"] then
 					VUHDO_customizeIconText(aFrame["childIcon"], tSize, aFrame["timerText"], anAnchorConfig["TIMER_TEXT"]);
 				end
 
-				if aFrame["countText"] and anAnchorConfig["COUNTER_TEXT"] and VUHDO_customizeIconText then
+				if aFrame["countText"] and anAnchorConfig["COUNTER_TEXT"] then
 					VUHDO_customizeIconText(aFrame["childIcon"], tSize, aFrame["countText"], anAnchorConfig["COUNTER_TEXT"]);
 				end
 			else
@@ -2120,11 +2120,11 @@ do
 
 			tSize = VUHDO_getAuraIconSizePixels(aButton, anAnchorConfig);
 
-			if tChild["timerText"] and anAnchorConfig["TIMER_TEXT"] and VUHDO_customizeIconText then
+			if tChild["timerText"] and anAnchorConfig["TIMER_TEXT"] then
 				VUHDO_customizeIconText(tChild, tSize, tChild["timerText"], anAnchorConfig["TIMER_TEXT"]);
 			end
 
-			if tChild["countText"] and anAnchorConfig["COUNTER_TEXT"] and VUHDO_customizeIconText then
+			if tChild["countText"] and anAnchorConfig["COUNTER_TEXT"] then
 				VUHDO_customizeIconText(tChild, tSize, tChild["countText"], anAnchorConfig["COUNTER_TEXT"]);
 			end
 		end
@@ -2616,7 +2616,7 @@ do
 				if sCurveTimerColor then
 					tTimerColorMixin = aDurationObj:EvaluateRemainingDuration(sCurveTimerColor);
 					aTimerText:SetTextColor(tTimerColorMixin:GetRGBA());
-				elseif anAnchorConfig["TIMER_TEXT"] and anAnchorConfig["TIMER_TEXT"]["COLOR"] and VUHDO_textColor then
+				elseif anAnchorConfig["TIMER_TEXT"] and anAnchorConfig["TIMER_TEXT"]["COLOR"] then
 					aTimerText:SetTextColor(VUHDO_textColor(anAnchorConfig["TIMER_TEXT"]["COLOR"]));
 				else
 					aTimerText:SetTextColor(1, 1, 1, 1);
@@ -2669,7 +2669,7 @@ do
 					tCountStr = GetAuraApplicationDisplayCount(aUnit, anAuraData["auraInstanceID"], 2, 999);
 					aCountText:SetText(tCountStr or "");
 
-					if anAnchorConfig["COUNTER_TEXT"] and anAnchorConfig["COUNTER_TEXT"]["COLOR"] and VUHDO_textColor then
+					if anAnchorConfig["COUNTER_TEXT"] and anAnchorConfig["COUNTER_TEXT"]["COLOR"] then
 						aCountText:SetTextColor(VUHDO_textColor(anAnchorConfig["COUNTER_TEXT"]["COLOR"]));
 					end
 				else
