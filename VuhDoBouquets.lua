@@ -19,6 +19,7 @@ local issecretvalue = issecretvalue;
 local VUHDO_copyColorTo;
 local VUHDO_getDispelAbilities;
 local VUHDO_getPurgeAbilities;
+local VUHDO_isConfigDemoUsers;
 
 local VUHDO_BOUQUETS = { };
 local VUHDO_RAID = { };
@@ -93,6 +94,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
 	VUHDO_getDispelAbilities = _G["VUHDO_getDispelAbilities"];
 	VUHDO_getPurgeAbilities = _G["VUHDO_getPurgeAbilities"];
+	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
 
 	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -2526,7 +2528,7 @@ local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 	tAnzInfos = #tBouquet;
 	tLayerTemplate = nil;
 
-	if sSecretsEnabled then
+	if sSecretsEnabled and not VUHDO_isConfigDemoUsers() then
 		tLayerTemplate = sBouquetLayerTemplates[aBouquetName];
 
 		VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, tInfo, tUnit, tBouquet, tAnzInfos, tLayerTemplate);
