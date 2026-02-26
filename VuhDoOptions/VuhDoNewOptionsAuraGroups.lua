@@ -126,6 +126,42 @@ end
 
 
 --
+local tCandidate;
+local tSuffix;
+local tAllGroups;
+local tFound;
+local function VUHDO_ensureUniqueAuraGroupName(aBaseName)
+
+	tCandidate = aBaseName;
+	tSuffix = 1;
+
+	tAllGroups = VUHDO_getAllAuraGroups();
+
+	while true do
+		tFound = false;
+
+		for _, tGroup in pairs(tAllGroups) do
+			if tGroup["displayName"] == tCandidate then
+				tFound = true;
+
+				tSuffix = tSuffix + 1;
+
+				tCandidate = aBaseName .. " (" .. tSuffix .. ")";
+
+				break;
+			end
+		end
+
+		if not tFound then
+			return tCandidate;
+		end
+	end
+
+end
+
+
+
+--
 local tAllGroups;
 local tDisplayName;
 local tSortTable;
@@ -206,6 +242,21 @@ function VUHDO_auraGroupsComboChanged(aComboBox, aValue, anArrayModel)
 	sSelectedGroupId = aValue;
 
 	VUHDO_auraGroupsRefreshRightPanel();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsNameChanged(aEditBox)
+
+	if VUHDO_AURA_GROUPS_SELECTED and VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][VUHDO_AURA_GROUPS_SELECTED] and aEditBox:GetText() then
+		VUHDO_CONFIG["AURA_GROUPS"][VUHDO_AURA_GROUPS_SELECTED]["displayName"] = aEditBox:GetText();
+
+		VUHDO_auraGroupsRefreshList();
+	end
 
 	return;
 
@@ -541,7 +592,7 @@ function VUHDO_auraGroupsOnNewGroup()
 		["canColorBar"] = true,
 		["canColorText"] = true,
 		["enabled"] = true,
-		["displayName"] = "New Group",
+		["displayName"] = VUHDO_ensureUniqueAuraGroupName(VUHDO_I18N_NEW .. " " .. VUHDO_I18N_GROUP),
 		["isHarmful"] = false,
 	};
 
@@ -568,7 +619,7 @@ function VUHDO_auraGroupsOnCloneGroup(aSourceId)
 		return;
 	end
 
-	tNewId = VUHDO_cloneAuraGroup(aSourceId, VUHDO_getAuraGroupDisplayName(aSourceId) .. " (Copy)");
+	tNewId = VUHDO_cloneAuraGroup(aSourceId, VUHDO_ensureUniqueAuraGroupName(VUHDO_getAuraGroupDisplayName(aSourceId) .. " (Copy)"));
 
 	if tNewId then
 		sSelectedGroupId = tNewId;

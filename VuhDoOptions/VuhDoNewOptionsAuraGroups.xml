@@ -170,9 +170,7 @@
 						</Anchors>
 						<Scripts>
 							<OnTextChanged>
-								if VUHDO_AURA_GROUPS_SELECTED and VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][VUHDO_AURA_GROUPS_SELECTED] and self:GetText() then
-									VUHDO_CONFIG["AURA_GROUPS"][VUHDO_AURA_GROUPS_SELECTED]["displayName"] = self:GetText();
-								end
+								VUHDO_auraGroupsNameChanged(self);
 							</OnTextChanged>
 						</Scripts>
 					</EditBox>
