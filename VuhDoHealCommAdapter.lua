@@ -35,10 +35,6 @@ function VUHDO_ensureHealPredictionCalculator()
 		return sHealPredictionCalculator;
 	end
 
-	if not CreateUnitHealPredictionCalculator then
-		return nil;
-	end
-
 	sHealPredictionCalculator = CreateUnitHealPredictionCalculator();
 
 	if not sHealPredictionCalculator then
@@ -62,10 +58,6 @@ function VUHDO_getOvershieldCalculator()
 
 	if sOvershieldCalculator then
 		return sOvershieldCalculator;
-	end
-
-	if not CreateUnitHealPredictionCalculator then
-		return nil;
 	end
 
 	sOvershieldCalculator = CreateUnitHealPredictionCalculator();
@@ -107,8 +99,9 @@ function VUHDO_determineIncHeal(aUnit)
 	if sSecretsEnabled then
 		tCalculator = VUHDO_ensureHealPredictionCalculator();
 
-		if tCalculator and UnitGetDetailedHealPrediction then
+		if tCalculator then
 			tCalculator:ResetPredictedValues();
+
 			UnitGetDetailedHealPrediction(aUnit, "player", tCalculator);
 
 			tTotal, tFromHealer, tFromOthers, tClamped = tCalculator:GetIncomingHeals();
