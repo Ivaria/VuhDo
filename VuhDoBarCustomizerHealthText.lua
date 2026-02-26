@@ -284,7 +284,7 @@ local tMissingHealth;
 local tLifeStr;
 local function VUHDO_buildLifeTextSecret(aUnit, aLifeConfig, anIsTarget)
 
-	if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+	if not sHealPredictionCalculator then
 		if 1 == aLifeConfig["mode"] or anIsTarget then
 			return format("%.0f%%", UnitHealthPercent(aUnit, true, CurveConstants.ScaleTo100)), true;
 		elseif 3 == aLifeConfig["mode"] then

@@ -78,10 +78,6 @@ end
 --
 function VUHDO_initHealPredictionCalculator()
 
-	if not CreateUnitHealPredictionCalculator then
-		return;
-	end
-
 	sHealPredictionCalculator = CreateUnitHealPredictionCalculator();
 
 	sHealPredictionCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MaximumHealth);
@@ -611,7 +607,7 @@ local function VUHDO_statusIncomingValidator(anInfo, _)
 		return false, nil, -1, -1, -1;
 	end
 
-	if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+	if not sHealPredictionCalculator then
 		return false, nil, -1, -1, -1;
 	end
 
@@ -661,7 +657,7 @@ local function VUHDO_statusTotalAbsorbValidator(anInfo, _)
 		return false, nil, -1, -1, -1;
 	end
 
-	if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+	if not sHealPredictionCalculator then
 		return false, nil, -1, -1, -1;
 	end
 
@@ -742,7 +738,7 @@ local function VUHDO_shieldCountValidator(anInfo, _)
 		return tShieldLeft >= 1000, nil, -1, floor(tShieldLeft * 0.001 + 0.5), -1;
 	end
 
-	if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+	if not sHealPredictionCalculator then
 		return false, nil, -1, -1, -1;
 	end
 
@@ -772,7 +768,7 @@ local tShieldLeft, tHealthMax;
 local function VUHDO_statusShieldFromHealthValidator(anInfo, _)
 
 	if sSecretsEnabled then
-		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+		if not sHealPredictionCalculator then
 			return false, nil, -1, -1, -1;
 		end
 
@@ -799,7 +795,7 @@ local tShieldLeft;
 local function VUHDO_healAbsorbCountValidator(anInfo, _)
 
 	if sSecretsEnabled then
-		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+		if not sHealPredictionCalculator then
 			return false, nil, -1, -1, -1;
 		end
 
@@ -824,7 +820,7 @@ local tShieldLeft, tHealthMax;
 local function VUHDO_statusHealAbsorbFromHealthValidator(anInfo, _)
 
 	if sSecretsEnabled then
-		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+		if not sHealPredictionCalculator then
 			return false, nil, -1, -1, -1;
 		end
 
@@ -851,7 +847,7 @@ local tShieldLeft, tHealthMax, tHealth;
 local function VUHDO_statusShieldOvershieldValidator(anInfo, _)
 
 	if sSecretsEnabled then
-		if not sHealPredictionCalculator or not UnitGetDetailedHealPrediction then
+		if not sHealPredictionCalculator then
 			return false, nil, -1, -1, -1;
 		end
 

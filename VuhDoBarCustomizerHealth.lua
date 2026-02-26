@@ -379,7 +379,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 		return;
 	end
 
-	if sHealPredictionCalculator and UnitGetDetailedHealPrediction then
+	if sHealPredictionCalculator then
 		sHealPredictionCalculator:ResetPredictedValues();
 		sHealPredictionCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealth);
 
@@ -474,7 +474,7 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 							tOvershieldBar:SetAlpha(sConfigOvershieldColor["O"] or 1);
 						end
 					end
-				else
+				elseif not sSecretsEnabled then
 					tOvershieldColor["R"], tOvershieldColor["G"], tOvershieldColor["B"], tOvershieldOpacity = tHealthBar:GetStatusBarColor();
 					tOvershieldColor = VUHDO_getDiffColor(tOvershieldColor, VUHDO_getStatusBarColor("OVERSHIELD", aUnit));
 
@@ -483,6 +483,12 @@ function VUHDO_updateShieldBar(aUnit, aIncHealAmount)
 					end
 
 					VUHDO_setStatusBarVuhDoColor(tOvershieldBar, tOvershieldColor);
+				else
+					sConfigOvershieldColor = VUHDO_getStatusBarColor("OVERSHIELD", aUnit);
+
+					if sConfigOvershieldColor then
+						VUHDO_setStatusBarVuhDoColor(tOvershieldBar, sConfigOvershieldColor);
+					end
 				end
 
 				tOvershieldBar:Show();
@@ -723,7 +729,7 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 		return;
 	end
 
-	if sHealPredictionCalculator and UnitGetDetailedHealPrediction then
+	if sHealPredictionCalculator then
 		sHealPredictionCalculator:ResetPredictedValues();
 
 		UnitGetDetailedHealPrediction(aUnit, "player", sHealPredictionCalculator);
