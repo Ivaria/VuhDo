@@ -133,6 +133,8 @@ local VUHDO_shouldDisplayArrow = VUHDO_shouldDisplayArrow;
 --
 local tPanelNum;
 local tUnit;
+local tShouldShow;
+local tHasSecretRange;
 local tDirection;
 local tCell;
 local sLastCell = nil;

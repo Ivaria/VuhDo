@@ -968,6 +968,7 @@ local tTemplate;
 local tCurveIdx;
 local tBoolIdx;
 local tDispelIdx;
+local tSpriteCellIdx;
 local tAlphaIdx;
 local tNonSecretIdx;
 local tAuraIdx;

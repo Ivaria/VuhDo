@@ -5,6 +5,7 @@ local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
 local VUHDO_applyAllLayersToTexture;
+local VUHDO_getIsDirectionArrow;
 
 
 
@@ -14,6 +15,7 @@ function VUHDO_barCustomizerThreatInitLocalOverrides()
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
 	VUHDO_applyAllLayersToTexture = _G["VUHDO_applyAllLayersToTexture"];
+	VUHDO_getIsDirectionArrow = _G["VUHDO_getIsDirectionArrow"];
 
 	return;
 
@@ -191,7 +193,7 @@ function VUHDO_updateUnitRange(aUnit, aMode)
 
 			VUHDO_updateHealthBarsFor(aUnit, 5);
 
-			if sIsDirectionArrow and VUHDO_getCurrentMouseOver() == aUnit
+			if VUHDO_getIsDirectionArrow() and VUHDO_getCurrentMouseOver() == aUnit
 				and (VuhDoDirectionFrame["shown"] or VUHDO_CONFIG["DIRECTION"]["isAlways"]) then
 				VUHDO_updateDirectionFrame();
 			end
@@ -201,7 +203,7 @@ function VUHDO_updateUnitRange(aUnit, aMode)
 
 				VUHDO_updateHealthBarsFor(aUnit, 5);
 
-				if sIsDirectionArrow and VUHDO_getCurrentMouseOver() == aUnit
+				if VUHDO_getIsDirectionArrow() and VUHDO_getCurrentMouseOver() == aUnit
 					and (VuhDoDirectionFrame["shown"] or (not tIsInRange or VUHDO_CONFIG["DIRECTION"]["isAlways"])) then
 					VUHDO_updateDirectionFrame();
 				end
@@ -295,7 +297,7 @@ end
 
 
 --
-function VUHDO_deferUpdateUnitRange(aUnit, Priority)
+function VUHDO_deferUpdateUnitRange(aUnit, aPriority)
 
 	VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_RANGE, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aUnit);
 

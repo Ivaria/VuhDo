@@ -1941,6 +1941,7 @@ do
 	local tGrowthDir;
 	local tWrapDir;
 	local tSize;
+	local tAuraDefaults;
 	local tSpacing;
 	local tMaxCols;
 	local tCol;

@@ -631,6 +631,16 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 end
 
 
+
+--
+function VUHDO_getIsDirectionArrow()
+
+	return sIsDirectionArrow;
+
+end
+
+
+
 ----------------------------------------------------
 
 local VUHDO_VARIABLES_LOADED = false;
@@ -1492,6 +1502,7 @@ do
 	local tPanelNum;
 	local tHelpText;
 	local tCurrentValue;
+	local tCount;
 	function VUHDO_slashCmd(aCommand)
 
 		tParsedTexts = VUHDO_textParse(aCommand);
