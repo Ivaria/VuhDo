@@ -436,7 +436,7 @@ local function VUHDO_applyLifeTextAlpha(aHealthBar, aUnit, aInfo, aLifeConfig)
 	if tAlphaColor then
 		if 1 == aLifeConfig["position"] or 2 == aLifeConfig["position"] then
 			VUHDO_getBarText(aHealthBar):SetAlpha(tAlphaColor["a"] or 1);
-			VUHDO_getBarTextSolo(aHealthBar):SetAlpha(tSoloAlphaColor and tSoloAlphaColor["a"] or 0);
+			VUHDO_getBarTextSolo(aHealthBar):SetAlpha(tSoloAlphaColor and tSoloAlphaColor["a"] or 1);
 		else
 			VUHDO_getLifeText(aHealthBar):SetAlpha(tAlphaColor["a"] or 1);
 			VUHDO_getBarText(aHealthBar):SetAlpha(1);

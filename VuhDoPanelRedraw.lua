@@ -811,12 +811,14 @@ do
 			VUHDO_PixelUtil.ClearAllPoints(tNameText);
 			VUHDO_PixelUtil.SetPoint(tNameText, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
 			VUHDO_PixelUtil.Show(tNameText);
+			tNameText:SetAlpha(1);
 
 			VUHDO_PixelUtil.SetWidth(tNameTextSolo, aWidth);
 			VUHDO_PixelUtil.SetHeight(tNameTextSolo, sPanelConfig[aPanelNum]["mainFontHeight"]);
 			VUHDO_PixelUtil.ClearAllPoints(tNameTextSolo);
 			VUHDO_PixelUtil.SetPoint(tNameTextSolo, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
 			VUHDO_PixelUtil.Show(tNameTextSolo);
+			tNameTextSolo:SetAlpha(0);
 		else
 			VUHDO_PixelUtil.ClearAllPoints(tLifeText);
 			VUHDO_PixelUtil.SetWidth(tLifeText, aWidth);
