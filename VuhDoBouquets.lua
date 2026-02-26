@@ -2025,7 +2025,7 @@ do
 			txState["isColorInit"] = false;
 			txState["isMaxColorInit"] = false;
 
-			for tIdx = 1, #aLayerTemplate["nonSecretResults"] do
+			for tIdx = #aLayerTemplate["nonSecretResults"], 1, -1 do
 				tResultSlot = aLayerTemplate["nonSecretResults"][tIdx];
 
 				if tResultSlot["isActive"] then
@@ -2141,7 +2141,7 @@ do
 				end
 			end
 
-			for tIdx = 1, #aLayerTemplate["auraResults"] do
+			for tIdx = #aLayerTemplate["auraResults"], 1, -1 do
 				tResultSlot = aLayerTemplate["auraResults"][tIdx];
 
 				if tResultSlot["isActive"] then
@@ -2504,9 +2504,7 @@ local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 	tInfo = anInfo or VUHDO_RAID[tUnit];
 
 	if not tInfo then
-		return false, nil, nil, nil, nil, nil, nil,
-			VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0,
-			nil, nil, nil, nil, nil, nil;
+		return false, nil, nil, nil, nil, nil, nil, VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0, nil, nil, nil, nil, nil, nil;
 	end
 
 	txState["active"] = false;
