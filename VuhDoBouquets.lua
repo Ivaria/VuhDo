@@ -990,6 +990,7 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 		["hasDispels"] = false,
 		["hasAlpha"] = false,
 		["hasNonSecrets"] = false,
+		["hasSecretValues"] = false,
 		["hasAuras"] = false,
 		["useBackground"] = false,
 		["useText"] = false,
@@ -1202,10 +1203,14 @@ function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 					["icon"] = nil,
 					["spriteCell"] = nil,
 				};
-			elseif tSecretType == VUHDO_SECRET_TYPE_NONE then
+			elseif tSecretType == VUHDO_SECRET_TYPE_NONE or tSecretType == VUHDO_SECRET_TYPE_VALUES then
 				tNonSecretIdx = tNonSecretIdx + 1;
 
 				tTemplate["hasNonSecrets"] = true;
+
+				if tSecretType == VUHDO_SECRET_TYPE_VALUES then
+					tTemplate["hasSecretValues"] = true;
+				end
 
 				tTemplate["nonSecretValidators"][tNonSecretIdx] = {
 					["item"] = tItem,
@@ -1852,7 +1857,7 @@ do
 				else
 					tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
-					if tSecretType == VUHDO_SECRET_TYPE_NONE then
+					if tSecretType == VUHDO_SECRET_TYPE_NONE or tSecretType == VUHDO_SECRET_TYPE_VALUES then
 						tNonSecretResultSlot = VUHDO_findNonSecretResultSlot(aLayerTemplate, tCnt);
 
 						if tNonSecretResultSlot then
@@ -2535,7 +2540,7 @@ local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 		VUHDO_evaluateBouquetNonSecret(aUnit, tInfo, tUnit, tBouquet, tAnzInfos);
 	end
 
-	tHasSecretResults = tLayerTemplate and (tLayerTemplate["hasCurves"] or tLayerTemplate["hasBools"] or tLayerTemplate["hasDispels"]);
+	tHasSecretResults = tLayerTemplate and (tLayerTemplate["hasCurves"] or tLayerTemplate["hasBools"] or tLayerTemplate["hasDispels"] or tLayerTemplate["hasSecretValues"]);
 
 	if txState["active"] then
 		if not txState["isColorInit"] then
