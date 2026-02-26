@@ -3,8 +3,8 @@ local _;
 local smatch = string.match;
 
 local InCombatLockdown = InCombatLockdown;
-local GetSpellName = C_Spell.GetSpellName;
-local SendChatMessage = C_ChatInfo.SendChatMessage;
+local GetSpellName = C_Spell and C_Spell.GetSpellName;
+local SendChatMessage = C_ChatInfo and C_ChatInfo.SendChatMessage;
 local issecretvalue = issecretvalue;
 
 local VUHDO_initGcd;
@@ -86,7 +86,7 @@ function VUHDO_spellcastSent(aUnit, aTargetName, aSpellId)
 	end
 
 	-- Resurrection?
-	if not sSecretsEnabled and tSpellName == sFirstRes or tSpellName == sSecondRes or tSpellName == sThirdRes then
+	if not sSecretsEnabled and (tSpellName == sFirstRes or tSpellName == sSecondRes or tSpellName == sThirdRes) then
 		if aTargetName and not VUHDO_strempty(aTargetName) then
 			aTargetName = smatch(aTargetName, "^[^-]*");
 
