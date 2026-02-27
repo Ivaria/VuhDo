@@ -1,6 +1,7 @@
 local _;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+local issecretvalue = issecretvalue;
 
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
@@ -134,12 +135,14 @@ function VUHDO_updateUnitAggro(aUnit, aMode)
 
 		tUnitTarget = tUnitInfo["targetUnit"];
 		tUnitInfo["threatPerc"] = 0;
+		tUnitInfo["hasSecretThreat"] = false;
 
 		if UnitIsEnemy(aUnit, tUnitTarget) then
 			if VUHDO_INTERNAL_TOGGLES[14] then
 				_, _, tThreatPerc = UnitDetailedThreatSituation(aUnit, tUnitTarget);
 
 				tUnitInfo["threatPerc"] = tThreatPerc or 0;
+				tUnitInfo["hasSecretThreat"] = sSecretsEnabled and tThreatPerc and issecretvalue(tThreatPerc);
 			end
 		end
 
@@ -147,7 +150,7 @@ function VUHDO_updateUnitAggro(aUnit, aMode)
 			VUHDO_updateHealthBarsFor(aUnit, 7);
 		end
 
-		if tUnitInfo["threatPerc"] ~= tOldThreatPerc then
+		if tUnitInfo["hasSecretThreat"] or tUnitInfo["threatPerc"] ~= tOldThreatPerc then
 			VUHDO_updateBouquetsForEvent(aUnit, 14);
 		end
 	end
