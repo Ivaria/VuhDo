@@ -516,7 +516,7 @@ do
 			tGlobal = _G[tTableIndices[1]];
 			tLastField = tGlobal;
 
-			if not tGlobal then
+			if not tGlobal and #tTableIndices > 1 then
 				return;
 			end
 
@@ -1575,7 +1575,6 @@ do
 		["VuhDoNewOptionsColors"] = "VuhDoNewOptionsColorsStates",
 		["VuhDoNewOptionsMove"] = "",
 		["VuhDoNewOptionsBuffs"] = "VuhDoNewOptionsBuffsGeneric",
-		["VuhDoNewOptionsDebuffs"] = "VuhDoNewOptionsDebuffsStandard",
 		["VuhDoNewOptionsTools"] = "VuhDoNewOptionsToolsSkins",
 		["VuhDoNewOptionsAura"] = "VuhDoNewOptionsAuraGroups",
 	};
