@@ -108,6 +108,7 @@ end
 local tUnitInfo;
 local tOldAggro;
 local tOldThreatPerc;
+local tOldHasSecretThreat;
 local tUnitTarget;
 local tThreatPerc;
 function VUHDO_updateUnitAggro(aUnit, aMode)
@@ -121,6 +122,7 @@ function VUHDO_updateUnitAggro(aUnit, aMode)
 	if tUnitInfo and tUnitInfo["connected"] and not tUnitInfo["dead"] then
 		tOldAggro = tUnitInfo["aggro"];
 		tOldThreatPerc = tUnitInfo["threatPerc"];
+		tOldHasSecretThreat = tUnitInfo["hasSecretThreat"];
 
 		-- 3 = tanking, others less than 100%
 		-- 2 = tanking, others more than 100%
@@ -150,7 +152,7 @@ function VUHDO_updateUnitAggro(aUnit, aMode)
 			VUHDO_updateHealthBarsFor(aUnit, 7);
 		end
 
-		if tUnitInfo["hasSecretThreat"] or tUnitInfo["threatPerc"] ~= tOldThreatPerc then
+		if tUnitInfo["hasSecretThreat"] or tOldHasSecretThreat or tUnitInfo["threatPerc"] ~= tOldThreatPerc then
 			VUHDO_updateBouquetsForEvent(aUnit, 14);
 		end
 	end
