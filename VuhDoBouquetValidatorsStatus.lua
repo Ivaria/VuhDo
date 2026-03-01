@@ -95,6 +95,10 @@ end
 --
 function VUHDO_getHealPredictionCalculator()
 
+	if not sHealPredictionCalculator and sSecretsEnabled then
+		VUHDO_initHealPredictionCalculator();
+	end
+
 	return sHealPredictionCalculator;
 
 end
