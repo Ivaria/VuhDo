@@ -356,6 +356,8 @@ local sAuraTimerCount = 0;
 
 local sAuraIconPool;
 local sAuraBarPool;
+local sSlotDataAsAuraPool;
+local sSlotAssignmentPool;
 
 local sAuraBackdropInfo = {
 	["edgeFile"] = "Interface\\Buttons\\WHITE8X8",
@@ -431,6 +433,9 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
+
+	sSlotDataAsAuraPool = VUHDO_createTablePool("SlotDataAsAura", 500);
+	sSlotAssignmentPool = VUHDO_createTablePool("SlotAssignment", 200);
 
 	VUHDO_initAuraDurationCurves();
 	VUHDO_initAuraTimer();
@@ -1555,6 +1560,7 @@ end
 do
 	--
 	local tButtonName;
+	local tState;
 	function VUHDO_resetFixedAuraOverflowState(aButton, anAnchorIndex)
 
 		if not aButton then
@@ -1569,6 +1575,16 @@ do
 
 		if not VUHDO_FIXED_AURA_OVERFLOW_STATE[tButtonName] then
 			VUHDO_FIXED_AURA_OVERFLOW_STATE[tButtonName] = { };
+		end
+
+		tState = VUHDO_FIXED_AURA_OVERFLOW_STATE[tButtonName][anAnchorIndex];
+
+		if tState and tState["slotAssignments"] then
+			for tSlotIdx, tAssignment in pairs(tState["slotAssignments"]) do
+				if tAssignment then
+					sSlotAssignmentPool:release(tAssignment);
+				end
+			end
 		end
 
 		VUHDO_FIXED_AURA_OVERFLOW_STATE[tButtonName][anAnchorIndex] = {
@@ -1593,6 +1609,7 @@ do
 	local tNumBasePositions;
 	local tStartAnchor;
 	local tCheckedCount;
+	local tAssignment;
 	function VUHDO_assignFixedOverflowSlot(aButton, anAnchorIndex, aSlotIndex, anAnchorConfig)
 
 		if not aButton or not anAnchorIndex or not aSlotIndex or not anAnchorConfig then
@@ -1617,10 +1634,18 @@ do
 			tAnchorCounts = tState["anchorCounts"];
 			tAnchorCounts[aSlotIndex] = (tAnchorCounts[aSlotIndex] or 0) + 1;
 
-			tState["slotAssignments"][aSlotIndex] = {
-				["baseAnchor"] = aSlotIndex,
-				["layerIndex"] = 0,
-			};
+			tAssignment = tState["slotAssignments"][aSlotIndex];
+
+			if tAssignment then
+				sSlotAssignmentPool:release(tAssignment);
+			end
+
+			tAssignment = sSlotAssignmentPool:get();
+
+			tAssignment["baseAnchor"] = aSlotIndex;
+			tAssignment["layerIndex"] = 0;
+
+			tState["slotAssignments"][aSlotIndex] = tAssignment;
 
 			return aSlotIndex, 0;
 		end
@@ -1639,10 +1664,18 @@ do
 				tLayerIndex = tAnchorCounts[tBaseAnchor] or 0;
 				tAnchorCounts[tBaseAnchor] = tLayerIndex + 1;
 
-				tState["slotAssignments"][aSlotIndex] = {
-					["baseAnchor"] = tBaseAnchor,
-					["layerIndex"] = tLayerIndex,
-				};
+				tAssignment = tState["slotAssignments"][aSlotIndex];
+
+				if tAssignment then
+					sSlotAssignmentPool:release(tAssignment);
+				end
+
+				tAssignment = sSlotAssignmentPool:get();
+
+				tAssignment["baseAnchor"] = tBaseAnchor;
+				tAssignment["layerIndex"] = tLayerIndex;
+
+				tState["slotAssignments"][aSlotIndex] = tAssignment;
 
 				return tBaseAnchor, tLayerIndex;
 			end
@@ -2425,21 +2458,23 @@ function VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, an
 				tSlotData = tListSlots and tListSlots[tSlotIndex];
 
 				if tSlotData and tSlotData["isActive"] then
-					tSlotDataAsAura = {
-						["icon"] = tSlotData["icon"],
-						["expirationTime"] = tSlotData["expirationTime"] or 0,
-						["duration"] = tSlotData["duration"] or 0,
-						["applications"] = tSlotData["stacks"] or 0,
-						["name"] = tSlotData["name"],
-						["auraInstanceID"] = -1,
-						["clipL"] = tSlotData["clipL"],
-						["clipR"] = tSlotData["clipR"],
-						["clipT"] = tSlotData["clipT"],
-						["clipB"] = tSlotData["clipB"],
-						["color"] = tSlotData["color"],
-					};
+					tSlotDataAsAura = sSlotDataAsAuraPool:get();
+
+					tSlotDataAsAura["icon"] = tSlotData["icon"];
+					tSlotDataAsAura["expirationTime"] = tSlotData["expirationTime"] or 0;
+					tSlotDataAsAura["duration"] = tSlotData["duration"] or 0;
+					tSlotDataAsAura["applications"] = tSlotData["stacks"] or 0;
+					tSlotDataAsAura["name"] = tSlotData["name"];
+					tSlotDataAsAura["auraInstanceID"] = -1;
+					tSlotDataAsAura["clipL"] = tSlotData["clipL"];
+					tSlotDataAsAura["clipR"] = tSlotData["clipR"];
+					tSlotDataAsAura["clipT"] = tSlotData["clipT"];
+					tSlotDataAsAura["clipB"] = tSlotData["clipB"];
+					tSlotDataAsAura["color"] = tSlotData["color"];
 
 					VUHDO_displayAuraInSlot(tButton, aPanelNum, anAnchorIndex, tSlotIndex, tSlotDataAsAura, anAnchorConfig);
+
+					sSlotDataAsAuraPool:release(tSlotDataAsAura);
 				else
 					VUHDO_hideAuraSlot(tButton, anAnchorIndex, tSlotIndex, anAnchorConfig["style"] == "bars");
 				end

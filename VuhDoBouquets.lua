@@ -63,6 +63,11 @@ local sBouquetCurves = { };
 local sBouquetColors = { };
 local sCurveCache = { };
 local sBrightnessCurveCache = { };
+local sThresholds = { };
+
+local sBouquetStatePool;
+local sThresholdEntryPool;
+local sValidatorEntryPool;
 
 local sDispelTypeCurve;
 local sDebuffDurationCurve;
@@ -123,6 +128,10 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_getAuraGroupRaw = _G["VUHDO_getAuraGroupRaw"];
 	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
 	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
+
+	sBouquetStatePool = VUHDO_createTablePool("BouquetState", 500);
+	sThresholdEntryPool = VUHDO_createTablePool("ThresholdEntry", 100);
+	sValidatorEntryPool = VUHDO_createTablePool("ValidatorEntry", 200);
 
 	sPlayerArray["player"] = VUHDO_RAID["player"];
 
@@ -321,7 +330,6 @@ do
 	--
 	local tCurve;
 	local tRadio;
-	local tThresholds;
 	local tBaseColor;
 	local tLowColor;
 	local tMedColor;
@@ -336,9 +344,11 @@ do
 	local tThresholdColorMixin;
 	local tItem;
 	local tName;
+	local tEntry;
 	function VUHDO_buildCompositeHealthCurve(aBouquet, anInfo)
 
-		tThresholds = { };
+		twipe(sThresholds);
+
 		tRadio = 3;
 		tBaseColor, tLowColor, tMedColor, tHighColor = nil, nil, nil, nil;
 
@@ -360,21 +370,25 @@ do
 					tLowColor = tItem["custom"]["grad_low"];
 				end
 			elseif tName == "HEALTH_BELOW" then
-				tinsert(tThresholds, {
-					["type"] = "below",
-					["percent"] = tItem["custom"][1],
-					["color"] = tItem["color"],
-				});
+				tEntry = sThresholdEntryPool:get();
+
+				tEntry["type"] = "below";
+				tEntry["percent"] = tItem["custom"][1];
+				tEntry["color"] = tItem["color"];
+
+				tinsert(sThresholds, tEntry);
 			elseif tName == "HEALTH_ABOVE" then
-				tinsert(tThresholds, {
-					["type"] = "above",
-					["percent"] = tItem["custom"][1],
-					["color"] = tItem["color"],
-				});
+				tEntry = sThresholdEntryPool:get();
+
+				tEntry["type"] = "above";
+				tEntry["percent"] = tItem["custom"][1];
+				tEntry["color"] = tItem["color"];
+
+				tinsert(sThresholds, tEntry);
 			end
 		end
 
-		tsort(tThresholds, function(a, b) return a["percent"] < b["percent"]; end);
+		tsort(sThresholds, function(a, b) return a["percent"] < b["percent"]; end);
 
 		tCurve = CreateColorCurve();
 		tCurve:SetType(Enum.LuaCurveType.Linear);
@@ -394,7 +408,7 @@ do
 			tHighColorMixin = CreateColor(tHighColor["R"], tHighColor["G"], tHighColor["B"], tHighColor["O"] or 1);
 		end
 
-		if #tThresholds == 0 then
+		if #sThresholds == 0 then
 			if tRadio == 3 and tLowColorMixin then
 				tCurve:AddPoint(0.00, tLowColorMixin);
 				tCurve:AddPoint(0.25, tLowColorMixin);
@@ -415,7 +429,7 @@ do
 
 		tCurrentX = 0;
 
-		for _, tThreshold in ipairs(tThresholds) do
+		for _, tThreshold in ipairs(sThresholds) do
 			tThresholdFraction = tThreshold["percent"] / 100;
 
 			tThresholdColorMixin = CreateColor(
@@ -456,6 +470,12 @@ do
 				tCurve:AddPoint(1.00, tBaseColorMixin);
 			end
 		end
+
+		for tIdx = 1, #sThresholds do
+			sThresholdEntryPool:release(sThresholds[tIdx]);
+		end
+
+		twipe(sThresholds);
 
 		return tCurve;
 
@@ -978,418 +998,555 @@ end
 
 
 
---
-local tItem;
-local tSpecial;
-local tSecretType;
-local tTemplate;
-local tCurveIdx;
-local tBoolIdx;
-local tDispelIdx;
-local tSpriteCellIdx;
-local tAlphaIdx;
-local tNonSecretIdx;
-local tAuraIdx;
-local tTrueColor;
-local tBouquet;
-local tAllValidators;
-local tEntry;
-function VUHDO_buildBouquetLayerTemplate(aBouquetName)
+do
+	--
+	local tItem;
+	local tSpecial;
+	local tSecretType;
+	local tTemplate;
+	local tCurveIdx;
+	local tBoolIdx;
+	local tDispelIdx;
+	local tSpriteCellIdx;
+	local tAlphaIdx;
+	local tNonSecretIdx;
+	local tAuraIdx;
+	local tTrueColor;
+	local tBouquet;
+	local tAllValidators;
+	local tEntry;
+	local tOldTemplate;
+	function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 
-	tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
+		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
 
-	if not tBouquet then
-		return nil;
-	end
+		if not tBouquet then
+			return nil;
+		end
 
-	tTemplate = {
-		["hasCurves"] = false,
-		["hasBools"] = false,
-		["hasDispels"] = false,
-		["hasAlpha"] = false,
-		["hasNonSecrets"] = false,
-		["hasSecretValues"] = false,
-		["hasAuras"] = false,
-		["useBackground"] = false,
-		["useText"] = false,
-		["useOpacity"] = false,
-		["baseType"] = nil,
-		["curveValidators"] = { },
-		["booleanValidators"] = { },
-		["dispelValidators"] = { },
-		["spriteCellValidators"] = { },
-		["nonSecretValidators"] = { },
-		["auraValidators"] = { },
-		["alphaValidators"] = { },
-		["curveResults"] = { },
-		["booleanResults"] = { },
-		["dispelResults"] = { },
-		["spriteCellResults"] = { },
-		["nonSecretResults"] = { },
-		["auraResults"] = { },
-		["alphaResults"] = { },
-	};
+		tOldTemplate = sBouquetLayerTemplates[aBouquetName];
 
-	tCurveIdx = 0;
-	tBoolIdx = 0;
-	tDispelIdx = 0;
-	tSpriteCellIdx = 0;
-	tAlphaIdx = 0;
-	tNonSecretIdx = 0;
-	tAuraIdx = 0;
+		if tOldTemplate and tOldTemplate["sortedValidators"] then
+			for tIdx = 1, #tOldTemplate["sortedValidators"] do
+				sValidatorEntryPool:release(tOldTemplate["sortedValidators"][tIdx]);
+			end
+		end
 
-	for tCnt = 1, #tBouquet do
-		tItem = tBouquet[tCnt];
-		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
+		tTemplate = {
+			["hasCurves"] = false,
+			["hasBools"] = false,
+			["hasDispels"] = false,
+			["hasAlpha"] = false,
+			["hasNonSecrets"] = false,
+			["hasSecretValues"] = false,
+			["hasAuras"] = false,
+			["useBackground"] = false,
+			["useText"] = false,
+			["useOpacity"] = false,
+			["baseType"] = nil,
+			["curveValidators"] = { },
+			["booleanValidators"] = { },
+			["dispelValidators"] = { },
+			["spriteCellValidators"] = { },
+			["nonSecretValidators"] = { },
+			["auraValidators"] = { },
+			["alphaValidators"] = { },
+			["curveResults"] = { },
+			["booleanResults"] = { },
+			["dispelResults"] = { },
+			["spriteCellResults"] = { },
+			["nonSecretResults"] = { },
+			["auraResults"] = { },
+			["alphaResults"] = { },
+		};
 
-		if not tSpecial then
-			tAuraIdx = tAuraIdx + 1;
+		tCurveIdx = 0;
+		tBoolIdx = 0;
+		tDispelIdx = 0;
+		tSpriteCellIdx = 0;
+		tAlphaIdx = 0;
+		tNonSecretIdx = 0;
+		tAuraIdx = 0;
 
-			tTemplate["hasAuras"] = true;
+		for tCnt = 1, #tBouquet do
+			tItem = tBouquet[tCnt];
+			tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
 
-			tTemplate["auraValidators"][tAuraIdx] = {
-				["item"] = tItem,
-				["index"] = tCnt,
-			};
+			if not tSpecial then
+				tAuraIdx = tAuraIdx + 1;
 
-			tTemplate["auraResults"][tAuraIdx] = {
-				["isActive"] = false,
-				["icon"] = nil,
-				["timer"] = 0,
-				["counter"] = 0,
-				["duration"] = 0,
-				["color"] = nil,
-				["clipL"] = nil,
-				["clipR"] = nil,
-				["clipT"] = nil,
-				["clipB"] = nil,
-				["name"] = nil,
-			};
-		else
-			tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
+				tTemplate["hasAuras"] = true;
 
-			if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT or tSecretType == VUHDO_SECRET_TYPE_POWER_PERCENT then
-				tCurveIdx = tCurveIdx + 1;
-
-				tTemplate["hasCurves"] = true;
-
-				tTemplate["curveValidators"][tCurveIdx] = {
+				tTemplate["auraValidators"][tAuraIdx] = {
 					["item"] = tItem,
-					["special"] = tSpecial,
 					["index"] = tCnt,
 				};
 
-				tTemplate["curveResults"][tCurveIdx] = {
-					["isActive"] = false,
-					["r"] = nil,
-					["g"] = nil,
-					["b"] = nil,
-					["a"] = nil,
-					["value"] = nil,
-					["maxValue"] = 100,
-					["timer"] = 0,
-					["duration"] = 0,
-					["timer2"] = 0,
-				};
-
-				if not tTemplate["baseType"] then
-					if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT then
-						tTemplate["baseType"] = "health";
-					else
-						tTemplate["baseType"] = "power";
-					end
-				end
-
-				if tItem["color"] then
-					if tItem["color"]["useBackground"] then
-						tTemplate["useBackground"] = true;
-					end
-
-					if tItem["color"]["useText"] then
-						tTemplate["useText"] = true;
-					end
-
-					if tItem["color"]["useOpacity"] then
-						tTemplate["useOpacity"] = true;
-					end
-				end
-			elseif tSecretType == VUHDO_SECRET_TYPE_BOOLEAN then
-				tBoolIdx = tBoolIdx + 1;
-
-				tTemplate["hasBools"] = true;
-
-				tTemplate["booleanValidators"][tBoolIdx] = {
-					["item"] = tItem,
-					["special"] = tSpecial,
-					["index"] = tCnt,
-				};
-
-				tTrueColor = VUHDO_getBouquetBoolColor(aBouquetName, tItem["name"]);
-
-				if tSpecial and tSpecial["isInverted"] then
-					tTemplate["booleanResults"][tBoolIdx] = {
-						["secretBool"] = nil,
-						["trueColorMixin"] = sTransparentColor,
-						["falseColorMixin"] = tTrueColor,
-						["color"] = tItem["color"],
-					};
-				else
-					tTemplate["booleanResults"][tBoolIdx] = {
-						["secretBool"] = nil,
-						["trueColorMixin"] = tTrueColor,
-						["falseColorMixin"] = sTransparentColor,
-						["color"] = tItem["color"],
-					};
-				end
-
-				if tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] then
-					tAlphaIdx = tAlphaIdx + 1;
-
-					tTemplate["hasAlpha"] = true;
-
-					tTemplate["alphaValidators"][tAlphaIdx] = {
-						["item"] = tItem,
-						["special"] = tSpecial,
-						["index"] = tCnt,
-					};
-
-					if tSpecial and tSpecial["isInverted"] then
-						tTemplate["alphaResults"][tAlphaIdx] = {
-							["secretBool"] = nil,
-							["trueAlpha"] = 1,
-							["falseAlpha"] = tItem["color"]["O"] or 1,
-						};
-					else
-						tTemplate["alphaResults"][tAlphaIdx] = {
-							["secretBool"] = nil,
-							["trueAlpha"] = tItem["color"]["O"] or 1,
-							["falseAlpha"] = 1,
-						};
-					end
-				end
-			elseif tSecretType == VUHDO_SECRET_TYPE_DISPEL then
-				tDispelIdx = tDispelIdx + 1;
-
-				tTemplate["hasDispels"] = true;
-
-				tTemplate["dispelValidators"][tDispelIdx] = {
-					["item"] = tItem,
-					["special"] = tSpecial,
-					["index"] = tCnt,
-					["debuffType"] = tSpecial["debuffType"],
-				};
-
-				if tSpecial["buildCurves"] and tItem["custom"] and tItem["custom"]["bright"] then
-					tTemplate["dispelValidators"][tDispelIdx]["curves"] = tSpecial["buildCurves"](tItem["custom"]["bright"]);
-				end
-
-				tTemplate["dispelResults"][tDispelIdx] = {
-					["isActive"] = false,
-					["r"] = nil,
-					["g"] = nil,
-					["b"] = nil,
-					["a"] = nil,
-					["auraInstanceId"] = nil,
-				};
-
-				if tItem["color"] then
-					if tItem["color"]["useBackground"] then
-						tTemplate["useBackground"] = true;
-					end
-
-					if tItem["color"]["useText"] then
-						tTemplate["useText"] = true;
-					end
-
-					if tItem["color"]["useOpacity"] then
-						tTemplate["useOpacity"] = true;
-					end
-				end
-			elseif tSecretType == VUHDO_SECRET_TYPE_SPRITE_CELL then
-				tSpriteCellIdx = tSpriteCellIdx + 1;
-
-				tTemplate["hasSpriteCells"] = true;
-
-				tTemplate["spriteCellValidators"][tSpriteCellIdx] = {
-					["item"] = tItem,
-					["special"] = tSpecial,
-					["index"] = tCnt,
-				};
-
-				tTemplate["spriteCellResults"][tSpriteCellIdx] = {
-					["isActive"] = false,
-					["icon"] = nil,
-					["spriteCell"] = nil,
-				};
-			elseif tSecretType == VUHDO_SECRET_TYPE_NONE or tSecretType == VUHDO_SECRET_TYPE_VALUES then
-				tNonSecretIdx = tNonSecretIdx + 1;
-
-				tTemplate["hasNonSecrets"] = true;
-
-				if tSecretType == VUHDO_SECRET_TYPE_VALUES then
-					tTemplate["hasSecretValues"] = true;
-				end
-
-				tTemplate["nonSecretValidators"][tNonSecretIdx] = {
-					["item"] = tItem,
-					["special"] = tSpecial,
-					["index"] = tCnt,
-				};
-
-				tTemplate["nonSecretResults"][tNonSecretIdx] = {
+				tTemplate["auraResults"][tAuraIdx] = {
 					["isActive"] = false,
 					["icon"] = nil,
 					["timer"] = 0,
 					["counter"] = 0,
 					["duration"] = 0,
-					["color"] = { },
-					["timer2"] = 0,
+					["color"] = nil,
 					["clipL"] = nil,
 					["clipR"] = nil,
 					["clipT"] = nil,
 					["clipB"] = nil,
-					["maxColor"] = { },
+					["name"] = nil,
 				};
+			else
+				tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
+
+				if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT or tSecretType == VUHDO_SECRET_TYPE_POWER_PERCENT then
+					tCurveIdx = tCurveIdx + 1;
+
+					tTemplate["hasCurves"] = true;
+
+					tTemplate["curveValidators"][tCurveIdx] = {
+						["item"] = tItem,
+						["special"] = tSpecial,
+						["index"] = tCnt,
+					};
+
+					tTemplate["curveResults"][tCurveIdx] = {
+						["isActive"] = false,
+						["r"] = nil,
+						["g"] = nil,
+						["b"] = nil,
+						["a"] = nil,
+						["value"] = nil,
+						["maxValue"] = 100,
+						["timer"] = 0,
+						["duration"] = 0,
+						["timer2"] = 0,
+					};
+
+					if not tTemplate["baseType"] then
+						if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT then
+							tTemplate["baseType"] = "health";
+						else
+							tTemplate["baseType"] = "power";
+						end
+					end
+
+					if tItem["color"] then
+						if tItem["color"]["useBackground"] then
+							tTemplate["useBackground"] = true;
+						end
+
+						if tItem["color"]["useText"] then
+							tTemplate["useText"] = true;
+						end
+
+						if tItem["color"]["useOpacity"] then
+							tTemplate["useOpacity"] = true;
+						end
+					end
+				elseif tSecretType == VUHDO_SECRET_TYPE_BOOLEAN then
+					tBoolIdx = tBoolIdx + 1;
+
+					tTemplate["hasBools"] = true;
+
+					tTemplate["booleanValidators"][tBoolIdx] = {
+						["item"] = tItem,
+						["special"] = tSpecial,
+						["index"] = tCnt,
+					};
+
+					tTrueColor = VUHDO_getBouquetBoolColor(aBouquetName, tItem["name"]);
+
+					if tSpecial and tSpecial["isInverted"] then
+						tTemplate["booleanResults"][tBoolIdx] = {
+							["secretBool"] = nil,
+							["trueColorMixin"] = sTransparentColor,
+							["falseColorMixin"] = tTrueColor,
+							["color"] = tItem["color"],
+						};
+					else
+						tTemplate["booleanResults"][tBoolIdx] = {
+							["secretBool"] = nil,
+							["trueColorMixin"] = tTrueColor,
+							["falseColorMixin"] = sTransparentColor,
+							["color"] = tItem["color"],
+						};
+					end
+
+					if tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] then
+						tAlphaIdx = tAlphaIdx + 1;
+
+						tTemplate["hasAlpha"] = true;
+
+						tTemplate["alphaValidators"][tAlphaIdx] = {
+							["item"] = tItem,
+							["special"] = tSpecial,
+							["index"] = tCnt,
+						};
+
+						if tSpecial and tSpecial["isInverted"] then
+							tTemplate["alphaResults"][tAlphaIdx] = {
+								["secretBool"] = nil,
+								["trueAlpha"] = 1,
+								["falseAlpha"] = tItem["color"]["O"] or 1,
+							};
+						else
+							tTemplate["alphaResults"][tAlphaIdx] = {
+								["secretBool"] = nil,
+								["trueAlpha"] = tItem["color"]["O"] or 1,
+								["falseAlpha"] = 1,
+							};
+						end
+					end
+				elseif tSecretType == VUHDO_SECRET_TYPE_DISPEL then
+					tDispelIdx = tDispelIdx + 1;
+
+					tTemplate["hasDispels"] = true;
+
+					tTemplate["dispelValidators"][tDispelIdx] = {
+						["item"] = tItem,
+						["special"] = tSpecial,
+						["index"] = tCnt,
+						["debuffType"] = tSpecial["debuffType"],
+					};
+
+					if tSpecial["buildCurves"] and tItem["custom"] and tItem["custom"]["bright"] then
+						tTemplate["dispelValidators"][tDispelIdx]["curves"] = tSpecial["buildCurves"](tItem["custom"]["bright"]);
+					end
+
+					tTemplate["dispelResults"][tDispelIdx] = {
+						["isActive"] = false,
+						["r"] = nil,
+						["g"] = nil,
+						["b"] = nil,
+						["a"] = nil,
+						["auraInstanceId"] = nil,
+					};
+
+					if tItem["color"] then
+						if tItem["color"]["useBackground"] then
+							tTemplate["useBackground"] = true;
+						end
+
+						if tItem["color"]["useText"] then
+							tTemplate["useText"] = true;
+						end
+
+						if tItem["color"]["useOpacity"] then
+							tTemplate["useOpacity"] = true;
+						end
+					end
+				elseif tSecretType == VUHDO_SECRET_TYPE_SPRITE_CELL then
+					tSpriteCellIdx = tSpriteCellIdx + 1;
+
+					tTemplate["hasSpriteCells"] = true;
+
+					tTemplate["spriteCellValidators"][tSpriteCellIdx] = {
+						["item"] = tItem,
+						["special"] = tSpecial,
+						["index"] = tCnt,
+					};
+
+					tTemplate["spriteCellResults"][tSpriteCellIdx] = {
+						["isActive"] = false,
+						["icon"] = nil,
+						["spriteCell"] = nil,
+					};
+				elseif tSecretType == VUHDO_SECRET_TYPE_NONE or tSecretType == VUHDO_SECRET_TYPE_VALUES then
+					tNonSecretIdx = tNonSecretIdx + 1;
+
+					tTemplate["hasNonSecrets"] = true;
+
+					if tSecretType == VUHDO_SECRET_TYPE_VALUES then
+						tTemplate["hasSecretValues"] = true;
+					end
+
+					tTemplate["nonSecretValidators"][tNonSecretIdx] = {
+						["item"] = tItem,
+						["special"] = tSpecial,
+						["index"] = tCnt,
+					};
+
+					tTemplate["nonSecretResults"][tNonSecretIdx] = {
+						["isActive"] = false,
+						["icon"] = nil,
+						["timer"] = 0,
+						["counter"] = 0,
+						["duration"] = 0,
+						["color"] = { },
+						["timer2"] = 0,
+						["clipL"] = nil,
+						["clipR"] = nil,
+						["clipT"] = nil,
+						["clipB"] = nil,
+						["maxColor"] = { },
+					};
+				end
+			end
+		end
+
+		tAllValidators = { };
+
+		if tTemplate["hasNonSecrets"] then
+			for tIdx = 1, #tTemplate["nonSecretValidators"] do
+				tEntry = sValidatorEntryPool:get();
+				tEntry["type"] = "nonsecret";
+				tEntry["resultIdx"] = tIdx;
+				tEntry["bouquetIdx"] = tTemplate["nonSecretValidators"][tIdx]["index"];
+				tinsert(tAllValidators, tEntry);
+			end
+		end
+
+		if tTemplate["hasCurves"] then
+			for tIdx = 1, #tTemplate["curveValidators"] do
+				tEntry = sValidatorEntryPool:get();
+				tEntry["type"] = "curve";
+				tEntry["resultIdx"] = tIdx;
+				tEntry["bouquetIdx"] = tTemplate["curveValidators"][tIdx]["index"];
+				tinsert(tAllValidators, tEntry);
+			end
+		end
+
+		if tTemplate["hasDispels"] then
+			for tIdx = 1, #tTemplate["dispelValidators"] do
+				tEntry = sValidatorEntryPool:get();
+				tEntry["type"] = "dispel";
+				tEntry["resultIdx"] = tIdx;
+				tEntry["bouquetIdx"] = tTemplate["dispelValidators"][tIdx]["index"];
+				tinsert(tAllValidators, tEntry);
+			end
+		end
+
+		tsort(tAllValidators, function(a, b)
+			return a["bouquetIdx"] > b["bouquetIdx"];
+		end);
+
+		tTemplate["sortedValidators"] = tAllValidators;
+
+		sBouquetLayerTemplates[aBouquetName] = tTemplate;
+
+		return tTemplate;
+
+	end
+
+
+
+	--
+	function VUHDO_buildAllBouquetLayerTemplates()
+
+		twipe(sBouquetLayerTemplates);
+
+		for tBouquetName, _ in pairs(VUHDO_BOUQUETS["STORED"]) do
+			VUHDO_buildBouquetLayerTemplate(tBouquetName);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_getBouquetLayerTemplate(aBouquetName)
+
+		return sBouquetLayerTemplates[aBouquetName];
+
+	end
+end
+
+
+
+do
+	--
+	local tValidatorEntry;
+	local tValidators;
+	local function VUHDO_findResultSlot(aLayerTemplate, aValidatorsKey, aResultsKey, aPriorityIndex)
+
+		tValidators = aLayerTemplate[aValidatorsKey];
+
+		for tIdx = 1, #tValidators do
+			tValidatorEntry = tValidators[tIdx];
+			if tValidatorEntry["index"] == aPriorityIndex then
+				return aLayerTemplate[aResultsKey][tIdx];
+			end
+		end
+
+		return nil;
+
+	end
+
+
+
+	--
+	function VUHDO_findNonSecretResultSlot(aLayerTemplate, aPriorityIndex)
+
+		return VUHDO_findResultSlot(aLayerTemplate, "nonSecretValidators", "nonSecretResults", aPriorityIndex);
+
+	end
+
+
+
+	--
+	function VUHDO_findAuraResultSlot(aLayerTemplate, aPriorityIndex)
+
+		return VUHDO_findResultSlot(aLayerTemplate, "auraValidators", "auraResults", aPriorityIndex);
+
+	end
+
+
+
+	--
+	function VUHDO_findCurveResultSlot(aLayerTemplate, aPriorityIndex)
+
+		return VUHDO_findResultSlot(aLayerTemplate, "curveValidators", "curveResults", aPriorityIndex);
+
+	end
+
+
+
+	--
+	function VUHDO_findBoolResultSlot(aLayerTemplate, aPriorityIndex)
+
+		return VUHDO_findResultSlot(aLayerTemplate, "booleanValidators", "booleanResults", aPriorityIndex);
+
+	end
+
+
+
+	--
+	function VUHDO_findDispelResultSlot(aLayerTemplate, aPriorityIndex)
+
+		return VUHDO_findResultSlot(aLayerTemplate, "dispelValidators", "dispelResults", aPriorityIndex);
+
+	end
+
+
+
+	do
+		--
+		local tValidators;
+		local tValidatorEntry;
+		function VUHDO_findDispelValidatorEntry(aLayerTemplate, aPriorityIndex)
+
+			tValidators = aLayerTemplate["dispelValidators"];
+
+			for tIdx = 1, #tValidators do
+				tValidatorEntry = tValidators[tIdx];
+
+				if tValidatorEntry["index"] == aPriorityIndex then
+					return tValidatorEntry;
+				end
+			end
+
+			return nil;
+
+		end
+	end
+
+
+
+	--
+	function VUHDO_findSpriteCellResultSlot(aLayerTemplate, aPriorityIndex)
+
+		return VUHDO_findResultSlot(aLayerTemplate, "spriteCellValidators", "spriteCellResults", aPriorityIndex);
+
+	end
+end
+
+
+
+do
+	--
+	function VUHDO_getColorHash(aColor)
+
+		return
+			(aColor["R"] or 0) * 0.0001
+			+ (aColor["G"] or 0) * 0.001
+			+ (aColor["B"] or 0) * 0.01
+			+ (aColor["O"] or 0) * 0.1
+			+ (aColor["TR"] or 0)
+			+ (aColor["TG"] or 0) * 10
+			+ (aColor["TB"] or 0) * 100
+			+ (aColor["TO"] or 0) * 1000;
+
+	end
+
+
+
+	--
+	local tHasChanged;
+	local tLastTime;
+	function VUHDO_hasBouquetChanged(aUnit, aBouquetName, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10)
+
+		tLastTime = VUHDO_LAST_EVALUATED_BOUQUETS[aBouquetName][aUnit];
+
+		if not tLastTime then
+			VUHDO_LAST_EVALUATED_BOUQUETS[aBouquetName][aUnit] = sBouquetStatePool:get();
+
+			return true;
+		end
+
+		tHasChanged = false;
+
+		if anArg1  ~= tLastTime[ 1] then
+			tLastTime[ 1] = anArg1;  tHasChanged = true;
+		end
+
+		if anArg2  ~= tLastTime[ 2] then
+			tLastTime[ 2] = anArg2;  tHasChanged = true;
+		end
+
+		if anArg3  ~= tLastTime[ 3] then
+			tLastTime[ 3] = anArg3;  tHasChanged = true;
+		end
+
+		if anArg4  ~= tLastTime[ 4] then
+			tLastTime[ 4] = anArg4;  tHasChanged = true;
+		end
+
+		if anArg5  ~= tLastTime[ 5] then
+			tLastTime[ 5] = anArg5;  tHasChanged = true;
+		end
+
+		if anArg6  ~= tLastTime[ 6] then
+			tLastTime[ 6] = anArg6;  tHasChanged = true;
+		end
+
+		if anArg7  ~= tLastTime[ 7] then
+			tLastTime[ 7] = anArg7;  tHasChanged = true;
+		end
+
+		if anArg8  ~= tLastTime[ 8] then
+			tLastTime[ 8] = anArg8;  tHasChanged = true;
+		end
+
+		if anArg9  ~= tLastTime[ 9] then
+			tLastTime[ 9] = anArg9;  tHasChanged = true;
+		end
+
+		if anArg10 ~= tLastTime[10] then
+			tLastTime[10] = anArg10; tHasChanged = true;
+		end
+
+		return tHasChanged;
+	end
+end
+
+
+
+--
+function VUHDO_releaseAndWipeLastEvaluatedBouquets()
+
+	for tBouquetName, tUnitStates in pairs(VUHDO_LAST_EVALUATED_BOUQUETS) do
+		for tUnit, tState in pairs(tUnitStates) do
+			if tState then
+				sBouquetStatePool:release(tState);
 			end
 		end
 	end
 
-	tAllValidators = { };
-
-	if tTemplate["hasNonSecrets"] then
-		for tIdx = 1, #tTemplate["nonSecretValidators"] do
-			tEntry = {
-				["type"] = "nonsecret",
-				["resultIdx"] = tIdx,
-				["bouquetIdx"] = tTemplate["nonSecretValidators"][tIdx]["index"],
-			};
-
-			tinsert(tAllValidators, tEntry);
-		end
-	end
-
-	if tTemplate["hasCurves"] then
-		for tIdx = 1, #tTemplate["curveValidators"] do
-			tEntry = {
-				["type"] = "curve",
-				["resultIdx"] = tIdx,
-				["bouquetIdx"] = tTemplate["curveValidators"][tIdx]["index"],
-			};
-
-			tinsert(tAllValidators, tEntry);
-		end
-	end
-
-	if tTemplate["hasDispels"] then
-		for tIdx = 1, #tTemplate["dispelValidators"] do
-			tEntry = {
-				["type"] = "dispel",
-				["resultIdx"] = tIdx,
-				["bouquetIdx"] = tTemplate["dispelValidators"][tIdx]["index"],
-			};
-
-			tinsert(tAllValidators, tEntry);
-		end
-	end
-
-	tsort(tAllValidators, function(a, b)
-		return a["bouquetIdx"] > b["bouquetIdx"];
-	end);
-
-	tTemplate["sortedValidators"] = tAllValidators;
-
-	sBouquetLayerTemplates[aBouquetName] = tTemplate;
-
-	return tTemplate;
-
-end
-
-
-
---
-function VUHDO_buildAllBouquetLayerTemplates()
-
-	twipe(sBouquetLayerTemplates);
-
-	for tBouquetName, _ in pairs(VUHDO_BOUQUETS["STORED"]) do
-		VUHDO_buildBouquetLayerTemplate(tBouquetName);
-	end
+	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);
 
 	return;
-
-end
-
-
-
---
-function VUHDO_getBouquetLayerTemplate(aBouquetName)
-
-	return sBouquetLayerTemplates[aBouquetName];
-
-end
-
-
-
---
-local tValidatorEntry;
-local tValidators;
-local function VUHDO_findResultSlot(aLayerTemplate, aValidatorsKey, aResultsKey, aPriorityIndex)
-
-	tValidators = aLayerTemplate[aValidatorsKey];
-
-	for tIdx = 1, #tValidators do
-		tValidatorEntry = tValidators[tIdx];
-		if tValidatorEntry["index"] == aPriorityIndex then
-			return aLayerTemplate[aResultsKey][tIdx];
-		end
-	end
-
-	return nil;
-
-end
-
-
-
---
-local function VUHDO_findNonSecretResultSlot(aLayerTemplate, aPriorityIndex)
-
-	return VUHDO_findResultSlot(aLayerTemplate, "nonSecretValidators", "nonSecretResults", aPriorityIndex);
-
-end
-
-
-
---
-local function VUHDO_findAuraResultSlot(aLayerTemplate, aPriorityIndex)
-
-	return VUHDO_findResultSlot(aLayerTemplate, "auraValidators", "auraResults", aPriorityIndex);
-
-end
-
-
-
---
-local function VUHDO_findCurveResultSlot(aLayerTemplate, aPriorityIndex)
-
-	return VUHDO_findResultSlot(aLayerTemplate, "curveValidators", "curveResults", aPriorityIndex);
-
-end
-
-
-
---
-local function VUHDO_findBoolResultSlot(aLayerTemplate, aPriorityIndex)
-
-	return VUHDO_findResultSlot(aLayerTemplate, "booleanValidators", "booleanResults", aPriorityIndex);
-
-end
-
-
-
---
-local function VUHDO_findDispelResultSlot(aLayerTemplate, aPriorityIndex)
-
-	return VUHDO_findResultSlot(aLayerTemplate, "dispelValidators", "dispelResults", aPriorityIndex);
 
 end
 
@@ -1397,235 +1554,128 @@ end
 
 do
 	--
-	local tValidators;
-	local tValidatorEntry;
-	function VUHDO_findDispelValidatorEntry(aLayerTemplate, aPriorityIndex)
+	local function VUHDO_ensureClassColorsInitialized()
 
-		tValidators = aLayerTemplate["dispelValidators"];
-
-		for tIdx = 1, #tValidators do
-			tValidatorEntry = tValidators[tIdx];
-
-			if tValidatorEntry["index"] == aPriorityIndex then
-				return tValidatorEntry;
-			end
+		if not VUHDO_USER_CLASS_COLORS or not VUHDO_USER_CLASS_GRADIENT_COLORS then
+			VUHDO_initClassColors();
 		end
 
-		return nil;
+		return;
 
 	end
-end
 
 
 
---
-local function VUHDO_findSpriteCellResultSlot(aLayerTemplate, aPriorityIndex)
+	--
+	local tColor;
+	local tFactor;
+	local tModi, tInvModi;
+	local tR1, tG1, tB1, tO1;
+	local tR2, tG2, tB2, tO2;
+	local tGood, tFair, tLow;
+	local tDestColor = { ["useBackground"] = true, ["useOpacity"] = true };
+	local tRadio;
+	local tIsGradient;
+	local tClassId;
+	local tMaxColor;
+	local tDestMaxColor = { ["useBackground"] = true, ["useOpacity"] = true };
+	function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue)
 
-	return VUHDO_findResultSlot(aLayerTemplate, "spriteCellValidators", "spriteCellResults", aPriorityIndex);
+		VUHDO_ensureClassColorsInitialized();
 
-end
+		tRadio = anEntry["custom"]["radio"];
 
+		if 1 == tRadio then -- solid
+			tColor = anEntry["color"];
+			tIsGradient = anEntry["custom"]["isSolidGradient"];
 
-
---
-local function VUHDO_getColorHash(aColor)
-
-		return
-			(aColor["R"] or 0) * 0.0001
-		+ (aColor["G"] or 0) * 0.001
-		+ (aColor["B"] or 0) * 0.01
-		+ (aColor["O"] or 0) * 0.1
-		+ (aColor["TR"] or 0)
-		+ (aColor["TG"] or 0) * 10
-		+ (aColor["TB"] or 0) * 100
-		+ (aColor["TO"] or 0) * 1000;
-
-end
-
-
-
---
-local tHasChanged;
-local tLastTime;
-local function VUHDO_hasBouquetChanged(aUnit, aBouquetName, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10)
-
-	tLastTime = VUHDO_LAST_EVALUATED_BOUQUETS[aBouquetName][aUnit];
-
-	if not tLastTime then
-		VUHDO_LAST_EVALUATED_BOUQUETS[aBouquetName][aUnit] = { };
-
-		return true;
-	end
-
-	tHasChanged = false;
-
-	if anArg1  ~= tLastTime[ 1] then
-		tLastTime[ 1] = anArg1;  tHasChanged = true;
-	end
-
-	if anArg2  ~= tLastTime[ 2] then
-		tLastTime[ 2] = anArg2;  tHasChanged = true;
-	end
-
-	if anArg3  ~= tLastTime[ 3] then
-		tLastTime[ 3] = anArg3;  tHasChanged = true;
-	end
-
-	if anArg4  ~= tLastTime[ 4] then
-		tLastTime[ 4] = anArg4;  tHasChanged = true;
-	end
-
-	if anArg5  ~= tLastTime[ 5] then
-		tLastTime[ 5] = anArg5;  tHasChanged = true;
-	end
-
-	if anArg6  ~= tLastTime[ 6] then
-		tLastTime[ 6] = anArg6;  tHasChanged = true;
-	end
-
-	if anArg7  ~= tLastTime[ 7] then
-		tLastTime[ 7] = anArg7;  tHasChanged = true;
-	end
-
-	if anArg8  ~= tLastTime[ 8] then
-		tLastTime[ 8] = anArg8;  tHasChanged = true;
-	end
-
-	if anArg9  ~= tLastTime[ 9] then
-		tLastTime[ 9] = anArg9;  tHasChanged = true;
-	end
-
-	if anArg10 ~= tLastTime[10] then
-		tLastTime[10] = anArg10; tHasChanged = true;
-	end
-
-	return tHasChanged;
-end
-
-
-
---
-local function VUHDO_ensureClassColorsInitialized()
-
-	if not VUHDO_USER_CLASS_COLORS or not VUHDO_USER_CLASS_GRADIENT_COLORS then
-		VUHDO_initClassColors();
-	end
-
-	return;
-
-end
-
-
-
---
-local tColor;
-local tFactor;
-local tModi, tInvModi;
-local tR1, tG1, tB1, tO1;
-local tR2, tG2, tB2, tO2;
-local tGood, tFair, tLow;
-local tDestColor = { ["useBackground"] = true, ["useOpacity"] = true };
-local tRadio;
-local tIsGradient;
-local tClassId;
-local tMaxColor;
-local tDestMaxColor = { ["useBackground"] = true, ["useOpacity"] = true };
-local function VUHDO_getBouquetStatusBarColor(anEntry, anInfo, aValue, aMaxValue)
-
-	VUHDO_ensureClassColorsInitialized();
-
-	tRadio = anEntry["custom"]["radio"];
-
-	if 1 == tRadio then -- solid
-		tColor = anEntry["color"];
-		tIsGradient = anEntry["custom"]["isSolidGradient"];
-
-		if tIsGradient then
-			tMaxColor = anEntry["custom"]["maxColor"];
-
-			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
-
-			if tMaxColor then
-				tDestMaxColor["R"], tDestMaxColor["G"], tDestMaxColor["B"], tDestMaxColor["O"]
-					= tMaxColor["R"], tMaxColor["G"], tMaxColor["B"], tMaxColor["O"];
-
-				return tDestColor, tDestMaxColor;
-			else
-				return tDestColor, nil;
-			end
-		else
-			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
-
-			return tDestColor, nil;
-		end
-	elseif 2 == tRadio then -- class color
-		tClassId = anInfo["classId"];
-		tFactor = anEntry["custom"]["bright"];
-		tIsGradient = anEntry["custom"]["isClassGradient"];
-
-		if tIsGradient then
-			if VUHDO_USER_CLASS_GRADIENT_COLORS and VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId] then
-				tColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["min"] or anEntry["color"];
-				tMaxColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["max"] or anEntry["custom"]["maxColor"];
-			else
-				tColor = anEntry["color"];
+			if tIsGradient then
 				tMaxColor = anEntry["custom"]["maxColor"];
-			end
 
-			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
-				= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
+				tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
 
-			if tMaxColor then
-				tDestMaxColor["R"], tDestMaxColor["G"], tDestMaxColor["B"], tDestMaxColor["O"]
-					= tMaxColor["R"] * tFactor, tMaxColor["G"] * tFactor, tMaxColor["B"] * tFactor, tMaxColor["O"];
+				if tMaxColor then
+					tDestMaxColor["R"], tDestMaxColor["G"], tDestMaxColor["B"], tDestMaxColor["O"]
+						= tMaxColor["R"], tMaxColor["G"], tMaxColor["B"], tMaxColor["O"];
 
-				return tDestColor, tDestMaxColor;
+					return tDestColor, tDestMaxColor;
+				else
+					return tDestColor, nil;
+				end
 			else
+				tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
+
 				return tDestColor, nil;
 			end
-		else
-			if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[tClassId] then
-				tColor = VUHDO_USER_CLASS_COLORS[tClassId] or anEntry["color"];
+		elseif 2 == tRadio then -- class color
+			tClassId = anInfo["classId"];
+			tFactor = anEntry["custom"]["bright"];
+			tIsGradient = anEntry["custom"]["isClassGradient"];
+
+			if tIsGradient then
+				if VUHDO_USER_CLASS_GRADIENT_COLORS and VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId] then
+					tColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["min"] or anEntry["color"];
+					tMaxColor = VUHDO_USER_CLASS_GRADIENT_COLORS[tClassId]["max"] or anEntry["custom"]["maxColor"];
+				else
+					tColor = anEntry["color"];
+					tMaxColor = anEntry["custom"]["maxColor"];
+				end
+
+				tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
+					= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
+
+				if tMaxColor then
+					tDestMaxColor["R"], tDestMaxColor["G"], tDestMaxColor["B"], tDestMaxColor["O"]
+						= tMaxColor["R"] * tFactor, tMaxColor["G"] * tFactor, tMaxColor["B"] * tFactor, tMaxColor["O"];
+
+					return tDestColor, tDestMaxColor;
+				else
+					return tDestColor, nil;
+				end
 			else
-				tColor = anEntry["color"];
+				if VUHDO_USER_CLASS_COLORS and VUHDO_USER_CLASS_COLORS[tClassId] then
+					tColor = VUHDO_USER_CLASS_COLORS[tClassId] or anEntry["color"];
+				else
+					tColor = anEntry["color"];
+				end
+
+				tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
+					= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
+
+				return tDestColor, nil;
+			end
+		elseif not issecretvalue(aValue) and not issecretvalue(aMaxValue) and aMaxValue ~= 0 then -- 3 == gradient
+			tModi = ((aValue / aMaxValue) ^ 1.7) * 2;
+			tFair = anEntry["custom"]["grad_med"];
+
+			if tModi > 1 then
+				tGood = anEntry["color"];
+				tR1, tG1, tB1, tO1 = tGood["R"], tGood["G"], tGood["B"], tGood["O"];
+				tR2, tG2, tB2, tO2 = tFair["R"], tFair["G"], tFair["B"], tFair["O"];
+				tModi = tModi - 1;
+			else
+				tLow = anEntry["custom"]["grad_low"];
+				tR1, tG1, tB1, tO1 = tFair["R"], tFair["G"], tFair["B"], tFair["O"];
+				tR2, tG2, tB2, tO2 = tLow["R"], tLow["G"], tLow["B"], tLow["O"];
 			end
 
+			tInvModi = 1 - tModi;
 			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
-				= tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor, tColor["O"];
+				= tR2 * tInvModi + tR1 * tModi, tG2 * tInvModi + tG1 * tModi,
+				tB2 * tInvModi + tB1 * tModi, tO2 * tInvModi + tO1 * tModi;
+
+			return tDestColor, nil;
+		else
+			tColor = anEntry["color"];
+
+			tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
 
 			return tDestColor, nil;
 		end
-	elseif not issecretvalue(aValue) and not issecretvalue(aMaxValue) and aMaxValue ~= 0 then -- 3 == gradient
-		tModi = ((aValue / aMaxValue) ^ 1.7) * 2;
-		tFair = anEntry["custom"]["grad_med"];
 
-		if tModi > 1 then
-			tGood = anEntry["color"];
-			tR1, tG1, tB1, tO1 = tGood["R"], tGood["G"], tGood["B"], tGood["O"];
-			tR2, tG2, tB2, tO2 = tFair["R"], tFair["G"], tFair["B"], tFair["O"];
-			tModi = tModi - 1;
-		else
-			tLow = anEntry["custom"]["grad_low"];
-			tR1, tG1, tB1, tO1 = tFair["R"], tFair["G"], tFair["B"], tFair["O"];
-			tR2, tG2, tB2, tO2 = tLow["R"], tLow["G"], tLow["B"], tLow["O"];
-		end
+		return;
 
-		tInvModi = 1 - tModi;
-		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"]
-			= tR2 * tInvModi + tR1 * tModi, tG2 * tInvModi + tG1 * tModi,
-		 		tB2 * tInvModi + tB1 * tModi, tO2 * tInvModi + tO1 * tModi;
-
-		return tDestColor, nil;
-	else
-		tColor = anEntry["color"];
-
-		tDestColor["R"], tDestColor["G"], tDestColor["B"], tDestColor["O"] = tColor["R"], tColor["G"], tColor["B"], tColor["O"];
-
-		return tDestColor, nil;
 	end
-
-	return;
-
 end
 
 
@@ -2513,169 +2563,174 @@ end
 
 
 
---
-local tEmptyInfo = { };
-local tUnit;
-local tInfo;
-local tBouquet;
-local tAnzInfos;
-local tLayerTemplate;
-local tHasSecretResults;
-local function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
+do
+	--
+	local tEmptyInfo = { };
+	local tUnit;
+	local tInfo;
+	local tBouquet;
+	local tAnzInfos;
+	local tLayerTemplate;
+	local tHasSecretResults;
+	function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 
-	tUnit = (VUHDO_RAID[aUnit] or tEmptyInfo)["isVehicle"] and VUHDO_RAID[aUnit]["petUnit"] or aUnit;
-	tInfo = anInfo or VUHDO_RAID[tUnit];
+		tUnit = (VUHDO_RAID[aUnit] or tEmptyInfo)["isVehicle"] and VUHDO_RAID[aUnit]["petUnit"] or aUnit;
+		tInfo = anInfo or VUHDO_RAID[tUnit];
 
-	if not tInfo then
-		return false, nil, nil, nil, nil, nil, nil, VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0, nil, nil, nil, nil, nil, nil;
-	end
-
-	txState["active"] = false;
-	txState["icon"] = nil;
-	txState["isColorInit"] = false;
-	txState["name"] = nil;
-
-	txState["isMaxColorInit"] = false;
-	txState["counter"] = 0;
-	txState["timer"] = 0;
-	txState["duration"] = 0;
-	txState["timer2"] = 0;
-	txState["level"] = 0;
-	txState["activeAuras"] = 0;
-
-	txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"] = nil, nil, nil, nil;
-
-	tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
-	tAnzInfos = #tBouquet;
-	tLayerTemplate = nil;
-
-	if sSecretsEnabled and not VUHDO_isConfigDemoUsers() then
-		tLayerTemplate = sBouquetLayerTemplates[aBouquetName];
-
-		VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, tInfo, tUnit, tBouquet, tAnzInfos, tLayerTemplate);
-	else
-		VUHDO_evaluateBouquetNonSecret(aUnit, tInfo, tUnit, tBouquet, tAnzInfos);
-	end
-
-	tHasSecretResults = tLayerTemplate and (tLayerTemplate["hasCurves"] or tLayerTemplate["hasBools"] or tLayerTemplate["hasDispels"] or tLayerTemplate["hasSecretValues"]);
-
-	if txState["active"] then
-		if not txState["isColorInit"] then
-			txState["color"]["R"], txState["color"]["G"], txState["color"]["B"], txState["color"]["O"], txState["color"]["TR"], txState["color"]["TG"], txState["color"]["TB"], txState["color"]["TO"],
-				txState["color"]["useText"], txState["color"]["useBackground"], txState["color"]["useOpacity"] = 1, 1, 1, 1, 1, 1, 1, 1, true, true, true;
-		elseif not txState["color"]["useOpacity"] then
-			txState["color"]["TO"], txState["color"]["O"] = 1, 1;
+		if not tInfo then
+			return false, nil, nil, nil, nil, nil, nil, VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0, nil, nil, nil, nil, nil, nil;
 		end
 
-		if txState["isMaxColorInit"] and not txState["maxColor"]["useOpacity"] then
-			txState["maxColor"]["TO"], txState["maxColor"]["O"] = 1, 1;
+		txState["active"] = false;
+		txState["icon"] = nil;
+		txState["isColorInit"] = false;
+		txState["name"] = nil;
+
+		txState["isMaxColorInit"] = false;
+		txState["counter"] = 0;
+		txState["timer"] = 0;
+		txState["duration"] = 0;
+		txState["timer2"] = 0;
+		txState["level"] = 0;
+		txState["activeAuras"] = 0;
+
+		txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"] = nil, nil, nil, nil;
+
+		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
+		tAnzInfos = #tBouquet;
+		tLayerTemplate = nil;
+
+		if sSecretsEnabled and not VUHDO_isConfigDemoUsers() then
+			tLayerTemplate = sBouquetLayerTemplates[aBouquetName];
+
+			VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, tInfo, tUnit, tBouquet, tAnzInfos, tLayerTemplate);
+		else
+			VUHDO_evaluateBouquetNonSecret(aUnit, tInfo, tUnit, tBouquet, tAnzInfos);
 		end
 
-		return true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], txState["color"], txState["name"],
-			tHasSecretResults or VUHDO_hasBouquetChanged(aUnit, aBouquetName, true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], VUHDO_getColorHash(txState["color"]), txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"]),
-			tAnzInfos - txState["level"], txState["timer2"], txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"], txState["isMaxColorInit"] and txState["maxColor"] or nil,
-			tLayerTemplate;
+		tHasSecretResults = tLayerTemplate and (tLayerTemplate["hasCurves"] or tLayerTemplate["hasBools"] or tLayerTemplate["hasDispels"] or tLayerTemplate["hasSecretValues"]);
+
+		if txState["active"] then
+			if not txState["isColorInit"] then
+				txState["color"]["R"], txState["color"]["G"], txState["color"]["B"], txState["color"]["O"], txState["color"]["TR"], txState["color"]["TG"], txState["color"]["TB"], txState["color"]["TO"],
+					txState["color"]["useText"], txState["color"]["useBackground"], txState["color"]["useOpacity"] = 1, 1, 1, 1, 1, 1, 1, 1, true, true, true;
+			elseif not txState["color"]["useOpacity"] then
+				txState["color"]["TO"], txState["color"]["O"] = 1, 1;
+			end
+
+			if txState["isMaxColorInit"] and not txState["maxColor"]["useOpacity"] then
+				txState["maxColor"]["TO"], txState["maxColor"]["O"] = 1, 1;
+			end
+
+			return true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], txState["color"], txState["name"],
+				tHasSecretResults or VUHDO_hasBouquetChanged(aUnit, aBouquetName, true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], VUHDO_getColorHash(txState["color"]), txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"]),
+				tAnzInfos - txState["level"], txState["timer2"], txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"], txState["isMaxColorInit"] and txState["maxColor"] or nil,
+				tLayerTemplate;
 	else
 		return false, nil, nil, nil, nil, nil, nil, tHasSecretResults or VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0,
 			nil, nil, nil, nil, nil, tLayerTemplate;
 	end
 
+	end
 end
 
 
 
 
 --
-local tBouquet;
-local tName;
-local function VUHDO_activateBuffsInScanner(aBouquetName)
+do
+	--
+	local tBouquet;
+	local tName;
+	local function VUHDO_activateBuffsInScanner(aBouquetName)
 
-	tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
+		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
 
-	for _, tInfos in pairs(tBouquet) do
-		tName = tInfos["name"];
-		if not VUHDO_strempty(tName) and not VUHDO_BOUQUET_BUFFS_SPECIAL[tName] then
-			VUHDO_ACTIVE_HOTS[tName] = true;
+		for _, tInfos in pairs(tBouquet) do
+			tName = tInfos["name"];
+			if not VUHDO_strempty(tName) and not VUHDO_BOUQUET_BUFFS_SPECIAL[tName] then
+				VUHDO_ACTIVE_HOTS[tName] = true;
 
-			if tInfos["others"] then VUHDO_ACTIVE_HOTS_OTHERS[tName] = true; end
+				if tInfos["others"] then VUHDO_ACTIVE_HOTS_OTHERS[tName] = true; end
+			end
 		end
+
+		return;
+
 	end
 
-	return;
-
-end
 
 
+	--
+	local function VUHDO_hasCyclic(aBouquetName)
 
---
-local function VUHDO_hasCyclic(aBouquetName)
-
-	for _, tItem in pairs(VUHDO_BOUQUETS["STORED"][aBouquetName]) do
-		if not VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]] or VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]]["updateCyclic"] then
-			return true;
+		for _, tItem in pairs(VUHDO_BOUQUETS["STORED"][aBouquetName]) do
+			if not VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]] or VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]]["updateCyclic"] then
+				return true;
+			end
 		end
+
+		return false;
+
 	end
 
-	return false;
-
-end
 
 
+	--
+	function VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction)
 
---
-local function VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction)
+		if VUHDO_strempty(aBouquetName) or VUHDO_strempty(anOwnerName) then
+			return;
+		elseif not VUHDO_BOUQUETS["STORED"][aBouquetName] then
+			VUHDO_Msg(format(VUHDO_I18N_ERR_NO_BOUQUET, anOwnerName, aBouquetName), 1, 0.4, 0.4);
 
-	if VUHDO_strempty(aBouquetName) or VUHDO_strempty(anOwnerName) then
+			return;
+		end
+
+		VUHDO_BOUQUETS["STORED"][aBouquetName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][aBouquetName]);
+
+		VUHDO_buildCurvesForBouquet(aBouquetName);
+
+		VUHDO_REGISTERED_BOUQUETS[aBouquetName][anOwnerName] = aFunction;
+
+		if not VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName] then
+			VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName] = { };
+		end
+
+		VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName][aBouquetName] = aFunction;
+
+		VUHDO_activateBuffsInScanner(aBouquetName);
+
+		for tUnit, _ in pairs(VUHDO_RAID) do
+			aFunction(tUnit, false, nil, 0, 0, 0, nil, nil, nil);
+		end
+
+		if VUHDO_hasCyclic(aBouquetName) then
+			VUHDO_CYCLIC_BOUQUETS[aBouquetName] = true;
+		end
+
 		return;
-	elseif not VUHDO_BOUQUETS["STORED"][aBouquetName] then
-		VUHDO_Msg(format(VUHDO_I18N_ERR_NO_BOUQUET, anOwnerName, aBouquetName), 1, 0.4, 0.4);
+
+	end
+
+
+
+	--
+	function VUHDO_registerForBouquetUnique(aBouquetName, anOwnerName, aFunction, anAlreadyRegistered)
+
+		if not anAlreadyRegistered then
+			return;
+		end
+
+		if not VUHDO_strempty(aBouquetName) and not VUHDO_strempty(anOwnerName) and not anAlreadyRegistered[aBouquetName .. anOwnerName] then
+			VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction);
+
+			anAlreadyRegistered[aBouquetName .. anOwnerName] = true;
+		end
 
 		return;
+
 	end
-
-	VUHDO_BOUQUETS["STORED"][aBouquetName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][aBouquetName]);
-
-	VUHDO_buildCurvesForBouquet(aBouquetName);
-
-	VUHDO_REGISTERED_BOUQUETS[aBouquetName][anOwnerName] = aFunction;
-
-	if not VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName] then
-		VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName] = { };
-	end
-
-	VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName][aBouquetName] = aFunction;
-
-	VUHDO_activateBuffsInScanner(aBouquetName);
-
-	for tUnit, _ in pairs(VUHDO_RAID) do
-		aFunction(tUnit, false, nil, 0, 0, 0, nil, nil, nil);
-	end
-
-	if VUHDO_hasCyclic(aBouquetName) then
-		VUHDO_CYCLIC_BOUQUETS[aBouquetName] = true;
-	end
-
-	return;
-
-end
-
-
-
---
-function VUHDO_registerForBouquetUnique(aBouquetName, anOwnerName, aFunction, anAlreadyRegistered)
-
-	if not anAlreadyRegistered then
-		return;
-	end
-
-	if not VUHDO_strempty(aBouquetName) and not VUHDO_strempty(anOwnerName) and not anAlreadyRegistered[aBouquetName .. anOwnerName] then
-		VUHDO_registerForBouquet(aBouquetName, anOwnerName, aFunction);
-
-		anAlreadyRegistered[aBouquetName .. anOwnerName] = true;
-	end
-
-	return;
-
 end
 
 
@@ -2697,55 +2752,50 @@ do
 			return;
 		end
 
+		tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
+
+		if not tTier then
+			return;
+		end
+
 		for _, tMapping in ipairs(tSlotMappings) do
-			tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
-
-			if not tTier then
-				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] = { };
-				tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
-			end
-
 			tTier = tTier[tMapping["panelNum"]];
 
-			if not tTier then
-				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]] = { };
-				tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]];
+			if tTier then
+				tTier = tTier[tMapping["anchorKey"]];
+
+				if tTier then
+					tSlotData = tTier[tMapping["entryIndex"]];
+
+					if not tSlotData then
+						tSlotData = VUHDO_getSlotData();
+						tTier[tMapping["entryIndex"]] = tSlotData;
+					end
+
+					tSlotData["icon"] = anIcon;
+					tSlotData["expirationTime"] = (anIsActive and aDuration and aDuration > 0 and aTimer) and (GetTime() + aTimer) or 0;
+					tSlotData["stacks"] = aCounter or 0;
+					tSlotData["duration"] = aDuration or 0;
+
+					if aColor then
+						VUHDO_copyColorTo(aColor, tSlotData["color"]);
+					else
+						twipe(tSlotData["color"]);
+					end
+
+					tInfo = VUHDO_RAID[aUnit];
+					tSlotData["isActive"] = anIsActive and tInfo and tInfo["connected"] and not tInfo["dead"];
+
+					tSlotData["name"] = aBuffName;
+					tSlotData["entryType"] = 2;
+					tSlotData["clipL"] = aClipL;
+					tSlotData["clipR"] = aClipR;
+					tSlotData["clipT"] = aClipT;
+					tSlotData["clipB"] = aClipB;
+				end
 			end
 
-			tTier = tTier[tMapping["anchorKey"]];
-
-			if not tTier then
-				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]][tMapping["anchorKey"]] = { };
-				tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]][tMapping["anchorKey"]];
-			end
-
-			tSlotData = tTier[tMapping["entryIndex"]];
-
-			if not tSlotData then
-				tSlotData = VUHDO_getSlotData();
-				tTier[tMapping["entryIndex"]] = tSlotData;
-			end
-
-			tSlotData["icon"] = anIcon;
-			tSlotData["expirationTime"] = (anIsActive and aDuration and aDuration > 0 and aTimer) and (GetTime() + aTimer) or 0;
-			tSlotData["stacks"] = aCounter or 0;
-			tSlotData["duration"] = aDuration or 0;
-
-			if aColor then
-				VUHDO_copyColorTo(aColor, tSlotData["color"]);
-			else
-				twipe(tSlotData["color"]);
-			end
-
-			tInfo = VUHDO_RAID[aUnit];
-			tSlotData["isActive"] = anIsActive and tInfo and tInfo["connected"] and not tInfo["dead"];
-
-			tSlotData["name"] = aBuffName;
-			tSlotData["entryType"] = 2;
-			tSlotData["clipL"] = aClipL;
-			tSlotData["clipR"] = aClipR;
-			tSlotData["clipT"] = aClipT;
-			tSlotData["clipB"] = aClipB;
+			tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
 		end
 
 		if aUnit and VUHDO_displayAurasAtAnchorFromCache then
@@ -2773,208 +2823,210 @@ end
 
 
 
---
-local tAnchors;
-local tGroup;
-local tBouquetName;
-function VUHDO_registerListGroupBouquetEntries(anAlreadyRegistered)
+do
+	--
+	local tAnchors;
+	local tGroup;
+	local tBouquetName;
+	function VUHDO_registerListGroupBouquetEntries(anAlreadyRegistered)
 
-	for tPanelNum = 1, VUHDO_MAX_PANELS do
-		tAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			tAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-		if tAnchors then
-			for tKey, tVal in pairs(tAnchors) do
-				tGroup = VUHDO_getAuraGroupRaw(tVal["groupId"]);
+			if tAnchors then
+				for tKey, tVal in pairs(tAnchors) do
+					tGroup = VUHDO_getAuraGroupRaw(tVal["groupId"]);
 
-				if tGroup and (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
-					for tEntryIndex, tEntry in ipairs(tGroup["entries"]) do
-						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
-							tBouquetName = tEntry["value"];
+					if tGroup and (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
+						for tEntryIndex, tEntry in ipairs(tGroup["entries"]) do
+							if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
+								tBouquetName = tEntry["value"];
 
-							VUHDO_registerForBouquetUnique(
-								tBouquetName,
-								"ListAuraGroup",
-								VUHDO_listAuraGroupBouquetCallback,
-								anAlreadyRegistered
-							);
+								VUHDO_registerForBouquetUnique(
+									tBouquetName,
+									"ListAuraGroup",
+									VUHDO_listAuraGroupBouquetCallback,
+									anAlreadyRegistered
+								);
 
-							if not VUHDO_AURA_LIST_BOUQUETS[tBouquetName] then
-								VUHDO_AURA_LIST_BOUQUETS[tBouquetName] = { };
+								if not VUHDO_AURA_LIST_BOUQUETS[tBouquetName] then
+									VUHDO_AURA_LIST_BOUQUETS[tBouquetName] = { };
+								end
+
+								tinsert(VUHDO_AURA_LIST_BOUQUETS[tBouquetName], {
+									["panelNum"] = tPanelNum,
+									["anchorKey"] = tKey,
+									["entryIndex"] = tEntryIndex,
+								});
 							end
-
-							tinsert(VUHDO_AURA_LIST_BOUQUETS[tBouquetName], {
-								["panelNum"] = tPanelNum,
-								["anchorKey"] = tKey,
-								["entryIndex"] = tEntryIndex,
-							});
 						end
 					end
 				end
 			end
 		end
-	end
 
-	return;
-
-end
-
-
-
---
-local tHotSlots;
-local tAlreadyRegistered = { };
-function VUHDO_registerAllBouquets(aDoCompress)
-
-	twipe(VUHDO_REGISTERED_BOUQUETS);
-	twipe(VUHDO_CYCLIC_BOUQUETS);
-	twipe(VUHDO_REGISTERED_BOUQUET_INDICATORS);
-	twipe(VUHDO_AURA_LIST_BOUQUETS);
-
-	if not VUHDO_BOUQUETS["STORED"] then
 		return;
+
 	end
 
-	if aDoCompress then
-		VUHDO_compressAllBouquets();
-	end
 
-	VUHDO_initSecretColorConstants();
-	VUHDO_buildAllBouquetCurves();
 
-	twipe(tAlreadyRegistered);
+	--
+	local tHotSlots;
+	local tAlreadyRegistered = { };
+	function VUHDO_registerAllBouquets(aDoCompress)
 
-	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
-		if VUHDO_PANEL_MODELS[tPanelNum] then
-			-- Hot Icons+Bars
-			if not sSecretsEnabled then
-				tHotSlots = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTS"];
+		twipe(VUHDO_REGISTERED_BOUQUETS);
+		twipe(VUHDO_CYCLIC_BOUQUETS);
+		twipe(VUHDO_REGISTERED_BOUQUET_INDICATORS);
+		twipe(VUHDO_AURA_LIST_BOUQUETS);
 
-				for _, tHotName in pairs(tHotSlots) do
-					if tHotName and "BOUQUET_" == strsub(tHotName, 1, 8) then
-						VUHDO_registerForBouquetUnique(
-							strsub(tHotName, 9),
-							"HoT",
-							VUHDO_hotBouquetCallback,
-							tAlreadyRegistered
-						);
+		if not VUHDO_BOUQUETS["STORED"] then
+			return;
+		end
+
+		if aDoCompress then
+			VUHDO_compressAllBouquets();
+		end
+
+		VUHDO_initSecretColorConstants();
+		VUHDO_buildAllBouquetCurves();
+
+		twipe(tAlreadyRegistered);
+
+		for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+			if VUHDO_PANEL_MODELS[tPanelNum] then
+				-- Hot Icons+Bars
+				if not sSecretsEnabled then
+					tHotSlots = VUHDO_PANEL_SETUP[tPanelNum]["HOTS"]["SLOTS"];
+
+					for _, tHotName in pairs(tHotSlots) do
+						if tHotName and "BOUQUET_" == strsub(tHotName, 1, 8) then
+							VUHDO_registerForBouquetUnique(
+								strsub(tHotName, 9),
+								"HoT",
+								VUHDO_hotBouquetCallback,
+								tAlreadyRegistered
+							);
+						end
 					end
 				end
+
+				-- Bar (=Outer) Border
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BAR_BORDER"],
+					"Outer Border",
+					VUHDO_barBorderBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Cluster (=Inner) Border
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["CLUSTER_BORDER"],
+					"Inner Border",
+					VUHDO_clusterBorderBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Swiftmend Indicator
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SWIFTMEND_INDICATOR"],
+					"Special Dot",
+					VUHDO_swiftmendIndicatorBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Aggro Line
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["AGGRO_BAR"],
+					"Aggro Bar",
+					VUHDO_aggroBarBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Mouseover Highlighter
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MOUSEOVER_HIGHLIGHT"],
+					"Mouseover Highlight",
+					VUHDO_highlighterBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Threat Marks
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_MARK"],
+					"Threat Indicators",
+					VUHDO_threatIndicatorsBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Threat Bar
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_BAR"],
+					"THREAT_BAR",
+					VUHDO_threatBarBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Mana Bar
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"],
+					"MANA_BAR",
+					VUHDO_manaBarBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Background Bar
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BACKGROUND_BAR"],
+					"Background Bar",
+					VUHDO_backgroundBarBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Health Bar
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["HEALTH_BAR"],
+					"Health Bar",
+					VUHDO_healthBarBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Side bar left
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SIDE_LEFT"],
+					"SIDE_LEFT",
+					VUHDO_sideBarLeftBouquetCallback,
+					tAlreadyRegistered
+				);
+
+				-- Side bar right
+				VUHDO_registerForBouquetUnique(
+					VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SIDE_RIGHT"],
+					"SIDE_RIGHT",
+					VUHDO_sideBarRightBouquetCallback,
+					tAlreadyRegistered
+				);
 			end
-
-			-- Bar (=Outer) Border
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BAR_BORDER"],
-				"Outer Border",
-				VUHDO_barBorderBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Cluster (=Inner) Border
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["CLUSTER_BORDER"],
-				"Inner Border",
-				VUHDO_clusterBorderBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Swiftmend Indicator
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SWIFTMEND_INDICATOR"],
-				"Special Dot",
-				VUHDO_swiftmendIndicatorBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Aggro Line
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["AGGRO_BAR"],
-				"Aggro Bar",
-				VUHDO_aggroBarBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Mouseover Highlighter
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MOUSEOVER_HIGHLIGHT"],
-				"Mouseover Highlight",
-				VUHDO_highlighterBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Threat Marks
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_MARK"],
-				"Threat Indicators",
-				VUHDO_threatIndicatorsBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Threat Bar
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_BAR"],
-				"THREAT_BAR",
-				VUHDO_threatBarBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Mana Bar
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"],
-				"MANA_BAR",
-				VUHDO_manaBarBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Background Bar
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BACKGROUND_BAR"],
-				"Background Bar",
-				VUHDO_backgroundBarBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Health Bar
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["HEALTH_BAR"],
-				"Health Bar",
-				VUHDO_healthBarBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Side bar left
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SIDE_LEFT"],
-				"SIDE_LEFT",
-				VUHDO_sideBarLeftBouquetCallback,
-				tAlreadyRegistered
-			);
-
-			-- Side bar right
-			VUHDO_registerForBouquetUnique(
-				VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["SIDE_RIGHT"],
-				"SIDE_RIGHT",
-				VUHDO_sideBarRightBouquetCallback,
-				tAlreadyRegistered
-			);
 		end
+
+		VUHDO_registerListGroupBouquetEntries(tAlreadyRegistered);
+
+		for _, tBouquetName in pairs(VUHDO_CUSTOM_BOUQUETS) do
+			VUHDO_BOUQUETS["STORED"][tBouquetName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][tBouquetName]);
+
+			VUHDO_buildCurvesForBouquet(tBouquetName);
+		end
+
+		VUHDO_releaseAndWipeLastEvaluatedBouquets();
+
+		VUHDO_updateGlobalToggles();
+		VUHDO_buildEventInterestCache();
+		VUHDO_initAllEventBouquets();
+
+		return;
+
 	end
-
-	VUHDO_registerListGroupBouquetEntries(tAlreadyRegistered);
-
-	for _, tBouquetName in pairs(VUHDO_CUSTOM_BOUQUETS) do
-		VUHDO_BOUQUETS["STORED"][tBouquetName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][tBouquetName]);
-
-		VUHDO_buildCurvesForBouquet(tBouquetName);
-	end
-
-	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);
-
-	VUHDO_updateGlobalToggles();
-	VUHDO_buildEventInterestCache();
-	VUHDO_initAllEventBouquets();
-
-	return;
-
 end
 
 
@@ -2986,6 +3038,10 @@ setmetatable(VUHDO_EVENT_BOUQUETS, VUHDO_META_NEW_ARRAY);
 --
 local VUHDO_EVENT_INTEREST_CACHE = { };
 setmetatable(VUHDO_EVENT_INTEREST_CACHE, VUHDO_META_NEW_ARRAY);
+
+for tEventType = 1, 50 do
+	VUHDO_EVENT_INTEREST_CACHE[tEventType] = { };
+end
 
 
 
@@ -3020,15 +3076,13 @@ end
 --
 function VUHDO_buildEventInterestCache()
 
-	twipe(VUHDO_EVENT_INTEREST_CACHE);
+	for tEventType = 1, 50 do
+		twipe(VUHDO_EVENT_INTEREST_CACHE[tEventType]);
+	end
 
 	for tBouquetName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
-		for tEventType = 1, 50 do -- VUHDO_UPDATE_ALL to reasonable max
+		for tEventType = 1, 50 do
 			if VUHDO_isBouquetInterestedInEvent(tBouquetName, tEventType) then
-				if not VUHDO_EVENT_INTEREST_CACHE[tEventType] then
-					VUHDO_EVENT_INTEREST_CACHE[tEventType] = { };
-				end
-
 				VUHDO_EVENT_INTEREST_CACHE[tEventType][tBouquetName] = true;
 			end
 		end
@@ -3040,93 +3094,80 @@ end
 
 
 
---
-local tIsActive;
-local tIcon;
-local tTimer;
-local tCounter;
-local tDuration;
-local tColor;
-local tBuffName;
-local tHasChanged;
-local tImpact;
-local tTimer2;
-local tClipL;
-local tClipR;
-local tClipT;
-local tClipB;
-local tMaxColor;
-local tLayerTemplate;
-local function VUHDO_updateEventBouquet(aUnit, aBouquetName, anEventType)
+do
+	--
+	local tIsActive;
+	local tIcon;
+	local tTimer;
+	local tCounter;
+	local tDuration;
+	local tColor;
+	local tBuffName;
+	local tHasChanged;
+	local tImpact;
+	local tTimer2;
+	local tClipL;
+	local tClipR;
+	local tClipT;
+	local tClipB;
+	local tMaxColor;
+	local tLayerTemplate;
+	function VUHDO_updateEventBouquet(aUnit, aBouquetName, anEventType)
 
-	tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName,
-		tHasChanged, tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate
-		= VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
+		tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName,
+			tHasChanged, tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate
+			= VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
 
-	if not tHasChanged then
+		if not tHasChanged then
+			return;
+		end
+
+		if tHasChanged or tIsActive then
+			for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
+				tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
+					tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate);
+			end
+
+			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = true;
+
+			VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, tIsActive);
+		elseif VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] then
+			for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
+				tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
+					tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate);
+			end
+
+			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = false;
+
+			VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, false);
+		end
+
 		return;
+
 	end
 
-	if tHasChanged or tIsActive then
-		for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
-			tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
+
+
+	--
+	function VUHDO_invokeCustomBouquet(aButton, aUnit, anInfo, aBouquetName, aDelegate)
+
+		tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName,
+			_, tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate
+			= VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo);
+
+		if tIsActive then
+			aDelegate(aButton, aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
 				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate);
+			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = true;
+		elseif VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] then
+			aDelegate(aButton, aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
+				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate);
+			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = false;
 		end
 
-		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = true;
+		return;
 
-		VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, tIsActive);
-	elseif VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] then
-		for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
-			tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate);
-		end
-
-		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = false;
-
-		VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, false);
 	end
-
-	return;
-
-end
-
-
-
---
-local tIsActive;
-local tIcon;
-local tTimer;
-local tCounter;
-local tDuration;
-local tColor;
-local tBuffName;
-local tImpact;
-local tTimer2;
-local tClipL;
-local tClipR;
-local tClipT;
-local tClipB;
-local tMaxColor;
-local tLayerTemplate;
-function VUHDO_invokeCustomBouquet(aButton, aUnit, anInfo, aBouquetName, aDelegate)
-
-	tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName,
-		_, tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate
-		= VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo);
-
-	if tIsActive then
-		aDelegate(aButton, aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-			tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate);
-		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = true;
-	elseif VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] then
-		aDelegate(aButton, aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-			tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate);
-		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = false;
-	end
-
-	return;
-
 end
 
 
@@ -3193,7 +3234,7 @@ local VUHDO_updateBouquetsForEvent = VUHDO_updateBouquetsForEvent;
 --
 function VUHDO_initAllEventBouquets()
 
-	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);
+	VUHDO_releaseAndWipeLastEvaluatedBouquets();
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_updateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
@@ -3213,7 +3254,7 @@ end
 --
 function VUHDO_deferInitAllEventBouquetsDelegate()
 
-	twipe(VUHDO_LAST_EVALUATED_BOUQUETS);
+	VUHDO_releaseAndWipeLastEvaluatedBouquets();
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_deferUpdateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
@@ -3265,84 +3306,86 @@ end
 
 
 
---
-local tIsActive;
-local tIcon;
-local tTimer;
-local tCounter;
-local tDuration;
-local tColor;
-local tBuffName;
-local tHasChanged;
-local tImpact;
-local tTimer2;
-local tClipL;
-local tClipR;
-local tClipT;
-local tClipB;
-local tMaxColor;
-local tAllListeners;
-function VUHDO_updateUnitCyclicBouquet(aUnit, aBouquetName)
+do
+	--
+	local tIsActive;
+	local tIcon;
+	local tTimer;
+	local tCounter;
+	local tDuration;
+	local tColor;
+	local tBuffName;
+	local tHasChanged;
+	local tImpact;
+	local tTimer2;
+	local tClipL;
+	local tClipR;
+	local tClipT;
+	local tClipB;
+	local tMaxColor;
+	local tAllListeners;
+	local tDestArray;
+	function VUHDO_updateUnitCyclicBouquet(aUnit, aBouquetName)
 
-	if not aUnit or not aBouquetName then
+		if not aUnit or not aBouquetName then
+			return;
+		end
+
+		tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tHasChanged,
+			tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor = VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
+
+		if tHasChanged and (tIsActive or VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName]) then
+			tAllListeners = VUHDO_REGISTERED_BOUQUETS[aBouquetName];
+
+			for _, tDelegate in pairs(tAllListeners) do
+				tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
+					tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor);
+			end
+
+			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = tIsActive;
+		end
+
 		return;
+
 	end
 
-	tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tHasChanged,
-		tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor = VUHDO_evaluateBouquet(aUnit, aBouquetName, nil);
 
-	if tHasChanged and (tIsActive or VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName]) then
-		tAllListeners = VUHDO_REGISTERED_BOUQUETS[aBouquetName];
 
-		for _, tDelegate in pairs(tAllListeners) do
-			tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor);
+	--
+	function VUHDO_updateAllCyclicBouquets(anIsPlayerOnly)
+
+		tDestArray = anIsPlayerOnly and sPlayerArray or VUHDO_RAID;
+
+		for tBouquetName, _ in pairs(VUHDO_CYCLIC_BOUQUETS) do
+			for tUnit, _ in pairs(tDestArray) do
+				VUHDO_updateUnitCyclicBouquet(tUnit, tBouquetName);
+			end
 		end
 
-		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = tIsActive;
-	end
-
-	return;
-
-end
-
-
-
---
-local tDestArray;
-function VUHDO_updateAllCyclicBouquets(anIsPlayerOnly)
-
-	tDestArray = anIsPlayerOnly and sPlayerArray or VUHDO_RAID;
-
-	for tBouquetName, _ in pairs(VUHDO_CYCLIC_BOUQUETS) do
-		for tUnit, _ in pairs(tDestArray) do
-			VUHDO_updateUnitCyclicBouquet(tUnit, tBouquetName);
-		end
-	end
-
-	return;
-
-end
-
-
-
---
-function VUHDO_deferUpdateAllCyclicBouquets(anIsPlayerOnly, aPriority)
-
-	tDestArray = anIsPlayerOnly and sPlayerArray or VUHDO_RAID;
-
-	if not tDestArray then
 		return;
+
 	end
 
-	for tBouquetName, _ in pairs(VUHDO_CYCLIC_BOUQUETS) do
-		for tUnit, _ in pairs(tDestArray) do
-			VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, tBouquetName);
+
+
+	--
+	function VUHDO_deferUpdateAllCyclicBouquets(anIsPlayerOnly, aPriority)
+
+		tDestArray = anIsPlayerOnly and sPlayerArray or VUHDO_RAID;
+
+		if not tDestArray then
+			return;
 		end
+
+		for tBouquetName, _ in pairs(VUHDO_CYCLIC_BOUQUETS) do
+			for tUnit, _ in pairs(tDestArray) do
+				VUHDO_deferTask(VUHDO_DEFER_UPDATE_UNIT_CYCLIC_BOUQUET, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, tBouquetName);
+			end
+		end
+
+		return;
+
 	end
-
-	return;
-
 end
 
 
@@ -3351,7 +3394,10 @@ end
 function VUHDO_bouqetsChanged()
 
 	twipe(VUHDO_EVENT_BOUQUETS);
-	twipe(VUHDO_EVENT_INTEREST_CACHE);
+
+	for tEventType = 1, 50 do
+		twipe(VUHDO_EVENT_INTEREST_CACHE[tEventType]);
+	end
 
 	VUHDO_initFromSpellbook();
 	VUHDO_registerAllBouquets(false);
