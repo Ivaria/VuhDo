@@ -27,7 +27,7 @@
 				</Layers>
 			</Frame>
 
-			<Button name="$parentGroupCombo" inherits="VuhDoComboBoxTemplate">
+			<Button name="$parentGroupCombo" inherits="VuhDoScrollComboBoxResizeableTemplate">
 				<Size>
 					<AbsDimension x="180" y="24" />
 				</Size>
@@ -40,6 +40,8 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						VUHDO_initResizeableScrollCombo(self);
+
 						VUHDO_panelAurasAnchorGroupComboOnLoad(self);
 					</OnLoad>
 					<OnShow>

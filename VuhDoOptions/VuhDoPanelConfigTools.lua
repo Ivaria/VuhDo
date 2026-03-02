@@ -1,7 +1,7 @@
 local _;
 VUHDO_GLOBAL_ICONS = { };
 
-local VUHDO_GI_SCAN_MAX = 1300001;
+local VUHDO_GI_SCAN_MAX = 1600001;
 VUHDO_GI_SCAN_IDX = VUHDO_GI_SCAN_MAX;
 
 local VUHDO_GI_SCAN_SKIPS = {
@@ -15,6 +15,7 @@ local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 local GetSpellName = C_Spell.GetSpellName;
 local GetSpellBookItemTexture = GetSpellBookItemTexture or VUHDO_getSpellBookItemTexture;
 local pairs = pairs;
+
 
 
 --
@@ -149,18 +150,22 @@ end
 
 --
 local VUHDO_USED_BUFFS = { };
+local tSpell;
+local tSpellId;
+local tIcon;
 function VUHDO_updateGlobalIconList()
+
 	table.wipe(VUHDO_USED_BUFFS);
 
 	-- Add custom debuffs
-	for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
-		VUHDO_USED_BUFFS[tName] = true;
-	end
+	--for _, tName in pairs(VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED"]) do
+	--	VUHDO_USED_BUFFS[tName] = true;
+	--end
 
 	-- Add spell traces
-	for _, tName in pairs(VUHDO_CONFIG["SPELL_TRACE"]["STORED"]) do
-		VUHDO_USED_BUFFS[tName] = true;
-	end
+	--for _, tName in pairs(VUHDO_CONFIG["SPELL_TRACE"]["STORED"]) do
+	--	VUHDO_USED_BUFFS[tName] = true;
+	--end
 
 	-- Add bouquet item buffs
 	for _, tItems in pairs(VUHDO_BOUQUETS["STORED"]) do
@@ -182,8 +187,36 @@ function VUHDO_updateGlobalIconList()
 	end
 
 	-- Add standard ignore debuffs
-	for tName, _  in pairs(VUHDO_DEBUFF_BLACKLIST) do
-		VUHDO_USED_BUFFS[tName] = true;
+	--for tName, _  in pairs(VUHDO_DEBUFF_BLACKLIST) do
+	--	VUHDO_USED_BUFFS[tName] = true;
+	--end
+
+	-- Add spell entries from list type aura groups (defaults)
+	for _, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS) do
+		if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
+			for _, tEntry in ipairs(tGroup["entries"]) do
+				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+					tSpell = tostring(tEntry["value"]);
+
+					VUHDO_USED_BUFFS[tSpell] = true;
+				end
+			end
+		end
+	end
+
+	-- Add spell entries from list type aura groups (custom)
+	if VUHDO_CONFIG["AURA_GROUPS"] then
+		for _, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"]) do
+			if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
+				for _, tEntry in ipairs(tGroup["entries"]) do
+					if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+						tSpell = tostring(tEntry["value"]);
+
+						VUHDO_USED_BUFFS[tSpell] = true;
+					end
+				end
+			end
+		end
 	end
 
 	-- Remove obsolete
@@ -196,14 +229,20 @@ function VUHDO_updateGlobalIconList()
 	-- Add new
 	for tName, _ in pairs(VUHDO_USED_BUFFS) do
 		if (VUHDO_GLOBAL_ICONS[tName] == nil) then
-			if tonumber(tName) then
-				local _, _, tIcon = GetSpellInfo(tonumber(tName));
+			tSpellId = tonumber(tName);
+
+			if tSpellId then
+				_, _, tIcon = GetSpellInfo(tSpellId);
+
 				VUHDO_GLOBAL_ICONS[tName] = tIcon;
 			else
 				VUHDO_GLOBAL_ICONS[tName] = "";
 			end
 		end
 	end
+
+	return;
+
 end
 
 

@@ -15,11 +15,14 @@ local UnitHealthPercent = UnitHealthPercent;
 local UnitPowerPercent = UnitPowerPercent;
 local CreateColor = CreateColor;
 local issecretvalue = issecretvalue;
+local ShouldUnitAuraInstanceBeSecret = C_Secrets and C_Secrets.ShouldUnitAuraInstanceBeSecret;
 
 local VUHDO_copyColorTo;
 local VUHDO_getDispelAbilities;
 local VUHDO_getPurgeAbilities;
 local VUHDO_isConfigDemoUsers;
+local VUHDO_displayAurasAtAnchorFromCache;
+local VUHDO_getSlotData;
 
 local VUHDO_BOUQUETS = { };
 local VUHDO_RAID = { };
@@ -29,6 +32,12 @@ local VUHDO_CUSTOM_ICONS;
 local VUHDO_USER_CLASS_COLORS;
 local VUHDO_POWER_TYPE_COLORS;
 local VUHDO_PANEL_SETUP;
+local VUHDO_AURA_LIST_BOUQUETS;
+local VUHDO_UNIT_AURA_LIST_SLOTS;
+local VUHDO_getAuraGroupRaw;
+local VUHDO_MAX_PANELS;
+local VUHDO_AURA_GROUP_TYPE_LIST;
+local VUHDO_AURA_LIST_ENTRY_BOUQUET;
 
 local VUHDO_LAST_EVALUATED_BOUQUETS = { };
 setmetatable(VUHDO_LAST_EVALUATED_BOUQUETS, VUHDO_META_NEW_ARRAY);
@@ -45,6 +54,7 @@ local VUHDO_CUSTOM_BOUQUETS = {
 };
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+
 local sDebuffTypeCurves;
 local sPlayerArray = { };
 local sDurationCurves = { };
@@ -89,13 +99,6 @@ local VUHDO_DISPEL_TYPE_COLOR_KEY_MAP = {
 --
 function VUHDO_bouquetsInitLocalOverrides()
 
-	VUHDO_rebuildAllAlphaChains = _G["VUHDO_rebuildAllAlphaChains"];
-	VUHDO_getChosenDebuffAuraInstanceId = _G["VUHDO_getChosenDebuffAuraInstanceId"];
-	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
-	VUHDO_getDispelAbilities = _G["VUHDO_getDispelAbilities"];
-	VUHDO_getPurgeAbilities = _G["VUHDO_getPurgeAbilities"];
-	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
-
 	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
@@ -105,6 +108,21 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
 	VUHDO_POWER_TYPE_COLORS = _G["VUHDO_POWER_TYPE_COLORS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+	VUHDO_AURA_LIST_BOUQUETS = _G["VUHDO_AURA_LIST_BOUQUETS"];
+	VUHDO_UNIT_AURA_LIST_SLOTS = _G["VUHDO_UNIT_AURA_LIST_SLOTS"];
+	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
+	VUHDO_AURA_GROUP_TYPE_LIST = _G["VUHDO_AURA_GROUP_TYPE_LIST"];
+	VUHDO_AURA_LIST_ENTRY_BOUQUET = _G["VUHDO_AURA_LIST_ENTRY_BOUQUET"];
+
+	VUHDO_rebuildAllAlphaChains = _G["VUHDO_rebuildAllAlphaChains"];
+	VUHDO_getChosenDebuffAuraInstanceId = _G["VUHDO_getChosenDebuffAuraInstanceId"];
+	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
+	VUHDO_getDispelAbilities = _G["VUHDO_getDispelAbilities"];
+	VUHDO_getPurgeAbilities = _G["VUHDO_getPurgeAbilities"];
+	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
+	VUHDO_getAuraGroupRaw = _G["VUHDO_getAuraGroupRaw"];
+	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
+	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
 
 	sPlayerArray["player"] = VUHDO_RAID["player"];
 
@@ -1710,9 +1728,6 @@ do
 	local tTimer;
 	local tCounter;
 	local tDuration;
-	local tSourceType;
-	local tUnitHot;
-	local tUnitHotInfo;
 	local tNow;
 	local tTimer2;
 	local tClipL;
@@ -1733,6 +1748,8 @@ do
 	local tSpriteCell;
 	local tNonSecretResultSlot;
 	local tAuraResultSlot;
+	local tAuraInstances;
+	local tCachedAura;
 	local tSecretBool;
 	local tWorkingColor = { };
 	local tSecretContext = { };
@@ -1799,57 +1816,54 @@ do
 					if tAuraResultSlot then
 						tName = tInfos["name"];
 						tIsActive = false;
-						tSourceType = 0;
 
-						if tInfos["mine"] and tInfos["others"] then
-							tSourceType = VUHDO_UNIT_HOT_TYPE_BOTH;
-						elseif tInfos["mine"] then
-							tSourceType = VUHDO_UNIT_HOT_TYPE_MINE;
-						elseif tInfos["others"] then
-							tSourceType = VUHDO_UNIT_HOT_TYPE_OTHERS;
-						end
+						tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit] and VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit][tName];
 
-						if tSourceType > 0 then
-							tUnitHot, _ = VUHDO_getUnitHot(aResolvedUnit, tName, tSourceType);
+						if tAuraInstances then
+							for _, tAuraInstanceId in ipairs(tAuraInstances) do
+								if not ShouldUnitAuraInstanceBeSecret or not ShouldUnitAuraInstanceBeSecret(aResolvedUnit, tAuraInstanceId) then
+									tCachedAura = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
 
-							if tUnitHot and tUnitHot["auraInstanceId"] then
-								tUnitHotInfo = VUHDO_getUnitHotInfo(aUnit, tUnitHot["auraInstanceId"]);
+									if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tInfos) then
+										tIsActive = true;
+										txState["activeAuras"] = txState["activeAuras"] + 1;
 
-								if tUnitHotInfo then
-									tIsActive = true;
-									txState["activeAuras"] = txState["activeAuras"] + 1;
+										tNow = GetTime();
 
-									tNow = GetTime();
+										if tInfos["alive"] then
+											tTimer = tNow - (tCachedAura["expirationTime"] or 0) + (tCachedAura["duration"] or 0);
+										else
+											tTimer = (tCachedAura["expirationTime"] or 0) - tNow;
+										end
 
-									if tInfos["alive"] then
-										tTimer = tNow - tUnitHotInfo[2] + (tUnitHotInfo[4] or 0);
-									else
-										tTimer = tUnitHotInfo[2] - tNow;
+										tIcon = tCachedAura["icon"];
+										tCounter = tCachedAura["applications"];
+										tDuration = tCachedAura["duration"];
+
+										if tTimer then
+											tTimer = floor(tTimer * 10) * 0.1;
+										end
+
+										tColor = tInfos["color"];
+
+										if tInfos["icon"] ~= 1 then
+											tIcon = VUHDO_CUSTOM_ICONS[tInfos["icon"]][2];
+
+											tColor["isDefault"] = false;
+										else
+											tColor["isDefault"] = true;
+										end
+
+										tAuraResultSlot["isActive"] = true;
+										tAuraResultSlot["icon"] = tIcon;
+										tAuraResultSlot["timer"] = tTimer or 0;
+										tAuraResultSlot["counter"] = tCounter or 0;
+										tAuraResultSlot["duration"] = tDuration or 0;
+										tAuraResultSlot["color"] = tColor;
+										tAuraResultSlot["name"] = tName;
+
+										break;
 									end
-
-									tIcon, tCounter, tDuration = tUnitHotInfo[1], tUnitHotInfo[3], tUnitHotInfo[4];
-
-									if tTimer then
-										tTimer = floor(tTimer * 10) * 0.1;
-									end
-
-									tColor = tInfos["color"];
-
-									if tInfos["icon"] ~= 1 then
-										tIcon = VUHDO_CUSTOM_ICONS[tInfos["icon"]][2];
-
-										tColor["isDefault"] = false;
-									else
-										tColor["isDefault"] = true;
-									end
-
-									tAuraResultSlot["isActive"] = true;
-									tAuraResultSlot["icon"] = tIcon;
-									tAuraResultSlot["timer"] = tTimer or 0;
-									tAuraResultSlot["counter"] = tCounter or 0;
-									tAuraResultSlot["duration"] = tDuration or 0;
-									tAuraResultSlot["color"] = tColor;
-									tAuraResultSlot["name"] = tName;
 								end
 							end
 						end
@@ -2281,7 +2295,10 @@ do
 	local tUnitHotInfo;
 	local tNow;
 	local tTimer2;
-	local tClipL, tClipR, tClipT, tClipB;
+	local tClipL;
+	local tClipR;
+	local tClipT;
+	local tClipB;
 	local tColor;
 	local tFactor;
 	local tMaxColor;
@@ -2663,6 +2680,146 @@ end
 
 
 
+do
+	--
+	local tSlotMappings;
+	local tTier;
+	local tSlotData;
+	local tAnchorConfig;
+	local tListSlots;
+	local tMaxSlots;
+	local tInfo;
+	function VUHDO_listAuraGroupBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
+
+		tSlotMappings = VUHDO_AURA_LIST_BOUQUETS[aBouquetName];
+
+		if not tSlotMappings then
+			return;
+		end
+
+		for _, tMapping in ipairs(tSlotMappings) do
+			tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
+
+			if not tTier then
+				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] = { };
+				tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
+			end
+
+			tTier = tTier[tMapping["panelNum"]];
+
+			if not tTier then
+				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]] = { };
+				tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]];
+			end
+
+			tTier = tTier[tMapping["anchorKey"]];
+
+			if not tTier then
+				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]][tMapping["anchorKey"]] = { };
+				tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]][tMapping["anchorKey"]];
+			end
+
+			tSlotData = tTier[tMapping["entryIndex"]];
+
+			if not tSlotData then
+				tSlotData = VUHDO_getSlotData();
+				tTier[tMapping["entryIndex"]] = tSlotData;
+			end
+
+			tSlotData["icon"] = anIcon;
+			tSlotData["expirationTime"] = (anIsActive and aDuration and aDuration > 0 and aTimer) and (GetTime() + aTimer) or 0;
+			tSlotData["stacks"] = aCounter or 0;
+			tSlotData["duration"] = aDuration or 0;
+
+			if aColor then
+				VUHDO_copyColorTo(aColor, tSlotData["color"]);
+			else
+				twipe(tSlotData["color"]);
+			end
+
+			tInfo = VUHDO_RAID[aUnit];
+			tSlotData["isActive"] = anIsActive and tInfo and tInfo["connected"] and not tInfo["dead"];
+
+			tSlotData["name"] = aBuffName;
+			tSlotData["entryType"] = 2;
+			tSlotData["clipL"] = aClipL;
+			tSlotData["clipR"] = aClipR;
+			tSlotData["clipT"] = aClipT;
+			tSlotData["clipB"] = aClipB;
+		end
+
+		if aUnit and VUHDO_displayAurasAtAnchorFromCache then
+			for _, tMapping in ipairs(tSlotMappings) do
+				tAnchorConfig = VUHDO_PANEL_SETUP[tMapping["panelNum"]] and
+					VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"] and
+					VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"][tMapping["anchorKey"]];
+
+				if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
+					tListSlots = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] and
+						VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]] and
+						VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tMapping["panelNum"]][tMapping["anchorKey"]];
+					tMaxSlots = tAnchorConfig["maxDisplay"] or 5;
+
+					VUHDO_displayAurasAtAnchorFromCache(aUnit, tMapping["panelNum"], tMapping["anchorKey"],
+						tAnchorConfig, tListSlots, tMaxSlots);
+				end
+			end
+		end
+
+		return;
+
+	end
+end
+
+
+
+--
+local tAnchors;
+local tGroup;
+local tBouquetName;
+function VUHDO_registerListGroupBouquetEntries(anAlreadyRegistered)
+
+	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		tAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+		if tAnchors then
+			for tKey, tVal in pairs(tAnchors) do
+				tGroup = VUHDO_getAuraGroupRaw(tVal["groupId"]);
+
+				if tGroup and (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
+					for tEntryIndex, tEntry in ipairs(tGroup["entries"]) do
+						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
+							tBouquetName = tEntry["value"];
+
+							VUHDO_registerForBouquetUnique(
+								tBouquetName,
+								"ListAuraGroup",
+								VUHDO_listAuraGroupBouquetCallback,
+								anAlreadyRegistered
+							);
+
+							if not VUHDO_AURA_LIST_BOUQUETS[tBouquetName] then
+								VUHDO_AURA_LIST_BOUQUETS[tBouquetName] = { };
+							end
+
+							tinsert(VUHDO_AURA_LIST_BOUQUETS[tBouquetName], {
+								["panelNum"] = tPanelNum,
+								["anchorKey"] = tKey,
+								["entryIndex"] = tEntryIndex,
+							});
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
 --
 local tHotSlots;
 local tAlreadyRegistered = { };
@@ -2671,6 +2828,7 @@ function VUHDO_registerAllBouquets(aDoCompress)
 	twipe(VUHDO_REGISTERED_BOUQUETS);
 	twipe(VUHDO_CYCLIC_BOUQUETS);
 	twipe(VUHDO_REGISTERED_BOUQUET_INDICATORS);
+	twipe(VUHDO_AURA_LIST_BOUQUETS);
 
 	if not VUHDO_BOUQUETS["STORED"] then
 		return;
@@ -2800,6 +2958,8 @@ function VUHDO_registerAllBouquets(aDoCompress)
 			);
 		end
 	end
+
+	VUHDO_registerListGroupBouquetEntries(tAlreadyRegistered);
 
 	for _, tBouquetName in pairs(VUHDO_CUSTOM_BOUQUETS) do
 		VUHDO_BOUQUETS["STORED"][tBouquetName] = VUHDO_decompressIfCompressed(VUHDO_BOUQUETS["STORED"][tBouquetName]);

@@ -3,6 +3,7 @@ local _;
 local pairs = pairs;
 local ipairs = ipairs;
 local tinsert = table.insert;
+local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
 local strfind = string.find;
@@ -13,6 +14,7 @@ local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFiltered
 local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplicationDisplayCount;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
 local GetTime = GetTime;
+local UnitIsUnit = UnitIsUnit;
 local issecretvalue = issecretvalue;
 local next = next;
 
@@ -36,6 +38,15 @@ local VUHDO_UNIT_AURA_SLOTS = VUHDO_UNIT_AURA_SLOTS;
 
 VUHDO_UNIT_AURA_SLOT_INDEX = VUHDO_UNIT_AURA_SLOT_INDEX or { };
 local VUHDO_UNIT_AURA_SLOT_INDEX = VUHDO_UNIT_AURA_SLOT_INDEX;
+
+VUHDO_UNIT_AURA_BY_SPELL = VUHDO_UNIT_AURA_BY_SPELL or { };
+local VUHDO_UNIT_AURA_BY_SPELL = VUHDO_UNIT_AURA_BY_SPELL;
+
+VUHDO_UNIT_AURA_LIST_SLOTS = VUHDO_UNIT_AURA_LIST_SLOTS or { };
+local VUHDO_UNIT_AURA_LIST_SLOTS = VUHDO_UNIT_AURA_LIST_SLOTS;
+
+VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS or { };
+local VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS;
 
 VUHDO_AURA_MIGRATION_VERSION = 1;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
@@ -112,6 +123,11 @@ local sFilteredAuras = { };
 
 local sAuraDataPool;
 local sSlotIndexPool;
+local sSlotDataPool;
+local sReverseIndexArrayPool;
+
+local sAllGroups = { };
+local sScaleCounts = { };
 
 
 
@@ -134,6 +150,42 @@ end
 
 
 --
+local function VUHDO_createSlotDataDelegate()
+
+	return { ["color"] = { } };
+
+end
+
+
+
+--
+local function VUHDO_cleanupSlotDataDelegate(aSlotData)
+
+	aSlotData["icon"] = nil;
+	aSlotData["expirationTime"] = nil;
+	aSlotData["stacks"] = nil;
+	aSlotData["duration"] = nil;
+	aSlotData["name"] = nil;
+	aSlotData["spellId"] = nil;
+	aSlotData["auraInstanceID"] = nil;
+	aSlotData["entryType"] = nil;
+	aSlotData["isActive"] = nil;
+	aSlotData["clipL"] = nil;
+	aSlotData["clipR"] = nil;
+	aSlotData["clipT"] = nil;
+	aSlotData["clipB"] = nil;
+
+	if aSlotData["color"] then
+		twipe(aSlotData["color"]);
+	end
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_aurasInitLocalOverrides()
 
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
@@ -150,8 +202,35 @@ function VUHDO_aurasInitLocalOverrides()
 
 	sAuraDataPool = VUHDO_createTablePool("AuraData", 500);
 	sSlotIndexPool = VUHDO_createTablePool("SlotIndex", 200);
+	sSlotDataPool = VUHDO_createTablePool("SlotData", 500, VUHDO_createSlotDataDelegate, VUHDO_cleanupSlotDataDelegate);
+	sReverseIndexArrayPool = VUHDO_createTablePool("ReverseIndexArray", 300);
 
 	VUHDO_initAuraGroupFilters();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_getSlotData()
+
+	return sSlotDataPool:get();
+
+end
+
+
+
+--
+local tSlotData;
+function VUHDO_releaseSlotData(aSlotData)
+
+	tSlotData = aSlotData;
+
+	if tSlotData then
+		sSlotDataPool:release(tSlotData);
+	end
 
 	return;
 
@@ -200,6 +279,37 @@ function VUHDO_getAuraGroupRaw(aGroupId)
 	end
 
 	return tGroup;
+
+end
+
+
+
+--
+local tSourceUnit;
+local tIsMine;
+function VUHDO_auraSourceMatchesFilter(aCachedAura, aLayerInfos)
+
+	if aLayerInfos["mine"] and aLayerInfos["others"] then
+		return true;
+	end
+
+	tSourceUnit = aCachedAura["sourceUnit"];
+
+	if issecretvalue(tSourceUnit) then
+		return aLayerInfos["others"] == true;
+	end
+
+	tIsMine = UnitIsUnit(tSourceUnit or "", "player");
+
+	if aLayerInfos["mine"] and tIsMine then
+		return true;
+	end
+
+	if aLayerInfos["others"] and not tIsMine then
+		return true;
+	end
+
+	return false;
 
 end
 
@@ -320,28 +430,28 @@ end
 
 
 --
-local tAllGroups;
 function VUHDO_getAllAuraGroups()
 
-	tAllGroups = { };
+	twipe(sAllGroups);
 
 	for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
 		if not tGroup["playerClassRequired"] or tGroup["playerClassRequired"] == VUHDO_PLAYER_CLASS then
-			tAllGroups[tGroupId] = tGroup;
+			sAllGroups[tGroupId] = tGroup;
 		end
 	end
 
 	for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or sEmpty) do
-		tAllGroups[tGroupId] = tGroup;
+		sAllGroups[tGroupId] = tGroup;
 	end
 
-	return tAllGroups;
+	return sAllGroups;
 
 end
 
 
 
 --
+local tAllGroups;
 local tMaxPriority;
 local tPriority;
 function VUHDO_getNextAuraGroupPriority()
@@ -498,6 +608,8 @@ end
 --
 local tCachedData;
 local tAuraInstanceId;
+local tSpellId;
+local tSpellName;
 function VUHDO_cacheAuraData(aUnit, anAuraData)
 
 	if not aUnit or not anAuraData then
@@ -525,9 +637,34 @@ function VUHDO_cacheAuraData(aUnit, anAuraData)
 	tCachedData["expirationTime"] = anAuraData["expirationTime"];
 	tCachedData["sourceUnit"] = anAuraData["sourceUnit"];
 	tCachedData["isHarmful"] = anAuraData["isHarmful"];
+	tCachedData["isHelpful"] = anAuraData["isHelpful"];
 	tCachedData["dispelName"] = anAuraData["dispelName"];
 
 	VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId] = tCachedData;
+
+	tSpellId = anAuraData["spellId"];
+
+	if tSpellId and not issecretvalue(tSpellId) then
+		if not VUHDO_UNIT_AURA_BY_SPELL[aUnit] then
+			VUHDO_UNIT_AURA_BY_SPELL[aUnit] = { };
+		end
+
+		if not VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellId] then
+			VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellId] = sReverseIndexArrayPool:get();
+		end
+
+		tinsert(VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellId], tAuraInstanceId);
+
+		tSpellName = anAuraData["name"];
+
+		if tSpellName and not issecretvalue(tSpellName) then
+			if not VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellName] then
+				VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellName] = sReverseIndexArrayPool:get();
+			end
+
+			tinsert(VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellName], tAuraInstanceId);
+		end
+	end
 
 	return tCachedData;
 
@@ -537,6 +674,9 @@ end
 
 --
 local tCachedData;
+local tSpellId;
+local tSpellName;
+local tBySpell;
 function VUHDO_uncacheAuraData(aUnit, anAuraInstanceId)
 
 	if not aUnit or not anAuraInstanceId then
@@ -550,6 +690,47 @@ function VUHDO_uncacheAuraData(aUnit, anAuraInstanceId)
 	tCachedData = VUHDO_UNIT_AURA_CACHE[aUnit][anAuraInstanceId];
 
 	if tCachedData then
+		tSpellId = tCachedData["spellId"];
+		tSpellName = tCachedData["name"];
+
+		if tSpellId and not issecretvalue(tSpellId) and VUHDO_UNIT_AURA_BY_SPELL[aUnit] then
+			tBySpell = VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellId];
+
+			if tBySpell then
+				for tIdx = #tBySpell, 1, -1 do
+					if tBySpell[tIdx] == anAuraInstanceId then
+						tremove(tBySpell, tIdx);
+
+						break;
+					end
+				end
+
+				if #tBySpell == 0 then
+					sReverseIndexArrayPool:release(tBySpell);
+					VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellId] = nil;
+				end
+			end
+		end
+
+		if tSpellName and not issecretvalue(tSpellName) and VUHDO_UNIT_AURA_BY_SPELL[aUnit] then
+			tBySpell = VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellName];
+
+			if tBySpell then
+				for tIdx = #tBySpell, 1, -1 do
+					if tBySpell[tIdx] == anAuraInstanceId then
+						tremove(tBySpell, tIdx);
+
+						break;
+					end
+				end
+
+				if #tBySpell == 0 then
+					sReverseIndexArrayPool:release(tBySpell);
+					VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellName] = nil;
+				end
+			end
+		end
+
 		sAuraDataPool:release(tCachedData);
 
 		VUHDO_UNIT_AURA_CACHE[aUnit][anAuraInstanceId] = nil;
@@ -564,6 +745,7 @@ end
 --
 local tUnitCache;
 local tUnitSlots;
+local tListPanels;
 function VUHDO_clearUnitAuraCache(aUnit)
 
 	if not aUnit then
@@ -582,8 +764,12 @@ function VUHDO_clearUnitAuraCache(aUnit)
 	tUnitSlots = VUHDO_UNIT_AURA_SLOT_INDEX[aUnit];
 
 	if tUnitSlots then
-		for tInstanceId, tSlotInfo in pairs(tUnitSlots) do
-			sSlotIndexPool:release(tSlotInfo);
+		for tInstanceId, tAuraIndex in pairs(tUnitSlots) do
+			for tPanelNum, tPanelIndex in pairs(tAuraIndex) do
+				sSlotIndexPool:release(tPanelIndex);
+			end
+
+			sSlotIndexPool:release(tAuraIndex);
 			tUnitSlots[tInstanceId] = nil;
 		end
 	end
@@ -594,6 +780,30 @@ function VUHDO_clearUnitAuraCache(aUnit)
 				twipe(tAnchorSlots);
 			end
 		end
+	end
+
+	if VUHDO_UNIT_AURA_BY_SPELL[aUnit] then
+		for tBySpellKey, tBySpellArray in pairs(VUHDO_UNIT_AURA_BY_SPELL[aUnit]) do
+			sReverseIndexArrayPool:release(tBySpellArray);
+		end
+
+		VUHDO_UNIT_AURA_BY_SPELL[aUnit] = nil;
+	end
+
+	if VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] then
+		tListPanels = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
+
+		for tPanelNum, tListAnchors in pairs(tListPanels) do
+			for tAnchorIndex, tAnchorList in pairs(tListAnchors) do
+				for tEntryIndex, tSlotData in pairs(tAnchorList) do
+					if tSlotData then
+						sSlotDataPool:release(tSlotData);
+					end
+				end
+			end
+		end
+
+		VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] = nil;
 	end
 
 	return;
@@ -652,9 +862,17 @@ function VUHDO_initUnitAuraSlots(aUnit)
 		VUHDO_UNIT_AURA_CACHE[aUnit] = { };
 	end
 
+	if not VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] then
+		VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] = { };
+	end
+
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
 		if not VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum] then
 			VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum] = { };
+		end
+
+		if not VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum] then
+			VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum] = { };
 		end
 
 		tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
@@ -663,6 +881,10 @@ function VUHDO_initUnitAuraSlots(aUnit)
 			for tAnchorKey, _ in pairs(tPanelAnchors) do
 				if not VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum][tAnchorKey] then
 					VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum][tAnchorKey] = { };
+				end
+
+				if not VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum][tAnchorKey] then
+					VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum][tAnchorKey] = { };
 				end
 			end
 		end
@@ -747,11 +969,11 @@ function VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, aSlotIndex, 
 
 	if anAuraInstanceId then
 		if not VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId] then
-			VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId] = { };
+			VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId] = sSlotIndexPool:get();
 		end
 
 		if not VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId][aPanelNum] then
-			VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId][aPanelNum] = { };
+			VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId][aPanelNum] = sSlotIndexPool:get();
 		end
 
 		VUHDO_UNIT_AURA_SLOT_INDEX[aUnit][anAuraInstanceId][aPanelNum][anAnchorIndex] = aSlotIndex;
@@ -921,6 +1143,7 @@ function VUHDO_fullAuraRefresh(aUnit)
 	end
 
 	VUHDO_clearUnitAuraCache(aUnit);
+	VUHDO_initUnitAuraSlots(aUnit);
 
 	tAuras = GetUnitAuras(aUnit, "HELPFUL", 40, 0, 0);
 
@@ -1042,8 +1265,9 @@ local tPanelNum;
 local tAnchorIndex;
 local tSlotIndex;
 local tAuraIndex;
-local tPanelIndex;
 local tIdx;
+local tPanelAnchorsRemove;
+local tGroupRemove;
 function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId)
 
 	if not aUnit or not anAuraInstanceId then
@@ -1060,6 +1284,7 @@ function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId)
 			for tAnchorIndex, tSlotIndex in pairs(tPanelIndex) do
 				sSlotsToClearCount = sSlotsToClearCount + 1;
 				tIdx = sSlotsToClearCount * 3;
+
 				sSlotsToClear[tIdx - 2] = tPanelNum;
 				sSlotsToClear[tIdx - 1] = tAnchorIndex;
 				sSlotsToClear[tIdx] = tSlotIndex;
@@ -1074,6 +1299,22 @@ function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId)
 			VUHDO_setAnchorSlotAuraId(aUnit, tPanelNum, tAnchorIndex, tSlotIndex, nil);
 
 			VUHDO_refillAnchorSlots(aUnit, tPanelNum, tAnchorIndex);
+		end
+	end
+
+	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		tPanelAnchorsRemove = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+		if tPanelAnchorsRemove then
+			for tAnchorIndex, tAnchorConfigRemove in pairs(tPanelAnchorsRemove) do
+				if tAnchorConfigRemove["enabled"] ~= false then
+					tGroupRemove = VUHDO_getAuraGroup(tAnchorConfigRemove["groupId"]);
+
+					if tGroupRemove and (tGroupRemove["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
+						VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfigRemove);
+					end
+				end
+			end
 		end
 	end
 
@@ -1105,7 +1346,9 @@ function VUHDO_checkAuraForPanelAnchors(aUnit, aPanelNum, anAuraData)
 			tGroup = VUHDO_getAuraGroup(tAnchorConfig["groupId"]);
 
 			if tGroup then
-				if VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["filter"]) then
+				if tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
+					VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig);
+				elseif VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["filter"]) then
 					if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["excludeFilter"]) then
 						VUHDO_tryAddAuraToAnchor(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig, anAuraData);
 					end
@@ -1230,7 +1473,6 @@ local tSlotIndex;
 local tMaxSlots;
 local tAnchorSlots;
 local tInstanceId;
-local tClearIdx;
 local tInferredAura;
 function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig)
 
@@ -1241,6 +1483,12 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
 
 	if not tGroup then
+		return;
+	end
+
+	if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
+		VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig);
+
 		return;
 	end
 
@@ -1338,10 +1586,102 @@ end
 
 
 --
+local tGroup;
+local tEntries;
+local tLookupKey;
+local tAuraInstances;
+local tCachedAura;
+local tSlotData;
+local tOldSlot;
+local tNow;
+function VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig)
+
+	if not aUnit or not aPanelNum or not anAnchorIndex or not anAnchorConfig then
+		return;
+	end
+
+	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+
+	if not tGroup then
+		return;
+	end
+
+	if (tGroup["type"] or 1) ~= VUHDO_AURA_GROUP_TYPE_LIST then
+		return;
+	end
+
+	tEntries = tGroup["entries"];
+
+	if not tEntries then
+		return;
+	end
+
+	tNow = GetTime();
+
+	for tEntryIndex, tEntry in ipairs(tEntries) do
+		if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+			tLookupKey = tEntry["value"];
+
+			tOldSlot = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex];
+
+			if tOldSlot then
+				sSlotDataPool:release(tOldSlot);
+			end
+
+			VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex] = nil;
+
+			if tLookupKey and VUHDO_UNIT_AURA_BY_SPELL[aUnit] then
+				tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aUnit][tLookupKey];
+
+				if tAuraInstances then
+					for _, tAuraInstanceId in ipairs(tAuraInstances) do
+						if not ShouldUnitAuraInstanceBeSecret or not ShouldUnitAuraInstanceBeSecret(aUnit, tAuraInstanceId) then
+							tCachedAura = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
+
+							if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tEntry) then
+								tSlotData = sSlotDataPool:get();
+
+								tSlotData["icon"] = tCachedAura["icon"];
+								tSlotData["expirationTime"] = tCachedAura["expirationTime"];
+								tSlotData["stacks"] = tCachedAura["applications"];
+								tSlotData["duration"] = tCachedAura["duration"];
+								tSlotData["name"] = tCachedAura["name"];
+								tSlotData["spellId"] = tCachedAura["spellId"];
+								tSlotData["auraInstanceID"] = tAuraInstanceId;
+								tSlotData["entryType"] = VUHDO_AURA_LIST_ENTRY_SPELL;
+								tSlotData["isActive"] = true;
+
+								VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex] = tSlotData;
+
+								break;
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if not VUHDO_UNIT_AURA_SLOTS[aUnit] then
+		VUHDO_UNIT_AURA_SLOTS[aUnit] = { };
+	end
+
+	if not VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] then
+		VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] = { };
+	end
+
+	VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex] = VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex] or { };
+
+	return;
+
+end
+
+
+
+--
 local tAnchorConfig;
 local tGroup;
 local tAuras;
-local tFilteredAuras;
 local tSlotIndex;
 local tMaxSlots;
 function VUHDO_queryAndCacheAurasForAnchor(aUnit, aPanelNum, anAnchorIndex)
@@ -1365,6 +1705,12 @@ function VUHDO_queryAndCacheAurasForAnchor(aUnit, aPanelNum, anAnchorIndex)
 	tGroup = VUHDO_getAuraGroup(tAnchorConfig["groupId"]);
 
 	if not tGroup then
+		return;
+	end
+
+	if tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
+		VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, tAnchorConfig);
+
 		return;
 	end
 
@@ -1406,7 +1752,6 @@ end
 do
 	--
 	local tSlotCfg;
-	local tScaleCounts;
 	local tScale;
 	local tMaxCount;
 	local tMostCommonScale;
@@ -1418,16 +1763,17 @@ do
 			return 1;
 		end
 
-		tScaleCounts = { };
+		twipe(sScaleCounts);
+
 		tMostCommonScale = 1;
 		tMaxCount = 0;
 
 		for tSlotNum = 1, 12 do
 			tScale = tSlotCfg["" .. tSlotNum] and tSlotCfg["" .. tSlotNum]["scale"] or 1;
-			tScaleCounts[tScale] = (tScaleCounts[tScale] or 0) + 1;
+			sScaleCounts[tScale] = (sScaleCounts[tScale] or 0) + 1;
 
-			if tScaleCounts[tScale] > tMaxCount then
-				tMaxCount = tScaleCounts[tScale];
+			if sScaleCounts[tScale] > tMaxCount then
+				tMaxCount = sScaleCounts[tScale];
 				tMostCommonScale = tScale;
 			end
 		end

@@ -3,15 +3,20 @@ local _;
 local pairs = pairs;
 local ipairs = ipairs;
 local tinsert = table.insert;
+local tremove = table.remove;
 local tsort = table.sort;
 local twipe = table.wipe;
 local strfind = string.find;
+
+local GetSpellIDForSpellIdentifier = C_Spell and C_Spell.GetSpellIDForSpellIdentifier;
+local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
 
 VUHDO_AURA_GROUPS_SELECTED = nil;
 VUHDO_AURA_GROUPS_COMBO_MODEL = { };
 VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL = { };
 VUHDO_AURA_GROUPS_FILTER_SELECTED = "";
 VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = "";
+VUHDO_AURA_GROUPS_TYPE_SELECTED = 1;
 VUHDO_AURA_GROUPS_PRIORITY = 50;
 VUHDO_AURA_GROUPS_COLOR_TYPE = 1;
 
@@ -66,6 +71,18 @@ local VUHDO_AURA_GROUP_TOOLTIPS = {
 	["OTHERS_HOTS"] = VUHDO_I18N_TT.K660,
 	["OTHERS_BUFFS"] = VUHDO_I18N_TT.K661,
 	["OTHERS_NAMEPLATE_DEBUFFS"] = VUHDO_I18N_TT.K662,
+	["PRESERVATION_EVOKER_HOTS"] = VUHDO_I18N_TT.K670,
+	["AUGMENTATION_EVOKER_BUFFS"] = VUHDO_I18N_TT.K671,
+	["RESTORATION_DRUID_HOTS"] = VUHDO_I18N_TT.K672,
+	["DISCIPLINE_PRIEST_HOTS"] = VUHDO_I18N_TT.K673,
+	["HOLY_PRIEST_HOTS"] = VUHDO_I18N_TT.K674,
+	["MISTWEAVER_MONK_HOTS"] = VUHDO_I18N_TT.K675,
+	["RESTORATION_SHAMAN_HOTS"] = VUHDO_I18N_TT.K676,
+	["HOLY_PALADIN_HOTS"] = VUHDO_I18N_TT.K677,
+	["RAID_BUFFS"] = VUHDO_I18N_TT.K678,
+	["BLESSING_OF_BRONZE"] = VUHDO_I18N_TT.K679,
+	["ROGUE_POISONS"] = VUHDO_I18N_TT.K680,
+	["SHAMAN_IMBUEMENTS"] = VUHDO_I18N_TT.K681,
 };
 
 local VUHDO_AURA_FILTER_TOOLTIPS = {
@@ -98,7 +115,17 @@ VUHDO_AURA_GROUPS_COLOR_TYPE_OPTIONS = {
 	{ VUHDO_AURA_GROUP_COLOR_CUSTOM, VUHDO_I18N_AURA_COLOR_CUSTOM },
 };
 
+VUHDO_AURA_GROUP_TYPE_OPTIONS = {
+	{ VUHDO_AURA_GROUP_TYPE_FILTER, VUHDO_I18N_AURA_GROUP_TYPE_FILTER },
+	{ VUHDO_AURA_GROUP_TYPE_LIST, VUHDO_I18N_AURA_GROUP_TYPE_LIST },
+};
+
+local VUHDO_AURA_GROUP_LIST_ENTRY_ROW_HEIGHT = 22;
+
+VUHDO_AURA_GROUPS_NEW_BOUQUET_SELECTED = "";
+
 local sSelectedGroupId = nil;
+local sAuraGroupEntryItems = { };
 
 
 
@@ -308,8 +335,15 @@ end
 --
 local tGroup;
 local tNameEditBox;
+local tNameLabel;
+local tTypeCombo;
+local tTypeLabel;
 local tFilterCombo;
 local tExcludeFilterCombo;
+local tFilterLabel;
+local tExcludeFilterLabel;
+local tListEntriesPanel;
+local tColorTypeLabel;
 local tPrioritySlider;
 local tColorTypeCombo;
 local tCanColorBarCheck;
@@ -319,14 +353,25 @@ local tEnabledCheck;
 local tDeleteButton;
 local tIsBuiltIn;
 local tInnerSlider;
+local tNewSpellEditBox;
+local tAddSpellButton;
+local tNewBouquetCombo;
+local tAddBouquetButton;
 function VUHDO_auraGroupsRefreshRightPanel()
 
 	tGroup = sSelectedGroupId and VUHDO_getAuraGroupRaw(sSelectedGroupId) or nil;
 	tIsBuiltIn = tGroup and VUHDO_isBuiltInAuraGroup(sSelectedGroupId);
 
 	tNameEditBox = _G["VuhDoNewOptionsAuraGroupsStorePanelNameEditBox"];
+	tNameLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelNameLabel"];
+	tTypeLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelTypeLabel"];
+	tTypeCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelTypeCombo"];
+	tFilterLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelFilterLabel"];
+	tExcludeFilterLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelExcludeFilterLabel"];
 	tFilterCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelFilterCombo"];
 	tExcludeFilterCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelExcludeFilterCombo"];
+	tListEntriesPanel = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanel"];
+	tColorTypeLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelColorTypeLabel"];
 	tPrioritySlider = _G["VuhDoNewOptionsAuraGroupsStorePanelPrioritySlider"];
 	tColorTypeCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelColorTypeCombo"];
 	tCanColorBarCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelCanColorBarCheckButton"];
@@ -349,42 +394,207 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		tNameEditBox:Show();
 		if tIsBuiltIn then
 			tNameEditBox:SetText(VUHDO_getAuraGroupDisplayName(sSelectedGroupId) or "");
+
 			tNameEditBox:Disable();
 			tNameEditBox:SetAlpha(0.5);
 		else
 			tNameEditBox:SetText(tGroup["displayName"] or "");
+
 			tNameEditBox:Enable();
 			tNameEditBox:SetAlpha(1);
 		end
 	end
 
-	if tFilterCombo and tGroup then
-		tFilterCombo:SetShown(true);
-
-		VUHDO_AURA_GROUPS_FILTER_SELECTED = tGroup["filter"] or "";
-
-		VUHDO_lnfComboBoxInitFromModel(tFilterCombo);
-		tFilterCombo:Enable();
-		tFilterCombo:SetAlpha(1);
-
-		if tIsBuiltIn or tGroup["isInferred"] then
-			tFilterCombo:Disable();
-			tFilterCombo:SetAlpha(0.5);
+	if tNameLabel and tGroup then
+		if tIsBuiltIn then
+			tNameLabel:SetAlpha(0.5);
+		else
+			tNameLabel:SetAlpha(1);
 		end
 	end
 
-	if tExcludeFilterCombo and tGroup then
-		tExcludeFilterCombo:SetShown(true);
+	if tTypeLabel and tTypeCombo then
+		if tGroup then
+			tTypeLabel:Show();
+			tTypeCombo:Show();
 
-		VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = tGroup["excludeFilter"] or "";
+			VUHDO_AURA_GROUPS_TYPE_SELECTED = tGroup["type"] or 1;
 
-		VUHDO_lnfComboBoxInitFromModel(tExcludeFilterCombo);
-		tExcludeFilterCombo:Enable();
-		tExcludeFilterCombo:SetAlpha(1);
+			VUHDO_lnfComboBoxInitFromModel(tTypeCombo);
 
-		if tIsBuiltIn or tGroup["isInferred"] then
-			tExcludeFilterCombo:Disable();
-			tExcludeFilterCombo:SetAlpha(0.5);
+			if tIsBuiltIn then
+				tTypeLabel:SetAlpha(0.5);
+				tTypeCombo:Disable();
+				tTypeCombo:SetAlpha(0.5);
+			else
+				tTypeLabel:SetAlpha(1);
+				tTypeCombo:Enable();
+				tTypeCombo:SetAlpha(1);
+			end
+		else
+			tTypeLabel:Hide();
+			tTypeCombo:Hide();
+		end
+	end
+
+	if not tGroup then
+		if tFilterLabel then
+			tFilterLabel:Hide();
+		end
+
+		if tExcludeFilterLabel then
+			tExcludeFilterLabel:Hide();
+		end
+
+		if tFilterCombo then
+			tFilterCombo:Hide();
+		end
+
+		if tExcludeFilterCombo then
+			tExcludeFilterCombo:Hide();
+		end
+
+		if tListEntriesPanel then
+			tListEntriesPanel:Hide();
+		end
+	elseif (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
+		if tFilterLabel then
+			tFilterLabel:Hide();
+		end
+
+		if tExcludeFilterLabel then
+			tExcludeFilterLabel:Hide();
+		end
+
+		if tFilterCombo then
+			tFilterCombo:Hide();
+		end
+
+		if tExcludeFilterCombo then
+			tExcludeFilterCombo:Hide();
+		end
+
+		if tListEntriesPanel then
+			if VUHDO_initBouquetComboModel then
+				VUHDO_initBouquetComboModel();
+			end
+
+			tNewSpellEditBox = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelNewSpellEditBox"];
+
+			if tNewSpellEditBox then
+				tNewSpellEditBox:SetText("");
+			end
+
+			tListEntriesPanel:Show();
+			VUHDO_auraGroupsRefreshListEntries();
+
+			tAddSpellButton = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelAddSpellButton"];
+			tNewBouquetCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelNewBouquetCombo"];
+			tAddBouquetButton = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelAddBouquetButton"];
+
+			if tIsBuiltIn then
+				if tNewSpellEditBox then
+					tNewSpellEditBox:Disable();
+					tNewSpellEditBox:SetAlpha(0.5);
+				end
+
+				if tAddSpellButton then
+					tAddSpellButton:Disable();
+					tAddSpellButton:SetAlpha(0.5);
+				end
+
+				if tNewBouquetCombo then
+					tNewBouquetCombo:Disable();
+					tNewBouquetCombo:SetAlpha(0.5);
+				end
+
+				if tAddBouquetButton then
+					tAddBouquetButton:Disable();
+					tAddBouquetButton:SetAlpha(0.5);
+				end
+			else
+				if tNewSpellEditBox then
+					tNewSpellEditBox:Enable();
+					tNewSpellEditBox:SetAlpha(1);
+				end
+
+				if tAddSpellButton then
+					tAddSpellButton:Enable();
+					tAddSpellButton:SetAlpha(1);
+				end
+
+				if tNewBouquetCombo then
+					tNewBouquetCombo:Enable();
+					tNewBouquetCombo:SetAlpha(1);
+				end
+
+				if tAddBouquetButton then
+					tAddBouquetButton:Enable();
+					tAddBouquetButton:SetAlpha(1);
+				end
+			end
+		end
+
+		if tColorTypeLabel and tListEntriesPanel then
+			tColorTypeLabel:ClearAllPoints();
+			tColorTypeLabel:SetPoint("TOPLEFT", tListEntriesPanel, "BOTTOMLEFT", 0, -8);
+		end
+	else
+		if tFilterLabel then
+			tFilterLabel:Show();
+		end
+
+		if tExcludeFilterLabel then
+			tExcludeFilterLabel:Show();
+		end
+
+		if tFilterCombo then
+			tFilterCombo:SetShown(true);
+
+			VUHDO_AURA_GROUPS_FILTER_SELECTED = tGroup["filter"] or "";
+
+			VUHDO_lnfComboBoxInitFromModel(tFilterCombo);
+
+			tFilterCombo:Enable();
+			tFilterCombo:SetAlpha(1);
+
+			if tIsBuiltIn or tGroup["isInferred"] then
+				tFilterCombo:Disable();
+				tFilterCombo:SetAlpha(0.5);
+			end
+		end
+
+		if tExcludeFilterCombo then
+			tExcludeFilterCombo:SetShown(true);
+
+			VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = tGroup["excludeFilter"] or "";
+
+			VUHDO_lnfComboBoxInitFromModel(tExcludeFilterCombo);
+
+			tExcludeFilterCombo:Enable();
+			tExcludeFilterCombo:SetAlpha(1);
+
+			if tIsBuiltIn or tGroup["isInferred"] then
+				tExcludeFilterCombo:Disable();
+				tExcludeFilterCombo:SetAlpha(0.5);
+			end
+		end
+
+		if tFilterLabel then
+			tFilterLabel:SetAlpha((tIsBuiltIn or tGroup["isInferred"]) and 0.5 or 1);
+		end
+
+		if tExcludeFilterLabel then
+			tExcludeFilterLabel:SetAlpha((tIsBuiltIn or tGroup["isInferred"]) and 0.5 or 1);
+		end
+
+		if tListEntriesPanel then
+			tListEntriesPanel:Hide();
+		end
+
+		if tColorTypeLabel and tFilterCombo then
+			tColorTypeLabel:ClearAllPoints();
+			tColorTypeLabel:SetPoint("TOPLEFT", tFilterCombo, "BOTTOMLEFT", 0, -8);
 		end
 	end
 
@@ -416,6 +626,10 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		if tIsBuiltIn then
 			tColorTypeCombo:Disable();
 			tColorTypeCombo:SetAlpha(0.5);
+		end
+
+		if tColorTypeLabel then
+			tColorTypeLabel:SetAlpha(tIsBuiltIn and 0.5 or 1);
 		end
 	end
 
@@ -536,9 +750,11 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		if tPrioritySlider then
 			tPrioritySlider:Show();
 			tInnerSlider = _G[tPrioritySlider:GetName() .. "Slider"];
+
 			if tInnerSlider then
 				tInnerSlider:Disable();
 			end
+
 			tPrioritySlider:SetAlpha(0.5);
 		end
 
@@ -585,6 +801,7 @@ function VUHDO_auraGroupsOnNewGroup()
 	tNewId = VUHDO_generateAuraGroupId();
 
 	VUHDO_CONFIG["AURA_GROUPS"][tNewId] = {
+		["type"] = VUHDO_AURA_GROUP_TYPE_FILTER,
 		["filter"] = "HELPFUL|PLAYER",
 		["excludeFilter"] = nil,
 		["priority"] = VUHDO_getNextAuraGroupPriority(),
@@ -647,6 +864,33 @@ function VUHDO_auraGroupsOnDeleteGroup(aGroupId)
 	VUHDO_AURA_GROUPS_SELECTED = nil;
 
 	VUHDO_auraGroupsRefreshList();
+	VUHDO_auraGroupsRefreshRightPanel();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsTypeChanged(aComboBox, aValue, anArrayModel)
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["type"] = tonumber(aValue) or 1;
+
+	if (tonumber(aValue) or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
+		if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["entries"] then
+			VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["entries"] = { };
+		end
+	else
+		if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["filter"] then
+			VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["filter"] = "HELPFUL|PLAYER";
+		end
+	end
+
 	VUHDO_auraGroupsRefreshRightPanel();
 
 	return;
@@ -785,6 +1029,390 @@ function VUHDO_auraGroupsEnabledChanged(aParent, aValue)
 	VUHDO_auraGroupsRefreshList();
 
 	VUHDO_reloadUI(false);
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_getOrCreateAuraGroupEntryItem(anIndex, aParent)
+
+	if sAuraGroupEntryItems[anIndex] == nil then
+		sAuraGroupEntryItems[anIndex] = CreateFrame("Frame", "VuhDoAuraGroupEntry" .. anIndex, aParent, "VuhDoAuraGroupListEntryTemplate");
+	end
+
+	return sAuraGroupEntryItems[anIndex];
+
+end
+
+
+
+--
+local tRowName;
+local tIcon;
+local tValueLabel;
+local tTypeLabel;
+local tRemoveButton;
+local tUpButton;
+local tDownButton;
+local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEntry, anIsBuiltIn)
+
+	anItemPanel["vuhdo_entryIdx"] = anIndex;
+
+	anItemPanel:ClearAllPoints();
+	VUHDO_PixelUtil.SetPoint(anItemPanel, "TOPLEFT", aParent:GetName(), "TOPLEFT", 0, -(anIndex - 1) * VUHDO_AURA_GROUP_LIST_ENTRY_ROW_HEIGHT);
+
+	tRowName = anItemPanel:GetName();
+
+	tIcon = _G[tRowName .. "IconTexture"];
+
+	if tIcon then
+		tIcon:SetTexture(VUHDO_getGlobalIcon(tostring(anEntry["value"])));
+	end
+
+	tValueLabel = _G[tRowName .. "ValueLabelLabel"];
+
+	if tValueLabel then
+		tValueLabel:SetText(VUHDO_formatSpellDisplayName(tostring(anEntry["value"] or "")));
+	end
+
+	tTypeLabel = _G[tRowName .. "TypeLabelLabel"];
+
+	if tTypeLabel then
+		tTypeLabel:SetText((anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET) and VUHDO_I18N_AURA_GROUP_ENTRY_BOUQUET or VUHDO_I18N_AURA_GROUP_ENTRY_SPELL);
+	end
+
+	tRemoveButton = _G[tRowName .. "RemoveButton"];
+	tUpButton = _G[tRowName .. "UpButton"];
+	tDownButton = _G[tRowName .. "DownButton"];
+
+	if tRemoveButton then
+		tRemoveButton:SetText("");
+	end
+
+	if anIsBuiltIn then
+		if tRemoveButton then
+			tRemoveButton:Disable();
+			tRemoveButton:SetAlpha(0.5);
+		end
+
+		if tUpButton then
+			tUpButton:Disable();
+			tUpButton:SetAlpha(0.5);
+		end
+
+		if tDownButton then
+			tDownButton:Disable();
+			tDownButton:SetAlpha(0.5);
+		end
+	else
+		if tRemoveButton then
+			tRemoveButton:Enable();
+			tRemoveButton:SetAlpha(1);
+		end
+
+		if tUpButton then
+			tUpButton:Enable();
+			tUpButton:SetAlpha(1);
+		end
+
+		if tDownButton then
+			tDownButton:Enable();
+			tDownButton:SetAlpha(1);
+		end
+	end
+
+	anItemPanel:Show();
+
+	return;
+
+end
+
+
+
+--
+local tPanel;
+local tGroup;
+local tEntries;
+local tEntryScrollChild;
+local tIsBuiltInList;
+function VUHDO_auraGroupsRefreshListEntries()
+
+	for _, tPanel in pairs(sAuraGroupEntryItems) do
+		tPanel:Hide();
+	end
+
+	if not sSelectedGroupId then
+		return;
+	end
+
+	tGroup = VUHDO_getAuraGroupRaw(sSelectedGroupId);
+
+	if not tGroup or (tGroup["type"] or 1) ~= VUHDO_AURA_GROUP_TYPE_LIST then
+		return;
+	end
+
+	tIsBuiltInList = VUHDO_isBuiltInAuraGroup(sSelectedGroupId);
+
+	tEntries = tGroup["entries"] or { };
+	tEntryScrollChild = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelEntryScrollEntryScrollChild"];
+
+	if not tEntryScrollChild then
+		return;
+	end
+
+	for tIdx, tEntry in ipairs(tEntries) do
+		tPanel = VUHDO_getOrCreateAuraGroupEntryItem(tIdx, tEntryScrollChild);
+		VUHDO_initAuraGroupEntryItem(tEntryScrollChild, tPanel, tIdx, tEntry, tIsBuiltInList);
+	end
+
+	if #tEntries > 0 then
+		VUHDO_PixelUtil.SetHeight(tEntryScrollChild, #tEntries * VUHDO_AURA_GROUP_LIST_ENTRY_ROW_HEIGHT);
+	else
+		VUHDO_PixelUtil.SetHeight(tEntryScrollChild, VUHDO_AURA_GROUP_LIST_ENTRY_ROW_HEIGHT);
+	end
+
+	return;
+
+end
+
+
+
+--
+local tSpellEditBox;
+local tText;
+local tSpellId;
+local tSecrecy;
+function VUHDO_auraGroupsListAddSpell()
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	tGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
+
+	if tGroup["type"] ~= VUHDO_AURA_GROUP_TYPE_LIST then
+		return;
+	end
+
+	tSpellEditBox = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelNewSpellEditBox"];
+
+	if not tSpellEditBox then
+		return;
+	end
+
+	tText = tSpellEditBox:GetText();
+
+	if not tText or tText == "" then
+		return;
+	end
+
+	tText = strtrim(tText);
+
+	if tText == "" then
+		return;
+	end
+
+	tSpellId = GetSpellIDForSpellIdentifier(tText) or tonumber(tText);
+
+	if tSpellId then
+		tSecrecy = GetSpellAuraSecrecy(tSpellId);
+
+		if tSecrecy == 1 then
+			VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_ALWAYS_SECRET);
+
+			return;
+		end
+
+		if tSecrecy == 2 and VUHDO_Msg then
+			VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_CONTEXT_SECRET);
+		end
+	end
+
+	if not tGroup["entries"] then
+		tGroup["entries"] = { };
+	end
+
+	tinsert(tGroup["entries"], {
+		["entryType"] = VUHDO_AURA_LIST_ENTRY_SPELL,
+		["value"] = tonumber(tText) or tText,
+		["mine"] = true,
+		["others"] = false,
+	});
+
+	tSpellEditBox:SetText("");
+	VUHDO_auraGroupsRefreshListEntries();
+
+	return;
+
+end
+
+
+
+--
+local tBouquetName;
+function VUHDO_auraGroupsListAddBouquet()
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	tGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
+
+	if tGroup["type"] ~= VUHDO_AURA_GROUP_TYPE_LIST then
+		return;
+	end
+
+	tBouquetName = VUHDO_AURA_GROUPS_NEW_BOUQUET_SELECTED;
+
+	if not tBouquetName or tBouquetName == "" then
+		return;
+	end
+
+	if not tGroup["entries"] then
+		tGroup["entries"] = { };
+	end
+
+	tinsert(tGroup["entries"], {
+		["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET,
+		["value"] = tBouquetName,
+	});
+
+	VUHDO_auraGroupsRefreshListEntries();
+
+	return;
+
+end
+
+
+
+--
+local tPanel;
+local tIdx;
+function VUHDO_auraGroupEntryRemoveOnClick(aButton)
+
+	tPanel = aButton:GetParent();
+
+	if not tPanel then
+		return;
+	end
+
+	tIdx = tPanel["vuhdo_entryIdx"];
+
+	if not tIdx then
+		return;
+	end
+
+	VUHDO_auraGroupsListRemoveEntry(tIdx);
+
+	return;
+
+end
+
+
+
+--
+local tPanel;
+local tIdx;
+function VUHDO_auraGroupEntryUpOnClick(aButton)
+
+	tPanel = aButton:GetParent();
+
+	if not tPanel then
+		return;
+	end
+
+	tIdx = tPanel["vuhdo_entryIdx"];
+
+	if not tIdx then
+		return;
+	end
+
+	VUHDO_auraGroupsListMoveEntry(tIdx, -1);
+
+	return;
+
+end
+
+
+
+--
+local tPanel;
+local tIdx;
+function VUHDO_auraGroupEntryDownOnClick(aButton)
+
+	tPanel = aButton:GetParent();
+
+	if not tPanel then
+		return;
+	end
+
+	tIdx = tPanel["vuhdo_entryIdx"];
+
+	if not tIdx then
+		return;
+	end
+
+	VUHDO_auraGroupsListMoveEntry(tIdx, 1);
+
+	return;
+
+end
+
+
+
+--
+local tEntries;
+function VUHDO_auraGroupsListRemoveEntry(anIndex)
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	tEntries = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["entries"];
+
+	if not tEntries or anIndex < 1 or anIndex > #tEntries then
+		return;
+	end
+
+	tremove(tEntries, anIndex);
+
+	VUHDO_auraGroupsRefreshListEntries();
+
+	return;
+
+end
+
+
+
+--
+local tEntries;
+local tSwap;
+function VUHDO_auraGroupsListMoveEntry(anIndex, aDirection)
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	tEntries = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["entries"];
+
+	if not tEntries or anIndex < 1 or anIndex > #tEntries then
+		return;
+	end
+
+	tSwap = anIndex + aDirection;
+
+	if tSwap < 1 or tSwap > #tEntries then
+		return;
+	end
+
+	tSwap = tEntries[anIndex];
+	tEntries[anIndex] = tEntries[anIndex + aDirection];
+	tEntries[anIndex + aDirection] = tSwap;
+
+	VUHDO_auraGroupsRefreshListEntries();
 
 	return;
 
