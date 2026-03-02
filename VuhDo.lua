@@ -474,8 +474,6 @@ function VUHDO_setHealth(aUnit, aMode)
 
 			if sSecretsEnabled and issecretvalue(tRealm) then
 				tInfo["fullName"] = tName;
-			elseif sSecretsEnabled and issecretvalue(tName) then
-				tInfo["fullName"] = tRealm ~= "" and (tName .. "-" .. tRealm) or tName;
 			else
 				tInfo["fullName"] = (tRealm or "") ~= "" and (tName .. "-" .. tRealm) or tName;
 			end
