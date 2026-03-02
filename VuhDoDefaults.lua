@@ -3402,6 +3402,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 			{ ["entryType"] = 1, ["value"] = 17, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 194384, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 1253593, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 41635, ["mine"] = true, ["others"] = false },
 		},
 		["displayName"] = nil,
 		["enabled"] = true,
