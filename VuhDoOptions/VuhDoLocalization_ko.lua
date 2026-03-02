@@ -737,6 +737,10 @@ VUHDO_I18N_TT.K678 = "Common raid buffs: Mark of the Wild, Arcane Intellect, Bat
 VUHDO_I18N_TT.K679 = "Evoker Blessing of the Bronze (class-specific movement cooldown reduction auras).";
 VUHDO_I18N_TT.K680 = "Rogue weapon poisons: Deadly, Wound, Crippling, Numbing, Instant, Atrophic, Amplifying.";
 VUHDO_I18N_TT.K681 = "Shaman weapon imbuements: Windfury, Flametongue, Earthliving, Tidecaller's Guard, Thunderstrike Ward.";
+VUHDO_I18N_TT.K682 = "Paladin weapon imbuements: Rite of Sanctification, Rite of Adjuration.";
+VUHDO_I18N_TT.K683 = "Enhancement Shaman buffs: Maelstrom Weapon.";
+VUHDO_I18N_TT.K684 = "Brewmaster Monk buffs: Stagger.";
+VUHDO_I18N_TT.K685 = "Warlock Metamorphosis: Void Metamorphosis states, Collapsing Star.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "기본 프로필";
 VUHDO_I18N_DEFAULT_LAYOUT = "기본 배치";

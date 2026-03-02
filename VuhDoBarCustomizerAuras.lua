@@ -2598,7 +2598,7 @@ do
 
 				aIconTexture:Show();
 			else
-				if anAuraData["icon"] and VUHDO_ATLAS_TEXTURES and VUHDO_ATLAS_TEXTURES[anAuraData["icon"]] then
+				if anAuraData["icon"] and not issecretvalue(anAuraData["icon"]) and VUHDO_ATLAS_TEXTURES and VUHDO_ATLAS_TEXTURES[anAuraData["icon"]] then
 					aIconTexture:SetAtlas(anAuraData["icon"]);
 				else
 					aIconTexture:SetTexture(anAuraData["icon"]);

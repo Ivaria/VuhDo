@@ -3367,6 +3367,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["entries"] = {
 			{ ["entryType"] = 1, ["value"] = 360827, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 395152, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 395296, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 410089, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 410263, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 410686, ["mine"] = true, ["others"] = false },
@@ -3458,6 +3459,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 			{ ["entryType"] = 1, ["value"] = 53563, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 156322, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 156910, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 200025, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 1244893, ["mine"] = true, ["others"] = false },
 		},
 		["displayName"] = nil,
@@ -3527,7 +3529,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 	},
-	["SHAMAN_IMBUEMENTS"] = {
+	["SHAMAN_WEAPON_IMBUEMENTS"] = {
 		["type"] = 2,
 		["entries"] = {
 			{ ["entryType"] = 1, ["value"] = 319773, ["mine"] = true, ["others"] = false },
@@ -3538,6 +3540,57 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 			{ ["entryType"] = 1, ["value"] = 457481, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 462757, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 462742, ["mine"] = true, ["others"] = false },
+		},
+		["displayName"] = nil,
+		["enabled"] = true,
+		["priority"] = 50,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+		["canColorBar"] = false,
+		["canColorText"] = false,
+	},
+	["PALADIN_WEAPON_IMBUEMENTS"] = {
+		["type"] = 2,
+		["entries"] = {
+			{ ["entryType"] = 1, ["value"] = 433568, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 433583, ["mine"] = true, ["others"] = false },
+		},
+		["displayName"] = nil,
+		["enabled"] = true,
+		["priority"] = 50,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+		["canColorBar"] = false,
+		["canColorText"] = false,
+	},
+	["ENHANCEMENT_SHAMAN_BUFFS"] = {
+		["type"] = 2,
+		["entries"] = {
+			{ ["entryType"] = 1, ["value"] = 344179, ["mine"] = true, ["others"] = false },
+		},
+		["displayName"] = nil,
+		["enabled"] = true,
+		["priority"] = 50,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+		["canColorBar"] = false,
+		["canColorText"] = false,
+	},
+	["BREWMASTER_MONK_BUFFS"] = {
+		["type"] = 2,
+		["entries"] = {
+			{ ["entryType"] = 1, ["value"] = 124255, ["mine"] = true, ["others"] = false },
+		},
+		["displayName"] = nil,
+		["enabled"] = true,
+		["priority"] = 50,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+		["canColorBar"] = false,
+		["canColorText"] = false,
+	},
+	["WARLOCK_METAMORPHOSIS"] = {
+		["type"] = 2,
+		["entries"] = {
+			{ ["entryType"] = 1, ["value"] = 1217607, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 1225789, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 1227702, ["mine"] = true, ["others"] = false },
 		},
 		["displayName"] = nil,
 		["enabled"] = true,
