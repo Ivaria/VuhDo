@@ -2465,7 +2465,7 @@ function VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, an
 					tSlotDataAsAura["duration"] = tSlotData["duration"] or 0;
 					tSlotDataAsAura["applications"] = tSlotData["stacks"] or 0;
 					tSlotDataAsAura["name"] = tSlotData["name"];
-					tSlotDataAsAura["auraInstanceID"] = -1;
+					tSlotDataAsAura["auraInstanceID"] = tSlotData["auraInstanceID"] or -1;
 					tSlotDataAsAura["clipL"] = tSlotData["clipL"];
 					tSlotDataAsAura["clipR"] = tSlotData["clipR"];
 					tSlotDataAsAura["clipT"] = tSlotData["clipT"];
@@ -2559,7 +2559,7 @@ do
 					if "debuff" == tColorMode and anAuraData["dispelName"] then
 						tDispelCurve = VUHDO_getDispelTypeCurve();
 
-						if tDispelCurve then
+						if tDispelCurve and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 							tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
 
 							if tColorMixin then
@@ -2601,7 +2601,7 @@ do
 					if "debuff" == tColorMode and anAuraData["dispelName"] then
 						tDispelCurve = VUHDO_getDispelTypeCurve();
 
-						if tDispelCurve then
+						if tDispelCurve and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 							tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
 
 							if tColorMixin then
@@ -2682,7 +2682,7 @@ do
 		if aBackdropFrame and aBackdropFrame.SetBackdropBorderColor then
 			tDispelCurve = VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig);
 
-			if tDispelBorder and aUnit and tDispelCurve then
+			if tDispelBorder and aUnit and tDispelCurve and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 				tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
 
 				if tColorMixin then
@@ -2942,7 +2942,7 @@ do
 			if "debuff" == tColorMode and anAuraData["dispelName"] then
 				tDispelCurve = VUHDO_getDispelTypeCurve();
 
-				if tDispelCurve then
+				if tDispelCurve and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 					tColorMixin = GetAuraDispelTypeColor(tUnit, anAuraData["auraInstanceID"], tDispelCurve);
 
 					if tColorMixin then
