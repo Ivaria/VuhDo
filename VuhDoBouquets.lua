@@ -2773,9 +2773,21 @@ do
 					end
 
 					tSlotData["icon"] = anIcon;
-					tSlotData["expirationTime"] = (anIsActive and aDuration and aDuration > 0 and aTimer) and (GetTime() + aTimer) or 0;
-					tSlotData["stacks"] = aCounter or 0;
-					tSlotData["duration"] = aDuration or 0;
+
+					if anIsActive and aDuration then
+						if issecretvalue(aDuration) or issecretvalue(aTimer) then
+							tSlotData["expirationTime"] = aTimer;
+						elseif aDuration > 0 and aTimer then
+							tSlotData["expirationTime"] = GetTime() + aTimer;
+						else
+							tSlotData["expirationTime"] = 0;
+						end
+					else
+						tSlotData["expirationTime"] = 0;
+					end
+
+					tSlotData["stacks"] = aCounter;
+					tSlotData["duration"] = aDuration;
 
 					if aColor then
 						VUHDO_copyColorTo(aColor, tSlotData["color"]);

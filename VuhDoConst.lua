@@ -12,6 +12,7 @@ VUHDO_YES = 1;
 VUHDO_NO = 2;
 
 VUHDO_MAX_PANELS = 10;        -- Maximum number of Panels, change in VuhDoPanel.XML accordingly
+VUHDO_MAX_BOSS_FRAMES = 8;
 --VUHDO_MAX_GROUPS_PER_PANEL = 15; -- Maximum number of Models (Groups) per Panel
 
 --VUHDO_MAX_MTS = 8;

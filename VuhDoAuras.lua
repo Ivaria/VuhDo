@@ -129,6 +129,12 @@ local sReverseIndexArrayPool;
 local sAllGroups = { };
 local sScaleCounts = { };
 
+local sSpecialAuraUnits = { "player", "pet", "target", "focus" };
+
+for tCnt = 1, VUHDO_MAX_BOSS_FRAMES do
+	tinsert(sSpecialAuraUnits, string.format("boss%d", tCnt));
+end
+
 
 
 --
@@ -897,6 +903,19 @@ end
 
 
 --
+function VUHDO_initSpecialUnitAuraSlots()
+
+	for _, tUnit in ipairs(sSpecialAuraUnits) do
+		VUHDO_initUnitAuraSlots(tUnit);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tPanelSlots;
 local tAnchorSlots;
 function VUHDO_getAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, aSlotIndex)
@@ -1614,6 +1633,18 @@ function VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAncho
 
 	if not tEntries then
 		return;
+	end
+
+	if not VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] then
+		VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] = { };
+	end
+
+	if not VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum] then
+		VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum] = { };
+	end
+
+	if not VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex] then
+		VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex] = { };
 	end
 
 	tNow = GetTime();

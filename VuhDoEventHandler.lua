@@ -946,6 +946,7 @@ local function VUHDO_init()
 	VUHDO_initDebuffs(); -- Too soon obviously => ReloadUI
 	VUHDO_clearUndefinedModelEntries();
 	VUHDO_registerAllBouquets(true);
+	VUHDO_initSpecialUnitAuraSlots();
 	VUHDO_reloadUI(false);
 	VUHDO_getAutoProfile();
 	VUHDO_initCliqueSupport();

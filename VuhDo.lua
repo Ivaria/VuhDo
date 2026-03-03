@@ -61,8 +61,6 @@ setmetatable(VUHDO_PANEL_UNITS, VUHDO_META_NEW_ARRAY);
 -- TODO: make local
 VUHDO_BOSS_UNITS = { };
 
-local VUHDO_MAX_BOSS_FRAMES = 8;
-
 for i = 1, VUHDO_MAX_BOSS_FRAMES do -- FIXME: Blizzard forgot to update the MAX_BOSS_FRAMES constant for 9.2
 	local tBossUnitId = format("boss%d", i);
 
