@@ -8,9 +8,6 @@ local tsort = table.sort;
 local twipe = table.wipe;
 local strfind = string.find;
 
-local GetSpellIDForSpellIdentifier = C_Spell and C_Spell.GetSpellIDForSpellIdentifier;
-local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
-
 VUHDO_AURA_GROUPS_SELECTED = nil;
 VUHDO_AURA_GROUPS_COMBO_MODEL = { };
 VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL = { };
@@ -1037,6 +1034,7 @@ local tTypeLabel;
 local tRemoveButton;
 local tUpButton;
 local tDownButton;
+local tSecrecy;
 local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEntry, anIsBuiltIn)
 
 	anItemPanel["vuhdo_entryIdx"] = anIndex;
@@ -1063,6 +1061,18 @@ local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEnt
 			tValueLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_EMPTY);
 		else
 			tValueLabel:SetText(VUHDO_formatSpellDisplayName(tostring(anEntry["value"] or "")));
+		end
+
+		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+			tSecrecy = VUHDO_getSpellAuraSecrecy(anEntry["value"]);
+
+			if tSecrecy == 1 or tSecrecy == 2 then
+				tValueLabel:SetTextColor(1, 0.3, 0.3, 1);
+			else
+				tValueLabel:SetTextColor(0.4, 0.4, 1, 1);
+			end
+		else
+			tValueLabel:SetTextColor(0.4, 0.4, 1, 1);
 		end
 	end
 
@@ -1177,8 +1187,6 @@ end
 --
 local tSpellEditBox;
 local tText;
-local tSpellId;
-local tSecrecy;
 function VUHDO_auraGroupsListAddSpell()
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -1209,20 +1217,8 @@ function VUHDO_auraGroupsListAddSpell()
 		return;
 	end
 
-	tSpellId = GetSpellIDForSpellIdentifier(tText) or tonumber(tText);
-
-	if tSpellId then
-		tSecrecy = GetSpellAuraSecrecy(tSpellId);
-
-		if tSecrecy == 1 then
-			VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_ALWAYS_SECRET);
-
-			return;
-		end
-
-		if tSecrecy == 2 and VUHDO_Msg then
-			VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_CONTEXT_SECRET);
-		end
+	if VUHDO_checkSpellSecrecy(tText) == 1 then
+		return;
 	end
 
 	if not tGroup["entries"] then

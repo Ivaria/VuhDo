@@ -10,6 +10,8 @@ local pairs = pairs;
 local ipairs = ipairs;
 local GetSpellName = C_Spell.GetSpellName;
 local GetMouseFocus = GetMouseFocus or VUHDO_getMouseFocus;
+local GetSpellIDForSpellIdentifier = C_Spell and C_Spell.GetSpellIDForSpellIdentifier;
+local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
 
 
 
@@ -109,6 +111,64 @@ BACKDROP_VUHDO_PANEL_APPEND_BOTTOM_16_16_1111 = {
 };
 
 local tIsInCustomFunction = false;
+
+
+
+--
+local tSpellId;
+local tSecrecy;
+function VUHDO_checkSpellSecrecy(aSpellText)
+
+	if not GetSpellAuraSecrecy then
+		return 0;
+	end
+
+	tSpellId = GetSpellIDForSpellIdentifier and GetSpellIDForSpellIdentifier(aSpellText) or tonumber(aSpellText);
+
+	if not tSpellId then
+		return 0;
+	end
+
+	tSecrecy = GetSpellAuraSecrecy(tSpellId);
+
+	if tSecrecy == 1 then
+		VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_ALWAYS_SECRET, 1, 0.3, 0.3);
+
+		return 1;
+	end
+
+	if tSecrecy == 2 then
+		VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_CONTEXT_SECRET, 1, 0.3, 0.3);
+	end
+
+	return 0;
+
+end
+
+
+
+--
+local tSpellId;
+local tSecrecy;
+function VUHDO_getSpellAuraSecrecy(aSpellText)
+
+	if not GetSpellAuraSecrecy then
+		return 0;
+	end
+
+	tSpellId = GetSpellIDForSpellIdentifier and GetSpellIDForSpellIdentifier(aSpellText) or tonumber(aSpellText);
+
+	if not tSpellId then
+		return 0;
+	end
+
+	tSecrecy = GetSpellAuraSecrecy(tSpellId);
+
+	return tSecrecy or 0;
+
+end
+
+
 
 --
 function VUHDO_lnfCheckButtonOnLoad(aCheckButton)
