@@ -157,42 +157,6 @@ end
 
 
 --
-local tCandidate;
-local tSuffix;
-local tAllGroups;
-local tFound;
-local function VUHDO_ensureUniqueAuraGroupName(aBaseName)
-
-	tCandidate = aBaseName;
-	tSuffix = 1;
-
-	tAllGroups = VUHDO_getAllAuraGroups();
-
-	while true do
-		tFound = false;
-
-		for _, tGroup in pairs(tAllGroups) do
-			if tGroup["displayName"] == tCandidate then
-				tFound = true;
-
-				tSuffix = tSuffix + 1;
-
-				tCandidate = aBaseName .. " (" .. tSuffix .. ")";
-
-				break;
-			end
-		end
-
-		if not tFound then
-			return tCandidate;
-		end
-	end
-
-end
-
-
-
---
 local tAllGroups;
 local tDisplayName;
 local tSortTable;
@@ -361,6 +325,7 @@ local tNewSpellEditBox;
 local tAddSpellButton;
 local tNewBouquetCombo;
 local tAddBouquetButton;
+local tAddEmptyButton;
 function VUHDO_auraGroupsRefreshRightPanel()
 
 	tGroup = sSelectedGroupId and VUHDO_getAuraGroupRaw(sSelectedGroupId) or nil;
@@ -495,6 +460,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tAddSpellButton = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelAddSpellButton"];
 			tNewBouquetCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelNewBouquetCombo"];
 			tAddBouquetButton = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelAddBouquetButton"];
+			tAddEmptyButton = _G["VuhDoNewOptionsAuraGroupsStorePanelListEntriesPanelNewEntryPanelAddEmptyButton"];
 
 			if tIsBuiltIn then
 				if tNewSpellEditBox then
@@ -516,6 +482,11 @@ function VUHDO_auraGroupsRefreshRightPanel()
 					tAddBouquetButton:Disable();
 					tAddBouquetButton:SetAlpha(0.5);
 				end
+
+				if tAddEmptyButton then
+					tAddEmptyButton:Disable();
+					tAddEmptyButton:SetAlpha(0.5);
+				end
 			else
 				if tNewSpellEditBox then
 					tNewSpellEditBox:Enable();
@@ -535,6 +506,11 @@ function VUHDO_auraGroupsRefreshRightPanel()
 				if tAddBouquetButton then
 					tAddBouquetButton:Enable();
 					tAddBouquetButton:SetAlpha(1);
+				end
+
+				if tAddEmptyButton then
+					tAddEmptyButton:Enable();
+					tAddEmptyButton:SetAlpha(1);
 				end
 			end
 		end
@@ -813,7 +789,7 @@ function VUHDO_auraGroupsOnNewGroup()
 		["canColorBar"] = true,
 		["canColorText"] = true,
 		["enabled"] = true,
-		["displayName"] = VUHDO_ensureUniqueAuraGroupName(VUHDO_I18N_NEW .. " " .. VUHDO_I18N_GROUP),
+		["displayName"] = VUHDO_ensureUniqueAuraGroupDisplayName(VUHDO_I18N_NEW .. " " .. VUHDO_I18N_GROUP),
 		["isHarmful"] = false,
 	};
 
@@ -840,7 +816,7 @@ function VUHDO_auraGroupsOnCloneGroup(aSourceId)
 		return;
 	end
 
-	tNewId = VUHDO_cloneAuraGroup(aSourceId, VUHDO_ensureUniqueAuraGroupName(VUHDO_getAuraGroupDisplayName(aSourceId) .. " (Copy)"));
+	tNewId = VUHDO_cloneAuraGroup(aSourceId, VUHDO_ensureUniqueAuraGroupDisplayName(VUHDO_getAuraGroupDisplayName(aSourceId) .. " (Copy)"));
 
 	if tNewId then
 		sSelectedGroupId = tNewId;
@@ -1073,19 +1049,33 @@ local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEnt
 	tIcon = _G[tRowName .. "IconTexture"];
 
 	if tIcon then
-		tIcon:SetTexture(VUHDO_getGlobalIcon(tostring(anEntry["value"])));
+		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
+			tIcon:SetTexture(nil);
+		else
+			tIcon:SetTexture(VUHDO_getGlobalIcon(tostring(anEntry["value"])));
+		end
 	end
 
 	tValueLabel = _G[tRowName .. "ValueLabelLabel"];
 
 	if tValueLabel then
-		tValueLabel:SetText(VUHDO_formatSpellDisplayName(tostring(anEntry["value"] or "")));
+		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
+			tValueLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_EMPTY);
+		else
+			tValueLabel:SetText(VUHDO_formatSpellDisplayName(tostring(anEntry["value"] or "")));
+		end
 	end
 
 	tTypeLabel = _G[tRowName .. "TypeLabelLabel"];
 
 	if tTypeLabel then
-		tTypeLabel:SetText((anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET) and VUHDO_I18N_AURA_GROUP_ENTRY_BOUQUET or VUHDO_I18N_AURA_GROUP_ENTRY_SPELL);
+		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
+			tTypeLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_EMPTY);
+		elseif anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
+			tTypeLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_BOUQUET);
+		else
+			tTypeLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_SPELL);
+		end
 	end
 
 	tRemoveButton = _G[tRowName .. "RemoveButton"];
@@ -1282,6 +1272,36 @@ function VUHDO_auraGroupsListAddBouquet()
 	tinsert(tGroup["entries"], {
 		["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET,
 		["value"] = tBouquetName,
+	});
+
+	VUHDO_auraGroupsRefreshListEntries();
+
+	return;
+
+end
+
+
+
+--
+local tGroup;
+function VUHDO_auraGroupsListAddEmpty()
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	tGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
+
+	if tGroup["type"] ~= VUHDO_AURA_GROUP_TYPE_LIST then
+		return;
+	end
+
+	if not tGroup["entries"] then
+		tGroup["entries"] = { };
+	end
+
+	tinsert(tGroup["entries"], {
+		["entryType"] = VUHDO_AURA_LIST_ENTRY_EMPTY,
 	});
 
 	VUHDO_auraGroupsRefreshListEntries();

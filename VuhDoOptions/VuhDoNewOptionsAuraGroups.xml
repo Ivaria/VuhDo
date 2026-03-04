@@ -486,6 +486,24 @@
 										</Scripts>
 									</Button>
 
+									<Button name="$parentAddEmptyButton" inherits="VuhDoButtonTemplate" text="VUHDO_I18N_AURA_GROUP_ADD_EMPTY">
+										<Size>
+											<AbsDimension x="80" y="22" />
+										</Size>
+										<Anchors>
+											<Anchor point="TOPLEFT" relativeTo="$parentAddSpellButton" relativePoint="TOPRIGHT">
+												<Offset>
+													<AbsDimension x="4" y="0" />
+												</Offset>
+											</Anchor>
+										</Anchors>
+										<Scripts>
+											<OnClick>
+												VUHDO_auraGroupsListAddEmpty();
+											</OnClick>
+										</Scripts>
+									</Button>
+
 								</Frames>
 							</Frame>
 

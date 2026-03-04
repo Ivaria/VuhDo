@@ -1871,7 +1871,7 @@ do
 
 						if tAuraInstances then
 							for _, tAuraInstanceId in ipairs(tAuraInstances) do
-								if not ShouldUnitAuraInstanceBeSecret or not ShouldUnitAuraInstanceBeSecret(aResolvedUnit, tAuraInstanceId) then
+								if not ShouldUnitAuraInstanceBeSecret(aResolvedUnit, tAuraInstanceId) then
 									tCachedAura = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
 
 									if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tInfos) then

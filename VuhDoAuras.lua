@@ -7,6 +7,8 @@ local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
 local strfind = string.find;
+local strsub = string.sub;
+local format = string.format;
 
 local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
@@ -48,7 +50,7 @@ local VUHDO_UNIT_AURA_LIST_SLOTS = VUHDO_UNIT_AURA_LIST_SLOTS;
 VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS or { };
 local VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS;
 
-VUHDO_AURA_MIGRATION_VERSION = 1;
+VUHDO_AURA_MIGRATION_VERSION = 2;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
@@ -451,6 +453,41 @@ function VUHDO_getAllAuraGroups()
 	end
 
 	return sAllGroups;
+
+end
+
+
+
+--
+local tCandidate;
+local tSuffix;
+local tAllGroups;
+local tFound;
+function VUHDO_ensureUniqueAuraGroupDisplayName(aBaseName)
+
+	tCandidate = aBaseName;
+	tSuffix = 0;
+
+	tAllGroups = VUHDO_getAllAuraGroups();
+
+	while true do
+		tFound = false;
+
+		for _, tGroup in pairs(tAllGroups or sEmpty) do
+			if tGroup["displayName"] == tCandidate then
+				tFound = true;
+
+				tSuffix = tSuffix + 1;
+				tCandidate = aBaseName .. " (" .. tSuffix .. ")";
+
+				break;
+			end
+		end
+
+		if not tFound then
+			return tCandidate;
+		end
+	end
 
 end
 
@@ -1650,7 +1687,15 @@ function VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAncho
 	tNow = GetTime();
 
 	for tEntryIndex, tEntry in ipairs(tEntries) do
-		if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+		if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
+			tOldSlot = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex];
+
+			if tOldSlot then
+				sSlotDataPool:release(tOldSlot);
+			end
+
+			VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex] = nil;
+		elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
 			tLookupKey = tEntry["value"];
 
 			tOldSlot = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex];
@@ -1783,12 +1828,15 @@ end
 do
 	--
 	local tSlotCfg;
+	local tSlots;
+	local tSlotVal;
 	local tScale;
 	local tMaxCount;
 	local tMostCommonScale;
 	function VUHDO_getMostCommonSlotScale(aHots)
 
 		tSlotCfg = aHots and aHots["SLOTCFG"];
+		tSlots = aHots and aHots["SLOTS"];
 
 		if not tSlotCfg then
 			return 1;
@@ -1800,21 +1848,185 @@ do
 		tMaxCount = 0;
 
 		for tSlotNum = 1, 12 do
-			tScale = tSlotCfg["" .. tSlotNum] and tSlotCfg["" .. tSlotNum]["scale"] or 1;
-			sScaleCounts[tScale] = (sScaleCounts[tScale] or 0) + 1;
+			tSlotVal = tSlots and tSlots[tSlotNum];
 
-			if sScaleCounts[tScale] > tMaxCount then
-				tMaxCount = sScaleCounts[tScale];
-				tMostCommonScale = tScale;
+			if tSlotVal and tSlotVal ~= "" and tSlotVal ~= "OTHER" and tSlotVal ~= "CLUSTER" then
+				tScale = tSlotCfg["" .. tSlotNum] and tSlotCfg["" .. tSlotNum]["scale"] or 1;
+				sScaleCounts[tScale] = (sScaleCounts[tScale] or 0) + 1;
+
+				if sScaleCounts[tScale] > tMaxCount then
+					tMaxCount = sScaleCounts[tScale];
+					tMostCommonScale = tScale;
+				end
 			end
 		end
 
 		return tMostCommonScale;
 
 	end
+end
 
 
 
+do
+	--
+	local tPanelSetup;
+	local tHots;
+	local tSlots;
+	local tSlotCfg;
+	local tCfg;
+	local tVal;
+	local tParts;
+	function VUHDO_getIconSlotSignature(aPanelNum)
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+		tHots = tPanelSetup and tPanelSetup[aPanelNum] and tPanelSetup[aPanelNum]["HOTS"];
+
+		if not tHots then
+			return "";
+		end
+
+		tSlots = tHots["SLOTS"];
+		tSlotCfg = tHots["SLOTCFG"];
+
+		tParts = { };
+
+		for _, tSlotNum in ipairs({ 1, 2, 3, 4, 5, 9, 10, 11, 12 }) do
+			tVal = tSlots and tSlots[tSlotNum];
+			tCfg = tSlotCfg and tSlotCfg["" .. tSlotNum];
+
+			tinsert(tParts, format("%s;%s;%s", tVal or "", tCfg and tCfg["mine"] and "1" or "0", tCfg and tCfg["others"] and "1" or "0"));
+		end
+
+		return table.concat(tParts, "|");
+
+	end
+
+
+
+	--
+	function VUHDO_getBarSlotSignature(aPanelNum)
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+		tHots = tPanelSetup and tPanelSetup[aPanelNum] and tPanelSetup[aPanelNum]["HOTS"];
+
+		if not tHots then
+			return "";
+		end
+
+		tSlots = tHots["SLOTS"];
+		tSlotCfg = tHots["SLOTCFG"];
+
+		tParts = { };
+
+		for _, tSlotNum in ipairs({ 6, 7, 8 }) do
+			tVal = tSlots and tSlots[tSlotNum];
+			tCfg = tSlotCfg and tSlotCfg["" .. tSlotNum];
+
+			tinsert(tParts, format("%s;%s;%s", tVal or "", tCfg and tCfg["mine"] and "1" or "0", tCfg and tCfg["others"] and "1" or "0"));
+		end
+
+		return table.concat(tParts, "|");
+
+	end
+end
+
+
+
+do
+	--
+	local tPanelSetup;
+	local tHots;
+	local tSlots;
+	local tSlotCfg;
+	local tParts;
+	local tVal;
+	local tCfg;
+	local tEntry;
+	local tNumVal;
+	function VUHDO_buildListGroupFromHotSlots(aPanelNum, anIconSlots)
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+		tHots = tPanelSetup and tPanelSetup[aPanelNum] and tPanelSetup[aPanelNum]["HOTS"];
+
+		if not tHots then
+			return nil;
+		end
+
+		tSlots = tHots["SLOTS"];
+		tSlotCfg = tHots["SLOTCFG"];
+
+		if not tSlots then
+			return nil;
+		end
+
+		tParts = { };
+
+		if anIconSlots then
+			for _, tSlotNum in ipairs({ 1, 2, 3, 4, 5, 9, 10, 11, 12 }) do
+				tVal = tSlots[tSlotNum];
+				tCfg = tSlotCfg and tSlotCfg["" .. tSlotNum];
+				tEntry = nil;
+
+				if not tVal or tVal == "" or tVal == "OTHER" or tVal == "CLUSTER" then
+					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_EMPTY };
+				elseif strfind(tVal or "", "^BOUQUET_") then
+					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET, ["value"] = strsub(tVal, 9) };
+				else
+					tNumVal = tonumber(tVal);
+
+					tEntry = {
+						["entryType"] = VUHDO_AURA_LIST_ENTRY_SPELL,
+						["value"] = (tNumVal and tNumVal or tVal),
+						["mine"] = tCfg and tCfg["mine"],
+						["others"] = tCfg and tCfg["others"],
+					};
+				end
+
+				tinsert(tParts, tEntry);
+			end
+		else
+			for _, tSlotNum in ipairs({ 6, 7, 8 }) do
+				tVal = tSlots[tSlotNum];
+				tCfg = tSlotCfg and tSlotCfg["" .. tSlotNum];
+				tEntry = nil;
+
+				if not tVal or tVal == "" or tVal == "OTHER" or tVal == "CLUSTER" then
+					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_EMPTY };
+				elseif strfind(tVal or "", "^BOUQUET_") then
+					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET, ["value"] = strsub(tVal, 9) };
+				else
+					tNumVal = tonumber(tVal);
+
+					tEntry = {
+						["entryType"] = VUHDO_AURA_LIST_ENTRY_SPELL,
+						["value"] = (tNumVal and tNumVal or tVal),
+						["mine"] = tCfg and tCfg["mine"],
+						["others"] = tCfg and tCfg["others"],
+					};
+				end
+
+				tinsert(tParts, tEntry);
+			end
+		end
+
+		return {
+			["type"] = VUHDO_AURA_GROUP_TYPE_LIST,
+			["entries"] = tParts,
+			["displayName"] = nil,
+			["enabled"] = true,
+			["priority"] = 50,
+			["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+			["canColorBar"] = false,
+			["canColorText"] = false,
+		};
+
+	end
+end
+
+
+
+do
 	--
 	local tHots;
 	local tAuraAnchors;
@@ -2012,9 +2224,11 @@ do
 		return;
 
 	end
+end
 
 
 
+do
 	--
 	local tDebuff;
 	local tAuraAnchors;
@@ -2079,6 +2293,258 @@ do
 
 
 	--
+	do
+		local tConfig;
+		local tIconSigToPanels;
+		local tBarSigToPanels;
+		local tIconSig;
+		local tBarSig;
+		local tGroup;
+		local tHasNonEmpty;
+		local tIconSigToGroupId;
+		local tBarSigToGroupId;
+		local tIconGroupIdToPanels;
+		local tBarGroupIdToPanels;
+		local tGroupId;
+		local tIconGroupCount;
+		local tBarGroupCount;
+		local tTotalGroupCount;
+		local tBaseName;
+		local tPanelList;
+		local tDisplayName;
+		local tAnchors;
+		local tInIconPanels;
+		local tInBarPanels;
+		local tIconGroupId;
+		local tBarGroupId;
+		local tPanelSetup;
+		local tHots;
+		function VUHDO_migrateHotsToAuraAnchorsV2()
+
+			tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+			tConfig = _G["VUHDO_CONFIG"];
+
+			tIconSigToPanels = { };
+			tBarSigToPanels = { };
+
+			tIconGroupCount = 0;
+			tBarGroupCount = 0;
+
+			tIconSigToGroupId = { };
+			tBarSigToGroupId = { };
+			tIconGroupIdToPanels = { };
+			tBarGroupIdToPanels = { };
+
+			if not tPanelSetup or not tConfig then
+				return;
+			end
+
+			tConfig["AURA_GROUPS"] = tConfig["AURA_GROUPS"] or { };
+
+			for tPanelNum = 1, 10 do
+				tHots = tPanelSetup[tPanelNum] and tPanelSetup[tPanelNum]["HOTS"];
+				tAnchors = tPanelSetup[tPanelNum] and tPanelSetup[tPanelNum]["AURA_ANCHORS"];
+
+				if tHots and tAnchors and tAnchors["1"] then
+					tIconSig = VUHDO_getIconSlotSignature(tPanelNum);
+					tGroup = VUHDO_buildListGroupFromHotSlots(tPanelNum, true);
+
+					if tGroup then
+						tHasNonEmpty = false;
+
+						for tIdx, tEntry in ipairs(tGroup["entries"]) do
+							if tEntry["entryType"] ~= VUHDO_AURA_LIST_ENTRY_EMPTY then
+								tHasNonEmpty = true;
+
+								break;
+							end
+						end
+
+						if tHasNonEmpty then
+							tIconSigToPanels[tIconSig] = tIconSigToPanels[tIconSig] or { };
+
+							tinsert(tIconSigToPanels[tIconSig], tPanelNum);
+						end
+					end
+
+					tBarSig = VUHDO_getBarSlotSignature(tPanelNum);
+					tGroup = VUHDO_buildListGroupFromHotSlots(tPanelNum, false);
+
+					if tGroup then
+						tHasNonEmpty = false;
+
+						for tIdx, tEntry in ipairs(tGroup["entries"]) do
+							if tEntry["entryType"] ~= VUHDO_AURA_LIST_ENTRY_EMPTY then
+								tHasNonEmpty = true;
+
+								break;
+							end
+						end
+
+						if tHasNonEmpty then
+							tBarSigToPanels[tBarSig] = tBarSigToPanels[tBarSig] or { };
+
+							tinsert(tBarSigToPanels[tBarSig], tPanelNum);
+						end
+					end
+				end
+			end
+
+			for tIconSig, tPanels in pairs(tIconSigToPanels) do
+				tGroup = VUHDO_buildListGroupFromHotSlots(tPanels[1], true);
+
+				if tGroup then
+					tGroupId = VUHDO_generateUUID("MIGRATED_HOTS_", 8);
+
+					tConfig["AURA_GROUPS"][tGroupId] = tGroup;
+
+					tIconSigToGroupId[tIconSig] = tGroupId;
+					tIconGroupIdToPanels[tGroupId] = tPanels;
+				end
+			end
+
+			for tBarSig, tPanels in pairs(tBarSigToPanels) do
+				tGroup = VUHDO_buildListGroupFromHotSlots(tPanels[1], false);
+
+				if tGroup then
+					tGroupId = VUHDO_generateUUID("MIGRATED_HOT_BARS_", 8);
+
+					tConfig["AURA_GROUPS"][tGroupId] = tGroup;
+
+					tBarSigToGroupId[tBarSig] = tGroupId;
+					tBarGroupIdToPanels[tGroupId] = tPanels;
+				end
+			end
+
+			for _ in pairs(tIconSigToGroupId) do
+				tIconGroupCount = tIconGroupCount + 1;
+			end
+
+			for _ in pairs(tBarSigToGroupId) do
+				tBarGroupCount = tBarGroupCount + 1;
+			end
+
+			tTotalGroupCount = tIconGroupCount + tBarGroupCount;
+
+			for tGroupId, tPanels in pairs(tIconGroupIdToPanels) do
+				tGroup = tConfig["AURA_GROUPS"][tGroupId];
+
+				if tGroup then
+					if tTotalGroupCount == 1 then
+						tBaseName = VUHDO_I18N_AURA_GROUP_MIGRATED_HOTS;
+					elseif tIconGroupCount > 0 and tBarGroupCount > 0 then
+						tBaseName = VUHDO_I18N_AURA_GROUP_MIGRATED_HOT_ICONS;
+					else
+						tBaseName = VUHDO_I18N_AURA_GROUP_MIGRATED_HOTS;
+					end
+
+					if tIconGroupCount > 1 then
+						tPanelList = table.concat(tPanels, ", ");
+
+						tDisplayName = tBaseName .. " (Panel " .. tPanelList .. ")";
+					else
+						tDisplayName = tBaseName;
+					end
+
+					tGroup["displayName"] = VUHDO_ensureUniqueAuraGroupDisplayName(tDisplayName);
+				end
+			end
+
+			for tGroupId, tPanels in pairs(tBarGroupIdToPanels) do
+				tGroup = tConfig["AURA_GROUPS"][tGroupId];
+
+				if tGroup then
+					if tTotalGroupCount == 1 then
+						tBaseName = VUHDO_I18N_AURA_GROUP_MIGRATED_HOTS;
+					elseif tIconGroupCount > 0 and tBarGroupCount > 0 then
+						tBaseName = VUHDO_I18N_AURA_GROUP_MIGRATED_HOT_BARS;
+					else
+						tBaseName = VUHDO_I18N_AURA_GROUP_MIGRATED_HOTS;
+					end
+
+					if tBarGroupCount > 1 then
+						tPanelList = table.concat(tPanels, ", ");
+
+						tDisplayName = tBaseName .. " (Panel " .. tPanelList .. ")";
+					else
+						tDisplayName = tBaseName;
+					end
+
+					tGroup["displayName"] = VUHDO_ensureUniqueAuraGroupDisplayName(tDisplayName);
+				end
+			end
+
+			for tPanelNum = 1, 10 do
+				tAnchors = tPanelSetup[tPanelNum] and tPanelSetup[tPanelNum]["AURA_ANCHORS"];
+
+				if tAnchors and tAnchors["1"] then
+					tInIconPanels = false;
+					tInBarPanels = false;
+					tIconGroupId = nil;
+					tBarGroupId = nil;
+
+					for tSig, tPanels in pairs(tIconSigToPanels) do
+						for tIdx, tPanelIdx in ipairs(tPanels) do
+							if tPanelIdx == tPanelNum then
+								tInIconPanels = true;
+								tIconGroupId = tIconSigToGroupId[tSig];
+
+								break;
+							end
+						end
+
+						if tInIconPanels then
+							break;
+						end
+					end
+
+					for tSig, tPanels in pairs(tBarSigToPanels) do
+						for tIdx, tPanelIdx in ipairs(tPanels) do
+							if tPanelIdx == tPanelNum then
+								tInBarPanels = true;
+								tBarGroupId = tBarSigToGroupId[tSig];
+
+								break;
+							end
+						end
+
+						if tInBarPanels then
+							break;
+						end
+					end
+
+					if tInIconPanels and tInBarPanels then
+						tAnchors["1"]["groupId"] = tIconGroupId;
+						tAnchors["1"]["fixedSlots"] = true;
+						tAnchors["1"]["style"] = "icons";
+						tAnchors["1"]["maxDisplay"] = 9;
+
+						tAnchors["4"] = VUHDO_deepCopyTable(tAnchors["1"]);
+						tAnchors["4"]["groupId"] = tBarGroupId;
+						tAnchors["4"]["style"] = "bars";
+						tAnchors["4"]["maxDisplay"] = 3;
+					elseif tInIconPanels then
+						tAnchors["1"]["groupId"] = tIconGroupId;
+						tAnchors["1"]["fixedSlots"] = true;
+						tAnchors["1"]["style"] = "icons";
+						tAnchors["1"]["maxDisplay"] = 9;
+					elseif tInBarPanels then
+						tAnchors["1"]["groupId"] = tBarGroupId;
+						tAnchors["1"]["fixedSlots"] = true;
+						tAnchors["1"]["style"] = "bars";
+						tAnchors["1"]["maxDisplay"] = 3;
+					end
+				end
+			end
+
+			return;
+
+		end
+	end
+
+
+
+	--
 	local tPanelSetup;
 	function VUHDO_migrateOldConfigsToAuraAnchors()
 
@@ -2088,11 +2554,16 @@ do
 			return;
 		end
 
+		if (tPanelSetup["AURA_MIGRATION_VERSION"] or 0) == 1 then
+			return;
+		end
+
 		for tPanelNum = 1, 10 do
 			VUHDO_migrateHotsToAuraAnchors(tPanelNum);
 			VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum);
 		end
 
+		VUHDO_migrateHotsToAuraAnchorsV2();
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
 
 		return;
