@@ -161,7 +161,9 @@ else
 		exit 1
 	fi
 
-	echo "Resolved to build: $BUILD_PARAM"
+	BUILD_BRANCH=$(echo "$BUILDS_JSON" | jq -r --arg version "$BUILD_PARAM" 'to_entries[] | select(.value[] | .version == $version) | .key' | head -n 1)
+
+	echo "Resolved to build: $BUILD_PARAM (branch: $BUILD_BRANCH)"
 fi
 
 SPELLMISC_ATTR15_COL=17
@@ -201,7 +203,7 @@ done
 OUTFILE="VuhDoSecretSpellLists.lua.$DATE"
 
 {
-	echo "-- $OUTFILE"
+	echo "-- $OUTFILE (Build: $BUILD_PARAM, Branch: $BUILD_BRANCH)"
 	echo "VUHDO_SPELL_CAST_ALWAYS_SECRET = {"
 
 	if [ -s "wow_secret_CAST_ALWAYS_SECRET_sorted_$DATE.txt" ]; then
