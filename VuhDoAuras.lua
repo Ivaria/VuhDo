@@ -22,6 +22,7 @@ local next = next;
 
 local VUHDO_CONFIG;
 local VUHDO_AURA_GROUPS;
+local VUHDO_AURA_IGNORE_LIST;
 local VUHDO_DEFAULT_AURA_GROUPS;
 local VUHDO_PANEL_SETUP;
 local VUHDO_RAID;
@@ -198,6 +199,7 @@ function VUHDO_aurasInitLocalOverrides()
 
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_AURA_GROUPS = VUHDO_CONFIG["AURA_GROUPS"];
+	VUHDO_AURA_IGNORE_LIST = _G["VUHDO_AURA_IGNORE_LIST"];
 	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
@@ -357,6 +359,76 @@ function VUHDO_getAuraGroup(aGroupId)
 	end
 
 	return tGroup;
+
+end
+
+
+
+--
+local tGroup;
+local tSpellIdStr;
+local tName;
+local tIgnoreList;
+local tIsIdKey;
+function VUHDO_isAuraIgnored(anAuraData, aGroupId)
+
+	if not anAuraData or not aGroupId then
+		return false;
+	end
+
+	tSpellIdStr = anAuraData["spellId"];
+
+	if tSpellIdStr ~= nil and not issecretvalue(tSpellIdStr) then
+		tSpellIdStr = tostring(tSpellIdStr);
+	end
+
+	tName = anAuraData["name"];
+
+	if tName ~= nil and issecretvalue(tName) then
+		tName = nil;
+	end
+
+	for tKey, _ in pairs(VUHDO_AURA_IGNORE_LIST) do
+		tIsIdKey = (tKey and tonumber(tKey));
+
+		if tIsIdKey then
+			if tSpellIdStr and tostring(tKey) == tSpellIdStr then
+				return true;
+			end
+		else
+			if tName and tKey == tName then
+				return true;
+			end
+		end
+	end
+
+	tGroup = VUHDO_getAuraGroupRaw(aGroupId);
+
+	if not tGroup then
+		return false;
+	end
+
+	tIgnoreList = tGroup["ignoreList"];
+
+	if not tIgnoreList then
+		return false;
+	end
+
+	for tKey, _ in pairs(tIgnoreList) do
+		tIsIdKey = (tKey and tonumber(tKey));
+
+		if tIsIdKey then
+			if tSpellIdStr and tostring(tKey) == tSpellIdStr then
+				return true;
+			end
+		else
+			if tName and tKey == tName then
+				return true;
+			end
+		end
+	end
+
+	return false;
 
 end
 
@@ -1405,7 +1477,8 @@ function VUHDO_checkAuraForPanelAnchors(aUnit, aPanelNum, anAuraData)
 				if tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
 					VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig);
 				elseif VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["filter"]) then
-					if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["excludeFilter"]) then
+					if (not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["excludeFilter"]))
+						and not VUHDO_isAuraIgnored(anAuraData, tAnchorConfig["groupId"]) then
 						VUHDO_tryAddAuraToAnchor(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig, anAuraData);
 					end
 				end
@@ -1578,7 +1651,11 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 					if tUnitCache and tUnitCache[tInstanceId] then
 						if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["filter"]) then
 							if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["excludeFilter"]) then
-								sAssignedAuras[tInstanceId] = true;
+								if not VUHDO_isAuraIgnored(tUnitCache[tInstanceId], anAnchorConfig["groupId"]) then
+									sAssignedAuras[tInstanceId] = true;
+								else
+									VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIdx, nil);
+								end
 							else
 								VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIdx, nil);
 							end
@@ -1597,15 +1674,17 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 				if not sAssignedAuras[tInstanceId] then
 					if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["filter"]) then
 						if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["excludeFilter"]) then
-							for tSlotIdx = 1, tMaxSlots do
-								tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex];
+							if not VUHDO_isAuraIgnored(tAuraData, anAnchorConfig["groupId"]) then
+								for tSlotIdx = 1, tMaxSlots do
+									tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_SLOTS[aUnit][aPanelNum][anAnchorIndex];
 
-								if not (tAnchorSlots and tAnchorSlots[tSlotIdx]) then
-									VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIdx, tInstanceId);
+									if not (tAnchorSlots and tAnchorSlots[tSlotIdx]) then
+										VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIdx, tInstanceId);
 
-									sAssignedAuras[tInstanceId] = true;
+										sAssignedAuras[tInstanceId] = true;
 
-									break;
+										break;
+									end
 								end
 							end
 						end
@@ -1624,10 +1703,12 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 			for tInstanceId, tAuraData in pairs(tUnitCache) do
 				if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["filter"]) then
 					if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["excludeFilter"]) then
-						tSlotIndex = tSlotIndex + 1;
+						if not VUHDO_isAuraIgnored(tAuraData, anAnchorConfig["groupId"]) then
+							tSlotIndex = tSlotIndex + 1;
 
-						if tSlotIndex <= tMaxSlots then
-							VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIndex, tInstanceId);
+							if tSlotIndex <= tMaxSlots then
+								VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIndex, tInstanceId);
+							end
 						end
 					end
 				end
@@ -1792,17 +1873,16 @@ function VUHDO_queryAndCacheAurasForAnchor(aUnit, aPanelNum, anAnchorIndex)
 
 	tAuras = VUHDO_getFilteredAuras(aUnit, tGroup["filter"], tAnchorConfig["maxDisplay"], tAnchorConfig["sortRule"], tAnchorConfig["sortDir"]);
 
-	if tGroup["excludeFilter"] then
-		twipe(sFilteredAuras);
+	twipe(sFilteredAuras);
 
-		for _, tAura in ipairs(tAuras) do
-			if not VUHDO_auraMatchesFilter(aUnit, tAura["auraInstanceID"], tGroup["excludeFilter"]) then
-				tinsert(sFilteredAuras, tAura);
-			end
+	for _, tAura in ipairs(tAuras) do
+		if (not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, tAura["auraInstanceID"], tGroup["excludeFilter"]))
+			and not VUHDO_isAuraIgnored(tAura, tAnchorConfig["groupId"]) then
+			tinsert(sFilteredAuras, tAura);
 		end
-
-		tAuras = sFilteredAuras;
 	end
+
+	tAuras = sFilteredAuras;
 
 	tSlotIndex = 0;
 	tMaxSlots = tAnchorConfig["maxDisplay"] or 5;

@@ -1,0 +1,325 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<Script file="VuhDoNewOptionsAuraIgnore.lua" />
+
+	<Frame name="VuhDoNewOptionsAuraIgnoreTemplate" virtual="true">
+		<Frames>
+
+			<Frame name="$parentIgnorePanel" inherits="VuhDoPanelTemplate">
+				<Size>
+					<AbsDimension x="238" y="180" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="25" y="-25" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Frames>
+
+					<Frame name="$parentIgnoreLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="280" y="24" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-12" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_GLOBAL_AURA_IGNORE_LIST" inherits="VuDoDefaultTitleFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Button name="$parentIgnoreComboBox" hidden="false" inherits="VuhDoEditComboBoxTemplate">
+						<Size>
+							<AbsDimension x="250" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="33" y="-58" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_setComboModel(self, "VUHDO_SELECTED_AURA_IGNORE", VUHDO_AURA_IGNORE_COMBO_MODEL);
+							</OnLoad>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentSaveButton" text="VUHDO_I18N_SAVE" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-92" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>VUHDO_saveAuraIgnoreClicked(self)</OnClick>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentDeleteButton" text="VUHDO_I18N_DELETE" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-92" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>VUHDO_deleteAuraIgnoreClicked(self)</OnClick>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentExportButton" text="VUHDO_I18N_EXPORT" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="13" y="-130" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>VUHDO_exportAuraIgnoreClicked(self)</OnClick>
+						</Scripts>
+					</Button>
+
+					<Button name="$parentImportButton" text="VUHDO_I18N_IMPORT" inherits="VuhDoButtonTemplate">
+						<Size>
+							<AbsDimension x="100" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="125" y="-130" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>VUHDO_importAuraIgnoreClicked(self)</OnClick>
+						</Scripts>
+					</Button>
+
+				</Frames>
+			</Frame>
+
+			<Frame name="$parentExportFrame" inherits="VuhDoFrameTemplate" frameStrata="TOOLTIP">
+				<Size>
+					<AbsDimension x="580" y="350"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="35" y="-25" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Frame name="$parentRootPane" setallpoints="true" inherits="VuhDoPanelTemplate">
+						<Frames>
+
+							<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
+								<Layers>
+									<Layer>
+										<FontString name="$parentLabel" text="VUHDO_I18N_EXPORT" inherits="VuDoDefaultTitleFontTemplate">
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+
+							<ScrollFrame name="$parentStringScrollFrame" inherits="VuhDoScrollPanelTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="13" y="-30" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Size>
+									<AbsDimension x="550" y="250" />
+								</Size>
+								<ScrollChild>
+									<EditBox name="$parentStringEditBox" inherits="VuhDoEditBoxMultiLineTemplate">
+										<Size>
+											<AbsDimension x="540" y="200" />
+										</Size>
+										<Scripts>
+											<OnShow>
+												VUHDO_auraIgnoreExportButtonShown(self);
+											</OnShow>
+										</Scripts>
+									</EditBox>
+								</ScrollChild>
+							</ScrollFrame>
+
+							<Button name="$parentOkayButton" inherits="VuhDoOkayButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMLEFT">
+										<Offset>
+											<AbsDimension x="13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+							<Button name="$parentCancelButton" inherits="VuhDoCancelButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMRIGHT">
+										<Offset>
+											<AbsDimension x="-13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+						</Frames>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetScript("OnKeyDown", function(anInstance, aKey)
+							if (aKey == "ESCAPE") then
+								self:Hide();
+							end
+						end);
+					</OnLoad>
+					<OnShow>
+						_G[self:GetName() .. "RootPane"]:Show();
+						_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText(VUHDO_I18N_EXPORT);
+					</OnShow>
+				</Scripts>
+			</Frame>
+
+			<Frame name="$parentImportFrame" inherits="VuhDoFrameTemplate" frameStrata="TOOLTIP">
+				<Size>
+					<AbsDimension x="580" y="350"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="35" y="-25" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Frame name="$parentRootPane" setallpoints="true" inherits="VuhDoPanelTemplate">
+						<Frames>
+
+							<Frame name="$parentTitleLabel" inherits="VuhDoLabelFrameTemplate">
+								<Layers>
+									<Layer>
+										<FontString name="$parentLabel" text="VUHDO_I18N_IMPORT" inherits="VuDoDefaultTitleFontTemplate">
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+
+							<ScrollFrame name="$parentStringScrollFrame" inherits="VuhDoScrollPanelTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="13" y="-30" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Size>
+									<AbsDimension x="550" y="250" />
+								</Size>
+								<ScrollChild>
+									<EditBox name="$parentStringEditBox" inherits="VuhDoEditBoxMultiLineTemplate">
+										<Size>
+											<AbsDimension x="540" y="200" />
+										</Size>
+									</EditBox>
+								</ScrollChild>
+							</ScrollFrame>
+
+							<Button name="$parentOkayButton" inherits="VuhDoOkayButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMLEFT">
+										<Offset>
+											<AbsDimension x="13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										VUHDO_importAuraIgnoreOkayClicked(self);
+									</OnClick>
+								</Scripts>
+							</Button>
+
+							<Button name="$parentCancelButton" inherits="VuhDoCancelButtonTemplate">
+								<Anchors>
+									<Anchor point="BOTTOMRIGHT">
+										<Offset>
+											<AbsDimension x="-13" y="15"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+						</Frames>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetScript("OnKeyDown", function(anInstance, aKey)
+							if (aKey == "ESCAPE") then
+								self:Hide();
+							end
+						end);
+					</OnLoad>
+					<OnShow>
+						_G[self:GetName() .. "RootPane"]:Show();
+						_G[self:GetName() .. "RootPaneTitleLabelLabel"]:SetText(VUHDO_I18N_IMPORT);
+					</OnShow>
+				</Scripts>
+			</Frame>
+
+		</Frames>
+		<Scripts>
+			<OnShow>
+				VUHDO_auraIgnoreOnShow();
+
+				_G[self:GetName() .. "ExportFrame"]:Hide();
+				_G[self:GetName() .. "ImportFrame"]:Hide();
+			</OnShow>
+		</Scripts>
+	</Frame>
+
+</Ui>

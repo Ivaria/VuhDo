@@ -186,12 +186,15 @@ function VUHDO_updateGlobalIconList()
 		end
 	end
 
-	-- Add standard ignore debuffs
-	--for tName, _  in pairs(VUHDO_DEBUFF_BLACKLIST) do
-	--	VUHDO_USED_BUFFS[tName] = true;
-	--end
+	-- Add global aura ignores
+	for tName, _  in pairs(VUHDO_AURA_IGNORE_LIST) do
+		tSpell = tostring(tName);
+
+		VUHDO_USED_BUFFS[tSpell] = true;
+	end
 
 	-- Add spell entries from list type aura groups (defaults)
+	-- Add auras from filter type aura group ignore lists
 	for _, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS) do
 		if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
 			for _, tEntry in ipairs(tGroup["entries"]) do
@@ -201,10 +204,17 @@ function VUHDO_updateGlobalIconList()
 					VUHDO_USED_BUFFS[tSpell] = true;
 				end
 			end
+		elseif (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_FILTER and tGroup["ignoreList"] then
+			for tName, _ in pairs(tGroup["ignoreList"]) do
+				tSpell = tostring(tName);
+
+				VUHDO_USED_BUFFS[tSpell] = true;
+			end
 		end
 	end
 
 	-- Add spell entries from list type aura groups (custom)
+	-- Add auras from filter type aura group ignore lists (custom)
 	if VUHDO_CONFIG["AURA_GROUPS"] then
 		for _, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"]) do
 			if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
@@ -214,6 +224,12 @@ function VUHDO_updateGlobalIconList()
 
 						VUHDO_USED_BUFFS[tSpell] = true;
 					end
+				end
+			elseif (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_FILTER and tGroup["ignoreList"] then
+				for tName, _ in pairs(tGroup["ignoreList"]) do
+					tSpell = tostring(tName);
+
+					VUHDO_USED_BUFFS[tSpell] = true;
 				end
 			end
 		end

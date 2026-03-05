@@ -187,11 +187,7 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								VUHDO_initResizeableScrollCombo(self);
-
-								VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_SELECTED", VUHDO_AURA_GROUPS_COMBO_MODEL, VUHDO_I18N_SELECT);
-								self:SetAttribute("custom_function", VUHDO_auraGroupsComboChanged);
-								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K611);
+								VUHDO_auraGroupsGroupComboOnLoad(self);
 							</OnLoad>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Text");
@@ -681,12 +677,12 @@
 
 					<Frame name="$parentPrioritySlider" inherits="VuhDoHSliderTemplate">
 						<Size>
-							<AbsDimension x="200" y="50" />
+							<AbsDimension x="200" y="20" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentCanColorBarCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="0" y="-2" />
+									<AbsDimension x="0" y="-16" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -698,6 +694,97 @@
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K614);
 							</OnLoad>
 						</Scripts>
+					</Frame>
+
+					<Frame name="$parentIgnorePanel" hidden="true">
+						<Size>
+							<AbsDimension x="350" y="110" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentPrioritySlider" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-4" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Frames>
+
+							<Frame name="$parentIgnoreLabel" inherits="VuhDoLabelFrameTemplate">
+								<Size>
+									<AbsDimension x="120" y="24" />
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="0" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Layers>
+									<Layer>
+										<FontString name="$parentLabel" text="VUHDO_I18N_IGNORE_LIST" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+
+							<Button name="$parentIgnoreCombo" hidden="false" inherits="VuhDoEditComboBoxTemplate">
+								<Size>
+									<AbsDimension x="250" y="18" />
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentIgnoreLabel" relativePoint="BOTTOMLEFT">
+										<Offset>
+											<AbsDimension x="8" y="-18" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self.prohibitCloseExtensions = true;
+
+										VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_IGNORE_SELECTED", VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL);
+									</OnLoad>
+								</Scripts>
+							</Button>
+
+							<Button name="$parentIgnoreAddButton" inherits="VuhDoButtonTemplate" text="VUHDO_I18N_SAVE">
+								<Size>
+									<AbsDimension x="80" y="26" />
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentIgnoreCombo" relativePoint="BOTTOMLEFT">
+										<Offset>
+											<AbsDimension x="0" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										VUHDO_auraGroupsIgnoreAdd();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+							<Button name="$parentIgnoreDeleteButton" inherits="VuhDoButtonTemplate" text="VUHDO_I18N_DELETE">
+								<Size>
+									<AbsDimension x="80" y="26" />
+								</Size>
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeTo="$parentIgnoreCombo" relativePoint="BOTTOMLEFT">
+										<Offset>
+											<AbsDimension x="92" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										VUHDO_auraGroupsIgnoreDelete();
+									</OnClick>
+								</Scripts>
+							</Button>
+
+						</Frames>
 					</Frame>
 
 				</Frames>

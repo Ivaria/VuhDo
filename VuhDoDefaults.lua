@@ -6,6 +6,13 @@ VUHDO_GLOBAL_CONFIG = {
 	["PROFILES_VERSION"] = 1;
 };
 
+VUHDO_AURA_IGNORE_LIST = VUHDO_AURA_IGNORE_LIST or {
+	[57724] = true, -- Sated (Bloodlust)
+	[57723] = true, -- Exhaustion (Heroism)
+	[80354] = true, -- Temporal Displacement (Time Warp)
+	[264689] = true, -- Fatigued (Primal Fury)
+};
+
 
 --
 local tHotCfg, tHotSlots;
@@ -3113,6 +3120,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["OTHERS_HOTS"] = {
 		["type"] = 1,
@@ -3123,6 +3131,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["ALL_HOTS"] = {
 		["type"] = 1,
@@ -3133,6 +3142,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["DISPELLABLE"] = {
 		["type"] = 1,
@@ -3143,6 +3153,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = true,
 		["canColorText"] = true,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["CC_EFFECTS"] = {
 		["type"] = 1,
@@ -3153,6 +3164,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["BIG_DEFENSIVES"] = {
 		["type"] = 1,
@@ -3163,6 +3175,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["EXTERNAL_DEFENSIVES"] = {
 		["type"] = 1,
@@ -3173,6 +3186,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["ALL_DEBUFFS"] = {
 		["type"] = 1,
@@ -3183,6 +3197,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["ALL_BUFFS"] = {
 		["type"] = 1,
@@ -3193,6 +3208,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["MY_BUFFS"] = {
 		["type"] = 1,
@@ -3203,6 +3219,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["OTHERS_BUFFS"] = {
 		["type"] = 1,
@@ -3213,6 +3230,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["ALL_RAID_BUFFS"] = {
 		["type"] = 1,
@@ -3223,6 +3241,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["RAID_DEBUFFS"] = {
 		["type"] = 1,
@@ -3233,6 +3252,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["IMPORTANT_BUFFS"] = {
 		["type"] = 1,
@@ -3243,6 +3263,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["IMPORTANT_DEBUFFS"] = {
 		["type"] = 1,
@@ -3253,6 +3274,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["MY_NAMEPLATE_DEBUFFS"] = {
 		["type"] = 1,
@@ -3263,6 +3285,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["OTHERS_NAMEPLATE_DEBUFFS"] = {
 		["type"] = 1,
@@ -3273,6 +3296,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["ALL_NAMEPLATE_DEBUFFS"] = {
 		["type"] = 1,
@@ -3283,6 +3307,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["MY_DEBUFFS"] = {
 		["type"] = 1,
@@ -3293,6 +3318,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["MY_EXTERNAL_DEFENSIVES"] = {
 		["type"] = 1,
@@ -3303,6 +3329,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["MY_RAID_DEBUFFS"] = {
 		["type"] = 1,
@@ -3313,6 +3340,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["CANCELABLE_BUFFS"] = {
 		["type"] = 1,
@@ -3323,6 +3351,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["NOT_CANCELABLE_BUFFS"] = {
 		["type"] = 1,
@@ -3333,6 +3362,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["TORGHAST_ANIMA"] = {
 		["type"] = 1,
@@ -3343,6 +3373,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["enabled"] = true,
+		["ignoreList"] = { },
 	},
 	["PRESERVATION_EVOKER_HOTS"] = {
 		["type"] = 2,
@@ -3361,6 +3392,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["AUGMENTATION_EVOKER_BUFFS"] = {
 		["type"] = 2,
@@ -3379,6 +3411,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["RESTORATION_DRUID_HOTS"] = {
 		["type"] = 2,
@@ -3395,6 +3428,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["DISCIPLINE_PRIEST_HOTS"] = {
 		["type"] = 2,
@@ -3410,6 +3444,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["HOLY_PRIEST_HOTS"] = {
 		["type"] = 2,
@@ -3424,6 +3459,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["MISTWEAVER_MONK_HOTS"] = {
 		["type"] = 2,
@@ -3439,6 +3475,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["RESTORATION_SHAMAN_HOTS"] = {
 		["type"] = 2,
@@ -3453,6 +3490,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["HOLY_PALADIN_HOTS"] = {
 		["type"] = 2,
@@ -3469,6 +3507,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["RAID_BUFFS"] = {
 		["type"] = 2,
@@ -3487,6 +3526,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["BLESSING_OF_BRONZE"] = {
 		["type"] = 2,
@@ -3511,6 +3551,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["ROGUE_POISONS"] = {
 		["type"] = 2,
@@ -3529,6 +3570,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["SHAMAN_WEAPON_IMBUEMENTS"] = {
 		["type"] = 2,
@@ -3548,6 +3590,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["PALADIN_WEAPON_IMBUEMENTS"] = {
 		["type"] = 2,
@@ -3561,6 +3604,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["ENHANCEMENT_SHAMAN_BUFFS"] = {
 		["type"] = 2,
@@ -3573,6 +3617,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["BREWMASTER_MONK_BUFFS"] = {
 		["type"] = 2,
@@ -3585,6 +3630,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	["WARLOCK_METAMORPHOSIS"] = {
 		["type"] = 2,
@@ -3599,6 +3645,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = false,
 		["canColorText"] = false,
+		["ignoreList"] = { },
 	},
 	-- ["INFERRED_RIPTIDE"] = {
 	-- 	["filter"] = nil,
