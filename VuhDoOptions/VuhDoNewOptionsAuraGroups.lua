@@ -814,6 +814,19 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	end
 
 	if not tGroup then
+		if tColorTypeLabel and tFilterCombo then
+			tColorTypeLabel:ClearAllPoints();
+			tColorTypeLabel:SetPoint("TOPLEFT", tFilterCombo, "BOTTOMLEFT", 0, -8);
+		end
+
+		VUHDO_AURA_GROUPS_ENABLED = false;
+		VUHDO_AURA_GROUPS_PRIORITY = 50;
+		VUHDO_AURA_GROUPS_COLOR_TYPE = 1;
+		VUHDO_AURA_GROUPS_FILTER_SELECTED = "";
+		VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = "";
+		VUHDO_AURA_GROUPS_CAN_COLOR_BAR = false;
+		VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = false;
+
 		if tNameEditBox then
 			tNameEditBox:Show();
 			tNameEditBox:SetText("");
@@ -825,12 +838,16 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tFilterCombo:Show();
 			tFilterCombo:Disable();
 			tFilterCombo:SetAlpha(0.5);
+
+			VUHDO_lnfComboBoxInitFromModel(tFilterCombo);
 		end
 
 		if tExcludeFilterCombo then
 			tExcludeFilterCombo:Show();
 			tExcludeFilterCombo:Disable();
 			tExcludeFilterCombo:SetAlpha(0.5);
+
+			VUHDO_lnfComboBoxInitFromModel(tExcludeFilterCombo);
 		end
 
 		if tPrioritySlider then
@@ -838,6 +855,8 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tInnerSlider = _G[tPrioritySlider:GetName() .. "Slider"];
 
 			if tInnerSlider then
+				VUHDO_lnfSliderInitFromModel(tInnerSlider);
+
 				tInnerSlider:Disable();
 			end
 
@@ -848,18 +867,24 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tColorTypeCombo:Show();
 			tColorTypeCombo:Disable();
 			tColorTypeCombo:SetAlpha(0.5);
+
+			VUHDO_lnfComboBoxInitFromModel(tColorTypeCombo);
 		end
 
 		if tCanColorBarCheck then
 			tCanColorBarCheck:Show();
 			tCanColorBarCheck:Disable();
 			tCanColorBarCheck:SetAlpha(0.5);
+
+			VUHDO_lnfCheckButtonInitFromModel(tCanColorBarCheck);
 		end
 
 		if tCanColorTextCheck then
 			tCanColorTextCheck:Show();
 			tCanColorTextCheck:Disable();
 			tCanColorTextCheck:SetAlpha(0.5);
+
+			VUHDO_lnfCheckButtonInitFromModel(tCanColorTextCheck);
 		end
 
 		if tCustomColorSwatch then
@@ -871,6 +896,8 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tEnabledCheck:Show();
 			tEnabledCheck:Disable();
 			tEnabledCheck:SetAlpha(0.5);
+
+			VUHDO_lnfCheckButtonInitFromModel(tEnabledCheck);
 		end
 	end
 
