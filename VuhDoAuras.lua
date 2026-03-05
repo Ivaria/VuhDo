@@ -15,6 +15,7 @@ local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAur
 local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFilteredOutByInstanceID;
 local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplicationDisplayCount;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
+local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
 local GetTime = GetTime;
 local UnitIsUnit = UnitIsUnit;
 local issecretvalue = issecretvalue;
@@ -2372,8 +2373,8 @@ do
 
 
 
-	--
 	do
+		--
 		local tConfig;
 		local tIconSigToPanels;
 		local tBarSigToPanels;
@@ -2399,6 +2400,9 @@ do
 		local tBarGroupId;
 		local tPanelSetup;
 		local tHots;
+		local tDebuffIgnoreList;
+		local tSpellId;
+		local tSecrecy;
 		function VUHDO_migrateHotsToAuraAnchorsV2()
 
 			tPanelSetup = _G["VUHDO_PANEL_SETUP"];
@@ -2420,6 +2424,28 @@ do
 			end
 
 			tConfig["AURA_GROUPS"] = tConfig["AURA_GROUPS"] or { };
+
+			tDebuffIgnoreList = VUHDO_DEBUFF_BLACKLIST;
+
+			if tDebuffIgnoreList then
+				for tKey, _ in pairs(tDebuffIgnoreList) do
+					tSpellId = tonumber(tKey);
+
+					if tSpellId then
+						tSecrecy = GetSpellAuraSecrecy(tSpellId) or 0;
+
+						if tSecrecy == 0 then
+							VUHDO_AURA_IGNORE_LIST[tSpellId] = true;
+						end
+					else
+						tSecrecy = GetSpellAuraSecrecy(tKey) or 0;
+
+						if tSecrecy == 0 then
+							VUHDO_AURA_IGNORE_LIST[tKey] = true;
+						end
+ 					end
+				end
+			end
 
 			for tPanelNum = 1, 10 do
 				tHots = tPanelSetup[tPanelNum] and tPanelSetup[tPanelNum]["HOTS"];
