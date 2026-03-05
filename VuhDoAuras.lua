@@ -2376,6 +2376,7 @@ do
 	do
 		--
 		local tConfig;
+		local tAuraIgnoreList;
 		local tIconSigToPanels;
 		local tBarSigToPanels;
 		local tIconSig;
@@ -2407,6 +2408,7 @@ do
 
 			tPanelSetup = _G["VUHDO_PANEL_SETUP"];
 			tConfig = _G["VUHDO_CONFIG"];
+			tAuraIgnoreList = _G["VUHDO_AURA_IGNORE_LIST"];
 
 			tIconSigToPanels = { };
 			tBarSigToPanels = { };
@@ -2432,16 +2434,16 @@ do
 					tSpellId = tonumber(tKey);
 
 					if tSpellId then
-						tSecrecy = GetSpellAuraSecrecy(tSpellId) or 0;
+						tSecrecy = GetSpellAuraSecrecy(tSpellId) or 2;
 
 						if tSecrecy == 0 then
-							VUHDO_AURA_IGNORE_LIST[tSpellId] = true;
+							tAuraIgnoreList[tSpellId] = true;
 						end
 					else
-						tSecrecy = GetSpellAuraSecrecy(tKey) or 0;
+						tSecrecy = GetSpellAuraSecrecy(tKey) or 2;
 
 						if tSecrecy == 0 then
-							VUHDO_AURA_IGNORE_LIST[tKey] = true;
+							tAuraIgnoreList[tKey] = true;
 						end
  					end
 				end
