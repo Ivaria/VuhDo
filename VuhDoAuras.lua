@@ -2500,7 +2500,8 @@ do
 				tGroup = VUHDO_buildListGroupFromHotSlots(tPanels[1], true);
 
 				if tGroup then
-					tGroupId = VUHDO_generateUUID("MIGRATED_HOTS_", 8);
+					-- migration runs before burst cache init
+					tGroupId = _G["VUHDO_generateUUID"]("MIGRATED_HOTS_", 8);
 
 					tConfig["AURA_GROUPS"][tGroupId] = tGroup;
 
@@ -2513,7 +2514,8 @@ do
 				tGroup = VUHDO_buildListGroupFromHotSlots(tPanels[1], false);
 
 				if tGroup then
-					tGroupId = VUHDO_generateUUID("MIGRATED_HOT_BARS_", 8);
+					-- migration runs before burst cache init
+					tGroupId = _G["VUHDO_generateUUID"]("MIGRATED_HOT_BARS_", 8);
 
 					tConfig["AURA_GROUPS"][tGroupId] = tGroup;
 
@@ -2670,6 +2672,7 @@ do
 		end
 
 		VUHDO_migrateHotsToAuraAnchorsV2();
+
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
 
 		return;

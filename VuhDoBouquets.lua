@@ -2597,6 +2597,11 @@ do
 		txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"] = nil, nil, nil, nil;
 
 		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
+
+		if not tBouquet or type(tBouquet) ~= "table" then
+			return false, nil, nil, nil, nil, nil, nil, VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0, nil, nil, nil, nil, nil, nil;
+		end
+
 		tAnzInfos = #tBouquet;
 		tLayerTemplate = nil;
 
