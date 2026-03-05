@@ -817,6 +817,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		if tColorTypeLabel and tFilterCombo then
 			tColorTypeLabel:ClearAllPoints();
 			tColorTypeLabel:SetPoint("TOPLEFT", tFilterCombo, "BOTTOMLEFT", 0, -8);
+			tColorTypeLabel:SetAlpha(0.5);
 		end
 
 		VUHDO_AURA_GROUPS_ENABLED = false;
