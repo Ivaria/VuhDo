@@ -118,20 +118,6 @@ end
 
 
 --
-local tSpellNameById;
-function VUHDO_resolveSpellId(aSpellName)
-	if tonumber(aSpellName or "x") then
-		tSpellNameById = GetSpellName(tonumber(aSpellName));
-		if tSpellNameById then
-			return tSpellNameById;
-		end
-	end
-	return aSpellName;
-end
-
-
-
---
 local tText, tTextById, tLabel;
 function VUHDO_newOptionsSpellEditBoxCheckId(anEditBox)
 	tLabel = _G[anEditBox:GetName() .. "Hint"];

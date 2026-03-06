@@ -11,18 +11,6 @@ VUHDO_AURA_IGNORE_SHARE_VERSION = 1;
 
 
 --
-local tResolvedName;
-function VUHDO_formatAuraSpellDisplayName(aSpellName)
-
-	tResolvedName = VUHDO_resolveSpellId(aSpellName);
-
-	return (tResolvedName ~= aSpellName) and ("[" .. aSpellName .. "] " .. tResolvedName) or aSpellName;
-
-end
-
-
-
---
 local tSpellNameById;
 local tDisplayName;
 local tSecrecy;
@@ -332,6 +320,10 @@ end
 --
 local tCombo;
 function VUHDO_auraIgnoreOnShow()
+
+	if VUHDO_CONFIG and not VUHDO_CONFIG["AURA_IGNORE_MODI"] then
+		VUHDO_CONFIG["AURA_IGNORE_MODI"] = "ALT-CTRL-SHIFT";
+	end
 
 	VUHDO_initAuraIgnoreComboModel();
 

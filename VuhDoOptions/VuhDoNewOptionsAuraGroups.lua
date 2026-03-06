@@ -1179,8 +1179,7 @@ function VUHDO_auraGroupsIgnoreAdd()
 
 	tGroup["ignoreList"][tText] = true;
 
-	tDisplayName = VUHDO_resolveSpellId(tText);
-	tDisplayName = (tDisplayName ~= tText) and ("[" .. tText .. "] " .. tDisplayName) or tText;
+	tDisplayName = VUHDO_formatAuraSpellDisplayName(tText);
 	VUHDO_Msg(string.format(VUHDO_I18N_AURA_ADDED_TO_IGNORE_LIST, tDisplayName));
 
 	tEditBox:SetText("");
@@ -1238,8 +1237,7 @@ function VUHDO_auraGroupsIgnoreDelete()
 	end
 
 	tText = strtrim(tText);
-	tDisplayName = VUHDO_resolveSpellId(tText);
-	tDisplayName = (tDisplayName ~= tText) and ("[" .. tText .. "] " .. tDisplayName) or tText;
+	tDisplayName = VUHDO_formatAuraSpellDisplayName(tText);
 
 	if tGroup["ignoreList"][tText] then
 		tGroup["ignoreList"][tText] = nil;
@@ -1402,7 +1400,7 @@ local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEnt
 		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
 			tValueLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_EMPTY);
 		else
-			tValueLabel:SetText(VUHDO_formatSpellDisplayName(tostring(anEntry["value"] or "")));
+			tValueLabel:SetText(VUHDO_formatAuraSpellDisplayName(tostring(anEntry["value"] or "")));
 		end
 
 		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then

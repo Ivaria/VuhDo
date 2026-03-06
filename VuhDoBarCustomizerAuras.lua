@@ -12,14 +12,19 @@ local GetAuraDuration = C_UnitAuras and C_UnitAuras.GetAuraDuration;
 local CreateDuration = C_DurationUtil and C_DurationUtil.CreateDuration;
 local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplicationDisplayCount;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
+local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
+local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
 local issecretvalue = issecretvalue;
 local AbbreviateNumbers = AbbreviateNumbers;
 local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
 local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
 local CreateColor = CreateColor;
+local format = string.format;
 
 local VUHDO_PANEL_SETUP;
+local VUHDO_CONFIG;
 local VUHDO_RAID;
+local VUHDO_AURA_IGNORE_LIST;
 local VUHDO_BUTTON_CACHE;
 local VUHDO_UNIT_AURA_CACHE;
 local VUHDO_UNIT_AURA_SLOTS;
@@ -399,7 +404,9 @@ end
 function VUHDO_barCustomizerAurasInitLocalOverrides()
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_AURA_IGNORE_LIST = _G["VUHDO_AURA_IGNORE_LIST"];
 	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
 	VUHDO_UNIT_AURA_CACHE = _G["VUHDO_UNIT_AURA_CACHE"];
 	VUHDO_UNIT_AURA_SLOTS = _G["VUHDO_UNIT_AURA_SLOTS"];
@@ -445,6 +452,136 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	return;
 
 end
+
+
+
+--
+local tAuraIgnoreModi;
+local function VUHDO_areAuraIgnoreModifiersPressed()
+
+	if not VUHDO_CONFIG then
+		return IsAltKeyDown() and IsControlKeyDown() and IsShiftKeyDown();
+	end
+
+	tAuraIgnoreModi = VUHDO_CONFIG["AURA_IGNORE_MODI"] or "ALT-CTRL-SHIFT";
+
+	if tAuraIgnoreModi == "OFF" then
+		return false;
+	elseif tAuraIgnoreModi == "ALT-CTRL-SHIFT" then
+		return IsAltKeyDown() and IsControlKeyDown() and IsShiftKeyDown();
+	elseif tAuraIgnoreModi == "ALT-SHIFT" then
+		return IsAltKeyDown() and IsShiftKeyDown() and not IsControlKeyDown();
+	elseif tAuraIgnoreModi == "ALT-CTRL" then
+		return IsAltKeyDown() and IsControlKeyDown() and not IsShiftKeyDown();
+	elseif tAuraIgnoreModi == "CTRL-SHIFT" then
+		return IsControlKeyDown() and IsShiftKeyDown() and not IsAltKeyDown();
+	elseif tAuraIgnoreModi == "SHIFT" then
+		return IsShiftKeyDown() and not IsAltKeyDown() and not IsControlKeyDown();
+	elseif tAuraIgnoreModi == "CTRL" then
+		return IsControlKeyDown() and not IsAltKeyDown() and not IsShiftKeyDown();
+	elseif tAuraIgnoreModi == "ALT" then
+		return IsAltKeyDown() and not IsControlKeyDown() and not IsShiftKeyDown();
+	end
+
+	return false;
+
+end
+
+
+
+--
+local tAuraData;
+local tSpellId;
+local tSecrecy;
+local tDisplayName;
+local tCombo;
+function VUHDO_addAuraToIgnoreList(aUnit, anAuraInstanceId)
+
+	if not aUnit or not anAuraInstanceId then
+		return;
+	end
+
+	tAuraData = GetAuraDataByAuraInstanceID(aUnit, anAuraInstanceId);
+
+	if not tAuraData or not tAuraData["spellId"] then
+		return;
+	end
+
+	if issecretvalue(tAuraData["spellId"]) then
+		VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_ALWAYS_SECRET, 1, 0.3, 0.3);
+
+		return;
+	end
+
+	tSpellId = tAuraData["spellId"];
+
+	tSecrecy = GetSpellAuraSecrecy(tSpellId);
+
+	if tSecrecy == 1 then
+		VUHDO_Msg(VUHDO_I18N_AURA_GROUP_SPELL_ALWAYS_SECRET, 1, 0.3, 0.3);
+
+		return;
+	end
+
+	if VUHDO_AURA_IGNORE_LIST[tSpellId] then
+		return;
+	end
+
+	VUHDO_AURA_IGNORE_LIST[tSpellId] = true;
+
+	tDisplayName = VUHDO_formatAuraSpellDisplayName(tSpellId);
+	VUHDO_Msg(format(VUHDO_I18N_AURA_ADDED_TO_IGNORE_LIST, tDisplayName));
+
+	VUHDO_showAllAuras();
+
+	tCombo = _G["VuhDoNewOptionsAuraIgnoreIgnorePanelIgnoreComboBox"];
+
+	if tCombo then
+		VUHDO_initAuraIgnoreComboModel();
+
+		VUHDO_lnfComboBoxInitFromModel(tCombo);
+
+		tCombo:Hide();
+		tCombo:Show();
+	end
+
+	return;
+
+end
+
+
+
+--
+local VUHDO_AURA_IGNORE_GLOBAL_HANDLER_FRAME = CreateFrame("Frame");
+VUHDO_AURA_IGNORE_GLOBAL_HANDLER_FRAME:RegisterEvent("GLOBAL_MOUSE_DOWN");
+VUHDO_AURA_IGNORE_GLOBAL_HANDLER_FRAME:SetScript("OnEvent", function(self, anEvent, aButton)
+
+	if anEvent == "GLOBAL_MOUSE_DOWN" and aButton == "RightButton" and VUHDO_areAuraIgnoreModifiersPressed() then
+		local tButtons;
+		local tFrameName;
+
+		for tUnit, _ in pairs(VUHDO_RAID) do
+			tButtons = VUHDO_getUnitButtonsSafe(tUnit);
+
+			for _, tButton in pairs(tButtons) do
+				tFrameName = tButton:GetName();
+
+				if VUHDO_AURA_FRAMES[tFrameName] then
+					for tAnchorIndex, tAnchorFrames in pairs(VUHDO_AURA_FRAMES[tFrameName]) do
+						for tSlotIndex, tFrame in pairs(tAnchorFrames) do
+							if tFrame and tFrame["auraInstanceId"] and tFrame:IsMouseOver() then
+								VUHDO_addAuraToIgnoreList(tButton:GetAttribute("unit"), tFrame["auraInstanceId"]);
+
+								return;
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+end);
 
 
 

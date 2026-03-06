@@ -203,6 +203,36 @@ end
 
 
 --
+local tSpellNameById;
+function VUHDO_resolveSpellId(aSpellName)
+
+	if tonumber(aSpellName or "x") then
+		tSpellNameById = GetSpellName(tonumber(aSpellName));
+
+		if tSpellNameById then
+			return tSpellNameById;
+		end
+	end
+
+	return aSpellName;
+
+end
+
+
+
+--
+local tResolvedName;
+function VUHDO_formatAuraSpellDisplayName(aSpellName)
+
+	tResolvedName = VUHDO_resolveSpellId(aSpellName);
+
+	return (tResolvedName ~= aSpellName) and ("[" .. aSpellName .. "] " .. tResolvedName) or aSpellName;
+
+end
+
+
+
+--
 local VUHDO_RANGE_SPELLS_REMAP = {
 	["HELPFUL"] = {
 		[VUHDO_SPELL_ID.LIVING_FLAME] = { VUHDO_SPELL_ID.EMERALD_BLOSSOM },
