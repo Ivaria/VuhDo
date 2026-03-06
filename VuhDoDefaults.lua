@@ -11,6 +11,11 @@ VUHDO_AURA_IGNORE_LIST = VUHDO_AURA_IGNORE_LIST or {
 	[57723] = true, -- Exhaustion (Heroism)
 	[80354] = true, -- Temporal Displacement (Time Warp)
 	[264689] = true, -- Fatigued (Primal Fury)
+	[26013] = true, -- Deserter (LFG penalty)
+	[71041] = true, -- Dungeon Deserter
+	[95809] = true, -- Insanity (Drums variant)
+	[160455] = true, -- Fatigued (Drums of Fury)
+	[390435] = true, -- Exhaustion (alternate)
 };
 
 
@@ -3484,6 +3489,8 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 			{ ["entryType"] = 1, ["value"] = 974, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 383648, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 61295, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 382024, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 207400, ["mine"] = true, ["others"] = false },
 		},
 		["displayName"] = nil,
 		["enabled"] = true,
