@@ -51,6 +51,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_setComboModel(self, "VUHDO_SELECTED_AURA_IGNORE", VUHDO_AURA_IGNORE_COMBO_MODEL);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K702);
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -62,11 +63,14 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-92" />
+									<AbsDimension x="13" y="-78" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K703);
+							</OnLoad>
 							<OnClick>VUHDO_saveAuraIgnoreClicked(self)</OnClick>
 						</Scripts>
 					</Button>
@@ -78,11 +82,14 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-92" />
+									<AbsDimension x="125" y="-78" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K704);
+							</OnLoad>
 							<OnClick>VUHDO_deleteAuraIgnoreClicked(self)</OnClick>
 						</Scripts>
 					</Button>
@@ -94,11 +101,14 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-130" />
+									<AbsDimension x="13" y="-116" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K705);
+							</OnLoad>
 							<OnClick>VUHDO_exportAuraIgnoreClicked(self)</OnClick>
 						</Scripts>
 					</Button>
@@ -110,11 +120,14 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="125" y="-130" />
+									<AbsDimension x="125" y="-116" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K706);
+							</OnLoad>
 							<OnClick>VUHDO_importAuraIgnoreClicked(self)</OnClick>
 						</Scripts>
 					</Button>
@@ -126,7 +139,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="13" y="-168" />
+									<AbsDimension x="13" y="-162" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -142,7 +155,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="40" y="-183" />
+									<AbsDimension x="40" y="-180" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -164,6 +177,7 @@
 										{ "ALT", VUHDO_I18N_ALT },
 									}
 								);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K707);
 							</OnLoad>
 						</Scripts>
 					</Button>

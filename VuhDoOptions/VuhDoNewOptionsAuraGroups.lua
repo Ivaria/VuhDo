@@ -1434,6 +1434,15 @@ local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEnt
 
 	if tRemoveButton then
 		tRemoveButton:SetText("");
+		VUHDO_lnfSetTooltip(tRemoveButton, VUHDO_I18N_TT.K726);
+	end
+
+	if tUpButton then
+		VUHDO_lnfSetTooltip(tUpButton, VUHDO_I18N_TT.K727);
+	end
+
+	if tDownButton then
+		VUHDO_lnfSetTooltip(tDownButton, VUHDO_I18N_TT.K728);
 	end
 
 	if anIsBuiltIn then

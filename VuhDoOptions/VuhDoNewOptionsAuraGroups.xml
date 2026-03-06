@@ -188,6 +188,7 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_auraGroupsGroupComboOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K611);
 							</OnLoad>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Text");
@@ -209,6 +210,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K686);
+							</OnLoad>
 							<OnClick>
 								VUHDO_auraGroupsOnNewGroup();
 							</OnClick>
@@ -227,6 +231,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K687);
+							</OnLoad>
 							<OnClick>
 								if VUHDO_AURA_GROUPS_SELECTED then
 									VUHDO_auraGroupsOnCloneGroup(VUHDO_AURA_GROUPS_SELECTED);
@@ -247,6 +254,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K688);
+							</OnLoad>
 							<OnClick>
 								if VUHDO_AURA_GROUPS_SELECTED and not VUHDO_isBuiltInAuraGroup(VUHDO_AURA_GROUPS_SELECTED) then
 									VUHDO_auraGroupsOnDeleteGroup(VUHDO_AURA_GROUPS_SELECTED);
@@ -270,7 +280,7 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_ENABLED");
 								VUHDO_lnfCheckButtonOnLoad(self);
-
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K689);
 								self:SetAttribute("custom_function_post", VUHDO_auraGroupsEnabledChanged);
 							</OnLoad>
 						</Scripts>
@@ -307,6 +317,9 @@
 							</Anchor>
 						</Anchors>
 						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K690);
+							</OnLoad>
 							<OnTextChanged>
 								VUHDO_auraGroupsNameChanged(self);
 							</OnTextChanged>
@@ -347,6 +360,7 @@
 							<OnLoad>
 								VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_TYPE_SELECTED", VUHDO_AURA_GROUP_TYPE_OPTIONS, VUHDO_I18N_AURA_GROUP_TYPE);
 								self:SetAttribute("custom_function", VUHDO_auraGroupsTypeChanged);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K691);
 							</OnLoad>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Text");
@@ -413,6 +427,9 @@
 											</Anchor>
 										</Anchors>
 										<Scripts>
+											<OnLoad>
+												VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K692);
+											</OnLoad>
 											<OnShow>
 												VUHDO_lnfPatchFont(self, "Hint");
 												VUHDO_lnfPatchFont(self, "");
@@ -434,6 +451,9 @@
 											</Anchor>
 										</Anchors>
 										<Scripts>
+											<OnLoad>
+												VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K693);
+											</OnLoad>
 											<OnClick>
 												VUHDO_auraGroupsListAddSpell();
 											</OnClick>
@@ -456,6 +476,7 @@
 												VUHDO_initResizeableScrollCombo(self);
 
 												VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_NEW_BOUQUET_SELECTED", VUHDO_BOUQET_COMBO_MODEL, VUHDO_I18N_AURA_GROUP_ADD_BOUQUET);
+												VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K694);
 											</OnLoad>
 											<OnShow>
 												VUHDO_lnfPatchFont(self, "Text");
@@ -476,6 +497,9 @@
 											</Anchor>
 										</Anchors>
 										<Scripts>
+											<OnLoad>
+												VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K695);
+											</OnLoad>
 											<OnClick>
 												VUHDO_auraGroupsListAddBouquet();
 											</OnClick>
@@ -494,6 +518,9 @@
 											</Anchor>
 										</Anchors>
 										<Scripts>
+											<OnLoad>
+												VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K696);
+											</OnLoad>
 											<OnClick>
 												VUHDO_auraGroupsListAddEmpty();
 											</OnClick>
@@ -640,6 +667,7 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_CAN_COLOR_BAR");
 								VUHDO_lnfCheckButtonOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K697);
 								self:SetAttribute("custom_function_post", VUHDO_auraGroupsCanColorBarChanged);
 							</OnLoad>
 						</Scripts>
@@ -657,6 +685,7 @@
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_CAN_COLOR_TEXT");
 								VUHDO_lnfCheckButtonOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K698);
 								self:SetAttribute("custom_function_post", VUHDO_auraGroupsCanColorTextChanged);
 							</OnLoad>
 						</Scripts>
@@ -673,6 +702,11 @@
 								</Offset>
 							</Anchor>
 						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K616);
+							</OnLoad>
+						</Scripts>
 					</Frame>
 
 					<Frame name="$parentPrioritySlider" inherits="VuhDoHSliderTemplate">
@@ -744,6 +778,7 @@
 										self.prohibitCloseExtensions = true;
 
 										VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_IGNORE_SELECTED", VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL);
+										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K699);
 									</OnLoad>
 								</Scripts>
 							</Button>
@@ -760,6 +795,9 @@
 									</Anchor>
 								</Anchors>
 								<Scripts>
+									<OnLoad>
+										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K700);
+									</OnLoad>
 									<OnClick>
 										VUHDO_auraGroupsIgnoreAdd();
 									</OnClick>
@@ -778,6 +816,9 @@
 									</Anchor>
 								</Anchors>
 								<Scripts>
+									<OnLoad>
+										VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K701);
+									</OnLoad>
 									<OnClick>
 										VUHDO_auraGroupsIgnoreDelete();
 									</OnClick>

@@ -455,6 +455,7 @@ end
 function VUHDO_panelAurasAnchorRadioOnLoad(aButton, aRadioValue)
 
 	aButton:SetAttribute("radio_value", aRadioValue);
+	VUHDO_lnfSetTooltip(aButton, VUHDO_I18N_TT.K619);
 
 	return;
 
