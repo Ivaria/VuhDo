@@ -49,7 +49,7 @@ local VUHDO_UNIT_AURA_LIST_SLOTS = VUHDO_UNIT_AURA_LIST_SLOTS;
 VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS or { };
 local VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS;
 
-VUHDO_AURA_MIGRATION_VERSION = 2;
+VUHDO_AURA_MIGRATION_VERSION = 3;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
@@ -492,13 +492,13 @@ function VUHDO_getAllAuraGroups()
 
 	twipe(sAllGroups);
 
-	for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
+	for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or _G["VUHDO_DEFAULT_AURA_GROUPS"] or sEmpty) do
 		if not tGroup["playerClassRequired"] or tGroup["playerClassRequired"] == VUHDO_PLAYER_CLASS then
 			sAllGroups[tGroupId] = tGroup;
 		end
 	end
 
-	for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or sEmpty) do
+	for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or (_G["VUHDO_CONFIG"] and _G["VUHDO_CONFIG"]["AURA_GROUPS"]) or sEmpty) do
 		sAllGroups[tGroupId] = tGroup;
 	end
 
@@ -2286,6 +2286,39 @@ do
 
 
 
+	--
+	local tPanelSetup;
+	local tAnchors;
+	function VUHDO_migrateAuraAnchorTextColors()
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+
+		if not tPanelSetup then
+			return;
+		end
+
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			tAnchors = tPanelSetup[tPanelNum] and tPanelSetup[tPanelNum]["AURA_ANCHORS"];
+
+			if tAnchors then
+				for _, tAnchor in pairs(tAnchors) do
+					if tAnchor["TIMER_TEXT"] and not tAnchor["TIMER_TEXT"]["COLOR"] then
+						tAnchor["TIMER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1);
+					end
+
+					if tAnchor["COUNTER_TEXT"] and not tAnchor["COUNTER_TEXT"]["COLOR"] then
+						tAnchor["COUNTER_TEXT"]["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1);
+					end
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
 	do
 		--
 		local tConfig;
@@ -2569,24 +2602,28 @@ do
 
 	--
 	local tPanelSetup;
+	local tCurrentMigrationVersion;
 	function VUHDO_migrateOldConfigsToAuraAnchors()
 
 		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+		tCurrentMigrationVersion = tPanelSetup["AURA_MIGRATION_VERSION"] or 0;
 
-		if (tPanelSetup["AURA_MIGRATION_VERSION"] or 0) >= VUHDO_AURA_MIGRATION_VERSION then
+		if tCurrentMigrationVersion >= VUHDO_AURA_MIGRATION_VERSION then
 			return;
 		end
 
-		if (tPanelSetup["AURA_MIGRATION_VERSION"] or 0) == 1 then
-			return;
+		if tCurrentMigrationVersion == 0 then
+			for tPanelNum = 1, 10 do
+				VUHDO_migrateHotsToAuraAnchors(tPanelNum);
+				VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum);
+			end
+
+			VUHDO_migrateHotsToAuraAnchorsV2();
 		end
 
-		for tPanelNum = 1, 10 do
-			VUHDO_migrateHotsToAuraAnchors(tPanelNum);
-			VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum);
+		if tCurrentMigrationVersion >= 0 then
+			VUHDO_migrateAuraAnchorTextColors();
 		end
-
-		VUHDO_migrateHotsToAuraAnchorsV2();
 
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
 
