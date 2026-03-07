@@ -16,6 +16,7 @@ VUHDO_AURA_IGNORE_LIST = VUHDO_AURA_IGNORE_LIST or {
 	[95809] = true, -- Insanity (Drums variant)
 	[160455] = true, -- Fatigued (Drums of Fury)
 	[390435] = true, -- Exhaustion (alternate)
+	[1227806] = true, -- Lifebloom (hidden player aura)
 };
 
 
