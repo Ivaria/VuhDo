@@ -28,7 +28,6 @@ local VUHDO_DEFAULT_AURA_GROUPS;
 local VUHDO_PANEL_SETUP;
 local VUHDO_RAID;
 local VUHDO_I18N_AURA_GROUP_NAMES;
-local VUHDO_ACTIVE_HOTS;
 
 local VUHDO_generateUUID;
 local VUHDO_determineDebuff;
@@ -204,7 +203,6 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_I18N_AURA_GROUP_NAMES = _G["VUHDO_I18N_AURA_GROUP_NAMES"];
-	VUHDO_ACTIVE_HOTS = _G["VUHDO_ACTIVE_HOTS"];
 
 	VUHDO_generateUUID = _G["VUHDO_generateUUID"];
 	VUHDO_determineDebuff = _G["VUHDO_determineDebuff"];
