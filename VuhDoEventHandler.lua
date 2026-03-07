@@ -753,6 +753,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_roleCheckerInitLocalOverrides();
 	VUHDO_sizeCalculatorInitLocalOverrides();
 	VUHDO_customHotsInitLocalOverrides();
+	VUHDO_auraColorsInitLocalOverrides();
 	VUHDO_debuffsInitLocalOverrides();
 	VUHDO_barCustomizerAurasInitLocalOverrides();
 	VUHDO_barCustomizerThreatInitLocalOverrides();
@@ -1005,8 +1006,10 @@ do
 
 				if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] then
 					if VUHDO_onUnitAuraInference(anArg1, anArg2) then
-						VUHDO_determineDebuff(anArg1);
+						VUHDO_determineAura(anArg1);
+
 						VUHDO_updateBouquetsForEvent(anArg1, 4);
+
 						VUHDO_updateInferredAuraDisplaysForUnit(anArg1);
 					end
 				end

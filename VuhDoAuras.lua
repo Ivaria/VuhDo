@@ -29,7 +29,7 @@ local VUHDO_RAID;
 local VUHDO_I18N_AURA_GROUP_NAMES;
 
 local VUHDO_generateUUID;
-local VUHDO_determineDebuff;
+local VUHDO_determineAura;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
@@ -204,7 +204,7 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_I18N_AURA_GROUP_NAMES = _G["VUHDO_I18N_AURA_GROUP_NAMES"];
 
 	VUHDO_generateUUID = _G["VUHDO_generateUUID"];
-	VUHDO_determineDebuff = _G["VUHDO_determineDebuff"];
+	VUHDO_determineAura = _G["VUHDO_determineAura"];
 
 	sAuraDataPool = VUHDO_createTablePool("AuraData", 500);
 	sSlotIndexPool = VUHDO_createTablePool("SlotIndex", 200);
@@ -921,6 +921,8 @@ function VUHDO_clearUnitAuraCache(aUnit)
 		VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] = nil;
 	end
 
+	VUHDO_clearUnitBouquetActiveCache(aUnit);
+
 	return;
 
 end
@@ -1175,7 +1177,7 @@ function VUHDO_onUnitAura(aUnit, aUpdateInfo)
 		VUHDO_incrementalAuraUpdate(aUnit, aUpdateInfo);
 	end
 
-	tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(aUnit, aUpdateInfo);
+	tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(aUnit, aUpdateInfo);
 
 	return;
 

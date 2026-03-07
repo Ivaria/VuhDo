@@ -90,7 +90,7 @@ local VUHDO_OWNER_2_PET;
 local VUHDO_getUnitIds;
 local VUHDO_getUnitNo;
 local VUHDO_isInRange;
-local VUHDO_determineDebuff;
+local VUHDO_determineAura;
 local VUHDO_getUnitGroup;
 local VUHDO_tableUniqueAdd;
 local VUHDO_getTargetUnit;
@@ -167,7 +167,7 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_getUnitIds = _G["VUHDO_getUnitIds"];
 	VUHDO_getUnitNo = _G["VUHDO_getUnitNo"];
 	VUHDO_isInRange = _G["VUHDO_isInRange"];
-	VUHDO_determineDebuff = _G["VUHDO_determineDebuff"];
+	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_getUnitGroup = _G["VUHDO_getUnitGroup"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 	VUHDO_tableUniqueAdd = _G["VUHDO_tableUniqueAdd"];
@@ -442,7 +442,7 @@ function VUHDO_setHealth(aUnit, aMode)
 				tInfo["hasSecretRange"] = false;
 			end
 
-			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineDebuff(aUnit);
+			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(aUnit);
 			tInfo["isPet"] = tIsPet;
 			tInfo["powertype"] = tonumber(tPowerType);
 			tInfo["power"] = UnitPower(aUnit);
