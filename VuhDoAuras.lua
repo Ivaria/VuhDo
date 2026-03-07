@@ -362,40 +362,28 @@ end
 
 --
 local tGroup;
-local tSpellIdStr;
+local tSpellId;
 local tName;
 local tIgnoreList;
-local tIsIdKey;
 function VUHDO_isAuraIgnored(anAuraData, aGroupId)
 
 	if not anAuraData or not aGroupId then
 		return false;
 	end
 
-	tSpellIdStr = anAuraData["spellId"];
-
-	if tSpellIdStr ~= nil and not issecretvalue(tSpellIdStr) then
-		tSpellIdStr = tostring(tSpellIdStr);
-	end
-
+	tSpellId = anAuraData["spellId"];
 	tName = anAuraData["name"];
 
 	if tName ~= nil and issecretvalue(tName) then
 		tName = nil;
 	end
 
-	for tKey, _ in pairs(VUHDO_AURA_IGNORE_LIST) do
-		tIsIdKey = tKey and tonumber(tKey);
+	if tSpellId and not issecretvalue(tSpellId) and VUHDO_AURA_IGNORE_LIST[tSpellId] then
+		return true;
+	end
 
-		if tIsIdKey then
-			if tSpellIdStr and tostring(tKey) == tSpellIdStr then
-				return true;
-			end
-		else
-			if tName and tKey == tName then
-				return true;
-			end
-		end
+	if tName and VUHDO_AURA_IGNORE_LIST[tName] then
+		return true;
 	end
 
 	tGroup = VUHDO_getAuraGroupRaw(aGroupId);
@@ -410,18 +398,12 @@ function VUHDO_isAuraIgnored(anAuraData, aGroupId)
 		return false;
 	end
 
-	for tKey, _ in pairs(tIgnoreList) do
-		tIsIdKey = tKey and tonumber(tKey);
+	if tSpellId and not issecretvalue(tSpellId) and tIgnoreList[tSpellId] then
+		return true;
+	end
 
-		if tIsIdKey then
-			if tSpellIdStr and tostring(tKey) == tSpellIdStr then
-				return true;
-			end
-		else
-			if tName and tKey == tName then
-				return true;
-			end
-		end
+	if tName and tIgnoreList[tName] then
+		return true;
 	end
 
 	return false;
@@ -2376,7 +2358,7 @@ do
 						if tSecrecy == 0 then
 							tAuraIgnoreList[tKey] = true;
 						end
- 					end
+					end
 				end
 			end
 

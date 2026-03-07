@@ -56,6 +56,7 @@ end
 
 --
 local tText;
+local tKey;
 local tDisplayName;
 local tCombo;
 function VUHDO_saveAuraIgnoreClicked(aButton)
@@ -71,7 +72,13 @@ function VUHDO_saveAuraIgnoreClicked(aButton)
 				return;
 			end
 
-			VUHDO_AURA_IGNORE_LIST[tText] = true;
+			tKey = tonumber(tText);
+
+			if tKey then
+				VUHDO_AURA_IGNORE_LIST[tKey] = true;
+			else
+				VUHDO_AURA_IGNORE_LIST[tText] = true;
+			end
 
 			tDisplayName = VUHDO_formatAuraSpellDisplayName(tText);
 			VUHDO_Msg(string.format(VUHDO_I18N_AURA_ADDED_TO_IGNORE_LIST, tDisplayName));
@@ -98,6 +105,8 @@ end
 --
 local tText;
 local tSpellId;
+local tTrimmed;
+local tKeyToRemove;
 local tDisplayName;
 local tCombo;
 function VUHDO_deleteAuraIgnoreClicked(aButton)
@@ -121,20 +130,21 @@ function VUHDO_deleteAuraIgnoreClicked(aButton)
 
 		tDisplayName = VUHDO_formatAuraSpellDisplayName(strtrim(tText));
 
-		if (VUHDO_AURA_IGNORE_LIST[strtrim(tText)]) then
-			VUHDO_AURA_IGNORE_LIST[strtrim(tText)] = nil;
+		tTrimmed = strtrim(tText);
+		tKeyToRemove = nil;
+
+		if tonumber(tTrimmed) and VUHDO_AURA_IGNORE_LIST[tonumber(tTrimmed)] then
+			tKeyToRemove = tonumber(tTrimmed);
+		elseif VUHDO_AURA_IGNORE_LIST[tTrimmed] then
+			tKeyToRemove = tTrimmed;
+		end
+
+		if tKeyToRemove then
+			VUHDO_AURA_IGNORE_LIST[tKeyToRemove] = nil;
 
 			VUHDO_Msg(string.format(VUHDO_I18N_AURA_REMOVED_FROM_IGNORE_LIST, tDisplayName));
 		else
-			tSpellId = string.match(tText, '([^%]%[]+)');
-
-			if (tSpellId ~= nil and VUHDO_AURA_IGNORE_LIST[tSpellId]) then
-				VUHDO_AURA_IGNORE_LIST[tSpellId] = nil;
-
-				VUHDO_Msg(string.format(VUHDO_I18N_AURA_REMOVED_FROM_IGNORE_LIST, tDisplayName));
-			else
-				VUHDO_Msg(string.format(VUHDO_I18N_AURA_DOES_NOT_EXIST_IN_IGNORE_LIST, tDisplayName));
-			end
+			VUHDO_Msg(string.format(VUHDO_I18N_AURA_DOES_NOT_EXIST_IN_IGNORE_LIST, tDisplayName));
 		end
 
 		VUHDO_initAuraIgnoreComboModel();
@@ -245,6 +255,7 @@ end
 --
 local tImportString;
 local tImportTable;
+local tKey;
 function VUHDO_auraIgnoreImport(anEditBoxName)
 
 	tImportString = _G[anEditBoxName]:GetText();
@@ -260,7 +271,9 @@ function VUHDO_auraIgnoreImport(anEditBoxName)
 	end
 
 	for tAuraIgnoreSpell, _ in pairs(tImportTable["auraIgnore"]) do
-		VUHDO_AURA_IGNORE_LIST[tAuraIgnoreSpell] = true;
+		tKey = tonumber(tAuraIgnoreSpell);
+
+		VUHDO_AURA_IGNORE_LIST[tKey or tAuraIgnoreSpell] = true;
 	end
 
 	VUHDO_Msg(VUHDO_I18N_AURA_IGNORE_IMPORTED);
