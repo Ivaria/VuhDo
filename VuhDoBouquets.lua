@@ -3016,6 +3016,10 @@ do
 		twipe(VUHDO_AURA_LIST_BOUQUETS);
 		twipe(VUHDO_LIST_GROUP_COLOR_BOUQUETS);
 
+		for tUnit, _ in pairs(VUHDO_RAID or { }) do
+			VUHDO_clearUnitBouquetActiveCache(tUnit);
+		end
+
 		if not VUHDO_BOUQUETS["STORED"] then
 			return;
 		end

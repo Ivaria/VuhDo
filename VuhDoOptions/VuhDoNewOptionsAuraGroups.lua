@@ -1270,6 +1270,7 @@ function VUHDO_auraGroupsColorTypeChanged(aComboBox, aValue, anArrayModel)
 
 	VUHDO_auraGroupsRefreshRightPanel();
 	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_registerAllBouquets(false);
 
 	return;
 
@@ -1345,6 +1346,7 @@ function VUHDO_auraGroupsEnabledChanged(aParent, aValue)
 
 	VUHDO_auraGroupsRefreshList();
 
+	VUHDO_registerAllBouquets(false);
 	VUHDO_reloadUI(false);
 
 	return;

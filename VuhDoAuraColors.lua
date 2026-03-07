@@ -310,6 +310,8 @@ do
 			return (tSortA["priority"] or 50) < (tSortB["priority"] or 50);
 		end);
 
+		VUHDO_clearDispellableAuraCache(nil);
+
 		return;
 
 	end
