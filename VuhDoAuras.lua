@@ -1698,7 +1698,7 @@ do
 							if not ShouldUnitAuraInstanceBeSecret or not ShouldUnitAuraInstanceBeSecret(aUnit, tAuraInstanceId) then
 								tCachedAura = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
 
-								if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tEntry) then
+								if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tEntry) and not VUHDO_isAuraIgnored(tCachedAura, anAnchorConfig["groupId"]) then
 									tSlotData = sSlotDataPool:get();
 
 									tSlotData["icon"] = tCachedAura["icon"];
