@@ -16,7 +16,6 @@ local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFiltered
 local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplicationDisplayCount;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
 local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
-local GetTime = GetTime;
 local UnitIsUnit = UnitIsUnit;
 local issecretvalue = issecretvalue;
 local next = next;
