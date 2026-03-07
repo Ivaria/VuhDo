@@ -2005,6 +2005,60 @@ do
 			end
 		end
 
+		if aFrame["childBar"] then
+			VUHDO_constrainAuraFrameHitRect(aFrame, aButton);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tFrameLeft;
+	local tFrameRight;
+	local tFrameTop;
+	local tFrameBottom;
+	local tButtonLeft;
+	local tButtonRight;
+	local tButtonTop;
+	local tButtonBottom;
+	local tInsetLeft;
+	local tInsetRight;
+	local tInsetTop;
+	local tInsetBottom;
+	function VUHDO_constrainAuraFrameHitRect(aFrame, aButton)
+
+		if not aFrame or not aButton then
+			return;
+		end
+
+		tFrameLeft = aFrame:GetLeft();
+		tFrameRight = aFrame:GetRight();
+		tFrameTop = aFrame:GetTop();
+		tFrameBottom = aFrame:GetBottom();
+
+		tButtonLeft = aButton:GetLeft();
+		tButtonRight = aButton:GetRight();
+		tButtonTop = aButton:GetTop();
+		tButtonBottom = aButton:GetBottom();
+
+		if not tFrameLeft or not tButtonLeft then
+			return;
+		end
+
+		tInsetLeft = max(0, tButtonLeft - tFrameLeft);
+		tInsetRight = max(0, tFrameRight - tButtonRight);
+		tInsetTop = max(0, tFrameTop - tButtonTop);
+		tInsetBottom = max(0, tButtonBottom - tFrameBottom);
+
+		if tInsetLeft > 0 or tInsetRight > 0 or tInsetTop > 0 or tInsetBottom > 0 then
+			aFrame:SetHitRectInsets(tInsetLeft, tInsetRight, tInsetTop, tInsetBottom);
+		else
+			aFrame:SetHitRectInsets(0, 0, 0, 0);
+		end
+
 		return;
 
 	end
@@ -2314,6 +2368,10 @@ do
 		if tParent then
 			VUHDO_PixelUtil.SetFrameStrata(aFrame, tParent:GetFrameStrata());
 			VUHDO_PixelUtil.SetFrameLevel(aFrame, tParent:GetFrameLevel() + (aFrame["addLevel"] or 10));
+		end
+
+		if aFrame["childBar"] then
+			VUHDO_constrainAuraFrameHitRect(aFrame, aButton);
 		end
 
 		return;
