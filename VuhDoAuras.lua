@@ -49,7 +49,7 @@ local VUHDO_UNIT_AURA_LIST_SLOTS = VUHDO_UNIT_AURA_LIST_SLOTS;
 VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS or { };
 local VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS;
 
-VUHDO_AURA_MIGRATION_VERSION = 3;
+VUHDO_AURA_MIGRATION_VERSION = 4;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
@@ -2625,7 +2625,52 @@ do
 			VUHDO_migrateAuraAnchorTextColors();
 		end
 
+		if tCurrentMigrationVersion < 4 then
+			VUHDO_migrateAuraAnchorDefaults();
+		end
+
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
+
+		return;
+
+	end
+
+
+
+	--
+	local tPanelSetup;
+	local tAnchors;
+	function VUHDO_migrateAuraAnchorDefaults()
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+
+		if not tPanelSetup then
+			return;
+		end
+
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			tAnchors = tPanelSetup[tPanelNum] and tPanelSetup[tPanelNum]["AURA_ANCHORS"];
+
+			if tAnchors then
+				for tAnchorKey, tAnchorData in pairs(tAnchors) do
+					if tAnchorData["size"] == nil then
+						tAnchorData["size"] = 20;
+					end
+
+					if tAnchorData["barWidth"] == nil then
+						tAnchorData["barWidth"] = 100;
+					end
+
+					if tAnchorData["barHeight"] == nil then
+						tAnchorData["barHeight"] = 12;
+					end
+
+					if tAnchorData["spacing"] == nil then
+						tAnchorData["spacing"] = 2;
+					end
+				end
+			end
+		end
 
 		return;
 

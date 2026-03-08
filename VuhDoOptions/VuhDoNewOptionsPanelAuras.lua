@@ -853,6 +853,9 @@ function VUHDO_panelAurasRebindContentPanel()
 	if tBarWidthSlider then
 		tBarWidthSlider:Show();
 
+		tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.barWidth", tAnchorKey);
+		VUHDO_lnfSetModel(tBarWidthSlider, tModel);
+
 		VUHDO_lnfSliderInitFromModel(_G[tBarWidthSlider:GetName() .. "Slider"]);
 		VUHDO_setControlEnabled(tContentPanel, "BarWidthSlider", tStyle == "bars");
 
@@ -861,6 +864,9 @@ function VUHDO_panelAurasRebindContentPanel()
 
 	if tBarHeightSlider then
 		tBarHeightSlider:Show();
+
+		tModel = format("VUHDO_PANEL_SETUP.#PNUM#.AURA_ANCHORS.%s.barHeight", tAnchorKey);
+		VUHDO_lnfSetModel(tBarHeightSlider, tModel);
 
 		VUHDO_lnfSliderInitFromModel(_G[tBarHeightSlider:GetName() .. "Slider"]);
 		VUHDO_setControlEnabled(tContentPanel, "BarHeightSlider", tStyle == "bars");
