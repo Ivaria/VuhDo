@@ -2557,18 +2557,18 @@ do
 
 				tCounter = tCounter or 0;
 
-				if tCounter >= 0 then
+				if issecretvalue(tCounter) or tCounter >= 0 then
 					txState["counter"] = tCounter;
 				end
 
 				tTimer, tTimer2, tDuration = tTimer or 0, tTimer2 or 0, tDuration or 0;
 
-				if tDuration >= 0 then
-					if tTimer >= 0 then
+				if issecretvalue(tDuration) or tDuration >= 0 then
+					if issecretvalue(tTimer) or tTimer >= 0 then
 						txState["timer"], txState["duration"] = tTimer, tDuration;
 					end
 
-					if tTimer2 >= 0 then
+					if issecretvalue(tTimer2) or tTimer2 >= 0 then
 						txState["timer2"] = tTimer2;
 					end
 				end
