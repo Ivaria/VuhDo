@@ -1137,6 +1137,7 @@ end
 
 --
 local tText;
+local tKey;
 local tGroup;
 local tDisplayName;
 local tEditBox;
@@ -1178,7 +1179,13 @@ function VUHDO_auraGroupsIgnoreAdd()
 		tGroup["ignoreList"] = { };
 	end
 
-	tGroup["ignoreList"][tText] = true;
+	tKey = tonumber(tText);
+
+	if tKey then
+		tGroup["ignoreList"][tKey] = true;
+	else
+		tGroup["ignoreList"][tText] = true;
+	end
 
 	tDisplayName = VUHDO_formatAuraSpellDisplayName(tText);
 	VUHDO_Msg(string.format(VUHDO_I18N_AURA_ADDED_TO_IGNORE_LIST, tDisplayName));
@@ -1196,6 +1203,7 @@ end
 --
 local tText;
 local tSpellId;
+local tKeyToRemove;
 local tGroup;
 local tDisplayName;
 local tComboEditBox;
@@ -1240,18 +1248,20 @@ function VUHDO_auraGroupsIgnoreDelete()
 	tText = strtrim(tText);
 	tDisplayName = VUHDO_formatAuraSpellDisplayName(tText);
 
-	if tGroup["ignoreList"][tText] then
-		tGroup["ignoreList"][tText] = nil;
+	tKeyToRemove = nil;
+
+	if tonumber(tText) and tGroup["ignoreList"][tonumber(tText)] then
+		tKeyToRemove = tonumber(tText);
+	elseif tGroup["ignoreList"][tText] then
+		tKeyToRemove = tText;
+	end
+
+	if tKeyToRemove then
+		tGroup["ignoreList"][tKeyToRemove] = nil;
 
 		VUHDO_Msg(string.format(VUHDO_I18N_AURA_REMOVED_FROM_IGNORE_LIST, tDisplayName));
 	else
-		tSpellId = string.match(tText, '([^%]%[]+)');
-
-		if tSpellId and tGroup["ignoreList"][tSpellId] then
-			tGroup["ignoreList"][tSpellId] = nil;
-
-			VUHDO_Msg(string.format(VUHDO_I18N_AURA_REMOVED_FROM_IGNORE_LIST, tDisplayName));
-		end
+		VUHDO_Msg(string.format(VUHDO_I18N_AURA_DOES_NOT_EXIST_IN_IGNORE_LIST, tDisplayName));
 	end
 
 	VUHDO_auraGroupsRefreshIgnorePanel();
