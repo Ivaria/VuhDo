@@ -1884,7 +1884,9 @@ do
 						tName = tInfos["name"];
 						tIsActive = false;
 
-						tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit] and VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit][tName];
+						tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit] and
+							(VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit][tName] or
+								(tonumber(tName) and VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit][tonumber(tName)]));
 
 						if tAuraInstances then
 							for _, tAuraInstanceId in ipairs(tAuraInstances) do
