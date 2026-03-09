@@ -787,6 +787,8 @@ VUHDO_I18N_TT.K728 = "Click to move this entry down in the list.";
 VUHDO_I18N_TT.K729 = "Click to create a new aura anchor.";
 VUHDO_I18N_TT.K730 = "Click to duplicate the selected aura anchor.";
 VUHDO_I18N_TT.K731 = "Click to delete the selected aura anchor.";
+VUHDO_I18N_TT.K732 = "Click to open and edit this bouquet.";
+VUHDO_I18N_TT.K733 = "Click to open and edit this aura group.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "기본 프로필";
 VUHDO_I18N_DEFAULT_LAYOUT = "기본 배치";
@@ -1367,7 +1369,7 @@ VUHDO_I18N_DEBUFF_REMOVED_FROM_CUSTOM = "(De)Buff \"%s\"이(가) 제거되었습
 VUHDO_I18N_DEBUFF_DOES_NOT_EXIST = "(De)Buff \"%s\"이(가) 존재하지 않습니다.";
 
 VUHDO_I18N_AURAS = "Auras";
-VUHDO_I18N_AURA_GROUP = "Aura Group";
+VUHDO_I18N_AURA_GROUP = "Group";
 VUHDO_I18N_AURA_GROUPS = "Groups";
 VUHDO_I18N_AURA_GROUP_ENTRY_SPELL = "주문";
 VUHDO_I18N_AURA_GROUP_ENTRY_BOUQUET = "꽃다발";

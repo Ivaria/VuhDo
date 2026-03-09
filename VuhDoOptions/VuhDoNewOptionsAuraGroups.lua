@@ -9,6 +9,7 @@ local twipe = table.wipe;
 local strfind = string.find;
 
 VUHDO_AURA_GROUPS_SELECTED = nil;
+VUHDO_AURA_GROUPS_PENDING_SELECTION = nil;
 VUHDO_AURA_GROUPS_COMBO_MODEL = { };
 VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL = { };
 VUHDO_AURA_GROUPS_FILTER_SELECTED = "";
@@ -1373,6 +1374,8 @@ local tRowName;
 local tIcon;
 local tValueLabel;
 local tTypeLabel;
+local tTypeLabelFrame;
+local tBouquetButton;
 local tRemoveButton;
 local tUpButton;
 local tDownButton;
@@ -1419,6 +1422,8 @@ local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEnt
 	end
 
 	tTypeLabel = _G[tRowName .. "TypeLabelLabel"];
+	tTypeLabelFrame = _G[tRowName .. "TypeLabel"];
+	tBouquetButton = _G[tRowName .. "BouquetButton"];
 
 	if tTypeLabel then
 		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
@@ -1427,6 +1432,21 @@ local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEnt
 			tTypeLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_BOUQUET);
 		else
 			tTypeLabel:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_SPELL);
+		end
+	end
+
+	if tTypeLabelFrame and tBouquetButton then
+		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
+			tTypeLabelFrame:Hide();
+
+			tBouquetButton:Show();
+
+			tBouquetButton:SetText(VUHDO_I18N_AURA_GROUP_ENTRY_BOUQUET);
+			VUHDO_lnfSetTooltip(tBouquetButton, VUHDO_I18N_TT.K732);
+		else
+			tTypeLabelFrame:Show();
+
+			tBouquetButton:Hide();
 		end
 	end
 
@@ -1660,6 +1680,57 @@ end
 
 
 --
+local tItemPanel;
+local tIdx;
+local tGroup;
+local tEntry;
+function VUHDO_auraGroupEntryBouquetButtonClicked(aButton)
+
+	tItemPanel = aButton:GetParent();
+
+	if not tItemPanel then
+		return;
+	end
+
+	tIdx = tItemPanel["vuhdo_entryIdx"];
+
+	if not tIdx or not sSelectedGroupId then
+		return;
+	end
+
+	tGroup = VUHDO_getAuraGroupRaw(sSelectedGroupId);
+
+	if not tGroup or not tGroup["entries"] then
+		return;
+	end
+
+	tEntry = tGroup["entries"][tIdx];
+
+	if not tEntry or tEntry["entryType"] ~= VUHDO_AURA_LIST_ENTRY_BOUQUET then
+		return;
+	end
+
+	VUHDO_BOUQUETS["SELECTED"] = tEntry["value"];
+
+	if VUHDO_MENU_RETURN_TARGET_MAIN ~= nil or VUHDO_MENU_RETURN_TARGET ~= nil then
+		VUHDO_MENU_RETURN_TARGET_MAIN_SAVED = VUHDO_MENU_RETURN_TARGET_MAIN;
+		VUHDO_MENU_RETURN_TARGET_SAVED = VUHDO_MENU_RETURN_TARGET;
+	end
+
+	VUHDO_MENU_RETURN_TARGET_MAIN = VuhDoNewOptionsTabbedFrameTabsPanelAurasRadioButton;
+	VUHDO_MENU_RETURN_TARGET = VuhDoNewOptionsAuraRadioPanelGroupsRadioButton;
+
+	VUHDO_newOptionsTabbedClickedClicked(VuhDoNewOptionsTabbedFrameTabsPanelGeneralRadioButton);
+	VUHDO_lnfRadioButtonClicked(VuhDoNewOptionsTabbedFrameTabsPanelGeneralRadioButton);
+	VUHDO_lnfTabRadioButtonClicked(VuhDoNewOptionsGeneralRadioPanelBouquetRadioButton);
+
+	return;
+
+end
+
+
+
+--
 local tPanel;
 local tIdx;
 function VUHDO_auraGroupEntryRemoveOnClick(aButton)
@@ -1795,6 +1866,13 @@ end
 local tGroupsRadio;
 function VUHDO_auraGroupsOnShow()
 
+	if VUHDO_AURA_GROUPS_PENDING_SELECTION then
+		sSelectedGroupId = VUHDO_AURA_GROUPS_PENDING_SELECTION;
+
+		VUHDO_AURA_GROUPS_SELECTED = VUHDO_AURA_GROUPS_PENDING_SELECTION;
+		VUHDO_AURA_GROUPS_PENDING_SELECTION = nil;
+	end
+
 	tGroupsRadio = _G["VuhDoNewOptionsAuraRadioPanelGroupsRadioButton"];
 
 	if tGroupsRadio and tGroupsRadio:GetChecked() then
@@ -1810,6 +1888,32 @@ function VUHDO_auraGroupsOnShow()
 		VUHDO_auraGroupsOnGroupSelected(sSelectedGroupId);
 	else
 		sSelectedGroupId = nil;
+	end
+
+	if _G["VuhDoNewOptionsAuraGroupsBackButton"] then
+		_G["VuhDoNewOptionsAuraGroupsBackButton"]:SetShown(VUHDO_MENU_RETURN_TARGET ~= nil or VUHDO_MENU_RETURN_TARGET_MAIN ~= nil);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsBackButtonClicked(aPanel)
+
+	if VUHDO_MENU_RETURN_TARGET_MAIN ~= nil then
+		VUHDO_newOptionsTabbedClickedClicked(VUHDO_MENU_RETURN_TARGET_MAIN);
+		VUHDO_lnfRadioButtonClicked(VUHDO_MENU_RETURN_TARGET_MAIN);
+
+		VUHDO_MENU_RETURN_TARGET_MAIN = nil;
+	end
+
+	if VUHDO_MENU_RETURN_TARGET ~= nil then
+		VUHDO_lnfTabRadioButtonClicked(VUHDO_MENU_RETURN_TARGET);
+
+		VUHDO_MENU_RETURN_TARGET = nil;
 	end
 
 	return;
