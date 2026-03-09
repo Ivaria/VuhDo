@@ -1255,7 +1255,7 @@ function VUHDO_initResizeableEditCombo(aComboBox)
 	tMiddle:SetPoint("BOTTOMRIGHT", tRight, "BOTTOMLEFT", 0, 0);
 
 	tEditBox:ClearAllPoints();
-	tEditBox:SetPoint("LEFT", tLeft, "LEFT", 0, 0);
+	tEditBox:SetPoint("LEFT", tLeft, "LEFT", 7, 0);
 	tEditBox:SetPoint("RIGHT", tRight, "RIGHT", -32, 0);
 
 	return;
