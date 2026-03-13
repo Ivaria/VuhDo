@@ -1102,15 +1102,15 @@ do
 
 			if tBody then
 				owner:RunFor(tFrame, tBody);
+			end
 
-				sCliqueHeader = owner:GetFrameRef("sCliqueHeader");
+			sCliqueHeader = owner:GetFrameRef("sCliqueHeader");
 
-				if sCliqueHeader then
-					tCliqueEnter = sCliqueHeader:GetAttribute("setup_onenter");
+			if sCliqueHeader then
+				tCliqueEnter = sCliqueHeader:GetAttribute("setup_onenter");
 
-					if tCliqueEnter then
-						sCliqueHeader:RunFor(tFrame, tCliqueEnter);
-					end
+				if tCliqueEnter then
+					sCliqueHeader:RunFor(tFrame, tCliqueEnter);
 				end
 			end
 		else
@@ -1154,6 +1154,7 @@ do
 		else
 			if sHealButton then
 				sHealButton:ClearBindings();
+
 				sHealButton = nil;
 			end
 		end
