@@ -2232,9 +2232,7 @@ do
 			end
 		end
 
-		if aFrame["childBar"] then
-			VUHDO_constrainAuraFrameHitRect(aFrame, aButton);
-		end
+		VUHDO_constrainAuraFrameHitRect(aFrame, aButton);
 
 		return;
 
@@ -2629,9 +2627,7 @@ do
 			VUHDO_PixelUtil.SetFrameLevel(aFrame, tParent:GetFrameLevel() + (aFrame["addLevel"] or 10));
 		end
 
-		if aFrame["childBar"] then
-			VUHDO_constrainAuraFrameHitRect(aFrame, aButton);
-		end
+		VUHDO_constrainAuraFrameHitRect(aFrame, aButton);
 
 		return;
 
