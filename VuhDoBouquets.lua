@@ -23,6 +23,9 @@ local VUHDO_getPurgeAbilities;
 local VUHDO_isConfigDemoUsers;
 local VUHDO_displayAurasAtAnchorFromCache;
 local VUHDO_getSlotData;
+local VUHDO_getAuraGroupRaw;
+local VUHDO_getAuraBarColorType;
+local VUHDO_getAuraTextColorType;
 
 local VUHDO_BOUQUETS = { };
 local VUHDO_RAID = { };
@@ -34,8 +37,6 @@ local VUHDO_POWER_TYPE_COLORS;
 local VUHDO_PANEL_SETUP;
 local VUHDO_AURA_LIST_BOUQUETS;
 local VUHDO_UNIT_AURA_LIST_SLOTS;
-local VUHDO_getAuraGroupRaw;
-local VUHDO_getAuraBarColorType;
 local VUHDO_MAX_PANELS;
 local VUHDO_AURA_GROUP_TYPE_LIST;
 local VUHDO_AURA_LIST_ENTRY_BOUQUET;
@@ -146,6 +147,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
 	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
 	VUHDO_getAuraBarColorType = _G["VUHDO_getAuraBarColorType"];
+	VUHDO_getAuraTextColorType = _G["VUHDO_getAuraTextColorType"];
 
 	sBouquetStatePool = VUHDO_createTablePool("BouquetState", 500);
 	sThresholdEntryPool = VUHDO_createTablePool("ThresholdEntry", 100);
@@ -1267,7 +1269,13 @@ do
 						["g"] = nil,
 						["b"] = nil,
 						["a"] = nil,
+						["tr"] = nil,
+						["tg"] = nil,
+						["tb"] = nil,
+						["ta"] = nil,
 						["auraInstanceId"] = nil,
+						["useBackground"] = nil,
+						["useText"] = nil,
 					};
 
 					if tItem["color"] then
@@ -1839,7 +1847,9 @@ do
 	local tResultSlot;
 	local tAuraInstanceId;
 	local tSecretType;
-	local tColorType;
+	local tBarColorType;
+	local tTextColorType;
+	local tNeedsCopy;
 	local tCurveResultSlot;
 	local tBoolResultSlot;
 	local tDispelResultSlot;
@@ -1897,7 +1907,13 @@ do
 				aLayerTemplate["dispelResults"][tIdx]["g"] = nil;
 				aLayerTemplate["dispelResults"][tIdx]["b"] = nil;
 				aLayerTemplate["dispelResults"][tIdx]["a"] = nil;
+				aLayerTemplate["dispelResults"][tIdx]["tr"] = nil;
+				aLayerTemplate["dispelResults"][tIdx]["tg"] = nil;
+				aLayerTemplate["dispelResults"][tIdx]["tb"] = nil;
+				aLayerTemplate["dispelResults"][tIdx]["ta"] = nil;
 				aLayerTemplate["dispelResults"][tIdx]["auraInstanceId"] = nil;
+				aLayerTemplate["dispelResults"][tIdx]["useBackground"] = nil;
+				aLayerTemplate["dispelResults"][tIdx]["useText"] = nil;
 			end
 
 			for tIdx = 1, #aLayerTemplate["spriteCellResults"] do
@@ -2110,28 +2126,52 @@ do
 
 							if tIsActive then
 								if tColor then
-									tColorType = VUHDO_getAuraBarColorType(aUnit);
+									tBarColorType = VUHDO_getAuraBarColorType(aUnit);
+									tTextColorType = VUHDO_getAuraTextColorType(aUnit);
 
-									if tColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
+									tFactor = tInfos["custom"] and tInfos["custom"]["bright"] or 1;
+
+									tNeedsCopy = false;
+
+									if tBarColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
 										tDispelResultSlot["r"] = tColor["R"];
 										tDispelResultSlot["g"] = tColor["G"];
 										tDispelResultSlot["b"] = tColor["B"];
 										tDispelResultSlot["a"] = tColor["O"];
-									else
-										tFactor = tInfos["custom"] and tInfos["custom"]["bright"] or 1;
 
-										if tFactor < 1 then
+										tDispelResultSlot["useBackground"] = tColor["useBackground"];
+									else
+										if tFactor < 1 and tColor["useBackground"] then
 											tColor = VUHDO_copyColorTo(tColor, tWorkingColor);
 
-											if tColor["useBackground"] then
-												tColor["R"], tColor["G"], tColor["B"] = tColor["R"] * tFactor, tColor["G"] * tFactor, tColor["B"] * tFactor;
-											end
+											tNeedsCopy = true;
 
-											if tColor["useText"] then
-												tColor["TR"], tColor["TG"], tColor["TB"] = tColor["TR"] * tFactor, tColor["TG"] * tFactor, tColor["TB"] * tFactor;
-											end
+											tColor["R"] = tColor["R"] * tFactor;
+											tColor["G"] = tColor["G"] * tFactor;
+											tColor["B"] = tColor["B"] * tFactor;
 										end
+									end
 
+									if tTextColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
+										tDispelResultSlot["tr"] = tColor["TR"];
+										tDispelResultSlot["tg"] = tColor["TG"];
+										tDispelResultSlot["tb"] = tColor["TB"];
+										tDispelResultSlot["ta"] = tColor["TO"];
+
+										tDispelResultSlot["useText"] = tColor["useText"];
+									else
+										if tFactor < 1 and tColor["useText"] then
+											if not tNeedsCopy then
+												tColor = VUHDO_copyColorTo(tColor, tWorkingColor);
+											end
+
+											tColor["TR"] = tColor["TR"] * tFactor;
+											tColor["TG"] = tColor["TG"] * tFactor;
+											tColor["TB"] = tColor["TB"] * tFactor;
+										end
+									end
+
+									if tBarColorType ~= VUHDO_AURA_GROUP_COLOR_DISPEL or tTextColorType ~= VUHDO_AURA_GROUP_COLOR_DISPEL then
 										tDispelResultSlot["barColor"] = tColor;
 									end
 								end
