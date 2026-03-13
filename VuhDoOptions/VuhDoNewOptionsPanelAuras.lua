@@ -1113,6 +1113,8 @@ local tMainPanel;
 local tAnchorCombo;
 function VUHDO_panelAurasRefreshUI()
 
+	VUHDO_incrementAuraAnchorConfigVersion();
+
 	VUHDO_initPanelAurasAnchorComboModel();
 
 	tMainPanel = _G["VuhDoNewOptionsPanelAurasMainPanel"];

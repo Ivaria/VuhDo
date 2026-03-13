@@ -336,6 +336,9 @@
 				VUHDO_IS_CONFIG = false;
 				VUHDO_IS_PANEL_CONFIG = false;
 				VUHDO_CONFIG_SHOW_RAID = false;
+
+				VUHDO_incrementAuraAnchorConfigVersion();
+
 				VUHDO_reloadUI(false);
 
 				collectgarbage("collect");

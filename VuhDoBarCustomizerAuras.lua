@@ -1,11 +1,14 @@
 local _;
 
 local pairs = pairs;
+local ipairs = ipairs;
+local tinsert = table.insert;
 local twipe = table.wipe;
 local floor = math.floor;
 local max = math.max;
 
 local InCombatLockdown = InCombatLockdown;
+local debugprofilestop = debugprofilestop;
 local CreateFrame = CreateFrame;
 local CreateFramePool = CreateFramePool;
 local GetAuraDuration = C_UnitAuras and C_UnitAuras.GetAuraDuration;
@@ -61,6 +64,17 @@ local VUHDO_setAnchorSlotAuraId;
 
 VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES or { };
 local VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES;
+
+local sAuraAnchorConfigVersion = 0;
+
+local sPrewarmIconsNeeded = 0;
+local sPrewarmBarsNeeded = 0;
+local sPrewarmIconsCreated = 0;
+local sPrewarmBarsCreated = 0;
+local sPrewarmTempIconFrames = { };
+local sPrewarmTempBarFrames = { };
+
+local VUHDO_AURA_PREWARM_BUDGET_MS = 2;
 
 VUHDO_FIXED_AURA_OVERFLOW_STATE = VUHDO_FIXED_AURA_OVERFLOW_STATE or { };
 local VUHDO_FIXED_AURA_OVERFLOW_STATE = VUHDO_FIXED_AURA_OVERFLOW_STATE;
@@ -450,6 +464,60 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	sBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
 
 	return;
+
+end
+
+
+
+--
+function VUHDO_incrementAuraAnchorConfigVersion()
+
+	sAuraAnchorConfigVersion = sAuraAnchorConfigVersion + 1;
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_getAuraAnchorConfigVersion()
+
+	return sAuraAnchorConfigVersion;
+
+end
+
+
+
+--
+local tIconCount;
+local tBarCount;
+local tMaxButtonsPerPanel;
+local tAnchors;
+local tMaxSlots;
+function VUHDO_estimateRequiredAuraFrames()
+
+	tIconCount = 0;
+	tBarCount = 0;
+	tMaxButtonsPerPanel = 40;
+
+	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		tAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+		if tAnchors then
+			for _, tAnchorConfig in pairs(tAnchors) do
+				tMaxSlots = tAnchorConfig["maxDisplay"] or 5;
+
+				if tAnchorConfig["style"] == "bars" then
+					tBarCount = tBarCount + (tMaxSlots * tMaxButtonsPerPanel);
+				else
+					tIconCount = tIconCount + (tMaxSlots * tMaxButtonsPerPanel);
+				end
+			end
+		end
+	end
+
+	return tIconCount, tBarCount;
 
 end
 
@@ -1077,6 +1145,89 @@ do
 
 
 	--
+	local tFrame;
+	local tStartTime;
+	local tElapsed;
+	function VUHDO_prewarmAuraFramePoolsChunk()
+
+		VUHDO_initAuraFramePools();
+
+		tStartTime = debugprofilestop();
+
+		while sPrewarmIconsCreated < sPrewarmIconsNeeded do
+			tFrame = sAuraIconPool:Acquire();
+
+			if tFrame then
+				tinsert(sPrewarmTempIconFrames, tFrame);
+			end
+
+			sPrewarmIconsCreated = sPrewarmIconsCreated + 1;
+
+			tElapsed = (debugprofilestop() - tStartTime) * 1000;
+
+			if tElapsed >= VUHDO_AURA_PREWARM_BUDGET_MS then
+				VUHDO_deferPrewarmAuraPools();
+
+				return;
+			end
+		end
+
+		while sPrewarmBarsCreated < sPrewarmBarsNeeded do
+			tFrame = sAuraBarPool:Acquire();
+
+			if tFrame then
+				tinsert(sPrewarmTempBarFrames, tFrame);
+			end
+
+			sPrewarmBarsCreated = sPrewarmBarsCreated + 1;
+
+			tElapsed = (debugprofilestop() - tStartTime) * 1000;
+
+			if tElapsed >= VUHDO_AURA_PREWARM_BUDGET_MS then
+				VUHDO_deferPrewarmAuraPools();
+
+				return;
+			end
+		end
+
+		for _, tTempFrame in ipairs(sPrewarmTempIconFrames) do
+			sAuraIconPool:Release(tTempFrame);
+		end
+
+		for _, tTempFrame in ipairs(sPrewarmTempBarFrames) do
+			sAuraBarPool:Release(tTempFrame);
+		end
+
+		twipe(sPrewarmTempIconFrames);
+		twipe(sPrewarmTempBarFrames);
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_startAuraPoolPrewarm()
+
+		sPrewarmIconsNeeded, sPrewarmBarsNeeded = VUHDO_estimateRequiredAuraFrames();
+		sPrewarmIconsCreated = 0;
+		sPrewarmBarsCreated = 0;
+
+		twipe(sPrewarmTempIconFrames);
+		twipe(sPrewarmTempBarFrames);
+
+		if sPrewarmIconsNeeded > 0 or sPrewarmBarsNeeded > 0 then
+			VUHDO_deferPrewarmAuraPools();
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local sAuraOnEnterSnippet = [[
 		if sHealButton then
 			sHealButton:ClearBindings();
@@ -1603,6 +1754,36 @@ do
 		end
 
 		VUHDO_AURA_FRAMES[tFrameName] = nil;
+
+		return;
+
+	end
+
+
+
+	--
+	local tButtonFramesRefresh;
+	function VUHDO_refreshAuraFrameUnitsForButton(aButton)
+
+		if not aButton then
+			return;
+		end
+
+		tButtonFramesRefresh = VUHDO_AURA_FRAMES[aButton:GetName()];
+
+		if not tButtonFramesRefresh then
+			return;
+		end
+
+		for tAnchorIndex, tAnchorFramesRefresh in pairs(tButtonFramesRefresh) do
+			for tSlotIndex, tFrame in pairs(tAnchorFramesRefresh) do
+				if tFrame and aButton["raidid"] then
+					VUHDO_safeSetAttribute(tFrame, "unit", aButton["raidid"]);
+
+					tFrame["raidid"] = aButton["raidid"];
+				end
+			end
+		end
 
 		return;
 
@@ -2471,17 +2652,26 @@ function VUHDO_initAuraAnchorsForButton(aButton, aPanelNum)
 		return;
 	end
 
-	VUHDO_releaseAllAuraFramesForButton(aButton);
-
 	tPanelAnchors = VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"];
 
 	if not tPanelAnchors then
 		return;
 	end
 
+	if aButton["auraConfigVersion"] == sAuraAnchorConfigVersion and aButton["auraPanelNum"] == aPanelNum and VUHDO_AURA_FRAMES[aButton:GetName()] then
+		VUHDO_refreshAuraFrameUnitsForButton(aButton);
+
+		return;
+	end
+
+	VUHDO_releaseAllAuraFramesForButton(aButton);
+
 	for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
 		VUHDO_initAuraAnchorFrames(aButton, aPanelNum, tAnchorIndex, tAnchorConfig);
 	end
+
+	aButton["auraConfigVersion"] = sAuraAnchorConfigVersion;
+	aButton["auraPanelNum"] = aPanelNum;
 
 	return;
 
@@ -2511,7 +2701,6 @@ function VUHDO_initAuraAnchorFrames(aButton, aPanelNum, anAnchorIndex, anAnchorC
 
 		if tFrame then
 			VUHDO_positionAuraFrame(tFrame, aButton, anAnchorConfig, tSlotIndex, anAnchorIndex);
-
 			tFrame:SetAlpha(0);
 			tFrame:Show();
 		end
