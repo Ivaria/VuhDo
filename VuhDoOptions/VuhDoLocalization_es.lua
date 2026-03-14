@@ -793,6 +793,28 @@ VUHDO_I18N_TT.K730 = "Click to duplicate the selected aura anchor.";
 VUHDO_I18N_TT.K731 = "Click to delete the selected aura anchor.";
 VUHDO_I18N_TT.K732 = "Click to open and edit this bouquet.";
 VUHDO_I18N_TT.K733 = "Click to open and edit this aura group.";
+VUHDO_I18N_TT.K734 = "Show private aura icons on raid frame health bars.";
+VUHDO_I18N_TT.K735 = "Configure private aura display on raid frames.";
+VUHDO_I18N_TT.K736 = "Maximum number of private aura icons to display per unit (1-6).";
+VUHDO_I18N_TT.K737 = "Icon size as a percentage of the health bar height.";
+VUHDO_I18N_TT.K738 = "Gap between private aura icons in pixels.";
+VUHDO_I18N_TT.K739 = "Anchor private aura icons to the top-left of the health bar.";
+VUHDO_I18N_TT.K740 = "Anchor private aura icons to the top-right of the health bar.";
+VUHDO_I18N_TT.K741 = "Anchor private aura icons to the bottom-left of the health bar.";
+VUHDO_I18N_TT.K742 = "Anchor private aura icons to the bottom-right of the health bar.";
+VUHDO_I18N_TT.K743 = "Anchor private aura icons to the left of the health bar.";
+VUHDO_I18N_TT.K744 = "Anchor private aura icons to the top of the health bar.";
+VUHDO_I18N_TT.K745 = "Anchor private aura icons to the bottom of the health bar.";
+VUHDO_I18N_TT.K746 = "Anchor private aura icons to the right of the health bar.";
+VUHDO_I18N_TT.K747 = "Horizontal offset of private aura icons from the anchor point (percentage of bar width).";
+VUHDO_I18N_TT.K748 = "Vertical offset of private aura icons from the anchor point (percentage of bar height).";
+VUHDO_I18N_TT.K749 = "Show the cooldown spiral animation on private aura icons.";
+VUHDO_I18N_TT.K750 = "Show clock text on private aura icons (requires Show Clock to be enabled).";
+VUHDO_I18N_TT.K751 = "Show timer text below or beside private aura icons.";
+VUHDO_I18N_TT.K752 = "Show a border around private aura icons.";
+VUHDO_I18N_TT.K753 = "Layer order of private aura icons (0 = behind other elements, 13 = on top).";
+VUHDO_I18N_TT.K754 = "Arrange private aura icons in a horizontal or vertical row.";
+VUHDO_I18N_TT.K755 = "Where to show the timer text relative to the icon (below or above).";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1340,6 +1362,19 @@ VUHDO_I18N_X = "X";
 VUHDO_I18N_Y = "Y";
 
 VUHDO_I18N_PRIVATE_AURAS = "Private Auras";
+VUHDO_I18N_PRIVATE_AURAS_RADIO = "Private\nAuras";
+VUHDO_I18N_PRIVATE_AURA_NUM = "Number";
+VUHDO_I18N_PRIVATE_AURA_ORIENTATION = "Orientation";
+VUHDO_I18N_PRIVATE_AURA_SPACING = "Spacing";
+VUHDO_I18N_PRIVATE_AURA_ICON_SIZE = "Icon Size";
+VUHDO_I18N_PRIVATE_AURA_SHOW_COOLDOWN = "Show Clock";
+VUHDO_I18N_PRIVATE_AURA_SHOW_COOLDOWN_NUMBERS = "Clock Text";
+VUHDO_I18N_PRIVATE_AURA_SHOW_DURATION = "Timer Text";
+VUHDO_I18N_PRIVATE_AURA_SHOW_BORDER = "Show\nBorder";
+VUHDO_I18N_PRIVATE_AURA_FRAME_LEVEL = "Frame Level";
+VUHDO_I18N_PRIVATE_AURA_DURATION_BELOW = "Below";
+VUHDO_I18N_PRIVATE_AURA_DURATION_ABOVE = "Above";
+VUHDO_I18N_PRIVATE_AURA_DURATION_LABEL = "Timer Position";
 
 VUHDO_I18N_PETS_LAST = "Pets last";
 
