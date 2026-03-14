@@ -437,7 +437,7 @@ VUHDO_I18N_TT.K361 = "Select to show target bars left of health bars."
 VUHDO_I18N_TT.K362 = "Select to show target bars right of health bars."
 VUHDO_I18N_TT.K363 = "Select damage flash sensivity. A bigger value means more flashing (on lower damage).";
 VUHDO_I18N_TT.K364 = "Check to hide life text if life is above irrelevance trigger.";
-VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when key layout is being loaded.";
 VUHDO_I18N_TT.K366 = "Check this to target the unit you are healing at the same time.";
 VUHDO_I18N_TT.K367 = "This menu will let you select what kind of incoming heals will be detected.";
 VUHDO_I18N_TT.K376 = "Select to align groups at the bottom of the panel (at the right, when \"horizontal\" is selected above).";
@@ -664,7 +664,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
-VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when key layout is being loaded.";
 VUHDO_I18N_TT.K610 = "Check to hide standard Blizzard boss frames.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1383,7 +1383,7 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
-VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only\nAnchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "This debuff is in the ignore list and will be hidden.";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignoring \"%s\" overrides existing custom debuff settings.";

@@ -447,7 +447,7 @@ VUHDO_I18N_TT.K361 = "S\195\169lectionnez pour afficher les barres cible \195\16
 VUHDO_I18N_TT.K362 = "S\195\169lectionnez pour afficher les barres cible \195\160 droite des barres de sant\195\169."
 VUHDO_I18N_TT.K363 = "S\195\169lectionnez la sensibilit\195\169 du flash dommages. Une valeur plus grande signifie plus de clignotement (en bas/dommages).";
 VUHDO_I18N_TT.K364 = "Cochez pour cacher le texte de vie si la vie est au-dessus de d\195\169clenchement.";
-VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when key layout is being loaded.";
 VUHDO_I18N_TT.K366 = "Cochez cette case pour viser l'unit\195\169 que vous gu\195\169rissez en m\195\170me temps";
 VUHDO_I18N_TT.K367 = "Ce menu vous permet de choisir, quel type de soin entrant sera d\195\169tect\195\169.";
 VUHDO_I18N_TT.K376 = "Select to align groups at the bottom of the panel (at the right, when \"horizontal\" is selected above).";
@@ -674,7 +674,7 @@ VUHDO_I18N_TT.K605 = "Cochez ceci pour utiliser la couleur d\195\169grad\195\169
 VUHDO_I18N_TT.K606 = "S\195\169lectionnez la couleur maximale d\195\169grad\195\169e.";
 VUHDO_I18N_TT.K607 = "Cliquez pour changer de couleur afin d'indiquer les ennemis affect\195\169s par les buffs de rage.";
 VUHDO_I18N_TT.K608 = "Cochez pour ignorer les buffs purifiables sur les ennemis.";
-VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when key layout is being loaded.";
 VUHDO_I18N_TT.K610 = "Cochez pour cacher l'affichage standard de blizzard du cadre des boss.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1401,7 +1401,7 @@ VUHDO_I18N_MAX_COLOR = "Couleur max";
 VUHDO_I18N_ENRAGE = "Enrager";
 VUHDO_I18N_PURGEABLE_BUFFS = "Buffs\npurgeables";
 
-VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only\nAnchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Ce débuff est dans la liste d'ignorance et sera masqué.";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignorer \"%s\" remplace les paramètres de débuff personnalisés existants.";

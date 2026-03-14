@@ -439,7 +439,7 @@ VUHDO_I18N_TT.K361 = "在血条左边显示目标条."
 VUHDO_I18N_TT.K362 = "在血条右边显示目标条."
 VUHDO_I18N_TT.K363 = "伤害闪烁灵敏度. 较大的数值意味着(对更低的伤害)更强的闪烁 .";
 VUHDO_I18N_TT.K364 = "血量高於警戒线时不显示生命值文字.";
-VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when key layout is being loaded.";
 VUHDO_I18N_TT.K366 = "治疗时切换目标至被治疗者.";
 VUHDO_I18N_TT.K367 = "该面板将帮助你选择需要监测的治疗输入类型.";
 VUHDO_I18N_TT.K376 = "选此，队伍向面板底部对齐（如上项选了\"水平\"，则向右对齐）.";
@@ -666,7 +666,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
-VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when key layout is being loaded.";
 VUHDO_I18N_TT.K610 = "隐藏暴雪标准Boss框体.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1386,7 +1386,7 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
-VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only\nAnchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "此debuff在忽略列表中，将被隐藏。";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "忽略 \"%s\" 将覆盖现有的自定义debuff设置。";
