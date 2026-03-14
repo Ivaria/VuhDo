@@ -8,7 +8,7 @@ VUHDO_GLOBAL_CONFIG = {
 	["PROFILES_VERSION"] = 1;
 };
 
-VUHDO_AURA_IGNORE_LIST = VUHDO_AURA_IGNORE_LIST or {
+VUHDO_AURA_IGNORE_LIST_DEFAULTS = {
 	[57724] = true, -- Sated (Bloodlust)
 	[57723] = true, -- Exhaustion (Heroism)
 	[80354] = true, -- Temporal Displacement (Time Warp)
@@ -20,6 +20,31 @@ VUHDO_AURA_IGNORE_LIST = VUHDO_AURA_IGNORE_LIST or {
 	[390435] = true, -- Exhaustion (alternate)
 	[1227806] = true, -- Lifebloom (hidden player aura)
 };
+
+
+
+--
+function VUHDO_initAuraIgnoreList()
+
+	if not VUHDO_AURA_IGNORE_LIST then
+		VUHDO_AURA_IGNORE_LIST = { };
+	else
+		table.wipe(VUHDO_AURA_IGNORE_LIST);
+	end
+
+	for tKey, _ in pairs(VUHDO_AURA_IGNORE_LIST_DEFAULTS) do
+		VUHDO_AURA_IGNORE_LIST[tKey] = true;
+	end
+
+	return;
+
+end
+
+
+
+if not VUHDO_AURA_IGNORE_LIST then
+	VUHDO_initAuraIgnoreList();
+end
 
 
 --
