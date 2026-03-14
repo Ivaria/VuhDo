@@ -1857,11 +1857,12 @@ do
 	local tAuraResultSlot;
 	local tAuraInstances;
 	local tCachedAura;
+	local tSpellId;
 	local tSecretBool;
 	local tWorkingColor = { };
 	local tSecretContext = { };
 	local tSecretColor;
-	function VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, aInfo, aResolvedUnit, aBouquet, aAnzInfos, aLayerTemplate)
+	function VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, aInfo, aBouquet, aAnzInfos, aLayerTemplate)
 
 		txState["activeAuras"] = 0;
 
@@ -1930,14 +1931,14 @@ do
 					if tAuraResultSlot then
 						tName = tInfos["name"];
 						tIsActive = false;
+						tSpellId = tonumber(tName);
 
-						tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit] and
-							(VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit][tName] or
-								(tonumber(tName) and VUHDO_UNIT_AURA_BY_SPELL[aResolvedUnit][tonumber(tName)]));
+						tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aUnit] and
+							(VUHDO_UNIT_AURA_BY_SPELL[aUnit][tName] or (tSpellId and VUHDO_UNIT_AURA_BY_SPELL[aUnit][tSpellId]));
 
 						if tAuraInstances then
 							for _, tAuraInstanceId in ipairs(tAuraInstances) do
-								if not ShouldUnitAuraInstanceBeSecret(aResolvedUnit, tAuraInstanceId) then
+								if not ShouldUnitAuraInstanceBeSecret(aUnit, tAuraInstanceId) then
 									tCachedAura = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
 
 									if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tInfos) then
@@ -2072,7 +2073,7 @@ do
 									tCurveResultSlot["r"], tCurveResultSlot["g"], tCurveResultSlot["b"], tCurveResultSlot["a"] = tSecretColor:GetRGBA();
 								end
 
-								tCurveResultSlot["value"] = UnitHealthPercent(aResolvedUnit);
+								tCurveResultSlot["value"] = UnitHealthPercent(aUnit);
 								tCurveResultSlot["timer"] = tTimer or 0;
 								tCurveResultSlot["duration"] = tDuration or 0;
 								tCurveResultSlot["timer2"] = tTimer2 or 0;
@@ -2092,7 +2093,7 @@ do
 										tSecretColor:GetRGBA();
 								end
 
-								tCurveResultSlot["value"] = UnitPowerPercent(aResolvedUnit, aInfo["powertype"]);
+								tCurveResultSlot["value"] = UnitPowerPercent(aUnit, aInfo["powertype"]);
 								tCurveResultSlot["timer"] = tTimer or 0;
 								tCurveResultSlot["duration"] = tDuration or 0;
 								tCurveResultSlot["timer2"] = tTimer2 or 0;
@@ -2470,7 +2471,7 @@ do
 	local tFactor;
 	local tMaxColor;
 	local tWorkingColor = { };
-	function VUHDO_evaluateBouquetNonSecret(aUnit, aInfo, aResolvedUnit, aBouquet, aAnzInfos)
+	function VUHDO_evaluateBouquetNonSecret(aUnit, aInfo, aBouquet, aAnzInfos)
 
 		for tCnt = aAnzInfos, 1, -1  do
 			tInfos = aBouquet[tCnt];
@@ -2532,7 +2533,7 @@ do
 				end
 
 				if tSourceType > 0 then
-					tUnitHot, _ = VUHDO_getUnitHot(aResolvedUnit, tName, tSourceType);
+					tUnitHot, _ = VUHDO_getUnitHot(aUnit, tName, tSourceType);
 
 					if tUnitHot and tUnitHot["auraInstanceId"] then
 						-- tUnitHotInfo: aura icon, expiration, stacks, duration, isMine, name, spell ID
@@ -2725,9 +2726,9 @@ do
 		if sSecretsEnabled and not VUHDO_isConfigDemoUsers() then
 			tLayerTemplate = sBouquetLayerTemplates[aBouquetName];
 
-			VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, tInfo, tUnit, tBouquet, tAnzInfos, tLayerTemplate);
+			VUHDO_evaluateBouquetSecret(tUnit, aBouquetName, tInfo, tBouquet, tAnzInfos, tLayerTemplate);
 		else
-			VUHDO_evaluateBouquetNonSecret(aUnit, tInfo, tUnit, tBouquet, tAnzInfos);
+			VUHDO_evaluateBouquetNonSecret(tUnit, tInfo, tBouquet, tAnzInfos);
 		end
 
 		tHasSecretResults = (tLayerTemplate and (tLayerTemplate["hasCurves"] or tLayerTemplate["hasBools"] or tLayerTemplate["hasDispels"] or tLayerTemplate["hasSecretValues"]))
