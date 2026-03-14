@@ -2757,7 +2757,7 @@ function VUHDO_loadProfileNoInit(aName)
 			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = VUHDO_deepCopyTable(tPanelPositions[tPanelNum]);
 		end
 
-		VUHDO_activateLayoutLoadHotsForPanel(tLayoutName, tPanelNum);
+		VUHDO_activateLayoutLoadAurasForPanel(tLayoutName, tPanelNum);
 	end
 
 	-- @TODO: Warum werden die nicht direkt geladen (ipairs-Problem?)

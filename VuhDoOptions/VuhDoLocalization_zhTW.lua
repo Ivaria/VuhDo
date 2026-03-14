@@ -439,7 +439,7 @@ VUHDO_I18N_TT.K361 = "在血條左邊顯示目標條."
 VUHDO_I18N_TT.K362 = "在血條右邊顯示目標條."
 VUHDO_I18N_TT.K363 = "傷害閃爍靈敏度. 較大的數值意味著(對更低的傷害)更強的閃爍 .";
 VUHDO_I18N_TT.K364 = "血量高於警戒線時不顯示生命值文字.";
-VUHDO_I18N_TT.K365 = "當法術佈局發生變化時應用與HoT設置(選項=>面板=>HoTs) .";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
 VUHDO_I18N_TT.K366 = "治療時切換目標至被治療者.";
 VUHDO_I18N_TT.K367 = "該面板將幫助你選擇需要監測的治療輸入類型.";
 VUHDO_I18N_TT.K376 = "選此，隊伍向面板底部對齊（如上項選了\"水平\"，則向右對齊）.";
@@ -666,7 +666,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
-VUHDO_I18N_TT.K609 = "Check to only apply HoT slot setup (Panels => HoTs => Order) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
 VUHDO_I18N_TT.K610 = "隱藏暴雪標準Boss框體.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1071,7 +1071,7 @@ VUHDO_I18N_SOURCE_DESTINATION = "源/終目標";
 VUHDO_I18N_HIGH = "高";
 -- #+1.251
 VUHDO_I18N_15 = " 15";
-VUHDO_I18N_LOAD_HOTS = "存取HoTs";
+VUHDO_I18N_LOAD_AURAS = "Load Auras";
 VUHDO_I18N_IGNORE_LIST = "忽略列表";
 VUHDO_I18N_FIVE_MAN_MTS = "5人主坦";
 VUHDO_I18N_FILTER_ONLY = "只有過濾器";
@@ -1387,7 +1387,7 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
-VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "此debuff在忽略清單中，將被隱藏。";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "忽略 \"%s\" 將覆蓋現有的自定義debuff設定。";

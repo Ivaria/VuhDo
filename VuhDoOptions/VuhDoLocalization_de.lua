@@ -438,7 +438,7 @@ VUHDO_I18N_TT.K361 = "Diese Option zeigt die Zielbalken links vom Gesundheitsbal
 VUHDO_I18N_TT.K362 = "Diese Option zeigt die Zielbalken rechts vom Gesundheitsbalken."
 VUHDO_I18N_TT.K363 = "Wählen Sie die Empfindlichkeit des Schadensblitzens. Je größer der Wert desto geringer der Schaden, der nötig ist, um das Blitzen auszulösen.";
 VUHDO_I18N_TT.K364 = "Wählen Sie diese Option um den Lebenstext zu verstecken, wenn das Leben überhalb der Irrelevant-Schwelle ist.";
-VUHDO_I18N_TT.K365 = "Wählen Sie diese Option, um die HoT-Einstellungen zusammen mit der Tastaturbelegung zu laden.";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
 VUHDO_I18N_TT.K366 = "Wählen Sie diese Funktion, um beim Heilen den Geheilten auch gleichzeitg ins Ziel zu nehmen.";
 VUHDO_I18N_TT.K367 = "In diesem Menü können Sie auswählen, ob und welche Arten eingehender Heilung Sie sehen möchten.";
 VUHDO_I18N_TT.K376 = "Wählen Sie diese Option, um die Heilbalken unten innerhalb der Gruppe anzuordnen. (bzw. rechts, wenn \"horizontal\" angewählt ist).";
@@ -665,7 +665,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
-VUHDO_I18N_TT.K609 = "Check to only apply HoT slot setup (Panels => HoTs => Order) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
 VUHDO_I18N_TT.K610 = "Wählen Sie diese Option, um die Blizzard Standard Boss-Anzeige auszublenden.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1071,7 +1071,7 @@ VUHDO_I18N_SOURCE_DESTINATION = "Quelle/Ziel";
 VUHDO_I18N_HIGH = "Hoch";
 -- #+1.251
 VUHDO_I18N_15 = " 15";
-VUHDO_I18N_LOAD_HOTS = "Lade HoTs";
+VUHDO_I18N_LOAD_AURAS = "Load Auras";
 VUHDO_I18N_IGNORE_LIST = "Ignorieren";
 VUHDO_I18N_FIVE_MAN_MTS = "5-Mann MTs";
 VUHDO_I18N_FILTER_ONLY = "nur Filter";
@@ -1384,7 +1384,7 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
-VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Dieser Debuff ist in der Ignorierliste und wird versteckt.";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignorieren von \"%s\" überschreibt bestehende benutzerdefinierte Debuff-Einstellungen.";

@@ -526,7 +526,7 @@ VUHDO_I18N_TT.K361 = "Выберите для отображения панел�
 VUHDO_I18N_TT.K362 = "Выберите для отображения панелей цели справа от полос здоровья."
 VUHDO_I18N_TT.K363 = "Выберите чувствительность вспышки при уроне. Большее значение означает более частые вспышки (при меньшем уроне).";
 VUHDO_I18N_TT.K364 = "Отметьте, чтобы скрыть текст здоровья, если здоровье выше определенного значения.";
-VUHDO_I18N_TT.K365 = "Отметьте, чтобы применять настройки HoT'ов (Панели --> HoT) при смене профиля назначений.";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
 VUHDO_I18N_TT.K366 = "Отметьте это для взятия в цель игрока, которого вы исцеляете в текущий момент";
 VUHDO_I18N_TT.K367 = "Это меню позволит вам выбрать какие входящие исцеления будут обнаруживаться.";
 VUHDO_I18N_TT.K368 = "Выберите интервал времени в будущем, втечение которого направленные заклинания исцеления будут отображаться.";
@@ -769,7 +769,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
-VUHDO_I18N_TT.K609 = "Check to only apply HoT slot setup (Panels => HoTs => Order) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
 VUHDO_I18N_TT.K610 = "Отметьте, чтобы скрыть стандартный фрейм боссов.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1185,7 +1185,7 @@ VUHDO_I18N_GLOSSY = "Блестящий\nквадрат";
 VUHDO_I18N_DAMAGE_FLASH = "Мигать\nпри уроне";
 VUHDO_I18N_SENSIVITY = "Чувствительность";
 VUHDO_I18N_HIDE_IRRELEVANT = "Скрыть\nздоровых";
-VUHDO_I18N_LOAD_HOTS = "Загрузить\nHoT'ы";
+VUHDO_I18N_LOAD_AURAS = "Load Auras";
 VUHDO_I18N_CASTED = "Обычное";
 VUHDO_I18N_CHANNELLED = "Потоковое";
 VUHDO_I18N_BOMBED = "Бомбовое";
@@ -1239,7 +1239,7 @@ VUHDO_I18N_HIGH = "Высокий";
 
 -- #+1.251
 VUHDO_I18N_15 = " 15";
-VUHDO_I18N_LOAD_HOTS = "Загрузить\nHoT'ы";
+VUHDO_I18N_LOAD_AURAS = "Load Auras";
 VUHDO_I18N_IGNORE_LIST = "Список исключений";
 VUHDO_I18N_FIVE_MAN_MTS = "5 чел ГТ";
 VUHDO_I18N_FILTER_ONLY = "Только\nвыбранные";
@@ -1561,7 +1561,7 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
-VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Этот дебафф находится в списке игнорирования и будет скрыт.";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Игнорирование \"%s\" переопределяет существующие настройки пользовательского дебаффа.";

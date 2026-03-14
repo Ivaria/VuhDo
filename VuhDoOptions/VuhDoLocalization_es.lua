@@ -445,7 +445,7 @@ VUHDO_I18N_TT.K361 = "Select to show target bars left of health bars."
 VUHDO_I18N_TT.K362 = "Select to show target bars right of health bars."
 VUHDO_I18N_TT.K363 = "Select damage flash sensivity. A bigger value means more flashing (on lower damage).";
 VUHDO_I18N_TT.K364 = "Check to hide life text if life is above irrelevance trigger.";
-VUHDO_I18N_TT.K365 = "Check to apply HoT setup (Options=>Panels=>HoTs) when spell layout changes.";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
 VUHDO_I18N_TT.K366 = "Check this to target the unit you are healing at the same time.";
 VUHDO_I18N_TT.K367 = "This menu will let you select what kind of incoming heals will be detected.";
 VUHDO_I18N_TT.K376 = "Select to align groups at the bottom of the panel (at the right, when \"horizontal\" is selected above).";
@@ -672,7 +672,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
-VUHDO_I18N_TT.K609 = "Check to only apply HoT slot setup (Panels => HoTs => Order) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
 VUHDO_I18N_TT.K610 = "Marque para ocultar los marcos estándar de jefe de Blizzard.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1083,7 +1083,7 @@ VUHDO_I18N_SOURCE_DESTINATION = "Source/Destination";
 VUHDO_I18N_HIGH = "High";
 -- #+1.251
 VUHDO_I18N_15 = " 15";
-VUHDO_I18N_LOAD_HOTS = "Load HoTs";
+VUHDO_I18N_LOAD_AURAS = "Load Auras";
 VUHDO_I18N_IGNORE_LIST = "Ignore List";
 VUHDO_I18N_FIVE_MAN_MTS = "5 man MTs";
 VUHDO_I18N_FILTER_ONLY = "Filter only";
@@ -1399,7 +1399,7 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
-VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Este debuff está en la lista de ignorar y será ocultado.";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignorar \"%s\" anula la configuración de debuff personalizada existente.";

@@ -441,7 +441,7 @@ VUHDO_I18N_TT.K361 = "체력바 왼쪽에 대상바를 표시하려면 선택하
 VUHDO_I18N_TT.K362 = "체력바 오른쪽에 대상바를 표시하려면 선택하십시오.";
 VUHDO_I18N_TT.K363 = "데미지 플래시 감도를 선택하십시오. 값이 클수록 깜박임이 증가합니다(데미지가 적을 때).";
 VUHDO_I18N_TT.K364 = "생명력이 관련성이 없는 작동 요인보다 높은 경우 생명력 텍스트를 숨기려면 확인하십시오.";
-VUHDO_I18N_TT.K365 = "주문 레이아웃을 로드 할 때 HoT 설정(패널 => HoT)도 적용해야합니다.";
+VUHDO_I18N_TT.K365 = "Check to also apply aura settings when spell layout is being loaded.";
 VUHDO_I18N_TT.K366 = "치유하고있는 유닛을 동시에 대상으로 정하려면 선택하십시오.";
 VUHDO_I18N_TT.K367 = "이 메뉴를 통해 어떤 종류의 들어오는 치유가 감지되는지 선택할 수 있습니다.";
 VUHDO_I18N_TT.K376 = "패널 하단에서 그룹을 정렬하려면 선택합니다(오른쪽, \"수평\"이 선택된 경우).";
@@ -668,7 +668,7 @@ VUHDO_I18N_TT.K605 = "Check this to use gradient color.";
 VUHDO_I18N_TT.K606 = "Select the maximum gradient color.";
 VUHDO_I18N_TT.K607 = "Click to change color to indicate enemies affected by enrage buffs.";
 VUHDO_I18N_TT.K608 = "Check to ignore purgeable buffs on enemies.";
-VUHDO_I18N_TT.K609 = "Check to only apply HoT slot setup (Panels => HoTs => Order) when spell layout is being loaded.";
+VUHDO_I18N_TT.K609 = "Check to only apply aura anchor settings (not groups) when spell layout is being loaded.";
 VUHDO_I18N_TT.K610 = "체크시 블리자드 기본 보스창을 숨깁니다.";
 VUHDO_I18N_TT.K611 = "Select an aura group";
 VUHDO_I18N_TT.K612 = "Filter auras (read-only for built-in groups)";
@@ -1072,7 +1072,7 @@ VUHDO_I18N_SOURCE_DESTINATION = "근원/목적";
 VUHDO_I18N_HIGH = "높음";
 -- #+1.251
 VUHDO_I18N_15 = " 15";
-VUHDO_I18N_LOAD_HOTS = "로드 HoTs";
+VUHDO_I18N_LOAD_AURAS = "Load Auras";
 VUHDO_I18N_IGNORE_LIST = "무시 목록";
 VUHDO_I18N_FIVE_MAN_MTS = "5인 인던 메인탱커"; -- 임의 수정
 VUHDO_I18N_FILTER_ONLY = "필터 만";
@@ -1389,7 +1389,7 @@ VUHDO_I18N_MAX_COLOR = "Max Color";
 VUHDO_I18N_ENRAGE = "Enrage";
 VUHDO_I18N_PURGEABLE_BUFFS = "Purgeable\nBuffs";
 
-VUHDO_I18N_LOAD_HOTS_ONLY_SLOTS = "Only Slots";
+VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Only Anchors";
 
 VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "이 디버프는 무시 목록에 있어 숨겨집니다.";
 VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "\"%s\" 무시는 기존 사용자 정의 디버프 설정을 덮어씁니다.";
