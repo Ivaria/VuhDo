@@ -34,6 +34,7 @@ VUHDO_AURA_GROUPS_CUSTOM_COLOR = {
 
 VUHDO_AURA_GROUPS_CAN_COLOR_BAR = false;
 VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = false;
+VUHDO_AURA_GROUPS_SOUND = nil;
 VUHDO_AURA_GROUPS_ENABLED = true;
 VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL = { };
 VUHDO_AURA_GROUPS_IGNORE_SELECTED = "";
@@ -416,6 +417,8 @@ local tIgnoreLabel;
 local tIgnoreCombo;
 local tIgnoreAddButton;
 local tIgnoreDeleteButton;
+local tSoundCombo;
+local tSoundLabel;
 local tFrame;
 function VUHDO_auraGroupsRefreshRightPanel()
 
@@ -440,6 +443,8 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	tDeleteButton = _G["VuhDoNewOptionsAuraGroupsStorePanelDeleteButton"];
 	tEnabledCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"];
 	tIgnorePanel = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnorePanel"];
+	tSoundCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelSoundCombo"];
+	tSoundLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelSoundLabel"];
 
 	if tDeleteButton then
 		if tGroup and not tIsBuiltIn then
@@ -650,7 +655,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 		if tColorTypeLabel and tListEntriesPanel then
 			tColorTypeLabel:ClearAllPoints();
-			tColorTypeLabel:SetPoint("TOPLEFT", tListEntriesPanel, "BOTTOMLEFT", 0, -8);
+			tColorTypeLabel:SetPoint("TOPLEFT", tListEntriesPanel, "BOTTOMLEFT", 0, -16);
 		end
 	else
 		if tFilterLabel then
@@ -707,7 +712,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 		if tColorTypeLabel and tFilterCombo then
 			tColorTypeLabel:ClearAllPoints();
-			tColorTypeLabel:SetPoint("TOPLEFT", tFilterCombo, "BOTTOMLEFT", 0, -8);
+			tColorTypeLabel:SetPoint("TOPLEFT", tFilterCombo, "BOTTOMLEFT", 0, -16);
 		end
 
 		if tIgnorePanel then
@@ -768,6 +773,25 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		if tIsBuiltIn then
 			tPrioritySlider:SetAlpha(0.5);
 			tInnerSlider:Disable();
+		end
+	end
+
+	if tSoundLabel and tSoundCombo and tGroup then
+		tSoundLabel:SetShown(true);
+		tSoundCombo:SetShown(true);
+
+		VUHDO_AURA_GROUPS_SOUND = tGroup["sound"];
+
+		VUHDO_lnfComboBoxInitFromModel(tSoundCombo);
+
+		if tIsBuiltIn then
+			tSoundLabel:SetAlpha(0.5);
+			tSoundCombo:Disable();
+			tSoundCombo:SetAlpha(0.5);
+		else
+			tSoundLabel:SetAlpha(1);
+			tSoundCombo:Enable();
+			tSoundCombo:SetAlpha(1);
 		end
 	end
 
@@ -898,6 +922,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = "";
 		VUHDO_AURA_GROUPS_CAN_COLOR_BAR = false;
 		VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = false;
+		VUHDO_AURA_GROUPS_SOUND = nil;
 
 		if tNameEditBox then
 			tNameEditBox:Show();
@@ -933,6 +958,19 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			end
 
 			tPrioritySlider:SetAlpha(0.5);
+		end
+
+		if tSoundLabel then
+			tSoundLabel:Show();
+			tSoundLabel:SetAlpha(0.5);
+		end
+
+		if tSoundCombo then
+			tSoundCombo:Show();
+			tSoundCombo:Disable();
+			tSoundCombo:SetAlpha(0.5);
+
+			VUHDO_lnfComboBoxInitFromModel(tSoundCombo);
 		end
 
 		if tColorTypeCombo then
@@ -996,6 +1034,7 @@ function VUHDO_auraGroupsOnNewGroup()
 		["enabled"] = true,
 		["displayName"] = VUHDO_ensureUniqueAuraGroupDisplayName(VUHDO_I18N_NEW .. " " .. VUHDO_I18N_GROUP),
 		["isHarmful"] = false,
+		["sound"] = nil,
 	};
 
 	sSelectedGroupId = tNewId;
@@ -1122,6 +1161,29 @@ function VUHDO_auraGroupsPriorityChanged(aComponent, aValue)
 	end
 
 	VUHDO_rebuildCanColorBarGroupsCache();
+
+	return;
+
+end
+
+
+
+--
+local tOldValue = nil;
+local tSuccess;
+function VUHDO_auraGroupsSoundSelect(aComboBox, aValue, anArrayModel)
+
+	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["sound"] = (aValue ~= nil and aValue ~= "") and aValue or nil;
+	end
+
+	if aValue ~= nil and tOldValue ~= aValue then
+		tSuccess = VUHDO_playSoundFile(aValue);
+
+		if tSuccess then
+			tOldValue = aValue;
+		end
+	end
 
 	return;
 

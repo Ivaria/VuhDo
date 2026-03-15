@@ -3165,6 +3165,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["OTHERS_HOTS"] = {
 		["type"] = 1,
@@ -3176,6 +3177,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["ALL_HOTS"] = {
 		["type"] = 1,
@@ -3187,6 +3189,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["DISPELLABLE"] = {
 		["type"] = 1,
@@ -3198,6 +3201,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = true,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["CC_EFFECTS"] = {
 		["type"] = 1,
@@ -3209,6 +3213,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["BIG_DEFENSIVES"] = {
 		["type"] = 1,
@@ -3220,6 +3225,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["EXTERNAL_DEFENSIVES"] = {
 		["type"] = 1,
@@ -3231,6 +3237,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["ALL_DEBUFFS"] = {
 		["type"] = 1,
@@ -3242,6 +3249,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["ALL_BUFFS"] = {
 		["type"] = 1,
@@ -3253,6 +3261,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["MY_BUFFS"] = {
 		["type"] = 1,
@@ -3264,6 +3273,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["OTHERS_BUFFS"] = {
 		["type"] = 1,
@@ -3275,6 +3285,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["ALL_RAID_BUFFS"] = {
 		["type"] = 1,
@@ -3286,6 +3297,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["RAID_DEBUFFS"] = {
 		["type"] = 1,
@@ -3297,6 +3309,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["IMPORTANT_BUFFS"] = {
 		["type"] = 1,
@@ -3308,6 +3321,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["IMPORTANT_DEBUFFS"] = {
 		["type"] = 1,
@@ -3319,6 +3333,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["MY_NAMEPLATE_DEBUFFS"] = {
 		["type"] = 1,
@@ -3330,6 +3345,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["OTHERS_NAMEPLATE_DEBUFFS"] = {
 		["type"] = 1,
@@ -3341,6 +3357,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["ALL_NAMEPLATE_DEBUFFS"] = {
 		["type"] = 1,
@@ -3352,6 +3369,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["MY_DEBUFFS"] = {
 		["type"] = 1,
@@ -3363,6 +3381,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["MY_EXTERNAL_DEFENSIVES"] = {
 		["type"] = 1,
@@ -3374,6 +3393,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["MY_RAID_DEBUFFS"] = {
 		["type"] = 1,
@@ -3385,6 +3405,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["CANCELABLE_BUFFS"] = {
 		["type"] = 1,
@@ -3396,6 +3417,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["NOT_CANCELABLE_BUFFS"] = {
 		["type"] = 1,
@@ -3407,6 +3429,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["TORGHAST_ANIMA"] = {
 		["type"] = 1,
@@ -3418,6 +3441,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorText"] = false,
 		["enabled"] = true,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["PRESERVATION_EVOKER_HOTS"] = {
 		["type"] = 2,
@@ -3437,6 +3461,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["AUGMENTATION_EVOKER_BUFFS"] = {
 		["type"] = 2,
@@ -3456,6 +3481,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["RESTORATION_DRUID_HOTS"] = {
 		["type"] = 2,
@@ -3473,6 +3499,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["DISCIPLINE_PRIEST_HOTS"] = {
 		["type"] = 2,
@@ -3489,6 +3516,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["HOLY_PRIEST_HOTS"] = {
 		["type"] = 2,
@@ -3504,6 +3532,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["MISTWEAVER_MONK_HOTS"] = {
 		["type"] = 2,
@@ -3520,6 +3549,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["RESTORATION_SHAMAN_HOTS"] = {
 		["type"] = 2,
@@ -3537,6 +3567,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["HOLY_PALADIN_HOTS"] = {
 		["type"] = 2,
@@ -3554,6 +3585,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["RAID_BUFFS"] = {
 		["type"] = 2,
@@ -3573,6 +3605,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["BLESSING_OF_BRONZE"] = {
 		["type"] = 2,
@@ -3598,6 +3631,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["ROGUE_POISONS"] = {
 		["type"] = 2,
@@ -3617,6 +3651,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["SHAMAN_WEAPON_IMBUEMENTS"] = {
 		["type"] = 2,
@@ -3637,6 +3672,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["PALADIN_WEAPON_IMBUEMENTS"] = {
 		["type"] = 2,
@@ -3651,6 +3687,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["ENHANCEMENT_SHAMAN_BUFFS"] = {
 		["type"] = 2,
@@ -3664,6 +3701,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["BREWMASTER_MONK_BUFFS"] = {
 		["type"] = 2,
@@ -3677,6 +3715,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	["WARLOCK_METAMORPHOSIS"] = {
 		["type"] = 2,
@@ -3692,6 +3731,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["canColorBar"] = false,
 		["canColorText"] = false,
 		["ignoreList"] = { },
+		["sound"] = nil,
 	},
 	-- ["INFERRED_RIPTIDE"] = {
 	-- 	["filter"] = nil,

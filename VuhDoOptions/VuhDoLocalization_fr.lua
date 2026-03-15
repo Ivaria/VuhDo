@@ -817,6 +817,7 @@ VUHDO_I18N_TT.K752 = "Show a border around private aura icons.";
 VUHDO_I18N_TT.K753 = "Layer order of private aura icons (0 = behind other elements, 13 = on top).";
 VUHDO_I18N_TT.K754 = "Arrange private aura icons in a horizontal or vertical row.";
 VUHDO_I18N_TT.K755 = "Where to show the timer text relative to the icon (below or above).";
+VUHDO_I18N_TT.K756 = "Play this sound when a new aura matching this group is detected on a unit.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Profil par d\195\169faut";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposition \npar d\195\169faut";
