@@ -719,13 +719,50 @@
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentCanColorTextCheckButton" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="8" y="-2" />
+									<AbsDimension x="4" y="-2" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K616);
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<CheckButton name="$parentCanGlowBarCheckButton" text="VUHDO_I18N_AURA_GLOW_BAR" inherits="VuhDoCheckButtonTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentCustomColorTexture" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="4" y="2" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_AURA_GROUPS_CAN_GLOW_BAR");
+								VUHDO_lnfCheckButtonOnLoad(self);
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K757);
+
+								self:SetAttribute("custom_function_post", VUHDO_auraGroupsCanGlowBarChanged);
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<Frame name="$parentGlowBarColorTexture" inherits="VuhDoColorSwatchTexture">
+						<Size>
+							<AbsDimension x="88" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentCanGlowBarCheckButton" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="4" y="-2" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K758);
 							</OnLoad>
 						</Scripts>
 					</Frame>

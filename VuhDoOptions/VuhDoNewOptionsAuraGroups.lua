@@ -34,6 +34,7 @@ VUHDO_AURA_GROUPS_CUSTOM_COLOR = {
 
 VUHDO_AURA_GROUPS_CAN_COLOR_BAR = false;
 VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = false;
+VUHDO_AURA_GROUPS_CAN_GLOW_BAR = false;
 VUHDO_AURA_GROUPS_SOUND = nil;
 VUHDO_AURA_GROUPS_ENABLED = true;
 VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL = { };
@@ -403,6 +404,10 @@ local tColorTypeCombo;
 local tCanColorBarCheck;
 local tCanColorTextCheck;
 local tCustomColorSwatch;
+local tCanUseCustomColor;
+local tCanUseGlow;
+local tCanGlowBarCheck;
+local tGlowBarColorSwatch;
 local tEnabledCheck;
 local tDeleteButton;
 local tIsBuiltIn;
@@ -440,6 +445,8 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	tCanColorBarCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelCanColorBarCheckButton"];
 	tCanColorTextCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelCanColorTextCheckButton"];
 	tCustomColorSwatch = _G["VuhDoNewOptionsAuraGroupsStorePanelCustomColorTexture"];
+	tCanGlowBarCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelCanGlowBarCheckButton"];
+	tGlowBarColorSwatch = _G["VuhDoNewOptionsAuraGroupsStorePanelGlowBarColorTexture"];
 	tDeleteButton = _G["VuhDoNewOptionsAuraGroupsStorePanelDeleteButton"];
 	tEnabledCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"];
 	tIgnorePanel = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnorePanel"];
@@ -857,7 +864,9 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	end
 
 	if tCustomColorSwatch and tGroup then
-		if VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_CUSTOM then
+		if VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_DISPEL then
+			tCustomColorSwatch:SetShown(false);
+		else
 			tCustomColorSwatch:SetShown(true);
 
 			if not tIsBuiltIn then
@@ -877,10 +886,14 @@ function VUHDO_auraGroupsRefreshRightPanel()
 
 				VUHDO_lnfSetModel(tCustomColorSwatch, "VUHDO_CONFIG.AURA_GROUPS." .. sSelectedGroupId .. ".customColor");
 				tCustomColorSwatch:SetAttribute("custom_function_post", VUHDO_auraGroupsCustomColorChanged);
-				tCustomColorSwatch:SetAttribute("disabled", nil);
-				tCustomColorSwatch:SetAlpha(1);
+
+				tCanUseCustomColor = VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_CUSTOM and (VUHDO_AURA_GROUPS_CAN_COLOR_BAR or VUHDO_AURA_GROUPS_CAN_COLOR_TEXT);
+
+				tCustomColorSwatch:SetAttribute("disabled", not tCanUseCustomColor);
+				tCustomColorSwatch:SetAlpha(tCanUseCustomColor and 1 or 0.5);
 			else
 				VUHDO_lnfSetModel(tCustomColorSwatch, "VUHDO_DEFAULT_AURA_GROUPS." .. sSelectedGroupId .. ".customColor");
+
 				tCustomColorSwatch:SetAttribute("disabled", true);
 				tCustomColorSwatch:SetAlpha(0.5);
 			end
@@ -888,9 +901,60 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			VUHDO_lnfInitColorSwatch(tCustomColorSwatch, VUHDO_I18N_AURA_GROUP_CUSTOM_COLOR, VUHDO_I18N_AURA_GROUP_CUSTOM_COLOR);
 			VUHDO_lnfSetTooltip(tCustomColorSwatch, VUHDO_I18N_TT.K616);
 			VUHDO_lnfColorSwatchInitFromModel(tCustomColorSwatch);
-		else
-			tCustomColorSwatch:SetShown(false);
 		end
+	end
+
+	if tCanGlowBarCheck and tGroup then
+		tCanGlowBarCheck:SetShown(true);
+
+		VUHDO_AURA_GROUPS_CAN_GLOW_BAR = tGroup["canGlowBar"];
+
+		VUHDO_lnfCheckButtonInitFromModel(tCanGlowBarCheck);
+
+		if VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_OFF then
+			tCanGlowBarCheck:Disable();
+			tCanGlowBarCheck:SetAlpha(0.5);
+		elseif tIsBuiltIn then
+			tCanGlowBarCheck:Disable();
+			tCanGlowBarCheck:SetAlpha(0.5);
+		else
+			tCanGlowBarCheck:Enable();
+			tCanGlowBarCheck:SetAlpha(1);
+		end
+	end
+
+	if tGlowBarColorSwatch and tGroup then
+		tGlowBarColorSwatch:SetShown(true);
+
+		if not tIsBuiltIn then
+			VUHDO_CONFIG["AURA_GROUPS"] = VUHDO_CONFIG["AURA_GROUPS"] or { };
+
+			if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+				VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] = { };
+			end
+
+			if not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["glowBarColor"] then
+				VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["glowBarColor"] = (VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"] and VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"]) and VUHDO_deepCopyTable(VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"]) or { ["R"] = 0.95, ["G"] = 0.95, ["B"] = 0.32, ["O"] = 1 };
+			end
+
+			VUHDO_lnfSetModel(tGlowBarColorSwatch, "VUHDO_CONFIG.AURA_GROUPS." .. sSelectedGroupId .. ".glowBarColor");
+
+			tGlowBarColorSwatch:SetAttribute("custom_function_post", VUHDO_auraGroupsGlowColorChanged);
+
+			tCanUseGlow = VUHDO_AURA_GROUPS_COLOR_TYPE ~= VUHDO_AURA_GROUP_COLOR_OFF and VUHDO_AURA_GROUPS_CAN_GLOW_BAR;
+
+			tGlowBarColorSwatch:SetAttribute("disabled", not tCanUseGlow);
+			tGlowBarColorSwatch:SetAlpha(tCanUseGlow and 1 or 0.5);
+		else
+			VUHDO_lnfSetModel(tGlowBarColorSwatch, "VUHDO_DEFAULT_AURA_GROUPS." .. sSelectedGroupId .. ".glowBarColor");
+
+			tGlowBarColorSwatch:SetAttribute("disabled", true);
+			tGlowBarColorSwatch:SetAlpha(0.5);
+		end
+
+		VUHDO_lnfInitColorSwatch(tGlowBarColorSwatch, VUHDO_I18N_AURA_GLOW_BAR, VUHDO_I18N_AURA_GLOW_BAR);
+		VUHDO_lnfSetTooltip(tGlowBarColorSwatch, VUHDO_I18N_TT.K758);
+		VUHDO_lnfColorSwatchInitFromModel(tGlowBarColorSwatch);
 	end
 
 	if tEnabledCheck and tGroup then
@@ -922,6 +986,7 @@ function VUHDO_auraGroupsRefreshRightPanel()
 		VUHDO_AURA_GROUPS_EXCLUDE_SELECTED = "";
 		VUHDO_AURA_GROUPS_CAN_COLOR_BAR = false;
 		VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = false;
+		VUHDO_AURA_GROUPS_CAN_GLOW_BAR = false;
 		VUHDO_AURA_GROUPS_SOUND = nil;
 
 		if tNameEditBox then
@@ -1002,6 +1067,19 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tCustomColorSwatch:SetAlpha(0.5);
 		end
 
+		if tCanGlowBarCheck then
+			tCanGlowBarCheck:Show();
+			tCanGlowBarCheck:Disable();
+			tCanGlowBarCheck:SetAlpha(0.5);
+
+			VUHDO_lnfCheckButtonInitFromModel(tCanGlowBarCheck);
+		end
+
+		if tGlowBarColorSwatch then
+			tGlowBarColorSwatch:Show();
+			tGlowBarColorSwatch:SetAlpha(0.5);
+		end
+
 		if tEnabledCheck then
 			tEnabledCheck:Show();
 			tEnabledCheck:Disable();
@@ -1031,6 +1109,8 @@ function VUHDO_auraGroupsOnNewGroup()
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 		["canColorBar"] = true,
 		["canColorText"] = true,
+		["canGlowBar"] = false,
+		["glowBarColor"] = nil,
 		["enabled"] = true,
 		["displayName"] = VUHDO_ensureUniqueAuraGroupDisplayName(VUHDO_I18N_NEW .. " " .. VUHDO_I18N_GROUP),
 		["isHarmful"] = false,
@@ -1433,6 +1513,26 @@ end
 
 
 --
+local tCustomColorSwatchForUpdate;
+local tCanUseCustomColorForUpdate;
+function VUHDO_auraGroupsUpdateCustomColorSwatchState()
+
+	tCustomColorSwatchForUpdate = _G["VuhDoNewOptionsAuraGroupsStorePanelCustomColorTexture"];
+
+	if tCustomColorSwatchForUpdate and tCustomColorSwatchForUpdate:IsShown() then
+		tCanUseCustomColorForUpdate = VUHDO_AURA_GROUPS_COLOR_TYPE == VUHDO_AURA_GROUP_COLOR_CUSTOM and (VUHDO_AURA_GROUPS_CAN_COLOR_BAR or VUHDO_AURA_GROUPS_CAN_COLOR_TEXT);
+
+		tCustomColorSwatchForUpdate:SetAttribute("disabled", not tCanUseCustomColorForUpdate);
+		tCustomColorSwatchForUpdate:SetAlpha(tCanUseCustomColorForUpdate and 1 or 0.5);
+	end
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_auraGroupsCanColorBarChanged(aParent, aValue)
 
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -1440,6 +1540,8 @@ function VUHDO_auraGroupsCanColorBarChanged(aParent, aValue)
 	end
 
 	VUHDO_rebuildCanColorBarGroupsCache();
+
+	VUHDO_auraGroupsUpdateCustomColorSwatchState();
 
 	return;
 
@@ -1453,6 +1555,36 @@ function VUHDO_auraGroupsCanColorTextChanged(aParent, aValue)
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canColorText"] = aValue;
 	end
+
+	VUHDO_rebuildCanColorBarGroupsCache();
+
+	VUHDO_auraGroupsUpdateCustomColorSwatchState();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsCanGlowBarChanged(aParent, aValue)
+
+	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canGlowBar"] = aValue;
+	end
+
+	VUHDO_rebuildCanColorBarGroupsCache();
+
+	VUHDO_auraGroupsRefreshRightPanel();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsGlowColorChanged(aColorSwatch)
 
 	VUHDO_rebuildCanColorBarGroupsCache();
 
