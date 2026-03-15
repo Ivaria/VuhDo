@@ -138,6 +138,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
+
 			<Cooldown name="$parentCd" inherits="CooldownFrameTemplate">
 				<Scripts>
 					<OnLoad>
@@ -149,6 +150,7 @@
 					</OnLoad>
 				</Scripts>
 			</Cooldown>
+
 			<StatusBar name="$parentAuBar" inherits="VuhDoStatusBar" enableMouse="false">
 				<Scripts>
 					<OnLoad>
@@ -157,6 +159,20 @@
 					</OnLoad>
 				</Scripts>
 			</StatusBar>
+
+			<Frame name="$parentChgFr">
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture name="$parentTex" hidden="true"></Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.addLevel = 1;
+					</OnLoad>
+				</Scripts>
+			</Frame>
+
 		</Frames>
 		<Scripts>
 			<OnLoad>
@@ -173,8 +189,6 @@
 			</Layer>
 		</Layers>
 	</Frame>
-
-
 
 	<StatusBar name="VuhDoHotBarTemplate" setAllPoints="true" hidden="false" inherits="VuhDoStatusBar" virtual="true">
 		<Scripts>

@@ -825,7 +825,7 @@ do
 	local tRegion;
 	local function VUHDO_getAuraIconChargeTexture(aChargeFrame)
 
-		_, tRegion = aChargeFrame:GetRegions();
+		tRegion = aChargeFrame:GetRegions();
 
 		return tRegion;
 	end
@@ -875,6 +875,36 @@ do
 		_, _, tCounter = aFrame:GetRegions();
 
 		return tCounter;
+
+	end
+
+
+
+	--
+	local tChargeFrame;
+	local function VUHDO_getAuraBarChargeFrame(aFrame)
+
+		_, _, tChargeFrame = aFrame:GetChildren();
+
+		return tChargeFrame;
+
+	end
+
+
+
+	--
+	local tRegion;
+	local function VUHDO_getAuraBarChargeTexture(aFrame)
+
+		tChargeFrame = VUHDO_getAuraBarChargeFrame(aFrame);
+
+		if not tChargeFrame then
+			return nil;
+		end
+
+		tRegion = tChargeFrame:GetRegions();
+
+		return tRegion;
 
 	end
 
@@ -1135,6 +1165,10 @@ do
 
 		if aFrame["childB"] and aFrame["childB"]["chargeTexture"] then
 			aFrame["childB"]["chargeTexture"]:Hide();
+		end
+
+		if aFrame["chargeTexture"] then
+			aFrame["chargeTexture"]:Hide();
 		end
 
 		VUHDO_safeSetAttribute(aFrame, "vuhdo_button", nil);
@@ -1537,6 +1571,7 @@ do
 		tFrame["childIcon"] = VUHDO_getAuraBarIconTexture(tFrame);
 		tFrame["timerText"] = VUHDO_getAuraBarTimer(tFrame);
 		tFrame["countText"] = VUHDO_getAuraBarCounter(tFrame);
+		tFrame["chargeTexture"] = VUHDO_getAuraBarChargeTexture(tFrame);
 
 		tParent = _G[aButton:GetName() .. "BgBarHlBar"];
 
@@ -2224,6 +2259,11 @@ do
 						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
 					end
 
+					if aFrame["chargeTexture"] and aFrame["childIcon"] then
+						aFrame["chargeTexture"]:ClearAllPoints();
+						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
+					end
+
 					aFrame["childBar"]:ClearAllPoints();
 					VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "TOP", aFrame["childIcon"], "BOTTOM", 0, 0);
 					VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, tBarHeight);
@@ -2235,6 +2275,11 @@ do
 					if aFrame["cooldownFrame"] and aFrame["childIcon"] then
 						aFrame["cooldownFrame"]:ClearAllPoints();
 						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+					end
+
+					if aFrame["chargeTexture"] and aFrame["childIcon"] then
+						aFrame["chargeTexture"]:ClearAllPoints();
+						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
 					end
 
 					aFrame["childBar"]:ClearAllPoints();
@@ -2252,6 +2297,11 @@ do
 						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
 					end
 
+					if aFrame["chargeTexture"] and aFrame["childIcon"] then
+						aFrame["chargeTexture"]:ClearAllPoints();
+						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
+					end
+
 					aFrame["childBar"]:ClearAllPoints();
 					VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "RIGHT", aFrame["childIcon"], "LEFT", 0, 0);
 					VUHDO_PixelUtil.SetSize(aFrame["childBar"], tBarWidth, tBarHeight);
@@ -2263,6 +2313,11 @@ do
 					if aFrame["cooldownFrame"] and aFrame["childIcon"] then
 						aFrame["cooldownFrame"]:ClearAllPoints();
 						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+					end
+
+					if aFrame["chargeTexture"] and aFrame["childIcon"] then
+						aFrame["chargeTexture"]:ClearAllPoints();
+						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
 					end
 
 					aFrame["childBar"]:ClearAllPoints();
@@ -2580,6 +2635,11 @@ do
 							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
 						end
 
+						if aFrame["chargeTexture"] and aFrame["childIcon"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
+						end
+
 						tChild:ClearAllPoints();
 						VUHDO_PixelUtil.SetPoint(tChild, "TOP", aFrame["childIcon"], "BOTTOM", 0, 0);
 						VUHDO_PixelUtil.SetSize(tChild, tIconSize, tBarHeight);
@@ -2591,6 +2651,11 @@ do
 						if aFrame["cooldownFrame"] and aFrame["childIcon"] then
 							aFrame["cooldownFrame"]:ClearAllPoints();
 							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+						end
+
+						if aFrame["chargeTexture"] and aFrame["childIcon"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
 						end
 
 						tChild:ClearAllPoints();
@@ -2609,6 +2674,11 @@ do
 							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
 						end
 
+						if aFrame["chargeTexture"] and aFrame["childIcon"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
+						end
+
 						tChild:ClearAllPoints();
 						VUHDO_PixelUtil.SetPoint(tChild, "RIGHT", aFrame["childIcon"], "LEFT", 0, 0);
 						VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
@@ -2620,6 +2690,11 @@ do
 						if aFrame["cooldownFrame"] and aFrame["childIcon"] then
 							aFrame["cooldownFrame"]:ClearAllPoints();
 							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+						end
+
+						if aFrame["chargeTexture"] and aFrame["childIcon"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
 						end
 
 						tChild:ClearAllPoints();
@@ -3268,7 +3343,7 @@ do
 			if tShowStacks and tStackType == 2 and aChargeTexture then
 				tApplications = anAuraData["applications"];
 
-				if tApplications and not issecretvalue(tApplications) and tApplications > 0 then
+				if tApplications and (issecretvalue(tApplications) or tApplications > 0) then
 					aChargeTexture:SetTexture("Interface\\AddOns\\VuhDo\\Images\\aura_stacks_spritesheet");
 					aChargeTexture:SetSpriteSheetCell(tApplications, 1, 8);
 
@@ -3280,6 +3355,7 @@ do
 						aChargeTexture:SetVertexColor(1, 1, 1, 1);
 					end
 
+					aChargeTexture:SetAlpha(tApplications);
 					aChargeTexture:Show();
 				else
 					aChargeTexture:Hide();
@@ -3509,7 +3585,7 @@ do
 
 		VUHDO_updateAuraIconDisplay(tBarFrame["childIcon"], tBarFrame["cooldownFrame"], nil, anAnchorConfig, anAuraData, tDurationObj, tUnit);
 
-		VUHDO_updateAuraTimerAndStacks(tBarFrame["timerText"], tBarFrame["countText"], nil, anAnchorConfig, anAuraData, tDurationObj, tUnit);
+		VUHDO_updateAuraTimerAndStacks(tBarFrame["timerText"], tBarFrame["countText"], tBarFrame["chargeTexture"], anAnchorConfig, anAuraData, tDurationObj, tUnit);
 
 		tBar:SetAlpha(1);
 
