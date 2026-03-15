@@ -2934,6 +2934,9 @@ local tGroup;
 local tListSlots;
 local tSlotData;
 local tSlotDataAsAura;
+local tFixedSlots;
+local tDisplaySlotIndex;
+local tActualSlot;
 function VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig, anAnchorSlots, aMaxSlots)
 
 	if not aUnit or not aPanelNum or not anAnchorIndex or not anAnchorConfig then
@@ -2950,12 +2953,18 @@ function VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, an
 
 	if tGroup and (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
 		tListSlots = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex];
+		tFixedSlots = anAnchorConfig["fixedSlots"];
 
 		for _, tButton in pairs(tPanelUnitButtons) do
+			tDisplaySlotIndex = 0;
+
 			for tSlotIndex = 1, aMaxSlots do
 				tSlotData = tListSlots and tListSlots[tSlotIndex];
 
 				if tSlotData and tSlotData["isActive"] then
+					tDisplaySlotIndex = tDisplaySlotIndex + 1;
+					tActualSlot = tFixedSlots and tSlotIndex or tDisplaySlotIndex;
+
 					tSlotDataAsAura = sSlotDataAsAuraPool:get();
 
 					tSlotDataAsAura["icon"] = tSlotData["icon"];
@@ -2970,10 +2979,16 @@ function VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, an
 					tSlotDataAsAura["clipB"] = tSlotData["clipB"];
 					tSlotDataAsAura["color"] = tSlotData["color"];
 
-					VUHDO_displayAuraInSlot(tButton, aPanelNum, anAnchorIndex, tSlotIndex, tSlotDataAsAura, anAnchorConfig);
+					VUHDO_displayAuraInSlot(tButton, aPanelNum, anAnchorIndex, tActualSlot, tSlotDataAsAura, anAnchorConfig);
 
 					sSlotDataAsAuraPool:release(tSlotDataAsAura);
-				else
+				elseif tFixedSlots then
+					VUHDO_hideAuraSlot(tButton, anAnchorIndex, tSlotIndex, anAnchorConfig["style"] == "bars");
+				end
+			end
+
+			if not tFixedSlots then
+				for tSlotIndex = tDisplaySlotIndex + 1, aMaxSlots do
 					VUHDO_hideAuraSlot(tButton, anAnchorIndex, tSlotIndex, anAnchorConfig["style"] == "bars");
 				end
 			end
