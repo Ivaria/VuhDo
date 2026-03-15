@@ -358,6 +358,12 @@ do
 
 		VUHDO_clearDispellableAuraCache(nil);
 
+		if VUHDO_RAID then
+			for tUnit, _ in pairs(VUHDO_RAID) do
+				VUHDO_updateDispellableAuraForUnit(tUnit);
+			end
+		end
+
 		return;
 
 	end
