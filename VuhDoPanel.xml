@@ -92,7 +92,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="VuhDoAuraAnchorIconTemplate" virtual="true" inherits="SecureHandlerEnterLeaveTemplate">
+	<Frame name="VuhDoAuraAnchorIconTemplate" virtual="true">
 		<Frames>
 			<Frame name="$parentB" enableMouse="false" inherits="BackdropTemplate">
 				<Layers>
@@ -129,7 +129,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="VuhDoAuraAnchorBarTemplate" virtual="true" inherits="SecureHandlerEnterLeaveTemplate">
+	<Frame name="VuhDoAuraAnchorBarTemplate" virtual="true">
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture name="$parentIcTex"></Texture>

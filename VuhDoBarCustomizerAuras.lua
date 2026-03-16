@@ -45,8 +45,6 @@ local VUHDO_UIFrameFlash;
 local VUHDO_UIFrameFlashStop;
 
 local VUHDO_safeSetAttribute;
-local VUHDO_safeWrapScript;
-local VUHDO_findButtonFromChild;
 local VUHDO_getUnitButtonsPanel;
 local VUHDO_getHealthBar;
 local VUHDO_getHealthBarWidth;
@@ -440,8 +438,6 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_UIFrameFlashStop = _G["VUHDO_UIFrameFlashStop"];
 
 	VUHDO_safeSetAttribute = _G["VUHDO_safeSetAttribute"];
-	VUHDO_safeWrapScript = _G["VUHDO_safeWrapScript"];
-	VUHDO_findButtonFromChild = _G["VUHDO_findButtonFromChild"];
 	VUHDO_getUnitButtonsPanel = _G["VUHDO_getUnitButtonsPanel"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getHealthBarWidth = _G["VUHDO_getHealthBarWidth"];
@@ -1171,7 +1167,7 @@ do
 			aFrame["chargeTexture"]:Hide();
 		end
 
-		VUHDO_safeSetAttribute(aFrame, "vuhdo_button", nil);
+		aFrame["vuhdo_button"] = nil;
 
 		aFrame:Hide();
 		aFrame:ClearAllPoints();
@@ -1302,143 +1298,52 @@ do
 
 
 	--
-	local sAuraOnEnterSnippet = [[
-		if sHealButton then
-			sHealButton:ClearBindings();
-		end
+	local tFocus;
+	local function VUHDO_auraFrameOnLeave(aAuraFrame)
 
-		tFrame = self:GetAttribute("vuhdo_button");
+		VUHDO_hideAuraTooltip();
 
-		if not tFrame then
-			tFrame = self:GetParent();
+		tFocus = VUHDO_getMouseFocus();
 
-			while tFrame do
-				if tFrame:GetAttribute("vuhdo_button_marker") then
-					break;
-				end
-
-				tFrame = tFrame:GetParent();
-			end
-		end
-
-		if tFrame then
-			sHealButton = tFrame;
-			tBody = tFrame:GetAttribute("vuhdo_onenter");
-
-			if tBody then
-				owner:RunFor(tFrame, tBody);
-			end
-
-			sCliqueHeader = owner:GetFrameRef("sCliqueHeader");
-
-			if sCliqueHeader then
-				tCliqueEnter = sCliqueHeader:GetAttribute("setup_onenter");
-
-				if tCliqueEnter then
-					sCliqueHeader:RunFor(tFrame, tCliqueEnter);
-				end
-			end
+		if tFocus and VUHDO_findButtonFromChild(tFocus) == aAuraFrame["vuhdo_button"] then
+			VuhDoActionOnEnter(aAuraFrame["vuhdo_button"]);
 		else
-			sHealButton = nil;
-		end
-	]];
-
-	local sAuraOnLeaveSnippet = [[
-		tFrame = self:GetAttribute("vuhdo_button");
-
-		if not tFrame then
-			tFrame = self:GetParent();
-
-			while tFrame do
-				if tFrame:GetAttribute("vuhdo_button_marker") then
-					break;
-				end
-
-				tFrame = tFrame:GetParent();
-			end
+			VuhDoActionOnLeave(aAuraFrame["vuhdo_button"]);
 		end
 
-		if tFrame then
-			tFrame:ClearBindings();
-			sHealButton = nil;
-			tBody = tFrame:GetAttribute("vuhdo_onleave");
+		return;
 
-			if tBody then
-				owner:RunFor(tFrame, tBody);
-			end
-
-			sCliqueHeader = owner:GetFrameRef("sCliqueHeader");
-
-			if sCliqueHeader then
-				tCliqueLeave = sCliqueHeader:GetAttribute("setup_onleave");
-
-				if tCliqueLeave then
-					sCliqueHeader:RunFor(tFrame, tCliqueLeave);
-				end
-			end
-		else
-			if sHealButton then
-				sHealButton:ClearBindings();
-
-				sHealButton = nil;
-			end
-		end
-	]];
+	end
 
 
 
 	--
-	local tHeaderFrame;
-	local function VUHDO_initAuraFrameSecureHandlers(aFrame, aButton)
+	local function VUHDO_setupAuraFrameForTooltips(aFrame, aButton)
 
 		if not aFrame or not aButton then
 			return;
 		end
 
-		VUHDO_safeSetAttribute(aFrame, "vuhdo_button", aButton);
+		aFrame["vuhdo_button"] = aButton;
 
 		if aButton["raidid"] then
-			VUHDO_safeSetAttribute(aFrame, "unit", aButton["raidid"]);
 			aFrame["raidid"] = aButton["raidid"];
 		end
 
-		if aFrame:GetAttribute("vuhdo_aura_secure_init") then
-			return;
-		end
-
 		if not aFrame:GetAttribute("vd_tt_hook") then
-			aFrame:SetScript("OnEnter", function(self)
-				if not VUHDO_showAuraTooltip(self) then
-					VuhDoActionOnEnter(VUHDO_findButtonFromChild(self));
-				end
-			end);
-
-			aFrame:SetScript("OnLeave", function(self)
-				VUHDO_hideAuraTooltip();
-
-				VuhDoActionOnLeave(VUHDO_findButtonFromChild(self));
-			end);
+			aFrame:SetScript("OnLeave", VUHDO_auraFrameOnLeave);
 
 			VUHDO_safeSetAttribute(aFrame, "vd_tt_hook", true);
 		end
 
-		if not aFrame:GetAttribute("vuhdo_secureheader_wrap") then
-			tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
-
-			if tHeaderFrame then
-				VUHDO_safeWrapScript(tHeaderFrame, aFrame, "OnEnter", sAuraOnEnterSnippet);
-				VUHDO_safeWrapScript(tHeaderFrame, aFrame, "OnLeave", sAuraOnLeaveSnippet);
-
-				VUHDO_safeSetAttribute(aFrame, "vuhdo_secureheader_wrap", true);
-			end
+		if not InCombatLockdown() then
+			aFrame:EnableMouse(true);
+			aFrame:SetPropagateMouseMotion(true);
+			aFrame:SetPropagateMouseClicks(true);
+			aFrame:SetMouseClickEnabled(false);
+			aFrame:EnableKeyboard(false);
+			aFrame:SetPropagateKeyboardInput(true);
 		end
-
-		aFrame:EnableMouse(false);
-		aFrame:SetMouseMotionEnabled(true);
-		aFrame:EnableKeyboard(false);
-		aFrame:SetPropagateKeyboardInput(true);
-
-		VUHDO_safeSetAttribute(aFrame, "vuhdo_aura_secure_init", true);
 
 		return;
 
@@ -1517,7 +1422,7 @@ do
 			tFrame:SetParent(tParent);
 		end
 
-		VUHDO_initAuraFrameSecureHandlers(tFrame, aButton);
+		VUHDO_setupAuraFrameForTooltips(tFrame, aButton);
 
 		VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex][aSlotIndex] = tFrame;
 
@@ -1579,7 +1484,7 @@ do
 			tFrame:SetParent(tParent);
 		end
 
-		VUHDO_initAuraFrameSecureHandlers(tFrame, aButton);
+		VUHDO_setupAuraFrameForTooltips(tFrame, aButton);
 
 		VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex][aSlotIndex] = tFrame;
 
@@ -2824,7 +2729,6 @@ end
 
 
 --
-local tButton;
 local tPanelNum;
 local tAnchorConfig;
 local tShowTooltip;
@@ -2847,9 +2751,7 @@ function VUHDO_showAuraTooltip(aAuraFrame)
 		return false;
 	end
 
-	tButton = VUHDO_findButtonFromChild(aAuraFrame);
-
-	if not tButton then
+	if not aAuraFrame["raidid"] then
 		return false;
 	end
 
@@ -2859,8 +2761,9 @@ function VUHDO_showAuraTooltip(aAuraFrame)
 
 	GameTooltip:SetOwner(aAuraFrame, "ANCHOR_RIGHT", 0, 0);
 
-	if aAuraFrame["auraInstanceId"] and aAuraFrame["auraInstanceId"] >= 0 and tButton["raidid"] then
-		GameTooltip:SetUnitAuraByAuraInstanceID(tButton["raidid"], aAuraFrame["auraInstanceId"]);
+	if aAuraFrame["auraInstanceId"] and aAuraFrame["auraInstanceId"] >= 0 then
+		GameTooltip:SetUnitAuraByAuraInstanceID(aAuraFrame["raidid"], aAuraFrame["auraInstanceId"]);
+
 		return true;
 	end
 
