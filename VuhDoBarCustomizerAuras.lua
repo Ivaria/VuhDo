@@ -3542,6 +3542,10 @@ do
 				tFrame["childIcon"]:Hide();
 			end
 
+			if tFrame["auraInstanceId"] then
+				tFrame["auraInstanceId"] = nil;
+			end
+
 			tFrame:SetAlpha(0);
 		end
 
