@@ -4343,7 +4343,7 @@ function VUHDO_loadDefaultPanelSetup()
 			tPrivateAura = tAktPanel["PRIVATE_AURA"];
 
 			if tPrivateAura["iconSize"] == nil and tPrivateAura["scale"] ~= nil then
-				tPrivateAura["iconSize"] = max(1, min(100, (tPrivateAura["scale"] or 0.8) * 100));
+				tPrivateAura["iconSize"] = max(1, min(100, tPrivateAura["scale"] * 100));
 
 				tPrivateAura["scale"] = nil;
 			end
