@@ -22,6 +22,7 @@ Bugfixes:
 -- Fixed aura icon alive time display  
 -- Fixed bouquets with both aura and non-aura entries  
 -- Fixed bouquets with infinite duration aura entries e.g. Beacon of Light  
+-- Fixed private aura icon size when migrating per-Midnight profiles  
   
   
 Improvements:  
