@@ -4061,7 +4061,7 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["durationOffsetX"] = 0,
 		["durationOffsetY"] = 0,
 		["showBorder"] = false,
-		["iconSize"] = 20,
+		["iconSize"] = 40,
 		["frameLevel"] = 13,
 	},
 
@@ -4343,7 +4343,7 @@ function VUHDO_loadDefaultPanelSetup()
 			tPrivateAura = tAktPanel["PRIVATE_AURA"];
 
 			if tPrivateAura["iconSize"] == nil and tPrivateAura["scale"] ~= nil then
-				tPrivateAura["iconSize"] = 20;
+				tPrivateAura["iconSize"] = 40;
 
 				tPrivateAura["scale"] = nil;
 			end
