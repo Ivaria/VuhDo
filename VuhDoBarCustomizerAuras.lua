@@ -67,6 +67,14 @@ local VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES;
 
 local sAuraAnchorConfigVersion = 0;
 
+local sAnchorShowTooltip = { };
+local sAnchorShowClock = { };
+local sAnchorFadeOnLow = { };
+local sAnchorDispelBorder = { };
+local sAnchorShowTimer = { };
+local sAnchorShowStacks = { };
+local sAnchorFlashOnLow = { };
+
 local sPrewarmIconsNeeded = 0;
 local sPrewarmBarsNeeded = 0;
 local sPrewarmIconsCreated = 0;
@@ -418,6 +426,8 @@ end
 
 
 --
+--
+local tPanelAnchors;
 function VUHDO_barCustomizerAurasInitLocalOverrides()
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
@@ -464,6 +474,30 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_initAuraTimer();
 
 	sBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+
+	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		sAnchorShowTooltip[tPanelNum] = { };
+		sAnchorShowClock[tPanelNum] = { };
+		sAnchorFadeOnLow[tPanelNum] = { };
+		sAnchorDispelBorder[tPanelNum] = { };
+		sAnchorShowTimer[tPanelNum] = { };
+		sAnchorShowStacks[tPanelNum] = { };
+		sAnchorFlashOnLow[tPanelNum] = { };
+
+		tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+		if tPanelAnchors then
+			for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
+				sAnchorShowTooltip[tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["showTooltip"], "showTooltip");
+				sAnchorShowClock[tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["showClock"], "showClock");
+				sAnchorFadeOnLow[tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["fadeOnLow"], "fadeOnLow");
+				sAnchorDispelBorder[tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["dispelBorder"], "dispelBorder");
+				sAnchorShowTimer[tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["showTimer"], "showTimer");
+				sAnchorShowStacks[tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["showStacks"], "showStacks");
+				sAnchorFlashOnLow[tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["flashOnLow"], "flashOnLow");
+			end
+		end
+	end
 
 	return;
 
@@ -2759,7 +2793,7 @@ function VUHDO_showAuraTooltip(aAuraFrame)
 		tAnchorConfig = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"][aAuraFrame["anchorIndex"]];
 	end
 
-	tShowTooltip = VUHDO_resolveAuraTriState(tAnchorConfig and tAnchorConfig["showTooltip"], "showTooltip");
+	tShowTooltip = sAnchorShowTooltip[tPanelNum] and sAnchorShowTooltip[tPanelNum][aAuraFrame["anchorIndex"]] or VUHDO_resolveAuraTriState(tAnchorConfig and tAnchorConfig["showTooltip"], "showTooltip");
 
 	if not tShowTooltip then
 		return false;
@@ -2801,6 +2835,7 @@ end
 
 
 --
+local tPanelAnchors;
 local tAnchorSlots;
 local tMaxSlots;
 local tAnchorConfig;
@@ -2816,8 +2851,14 @@ function VUHDO_updateAurasForAnchors(aUnit, aPanelNum)
 		return;
 	end
 
+	tPanelAnchors = VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"];
+
+	if not tPanelAnchors then
+		return;
+	end
+
 	for tAnchorIndex, tSlots in pairs(tAnchorSlots) do
-		tAnchorConfig = VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"] and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"][tAnchorIndex];
+		tAnchorConfig = tPanelAnchors[tAnchorIndex];
 
 		if tAnchorConfig then
 			if tAnchorConfig["enabled"] == false then
@@ -3044,7 +3085,7 @@ do
 	local tColorMode;
 	local tClassColor;
 	local tIconColor;
-	function VUHDO_updateAuraIconDisplay(aIconTexture, aCooldownFrame, aBackdropFrame, anAnchorConfig, anAuraData, aDurationObj, aUnit)
+	function VUHDO_updateAuraIconDisplay(aIconTexture, aCooldownFrame, aBackdropFrame, anAnchorConfig, anAuraData, aDurationObj, aUnit, aPanelNum, anAnchorIndex)
 
 		tIconType = anAnchorConfig["iconType"] or 1;
 
@@ -3158,7 +3199,7 @@ do
 			end
 		end
 
-		tShowClock = VUHDO_resolveAuraTriState(anAnchorConfig["showClock"], "showClock");
+		tShowClock = (aPanelNum and anAnchorIndex and sAnchorShowClock[aPanelNum] and sAnchorShowClock[aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["showClock"], "showClock");
 
 		if aCooldownFrame then
 			if tShowClock and aDurationObj then
@@ -3169,7 +3210,7 @@ do
 			end
 		end
 
-		tFadeOnLow = VUHDO_resolveAuraTriState(anAnchorConfig["fadeOnLow"], "fadeOnLow");
+		tFadeOnLow = (aPanelNum and anAnchorIndex and sAnchorFadeOnLow[aPanelNum] and sAnchorFadeOnLow[aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["fadeOnLow"], "fadeOnLow");
 
 		if aIconTexture then
 			if tFadeOnLow and aDurationObj and sCurveFadeAlpha then
@@ -3180,7 +3221,7 @@ do
 			end
 		end
 
-		tDispelBorder = VUHDO_resolveAuraTriState(anAnchorConfig["dispelBorder"], "dispelBorder");
+		tDispelBorder = (aPanelNum and anAnchorIndex and sAnchorDispelBorder[aPanelNum] and sAnchorDispelBorder[aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["dispelBorder"], "dispelBorder");
 
 		if aBackdropFrame and aBackdropFrame.SetBackdropBorderColor then
 			tDispelCurve = VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig);
@@ -3218,10 +3259,10 @@ do
 	local tApplications;
 	local tCountStr;
 	local tTriangleColor;
-	function VUHDO_updateAuraTimerAndStacks(aTimerText, aCountText, aChargeTexture, anAnchorConfig, anAuraData, aDurationObj, aUnit)
+	function VUHDO_updateAuraTimerAndStacks(aTimerText, aCountText, aChargeTexture, anAnchorConfig, anAuraData, aDurationObj, aUnit, aPanelNum, anAnchorIndex)
 
 		if aTimerText then
-			tShowTimer = VUHDO_resolveAuraTriState(anAnchorConfig["showTimer"], "showTimer");
+			tShowTimer = (aPanelNum and anAnchorIndex and sAnchorShowTimer[aPanelNum] and sAnchorShowTimer[aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["showTimer"], "showTimer");
 
 			if tShowTimer and aDurationObj and sCurveTimerVisible then
 				if anAuraData["isAliveTime"] then
@@ -3257,7 +3298,7 @@ do
 		end
 
 		if aCountText then
-			tShowStacks = VUHDO_resolveAuraTriState(anAnchorConfig["showStacks"], "showStacks");
+			tShowStacks = (aPanelNum and anAnchorIndex and sAnchorShowStacks[aPanelNum] and sAnchorShowStacks[aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["showStacks"], "showStacks");
 			tStackType = anAnchorConfig["stackType"] or 1;
 
 			if tShowStacks and tStackType == 2 and aChargeTexture then
@@ -3318,6 +3359,10 @@ do
 	local tCountText;
 	local tDurationObj;
 	local tFlashZone;
+	local tLastInstanceId;
+	local tLastExpiration;
+	local tLastApplications;
+	local tLastIcon;
 	function VUHDO_displayAuraAsIcon(aButton, aPanelNum, anAnchorIndex, aSlotIndex, anAuraData, anAnchorConfig)
 
 		if not aButton or not anAnchorIndex or not aSlotIndex or not anAuraData or not anAnchorConfig then
@@ -3329,6 +3374,27 @@ do
 		if not tIconFrame then
 			return;
 		end
+
+		tLastInstanceId = tIconFrame["lastAuraInstanceId"];
+		tLastExpiration = tIconFrame["lastExpirationTime"];
+		tLastApplications = tIconFrame["lastApplications"];
+		tLastIcon = tIconFrame["lastIcon"];
+
+		if not (issecretvalue(tLastExpiration) or issecretvalue(anAuraData["expirationTime"]) or
+			issecretvalue(tLastApplications) or issecretvalue(anAuraData["applications"]) or
+			issecretvalue(tLastIcon) or issecretvalue(anAuraData["icon"])) then
+			if tLastInstanceId == anAuraData["auraInstanceID"]
+				and tLastExpiration == anAuraData["expirationTime"]
+				and tLastApplications == anAuraData["applications"]
+				and tLastIcon == anAuraData["icon"] then
+				return;
+			end
+		end
+
+		tIconFrame["lastAuraInstanceId"] = anAuraData["auraInstanceID"];
+		tIconFrame["lastExpirationTime"] = issecretvalue(anAuraData["expirationTime"]) and nil or anAuraData["expirationTime"];
+		tIconFrame["lastApplications"] = issecretvalue(anAuraData["applications"]) and nil or anAuraData["applications"];
+		tIconFrame["lastIcon"] = issecretvalue(anAuraData["icon"]) and nil or anAuraData["icon"];
 
 		tIconFrame["panelNum"] = aPanelNum;
 		tIconFrame["anchorIndex"] = anAnchorIndex;
@@ -3351,16 +3417,16 @@ do
 		if tChild then
 			tTexture = tChild["textureI"] or VUHDO_getAuraIconTexture(tChild);
 
-			VUHDO_updateAuraIconDisplay(tTexture, tChild["cooldownFrame"], tChild, anAnchorConfig, anAuraData, tDurationObj, tUnit);
+			VUHDO_updateAuraIconDisplay(tTexture, tChild["cooldownFrame"], tChild, anAnchorConfig, anAuraData, tDurationObj, tUnit, aPanelNum, anAnchorIndex);
 
 			tTimerText = tChild["timerText"];
 			tCountText = tChild["countText"];
 
-			VUHDO_updateAuraTimerAndStacks(tTimerText, tCountText, tChild["chargeTexture"], anAnchorConfig, anAuraData, tDurationObj, tUnit);
+			VUHDO_updateAuraTimerAndStacks(tTimerText, tCountText, tChild["chargeTexture"], anAnchorConfig, anAuraData, tDurationObj, tUnit, aPanelNum, anAnchorIndex);
 
 			tChild:SetAlpha(1);
 
-			tFlashOnLow = VUHDO_resolveAuraTriState(anAnchorConfig["flashOnLow"], "flashOnLow");
+			tFlashOnLow = (aPanelNum and anAnchorIndex and sAnchorFlashOnLow[aPanelNum] and sAnchorFlashOnLow[aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["flashOnLow"], "flashOnLow");
 
 			if tFlashOnLow and tDurationObj and sCurveFlashZone and not tDurationObj:HasSecretValues() then
 				tFlashZone = tDurationObj:EvaluateRemainingDuration(sCurveFlashZone);
@@ -3503,13 +3569,13 @@ do
 			tBar:SetValue(tBarInvertGrowth and 0 or 1);
 		end
 
-		VUHDO_updateAuraIconDisplay(tBarFrame["childIcon"], tBarFrame["cooldownFrame"], nil, anAnchorConfig, anAuraData, tDurationObj, tUnit);
+		VUHDO_updateAuraIconDisplay(tBarFrame["childIcon"], tBarFrame["cooldownFrame"], nil, anAnchorConfig, anAuraData, tDurationObj, tUnit, aPanelNum, anAnchorIndex);
 
-		VUHDO_updateAuraTimerAndStacks(tBarFrame["timerText"], tBarFrame["countText"], tBarFrame["chargeTexture"], anAnchorConfig, anAuraData, tDurationObj, tUnit);
+		VUHDO_updateAuraTimerAndStacks(tBarFrame["timerText"], tBarFrame["countText"], tBarFrame["chargeTexture"], anAnchorConfig, anAuraData, tDurationObj, tUnit, aPanelNum, anAnchorIndex);
 
 		tBar:SetAlpha(1);
 
-		tFlashOnLow = VUHDO_resolveAuraTriState(anAnchorConfig["flashOnLow"], "flashOnLow");
+		tFlashOnLow = (aPanelNum and anAnchorIndex and sAnchorFlashOnLow[aPanelNum] and sAnchorFlashOnLow[aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["flashOnLow"], "flashOnLow");
 
 		if tFlashOnLow and tDurationObj and sCurveFlashZone and not tDurationObj:HasSecretValues() then
 			tFlashZone = tDurationObj:EvaluateRemainingDuration(sCurveFlashZone);
@@ -3563,6 +3629,11 @@ do
 				tFrame["auraInstanceId"] = nil;
 			end
 
+			tFrame["lastAuraInstanceId"] = nil;
+			tFrame["lastExpirationTime"] = nil;
+			tFrame["lastApplications"] = nil;
+			tFrame["lastIcon"] = nil;
+
 			tFrame:SetAlpha(0);
 		end
 
@@ -3574,6 +3645,7 @@ end
 
 
 --
+local tUnitPanels;
 function VUHDO_updateAuraDisplaysForUnit(aUnit)
 
 	if sAurasSuspended then
@@ -3584,8 +3656,16 @@ function VUHDO_updateAuraDisplaysForUnit(aUnit)
 		return;
 	end
 
+	tUnitPanels = VUHDO_UNIT_BUTTONS_PANEL[aUnit];
+
+	if not tUnitPanels then
+		return;
+	end
+
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
-		VUHDO_updateAurasForAnchors(aUnit, tPanelNum);
+		if tUnitPanels[tPanelNum] then
+			VUHDO_updateAurasForAnchors(aUnit, tPanelNum);
+		end
 	end
 
 	return;

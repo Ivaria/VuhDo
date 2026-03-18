@@ -2856,6 +2856,7 @@ do
 		VUHDO_REGISTERED_BOUQUET_INDICATORS[anOwnerName][aBouquetName] = aFunction;
 
 		VUHDO_activateBuffsInScanner(aBouquetName);
+		VUHDO_activateAurasFromBouquet(aBouquetName);
 
 		for tUnit, _ in pairs(VUHDO_RAID) do
 			aFunction(tUnit, false, nil, 0, 0, 0, nil, nil, aBouquetName);
@@ -3301,6 +3302,8 @@ do
 		VUHDO_updateGlobalToggles();
 		VUHDO_buildEventInterestCache();
 		VUHDO_initAllEventBouquets();
+
+		VUHDO_rebuildActiveAuraCaches();
 
 		return;
 

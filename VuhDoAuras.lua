@@ -24,12 +24,17 @@ local VUHDO_CONFIG;
 local VUHDO_AURA_GROUPS;
 local VUHDO_AURA_IGNORE_LIST;
 local VUHDO_DEFAULT_AURA_GROUPS;
+local VUHDO_PANEL_MODELS;
 local VUHDO_PANEL_SETUP;
 local VUHDO_RAID;
 local VUHDO_I18N_AURA_GROUP_NAMES;
+local VUHDO_BOUQUETS;
+local VUHDO_BOUQUET_BUFFS_SPECIAL;
 
 local VUHDO_generateUUID;
 local VUHDO_determineAura;
+local VUHDO_updateAuraDisplaysForUnit;
+local VUHDO_strempty;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
@@ -48,6 +53,12 @@ local VUHDO_UNIT_AURA_LIST_SLOTS = VUHDO_UNIT_AURA_LIST_SLOTS;
 
 VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS or { };
 local VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS;
+
+VUHDO_ACTIVE_AURA_SPELLS = { };
+local VUHDO_ACTIVE_AURA_SPELLS = VUHDO_ACTIVE_AURA_SPELLS;
+
+VUHDO_ACTIVE_AURA_FILTERS = { };
+local VUHDO_ACTIVE_AURA_FILTERS = VUHDO_ACTIVE_AURA_FILTERS;
 
 VUHDO_AURA_MIGRATION_VERSION = 5;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
@@ -127,6 +138,8 @@ local sSlotIndexPool;
 local sSlotDataPool;
 local sReverseIndexArrayPool;
 
+local sHasActiveAuraFilters = false;
+
 local sAllGroups = { };
 local sScaleCounts = { };
 
@@ -200,12 +213,19 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_AURA_GROUPS = VUHDO_CONFIG["AURA_GROUPS"];
 	VUHDO_AURA_IGNORE_LIST = _G["VUHDO_AURA_IGNORE_LIST"];
 	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
+	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_I18N_AURA_GROUP_NAMES = _G["VUHDO_I18N_AURA_GROUP_NAMES"];
+	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
+	VUHDO_BOUQUET_BUFFS_SPECIAL = _G["VUHDO_BOUQUET_BUFFS_SPECIAL"];
 
 	VUHDO_generateUUID = _G["VUHDO_generateUUID"];
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
+	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_updateAuraDisplaysForUnit"];
+	VUHDO_strempty = _G["VUHDO_strempty"];
+
+	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_deferUpdateAuraDisplaysForUnit"];
 
 	sAuraDataPool = VUHDO_createTablePool("AuraData", 500);
 	sSlotIndexPool = VUHDO_createTablePool("SlotIndex", 200);
@@ -409,6 +429,170 @@ function VUHDO_isAuraIgnored(anAuraData, aGroupId)
 
 	return false;
 
+end
+
+
+
+--
+local tSpellId;
+local tSpellName;
+function VUHDO_shouldCacheAura(aUnit, anAuraData)
+
+	if not aUnit or not anAuraData then
+		return false;
+	end
+
+	tSpellId = anAuraData["spellId"];
+	tSpellName = anAuraData["name"];
+
+	if (tSpellId and not issecretvalue(tSpellId) and VUHDO_ACTIVE_AURA_SPELLS[tSpellId]) or
+		(tSpellName and not issecretvalue(tSpellName) and VUHDO_ACTIVE_AURA_SPELLS[tSpellName]) then
+		return true;
+	end
+
+	if sHasActiveAuraFilters then
+		return true;
+	end
+
+	return false;
+
+end
+
+
+
+do
+	--
+	local tBouquet;
+	local tName;
+	local tSpellId;
+	function VUHDO_activateAurasFromBouquet(aBouquetName)
+
+		if not aBouquetName then
+			return;
+		end
+
+		if not VUHDO_BOUQUETS or not VUHDO_BOUQUETS["STORED"] then
+			return;
+		end
+
+		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
+
+		if not tBouquet then
+			return;
+		end
+
+		for _, tInfos in pairs(tBouquet) do
+			tName = tInfos["name"];
+
+			if not VUHDO_strempty(tName) and not (VUHDO_BOUQUET_BUFFS_SPECIAL and VUHDO_BOUQUET_BUFFS_SPECIAL[tName]) then
+				VUHDO_ACTIVE_AURA_SPELLS[tName] = true;
+
+				tSpellId = tonumber(tName);
+
+				if tSpellId then
+					VUHDO_ACTIVE_AURA_SPELLS[tSpellId] = true;
+				end
+			end
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tAnchors;
+	local tActiveGroupIds = { };
+	local tSeenFilters = { };
+	local tGroup;
+	local tEffectiveColorType;
+	local tValue;
+	function VUHDO_rebuildActiveAuraCaches()
+
+		twipe(VUHDO_ACTIVE_AURA_SPELLS);
+		twipe(VUHDO_ACTIVE_AURA_FILTERS);
+
+		twipe(tActiveGroupIds);
+		twipe(tSeenFilters);
+
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			if VUHDO_PANEL_MODELS and VUHDO_PANEL_MODELS[tPanelNum] then
+				tAnchors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+				if tAnchors then
+					for _, tAnchor in pairs(tAnchors) do
+						if tAnchor["enabled"] ~= false and tAnchor["groupId"] then
+							tActiveGroupIds[tAnchor["groupId"]] = true;
+						end
+					end
+				end
+			end
+		end
+
+		for tGroupId, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"] or sEmpty) do
+			if tGroup["enabled"] ~= false then
+				tEffectiveColorType = tGroup["colorType"] or VUHDO_AURA_GROUP_COLOR_OFF;
+
+				if tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL or (tGroup["sound"] and tGroup["sound"] ~= "") then
+					tActiveGroupIds[tGroupId] = true;
+				end
+			end
+		end
+
+		for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
+			if not (VUHDO_CONFIG["AURA_GROUPS"] or sEmpty)[tGroupId] then
+				if tGroup["enabled"] ~= false and not (VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][tGroupId]) then
+					tEffectiveColorType = tGroup["colorType"] or VUHDO_AURA_GROUP_COLOR_OFF;
+
+					if tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL or (tGroup["sound"] and tGroup["sound"] ~= "") then
+						tActiveGroupIds[tGroupId] = true;
+					end
+				end
+			end
+		end
+
+		for tGroupId, _ in pairs(tActiveGroupIds) do
+			tGroup = VUHDO_getAuraGroupRaw(tGroupId);
+
+			if tGroup then
+				if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_FILTER then
+					if tGroup["filter"] and not tSeenFilters[tGroup["filter"]] then
+						tSeenFilters[tGroup["filter"]] = true;
+
+						tinsert(VUHDO_ACTIVE_AURA_FILTERS, tGroup["filter"]);
+					end
+				elseif tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
+					for _, tEntry in pairs(tGroup["entries"]) do
+						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+							tValue = tEntry["value"];
+
+							if tValue then
+								VUHDO_ACTIVE_AURA_SPELLS[tValue] = true;
+
+								if type(tValue) == "number" then
+									VUHDO_ACTIVE_AURA_SPELLS[tostring(tValue)] = true;
+								end
+							end
+						elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
+							VUHDO_activateAurasFromBouquet(tEntry["value"]);
+						end
+					end
+				end
+			end
+		end
+
+		for tBouquetName, _ in pairs(VUHDO_getRegisteredBouquets()) do
+			VUHDO_activateAurasFromBouquet(tBouquetName);
+		end
+
+		sHasActiveAuraFilters = #VUHDO_ACTIVE_AURA_FILTERS > 0;
+
+		return;
+
+	end
 end
 
 
@@ -1182,16 +1366,20 @@ function VUHDO_fullAuraRefresh(aUnit)
 	tAuras = GetUnitAuras(aUnit, "HELPFUL", 40, 0, 0);
 
 	if tAuras then
-		for _, tAura in ipairs(tAuras) do
-			VUHDO_cacheAuraData(aUnit, tAura);
+		for _, tAura in pairs(tAuras) do
+			if VUHDO_shouldCacheAura(aUnit, tAura) then
+				VUHDO_cacheAuraData(aUnit, tAura);
+			end
 		end
 	end
 
 	tAuras = GetUnitAuras(aUnit, "HARMFUL", 40, 0, 0);
 
 	if tAuras then
-		for _, tAura in ipairs(tAuras) do
-			VUHDO_cacheAuraData(aUnit, tAura);
+		for _, tAura in pairs(tAuras) do
+			if VUHDO_shouldCacheAura(aUnit, tAura) then
+				VUHDO_cacheAuraData(aUnit, tAura);
+			end
 		end
 	end
 
@@ -1219,9 +1407,11 @@ do
 
 		if aUpdateInfo["addedAuras"] then
 			for _, tAura in pairs(aUpdateInfo["addedAuras"]) do
-				VUHDO_cacheAuraData(aUnit, tAura);
+				if VUHDO_shouldCacheAura(aUnit, tAura) then
+					VUHDO_cacheAuraData(aUnit, tAura);
 
-				VUHDO_onAuraAdded(aUnit, tAura);
+					VUHDO_onAuraAdded(aUnit, tAura);
+				end
 			end
 		end
 
