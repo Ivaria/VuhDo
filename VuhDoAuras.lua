@@ -34,6 +34,7 @@ local VUHDO_BOUQUET_BUFFS_SPECIAL;
 local VUHDO_generateUUID;
 local VUHDO_determineAura;
 local VUHDO_updateAuraDisplaysForUnit;
+local VUHDO_updateEventBouquet;
 local VUHDO_strempty;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
@@ -59,6 +60,9 @@ local VUHDO_ACTIVE_AURA_SPELLS = VUHDO_ACTIVE_AURA_SPELLS;
 
 VUHDO_ACTIVE_AURA_FILTERS = { };
 local VUHDO_ACTIVE_AURA_FILTERS = VUHDO_ACTIVE_AURA_FILTERS;
+
+VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS or { };
+local VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS;
 
 VUHDO_AURA_MIGRATION_VERSION = 5;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
@@ -223,6 +227,7 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_generateUUID = _G["VUHDO_generateUUID"];
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_updateAuraDisplaysForUnit"];
+	VUHDO_updateEventBouquet = _G["VUHDO_updateEventBouquet"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
 
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_deferUpdateAuraDisplaysForUnit"];
@@ -487,10 +492,22 @@ do
 			if not VUHDO_strempty(tName) and not (VUHDO_BOUQUET_BUFFS_SPECIAL and VUHDO_BOUQUET_BUFFS_SPECIAL[tName]) then
 				VUHDO_ACTIVE_AURA_SPELLS[tName] = true;
 
+				if not VUHDO_AURA_SPELL_TO_BOUQUETS[tName] then
+					VUHDO_AURA_SPELL_TO_BOUQUETS[tName] = { };
+				end
+
+				VUHDO_AURA_SPELL_TO_BOUQUETS[tName][aBouquetName] = true;
+
 				tSpellId = tonumber(tName);
 
 				if tSpellId then
 					VUHDO_ACTIVE_AURA_SPELLS[tSpellId] = true;
+
+					if not VUHDO_AURA_SPELL_TO_BOUQUETS[tSpellId] then
+						VUHDO_AURA_SPELL_TO_BOUQUETS[tSpellId] = { };
+					end
+
+					VUHDO_AURA_SPELL_TO_BOUQUETS[tSpellId][aBouquetName] = true;
 				end
 			end
 		end
@@ -514,6 +531,7 @@ do
 
 		twipe(VUHDO_ACTIVE_AURA_SPELLS);
 		twipe(VUHDO_ACTIVE_AURA_FILTERS);
+		twipe(VUHDO_AURA_SPELL_TO_BOUQUETS);
 
 		twipe(tActiveGroupIds);
 		twipe(tSeenFilters);
@@ -1395,6 +1413,38 @@ end
 
 
 
+--
+local tBouquetsForSpell;
+function VUHDO_updateBouquetsForSpell(aUnit, aSpellId, aSpellName)
+
+	if not aUnit then
+		return;
+	end
+
+	tBouquetsForSpell = VUHDO_AURA_SPELL_TO_BOUQUETS[aSpellId];
+
+	if tBouquetsForSpell then
+		for tBouquetName, _ in pairs(tBouquetsForSpell) do
+			VUHDO_updateEventBouquet(aUnit, tBouquetName, 4);
+		end
+	end
+
+	if aSpellName and aSpellName ~= aSpellId then
+		tBouquetsForSpell = VUHDO_AURA_SPELL_TO_BOUQUETS[aSpellName];
+
+		if tBouquetsForSpell then
+			for tBouquetName, _ in pairs(tBouquetsForSpell) do
+				VUHDO_updateEventBouquet(aUnit, tBouquetName, 4);
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
 do
 	--
 	local tAura;
@@ -1435,9 +1485,9 @@ do
 
 		if aUpdateInfo["removedAuraInstanceIDs"] then
 			for _, tAuraInstanceId in pairs(aUpdateInfo["removedAuraInstanceIDs"]) do
-				VUHDO_uncacheAuraData(aUnit, tAuraInstanceId);
-
 				VUHDO_onAuraRemoved(aUnit, tAuraInstanceId);
+
+				VUHDO_uncacheAuraData(aUnit, tAuraInstanceId);
 			end
 		end
 
@@ -1461,6 +1511,8 @@ do
 		for tPanelNum = 1, 10 do
 			VUHDO_checkAuraForPanelAnchors(aUnit, tPanelNum, anAuraData);
 		end
+
+		VUHDO_updateBouquetsForSpell(aUnit, anAuraData["spellId"], anAuraData["name"]);
 
 		return;
 
@@ -1491,11 +1543,19 @@ do
 	local tIdx;
 	local tPanelAnchorsRemove;
 	local tGroupRemove;
+	local tCachedData;
+	local tSpellIdForRemoved;
+	local tSpellNameForRemoved;
 	function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId)
 
 		if not aUnit or not anAuraInstanceId then
 			return;
 		end
+
+		tCachedData = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][anAuraInstanceId];
+
+		tSpellIdForRemoved = tCachedData and tCachedData["spellId"];
+		tSpellNameForRemoved = tCachedData and tCachedData["name"];
 
 		tAuraIndex = VUHDO_findAllAnchorSlotsByAuraId(aUnit, anAuraInstanceId);
 
@@ -1539,6 +1599,10 @@ do
 					end
 				end
 			end
+		end
+
+		if tSpellIdForRemoved then
+			VUHDO_updateBouquetsForSpell(aUnit, tSpellIdForRemoved, tSpellNameForRemoved);
 		end
 
 		return;
