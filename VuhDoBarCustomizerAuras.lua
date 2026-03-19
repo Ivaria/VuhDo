@@ -1525,7 +1525,7 @@ do
 
 		tFocus = VUHDO_getMouseFocus();
 
-		if tFocus and VUHDO_findButtonFromChild(tFocus) == aAuraFrame["vuhdo_button"] then
+		if tFocus and tFocus["vuhdo_button"] and VUHDO_findButtonFromChild(tFocus) == aAuraFrame["vuhdo_button"] then
 			VuhDoActionOnEnter(aAuraFrame["vuhdo_button"]);
 		else
 			VuhDoActionOnLeave(aAuraFrame["vuhdo_button"]);
