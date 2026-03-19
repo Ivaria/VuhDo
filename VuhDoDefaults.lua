@@ -4063,6 +4063,7 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["showBorder"] = false,
 		["iconSize"] = 40,
 		["frameLevel"] = 13,
+		["VERSION"] = 1,
 	},
 
 	["RAID_ICON"] = {
@@ -4348,6 +4349,15 @@ function VUHDO_loadDefaultPanelSetup()
 				tPrivateAura["scale"] = nil;
 			end
 
+			if (tPrivateAura["VERSION"] or 0) < 1 then
+				if tPrivateAura["iconSize"] == 80 then
+					tPrivateAura["iconSize"] = 40;
+				end
+
+				tPrivateAura["showBorder"] = true;
+
+				tPrivateAura["VERSION"] = 1;
+			end
 		end
 
 		VUHDO_PANEL_SETUP[tPanelNum] = VUHDO_ensureSanity("VUHDO_PANEL_SETUP[" .. tPanelNum .. "]", VUHDO_PANEL_SETUP[tPanelNum], VUHDO_DEFAULT_PER_PANEL_SETUP);
