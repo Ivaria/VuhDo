@@ -199,6 +199,8 @@ local function VUHDO_cleanupSlotDataDelegate(aSlotData)
 	aSlotData["clipT"] = nil;
 	aSlotData["clipB"] = nil;
 	aSlotData["isAliveTime"] = nil;
+	aSlotData["groupId"] = nil;
+	aSlotData["entryIndex"] = nil;
 
 	if aSlotData["color"] then
 		twipe(aSlotData["color"]);
@@ -1421,15 +1423,17 @@ function VUHDO_updateBouquetsForSpell(aUnit, aSpellId, aSpellName)
 		return;
 	end
 
-	tBouquetsForSpell = VUHDO_AURA_SPELL_TO_BOUQUETS[aSpellId];
+	if aSpellId and not issecretvalue(aSpellId) then
+		tBouquetsForSpell = VUHDO_AURA_SPELL_TO_BOUQUETS[aSpellId];
 
-	if tBouquetsForSpell then
-		for tBouquetName, _ in pairs(tBouquetsForSpell) do
-			VUHDO_updateEventBouquet(aUnit, tBouquetName, 4);
+		if tBouquetsForSpell then
+			for tBouquetName, _ in pairs(tBouquetsForSpell) do
+				VUHDO_updateEventBouquet(aUnit, tBouquetName, 4);
+			end
 		end
 	end
 
-	if aSpellName and aSpellName ~= aSpellId then
+	if aSpellName and not issecretvalue(aSpellName) and aSpellName ~= aSpellId then
 		tBouquetsForSpell = VUHDO_AURA_SPELL_TO_BOUQUETS[aSpellName];
 
 		if tBouquetsForSpell then
@@ -1449,6 +1453,8 @@ do
 	--
 	local tAura;
 	local tCachedData;
+	local tPanelAnchors;
+	local tGroup;
 	function VUHDO_incrementalAuraUpdate(aUnit, aUpdateInfo)
 
 		if not aUnit or not aUpdateInfo then
@@ -1485,9 +1491,11 @@ do
 
 		if aUpdateInfo["removedAuraInstanceIDs"] then
 			for _, tAuraInstanceId in pairs(aUpdateInfo["removedAuraInstanceIDs"]) do
-				VUHDO_onAuraRemoved(aUnit, tAuraInstanceId);
+				tCachedData = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
 
 				VUHDO_uncacheAuraData(aUnit, tAuraInstanceId);
+
+				VUHDO_onAuraRemoved(aUnit, tAuraInstanceId, tCachedData and tCachedData["spellId"], tCachedData and tCachedData["name"]);
 			end
 		end
 
@@ -1527,6 +1535,22 @@ do
 			return;
 		end
 
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+			if tPanelAnchors then
+				for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
+					if tAnchorConfig["enabled"] ~= false then
+						tGroup = VUHDO_getAuraGroupRaw(tAnchorConfig["groupId"]);
+
+						if tGroup and tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
+							VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+						end
+					end
+				end
+			end
+		end
+
 		return;
 
 	end
@@ -1543,19 +1567,11 @@ do
 	local tIdx;
 	local tPanelAnchorsRemove;
 	local tGroupRemove;
-	local tCachedData;
-	local tSpellIdForRemoved;
-	local tSpellNameForRemoved;
-	function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId)
+	function VUHDO_onAuraRemoved(aUnit, anAuraInstanceId, aSpellId, aSpellName)
 
 		if not aUnit or not anAuraInstanceId then
 			return;
 		end
-
-		tCachedData = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][anAuraInstanceId];
-
-		tSpellIdForRemoved = tCachedData and tCachedData["spellId"];
-		tSpellNameForRemoved = tCachedData and tCachedData["name"];
 
 		tAuraIndex = VUHDO_findAllAnchorSlotsByAuraId(aUnit, anAuraInstanceId);
 
@@ -1601,8 +1617,8 @@ do
 			end
 		end
 
-		if tSpellIdForRemoved then
-			VUHDO_updateBouquetsForSpell(aUnit, tSpellIdForRemoved, tSpellNameForRemoved);
+		if aSpellId then
+			VUHDO_updateBouquetsForSpell(aUnit, aSpellId, aSpellName);
 		end
 
 		return;
@@ -1969,6 +1985,9 @@ do
 									tSlotData["auraInstanceID"] = tAuraInstanceId;
 									tSlotData["entryType"] = VUHDO_AURA_LIST_ENTRY_SPELL;
 									tSlotData["isActive"] = true;
+									tSlotData["groupId"] = anAnchorConfig["groupId"];
+									tSlotData["entryIndex"] = tEntryIndex;
+									tSlotData["isAliveTime"] = tEntry["durationMode"] == VUHDO_SPELL_DURATION_MODE_ALIVE;
 
 									VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex] = tSlotData;
 

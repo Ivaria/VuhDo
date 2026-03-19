@@ -2966,6 +2966,15 @@ do
 					tSlotData["clipT"] = aClipT;
 					tSlotData["clipB"] = aClipB;
 					tSlotData["isAliveTime"] = aIsAliveTime or false;
+
+					tAnchorConfig = VUHDO_PANEL_SETUP[tMapping["panelNum"]] and
+						VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"] and
+						VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"][tMapping["anchorKey"]];
+
+					if tAnchorConfig then
+						tSlotData["groupId"] = tAnchorConfig["groupId"];
+						tSlotData["entryIndex"] = tMapping["entryIndex"];
+					end
 				end
 			end
 
