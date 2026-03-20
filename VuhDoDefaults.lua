@@ -2909,6 +2909,8 @@ end
 
 
 local VUHDO_DEFAULT_PANEL_SETUP = {
+	["PRIVATE_AURA_SHOW_DISPEL_TYPE"] = true,
+
 	["RAID_ICON_FILTER"] = {
 		[1] = true,
 		[2] = true,
@@ -4063,7 +4065,11 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["showBorder"] = false,
 		["iconSize"] = 40,
 		["frameLevel"] = 13,
-		["VERSION"] = 1,
+		["growthDir"] = "RIGHT",
+		["wrapDir"] = "DOWN",
+		["maxColumns"] = 3,
+		["maxRows"] = 2,
+		["VERSION"] = 2,
 	},
 
 	["RAID_ICON"] = {
@@ -4358,6 +4364,19 @@ function VUHDO_loadDefaultPanelSetup()
 
 				tPrivateAura["VERSION"] = 1;
 			end
+
+			if (tPrivateAura["VERSION"] or 0) < 2 then
+				tPrivateAura["growthDir"] = "RIGHT";
+				tPrivateAura["wrapDir"] = "DOWN";
+				tPrivateAura["maxColumns"] = 3;
+				tPrivateAura["maxRows"] = 2;
+
+				tPrivateAura["VERSION"] = 2;
+			end
+		end
+
+		if VUHDO_PANEL_SETUP["PRIVATE_AURA_SHOW_DISPEL_TYPE"] == nil then
+			VUHDO_PANEL_SETUP["PRIVATE_AURA_SHOW_DISPEL_TYPE"] = true;
 		end
 
 		VUHDO_PANEL_SETUP[tPanelNum] = VUHDO_ensureSanity("VUHDO_PANEL_SETUP[" .. tPanelNum .. "]", VUHDO_PANEL_SETUP[tPanelNum], VUHDO_DEFAULT_PER_PANEL_SETUP);

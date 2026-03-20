@@ -19,6 +19,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed dispellable Private Aura icon border display  
   
   
 Improvements:  
