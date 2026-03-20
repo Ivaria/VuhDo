@@ -4062,14 +4062,14 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["durationPosition"] = "BOTTOM",
 		["durationOffsetX"] = 0,
 		["durationOffsetY"] = 0,
-		["showBorder"] = false,
+		["showBorder"] = true,
 		["iconSize"] = 40,
 		["frameLevel"] = 13,
 		["growthDir"] = "RIGHT",
 		["wrapDir"] = "DOWN",
 		["maxColumns"] = 3,
 		["maxRows"] = 2,
-		["VERSION"] = 2,
+		["VERSION"] = 3,
 	},
 
 	["RAID_ICON"] = {
@@ -4372,6 +4372,14 @@ function VUHDO_loadDefaultPanelSetup()
 				tPrivateAura["maxRows"] = 2;
 
 				tPrivateAura["VERSION"] = 2;
+			end
+
+			if (tPrivateAura["VERSION"] or 0) < 3 then
+				tPrivateAura["showCooldown"] = true;
+				tPrivateAura["showCooldownNumbers"] = true;
+				tPrivateAura["showDuration"] = false;
+
+				tPrivateAura["VERSION"] = 3;
 			end
 		end
 
