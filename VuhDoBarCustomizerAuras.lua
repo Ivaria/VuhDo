@@ -98,6 +98,8 @@ local sEntrySettingsCache = {
 
 local sGlowColorArray = { 1, 1, 0, 1 };
 
+local sPanelBarHeights = { };
+
 local sPrewarm = {
 	["iconsNeeded"] = 0,
 	["barsNeeded"] = 0,
@@ -515,6 +517,8 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	sBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		sPanelBarHeights[tPanelNum] = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["barHeight"] or 40;
+
 		sAnchorSettingsCache["showTooltip"][tPanelNum] = { };
 		sAnchorSettingsCache["showClock"][tPanelNum] = { };
 		sAnchorSettingsCache["fadeOnLow"][tPanelNum] = { };
@@ -884,7 +888,7 @@ do
 
 		tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
 
-		tBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+		tBarHeight = sPanelBarHeights[tPanelNum] or 40;
 		tIconSize = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
 
 		tAvailableHeight = max(0, tBarHeight - tIconSize);
@@ -2315,7 +2319,13 @@ do
 
 		tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
 		tHealthBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
-		tHealthBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+
+		if anAnchorConfig["barVertical"] then
+			tHealthBarHeight = sPanelBarHeights[tPanelNum] or 40;
+		else
+			tHealthBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+		end
+
 		tBaseX = (anAnchorConfig["offsetX"] or 0) * tHealthBarWidth * 0.01;
 		tBaseY = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeight * 0.01;
 
@@ -2583,7 +2593,12 @@ do
 			tBarHeight = 0;
 		else
 			tBarWidth = VUHDO_getHealthBarWidth(tPanelNum);
-			tBarHeight = VUHDO_getHealthBarHeight(tPanelNum);
+
+			if anAnchorConfig["barVertical"] then
+				tBarHeight = sPanelBarHeights[tPanelNum] or 0;
+			else
+				tBarHeight = VUHDO_getHealthBarHeight(tPanelNum);
+			end
 		end
 
 		tXOff = (tSlotPos["xPercent"] or 0) * tBarWidth;
@@ -2721,7 +2736,13 @@ do
 			tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
 
 			tHealthBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
-			tHealthBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+
+			if anAnchorConfig["barVertical"] then
+				tHealthBarHeight = sPanelBarHeights[tPanelNum] or 40;
+			else
+				tHealthBarHeight = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
+			end
+
 			tOffsetXPixels = (anAnchorConfig["offsetX"] or 0) * tHealthBarWidth * 0.01;
 			tOffsetYPixels = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeight * 0.01;
 
