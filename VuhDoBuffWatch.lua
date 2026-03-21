@@ -583,7 +583,9 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec)
 			if tTexture then
 				tCount = tCount or 0;
 
-				if tCount > tMaxCount then tMaxCount = tCount; end
+				if (sSecretsEnabled and issecretvalue(tCount)) or (not issecretvalue(tCount) and tCount > tMaxCount) then
+					tMaxCount = tCount;
+				end
 
 				if sSecretsEnabled and (issecretvalue(tRest) or issecretvalue(tStart)) then
 					tOkayGroup[#tOkayGroup + 1] = tUnit;
@@ -816,7 +818,7 @@ local function VUHDO_setBuffSwatchTimer(aSwatchName, aSecsNum, aCount, aDuration
 
 		_G[aSwatchName .. "TimerLabelLabel"]:SetText(tDurationText or "");
 	elseif (aSecsNum or -1) >= 0 then
-		tCountStr = ((aCount or 0) > 0 and not VUHDO_BUFF_SETTINGS["CONFIG"]["HIDE_CHARGES"])
+		tCountStr = ((issecretvalue(aCount) and sSecretsEnabled) or (not issecretvalue(aCount) and (aCount or 0) > 0 and not VUHDO_BUFF_SETTINGS["CONFIG"]["HIDE_CHARGES"]))
 			and format("|cffffffff%dx |r", aCount) or "";
 		_G[aSwatchName .. "TimerLabelLabel"]:SetText(format("%s%d:%02d", tCountStr, aSecsNum / 60, aSecsNum % 60));
 	else
