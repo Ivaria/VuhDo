@@ -88,6 +88,8 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed dispellable Private Aura icon border display  
+-- Fixed vertical aura bar height  
   
   
 Improvements:  
