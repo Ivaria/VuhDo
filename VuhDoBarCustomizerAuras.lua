@@ -860,7 +860,12 @@ do
 
 		tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
 		tBarWidth = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
-		tAvailableWidth = max(0, tBarWidth - VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig));
+
+		if (anAnchorConfig["iconType"] or 1) == 5 then
+			tAvailableWidth = tBarWidth;
+		else
+			tAvailableWidth = max(0, tBarWidth - VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig));
+		end
 
 		return tAvailableWidth * (anAnchorConfig["barWidth"] or 100) * 0.01;
 
@@ -889,9 +894,14 @@ do
 		tPanelNum = VUHDO_BUTTON_CACHE and VUHDO_BUTTON_CACHE[aButton];
 
 		tBarHeight = sPanelBarHeights[tPanelNum] or 40;
-		tIconSize = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
 
-		tAvailableHeight = max(0, tBarHeight - tIconSize);
+		if (anAnchorConfig["iconType"] or 1) == 5 then
+			tAvailableHeight = tBarHeight;
+		else
+			tIconSize = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+
+			tAvailableHeight = max(0, tBarHeight - tIconSize);
+		end
 
 		return tAvailableHeight * (anAnchorConfig["barHeight"] or 100) * 0.01;
 
@@ -1008,78 +1018,12 @@ do
 
 
 	--
-	local tIcon;
-	function VUHDO_getAuraBarIconTexture(aFrame)
+	local tIconFrame;
+	function VUHDO_getAuraBarIconFrame(aFrame)
 
-		tIcon = aFrame:GetRegions();
+		tIconFrame = aFrame:GetChildren();
 
-		return tIcon;
-
-	end
-
-
-
-	--
-	local tTimer;
-	function VUHDO_getAuraBarTimer(aFrame)
-
-		_, tTimer = aFrame:GetRegions();
-
-		return tTimer;
-
-	end
-
-
-
-	--
-	local tCounter;
-	function VUHDO_getAuraBarCounter(aFrame)
-
-		_, _, tCounter = aFrame:GetRegions();
-
-		return tCounter;
-
-	end
-
-
-
-	--
-	local tChargeFrame;
-	function VUHDO_getAuraBarChargeFrame(aFrame)
-
-		_, _, tChargeFrame = aFrame:GetChildren();
-
-		return tChargeFrame;
-
-	end
-
-
-
-	--
-	local tRegion;
-	function VUHDO_getAuraBarChargeTexture(aFrame)
-
-		tChargeFrame = VUHDO_getAuraBarChargeFrame(aFrame);
-
-		if not tChargeFrame then
-			return nil;
-		end
-
-		tRegion = tChargeFrame:GetRegions();
-
-		return tRegion;
-
-	end
-
-
-
-	--
-	local tCooldown;
-	function VUHDO_getAuraBarCooldown(aFrame)
-
-		tCooldown = aFrame:GetChildren();
-
-		return tCooldown;
+		return tIconFrame;
 
 	end
 
@@ -1257,6 +1201,7 @@ do
 	local tTimerColorMixin;
 	local tDurationMode;
 	local tTimerThreshold;
+	local tGlowTarget;
 	local function VUHDO_auraTimerOnLoop()
 
 		for tFontString, tDurationObj in pairs(sAuraTimer["data"]) do
@@ -1377,10 +1322,19 @@ do
 	local function VUHDO_auraFramePoolReset(aPool, aFrame)
 
 		if aFrame["hasEntryGlow"] then
-			VUHDO_LibCustomGlow.PixelGlow_Stop(aFrame, aFrame["entryGlowKey"]);
+			tGlowTarget = aFrame;
+
+			VUHDO_LibCustomGlow.PixelGlow_Stop(tGlowTarget, aFrame["entryGlowKey"]);
 
 			aFrame["hasEntryGlow"] = nil;
 			aFrame["entryGlowKey"] = nil;
+		elseif aFrame["iconFrame"] and aFrame["iconFrame"]["hasEntryGlow"] then
+			tGlowTarget = aFrame["iconFrame"];
+
+			VUHDO_LibCustomGlow.PixelGlow_Stop(tGlowTarget, aFrame["iconFrame"]["entryGlowKey"]);
+
+			aFrame["iconFrame"]["hasEntryGlow"] = nil;
+			aFrame["iconFrame"]["entryGlowKey"] = nil;
 		end
 
 		if aFrame["childB"] and aFrame["childB"]["chargeTexture"] then
@@ -1697,17 +1651,52 @@ do
 			return nil;
 		end
 
-		tFrame["cooldownFrame"] = VUHDO_getAuraBarCooldown(tFrame);
+		tFrame["iconFrame"] = VUHDO_getAuraBarIconFrame(tFrame);
+
+		if tFrame["iconFrame"] then
+			if tFrame["iconFrame"].SetBackdrop then
+				tFrame["iconFrame"]:SetBackdrop(sAuraBackdropInfo);
+				tFrame["iconFrame"]:SetBackdropBorderColor(0, 0, 0, 0);
+			end
+
+			tFrame["iconFrame"]["textureI"] = VUHDO_getAuraIconTexture(tFrame["iconFrame"]);
+
+			tChargeFrame = VUHDO_getAuraIconChargeFrame(tFrame["iconFrame"]);
+
+			if tChargeFrame then
+				tFrame["iconFrame"]["chargeTexture"] = VUHDO_getAuraIconChargeTexture(tChargeFrame);
+			end
+
+			tFrame["iconFrame"]["timerText"] = VUHDO_getAuraIconTimer(tFrame["iconFrame"]);
+			tFrame["iconFrame"]["countText"] = VUHDO_getAuraIconCounter(tFrame["iconFrame"]);
+
+			tFrame["iconFrame"]["cooldownFrame"] = VUHDO_getAuraIconCooldown(tFrame["iconFrame"]);
+
+			if tFrame["iconFrame"]["cooldownFrame"] then
+				tFrame["iconFrame"]["cooldownFrame"]:SetHideCountdownNumbers(true);
+				tFrame["iconFrame"]["cooldownFrame"]:SetReverse(true);
+				tFrame["iconFrame"]["cooldownFrame"]:SetDrawSwipe(true);
+				tFrame["iconFrame"]["cooldownFrame"]:SetDrawEdge(true);
+				tFrame["iconFrame"]["cooldownFrame"]:SetDrawBling(false);
+			end
+
+			_, _, tTextOverlay = tFrame["iconFrame"]:GetChildren();
+
+			if tTextOverlay and tTextOverlay.addLevel then
+				tTextOverlay:SetFrameLevel(tFrame["iconFrame"]:GetFrameLevel() + (tTextOverlay.addLevel or 2));
+			end
+
+			tFrame["timerText"] = tFrame["iconFrame"]["timerText"];
+			tFrame["countText"] = tFrame["iconFrame"]["countText"];
+			tFrame["chargeTexture"] = tFrame["iconFrame"]["chargeTexture"];
+			tFrame["cooldownFrame"] = tFrame["iconFrame"]["cooldownFrame"];
+		end
+
 		tFrame["childBar"] = VUHDO_getAuraBarStatusBar(tFrame);
 
 		if tFrame["childBar"] then
 			tFrame["childBar"]:SetFrameLevel(tFrame:GetFrameLevel() - 1);
 		end
-
-		tFrame["childIcon"] = VUHDO_getAuraBarIconTexture(tFrame);
-		tFrame["timerText"] = VUHDO_getAuraBarTimer(tFrame);
-		tFrame["countText"] = VUHDO_getAuraBarCounter(tFrame);
-		tFrame["chargeTexture"] = VUHDO_getAuraBarChargeTexture(tFrame);
 
 		tParent = _G[aButton:GetName() .. "BgBarHlBar"];
 
@@ -2344,7 +2333,22 @@ do
 			tBarVertical = anAnchorConfig["barVertical"] or false;
 			tBarTurnAxis = anAnchorConfig["barTurnAxis"] or false;
 
-			if tBarVertical then
+			if (anAnchorConfig["iconType"] or 1) == 5 then
+				if tBarVertical then
+					tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+					tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
+
+					tIconSize = 0;
+					tTotalHeight = tBarHeight;
+					tTotalWidth = tBarWidth;
+				else
+					tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
+					tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
+
+					tIconSize = 0;
+					tTotalWidth = tBarWidth;
+				end
+			elseif tBarVertical then
 				tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
 				tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
 
@@ -2376,7 +2380,7 @@ do
 		tWrapY = tWrapDir[2];
 
 		if aFrame["childBar"] and tBarVertical then
-			tXOff = tBaseX + (tCol * (tIconSize + tSpacing) * tGrowX) + (tRow * (tIconSize + tSpacing) * tWrapX);
+			tXOff = tBaseX + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
 			tYOff = tBaseY + (tCol * (tTotalHeight + tSpacing) * tGrowY) + (tRow * (tTotalHeight + tSpacing) * tWrapY);
 		else
 			tXOff = tBaseX + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
@@ -2387,88 +2391,94 @@ do
 		VUHDO_PixelUtil.SetPoint(aFrame, tPos["anchor"], tRelFrame, tPos["relPoint"], tXOff, tYOff);
 
 		if aFrame["childBar"] and tBarVertical then
-			VUHDO_PixelUtil.SetSize(aFrame, tIconSize, tTotalHeight);
+			VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tTotalHeight);
 		else
 			VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tBarHeight);
 		end
 
-		if aFrame["childIcon"] and aFrame["childBar"] then
-			aFrame["childIcon"]:ClearAllPoints();
-			if tBarVertical then
-				if tBarTurnAxis then
-					VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "TOP", aFrame, "TOP", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-					aFrame["childIcon"]:Show();
-
-					if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-						aFrame["cooldownFrame"]:ClearAllPoints();
-						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
-					end
-
-					if aFrame["chargeTexture"] and aFrame["childIcon"] then
-						aFrame["chargeTexture"]:ClearAllPoints();
-						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-					end
-
-					aFrame["childBar"]:ClearAllPoints();
-					VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "TOP", aFrame["childIcon"], "BOTTOM", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, tBarHeight);
-				else
-					VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "BOTTOM", aFrame, "BOTTOM", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-					aFrame["childIcon"]:Show();
-
-					if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-						aFrame["cooldownFrame"]:ClearAllPoints();
-						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
-					end
-
-					if aFrame["chargeTexture"] and aFrame["childIcon"] then
-						aFrame["chargeTexture"]:ClearAllPoints();
-						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-					end
-
-					aFrame["childBar"]:ClearAllPoints();
-					VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "BOTTOM", aFrame["childIcon"], "TOP", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, tBarHeight);
-				end
+		if aFrame["iconFrame"] and aFrame["childBar"] then
+			if (anAnchorConfig["iconType"] or 1) == 5 then
+				aFrame["iconFrame"]:Hide();
+				aFrame["childBar"]:ClearAllPoints();
+				aFrame["childBar"]:SetAllPoints(aFrame);
 			else
-				if tBarTurnAxis then
-					VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "RIGHT", aFrame, "RIGHT", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-					aFrame["childIcon"]:Show();
+				aFrame["iconFrame"]:ClearAllPoints();
+				if tBarVertical then
+					if tBarTurnAxis then
+						VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "TOP", aFrame, "TOP", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+						aFrame["iconFrame"]:Show();
 
-					if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-						aFrame["cooldownFrame"]:ClearAllPoints();
-						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+						if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+							aFrame["cooldownFrame"]:ClearAllPoints();
+							aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						aFrame["childBar"]:ClearAllPoints();
+						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "TOP", aFrame["iconFrame"], "BOTTOM", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, tBarHeight);
+					else
+						VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "BOTTOM", aFrame, "BOTTOM", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+						aFrame["iconFrame"]:Show();
+
+						if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+							aFrame["cooldownFrame"]:ClearAllPoints();
+							aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						aFrame["childBar"]:ClearAllPoints();
+						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "BOTTOM", aFrame["iconFrame"], "TOP", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, tBarHeight);
 					end
-
-					if aFrame["chargeTexture"] and aFrame["childIcon"] then
-						aFrame["chargeTexture"]:ClearAllPoints();
-						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-					end
-
-					aFrame["childBar"]:ClearAllPoints();
-					VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "RIGHT", aFrame["childIcon"], "LEFT", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childBar"], tBarWidth, tBarHeight);
 				else
-					VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "LEFT", aFrame, "LEFT", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-					aFrame["childIcon"]:Show();
+					if tBarTurnAxis then
+						VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "RIGHT", aFrame, "RIGHT", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+						aFrame["iconFrame"]:Show();
 
-					if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-						aFrame["cooldownFrame"]:ClearAllPoints();
-						aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+						if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+							aFrame["cooldownFrame"]:ClearAllPoints();
+							aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						aFrame["childBar"]:ClearAllPoints();
+						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "RIGHT", aFrame["iconFrame"], "LEFT", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tBarWidth, tBarHeight);
+					else
+						VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "LEFT", aFrame, "LEFT", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+						aFrame["iconFrame"]:Show();
+
+						if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+							aFrame["cooldownFrame"]:ClearAllPoints();
+							aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+							aFrame["chargeTexture"]:ClearAllPoints();
+							aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+						end
+
+						aFrame["childBar"]:ClearAllPoints();
+						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "LEFT", aFrame["iconFrame"], "RIGHT", 0, 0);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tBarWidth, tBarHeight);
 					end
-
-					if aFrame["chargeTexture"] and aFrame["childIcon"] then
-						aFrame["chargeTexture"]:ClearAllPoints();
-						aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-					end
-
-					aFrame["childBar"]:ClearAllPoints();
-					VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "LEFT", aFrame["childIcon"], "RIGHT", 0, 0);
-					VUHDO_PixelUtil.SetSize(aFrame["childBar"], tBarWidth, tBarHeight);
 				end
 			end
 		end
@@ -2698,26 +2708,41 @@ do
 			tSpacing = anAnchorConfig["spacing"] or 2;
 			tMaxCols = anAnchorConfig["maxColumns"] or 5;
 
-		if aFrame["childBar"] then
-			tBarVertical = anAnchorConfig["barVertical"] or false;
+			if aFrame["iconFrame"] then
+				tBarVertical = anAnchorConfig["barVertical"] or false;
 
-			if tBarVertical then
-				tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
-				tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
+				if (anAnchorConfig["iconType"] or 1) == 5 then
+					if tBarVertical then
+						tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+						tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
 
-				tIconSize = tBarWidth;
+						tIconSize = 0;
+						tTotalHeight = tBarHeight;
+						tTotalWidth = tBarWidth;
+					else
+						tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
+						tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
 
-				tTotalHeight = tIconSize + tBarHeight;
-				tTotalWidth = tIconSize;
+						tIconSize = 0;
+						tTotalWidth = tBarWidth;
+					end
+				elseif tBarVertical then
+					tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+					tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
+
+					tIconSize = tBarWidth;
+
+					tTotalHeight = tIconSize + tBarHeight;
+					tTotalWidth = tIconSize;
+				else
+					tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
+					tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
+
+					tIconSize = tBarHeight;
+
+					tTotalWidth = tIconSize + tBarWidth;
+				end
 			else
-				tBarWidth = VUHDO_getAuraBarWidthPixels(aButton, anAnchorConfig);
-				tBarHeight = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
-
-				tIconSize = tBarHeight;
-
-				tTotalWidth = tIconSize + tBarWidth;
-			end
-		else
 				tBarWidth = tSize;
 				tBarHeight = tSize;
 
@@ -2747,7 +2772,7 @@ do
 			tOffsetYPixels = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeight * 0.01;
 
 			if aFrame["childBar"] and tBarVertical then
-				tXOff = tOffsetXPixels + (tCol * (tIconSize + tSpacing) * tGrowX) + (tRow * (tIconSize + tSpacing) * tWrapX);
+				tXOff = tOffsetXPixels + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
 				tYOff = tOffsetYPixels + (tCol * (tTotalHeight + tSpacing) * tGrowY) + (tRow * (tTotalHeight + tSpacing) * tWrapY);
 			else
 				tXOff = tOffsetXPixels + (tCol * (tTotalWidth + tSpacing) * tGrowX) + (tRow * (tTotalWidth + tSpacing) * tWrapX);
@@ -2758,7 +2783,7 @@ do
 			VUHDO_PixelUtil.SetPoint(aFrame, tAnchorPoint[1], aButton, tAnchorPoint[1], tXOff, tYOff);
 
 			if aFrame["childBar"] and tBarVertical then
-				VUHDO_PixelUtil.SetSize(aFrame, tIconSize, tTotalHeight);
+				VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tTotalHeight);
 			else
 				VUHDO_PixelUtil.SetSize(aFrame, tTotalWidth, tBarHeight);
 			end
@@ -2769,103 +2794,111 @@ do
 		if tChild then
 			tChild:ClearAllPoints();
 
-			if aFrame["childIcon"] and aFrame["childBar"] then
-				tBarVertical = anAnchorConfig["barVertical"] or false;
-				tBarTurnAxis = anAnchorConfig["barTurnAxis"] or false;
-
-				if tBarVertical then
-					tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
-					tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
-
-					tIconSize = tBarWidth;
-
-					aFrame["childIcon"]:ClearAllPoints();
-					if tBarTurnAxis then
-						VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "TOP", aFrame, "TOP", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-						aFrame["childIcon"]:Show();
-
-						if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-							aFrame["cooldownFrame"]:ClearAllPoints();
-							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
-						end
-
-						if aFrame["chargeTexture"] and aFrame["childIcon"] then
-							aFrame["chargeTexture"]:ClearAllPoints();
-							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-						end
-
-						tChild:ClearAllPoints();
-						VUHDO_PixelUtil.SetPoint(tChild, "TOP", aFrame["childIcon"], "BOTTOM", 0, 0);
-						VUHDO_PixelUtil.SetSize(tChild, tIconSize, tBarHeight);
-					else
-						VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "BOTTOM", aFrame, "BOTTOM", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-						aFrame["childIcon"]:Show();
-
-						if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-							aFrame["cooldownFrame"]:ClearAllPoints();
-							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
-						end
-
-						if aFrame["chargeTexture"] and aFrame["childIcon"] then
-							aFrame["chargeTexture"]:ClearAllPoints();
-							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-						end
-
-						tChild:ClearAllPoints();
-						VUHDO_PixelUtil.SetPoint(tChild, "BOTTOM", aFrame["childIcon"], "TOP", 0, 0);
-						VUHDO_PixelUtil.SetSize(tChild, tIconSize, tBarHeight);
-					end
+			if aFrame["iconFrame"] and aFrame["childBar"] then
+				if (anAnchorConfig["iconType"] or 1) == 5 then
+					aFrame["iconFrame"]:Hide();
+					tChild:ClearAllPoints();
+					tChild:SetAllPoints(aFrame);
 				else
-					aFrame["childIcon"]:ClearAllPoints();
-					if tBarTurnAxis then
-						VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "RIGHT", aFrame, "RIGHT", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-						aFrame["childIcon"]:Show();
+					tBarVertical = anAnchorConfig["barVertical"] or false;
+					tBarTurnAxis = anAnchorConfig["barTurnAxis"] or false;
 
-						if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-							aFrame["cooldownFrame"]:ClearAllPoints();
-							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+					if tBarVertical then
+						tBarWidth = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+						tBarHeight = VUHDO_getAuraBarHeightPixelsVertical(aButton, anAnchorConfig);
+
+						tIconSize = tBarWidth;
+
+						aFrame["iconFrame"]:ClearAllPoints();
+
+						if tBarTurnAxis then
+							VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "TOP", aFrame, "TOP", 0, 0);
+							VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+							aFrame["iconFrame"]:Show();
+
+							if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+								aFrame["cooldownFrame"]:ClearAllPoints();
+								aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+								aFrame["chargeTexture"]:ClearAllPoints();
+								aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							tChild:ClearAllPoints();
+							VUHDO_PixelUtil.SetPoint(tChild, "TOP", aFrame["iconFrame"], "BOTTOM", 0, 0);
+							VUHDO_PixelUtil.SetSize(tChild, tIconSize, tBarHeight);
+						else
+							VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "BOTTOM", aFrame, "BOTTOM", 0, 0);
+							VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+							aFrame["iconFrame"]:Show();
+
+							if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+								aFrame["cooldownFrame"]:ClearAllPoints();
+								aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+								aFrame["chargeTexture"]:ClearAllPoints();
+								aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							tChild:ClearAllPoints();
+							VUHDO_PixelUtil.SetPoint(tChild, "BOTTOM", aFrame["iconFrame"], "TOP", 0, 0);
+							VUHDO_PixelUtil.SetSize(tChild, tIconSize, tBarHeight);
 						end
-
-						if aFrame["chargeTexture"] and aFrame["childIcon"] then
-							aFrame["chargeTexture"]:ClearAllPoints();
-							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-						end
-
-						tChild:ClearAllPoints();
-						VUHDO_PixelUtil.SetPoint(tChild, "RIGHT", aFrame["childIcon"], "LEFT", 0, 0);
-						VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
 					else
-						VUHDO_PixelUtil.SetPoint(aFrame["childIcon"], "LEFT", aFrame, "LEFT", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childIcon"], tIconSize, tIconSize);
-						aFrame["childIcon"]:Show();
+						aFrame["iconFrame"]:ClearAllPoints();
 
-						if aFrame["cooldownFrame"] and aFrame["childIcon"] then
-							aFrame["cooldownFrame"]:ClearAllPoints();
-							aFrame["cooldownFrame"]:SetAllPoints(aFrame["childIcon"]);
+						if tBarTurnAxis then
+							VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "RIGHT", aFrame, "RIGHT", 0, 0);
+							VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+							aFrame["iconFrame"]:Show();
+
+							if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+								aFrame["cooldownFrame"]:ClearAllPoints();
+								aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+								aFrame["chargeTexture"]:ClearAllPoints();
+								aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							tChild:ClearAllPoints();
+							VUHDO_PixelUtil.SetPoint(tChild, "RIGHT", aFrame["iconFrame"], "LEFT", 0, 0);
+							VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
+						else
+							VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "LEFT", aFrame, "LEFT", 0, 0);
+							VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
+							aFrame["iconFrame"]:Show();
+
+							if aFrame["cooldownFrame"] and aFrame["iconFrame"] then
+								aFrame["cooldownFrame"]:ClearAllPoints();
+								aFrame["cooldownFrame"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							if aFrame["chargeTexture"] and aFrame["iconFrame"] then
+								aFrame["chargeTexture"]:ClearAllPoints();
+								aFrame["chargeTexture"]:SetAllPoints(aFrame["iconFrame"]);
+							end
+
+							tChild:ClearAllPoints();
+							VUHDO_PixelUtil.SetPoint(tChild, "LEFT", aFrame["iconFrame"], "RIGHT", 0, 0);
+							VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
 						end
-
-						if aFrame["chargeTexture"] and aFrame["childIcon"] then
-							aFrame["chargeTexture"]:ClearAllPoints();
-							aFrame["chargeTexture"]:SetAllPoints(aFrame["childIcon"]);
-						end
-
-						tChild:ClearAllPoints();
-						VUHDO_PixelUtil.SetPoint(tChild, "LEFT", aFrame["childIcon"], "RIGHT", 0, 0);
-						VUHDO_PixelUtil.SetSize(tChild, tBarWidth, tBarHeight);
 					end
-				end
 
-				tSize = tIconSize;
+					tSize = tIconSize;
 
-				if aFrame["timerText"] and anAnchorConfig["TIMER_TEXT"] then
-					VUHDO_customizeIconText(aFrame["childIcon"], tSize, aFrame["timerText"], anAnchorConfig["TIMER_TEXT"]);
-				end
+					if aFrame["timerText"] and anAnchorConfig["TIMER_TEXT"] then
+						VUHDO_customizeIconText(aFrame["iconFrame"], tSize, aFrame["timerText"], anAnchorConfig["TIMER_TEXT"]);
+					end
 
-				if aFrame["countText"] and anAnchorConfig["COUNTER_TEXT"] then
-					VUHDO_customizeIconText(aFrame["childIcon"], tSize, aFrame["countText"], anAnchorConfig["COUNTER_TEXT"]);
+					if aFrame["countText"] and anAnchorConfig["COUNTER_TEXT"] then
+						VUHDO_customizeIconText(aFrame["iconFrame"], tSize, aFrame["countText"], anAnchorConfig["COUNTER_TEXT"]);
+					end
 				end
 			else
 				tChild:SetAllPoints(aFrame);
@@ -3300,7 +3333,7 @@ do
 		tIconType = anAnchorConfig["iconType"] or 1;
 
 		if aIconTexture then
-			if tIconType == 4 then
+			if tIconType == 4 or tIconType == 5 then
 				aIconTexture:Hide();
 			elseif tIconType == 3 then
 				aIconTexture:SetTexture("Interface\\AddOns\\VuhDo\\Images\\hot_flat_16_16");
@@ -3869,6 +3902,18 @@ do
 	local tClassColor;
 	local tBarColor;
 	local tDispelCurve;
+	local tGroupId;
+	local tEntryIndex;
+	local tEntryColor;
+	local tHasGlow;
+	local tGlowColor;
+	local tGlowKey;
+	local tNumLines;
+	local tLength;
+	local tThickness;
+	local tIconSize;
+	local tBarIconType;
+	local tGlowFrame;
 	function VUHDO_displayAuraAsBar(aButton, aPanelNum, anAnchorIndex, aSlotIndex, anAuraData, anAnchorConfig)
 
 		if not aButton or not anAnchorIndex or not aSlotIndex or not anAuraData or not anAnchorConfig then
@@ -3937,12 +3982,25 @@ do
 					tBar:GetStatusBarTexture():SetVertexColor(0.2, 0.6, 0.2, 1);
 				end
 			else
-				tBarColor = sBarColors and sBarColors["AURA_BAR_DEFAULT"];
+				tGroupId = anAuraData["groupId"];
+				tEntryIndex = anAuraData["entryIndex"];
 
-				if tBarColor then
-					tBar:GetStatusBarTexture():SetVertexColor(tBarColor["R"], tBarColor["G"], tBarColor["B"], tBarColor["O"] or 1);
+				if tGroupId and tEntryIndex and sEntrySettingsCache["colorIcon"][tGroupId] and sEntrySettingsCache["colorIcon"][tGroupId][tEntryIndex] then
+					tEntryColor = sEntrySettingsCache["colorIconColor"][tGroupId] and sEntrySettingsCache["colorIconColor"][tGroupId][tEntryIndex];
+
+					if tEntryColor and tEntryColor["R"] then
+						tBar:GetStatusBarTexture():SetVertexColor(tEntryColor["R"], tEntryColor["G"], tEntryColor["B"], tEntryColor["O"] or 1);
+					else
+						tBar:GetStatusBarTexture():SetVertexColor(0.2, 0.6, 0.2, 1);
+					end
 				else
-					tBar:GetStatusBarTexture():SetVertexColor(0.2, 0.6, 0.2, 1);
+					tBarColor = sBarColors and sBarColors["AURA_BAR_DEFAULT"];
+
+					if tBarColor then
+						tBar:GetStatusBarTexture():SetVertexColor(tBarColor["R"], tBarColor["G"], tBarColor["B"], tBarColor["O"] or 1);
+					else
+						tBar:GetStatusBarTexture():SetVertexColor(0.2, 0.6, 0.2, 1);
+					end
 				end
 			end
 		end
@@ -3969,9 +4027,85 @@ do
 			tBar:SetValue(tBarInvertGrowth and 0 or 1);
 		end
 
-		VUHDO_updateAuraIconDisplay(tBarFrame["childIcon"], tBarFrame["cooldownFrame"], nil, anAnchorConfig, anAuraData, tDurationObj, tUnit, aPanelNum, anAnchorIndex);
+		VUHDO_updateAuraIconDisplay(tBarFrame["iconFrame"]["textureI"], tBarFrame["iconFrame"]["cooldownFrame"], tBarFrame["iconFrame"], anAnchorConfig, anAuraData, tDurationObj, tUnit, aPanelNum, anAnchorIndex);
+
+		tBarIconType = anAnchorConfig["iconType"] or 1;
+
+		if tBarFrame["iconFrame"] then
+			if tBarIconType == 5 then
+				tBarFrame["iconFrame"]:Hide();
+			else
+				tBarFrame["iconFrame"]:Show();
+			end
+		end
 
 		VUHDO_updateAuraTimerAndStacks(tBarFrame["timerText"], tBarFrame["countText"], tBarFrame["chargeTexture"], anAnchorConfig, anAuraData, tDurationObj, tUnit, aPanelNum, anAnchorIndex);
+
+		tGroupId = anAuraData["groupId"];
+		tEntryIndex = anAuraData["entryIndex"];
+		tHasGlow = tGroupId and tEntryIndex and sEntrySettingsCache["glowIcon"][tGroupId] and sEntrySettingsCache["glowIcon"][tGroupId][tEntryIndex];
+
+		if tHasGlow and tBarIconType ~= 5 then
+			tGlowColor = sEntrySettingsCache["glowColor"][tGroupId] and sEntrySettingsCache["glowColor"][tGroupId][tEntryIndex];
+
+			if tGlowColor then
+				sGlowColorArray[1] = tGlowColor["R"] or 1;
+				sGlowColorArray[2] = tGlowColor["G"] or 1;
+				sGlowColorArray[3] = tGlowColor["B"] or 0;
+				sGlowColorArray[4] = tGlowColor["O"] or 1;
+			elseif sBarColors and sBarColors["DEBUFF_ICON_GLOW"] then
+				sGlowColorArray[1] = sBarColors["DEBUFF_ICON_GLOW"]["R"];
+				sGlowColorArray[2] = sBarColors["DEBUFF_ICON_GLOW"]["G"];
+				sGlowColorArray[3] = sBarColors["DEBUFF_ICON_GLOW"]["B"];
+				sGlowColorArray[4] = sBarColors["DEBUFF_ICON_GLOW"]["O"];
+			else
+				sGlowColorArray[1] = 0.95;
+				sGlowColorArray[2] = 0.95;
+				sGlowColorArray[3] = 0.32;
+				sGlowColorArray[4] = 1;
+			end
+
+			tGlowKey = format("VdAuraGlow_%d_%d_%d", aPanelNum or 0, anAnchorIndex, aSlotIndex);
+
+			if tBarVertical then
+				tIconSize = VUHDO_getAuraBarWidthPixelsVertical(aButton, anAnchorConfig);
+			else
+				tIconSize = VUHDO_getAuraBarHeightPixels(aButton, anAnchorConfig);
+			end
+
+			if tIconSize and tIconSize < 24 then
+				tNumLines = 8;
+				tLength = 2;
+				tThickness = 1;
+			elseif tIconSize and tIconSize < 32 then
+				tNumLines = 8;
+				tLength = 4;
+				tThickness = 1;
+			else
+				tNumLines = 8;
+				tLength = 6;
+				tThickness = 2;
+			end
+
+			tGlowFrame = tBarFrame["iconFrame"];
+
+			if tGlowFrame then
+				VUHDO_LibCustomGlow.PixelGlow_Start(
+					tGlowFrame, sGlowColorArray,
+					tNumLines, 0.3, tLength, tThickness, 0, 0, false, tGlowKey
+				);
+
+				tGlowFrame["hasEntryGlow"] = true;
+				tGlowFrame["entryGlowKey"] = tGlowKey;
+			end
+		elseif tBarFrame["iconFrame"] and tBarFrame["iconFrame"]["hasEntryGlow"] then
+			tGlowFrame = tBarFrame["iconFrame"];
+
+			VUHDO_LibCustomGlow.PixelGlow_Stop(tGlowFrame, tGlowFrame["entryGlowKey"]);
+
+			tGlowFrame["hasEntryGlow"] = nil;
+			tGlowFrame["entryGlowKey"] = nil;
+		end
 
 		tBar:SetAlpha(1);
 
@@ -4002,6 +4136,7 @@ do
 	--
 	local tFrameName;
 	local tFrame;
+	local tGlowTarget;
 	function VUHDO_hideAuraSlot(aButton, anAnchorIndex, aSlotIndex, anIsBar)
 
 		if not aButton or not anAnchorIndex or not aSlotIndex then
@@ -4022,14 +4157,23 @@ do
 			VUHDO_UIFrameFlashStop(tFrame);
 
 			if tFrame["hasEntryGlow"] then
-				VUHDO_LibCustomGlow.PixelGlow_Stop(tFrame, tFrame["entryGlowKey"]);
+				tGlowTarget = tFrame;
+
+				VUHDO_LibCustomGlow.PixelGlow_Stop(tGlowTarget, tFrame["entryGlowKey"]);
 
 				tFrame["hasEntryGlow"] = nil;
 				tFrame["entryGlowKey"] = nil;
+			elseif tFrame["iconFrame"] and tFrame["iconFrame"]["hasEntryGlow"] then
+				tGlowTarget = tFrame["iconFrame"];
+
+				VUHDO_LibCustomGlow.PixelGlow_Stop(tGlowTarget, tFrame["iconFrame"]["entryGlowKey"]);
+
+				tFrame["iconFrame"]["hasEntryGlow"] = nil;
+				tFrame["iconFrame"]["entryGlowKey"] = nil;
 			end
 
-			if tFrame["childIcon"] then
-				tFrame["childIcon"]:Hide();
+			if tFrame["iconFrame"] then
+				tFrame["iconFrame"]:Hide();
 			end
 
 			if tFrame["auraInstanceId"] then
