@@ -19,9 +19,12 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed icon glow for bar style aura anchors  
+-- Fixed spell entry specific color for bar style aura anchors  
   
   
 Improvements:  
+-- Added option to hide icon for bar style aura anchors  
   
   
 --------------------------------------------------------------  
