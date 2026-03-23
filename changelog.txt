@@ -24,6 +24,7 @@ Bugfixes:
 -- Fixed flash on low for aura icons and bars  
 -- Fixed fade on low for aura icons and bars  
 -- Fixed out of range direction arrow  
+-- Fixed aura group colors to respect list entry spell source  
   
   
 Improvements:  
