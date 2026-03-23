@@ -56,6 +56,7 @@ BACKDROP_VUHDO_BUFF_WATCH_MAIN_FRAME_16_16_5555 = {
 
 local VUHDO_RAID;
 local VUHDO_RAID_NAMES;
+local VUHDO_BOSS_UNITS;
 
 local VUHDO_tableUniqueAdd;
 local VUHDO_isInSameZone;
@@ -114,8 +115,10 @@ local sGermanOrEnglish = GetLocale() == "deDE" or GetLocale() == "enGB" or GetLo
 
 -----------------------------------------------------------------------------
 function VUHDO_buffWatchInitLocalOverrides()
+
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
+	VUHDO_BOSS_UNITS = _G["VUHDO_BOSS_UNITS"];
 
 	VUHDO_tableUniqueAdd = _G["VUHDO_tableUniqueAdd"];
 	VUHDO_isInSameZone = _G["VUHDO_isInSameZone"];
@@ -126,6 +129,9 @@ function VUHDO_buffWatchInitLocalOverrides()
 	sConfig = VUHDO_BUFF_SETTINGS["CONFIG"];
 	sRebuffSecs = sConfig["REBUFF_MIN_MINUTES"] * 60;
 	sRebuffPerc = sConfig["REBUFF_AT_PERCENT"] * 0.01;
+
+	return;
+
 end
 
 ----------------------------------------------------
@@ -699,14 +705,19 @@ end
 
 --
 function VUHDO_updateBuffRaidGroup()
+
 	twipe(VUHDO_BUFF_RAID);
+
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
-		if "focus" ~= tUnit and "target" ~= tUnit and not tInfo["isPet"] then
+		if "focus" ~= tUnit and "target" ~= tUnit and not tInfo["isPet"] and not VUHDO_BOSS_UNITS[tUnit] then
 			VUHDO_BUFF_RAID[#VUHDO_BUFF_RAID + 1] = tUnit;
 		end
 	end
 
 	VUHDO_updateBuffFilters();
+
+	return;
+
 end
 
 
