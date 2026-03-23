@@ -340,13 +340,22 @@ end
 --
 local tOldValue;
 function VUHDO_profileComboValueChanged(aComboBox, aValue)
+
 	tOldValue = VUHDO_lnfGetValueFromModel(aComboBox);
+
 	if (aValue ~= tOldValue) then
-		VUHDO_skinsSaveAutoProfileButtonEnablement(aComboBox:GetParent():GetParent(), tOldValue);
+		if sAutoProfilesModified then
+			VUHDO_skinsSaveAutoProfileButtonEnablement(aComboBox:GetParent():GetParent(), tOldValue);
+
+			sAutoProfilesModified = false;
+		end
 	end
 
 	VUHDO_updateAllAutoProfiles(aComboBox:GetParent():GetParent());
 	VUHDO_updateDefaultProfileCheckButton(aComboBox:GetParent():GetParent());
+
+	return;
+
 end
 
 
