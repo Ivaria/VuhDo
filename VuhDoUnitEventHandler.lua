@@ -2,14 +2,9 @@ local _;
 
 local CreateFrame = CreateFrame;
 local InCombatLockdown = InCombatLockdown;
-local UnitExists = UnitExists;
 local pairs = pairs;
 local debugprofilestop = debugprofilestop;
-local tinsert = table.insert;
-local twipe = table.wipe;
 local format = string.format;
-local unpack = unpack;
-local type = type;
 
 local VUHDO_isBossUnit;
 local VUHDO_isAltPowerActive;
@@ -35,17 +30,10 @@ local VUHDO_updateHandlerOnEventMetrics;
 local VUHDO_RAID;
 local VUHDO_CONFIG;
 local VUHDO_PANEL_SETUP;
-local VUHDO_UNIT_BUTTONS;
 local VUHDO_INTERNAL_TOGGLES;
 local VUHDO_VARIABLES_LOADED;
-local VUHDO_MAX_BOSS_FRAMES;
 
-VUHDO_SPECIAL_UNIT_TOKENS = { };
-local VUHDO_SPECIAL_UNIT_TOKENS = VUHDO_SPECIAL_UNIT_TOKENS;
-
-local sSpecialUnitFrames = { };
-local sSpecialUnitChunks = { };
-local sAllSpecialUnits = { };
+local sUnitEventFrames = { };
 
 local sAllUnitEventNames = {
 	"UNIT_AURA",
@@ -91,10 +79,8 @@ function VUHDO_unitEventHandlerInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
-	VUHDO_UNIT_BUTTONS = _G["VUHDO_UNIT_BUTTONS"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_VARIABLES_LOADED = _G["VUHDO_VARIABLES_LOADED"];
-	VUHDO_MAX_BOSS_FRAMES = _G["VUHDO_MAX_BOSS_FRAMES"];
 
 	VUHDO_isBossUnit = _G["VUHDO_isBossUnit"];
 	VUHDO_isAltPowerActive = _G["VUHDO_isAltPowerActive"];
@@ -359,11 +345,9 @@ end
 
 
 
-local tButtons;
+--
 local tUnitEventStartTime;
 local tUnitEventDuration;
-
---
 local function VUHDO_runProfiledUnitDispatch(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5)
 
 	if VUHDO_HANDLER_PROFILING_ENABLED then
@@ -374,6 +358,7 @@ local function VUHDO_runProfiledUnitDispatch(anEvent, anArg1, anArg2, anArg3, an
 
 	if VUHDO_HANDLER_PROFILING_ENABLED then
 		tUnitEventDuration = (debugprofilestop() - tUnitEventStartTime) * 1000;
+
 		VUHDO_updateHandlerOnEventMetrics(anEvent, tUnitEventDuration, anArg1, anArg2, anArg3, anArg4, anArg5);
 	end
 
@@ -384,28 +369,7 @@ end
 
 
 --
-function VUHDO_onButtonUnitEvent(aButton, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5)
-
-	if VUHDO_SPECIAL_UNIT_TOKENS[anArg1] then
-		return;
-	end
-
-	tButtons = VUHDO_UNIT_BUTTONS[anArg1];
-
-	if tButtons and aButton ~= tButtons[1] then
-		return;
-	end
-
-	VUHDO_runProfiledUnitDispatch(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5);
-
-	return;
-
-end
-
-
-
---
-function VUHDO_onSpecialUnitEvent(aFrame, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5)
+function VUHDO_onUnitEvent(aFrame, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5)
 
 	VUHDO_runProfiledUnitDispatch(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5);
 
@@ -464,7 +428,6 @@ end
 
 
 --
-local tCnt;
 local tEvent;
 local function VUHDO_unregisterKnownUnitEventsFromFrame(aFrame)
 
@@ -481,67 +444,52 @@ end
 
 
 --
-local function VUHDO_registerUnitEventForCore(aFrame, aUnits, aEventName)
-
-	if type(aUnits) == "string" then
-		aFrame:RegisterUnitEvent(aEventName, aUnits);
-	else
-		aFrame:RegisterUnitEvent(aEventName, unpack(aUnits));
-	end
-
-	return;
-
-end
-
-
-
---
 local function VUHDO_applyCoreUnitRegistrations(aFrame, aUnits)
 
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_AURA");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_HEALTH");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_MAXHEALTH");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_CONNECTION");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_NAME_UPDATE");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_FACTION");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "INCOMING_RESURRECT_CHANGED");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "INCOMING_SUMMON_CHANGED");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_PHASE");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "PLAYER_FLAGS_CHANGED");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_PET");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_ENTERED_VEHICLE");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_EXITED_VEHICLE");
-	VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_EXITING_VEHICLE");
+	aFrame:RegisterUnitEvent("UNIT_AURA", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_HEALTH", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_MAXHEALTH", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_CONNECTION", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_NAME_UPDATE", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_FACTION", aUnits);
+	aFrame:RegisterUnitEvent("INCOMING_RESURRECT_CHANGED", aUnits);
+	aFrame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_PHASE", aUnits);
+	aFrame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_PET", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_EXITING_VEHICLE", aUnits);
 
 	if VUHDO_getThreatEventsInterest() then
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_THREAT_SITUATION_UPDATE");
+		aFrame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", aUnits);
 	end
 
 	if VUHDO_getPowerEventsInterest() then
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_DISPLAYPOWER");
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_MAXPOWER");
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_POWER_UPDATE");
+		aFrame:RegisterUnitEvent("UNIT_DISPLAYPOWER", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_MAXPOWER", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_POWER_UPDATE", aUnits);
 	end
 
 	if VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_UNIT_TARGET) then
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_TARGET");
+		aFrame:RegisterUnitEvent("UNIT_TARGET", aUnits);
 	end
 
 	if VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_ALT_POWER) then
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_POWER_BAR_SHOW");
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_POWER_BAR_HIDE");
+		aFrame:RegisterUnitEvent("UNIT_POWER_BAR_SHOW", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_POWER_BAR_HIDE", aUnits);
 	end
 
 	if VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"] then
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_HEAL_PREDICTION");
+		aFrame:RegisterUnitEvent("UNIT_HEAL_PREDICTION", aUnits);
 	end
 
 	if VUHDO_getShieldInterest() then
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_ABSORB_AMOUNT_CHANGED");
+		aFrame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", aUnits);
 	end
 
 	if VUHDO_getHealAbsorbInterest() then
-		VUHDO_registerUnitEventForCore(aFrame, aUnits, "UNIT_HEAL_ABSORB_AMOUNT_CHANGED");
+		aFrame:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", aUnits);
 	end
 
 	return;
@@ -551,49 +499,58 @@ end
 
 
 --
-local function VUHDO_registerHealButtonUnitEvents(aFrame, aUnit)
+local tUnitEventFrame;
+local function VUHDO_getOrCreateUnitEventFrame(aUnit)
 
-	VUHDO_unregisterKnownUnitEventsFromFrame(aFrame);
+	tUnitEventFrame = sUnitEventFrames[aUnit];
 
-	VUHDO_applyCoreUnitRegistrations(aFrame, aUnit);
+	if not tUnitEventFrame then
+		tUnitEventFrame = CreateFrame("Frame", format("VuhDoUnitEvent_%s", aUnit), UIParent);
 
-	aFrame:SetScript("OnEvent", VUHDO_onButtonUnitEvent);
+		tUnitEventFrame:Hide();
 
-	aFrame["vuhdo_unit_events"] = aUnit;
+		sUnitEventFrames[aUnit] = tUnitEventFrame;
+	end
 
-	return;
-
-end
-
-
-
---
-local function VUHDO_registerMultiUnitFrameEvents(aFrame, aUnits)
-
-	VUHDO_unregisterKnownUnitEventsFromFrame(aFrame);
-
-	VUHDO_applyCoreUnitRegistrations(aFrame, aUnits);
-
-	aFrame:SetScript("OnEvent", VUHDO_onSpecialUnitEvent);
-
-	return;
+	return tUnitEventFrame;
 
 end
 
 
 
 --
-function VUHDO_registerUnitEventsForButton(aButton, aUnit)
+function VUHDO_registerUnitForEvents(aUnit)
 
-	if not aUnit or not aButton then
+	if not aUnit then
 		return;
 	end
 
-	if aButton:GetScript("OnEvent") and aButton["vuhdo_unit_events"] == aUnit then
+	tUnitEventFrame = VUHDO_getOrCreateUnitEventFrame(aUnit);
+
+	VUHDO_unregisterKnownUnitEventsFromFrame(tUnitEventFrame);
+
+	VUHDO_applyCoreUnitRegistrations(tUnitEventFrame, aUnit);
+
+	tUnitEventFrame:SetScript("OnEvent", VUHDO_onUnitEvent);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_unregisterUnitForEvents(aUnit)
+
+	tUnitEventFrame = sUnitEventFrames[aUnit];
+
+	if not tUnitEventFrame then
 		return;
 	end
 
-	VUHDO_registerHealButtonUnitEvents(aButton, aUnit);
+	tUnitEventFrame:UnregisterAllEvents();
+
+	tUnitEventFrame:SetScript("OnEvent", nil);
 
 	return;
 
@@ -602,159 +559,29 @@ end
 
 
 --
-function VUHDO_unregisterUnitEventsForButton(aButton)
+function VUHDO_unregisterAllUnitEventFrames()
 
-	if not aButton then
+	for _, tFrame in pairs(sUnitEventFrames) do
+		tFrame:UnregisterAllEvents();
+
+		tFrame:SetScript("OnEvent", nil);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_refreshAllUnitEventRegistrations()
+
+	if not VUHDO_RAID then
 		return;
 	end
 
-	VUHDO_unregisterKnownUnitEventsFromFrame(aButton);
-
-	aButton:SetScript("OnEvent", nil);
-
-	aButton["vuhdo_unit_events"] = nil;
-
-	return;
-
-end
-
-
-
---
-function VUHDO_unregisterAllButtonUnitEvents()
-
-	if not VUHDO_UNIT_BUTTONS then
-		return;
-	end
-
-	for tUnit, tButtons in pairs(VUHDO_UNIT_BUTTONS) do
-		for _, tButton in pairs(tButtons) do
-			if tButton and tUnit then
-				VUHDO_unregisterUnitEventsForButton(tButton);
-			end
-		end
-	end
-
-	return;
-
-end
-
-
-
---
-function VUHDO_refreshAllHealButtonUnitEvents()
-
-	if not VUHDO_UNIT_BUTTONS then
-		return;
-	end
-
-	for tUnit, tButtons in pairs(VUHDO_UNIT_BUTTONS) do
-		if not VUHDO_SPECIAL_UNIT_TOKENS[tUnit] then
-			for _, tButton in pairs(tButtons) do
-				if tButton and tUnit then
-					VUHDO_registerHealButtonUnitEvents(tButton, tUnit);
-				end
-			end
-		end
-	end
-
-	return;
-
-end
-
-
-
---
-local function VUHDO_buildSpecialUnitList()
-
-	twipe(sAllSpecialUnits);
-
-	tinsert(sAllSpecialUnits, "player");
-	tinsert(sAllSpecialUnits, "focus");
-	tinsert(sAllSpecialUnits, "target");
-
-	for tCnt = 1, VUHDO_MAX_BOSS_FRAMES do
-		tinsert(sAllSpecialUnits, format("boss%d", tCnt));
-	end
-
-	return;
-
-end
-
-
-
---
-local function VUHDO_buildSpecialUnitTokens()
-
-	twipe(VUHDO_SPECIAL_UNIT_TOKENS);
-
-	for tCnt = 1, #sAllSpecialUnits do
-		VUHDO_SPECIAL_UNIT_TOKENS[sAllSpecialUnits[tCnt]] = true;
-	end
-
-	return;
-
-end
-
-
-
---
-local tChunk;
-local function VUHDO_createSpecialUnitFrames()
-
-	twipe(sSpecialUnitChunks);
-
-	for tCnt = 1, #sAllSpecialUnits do
-		if (tCnt - 1) % 4 == 0 then
-			tChunk = { };
-
-			tinsert(sSpecialUnitChunks, tChunk);
-		end
-
-		tinsert(tChunk, sAllSpecialUnits[tCnt]);
-	end
-
-	for tCnt = #sSpecialUnitFrames + 1, #sSpecialUnitChunks do
-		sSpecialUnitFrames[tCnt] = CreateFrame("Frame", format("VuhDoSpecialUnitEventFrame%d", tCnt), UIParent);
-	end
-
-	return;
-
-end
-
-
-
---
-local tHasValid;
-local function VUHDO_chunkHasValidUnit(aChunk)
-
-	tHasValid = false;
-
-	for tIdx = 1, #aChunk do
-		if UnitExists(aChunk[tIdx]) then
-			tHasValid = true;
-
-			break;
-		end
-	end
-
-	return tHasValid;
-
-end
-
-
-
---
-function VUHDO_refreshSpecialUnitFrames()
-
-	for tCnt = 1, #sSpecialUnitFrames do
-		if tCnt <= #sSpecialUnitChunks and VUHDO_chunkHasValidUnit(sSpecialUnitChunks[tCnt]) then
-			VUHDO_registerMultiUnitFrameEvents(sSpecialUnitFrames[tCnt], sSpecialUnitChunks[tCnt]);
-		else
-			VUHDO_unregisterKnownUnitEventsFromFrame(sSpecialUnitFrames[tCnt]);
-
-			sSpecialUnitFrames[tCnt]:SetScript("OnEvent", nil);
-		end
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_registerUnitForEvents(tUnit);
 	end
 
 	return;
@@ -766,8 +593,7 @@ end
 --
 function VUHDO_updateToggledUnitEvents()
 
-	VUHDO_refreshSpecialUnitFrames();
-	VUHDO_refreshAllHealButtonUnitEvents();
+	VUHDO_refreshAllUnitEventRegistrations();
 
 	return;
 
@@ -778,10 +604,7 @@ end
 --
 function VUHDO_initUnitEventHandler()
 
-	VUHDO_buildSpecialUnitList();
-	VUHDO_buildSpecialUnitTokens();
-	VUHDO_createSpecialUnitFrames();
-	VUHDO_refreshSpecialUnitFrames();
+	VUHDO_refreshAllUnitEventRegistrations();
 
 	return;
 

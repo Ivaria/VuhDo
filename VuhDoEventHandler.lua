@@ -65,17 +65,12 @@ local VUHDO_updateDirectionFrame;
 local VUHDO_updateHealth;
 local VUHDO_updateHealthBarsFor;
 local VUHDO_setHealth;
-local VUHDO_updateShieldBar;
-local VUHDO_updateHealAbsorbBar;
-local VUHDO_updateManaBars;
-local VUHDO_updateTargetBars;
 local VUHDO_initAllEventBouquets;
 local VUHDO_updateBouquetsForEvent;
 local VUHDO_updateAllHoTs;
 local VUHDO_updateAllCyclicBouquets;
 local VUHDO_updateAllDebuffIcons;
 local VUHDO_updateAllAggro;
-local VUHDO_updateUnitAggro;
 local VUHDO_updateAllRange;
 local VUHDO_updateAllClusters;
 local VUHDO_updateClusterHighlights;
@@ -89,6 +84,7 @@ local VUHDO_getUnitZoneName;
 local VUHDO_handleScaleChange;
 local VUHDO_redrawPanel;
 local VUHDO_redrawAllPanels;
+local VUHDO_unregisterUnitForEvents;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -529,7 +525,6 @@ local sRangeRefreshSecs = 1.1;
 local sClusterRefreshSecs = 1.2;
 local sAoeRefreshSecs = 1.3;
 local sBuffsRefreshSecs;
-local sParseCombatLog;
 local sLastShapeshiftTime = 0;
 
 local VuhDoGcdStatusBar;
@@ -544,8 +539,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 
 	VUHDO_updateHealth = _G["VUHDO_updateHealth"];
-	VUHDO_updateManaBars = _G["VUHDO_updateManaBars"];
-	VUHDO_updateTargetBars = _G["VUHDO_updateTargetBars"];
 	VUHDO_updateAllRaidBars = _G["VUHDO_updateAllRaidBars"];
 	VUHDO_updateAllOutRaidTargetButtons = _G["VUHDO_updateAllOutRaidTargetButtons"];
 	VUHDO_parseAddonMessage = _G["VUHDO_parseAddonMessage"];
@@ -567,42 +560,33 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateCustomDebuffTooltip = _G["VUHDO_updateCustomDebuffTooltip"];
 	VUHDO_UIFrameFlash_OnUpdate = _G["VUHDO_UIFrameFlash_OnUpdate"];
 	VUHDO_handleScaleChange = _G["VUHDO_handleScaleChange"];
-
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
-	VUHDO_updateShieldBar = _G["VUHDO_updateShieldBar"];
-	VUHDO_updateHealAbsorbBar = _G["VUHDO_updateHealAbsorbBar"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
-
 	VUHDO_updateSpellTrace = _G["VUHDO_updateSpellTrace"];
 	VUHDO_setHealth = _G["VUHDO_setHealth"];
 	VUHDO_initAllEventBouquets = _G["VUHDO_initAllEventBouquets"];
 	VUHDO_updateAllAggro = _G["VUHDO_updateAllAggro"];
-	VUHDO_updateUnitAggro = _G["VUHDO_updateUnitAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_updateAllRange"];
-
 	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
 	VUHDO_clearAllSpellTraces = _G["VUHDO_clearAllSpellTraces"];
+	VUHDO_unregisterUnitForEvents = _G["VUHDO_unregisterUnitForEvents"];
 
 	VUHDO_initTaskSystem();
 
 	-- override the base functions with their deferred counterparts
 	VUHDO_updateHealth = _G["VUHDO_deferUpdateHealth"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
-	VUHDO_updateShieldBar = _G["VUHDO_deferUpdateShieldBar"];
-	VUHDO_updateHealAbsorbBar = _G["VUHDO_deferUpdateHealAbsorbBar"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 	VUHDO_updateAllHoTs = _G["VUHDO_deferUpdateAllHoTs"];
 	VUHDO_updateAllCyclicBouquets = _G["VUHDO_deferUpdateAllCyclicBouquets"];
 	VUHDO_updateAllDebuffIcons = _G["VUHDO_deferUpdateAllDebuffIcons"];
 	VUHDO_updateAllAggro = _G["VUHDO_deferUpdateAllAggro"];
-	VUHDO_updateUnitAggro = _G["VUHDO_deferUpdateUnitAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_deferUpdateAllRange"];
 	VUHDO_updateAllClusters = _G["VUHDO_deferUpdateAllClusters"];
 	VUHDO_aoeUpdateAll = _G["VUHDO_deferAoeUpdateAll"];
 	VUHDO_updateSpellTrace = _G["VUHDO_deferUpdateSpellTrace"];
 	VUHDO_updateAllRaidBars = _G["VUHDO_deferUpdateAllRaidBars"];
 	VUHDO_initAllEventBouquets = _G["VUHDO_deferInitAllEventBouquets"];
-	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
 	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
@@ -623,8 +607,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	sClusterRefreshSecs = VUHDO_CONFIG["CLUSTER"]["REFRESH"] * 0.001;
 	sAoeRefreshSecs = VUHDO_CONFIG["AOE_ADVISOR"]["refresh"] * 0.001;
 	sBuffsRefreshSecs = VUHDO_BUFF_SETTINGS["CONFIG"]["REFRESH_SECS"];
-
-	sParseCombatLog = VUHDO_CONFIG["PARSE_COMBAT_LOG"];
 
 	return;
 
@@ -1115,6 +1097,8 @@ do
 						if VUHDO_RAID["focus"] then
 							table.wipe(VUHDO_RAID["focus"]);
 						end
+
+						VUHDO_unregisterUnitForEvents("focus");
 
 						VUHDO_RAID["focus"] = nil;
 					end
