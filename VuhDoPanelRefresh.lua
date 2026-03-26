@@ -309,6 +309,8 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 	end
 
 	if InCombatLockdown() then
+		VUHDO_deferTask(VUHDO_DEFER_REFRESH_PRIVATE_AURAS, VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aPanelNum, aButton, aUnit);
+
 		return;
 	end
 
