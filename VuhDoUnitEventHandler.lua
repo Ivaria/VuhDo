@@ -444,52 +444,52 @@ end
 
 
 --
-local function VUHDO_applyCoreUnitRegistrations(aFrame, aUnits)
+local function VUHDO_applyCoreUnitRegistrations(aFrame, aUnit)
 
-	aFrame:RegisterUnitEvent("UNIT_AURA", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_HEALTH", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_MAXHEALTH", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_CONNECTION", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_NAME_UPDATE", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_FACTION", aUnits);
-	aFrame:RegisterUnitEvent("INCOMING_RESURRECT_CHANGED", aUnits);
-	aFrame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_PHASE", aUnits);
-	aFrame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_PET", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", aUnits);
-	aFrame:RegisterUnitEvent("UNIT_EXITING_VEHICLE", aUnits);
+	aFrame:RegisterUnitEvent("UNIT_AURA", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_HEALTH", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_MAXHEALTH", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_CONNECTION", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_NAME_UPDATE", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_FACTION", aUnit);
+	aFrame:RegisterUnitEvent("INCOMING_RESURRECT_CHANGED", aUnit);
+	aFrame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_PHASE", aUnit);
+	aFrame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_PET", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_EXITING_VEHICLE", aUnit);
 
 	if VUHDO_getThreatEventsInterest() then
-		aFrame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", aUnit);
 	end
 
 	if VUHDO_getPowerEventsInterest() then
-		aFrame:RegisterUnitEvent("UNIT_DISPLAYPOWER", aUnits);
-		aFrame:RegisterUnitEvent("UNIT_MAXPOWER", aUnits);
-		aFrame:RegisterUnitEvent("UNIT_POWER_UPDATE", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_DISPLAYPOWER", aUnit);
+		aFrame:RegisterUnitEvent("UNIT_MAXPOWER", aUnit);
+		aFrame:RegisterUnitEvent("UNIT_POWER_UPDATE", aUnit);
 	end
 
 	if VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_UNIT_TARGET) then
-		aFrame:RegisterUnitEvent("UNIT_TARGET", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_TARGET", aUnit);
 	end
 
 	if VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_ALT_POWER) then
-		aFrame:RegisterUnitEvent("UNIT_POWER_BAR_SHOW", aUnits);
-		aFrame:RegisterUnitEvent("UNIT_POWER_BAR_HIDE", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_POWER_BAR_SHOW", aUnit);
+		aFrame:RegisterUnitEvent("UNIT_POWER_BAR_HIDE", aUnit);
 	end
 
 	if VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"] then
-		aFrame:RegisterUnitEvent("UNIT_HEAL_PREDICTION", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_HEAL_PREDICTION", aUnit);
 	end
 
 	if VUHDO_getShieldInterest() then
-		aFrame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", aUnit);
 	end
 
 	if VUHDO_getHealAbsorbInterest() then
-		aFrame:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", aUnits);
+		aFrame:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", aUnit);
 	end
 
 	return;
@@ -528,7 +528,6 @@ function VUHDO_registerUnitForEvents(aUnit)
 	tUnitEventFrame = VUHDO_getOrCreateUnitEventFrame(aUnit);
 
 	VUHDO_unregisterKnownUnitEventsFromFrame(tUnitEventFrame);
-
 	VUHDO_applyCoreUnitRegistrations(tUnitEventFrame, aUnit);
 
 	tUnitEventFrame:SetScript("OnEvent", VUHDO_onUnitEvent);
