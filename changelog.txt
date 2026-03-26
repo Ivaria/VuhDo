@@ -19,6 +19,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed turn axis option for overshield and heal absorb bars  
   
   
 Improvements:  
