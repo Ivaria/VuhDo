@@ -1062,7 +1062,9 @@ function VUHDO_loadDefaultConfig()
 		for tUnitReaction, tRangeSpells in pairs(VUHDO_DEFAULT_RANGE_SPELLS[tClass]) do
 			local tIsGuessRange = true;
 
-			if VUHDO_strempty(VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction]) then
+			if VUHDO_strempty(VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction])
+				or (not VUHDO_strempty(VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction])
+					and GetSpellName(VUHDO_CONFIG["RANGE_SPELL"][tUnitReaction]) == nil) then
 				for _, tRangeSpell in pairs(tRangeSpells) do
 					if type(tRangeSpell) == "number" then
 						tRangeSpell = IsPlayerSpell(tRangeSpell) and GetSpellName(tRangeSpell) or "!";
