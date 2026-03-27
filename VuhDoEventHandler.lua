@@ -2301,8 +2301,6 @@ do
 	--
 	local function VUHDO_handleSegment2I(aTimeDelta)
 
-		VUHDO_hideBlizzCompactPartyFrame();
-
 		return;
 
 	end
