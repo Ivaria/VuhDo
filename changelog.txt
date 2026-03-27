@@ -23,6 +23,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added hide standard for Blizzard Arena frames  
   
   
 --------------------------------------------------------------  
