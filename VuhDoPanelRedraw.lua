@@ -1,15 +1,5 @@
 local _;
 
-local VUHDO_STD_BACKDROP = nil;
-local VUHDO_DESIGN_BACKDROP = nil;
-local VUHDO_CONFIG;
-local VUHDO_INDICATOR_CONFIG;
-
-local VUHDO_STATUSBAR_LEFT_TO_RIGHT;
-local VUHDO_STATUSBAR_RIGHT_TO_LEFT;
-local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
-local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
-
 local ipairs = ipairs;
 local pairs = pairs;
 local strfind = strfind;
@@ -19,6 +9,29 @@ local floor = math.floor;
 
 local InCombatLockdown = InCombatLockdown;
 local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor;
+
+local VUHDO_getFont;
+local VUHDO_getHealthBar;
+local VUHDO_getPixelPerfectBorderEdgeSize;
+local VUHDO_getPixelPerfectBorderInsets;
+local VUHDO_getDynamicModelArray;
+local VUHDO_getGroupMembersSorted;
+local VUHDO_getGroupMembers;
+local VUHDO_redrawPanel;
+local VUHDO_redrawAllPanels;
+local VUHDO_refreshAllUnitAuras;
+local VUHDO_calculateDerivedOrientation;
+local VUHDO_updateToggledUnitEvents;
+
+local VUHDO_STD_BACKDROP = nil;
+local VUHDO_DESIGN_BACKDROP = nil;
+local VUHDO_CONFIG;
+local VUHDO_INDICATOR_CONFIG;
+
+local VUHDO_STATUSBAR_LEFT_TO_RIGHT;
+local VUHDO_STATUSBAR_RIGHT_TO_LEFT;
+local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
+local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
 
 local sPanelConfig = { };
 local sButtonInitSemaphores = { };
@@ -72,18 +85,6 @@ local sGrowthOffsets = {
 	["DOWN"] = { 0, -1 },
 };
 
-local VUHDO_getFont;
-local VUHDO_getHealthBar;
-local VUHDO_getPixelPerfectBorderEdgeSize;
-local VUHDO_getPixelPerfectBorderInsets;
-local VUHDO_getDynamicModelArray;
-local VUHDO_getGroupMembersSorted;
-local VUHDO_getGroupMembers;
-local VUHDO_redrawPanel;
-local VUHDO_redrawAllPanels;
-local VUHDO_refreshAllUnitAuras;
-local VUHDO_calculateDerivedOrientation;
-
 
 
 --
@@ -97,11 +98,6 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_STATUSBAR_BOTTOM_TO_TOP = _G["VUHDO_STATUSBAR_BOTTOM_TO_TOP"];
 	VUHDO_STATUSBAR_TOP_TO_BOTTOM = _G["VUHDO_STATUSBAR_TOP_TO_BOTTOM"];
 
-	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
-		sIsManaBouquet[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] ~= "";
-	end
-
-	VUHDO_calculateDerivedOrientation = _G["VUHDO_calculateDerivedOrientation"];
 	VUHDO_getFont = _G["VUHDO_getFont"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getPixelPerfectBorderEdgeSize = _G["VUHDO_getPixelPerfectBorderEdgeSize"];
@@ -109,6 +105,9 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_getDynamicModelArray = _G["VUHDO_getDynamicModelArray"];
 	VUHDO_getGroupMembersSorted = _G["VUHDO_getGroupMembersSorted"];
 	VUHDO_getGroupMembers = _G["VUHDO_getGroupMembers"];
+	VUHDO_refreshAllUnitAuras = _G["VUHDO_refreshAllUnitAuras"];
+	VUHDO_calculateDerivedOrientation = _G["VUHDO_calculateDerivedOrientation"];
+	VUHDO_updateToggledUnitEvents = _G["VUHDO_updateToggledUnitEvents"];
 
 	VUHDO_panelRedrawCustomDebuffsInitLocalOverrides();
 	VUHDO_panelRedrawHeadersInitLocalOverrides();
@@ -122,7 +121,9 @@ function VUHDO_panelRedrawInitLocalOverrides()
 		VUHDO_redrawAllPanels = _G["VUHDO_redrawAllPanels"];
 	end
 
-	VUHDO_refreshAllUnitAuras = _G["VUHDO_refreshAllUnitAuras"];
+	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
+		sIsManaBouquet[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] ~= "";
+	end
 
 	return;
 
@@ -2337,6 +2338,8 @@ do
 
 		VUHDO_initAllEventBouquets();
 
+		VUHDO_updateToggledUnitEvents();
+
 		return;
 
 	end
@@ -2621,6 +2624,8 @@ do
 		VUHDO_PixelUtil.SetFrameStrata(VuhDoDirectionFrame, "TOOLTIP");
 
 		VUHDO_initAllEventBouquets();
+
+		VUHDO_updateToggledUnitEvents();
 
 		sRedrawAllPanelsSemaphore = nil;
 
