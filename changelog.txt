@@ -21,6 +21,7 @@ Known issues:
 Bugfixes:  
 -- Fixed turn axis option for overshield and heal absorb bars  
 -- Fixed range check spell fallback for cross-class profile sharing  
+-- Fixed dispel text color  
   
   
 Improvements:  

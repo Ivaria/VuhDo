@@ -78,6 +78,7 @@ local sBouquetCurves = { };
 local sBouquetColors = { };
 local sCurveCache = { };
 local sBrightnessCurveCache = { };
+local sTextBrightnessCurveCache = { };
 local sThresholds = { };
 
 local sBouquetStatePool;
@@ -88,6 +89,7 @@ local sValidatorEntryPool;
 local sGroupsWithEnabledAnchorReusable = { };
 
 local sDispelTypeCurve;
+local sDispelTypeTextCurve;
 local sDebuffDurationCurve;
 local sMagicDispelCurve;
 local sDiseaseDispelCurve;
@@ -189,6 +191,19 @@ function VUHDO_safeColorFromTable(aColorTable, aFallback)
 
 	if aColorTable and aColorTable["R"] and aColorTable["G"] and aColorTable["B"] then
 		return CreateColor(aColorTable["R"], aColorTable["G"], aColorTable["B"], aColorTable["O"] or 1);
+	end
+
+	return aFallback or sTransparentColor;
+
+end
+
+
+
+--
+function VUHDO_safeTextColorFromTable(aColorTable, aFallback)
+
+	if aColorTable and aColorTable["TR"] and aColorTable["TG"] and aColorTable["TB"] then
+		return CreateColor(aColorTable["TR"], aColorTable["TG"], aColorTable["TB"], aColorTable["TO"] or 1);
 	end
 
 	return aFallback or sTransparentColor;
@@ -310,6 +325,119 @@ end
 
 
 
+do
+	--
+	local tBrightCacheKey;
+	local tColors;
+	local tTransparent;
+	local tNewCurve;
+	local tTypeColor;
+	local tR;
+	local tG;
+	local tB;
+	local tO;
+	function VUHDO_getOrBuildTextBrightnessCurve(aBaseCurve, aBrightness, aCurveType)
+
+		if not aBrightness or aBrightness >= 1 then
+			return aBaseCurve;
+		end
+
+		tBrightCacheKey = "text_" .. aCurveType .. "_" .. tostring(aBrightness);
+
+		if sTextBrightnessCurveCache[tBrightCacheKey] then
+			return sTextBrightnessCurveCache[tBrightCacheKey];
+		end
+
+		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+		tTransparent = CreateColor(0, 0, 0, 0);
+
+		tNewCurve = CreateColorCurve();
+		tNewCurve:SetType(Enum.LuaCurveType.Step);
+		tNewCurve:AddPoint(0, tTransparent);
+
+		if tColors then
+			tTypeColor = tColors["DEBUFF0"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(0, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF3"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(1, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF4"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(2, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF2"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(3, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF1"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(4, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF6"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(6, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF8"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(8, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF9"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(9, CreateColor(tR, tG, tB, tO));
+			end
+
+			tTypeColor = tColors["DEBUFF8"];
+
+			if tTypeColor then
+				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+
+				tNewCurve:AddPoint(11, CreateColor(tR, tG, tB, tO));
+			end
+		end
+
+		sTextBrightnessCurveCache[tBrightCacheKey] = tNewCurve;
+
+		return tNewCurve;
+
+	end
+end
+
+
+
 --
 local tBouquetCurves;
 function VUHDO_getBouquetCurve(aBouquetName, aCurveType)
@@ -364,6 +492,15 @@ end
 
 
 --
+function VUHDO_getDispelTypeTextCurve()
+
+	return sDispelTypeTextCurve;
+
+end
+
+
+
+--
 function VUHDO_getDebuffDurationCurve()
 
 	return sDebuffDurationCurve;
@@ -378,6 +515,7 @@ function VUHDO_clearCurveCache()
 	twipe(sCurveCache);
 	twipe(sBouquetCurves);
 	twipe(sBouquetColors);
+	twipe(sTextBrightnessCurveCache);
 
 	return;
 
@@ -693,11 +831,15 @@ do
 		sDispelTypeCurve = CreateColorCurve();
 		sDispelTypeCurve:SetType(Enum.LuaCurveType.Step);
 
+		sDispelTypeTextCurve = CreateColorCurve();
+		sDispelTypeTextCurve:SetType(Enum.LuaCurveType.Step);
+
 		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
 		tDefaultColor = CreateColor(0.5, 0.5, 0.5, 1);
 
 		if not tColors then
 			sDispelTypeCurve:AddPoint(0, tDefaultColor);
+			sDispelTypeTextCurve:AddPoint(0, tDefaultColor);
 
 			return;
 		end
@@ -711,6 +853,16 @@ do
 		sDispelTypeCurve:AddPoint(8, VUHDO_safeColorFromTable(tColors["DEBUFF8"], tDefaultColor));
 		sDispelTypeCurve:AddPoint(9, VUHDO_safeColorFromTable(tColors["DEBUFF9"], tDefaultColor));
 		sDispelTypeCurve:AddPoint(11, VUHDO_safeColorFromTable(tColors["DEBUFF8"], tDefaultColor));
+
+		sDispelTypeTextCurve:AddPoint(0, VUHDO_safeTextColorFromTable(tColors["DEBUFF0"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(1, VUHDO_safeTextColorFromTable(tColors["DEBUFF3"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(2, VUHDO_safeTextColorFromTable(tColors["DEBUFF4"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(3, VUHDO_safeTextColorFromTable(tColors["DEBUFF2"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(4, VUHDO_safeTextColorFromTable(tColors["DEBUFF1"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(6, VUHDO_safeTextColorFromTable(tColors["DEBUFF6"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(8, VUHDO_safeTextColorFromTable(tColors["DEBUFF8"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(9, VUHDO_safeTextColorFromTable(tColors["DEBUFF9"], tDefaultColor));
+		sDispelTypeTextCurve:AddPoint(11, VUHDO_safeTextColorFromTable(tColors["DEBUFF8"], tDefaultColor));
 
 		return;
 
@@ -807,6 +959,7 @@ do
 		end
 
 		twipe(sBrightnessCurveCache);
+		twipe(sTextBrightnessCurveCache);
 
 		return;
 
@@ -911,6 +1064,39 @@ do
 
 		if tCanAttack and not anIsHarmful then
 			return sDispelTypeCurve;
+		end
+
+		return nil;
+
+	end
+end
+
+
+
+do
+	--
+	local tInfo;
+	local tCanAttack;
+	function VUHDO_getDispelTextCurveForUnit(aUnit, anIsHarmful)
+
+		if not aUnit then
+			return nil;
+		end
+
+		tInfo = VUHDO_RAID[aUnit];
+
+		if not tInfo then
+			return nil;
+		end
+
+		tCanAttack = tInfo["canAttack"];
+
+		if not tCanAttack and anIsHarmful then
+			return sDispelTypeTextCurve;
+		end
+
+		if tCanAttack and not anIsHarmful then
+			return sDispelTypeTextCurve;
 		end
 
 		return nil;
@@ -1270,6 +1456,10 @@ do
 
 					if tSpecial["buildCurves"] and tItem["custom"] and tItem["custom"]["bright"] then
 						tTemplate["dispelValidators"][tDispelIdx]["curves"] = tSpecial["buildCurves"](tItem["custom"]["bright"]);
+					end
+
+					if tSpecial["buildTextCurves"] and tItem["custom"] and tItem["custom"]["bright"] then
+						tTemplate["dispelValidators"][tDispelIdx]["textCurves"] = tSpecial["buildTextCurves"](tItem["custom"]["bright"]);
 					end
 
 					tTemplate["dispelResults"][tDispelIdx] = {
@@ -2164,6 +2354,12 @@ do
 								tSecretContext["dispelCurve"] = tValidatorEntry["special"]["getCurve"](tValidatorEntry["curves"], aUnit, true);
 							else
 								tSecretContext["dispelCurve"] = nil;
+							end
+
+							if tValidatorEntry and tValidatorEntry["textCurves"] and tValidatorEntry["special"]["getTextCurve"] then
+								tSecretContext["dispelTextCurve"] = tValidatorEntry["special"]["getTextCurve"](tValidatorEntry["textCurves"], aUnit, true);
+							else
+								tSecretContext["dispelTextCurve"] = nil;
 							end
 
 							tIsActive, _, _, _, _, tColor, _, _, _, _, _, tAuraInstanceId, tSecretColor = tSpecial["validator"](aInfo, tInfos, tSecretContext);
