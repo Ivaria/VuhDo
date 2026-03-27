@@ -940,6 +940,7 @@ VUHDO_I18N_TT.K780 = "Click to set the glow color for this aura group.";
 VUHDO_I18N_TT.K781 = "Click to open spell entry settings.";
 VUHDO_I18N_TT.K782 = "Only show this aura when cast by you.";
 VUHDO_I18N_TT.K783 = "Check to hide standard Blizzard arena frames.";
+VUHDO_I18N_TT.K784 = "Show tooltip when hovering over private aura icons.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Стандартный\nпрофиль";
 VUHDO_I18N_DEFAULT_LAYOUT = "Стандартная раскладка клавиш ";

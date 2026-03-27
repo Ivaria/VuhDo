@@ -20,10 +20,12 @@ Known issues:
   
 Bugfixes:  
 -- Fixed turn axis option for overshield and heal absorb bars  
+-- Fixed range check spell fallback for cross-class profile sharing  
   
   
 Improvements:  
 -- Added hide standard for Blizzard Arena frames  
+-- Added show tooltip option for Private Auras  
   
   
 --------------------------------------------------------------  

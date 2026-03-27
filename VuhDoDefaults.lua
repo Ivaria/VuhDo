@@ -4073,6 +4073,7 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["wrapDir"] = "DOWN",
 		["maxColumns"] = 3,
 		["maxRows"] = 2,
+		["showTooltip"] = false,
 		["VERSION"] = 3,
 	},
 

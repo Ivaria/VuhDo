@@ -374,6 +374,7 @@ function VUHDO_initLocalVars(aPanelNum)
 		tPrivateAura["wrapDir"] = "DOWN";
 		tPrivateAura["maxColumns"] = 3;
 		tPrivateAura["maxRows"] = 2;
+		tPrivateAura["showTooltip"] = false;
 	end
 
 	tIconSizePercent = sPanelConfig[aPanelNum]["privateAura"]["iconSize"] or 40;
@@ -1051,7 +1052,12 @@ do
 
 		VUHDO_PixelUtil.SetPoint(tPrivateAura, sPanelConfig[aPanelNum]["privateAura"]["point"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["privateAura"]["point"], tX, tY);
 
-		VUHDO_PixelUtil.SetSize(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraFrameSize"], sPanelConfig[aPanelNum]["privateAuraFrameSize"]);
+		if sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
+			VUHDO_PixelUtil.SetSize(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraFrameSize"], sPanelConfig[aPanelNum]["privateAuraFrameSize"]);
+		else
+			VUHDO_PixelUtil.SetSize(tPrivateAura, 0.001, 0.001);
+		end
+
 		VUHDO_PixelUtil.SetScale(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraHeight"] / 32);
 
 		return;
