@@ -22,6 +22,7 @@ Bugfixes:
 -- Fixed turn axis option for overshield and heal absorb bars  
 -- Fixed range check spell fallback for cross-class profile sharing  
 -- Fixed dispel text color  
+-- Fixed out of range arrow when unit is not in the same zone  
   
   
 Improvements:  
