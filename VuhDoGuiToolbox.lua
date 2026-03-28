@@ -514,19 +514,6 @@ end
 
 
 --
-local function VUHDO_onCompactPartyFrameShow(aFrame)
-
-	if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 and not InCombatLockdown() then
-		VUHDO_unregisterAndSaveEvents(true, aFrame);
-	end
-
-	return;
-
-end
-
-
-
---
 local function VUHDO_initCompactUnitFrameHook()
 
 	if sCompactUnitFrameHooked then
@@ -647,6 +634,19 @@ local function VUHDO_registerOriginalEvents(anIsShow, ...)
 			end
 		end
 	end
+
+end
+
+
+
+--
+local function VUHDO_onCompactPartyFrameShow(aFrame)
+
+	if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 and not InCombatLockdown() then
+		VUHDO_unregisterAndSaveEvents(true, aFrame);
+	end
+
+	return;
 
 end
 
