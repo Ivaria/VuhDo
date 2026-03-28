@@ -19,6 +19,15 @@ VUHDO_AURA_IGNORE_LIST_DEFAULTS = {
 	[160455] = true, -- Fatigued (Drums of Fury)
 	[390435] = true, -- Exhaustion (alternate)
 	[1227806] = true, -- Lifebloom (hidden player aura)
+	[404464] = true, -- Flight Style: Skyriding
+	[404468] = true, -- Flight Style: Steady
+	[418590] = true, -- Static Charge (Skyriding)
+	[377234] = true, -- Thrill of the Skies (Skyriding)
+	[369968] = true, -- Racing (Dragonriding)
+	[447959] = true, -- Ride Along - Enabled (Skyriding)
+	[447960] = true, -- Ride Along - Inactive (Skyriding)
+	[427490] = true, -- Ride Along (Skyriding vehicle)
+	[388367] = true, -- Ohn'ahra's Gusts (Dragonriding)
 };
 
 
@@ -3507,6 +3516,8 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 			{ ["entryType"] = 1, ["value"] = 367364, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 373267, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 376788, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 409895, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 444490, ["mine"] = true, ["others"] = false },
 		},
 		["displayName"] = nil,
 		["enabled"] = true,
@@ -3549,6 +3560,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 			{ ["entryType"] = 1, ["value"] = 33763, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 48438, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 155777, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 439530, ["mine"] = true, ["others"] = false },
 		},
 		["displayName"] = nil,
 		["enabled"] = true,
@@ -3644,6 +3656,7 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 			{ ["entryType"] = 1, ["value"] = 156322, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 156910, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 200025, ["mine"] = true, ["others"] = false },
+			{ ["entryType"] = 1, ["value"] = 431381, ["mine"] = true, ["others"] = false },
 			{ ["entryType"] = 1, ["value"] = 1244893, ["mine"] = true, ["others"] = false },
 		},
 		["displayName"] = nil,

@@ -27,6 +27,8 @@ Bugfixes:
 Improvements:  
 -- Added hide standard for Blizzard Arena frames  
 -- Added show tooltip option for Private Auras  
+-- Added declassified spell auras to default aura groups  
+-- Added declassified spell auras to global ignore list  
   
   
 --------------------------------------------------------------  
