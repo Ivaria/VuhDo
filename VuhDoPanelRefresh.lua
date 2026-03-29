@@ -377,7 +377,18 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 			tPrivateAura["anchorId"] = nil;
 		end
 
-		tIconSize = 32;
+		if tPrivateAuraSetup["showTooltip"] then
+			tIconSize = 32;
+		else
+			tIconSizePercent = tPrivateAuraSetup["iconSize"] or 40;
+			tBarHeight = tPanelSetup["SCALING"]["barHeight"];
+
+			if tIconSizePercent > 100 then
+				tIconSize = min(tBarHeight, tIconSizePercent);
+			else
+				tIconSize = tBarHeight * (tIconSizePercent == 0 and 100 or tIconSizePercent) * 0.01;
+			end
+		end
 
 		tPrivateAuraAnchor = {
 			unitToken = aUnit,

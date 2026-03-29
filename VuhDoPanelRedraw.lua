@@ -85,6 +85,18 @@ local sGrowthOffsets = {
 	["DOWN"] = { 0, -1 },
 };
 
+local sAnchorToCenterOffsets = {
+	["LEFT"] = { 0.5, 0 },
+	["RIGHT"] = { -0.5, 0 },
+	["TOP"] = { 0, -0.5 },
+	["BOTTOM"] = { 0, 0.5 },
+	["TOPLEFT"] = { 0.5, -0.5 },
+	["TOPRIGHT"] = { -0.5, -0.5 },
+	["BOTTOMLEFT"] = { 0.5, 0.5 },
+	["BOTTOMRIGHT"] = { -0.5, 0.5 },
+	["CENTER"] = { 0, 0 },
+};
+
 
 
 --
@@ -1023,6 +1035,8 @@ do
 	local tCol;
 	local tRow;
 	local tStep;
+	local tAnchorOffset;
+	local tScaleFactor;
 	local function VUHDO_initPrivateAura(aHealthBar, aButton, anAuraIndex, aPanelNum)
 
 		tPrivateAura = VUHDO_getBarPrivateAura(aButton, anAuraIndex);
@@ -1031,7 +1045,10 @@ do
 			return;
 		end
 
-		VUHDO_PixelUtil.Hide(tPrivateAura);
+		if not tPrivateAura["anchorId"] then
+			VUHDO_PixelUtil.Hide(tPrivateAura);
+		end
+
 		VUHDO_PixelUtil.ClearAllPoints(tPrivateAura);
 		VUHDO_PixelUtil.SetFrameStrata(tPrivateAura, aHealthBar:GetFrameStrata());
 
@@ -1039,26 +1056,41 @@ do
 		tPrivateAura["addLevel"] = tFrameLevel;
 		VUHDO_PixelUtil.SetFrameLevel(tPrivateAura, aHealthBar:GetFrameLevel() + tPrivateAura["addLevel"]);
 
+		if sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
+			VUHDO_PixelUtil.SetSize(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraFrameSize"], sPanelConfig[aPanelNum]["privateAuraFrameSize"]);
+			VUHDO_PixelUtil.SetScale(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraHeight"] / 32);
+		else
+			tPrivateAura:SetSize(0.001, 0.001);
+			VUHDO_PixelUtil.SetScale(tPrivateAura, 1);
+		end
+
 		tGrowthDir = sGrowthOffsets[sPanelConfig[aPanelNum]["privateAura"]["growthDir"]] or sGrowthOffsets["RIGHT"];
 		tWrapDir = sGrowthOffsets[sPanelConfig[aPanelNum]["privateAura"]["wrapDir"]] or sGrowthOffsets["DOWN"];
 		tMaxCols = sPanelConfig[aPanelNum]["privateAura"]["maxColumns"] or 3;
+
 		tStep = sPanelConfig[aPanelNum]["privateAuraStep"];
 
 		tCol = (anAuraIndex - 1) % tMaxCols;
 		tRow = floor((anAuraIndex - 1) / tMaxCols);
 
-		tX = sPanelConfig[aPanelNum]["privateAuraXOffset"] + (tCol * tStep * tGrowthDir[1]) + (tRow * tStep * tWrapDir[1]);
-		tY = sPanelConfig[aPanelNum]["privateAuraYOffset"] + (tCol * tStep * tGrowthDir[2]) + (tRow * tStep * tWrapDir[2]);
+		if not sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
+			tScaleFactor = sPanelConfig[aPanelNum]["privateAuraHeight"] / 32;
 
-		VUHDO_PixelUtil.SetPoint(tPrivateAura, sPanelConfig[aPanelNum]["privateAura"]["point"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["privateAura"]["point"], tX, tY);
+			tX = sPanelConfig[aPanelNum]["privateAuraXOffset"] * tScaleFactor + (tCol * tStep * tScaleFactor * tGrowthDir[1]) + (tRow * tStep * tScaleFactor * tWrapDir[1]);
+			tY = sPanelConfig[aPanelNum]["privateAuraYOffset"] * tScaleFactor + (tCol * tStep * tScaleFactor * tGrowthDir[2]) + (tRow * tStep * tScaleFactor * tWrapDir[2]);
 
-		if sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
-			VUHDO_PixelUtil.SetSize(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraFrameSize"], sPanelConfig[aPanelNum]["privateAuraFrameSize"]);
+			tAnchorOffset = sAnchorToCenterOffsets[sPanelConfig[aPanelNum]["privateAura"]["point"]] or sAnchorToCenterOffsets["LEFT"];
+
+			tX = tX + sPanelConfig[aPanelNum]["privateAuraHeight"] * tAnchorOffset[1];
+			tY = tY + sPanelConfig[aPanelNum]["privateAuraHeight"] * tAnchorOffset[2];
 		else
-			VUHDO_PixelUtil.SetSize(tPrivateAura, 0.001, 0.001);
+			tX = sPanelConfig[aPanelNum]["privateAuraXOffset"] + (tCol * tStep * tGrowthDir[1]) + (tRow * tStep * tWrapDir[1]);
+			tY = sPanelConfig[aPanelNum]["privateAuraYOffset"] + (tCol * tStep * tGrowthDir[2]) + (tRow * tStep * tWrapDir[2]);
 		end
 
-		VUHDO_PixelUtil.SetScale(tPrivateAura, sPanelConfig[aPanelNum]["privateAuraHeight"] / 32);
+		if not InCombatLockdown() then
+			tPrivateAura:SetPoint(sPanelConfig[aPanelNum]["privateAura"]["point"], aHealthBar:GetName(), sPanelConfig[aPanelNum]["privateAura"]["point"], tX, tY);
+		end
 
 		return;
 
