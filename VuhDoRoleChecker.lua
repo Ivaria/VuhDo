@@ -362,7 +362,7 @@ function VUHDO_inspectLockRole()
 		return;
 	end
 
-	VUHDO_xMsg(VUHDO_NEXT_INSPECT_UNIT, tTreeId);
+	--VUHDO_xMsg(VUHDO_NEXT_INSPECT_UNIT, tTreeId);
 
 	VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_inspectRole(VUHDO_NEXT_INSPECT_UNIT);
 
