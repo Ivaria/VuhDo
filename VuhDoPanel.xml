@@ -526,12 +526,40 @@
 							</Scripts>
 						</StatusBar>
 
-						<Frame name="$parentPa1" setAllPoints="true"> </Frame>
-						<Frame name="$parentPa2" setAllPoints="true"> </Frame>
-						<Frame name="$parentPa3" setAllPoints="true"> </Frame>
-						<Frame name="$parentPa4" setAllPoints="true"> </Frame>
-						<Frame name="$parentPa5" setAllPoints="true"> </Frame>
-						<Frame name="$parentPa6" setAllPoints="true"> </Frame>
+						<Frame name="$parentPaCn">
+							<Frames>
+								<Frame name="$parentPa1">
+									<Frames>
+										<Frame name="$parentDurFr" hidden="true"> </Frame>
+									</Frames>
+								</Frame>
+								<Frame name="$parentPa2">
+									<Frames>
+										<Frame name="$parentDurFr" hidden="true"> </Frame>
+									</Frames>
+								</Frame>
+								<Frame name="$parentPa3">
+									<Frames>
+										<Frame name="$parentDurFr" hidden="true"> </Frame>
+									</Frames>
+								</Frame>
+								<Frame name="$parentPa4">
+									<Frames>
+										<Frame name="$parentDurFr" hidden="true"> </Frame>
+									</Frames>
+								</Frame>
+								<Frame name="$parentPa5">
+									<Frames>
+										<Frame name="$parentDurFr" hidden="true"> </Frame>
+									</Frames>
+								</Frame>
+								<Frame name="$parentPa6">
+									<Frames>
+										<Frame name="$parentDurFr" hidden="true"> </Frame>
+									</Frames>
+								</Frame>
+							</Frames>
+						</Frame>
 
 					</Frames>
 					<Layers>

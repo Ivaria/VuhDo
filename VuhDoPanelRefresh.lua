@@ -302,6 +302,7 @@ local tRelativePoint;
 local tIconSizePercent;
 local tBarHeight;
 local tVisualSize;
+local tDurationFrame;
 function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 
 	if not aPanelNum or not aButton or not aUnit then
@@ -365,7 +366,7 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 	end
 
 	for tAuraIndex = 1, tNumAuras do
-		tPrivateAura = VUHDO_getBarPrivateAura(aButton, tAuraIndex);
+		tPrivateAura = VUHDO_getPrivateAuraIcon(aButton, tAuraIndex);
 
 		if not tPrivateAura then
 			return;
@@ -377,18 +378,7 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 			tPrivateAura["anchorId"] = nil;
 		end
 
-		if tPrivateAuraSetup["showTooltip"] then
-			tIconSize = 32;
-		else
-			tIconSizePercent = tPrivateAuraSetup["iconSize"] or 40;
-			tBarHeight = tPanelSetup["SCALING"]["barHeight"];
-
-			if tIconSizePercent > 100 then
-				tIconSize = min(tBarHeight, tIconSizePercent);
-			else
-				tIconSize = tBarHeight * (tIconSizePercent == 0 and 100 or tIconSizePercent) * 0.01;
-			end
-		end
+		tIconSize = 32;
 
 		tPrivateAuraAnchor = {
 			unitToken = aUnit,
@@ -426,9 +416,15 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 		end
 
 		if tDurationAnchor then
+			tDurationFrame = nil;
+
+			if not tPrivateAuraSetup["showTooltip"] then
+				tDurationFrame = VUHDO_getPrivateAuraDuration(aButton, tAuraIndex);
+			end
+
 			tPrivateAuraAnchor["durationAnchor"] = {
 				["point"] = tDurationAnchor["point"],
-				["relativeTo"] = tPrivateAura,
+				["relativeTo"] = tDurationFrame or tPrivateAura,
 				["relativePoint"] = tDurationAnchor["relativePoint"],
 				["offsetX"] = tDurationAnchor["offsetX"],
 				["offsetY"] = tDurationAnchor["offsetY"],
@@ -453,7 +449,7 @@ function VUHDO_removePrivateAuras(aButton)
 	end
 
 	for tAuraIndex = 1, VUHDO_MAX_PRIVATE_AURAS do
-		tPrivateAura = VUHDO_getBarPrivateAura(aButton, tAuraIndex);
+		tPrivateAura = VUHDO_getPrivateAuraIcon(aButton, tAuraIndex);
 
 		if not tPrivateAura then
 			return;
