@@ -1445,6 +1445,7 @@ do
 	local tPredTurnAxisHealAbsorb;
 	local tPredOvershieldDerived;
 	local tPredHealAbsorbDerived;
+	local tHealthTexture;
 	local tAnchorFrom;
 	local tAnchorTo;
 	function VUHDO_initPredictionBarAnchors(aButton, aPanelNum)
@@ -1515,7 +1516,30 @@ do
 			tPredHealAbsorbDerived = VUHDO_calculateDerivedOrientation(tPredOrientation, tPredTurnAxisHealAbsorb);
 
 			tPredHealAbsorbBar:ClearAllPoints();
-			tPredHealAbsorbBar:SetAllPoints(tPredHealthBar);
+			tHealthTexture = tPredHealthBar:GetStatusBarTexture();
+
+			if tPredOrientation == "HORIZONTAL" then
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPLEFT", tPredHealthBar, "TOPLEFT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMLEFT", tPredHealthBar, "BOTTOMLEFT", 0, 0);
+			elseif tPredOrientation == "HORIZONTAL_INV" then
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPRIGHT", tPredHealthBar, "TOPRIGHT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMRIGHT", tPredHealthBar, "BOTTOMRIGHT", 0, 0);
+			elseif tPredOrientation == "VERTICAL" then
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPLEFT", tHealthTexture, "TOPLEFT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPRIGHT", tHealthTexture, "TOPRIGHT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMLEFT", tPredHealthBar, "BOTTOMLEFT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMRIGHT", tPredHealthBar, "BOTTOMRIGHT", 0, 0);
+			else
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMLEFT", tHealthTexture, "BOTTOMLEFT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "BOTTOMRIGHT", tHealthTexture, "BOTTOMRIGHT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPLEFT", tPredHealthBar, "TOPLEFT", 0, 0);
+				VUHDO_PixelUtil.SetPoint(tPredHealAbsorbBar, "TOPRIGHT", tPredHealthBar, "TOPRIGHT", 0, 0);
+			end
+
 			VUHDO_setStatusBarOrientation(tPredHealAbsorbBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 			tPredHealAbsorbBar:SetReverseFill(tPredIsInverted == (tPredHealAbsorbDerived == "HORIZONTAL_INV" or tPredHealAbsorbDerived == "VERTICAL_INV"));
 		end
