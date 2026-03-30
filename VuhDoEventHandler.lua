@@ -720,6 +720,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_auraSoundsInitLocalOverrides();
 	VUHDO_guiToolboxInitLocalOverrides();
 	VUHDO_vuhdoInitLocalOverrides();
+	VUHDO_readyCheckInitLocalOverrides();
 	VUHDO_spellEventHandlerInitLocalOverrides();
 	VUHDO_macroFactoryInitLocalOverrides();
 	VUHDO_keySetupInitLocalOverrides();
