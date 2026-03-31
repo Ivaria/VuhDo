@@ -445,28 +445,7 @@ local sAuraBackdropInfo = {
 	},
 };
 
-local sDurationCache = { };
-
 local sAurasSuspended = false;
-
-
-
---
-local tCacheKey;
-local tCachedDuration;
-function VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex)
-
-	tCacheKey = anAnchorIndex * 100 + aSlotIndex;
-	tCachedDuration = sDurationCache[tCacheKey];
-
-	if not tCachedDuration then
-		tCachedDuration = CreateDuration();
-		sDurationCache[tCacheKey] = tCachedDuration;
-	end
-
-	return tCachedDuration;
-
-end
 
 
 
@@ -3946,7 +3925,11 @@ do
 		if tUnit and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 			tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
 		elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
-			tDurationObj = VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex);
+			if not tIconFrame["durationObj"] then
+				tIconFrame["durationObj"] = CreateDuration();
+			end
+
+			tDurationObj = tIconFrame["durationObj"];
 
 			tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 		end
@@ -4253,7 +4236,11 @@ do
 			tMaxDuration = tBarFrame["maxObservedDuration"];
 
 			if tMaxDuration > 0 and anAuraData["expirationTime"] then
-				tDurationObj = VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex);
+				if not tBarFrame["durationObj"] then
+					tBarFrame["durationObj"] = CreateDuration();
+				end
+
+				tDurationObj = tBarFrame["durationObj"];
 
 				tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], tMaxDuration);
 			end
@@ -4261,7 +4248,11 @@ do
 			if tUnit and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 				tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
 			elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
-				tDurationObj = VUHDO_getOrCreateDuration(anAnchorIndex, aSlotIndex);
+				if not tBarFrame["durationObj"] then
+					tBarFrame["durationObj"] = CreateDuration();
+				end
+
+				tDurationObj = tBarFrame["durationObj"];
 
 				tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 			end
@@ -4498,6 +4489,7 @@ do
 			tFrame["lastApplications"] = nil;
 			tFrame["lastIcon"] = nil;
 			tFrame["maxObservedDuration"] = nil;
+			tFrame["durationObj"] = nil;
 
 			tFrame:SetAlpha(0);
 		end
