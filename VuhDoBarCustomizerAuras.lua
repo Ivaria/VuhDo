@@ -4243,9 +4243,13 @@ do
 			tRemaining = (anAuraData["expirationTime"] or 0) - GetTime();
 
 			if not tIsUpdate then
+				tBarFrame["baseDuration"] = tCurrentDuration;
 				tBarFrame["maxObservedDuration"] = max(tCurrentDuration, tRemaining);
-			elseif tBarFrame["lastExpirationTime"] ~= anAuraData["expirationTime"] then
-				tBarFrame["maxObservedDuration"] = max(tBarFrame["maxObservedDuration"] or 0, tCurrentDuration, tRemaining);
+			elseif tCurrentDuration >= (tBarFrame["baseDuration"] or 0) then
+				tBarFrame["baseDuration"] = tCurrentDuration;
+				tBarFrame["maxObservedDuration"] = max(tCurrentDuration, tRemaining);
+			elseif tRemaining > (tBarFrame["maxObservedDuration"] or 0) then
+				tBarFrame["maxObservedDuration"] = tRemaining;
 			end
 
 			if (tBarFrame["maxObservedDuration"] or 0) > 0 and anAuraData["expirationTime"] then
@@ -4523,6 +4527,7 @@ do
 			tFrame["lastApplications"] = nil;
 			tFrame["lastIcon"] = nil;
 			tFrame["maxObservedDuration"] = nil;
+			tFrame["baseDuration"] = nil;
 			tFrame["durationObj"] = nil;
 
 			tFrame:SetAlpha(0);
