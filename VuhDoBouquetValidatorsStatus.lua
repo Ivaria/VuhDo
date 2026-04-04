@@ -92,23 +92,6 @@ end
 
 
 
---
-function VUHDO_getHealPredictionCalculator()
-
-	if not sHealPredictionCalculator and sSecretsEnabled then
-		VUHDO_initHealPredictionCalculator();
-	end
-
-	return sHealPredictionCalculator;
-
-end
-
-
-
-----------------------------------------------------------
-
-
-
 -- return tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tTimer2, clipLeft, clipRight, clipTop, clipBottom
 
 

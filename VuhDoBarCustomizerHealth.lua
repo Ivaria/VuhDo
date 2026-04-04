@@ -9,6 +9,7 @@ local min = math.min;
 local GetRaidTargetIndex = GetRaidTargetIndex;
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
 local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
+local CreateUnitHealPredictionCalculator = CreateUnitHealPredictionCalculator;
 local UnitHealthPercent = UnitHealthPercent;
 local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
 local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
@@ -44,7 +45,6 @@ local VUHDO_getStatusbarOrientationString;
 local VUHDO_getPixelScale;
 local VUHDO_applyAllLayersToBar;
 local VUHDO_getAuraGroupGlowInfo;
-local VUHDO_getHealPredictionCalculator;
 local VUHDO_getOvershieldCalculator;
 local VUHDO_refreshPrivateAuras;
 
@@ -60,7 +60,9 @@ VUHDO_FORCE_IMMEDIATE_INTERPOLATION = false;
 local VUHDO_IMMEDIATE = Enum.StatusBarInterpolation.Immediate;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
-local sHealPredictionCalculator;
+local sShieldCalculator;
+local sTotalShieldCalculator;
+local sHealAbsorbCalculator;
 local sOvershieldCalculator;
 local sOvershieldAlphaCurve;
 local sHideWhenFullHealthCurve;
@@ -127,11 +129,45 @@ function VUHDO_customHealthInitLocalOverrides()
 	VUHDO_getPixelScale = _G["VUHDO_getPixelScale"];
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
 	VUHDO_getAuraGroupGlowInfo = _G["VUHDO_getAuraGroupGlowInfo"];
-	VUHDO_getHealPredictionCalculator = _G["VUHDO_getHealPredictionCalculator"];
 	VUHDO_getOvershieldCalculator = _G["VUHDO_getOvershieldCalculator"];
 	VUHDO_refreshPrivateAuras = _G["VUHDO_refreshPrivateAuras"];
 
-	sHealPredictionCalculator = VUHDO_getHealPredictionCalculator();
+	sShieldCalculator = nil;
+	sTotalShieldCalculator = nil;
+	sHealAbsorbCalculator = nil;
+
+	if sSecretsEnabled then
+		sShieldCalculator = CreateUnitHealPredictionCalculator();
+
+		if sShieldCalculator then
+			sShieldCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealth);
+			sShieldCalculator:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.MaximumHealth);
+			sShieldCalculator:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MaximumHealth);
+			sShieldCalculator:SetHealAbsorbMode(Enum.UnitHealAbsorbMode.Total);
+			sShieldCalculator:SetIncomingHealOverflowPercent(1.0);
+		end
+
+		sTotalShieldCalculator = CreateUnitHealPredictionCalculator();
+
+		if sTotalShieldCalculator then
+			sTotalShieldCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MaximumHealth);
+			sTotalShieldCalculator:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.MaximumHealth);
+			sTotalShieldCalculator:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MaximumHealth);
+			sTotalShieldCalculator:SetHealAbsorbMode(Enum.UnitHealAbsorbMode.Total);
+			sTotalShieldCalculator:SetIncomingHealOverflowPercent(1.0);
+		end
+
+		sHealAbsorbCalculator = CreateUnitHealPredictionCalculator();
+
+		if sHealAbsorbCalculator then
+			sHealAbsorbCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MaximumHealth);
+			sHealAbsorbCalculator:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.MaximumHealth);
+			sHealAbsorbCalculator:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MaximumHealth);
+			sHealAbsorbCalculator:SetHealAbsorbMode(Enum.UnitHealAbsorbMode.Total);
+			sHealAbsorbCalculator:SetIncomingHealOverflowPercent(1.0);
+		end
+	end
+
 	sOvershieldCalculator = VUHDO_getOvershieldCalculator();
 
 	sIsOverhealText = VUHDO_CONFIG["SHOW_TEXT_OVERHEAL"]
@@ -309,13 +345,12 @@ do
 	local tPanelNum;
 	function VUHDO_updateShieldBarSecret(aUnit, aIncHealAmount, tInfo, tAllButtons)
 
-		sHealPredictionCalculator:ResetPredictedValues();
-		sHealPredictionCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealth);
+		sShieldCalculator:ResetPredictedValues();
 
-		UnitGetDetailedHealPrediction(aUnit, "player", sHealPredictionCalculator);
+		UnitGetDetailedHealPrediction(aUnit, "player", sShieldCalculator);
 
-		tShieldInBar, _ = sHealPredictionCalculator:GetDamageAbsorbs();
-		tHealthMax = sHealPredictionCalculator:GetMaximumHealth();
+		tShieldInBar, _ = sShieldCalculator:GetDamageAbsorbs();
+		tHealthMax = sShieldCalculator:GetMaximumHealth();
 
 		if sOvershieldCalculator then
 			sOvershieldCalculator:ResetPredictedValues();
@@ -327,13 +362,11 @@ do
 			tShieldClamped = false;
 		end
 
-		sHealPredictionCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MaximumHealth);
+		sTotalShieldCalculator:ResetPredictedValues();
 
-		UnitGetDetailedHealPrediction(aUnit, "player", sHealPredictionCalculator);
+		UnitGetDetailedHealPrediction(aUnit, "player", sTotalShieldCalculator);
 
-		tTotalShield = sHealPredictionCalculator:GetTotalDamageAbsorbs();
-
-		sHealPredictionCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MissingHealth);
+		tTotalShield = sTotalShieldCalculator:GetTotalDamageAbsorbs();
 
 		for _, tButton in pairs(tAllButtons) do
 			tPanelNum = VUHDO_BUTTON_CACHE[tButton];
@@ -677,7 +710,7 @@ do
 			return;
 		end
 
-		if sHealPredictionCalculator then
+		if sShieldCalculator and sTotalShieldCalculator then
 			VUHDO_updateShieldBarSecret(aUnit, aIncHealAmount, tInfo, tAllButtons);
 		else
 			VUHDO_updateShieldBarNonSecret(aUnit, aIncHealAmount, tInfo, tAllButtons);
@@ -751,13 +784,13 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 		return;
 	end
 
-	if sHealPredictionCalculator then
-		sHealPredictionCalculator:ResetPredictedValues();
+	if sHealAbsorbCalculator then
+		sHealAbsorbCalculator:ResetPredictedValues();
 
-		UnitGetDetailedHealPrediction(aUnit, "player", sHealPredictionCalculator);
+		UnitGetDetailedHealPrediction(aUnit, "player", sHealAbsorbCalculator);
 
-		tHealAbsorb = sHealPredictionCalculator:GetTotalHealAbsorbs();
-		tHealthMax = sHealPredictionCalculator:GetMaximumHealth();
+		tHealAbsorb = sHealAbsorbCalculator:GetTotalHealAbsorbs();
+		tHealthMax = sHealAbsorbCalculator:GetMaximumHealth();
 
 		for _, tButton in pairs(tAllButtons) do
 			tPanelNum = VUHDO_BUTTON_CACHE[tButton];
