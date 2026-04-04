@@ -2589,7 +2589,7 @@ do
 
 						aFrame["childBar"]:ClearAllPoints();
 						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "TOP", aFrame["iconFrame"], "BOTTOM", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, tBarHeight);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, aFrame:GetHeight() - aFrame["iconFrame"]:GetHeight());
 					else
 						VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "BOTTOM", aFrame, "BOTTOM", 0, 0);
 						VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
@@ -2607,7 +2607,7 @@ do
 
 						aFrame["childBar"]:ClearAllPoints();
 						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "BOTTOM", aFrame["iconFrame"], "TOP", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, tBarHeight);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tIconSize, aFrame:GetHeight() - aFrame["iconFrame"]:GetHeight());
 					end
 				else
 					if tBarTurnAxis then
@@ -2627,7 +2627,7 @@ do
 
 						aFrame["childBar"]:ClearAllPoints();
 						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "RIGHT", aFrame["iconFrame"], "LEFT", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tBarWidth, tBarHeight);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], aFrame:GetWidth() - aFrame["iconFrame"]:GetWidth(), tBarHeight);
 					else
 						VUHDO_PixelUtil.SetPoint(aFrame["iconFrame"], "LEFT", aFrame, "LEFT", 0, 0);
 						VUHDO_PixelUtil.SetSize(aFrame["iconFrame"], tIconSize, tIconSize);
@@ -2645,7 +2645,7 @@ do
 
 						aFrame["childBar"]:ClearAllPoints();
 						VUHDO_PixelUtil.SetPoint(aFrame["childBar"], "LEFT", aFrame["iconFrame"], "RIGHT", 0, 0);
-						VUHDO_PixelUtil.SetSize(aFrame["childBar"], tBarWidth, tBarHeight);
+						VUHDO_PixelUtil.SetSize(aFrame["childBar"], aFrame:GetWidth() - aFrame["iconFrame"]:GetWidth(), tBarHeight);
 					end
 				end
 			end
@@ -4195,6 +4195,7 @@ do
 	local tCurrentDuration;
 	local tRemaining;
 	local tIsPermanent;
+	local tIsFullReset;
 	function VUHDO_displayAuraAsBar(aButton, aPanelNum, anAnchorIndex, aSlotIndex, anAuraData, anAnchorConfig)
 
 		if not aButton or not anAnchorIndex or not aSlotIndex or not anAuraData or not anAnchorConfig then
@@ -4237,6 +4238,7 @@ do
 		tUnit = aButton:GetAttribute("unit");
 
 		tDurationObj = nil;
+		tIsFullReset = false;
 
 		if not issecretvalue(anAuraData["duration"]) and not issecretvalue(anAuraData["expirationTime"]) then
 			tCurrentDuration = anAuraData["duration"] or 0;
@@ -4247,8 +4249,18 @@ do
 				tBarFrame["maxObservedDuration"] = max(tCurrentDuration, tRemaining);
 			elseif tCurrentDuration >= (tBarFrame["baseDuration"] or 0) then
 				tBarFrame["maxObservedDuration"] = max(tCurrentDuration, tRemaining);
+
+				if tBarFrame["maxObservedDuration"] - tCurrentDuration < 0.1 then
+					tBarFrame["maxObservedDuration"] = tCurrentDuration;
+
+					tIsFullReset = tRemaining >= tCurrentDuration - 0.15;
+				else
+					tIsFullReset = false;
+				end
 			elseif tRemaining > (tBarFrame["maxObservedDuration"] or 0) then
 				tBarFrame["maxObservedDuration"] = tRemaining;
+
+				tIsFullReset = false;
 			end
 
 			if (tBarFrame["maxObservedDuration"] or 0) > 0 and anAuraData["expirationTime"] then
@@ -4365,7 +4377,7 @@ do
 
 			tTimerDirection = tBarInvertGrowth and Enum.StatusBarTimerDirection.ElapsedTime or Enum.StatusBarTimerDirection.RemainingTime;
 
-			tBar:SetTimerDuration(tDurationObj, tIsUpdate and Enum.StatusBarInterpolation.ExponentialEaseOut or Enum.StatusBarInterpolation.Immediate, tTimerDirection);
+			tBar:SetTimerDuration(tDurationObj, (tIsUpdate and not tIsFullReset) and Enum.StatusBarInterpolation.ExponentialEaseOut or Enum.StatusBarInterpolation.Immediate, tTimerDirection);
 		elseif tIsPermanent then
 			tBar:Hide();
 		else
