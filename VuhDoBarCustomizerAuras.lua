@@ -4246,7 +4246,6 @@ do
 				tBarFrame["baseDuration"] = tCurrentDuration;
 				tBarFrame["maxObservedDuration"] = max(tCurrentDuration, tRemaining);
 			elseif tCurrentDuration >= (tBarFrame["baseDuration"] or 0) then
-				tBarFrame["baseDuration"] = tCurrentDuration;
 				tBarFrame["maxObservedDuration"] = max(tCurrentDuration, tRemaining);
 			elseif tRemaining > (tBarFrame["maxObservedDuration"] or 0) then
 				tBarFrame["maxObservedDuration"] = tRemaining;
