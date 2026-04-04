@@ -1,13 +1,15 @@
 local _;
 
-local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local issecretvalue = issecretvalue;
+
+local VUHDO_IMMEDIATE = Enum.StatusBarInterpolation.Immediate;
 
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
 local VUHDO_applyAllLayersToTexture;
 local VUHDO_getIsDirectionArrow;
 
+local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sThreatInterpolation = { };
 
 
@@ -81,12 +83,12 @@ function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 		if VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_BAR"] == aBouquetName then
 			tBar = VUHDO_getHealthBar(tButton, 7);
 
-			tBar:SetMinMaxValues(0, aMaxValue, sThreatInterpolation[tPanelNum]);
+			tBar:SetMinMaxValues(0, aMaxValue);
 
 			if tBar["isInverted"] then
-				tBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue), sThreatInterpolation[tPanelNum]);
+				tBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue), VUHDO_FORCE_IMMEDIATE_INTERPOLATION and VUHDO_IMMEDIATE or sThreatInterpolation[tPanelNum]);
 			else
-				tBar:SetValue(aCurrValue, sThreatInterpolation[tPanelNum]);
+				tBar:SetValue(aCurrValue, VUHDO_FORCE_IMMEDIATE_INTERPOLATION and VUHDO_IMMEDIATE or sThreatInterpolation[tPanelNum]);
 			end
 
 			if anIsActive then
