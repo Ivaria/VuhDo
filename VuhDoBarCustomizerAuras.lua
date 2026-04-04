@@ -3870,6 +3870,10 @@ do
 	local tGlowColor;
 	local tGlowKey;
 	local tHasGlow;
+	local tIconSize;
+	local tNumLines;
+	local tLength;
+	local tThickness;
 	local tEntryOverride;
 	local tFlashThreshold;
 	local tFadeOnLowResolved;
