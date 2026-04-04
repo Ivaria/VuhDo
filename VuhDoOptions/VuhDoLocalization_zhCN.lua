@@ -869,6 +869,7 @@ VUHDO_I18N_TT.K812 = "Select the minimum gradient color for Pets.";
 VUHDO_I18N_TT.K813 = "Select the maximum gradient color for Pets.";
 VUHDO_I18N_TT.K814 = "Auto-enable this profile when switching to specialization 3.";
 VUHDO_I18N_TT.K815 = "Auto-enable this profile when switching to specialization 4.";
+VUHDO_I18N_TT.K816 = "Setup class gradient colors.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "预设存档";
 VUHDO_I18N_DEFAULT_LAYOUT = "预设按键配置";
