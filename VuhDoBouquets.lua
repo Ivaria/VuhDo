@@ -64,6 +64,7 @@ local VUHDO_CYCLIC_BOUQUETS = { };
 
 VUHDO_UNIT_AURA_BOUQUET_ACTIVE = { };
 VUHDO_LIST_GROUP_COLOR_BOUQUETS = { };
+VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS = { };
 
 local VUHDO_CUSTOM_BOUQUETS = {
 	VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH,
@@ -3532,6 +3533,7 @@ do
 		twipe(VUHDO_REGISTERED_BOUQUET_INDICATORS);
 		twipe(VUHDO_AURA_LIST_BOUQUETS);
 		twipe(VUHDO_LIST_GROUP_COLOR_BOUQUETS);
+		twipe(VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS);
 
 		for tUnit, _ in pairs(VUHDO_RAID or { }) do
 			VUHDO_clearUnitBouquetActiveCache(tUnit);
@@ -3680,11 +3682,40 @@ do
 		VUHDO_buildEventInterestCache();
 		VUHDO_initAllEventBouquets();
 
-		VUHDO_rebuildActiveAuraCaches();
+		VUHDO_rebuildCanColorBarGroupsCache();
 
 		return;
 
 	end
+end
+
+
+
+--
+local tBouquetStored;
+local tAuraGroupIdFromItem;
+function VUHDO_collectBouquetAuraGroupIds()
+
+	twipe(VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS);
+
+	for tBouquetName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
+		tBouquetStored = VUHDO_BOUQUETS["STORED"][tBouquetName];
+
+		if tBouquetStored then
+			for _, tBouquetItemForAuraGroup in pairs(tBouquetStored) do
+				if "AURA_GROUP_ACTIVE" == tBouquetItemForAuraGroup["name"] and tBouquetItemForAuraGroup["custom"] then
+					tAuraGroupIdFromItem = tBouquetItemForAuraGroup["custom"]["auraGroupId"];
+
+					if tAuraGroupIdFromItem and tAuraGroupIdFromItem ~= "" then
+						VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS[tAuraGroupIdFromItem] = true;
+					end
+				end
+			end
+		end
+	end
+
+	return;
+
 end
 
 

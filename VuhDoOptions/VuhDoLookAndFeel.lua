@@ -469,17 +469,23 @@ end
 
 --
 local function VUHDO_hideAllComponentExtensions(aComponent)
+
 	local tRootPane = aComponent:GetParent():GetParent();
-	local tSubPanel, tComponent, tSelectPanel;
+	local tSubPanel, tComponent, tSelectPanel, tName;
 
 	for tCnt = 1, select("#", tRootPane:GetChildren()) do
 		tSubPanel = select(tCnt, tRootPane:GetChildren());
+
 		for tCnt2 = 1, select("#", tSubPanel:GetChildren()) do
 			tComponent = select(tCnt2, tSubPanel:GetChildren());
+
 			if aComponent ~= tComponent then
 				-- 1. Combo-Flyouts
-				if tComponent and strfind(tComponent:GetName() or "", "Combo") then
-					tSelectPanel = _G[tComponent:GetName() .. "ScrollPanel"] or _G[tComponent:GetName() .. "SelectPanel"];
+				tName = tComponent and tComponent:GetName() or "";
+
+				if tName ~= "" and strfind(tName, "Combo") and string.sub(tName, -11) ~= "ScrollPanel" then
+					tSelectPanel = _G[tName .. "ScrollPanel"] or _G[tName .. "SelectPanel"];
+
 					if tSelectPanel then
 						tSelectPanel:Hide();
 					end
@@ -488,6 +494,9 @@ local function VUHDO_hideAllComponentExtensions(aComponent)
 			end
 		end
 	end
+
+	return;
+
 end
 
 

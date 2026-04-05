@@ -23,6 +23,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added new bouquet validator 'Flag: Aura Group Active'  
   
   
 --------------------------------------------------------------  

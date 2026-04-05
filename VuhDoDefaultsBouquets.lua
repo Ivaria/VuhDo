@@ -1187,6 +1187,7 @@ VUHDO_SANE_BOUQUET_ITEM = {
 		["bright"] = 1.0,
 		["function"] = "return true;",
 		["spellTrace"] = "",
+		["auraGroupId"] = "",
 	},
 };
 

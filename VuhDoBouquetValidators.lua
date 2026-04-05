@@ -24,6 +24,8 @@ local VUHDO_UNIT_HOT_TYPE_BOTH;
 
 local VUHDO_EMERGENCIES;
 
+local VUHDO_AURA_GROUP_ACTIVE_NO_COLOR;
+
 local VUHDO_getChosenDebuffInfo;
 local VUHDO_getCurrentPlayerTarget;
 local VUHDO_getCurrentPlayerFocus;
@@ -40,6 +42,7 @@ local VUHDO_getUnitHotInfo;
 local VUHDO_getDispelCurveForUnit;
 local VUHDO_getAuraBarColor;
 local VUHDO_getAuraTextColor;
+local VUHDO_getAuraGroupActiveColor;
 local VUHDO_getAuraCanColorBar;
 local VUHDO_getAuraCanColorText;
 local VUHDO_getDispelTypeCurve;
@@ -120,6 +123,8 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 
 	VUHDO_EMERGENCIES = _G["VUHDO_EMERGENCIES"];
 
+	VUHDO_AURA_GROUP_ACTIVE_NO_COLOR = _G["VUHDO_AURA_GROUP_ACTIVE_NO_COLOR"];
+
 	VUHDO_getChosenDebuffInfo = _G["VUHDO_getChosenDebuffInfo"];
 	VUHDO_getCurrentPlayerTarget = _G["VUHDO_getCurrentPlayerTarget"];
 	VUHDO_getCurrentPlayerFocus = _G["VUHDO_getCurrentPlayerFocus"];
@@ -135,6 +140,7 @@ function VUHDO_bouquetValidatorsInitLocalOverrides()
 	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 	VUHDO_getAuraBarColor = _G["VUHDO_getAuraBarColor"];
 	VUHDO_getAuraTextColor = _G["VUHDO_getAuraTextColor"];
+	VUHDO_getAuraGroupActiveColor = _G["VUHDO_getAuraGroupActiveColor"];
 	VUHDO_getAuraCanColorBar = _G["VUHDO_getAuraCanColorBar"];
 	VUHDO_getAuraCanColorText = _G["VUHDO_getAuraCanColorText"];
 	VUHDO_getUnitHot = _G["VUHDO_getUnitHot"];
@@ -700,6 +706,33 @@ end
 --
 local function VUHDO_debuffCharmedValidator(anInfo, _)
 	return anInfo["charmed"], nil, -1, -1, -1;
+end
+
+
+
+--
+local tGroupId;
+local tGroupColor;
+local function VUHDO_auraGroupActiveValidator(anInfo, aItem)
+
+	tGroupId = aItem and aItem["custom"] and aItem["custom"]["auraGroupId"];
+
+	if not tGroupId or tGroupId == "" then
+		return false, nil, -1, -1, -1;
+	end
+
+	tGroupColor = VUHDO_getAuraGroupActiveColor(anInfo["unit"], tGroupId);
+
+	if not tGroupColor then
+		return false, nil, -1, -1, -1;
+	end
+
+	if tGroupColor == VUHDO_AURA_GROUP_ACTIVE_NO_COLOR then
+		return true, nil, -1, -1, -1;
+	end
+
+	return true, nil, -1, -1, -1, tGroupColor;
+
 end
 
 
@@ -1687,6 +1720,17 @@ VUHDO_BOUQUET_BUFFS_SPECIAL = {
 		["secretType"] = VUHDO_SECRET_TYPE_NONE,
 		["hasValue"] = false,
 		["isGlobal"] = true,
+	},
+
+	["AURA_GROUP_ACTIVE"] = {
+		["displayName"] = VUHDO_I18N_BOUQUET_AURA_GROUP_ACTIVE,
+		["validator"] = VUHDO_auraGroupActiveValidator,
+		["custom_type"] = VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP,
+		["interests"] = { VUHDO_UPDATE_DEBUFF },
+		["secretType"] = VUHDO_SECRET_TYPE_NONE,
+		["hasValue"] = false,
+		["isGlobal"] = false,
+		["updateCyclic"] = true,
 	},
 
 	["DEBUFF_BAR_COLOR"] = {
