@@ -1,3 +1,54 @@
+Version 3.203-tbcc  
+  
+  
+Known issues:  
+-- Spells by rank can be specified using a rank suffix:  
+--  Example: Lesser Heal(Rank 1)  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+-- Shield bar is not working due to unavailable Blizzard APIs  
+-- Spell trace only works for known spells in the player's spellbook  
+-- Group roster changes will not be reflected during combat  
+--   Swapping a player between groups during combat will cause  
+--   unpredictable, negative results.  Be warned!  
+-- Built-in Blizzard APIs for incoming healing only partially working  
+--   If other healers are using LibHealComm enable it under:  
+--   'VuhDo Options > General > Threat / Incoming > Incoming Heal > Use LibHealComm'  
+  
+  
+Bugfixes:  
+  
+  
+Improvements:  
+  
+  
+--------------------------------------------------------------  
+Version 3.203  
+  
+  
+Known issues:  
+-- Midnight add-on restrictions mean some features are not yet available:
+--   Text provider formatting e.g. +<#n>K is only partially working
+--   Overheal text provider and Life Text highlight are not yet working
+--   Many Hitpoints option (e.g. Show Effective) are not yet working
+--   Overshield Bar will only display when the unit is at full health
+--   Buff Watch is only partially working
+--   Raid Icon bar and text color filtring are not yet working
+--   Emergency Mode is not yet working
+--   Swiftmendable bouquet is not yet working
+--   Incoming Spell Trace (i.e. targeted spells) is not yet working
+-- Blizzard continues to have a bug that breaks proper spell targeting.  
+--   Under 'Game Menu > Options > Gameplay > Combat' deselect 'Auto Self Cast'  
+--   and set 'Self Cast Key' to 'None'  
+  
+  
+Bugfixes:  
+  
+  
+Improvements:  
+  
+  
+--------------------------------------------------------------  
 Version 3.202-tbcc  
   
   
@@ -44,9 +95,23 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed turn axis option for overshield and heal absorb bars  
+-- Fixed range check spell fallback for cross-class profile sharing  
+-- Fixed dispel text color  
+-- Fixed out of range arrow when unit is not in the same zone  
+-- Fixed role detection for target and focus units not in group  
+-- Fixed heal absorb bar to properly anchor to health bar  
+-- Fixed solid gradient and class gradient bar colors  
+-- Fixed demo test mode bar colors  
   
   
 Improvements:  
+-- Added hide standard for Blizzard Arena frames  
+-- Added show tooltip option for Private Auras  
+-- Added declassified spell auras to default aura groups  
+-- Added declassified spell auras to global ignore list  
+-- Added smooth interpolation for status bar indicators  
+-- Added smooth interpolation for shield, overshield and heal absorb bars  
   
   
 --------------------------------------------------------------  
