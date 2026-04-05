@@ -18,6 +18,8 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Buff Watch missing buff bar and text color  
+-- Fixed Smart Cast for missing Buff Watch buffs  
   
   
 Improvements:  

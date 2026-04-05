@@ -163,12 +163,16 @@ local function VUHDO_setupStaticBuffPanel(aCategoryName, aBuffPanel, anIsPresent
 	local tMissButton = _G[aBuffPanel:GetName() .. "MissingCheckButton"];
 	VUHDO_lnfSetModel(tMissButton, "VUHDO_BUFF_SETTINGS." .. aCategoryName .. ".missingColor.show");
 	VUHDO_lnfSetTooltip(tMissButton, VUHDO_I18N_TT.K386);
-	tMissButton:Hide();
+	tMissButton:Show();
+
+	VUHDO_lnfCheckButtonInitFromModel(tMissButton);
 
 	local tMissTexture = _G[aBuffPanel:GetName() .. "MissingTexture"];
 	VUHDO_lnfSetModel(tMissTexture, "VUHDO_BUFF_SETTINGS." .. aCategoryName .. ".missingColor");
 	VUHDO_lnfSetTooltip(tMissTexture, VUHDO_I18N_TT.K385);
-	tMissTexture:Hide();
+	tMissTexture:Show();
+
+	VUHDO_lnfColorSwatchInitFromModel(tMissTexture);
 
 	return;
 

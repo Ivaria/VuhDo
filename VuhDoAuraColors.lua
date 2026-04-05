@@ -14,6 +14,7 @@ local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local issecretvalue = issecretvalue;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
 local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFilteredOutByInstanceID;
+local InCombatLockdown = InCombatLockdown;
 
 local VUHDO_CONFIG;
 local VUHDO_RAID;
@@ -35,6 +36,7 @@ local VUHDO_PLAYER_PURGE_ABILITIES;
 local VUHDO_PLAYER_DISPEL_ABILITIES;
 local VUHDO_INFERRED_AURA_SYNTHETIC_IDS;
 local VUHDO_INFERRED_AURAS;
+local VUHDO_BUFF_SETTINGS;
 
 local VUHDO_getDispelCurveForUnit;
 local VUHDO_getDispelTextCurveForUnit;
@@ -147,6 +149,7 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_PLAYER_DISPEL_ABILITIES = _G["VUHDO_PLAYER_DISPEL_ABILITIES"];
 	VUHDO_INFERRED_AURA_SYNTHETIC_IDS = _G["VUHDO_INFERRED_AURA_SYNTHETIC_IDS"];
 	VUHDO_INFERRED_AURAS = _G["VUHDO_INFERRED_AURAS"];
+	VUHDO_BUFF_SETTINGS = _G["VUHDO_BUFF_SETTINGS"];
 
 	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 	VUHDO_getDispelTextCurveForUnit = _G["VUHDO_getDispelTextCurveForUnit"];
@@ -486,6 +489,10 @@ do
 	local tFoundDispelAuraId;
 	local tGroupActive;
 	local tNewWinner;
+	local tInfo;
+	local tMissingBuffCategory;
+	local tMissingColor;
+	local tBuffConfig;
 	function VUHDO_updateDispellableAuraForUnit(aUnit)
 
 		if not aUnit then
@@ -835,6 +842,43 @@ do
 			end
 		end
 
+		if (not tBarWinnerSet or not tTextWinnerSet) and VUHDO_RAID and VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["missbuff"] then
+			tBuffConfig = VUHDO_BUFF_SETTINGS["CONFIG"];
+
+			if tBuffConfig and (tBuffConfig["BAR_COLORS_IN_FIGHT"] or not InCombatLockdown()) then
+				tInfo = VUHDO_RAID[aUnit];
+				tMissingBuffCategory = tInfo["mibucateg"];
+
+				tMissingColor = tMissingBuffCategory and (VUHDO_BUFF_SETTINGS[tMissingBuffCategory] or sEmpty)["missingColor"];
+
+				if tMissingColor then
+					if not tBarWinnerSet and tBuffConfig["BAR_COLORS_BACKGROUND"] then
+						tNewWinner = sAuraColorWinnerPool:get();
+
+						tNewWinner["colorType"] = VUHDO_AURA_GROUP_COLOR_CUSTOM;
+						tNewWinner["customColor"] = tMissingColor;
+						tNewWinner["dispelAuraId"] = nil;
+
+						sUnitAuraBarWinner[aUnit] = tNewWinner;
+
+						tBarWinnerSet = true;
+					end
+
+					if not tTextWinnerSet and tBuffConfig["BAR_COLORS_TEXT"] then
+						tNewWinner = sAuraColorWinnerPool:get();
+
+						tNewWinner["colorType"] = VUHDO_AURA_GROUP_COLOR_CUSTOM;
+						tNewWinner["customColor"] = tMissingColor;
+						tNewWinner["dispelAuraId"] = nil;
+
+						sUnitAuraTextWinner[aUnit] = tNewWinner;
+
+						tTextWinnerSet = true;
+					end
+				end
+			end
+		end
+
 		if sUnitAuraBarWinner[aUnit] then
 			sUnitAuraColorType[aUnit] = sUnitAuraBarWinner[aUnit]["colorType"];
 			sUnitAuraCustomColor[aUnit] = sUnitAuraBarWinner[aUnit]["customColor"];
@@ -1133,6 +1177,10 @@ do
 
 		if VUHDO_hasDispellableAura(aUnit) then
 			return VUHDO_getDispellableAuraId(aUnit), nil;
+		end
+
+		if sUnitAuraBarWinner[aUnit] or sUnitAuraTextWinner[aUnit] then
+			return -1, nil;
 		end
 
 		return nil, nil;

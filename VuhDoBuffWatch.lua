@@ -63,6 +63,7 @@ local VUHDO_isInSameZone;
 local VUHDO_isInBattleground;
 local VUHDO_brightenTextColor;
 local VUHDO_isConfigDemoUsers;
+local VUHDO_determineAura;
 
 local GetTotemInfo = GetTotemInfo;
 local table = table;
@@ -125,6 +126,7 @@ function VUHDO_buffWatchInitLocalOverrides()
 	VUHDO_isInBattleground = _G["VUHDO_isInBattleground"];
 	VUHDO_brightenTextColor = _G["VUHDO_brightenTextColor"];
 	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
+	VUHDO_determineAura = _G["VUHDO_determineAura"];
 
 	sConfig = VUHDO_BUFF_SETTINGS["CONFIG"];
 	sRebuffSecs = sConfig["REBUFF_MIN_MINUTES"] * 60;
@@ -482,10 +484,6 @@ end
 --
 local tInfo;
 local function VUHDO_setUnitMissBuff(aUnit, aCategSpec, someVariants, aCategName)
-
-	if sSecretsEnabled then
-		return;
-	end
 
 	if not (VUHDO_BUFF_SETTINGS[aCategName]["missingColor"] or sEmpty)["show"] then
 		return;
@@ -1031,7 +1029,7 @@ function VUHDO_updateBuffPanel()
 
 	for tUnit, tInfo in pairs(VUHDO_RAID) do
 		if tOldMissBuffs[tUnit] ~= tInfo["missbuff"] then
-			tInfo["debuff"], tInfo["debuffName"] = VUHDO_getDeterminedDebuffInfo(tUnit, true);
+			tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(tUnit);
 
 			VUHDO_updateHealthBarsFor(tUnit, VUHDO_UPDATE_DEBUFF);
 		end
