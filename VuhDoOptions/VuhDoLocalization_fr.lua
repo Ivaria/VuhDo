@@ -878,6 +878,7 @@ VUHDO_I18N_TT.K813 = "Select the maximum gradient color for Pets.";
 VUHDO_I18N_TT.K814 = "Auto-enable this profile when switching to specialization 3.";
 VUHDO_I18N_TT.K815 = "Auto-enable this profile when switching to specialization 4.";
 VUHDO_I18N_TT.K816 = "Setup class gradient colors.";
+VUHDO_I18N_TT.K817 = "Feral Druid buffs: Overflowing Power.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Profil par d\195\169faut";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposition \npar d\195\169faut";

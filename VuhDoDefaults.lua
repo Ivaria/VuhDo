@@ -3814,6 +3814,22 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["ignoreList"] = { },
 		["sound"] = nil,
 	},
+	["FERAL_DRUID_BUFFS"] = {
+		["type"] = 2,
+		["entries"] = {
+			{ ["entryType"] = 1, ["value"] = 405189, ["mine"] = true, ["others"] = false },
+		},
+		["displayName"] = nil,
+		["enabled"] = true,
+		["priority"] = 50,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
+		["canColorBar"] = false,
+		["canColorText"] = false,
+		["canGlowBar"] = false,
+		["glowBarColor"] = nil,
+		["ignoreList"] = { },
+		["sound"] = nil,
+	},
 	["WARLOCK_METAMORPHOSIS"] = {
 		["type"] = 2,
 		["entries"] = {
