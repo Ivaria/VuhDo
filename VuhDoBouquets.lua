@@ -3441,22 +3441,24 @@ do
 							if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
 								tBouquetName = tEntry["value"];
 
-								VUHDO_registerForBouquetUnique(
-									tBouquetName,
-									"ListAuraGroup",
-									VUHDO_listAuraGroupBouquetCallback,
-									anAlreadyRegistered
-								);
+								if tBouquetName then
+									VUHDO_registerForBouquetUnique(
+										tBouquetName,
+										"ListAuraGroup",
+										VUHDO_listAuraGroupBouquetCallback,
+										anAlreadyRegistered
+									);
 
-								if not VUHDO_AURA_LIST_BOUQUETS[tBouquetName] then
-									VUHDO_AURA_LIST_BOUQUETS[tBouquetName] = { };
+									if not VUHDO_AURA_LIST_BOUQUETS[tBouquetName] then
+										VUHDO_AURA_LIST_BOUQUETS[tBouquetName] = { };
+									end
+
+									tinsert(VUHDO_AURA_LIST_BOUQUETS[tBouquetName], {
+										["panelNum"] = tPanelNum,
+										["anchorKey"] = tKey,
+										["entryIndex"] = tEntryIndex,
+									});
 								end
-
-								tinsert(VUHDO_AURA_LIST_BOUQUETS[tBouquetName], {
-									["panelNum"] = tPanelNum,
-									["anchorKey"] = tKey,
-									["entryIndex"] = tEntryIndex,
-								});
 							end
 						end
 					end
@@ -3475,14 +3477,16 @@ do
 						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
 							tBouquetName = tEntry["value"];
 
-							VUHDO_registerForBouquetUnique(
-								tBouquetName,
-								"ListAuraGroupColorOnly",
-								VUHDO_listAuraGroupBouquetColorOnlyCallback,
-								anAlreadyRegistered
-							);
+							if tBouquetName then
+								VUHDO_registerForBouquetUnique(
+									tBouquetName,
+									"ListAuraGroupColorOnly",
+									VUHDO_listAuraGroupBouquetColorOnlyCallback,
+									anAlreadyRegistered
+								);
 
-							VUHDO_LIST_GROUP_COLOR_BOUQUETS[tBouquetName] = true;
+								VUHDO_LIST_GROUP_COLOR_BOUQUETS[tBouquetName] = true;
+							end
 						end
 					end
 				end
@@ -3503,14 +3507,16 @@ do
 						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
 							tBouquetName = tEntry["value"];
 
-							VUHDO_registerForBouquetUnique(
-								tBouquetName,
-								"ListAuraGroupColorOnly",
-								VUHDO_listAuraGroupBouquetColorOnlyCallback,
-								anAlreadyRegistered
-							);
+							if tBouquetName then
+								VUHDO_registerForBouquetUnique(
+									tBouquetName,
+									"ListAuraGroupColorOnly",
+									VUHDO_listAuraGroupBouquetColorOnlyCallback,
+									anAlreadyRegistered
+								);
 
-							VUHDO_LIST_GROUP_COLOR_BOUQUETS[tBouquetName] = true;
+								VUHDO_LIST_GROUP_COLOR_BOUQUETS[tBouquetName] = true;
+							end
 						end
 					end
 				end

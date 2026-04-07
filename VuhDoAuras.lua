@@ -40,6 +40,7 @@ local VUHDO_determineAura;
 local VUHDO_updateAuraDisplaysForUnit;
 local VUHDO_updateEventBouquet;
 local VUHDO_strempty;
+local VUHDO_decompressIfCompressed;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
@@ -239,6 +240,7 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_updateAuraDisplaysForUnit"];
 	VUHDO_updateEventBouquet = _G["VUHDO_updateEventBouquet"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
+	VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
 
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_deferUpdateAuraDisplaysForUnit"];
 
@@ -493,6 +495,16 @@ do
 		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
 
 		if not tBouquet then
+			return;
+		end
+
+		if type(tBouquet) ~= "table" then
+			VUHDO_BOUQUETS["STORED"][aBouquetName] = VUHDO_decompressIfCompressed(tBouquet);
+
+			tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
+		end
+
+		if type(tBouquet) ~= "table" then
 			return;
 		end
 
@@ -2408,6 +2420,7 @@ do
 	local tCfg;
 	local tEntry;
 	local tNumVal;
+	local tBouquetName;
 	function VUHDO_buildListGroupFromHotSlots(aPanelNum, anIconSlots)
 
 		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
@@ -2435,7 +2448,13 @@ do
 				if not tVal or tVal == "" or tVal == "OTHER" or tVal == "CLUSTER" then
 					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_EMPTY };
 				elseif strfind(tVal or "", "^BOUQUET_") then
-					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET, ["value"] = strsub(tVal, 9) };
+					tBouquetName = strsub(tVal, 9);
+
+					if VUHDO_strempty(tBouquetName) then
+						tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_EMPTY };
+					else
+						tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET, ["value"] = tBouquetName };
+					end
 				else
 					tNumVal = tonumber(tVal);
 
@@ -2458,7 +2477,13 @@ do
 				if not tVal or tVal == "" or tVal == "OTHER" or tVal == "CLUSTER" then
 					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_EMPTY };
 				elseif strfind(tVal or "", "^BOUQUET_") then
-					tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET, ["value"] = strsub(tVal, 9) };
+					tBouquetName = strsub(tVal, 9);
+
+					if VUHDO_strempty(tBouquetName) then
+						tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_EMPTY };
+					else
+						tEntry = { ["entryType"] = VUHDO_AURA_LIST_ENTRY_BOUQUET, ["value"] = tBouquetName };
+					end
 				else
 					tNumVal = tonumber(tVal);
 
