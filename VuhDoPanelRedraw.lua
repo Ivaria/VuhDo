@@ -1501,7 +1501,12 @@ do
 		end
 
 		tPredIncBar:SetPoint(tAnchorFrom, tPredHealthBar:GetStatusBarTexture(), tAnchorTo);
-		tPredShieldBar:SetPoint(tAnchorFrom, tPredIncBar:GetStatusBarTexture(), tAnchorTo);
+
+		if VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"] then
+			tPredShieldBar:SetPoint(tAnchorFrom, tPredIncBar:GetStatusBarTexture(), tAnchorTo);
+		else
+			tPredShieldBar:SetPoint(tAnchorFrom, tPredHealthBar:GetStatusBarTexture(), tAnchorTo);
+		end
 
 		if tPredOvershieldBar then
 			tPredOvershieldDerived = VUHDO_calculateDerivedOrientation(tPredOrientation, tPredTurnAxisOvershield);
