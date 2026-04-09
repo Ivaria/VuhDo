@@ -37,6 +37,7 @@ local VUHDO_CUSTOM_ICONS;
 local VUHDO_USER_CLASS_COLORS;
 local VUHDO_POWER_TYPE_COLORS;
 local VUHDO_PANEL_SETUP;
+local VUHDO_PANEL_MODELS;
 local VUHDO_AURA_LIST_BOUQUETS;
 local VUHDO_UNIT_AURA_LIST_SLOTS;
 local VUHDO_MAX_PANELS;
@@ -137,6 +138,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
 	VUHDO_POWER_TYPE_COLORS = _G["VUHDO_POWER_TYPE_COLORS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
 	VUHDO_AURA_LIST_BOUQUETS = _G["VUHDO_AURA_LIST_BOUQUETS"];
 	VUHDO_UNIT_AURA_LIST_SLOTS = _G["VUHDO_UNIT_AURA_LIST_SLOTS"];
 	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
@@ -3336,7 +3338,7 @@ do
 					end
 
 					tInfo = VUHDO_RAID[aUnit];
-					tPreviouslyActive = tSlotData["isActive"];
+					tPreviouslyActive = tSlotData["isActive"] or false;
 					tSlotData["isActive"] = anIsActive and tInfo and tInfo["connected"] and not tInfo["dead"];
 
 					if tSlotData["isActive"] ~= tPreviouslyActive then
@@ -3410,7 +3412,7 @@ do
 			VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit] = sUnitBouquetActivePool:get();
 		end
 
-		tPreviouslyActive = VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit][aBouquetName];
+		tPreviouslyActive = VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit][aBouquetName] or false;
 		VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit][aBouquetName] = anIsActive;
 
 		if anIsActive ~= tPreviouslyActive then
@@ -3462,38 +3464,40 @@ do
 		tGroupsWithEnabledAnchor = sGroupsWithEnabledAnchorReusable;
 
 		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			tAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+			if VUHDO_PANEL_MODELS[tPanelNum] then
+				tAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-			if tAnchors then
-				for tKey, tVal in pairs(tAnchors) do
-					if tVal["enabled"] ~= false and tVal["groupId"] then
-						tGroupsWithEnabledAnchor[tVal["groupId"]] = true;
-					end
+				if tAnchors then
+					for tKey, tVal in pairs(tAnchors) do
+						if tVal["enabled"] ~= false and tVal["groupId"] then
+							tGroupsWithEnabledAnchor[tVal["groupId"]] = true;
+						end
 
-					tGroup = VUHDO_getAuraGroupRaw(tVal["groupId"]);
+						tGroup = VUHDO_getAuraGroupRaw(tVal["groupId"]);
 
-					if tGroup and (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
-						for tEntryIndex, tEntry in ipairs(tGroup["entries"]) do
-							if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
-								tBouquetName = tEntry["value"];
+						if tGroup and (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
+							for tEntryIndex, tEntry in ipairs(tGroup["entries"]) do
+								if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
+									tBouquetName = tEntry["value"];
 
-								if tBouquetName then
-									VUHDO_registerForBouquetUnique(
-										tBouquetName,
-										"ListAuraGroup",
-										VUHDO_listAuraGroupBouquetCallback,
-										anAlreadyRegistered
-									);
+									if tBouquetName then
+										VUHDO_registerForBouquetUnique(
+											tBouquetName,
+											"ListAuraGroup",
+											VUHDO_listAuraGroupBouquetCallback,
+											anAlreadyRegistered
+										);
 
-									if not VUHDO_AURA_LIST_BOUQUETS[tBouquetName] then
-										VUHDO_AURA_LIST_BOUQUETS[tBouquetName] = { };
+										if not VUHDO_AURA_LIST_BOUQUETS[tBouquetName] then
+											VUHDO_AURA_LIST_BOUQUETS[tBouquetName] = { };
+										end
+
+										tinsert(VUHDO_AURA_LIST_BOUQUETS[tBouquetName], {
+											["panelNum"] = tPanelNum,
+											["anchorKey"] = tKey,
+											["entryIndex"] = tEntryIndex,
+										});
 									end
-
-									tinsert(VUHDO_AURA_LIST_BOUQUETS[tBouquetName], {
-										["panelNum"] = tPanelNum,
-										["anchorKey"] = tKey,
-										["entryIndex"] = tEntryIndex,
-									});
 								end
 							end
 						end
