@@ -237,7 +237,7 @@ do
 		for tGroupId, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"] or sEmpty) do
 			tEffectiveColorType = tGroup["colorType"] or ((tGroup["canColorBar"] or tGroup["canColorText"]) and VUHDO_AURA_GROUP_COLOR_DISPEL or VUHDO_AURA_GROUP_COLOR_OFF);
 
-			if tGroup["enabled"] ~= false and (tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL or tGroup["canGlowBar"] or
+			if tGroup["enabled"] ~= false and (tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL or
 				(tEffectiveColorType == VUHDO_AURA_GROUP_COLOR_OFF and VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS[tGroupId])) then
 				if tGroup["isInferred"] then
 					tColorBarGroup = sCanColorBarGroupPool:get();
@@ -337,7 +337,7 @@ do
 
 				if not (VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][tGroupId]) and tGroup["enabled"] ~= false and not (VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][tGroupId]) and
 					not (VUHDO_DEFAULT_AURA_GROUPS[tGroupId] and VUHDO_DEFAULT_AURA_GROUPS[tGroupId]["enabled"] == false) and
-					(tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL or tGroup["canGlowBar"] or
+					(tEffectiveColorType >= VUHDO_AURA_GROUP_COLOR_DISPEL or
 					(tEffectiveColorType == VUHDO_AURA_GROUP_COLOR_OFF and VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS[tGroupId])) then
 					if tGroup["isInferred"] then
 						tColorBarGroup = sCanColorBarGroupPool:get();
