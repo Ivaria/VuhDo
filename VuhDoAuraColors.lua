@@ -19,6 +19,7 @@ local InCombatLockdown = InCombatLockdown;
 local VUHDO_CONFIG;
 local VUHDO_RAID;
 local VUHDO_PANEL_SETUP;
+local VUHDO_PANEL_MODELS;
 local VUHDO_DEFAULT_AURA_GROUPS;
 local VUHDO_AURA_GROUP_COLOR_OFF;
 local VUHDO_AURA_GROUP_COLOR_DISPEL;
@@ -169,6 +170,7 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
 	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
 	VUHDO_AURA_GROUP_COLOR_OFF = _G["VUHDO_AURA_GROUP_COLOR_OFF"];
 	VUHDO_AURA_GROUP_COLOR_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_DISPEL"];
@@ -730,83 +732,85 @@ do
 		tGroupActive = false;
 
 		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+			if VUHDO_PANEL_MODELS[tPanelNum] then
+				tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-			if tPanelAnchors then
-				for tAnchorKey, tAnchorConfig in pairs(tPanelAnchors) do
-					if tAnchorConfig["enabled"] ~= false and tAnchorConfig["groupId"] == tCanColorGroup["groupId"] then
-						tListSlots = (VUHDO_UNIT_AURA_LIST_SLOTS or sEmpty)[aUnit] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum][tAnchorKey];
+				if tPanelAnchors then
+					for tAnchorKey, tAnchorConfig in pairs(tPanelAnchors) do
+						if tAnchorConfig["enabled"] ~= false and tAnchorConfig["groupId"] == tCanColorGroup["groupId"] then
+							tListSlots = (VUHDO_UNIT_AURA_LIST_SLOTS or sEmpty)[aUnit] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum][tAnchorKey];
 
-						if tListSlots then
-							if tCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_CUSTOM then
-								for tEntryIndex, tSlotData in pairs(tListSlots) do
-									if tSlotData["isActive"] then
-										if not sUnitDispellableAuraId[aUnit] then
-											sUnitDispellableAuraId[aUnit] = -1;
+							if tListSlots then
+								if tCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_CUSTOM then
+									for tEntryIndex, tSlotData in pairs(tListSlots) do
+										if tSlotData["isActive"] then
+											if not sUnitDispellableAuraId[aUnit] then
+												sUnitDispellableAuraId[aUnit] = -1;
+											end
+
+											tFoundDispelAuraId = nil;
+
+											if not tBarWinnerSet and tCanColorGroup["canColorBar"] then
+												tNewWinner = sAuraColorWinnerPool:get();
+
+												tNewWinner["colorType"] = tCanColorGroup["colorType"];
+												tNewWinner["customColor"] = tCanColorGroup["customColor"];
+												tNewWinner["dispelAuraId"] = nil;
+
+												sUnitAuraBarWinner[aUnit] = tNewWinner;
+
+												tBarWinnerSet = true;
+											end
+
+											if not tTextWinnerSet and tCanColorGroup["canColorText"] then
+												tNewWinner = sAuraColorWinnerPool:get();
+
+												tNewWinner["colorType"] = tCanColorGroup["colorType"];
+												tNewWinner["customColor"] = tCanColorGroup["customColor"];
+												tNewWinner["dispelAuraId"] = nil;
+
+												sUnitAuraTextWinner[aUnit] = tNewWinner;
+
+												tTextWinnerSet = true;
+											end
+
+											VUHDO_setGlowWinnerIfNeeded(aUnit, tCanColorGroup);
+
+											tGroupActive = true;
+
+											break;
 										end
+									end
 
-										tFoundDispelAuraId = nil;
-
-										if not tBarWinnerSet and tCanColorGroup["canColorBar"] then
-											tNewWinner = sAuraColorWinnerPool:get();
-
-											tNewWinner["colorType"] = tCanColorGroup["colorType"];
-											tNewWinner["customColor"] = tCanColorGroup["customColor"];
-											tNewWinner["dispelAuraId"] = nil;
-
-											sUnitAuraBarWinner[aUnit] = tNewWinner;
-
-											tBarWinnerSet = true;
-										end
-
-										if not tTextWinnerSet and tCanColorGroup["canColorText"] then
-											tNewWinner = sAuraColorWinnerPool:get();
-
-											tNewWinner["colorType"] = tCanColorGroup["colorType"];
-											tNewWinner["customColor"] = tCanColorGroup["customColor"];
-											tNewWinner["dispelAuraId"] = nil;
-
-											sUnitAuraTextWinner[aUnit] = tNewWinner;
-
-											tTextWinnerSet = true;
-										end
-
-										VUHDO_setGlowWinnerIfNeeded(aUnit, tCanColorGroup);
-
-										tGroupActive = true;
-
+									if tGroupActive then
 										break;
 									end
-								end
+								elseif tCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_DISPEL then
+									for tEntryIndex, tSlotData in pairs(tListSlots) do
+										if tSlotData["isActive"] and tSlotData["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and tSlotData["auraInstanceID"] then
+											tAuraCache = VUHDO_UNIT_AURA_CACHE and VUHDO_UNIT_AURA_CACHE[aUnit];
 
-								if tGroupActive then
-									break;
-								end
-							elseif tCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_DISPEL then
-								for tEntryIndex, tSlotData in pairs(tListSlots) do
-									if tSlotData["isActive"] and tSlotData["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and tSlotData["auraInstanceID"] then
-										tAuraCache = VUHDO_UNIT_AURA_CACHE and VUHDO_UNIT_AURA_CACHE[aUnit];
+											if tAuraCache then
+												tAura = tAuraCache[tSlotData["auraInstanceID"]];
 
-										if tAuraCache then
-											tAura = tAuraCache[tSlotData["auraInstanceID"]];
+												if tAura and tAura["dispelName"] then
+													tDispelType = VUHDO_DEBUFF_TYPES[tAura["dispelName"]];
 
-											if tAura and tAura["dispelName"] then
-												tDispelType = VUHDO_DEBUFF_TYPES[tAura["dispelName"]];
+													if tDispelType and ((tIsHostile and tAura["isHelpful"] and VUHDO_PLAYER_PURGE_ABILITIES[tDispelType]) or
+														(not tIsHostile and tAura["isHarmful"] and VUHDO_PLAYER_DISPEL_ABILITIES[tDispelType])) then
+														if issecretvalue(tAura["expirationTime"]) or issecretvalue(tAura["duration"]) then
+															if tSlotData["auraInstanceID"] > tWinnerAuraInstanceId then
+																tWinnerAuraInstanceId = tSlotData["auraInstanceID"];
+																tWinnerIdSecret = tSlotData["auraInstanceID"];
+															end
+														else
+															tAppTime = (tAura["expirationTime"] or 0) - (tAura["duration"] or 0);
 
-												if tDispelType and ((tIsHostile and tAura["isHelpful"] and VUHDO_PLAYER_PURGE_ABILITIES[tDispelType]) or
-													(not tIsHostile and tAura["isHarmful"] and VUHDO_PLAYER_DISPEL_ABILITIES[tDispelType])) then
-													if issecretvalue(tAura["expirationTime"]) or issecretvalue(tAura["duration"]) then
-														if tSlotData["auraInstanceID"] > tWinnerAuraInstanceId then
-															tWinnerAuraInstanceId = tSlotData["auraInstanceID"];
-															tWinnerIdSecret = tSlotData["auraInstanceID"];
-														end
-													else
-														tAppTime = (tAura["expirationTime"] or 0) - (tAura["duration"] or 0);
+															if tAppTime > tWinnerAppTime then
+																tWinnerAppTime = tAppTime;
 
-														if tAppTime > tWinnerAppTime then
-															tWinnerAppTime = tAppTime;
-
-															tWinnerId = tSlotData["auraInstanceID"];
+																tWinnerId = tSlotData["auraInstanceID"];
+															end
 														end
 													end
 												end
@@ -816,10 +820,10 @@ do
 								end
 							end
 						end
-					end
 
-					if tGroupActive then
-						break;
+						if tGroupActive then
+							break;
+						end
 					end
 				end
 			end

@@ -1720,8 +1720,10 @@ do
 
 		VUHDO_checkAuraGroupSounds(aUnit, anAuraData);
 
-		for tPanelNum = 1, 10 do
-			VUHDO_checkAuraForPanelAnchors(aUnit, tPanelNum, anAuraData);
+		for tPanelNum = 1, VUHDO_MAX_PANELS do
+			if VUHDO_PANEL_MODELS[tPanelNum] then
+				VUHDO_checkAuraForPanelAnchors(aUnit, tPanelNum, anAuraData);
+			end
 		end
 
 		VUHDO_updateBouquetsForSpell(aUnit, anAuraData["spellId"], anAuraData["name"]);
@@ -1740,15 +1742,17 @@ do
 		end
 
 		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+			if VUHDO_PANEL_MODELS[tPanelNum] then
+				tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-			if tPanelAnchors then
-				for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
-					if tAnchorConfig["enabled"] ~= false then
-						tGroup = VUHDO_getAuraGroupRaw(tAnchorConfig["groupId"]);
+				if tPanelAnchors then
+					for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
+						if tAnchorConfig["enabled"] ~= false then
+							tGroup = VUHDO_getAuraGroupRaw(tAnchorConfig["groupId"]);
 
-						if tGroup and tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
-							VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+							if tGroup and tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
+								VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+							end
 						end
 					end
 				end
@@ -1806,15 +1810,17 @@ do
 		end
 
 		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			tPanelAnchorsRemove = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+			if VUHDO_PANEL_MODELS[tPanelNum] then
+				tPanelAnchorsRemove = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-			if tPanelAnchorsRemove then
-				for tAnchorIndex, tAnchorConfigRemove in pairs(tPanelAnchorsRemove) do
-					if tAnchorConfigRemove["enabled"] ~= false then
-						tGroupRemove = VUHDO_getAuraGroup(tAnchorConfigRemove["groupId"]);
+				if tPanelAnchorsRemove then
+					for tAnchorIndex, tAnchorConfigRemove in pairs(tPanelAnchorsRemove) do
+						if tAnchorConfigRemove["enabled"] ~= false then
+							tGroupRemove = VUHDO_getAuraGroup(tAnchorConfigRemove["groupId"]);
 
-						if tGroupRemove and (tGroupRemove["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
-							VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfigRemove);
+							if tGroupRemove and (tGroupRemove["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
+								VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfigRemove);
+							end
 						end
 					end
 				end

@@ -27,6 +27,7 @@ local CreateColor = CreateColor;
 local format = string.format;
 
 local VUHDO_PANEL_SETUP;
+local VUHDO_PANEL_MODELS;
 local VUHDO_CONFIG;
 local VUHDO_RAID;
 local VUHDO_AURA_IGNORE_LIST;
@@ -456,6 +457,7 @@ local tPanelAnchors;
 function VUHDO_barCustomizerAurasInitLocalOverrides()
 
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_AURA_IGNORE_LIST = _G["VUHDO_AURA_IGNORE_LIST"];
@@ -3293,26 +3295,28 @@ function VUHDO_updateInferredAuraDisplaysForUnit(aUnit)
 	end
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
-		tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+		if VUHDO_PANEL_MODELS[tPanelNum] then
+			tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-		if tPanelAnchors then
-			for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
-				if tAnchorConfig then
-					if tAnchorConfig["enabled"] == false then
-						VUHDO_clearAurasForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
-					else
-						tGroup = VUHDO_getAuraGroup(tAnchorConfig["groupId"]);
+			if tPanelAnchors then
+				for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
+					if tAnchorConfig then
+						if tAnchorConfig["enabled"] == false then
+							VUHDO_clearAurasForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+						else
+							tGroup = VUHDO_getAuraGroup(tAnchorConfig["groupId"]);
 
-						if tGroup and tGroup["isInferred"] then
-							VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+							if tGroup and tGroup["isInferred"] then
+								VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
 
-							tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum];
+								tAnchorSlots = VUHDO_UNIT_AURA_SLOTS[aUnit] and VUHDO_UNIT_AURA_SLOTS[aUnit][tPanelNum];
 
-							if tAnchorSlots then
-								tSlots = tAnchorSlots[tAnchorIndex];
-								tMaxSlots = tAnchorConfig["maxDisplay"] or 5;
+								if tAnchorSlots then
+									tSlots = tAnchorSlots[tAnchorIndex];
+									tMaxSlots = tAnchorConfig["maxDisplay"] or 5;
 
-								VUHDO_displayAurasAtAnchorFromCache(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig, tSlots, tMaxSlots);
+									VUHDO_displayAurasAtAnchorFromCache(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig, tSlots, tMaxSlots);
+								end
 							end
 						end
 					end
