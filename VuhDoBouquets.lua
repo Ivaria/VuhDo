@@ -26,6 +26,8 @@ local VUHDO_getSlotData;
 local VUHDO_getAuraGroupRaw;
 local VUHDO_getAuraBarColorType;
 local VUHDO_getAuraTextColorType;
+local VUHDO_determineAura;
+local VUHDO_updateHealthBarsFor;
 
 local VUHDO_BOUQUETS = { };
 local VUHDO_RAID = { };
@@ -163,6 +165,10 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
 	VUHDO_getAuraBarColorType = _G["VUHDO_getAuraBarColorType"];
 	VUHDO_getAuraTextColorType = _G["VUHDO_getAuraTextColorType"];
+	VUHDO_determineAura = _G["VUHDO_determineAura"];
+	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+
+	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
 	sBouquetStatePool = VUHDO_createTablePool("BouquetState", 500);
 	sThresholdEntryPool = VUHDO_createTablePool("ThresholdEntry", 100);
@@ -3270,6 +3276,8 @@ do
 	local tListSlots;
 	local tMaxSlots;
 	local tInfo;
+	local tPreviouslyActive;
+	local tActiveStateChanged;
 	function VUHDO_listAuraGroupBouquetCallback(aUnit, anIsActive, anIcon, aTimer, aCounter, aDuration, aColor, aBuffName, aBouquetName, anImpact, aTimer2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate, aIsAliveTime)
 
 		tSlotMappings = VUHDO_AURA_LIST_BOUQUETS[aBouquetName];
@@ -3283,6 +3291,8 @@ do
 		if not tTier then
 			return;
 		end
+
+		tActiveStateChanged = false;
 
 		for _, tMapping in ipairs(tSlotMappings) do
 			tTier = tTier[tMapping["panelNum"]];
@@ -3326,7 +3336,12 @@ do
 					end
 
 					tInfo = VUHDO_RAID[aUnit];
+					tPreviouslyActive = tSlotData["isActive"];
 					tSlotData["isActive"] = anIsActive and tInfo and tInfo["connected"] and not tInfo["dead"];
+
+					if tSlotData["isActive"] ~= tPreviouslyActive then
+						tActiveStateChanged = true;
+					end
 
 					tSlotData["name"] = aBuffName;
 					tSlotData["entryType"] = 2;
@@ -3368,6 +3383,16 @@ do
 			end
 		end
 
+		if tActiveStateChanged then
+			tInfo = VUHDO_RAID[aUnit];
+
+			if tInfo then
+				tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(aUnit);
+
+				VUHDO_updateHealthBarsFor(aUnit, 4);
+			end
+		end
+
 		return;
 
 	end
@@ -3385,7 +3410,18 @@ do
 			VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit] = sUnitBouquetActivePool:get();
 		end
 
+		tPreviouslyActive = VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit][aBouquetName];
 		VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit][aBouquetName] = anIsActive;
+
+		if anIsActive ~= tPreviouslyActive then
+			tInfo = VUHDO_RAID[aUnit];
+
+			if tInfo then
+				tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(aUnit);
+
+				VUHDO_updateHealthBarsFor(aUnit, 4);
+			end
+		end
 
 		return;
 
