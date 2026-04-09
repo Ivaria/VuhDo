@@ -161,7 +161,7 @@ function VUHDO_customHealthInitLocalOverrides()
 
 		if sHealAbsorbCalculator then
 			sHealAbsorbCalculator:SetDamageAbsorbClampMode(Enum.UnitDamageAbsorbClampMode.MaximumHealth);
-			sHealAbsorbCalculator:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.MaximumHealth);
+			sHealAbsorbCalculator:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth);
 			sHealAbsorbCalculator:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MaximumHealth);
 			sHealAbsorbCalculator:SetHealAbsorbMode(Enum.UnitHealAbsorbMode.Total);
 			sHealAbsorbCalculator:SetIncomingHealOverflowPercent(1.0);
@@ -745,7 +745,7 @@ local tIsInvertGrowth;
 local tIsTurnAxisHealAbsorb;
 local tPixelThreshold;
 local tSecretColor;
-local tHealthMax;
+local tHealth;
 function VUHDO_updateHealAbsorbBar(aUnit)
 
 	tInfo = VUHDO_RAID[aUnit];
@@ -789,15 +789,15 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 
 		UnitGetDetailedHealPrediction(aUnit, "player", sHealAbsorbCalculator);
 
-		tHealAbsorb = sHealAbsorbCalculator:GetTotalHealAbsorbs();
-		tHealthMax = sHealAbsorbCalculator:GetMaximumHealth();
+		tHealAbsorb = sHealAbsorbCalculator:GetHealAbsorbs();
+		tHealth = sHealAbsorbCalculator:GetCurrentHealth();
 
 		for _, tButton in pairs(tAllButtons) do
 			tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 			tHealthBar = VUHDO_getHealthBar(tButton, 1);
 			tHealAbsorbBar = VUHDO_getHealAbsorbBar(tHealthBar);
 
-			tHealAbsorbBar:SetMinMaxValues(0, tHealthMax);
+			tHealAbsorbBar:SetMinMaxValues(0, tHealth);
 			tHealAbsorbBar:SetValue(tHealAbsorb, VUHDO_FORCE_IMMEDIATE_INTERPOLATION and VUHDO_IMMEDIATE or sHealAbsorbInterpolation[tPanelNum]);
 
 			if sSecretsEnabled and tHealthBar["secretCurveColor"] and tHealthBar["secretCurveColor"]["R"] then
