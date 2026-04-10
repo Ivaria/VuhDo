@@ -702,6 +702,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["SHOW_SHIELD_BAR"] = true,
 	["SHOW_OVERSHIELD_BAR"] = false,
 	["SHOW_HEAL_ABSORB_BAR"] = true,
+	["SHOW_HEALTH_LOSS_BAR"] = true,
 
 	["RANGE_CHECK_DELAY"] = 260,
 
@@ -2998,6 +2999,12 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 			["R"] = 1, ["G"] = 0.4, ["B"] = 0.4, ["O"] = 1,
 			["TR"] = 0.35, ["TG"] = 0.52, ["TB"] = 1, ["TO"] = 1,
 			["useText"] = false, ["useBackground"] = true,	["useOpacity"] = true,
+			["useClassColor"] = false,
+		},
+		["HEALTH_LOSS"] = {
+			["R"] = 0, ["G"] = 0, ["B"] = 0, ["O"] = 1,
+			["TR"] = 1, ["TG"] = 1, ["TB"] = 1, ["TO"] = 1,
+			["useText"] = true, ["useBackground"] = true, ["useOpacity"] = true,
 			["useClassColor"] = false,
 		},
 		["DIRECTION"] = {

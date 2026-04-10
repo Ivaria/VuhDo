@@ -1751,7 +1751,7 @@ do
 			end
 		end
 
-		tParent = _G[aButton:GetName() .. "BgBarHlBar"];
+		tParent = _G[aButton:GetName() .. "BgBar"];
 
 		if tParent then
 			tFrame:SetParent(tParent);
@@ -1848,7 +1848,7 @@ do
 			tFrame["childBar"]:SetFrameLevel(tFrame:GetFrameLevel() - 1);
 		end
 
-		tParent = _G[aButton:GetName() .. "BgBarHlBar"];
+		tParent = _G[aButton:GetName() .. "BgBar"];
 
 		if tParent then
 			tFrame:SetParent(tParent);

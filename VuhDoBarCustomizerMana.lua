@@ -129,8 +129,8 @@ local tAllButtons, tManaBar;
 local tManaBarHeight;
 local tRegularHeight;
 local tPanelNum;
-local tInfo;
 local tHealthBar;
+local tLossBar;
 function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	aMaxValue = aMaxValue or 0;
@@ -177,9 +177,15 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 				if tRegularHeight then
 					tHealthBar = VUHDO_getHealthBar(tButton, 1);
-					tHealthBar:ClearAllPoints();
-					tHealthBar:SetPoint("TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
+					tLossBar = VUHDO_getHealthBar(tButton, 22);
+
+					if VUHDO_CONFIG["SHOW_HEALTH_LOSS_BAR"] and tLossBar and tLossBar:IsShown() then
+						VUHDO_PixelUtil.SetHeight(tHealthBar, tRegularHeight - tManaBarHeight);
+					else
+						VUHDO_PixelUtil.ClearAllPoints(tHealthBar);
+						VUHDO_PixelUtil.SetPoint(tHealthBar, "TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
+						VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
+					end
 
 					if not sIsHealthBarVertical[tPanelNum] then
 						VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(tButton, 6), tRegularHeight - tManaBarHeight);
@@ -245,10 +251,15 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 				if tRegularHeight then
 					tHealthBar = VUHDO_getHealthBar(tButton, 1);
+					tLossBar = VUHDO_getHealthBar(tButton, 22);
 
-					tHealthBar:ClearAllPoints();
-					tHealthBar:SetPoint("TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
-					VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
+					if VUHDO_CONFIG["SHOW_HEALTH_LOSS_BAR"] and tLossBar and tLossBar:IsShown() then
+						VUHDO_PixelUtil.SetHeight(tHealthBar, tRegularHeight - tManaBarHeight);
+					else
+						VUHDO_PixelUtil.ClearAllPoints(tHealthBar);
+						VUHDO_PixelUtil.SetPoint(tHealthBar, "TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
+						VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
+					end
 
 					if not sIsHealthBarVertical[tPanelNum] then
 						VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(tButton, 6), tRegularHeight - tManaBarHeight);

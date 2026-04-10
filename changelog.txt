@@ -20,10 +20,12 @@ Known issues:
 Bugfixes:  
 -- Fixed Buff Watch missing buff bar and text color  
 -- Fixed Smart Cast for missing Buff Watch buffs  
+-- Fixed heal absorb bar sizing relative to current health  
   
   
 Improvements:  
 -- Added new bouquet validator 'Flag: Aura Group Active'  
+-- Added new health loss bar for temporary max health reduction  
   
   
 --------------------------------------------------------------  
