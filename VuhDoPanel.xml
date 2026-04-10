@@ -198,15 +198,15 @@
 			<Frame name="$parentPlTg" setAllPoints="true" hidden="true" inherits="VuhDoPlayerTargetFrameTemplate" />
 
 			<StatusBar name="$parentBgBar" setAllPoints="true" hidden="true" inherits="VuhDoStatusBar">
+				<Layers>
+					<Layer level="OVERLAY">
+						-- Raid Icon
+						<Texture name="$parentIc50" hidden="true" file="interface\targetingframe\ui-raidtargetingicons">
+						</Texture>
+					</Layer>
+				</Layers>
 				<Frames>
 					<StatusBar name="$parentHlBar" setAllPoints="true" inherits="VuhDoStatusBar">
-						<Layers>
-							<Layer level="OVERLAY">
-								-- Raid Icon
-								<Texture name="$parentIc50" hidden="true" file="interface\targetingframe\ui-raidtargetingicons">
-								</Texture>
-							</Layer>
-						</Layers>
 					</StatusBar>
 
 							<StatusBar name="$parentMaBar" hidden="true" inherits="VuhDoStatusBar">
