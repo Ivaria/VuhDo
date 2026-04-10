@@ -1438,7 +1438,6 @@ do
 		end
 
 		tLossPerc = GetUnitTotalModifiedMaxHealthPercent(tResolvedUnit);
-		tLossPerc = 0.35;
 
 		if tLossPerc < 0 then
 			tLossPerc = 0;
