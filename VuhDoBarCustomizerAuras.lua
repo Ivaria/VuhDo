@@ -3952,16 +3952,8 @@ do
 				end
 			end
 		else
-			if tUnit and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
+			if tUnit and anAuraData["auraInstanceID"] and not issecretvalue(anAuraData["auraInstanceID"]) and anAuraData["auraInstanceID"] >= 0 then
 				tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
-			elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
-				if not tIconFrame["durationObj"] then
-					tIconFrame["durationObj"] = CreateDuration();
-				end
-
-				tDurationObj = tIconFrame["durationObj"];
-
-				tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 			end
 		end
 
@@ -4283,16 +4275,8 @@ do
 
 			tIsPermanent = (tCurrentDuration == 0 and (anAuraData["expirationTime"] or 0) == 0);
 		else
-			if tUnit and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
+			if tUnit and anAuraData["auraInstanceID"] and not issecretvalue(anAuraData["auraInstanceID"]) and anAuraData["auraInstanceID"] >= 0 then
 				tDurationObj = GetAuraDuration(tUnit, anAuraData["auraInstanceID"]);
-			elseif anAuraData["duration"] and anAuraData["duration"] > 0 and anAuraData["expirationTime"] then
-				if not tBarFrame["durationObj"] then
-					tBarFrame["durationObj"] = CreateDuration();
-				end
-
-				tDurationObj = tBarFrame["durationObj"];
-
-				tDurationObj:SetTimeFromEnd(anAuraData["expirationTime"], anAuraData["duration"]);
 			end
 
 			tIsPermanent = false;
