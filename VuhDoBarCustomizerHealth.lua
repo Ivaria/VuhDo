@@ -803,7 +803,6 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 		UnitGetDetailedHealPrediction(aUnit, "player", sHealAbsorbCalculator);
 
 		tHealAbsorb = sHealAbsorbCalculator:GetHealAbsorbs();
-		tHealAbsorb = 50000; -- TODO: Remove this
 		tHealth = sHealAbsorbCalculator:GetCurrentHealth();
 
 		for _, tButton in pairs(tAllButtons) do
