@@ -21,6 +21,7 @@ Bugfixes:
 -- Fixed Buff Watch missing buff bar and text color  
 -- Fixed Smart Cast for missing Buff Watch buffs  
 -- Fixed heal absorb bar sizing relative to current health  
+-- Fixed heal absorb bar when using inverted health  
   
   
 Improvements:  
