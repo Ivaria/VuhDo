@@ -4,6 +4,8 @@ local VUHDO_RAID;
 local VUHDO_IN_RAID_TARGET_BUTTONS;
 local VUHDO_PANEL_SETUP;
 local VUHDO_BUTTON_CACHE;
+local VUHDO_CONFIG;
+
 local VUHDO_IMMEDIATE = Enum.StatusBarInterpolation.Immediate;
 
 local pairs = pairs;
@@ -21,6 +23,7 @@ local VUHDO_updateBouquetsForEvent;
 local VUHDO_indicatorTextCallback;
 local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
+local VUHDO_updateHealthLossBar;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sIsInverted;
@@ -39,6 +42,7 @@ function VUHDO_customManaInitLocalOverrides()
 	VUHDO_IN_RAID_TARGET_BUTTONS = _G["VUHDO_IN_RAID_TARGET_BUTTONS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
+	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getRealParent = _G["VUHDO_getRealParent"];
@@ -47,6 +51,7 @@ function VUHDO_customManaInitLocalOverrides()
 	VUHDO_indicatorTextCallback = _G["VUHDO_indicatorTextCallback"];
 	VUHDO_setStatusBarVuhDoColor = _G["VUHDO_setStatusBarVuhDoColor"];
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
+	VUHDO_updateHealthLossBar = _G["VUHDO_updateHealthLossBar"];
 
 	sIsInverted = { };
 	sIsHealthBarVertical = { };
@@ -130,7 +135,6 @@ local tManaBarHeight;
 local tRegularHeight;
 local tPanelNum;
 local tHealthBar;
-local tLossBar;
 function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 	aMaxValue = aMaxValue or 0;
@@ -143,9 +147,13 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
 		if aBouquetName == nil or VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] == aBouquetName then
+			tManaBarHeight = 0;
+
 			if anIsActive then
 				tManaBarHeight = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["manaBarHeight"];
 			end
+
+			tButton["manaBarLayoutHeight"] = tManaBarHeight;
 
 			tManaBar = VUHDO_getHealthBar(tButton, 2);
 
@@ -177,20 +185,18 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 				if tRegularHeight then
 					tHealthBar = VUHDO_getHealthBar(tButton, 1);
-					tLossBar = VUHDO_getHealthBar(tButton, 22);
-
-					if VUHDO_CONFIG["SHOW_HEALTH_LOSS_BAR"] and tLossBar and tLossBar:IsShown() then
-						VUHDO_PixelUtil.SetHeight(tHealthBar, tRegularHeight - tManaBarHeight);
-					else
-						VUHDO_PixelUtil.ClearAllPoints(tHealthBar);
-						VUHDO_PixelUtil.SetPoint(tHealthBar, "TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
-						VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
-					end
+					tHealthBar:ClearAllPoints();
+					tHealthBar:SetPoint("TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
+					VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
 
 					if not sIsHealthBarVertical[tPanelNum] then
 						VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(tButton, 6), tRegularHeight - tManaBarHeight);
 						VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(tButton, 19), tRegularHeight - tManaBarHeight);
 					end
+				end
+
+				if VUHDO_CONFIG["SHOW_HEALTH_LOSS_BAR"] then
+					VUHDO_updateHealthLossBar(aUnit);
 				end
 			end
 
@@ -219,7 +225,13 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 
 		if aBouquetName == nil or VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] == aBouquetName then
-			tManaBarHeight = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["manaBarHeight"];
+			tManaBarHeight = 0;
+
+			if anIsActive then
+				tManaBarHeight = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["manaBarHeight"];
+			end
+
+			tButton["manaBarLayoutHeight"] = tManaBarHeight;
 
 			tManaBar = VUHDO_getHealthBar(tButton, 2);
 
@@ -251,20 +263,18 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 
 				if tRegularHeight then
 					tHealthBar = VUHDO_getHealthBar(tButton, 1);
-					tLossBar = VUHDO_getHealthBar(tButton, 22);
-
-					if VUHDO_CONFIG["SHOW_HEALTH_LOSS_BAR"] and tLossBar and tLossBar:IsShown() then
-						VUHDO_PixelUtil.SetHeight(tHealthBar, tRegularHeight - tManaBarHeight);
-					else
-						VUHDO_PixelUtil.ClearAllPoints(tHealthBar);
-						VUHDO_PixelUtil.SetPoint(tHealthBar, "TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
-						VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
-					end
+					tHealthBar:ClearAllPoints();
+					tHealthBar:SetPoint("TOPLEFT", VUHDO_getRealParent(tHealthBar), "TOPLEFT", 0, 0);
+					VUHDO_PixelUtil.SetSize(tHealthBar, tButton:GetWidth(), tRegularHeight - tManaBarHeight);
 
 					if not sIsHealthBarVertical[tPanelNum] then
 						VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(tButton, 6), tRegularHeight - tManaBarHeight);
 						VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(tButton, 19), tRegularHeight - tManaBarHeight);
 					end
+				end
+
+				if VUHDO_CONFIG["SHOW_HEALTH_LOSS_BAR"] then
+					VUHDO_updateHealthLossBar(aUnit);
 				end
 			end
 

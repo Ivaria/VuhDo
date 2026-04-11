@@ -823,7 +823,7 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BARS_PER_BUTTON[tButton][1]["vuhdo_parent_name"] = tButtonName .. "BgBar";
 	VUHDO_BUTTON_BY_HEALTH_BAR[VUHDO_BARS_PER_BUTTON[tButton][1]] = tButton;
 	-- Mana
-	VUHDO_BARS_PER_BUTTON[tButton][2] = _G[tButtonName .. "BgBarMaBar"];
+	VUHDO_BARS_PER_BUTTON[tButton][2] = _G[tButtonName .. "BgBarHlBarMaBar"];
 	-- Background
 	VUHDO_BARS_PER_BUTTON[tButton][3] = _G[tButtonName .. "BgBar"];
 	-- Aggro
@@ -852,8 +852,8 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BARS_PER_BUTTON[tButton][12] = _G[tButtonName .. "TgBgBar"];
 	VUHDO_BARS_PER_BUTTON[tTargetButton][3] = _G[tButtonName .. "TgBgBar"];
 	-- Target Mana
-	VUHDO_BARS_PER_BUTTON[tButton][13] = _G[tButtonName .. "TgBgBarMaBar"];
-	VUHDO_BARS_PER_BUTTON[tTargetButton][2] = _G[tButtonName .. "TgBgBarMaBar"];
+	VUHDO_BARS_PER_BUTTON[tButton][13] = _G[tButtonName .. "TgBgBarHlBarMaBar"];
+	VUHDO_BARS_PER_BUTTON[tTargetButton][2] = _G[tButtonName .. "TgBgBarHlBarMaBar"];
 
 	-- Tot Health
 	VUHDO_BARS_PER_BUTTON[tButton][14] = _G[tButtonName .. "TotBgBarHlBar"];
@@ -863,8 +863,8 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BARS_PER_BUTTON[tButton][15] = _G[tButtonName .. "TotBgBar"];
 	VUHDO_BARS_PER_BUTTON[tTotButton][3] = _G[tButtonName .. "TotBgBar"];
 	-- Tot Mana
-	VUHDO_BARS_PER_BUTTON[tButton][16] = _G[tButtonName .. "TotBgBarMaBar"];
-	VUHDO_BARS_PER_BUTTON[tTotButton][2] = _G[tButtonName .. "TotBgBarMaBar"];
+	VUHDO_BARS_PER_BUTTON[tButton][16] = _G[tButtonName .. "TotBgBarHlBarMaBar"];
+	VUHDO_BARS_PER_BUTTON[tTotButton][2] = _G[tButtonName .. "TotBgBarHlBarMaBar"];
 	-- Left side bar
 	VUHDO_BARS_PER_BUTTON[tButton][17] = _G[tButtonName .. "BgBarLsBar"];
 	-- Right side bar

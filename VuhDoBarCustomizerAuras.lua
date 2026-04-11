@@ -376,6 +376,18 @@ local sGrowthOffsets = {
 	["DOWN"] = { 0, -1 },
 };
 
+local sRelPointManaFactor = {
+	["TOPLEFT"] = 0,
+	["TOP"] = 0,
+	["TOPRIGHT"] = 0,
+	["LEFT"] = 0.5,
+	["CENTER"] = 0.5,
+	["RIGHT"] = 0.5,
+	["BOTTOMLEFT"] = 1,
+	["BOTTOM"] = 1,
+	["BOTTOMRIGHT"] = 1,
+};
+
 local sTimeAbbrevData = {
 	["breakpointData"] = {
 		{
@@ -2467,7 +2479,7 @@ do
 		end
 
 		if "HealthBar" == tPos["relFrame"] then
-			tRelFrame = VUHDO_getHealthBar(aButton, 1);
+			tRelFrame = VUHDO_getHealthBar(aButton, 3);
 		else
 			tRelFrame = aButton;
 		end
@@ -2491,6 +2503,10 @@ do
 		if aRadioValue ~= 17 then
 			tBaseX = (tPos["xOffset"] or 0) + tBaseX;
 			tBaseY = (tPos["yOffset"] or 0) + tBaseY;
+		end
+
+		if "HealthBar" == tPos["relFrame"] then
+			tBaseY = tBaseY + (aButton["manaBarLayoutHeight"] or 0) * (sRelPointManaFactor[tPos["relPoint"]] or 0);
 		end
 
 		tGrowthDir = sGrowthOffsets[anAnchorConfig["growthDir"]] or sGrowthOffsets["RIGHT"];
@@ -2760,7 +2776,7 @@ do
 			return;
 		end
 
-		tRelFrame = VUHDO_getHealthBar(aButton, 1);
+		tRelFrame = VUHDO_getHealthBar(aButton, 3);
 
 		if not tRelFrame then
 			return;
@@ -2806,6 +2822,8 @@ do
 			tXOff = tXOff + tGrowthXOff;
 			tYOff = tYOff + tGrowthYOff;
 		end
+
+		tYOff = tYOff + (aButton["manaBarLayoutHeight"] or 0) * (sRelPointManaFactor[tSlotPos["relPoint"]] or 0);
 
 		aFrame:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(aFrame, tSlotPos["anchor"], tRelFrame, tSlotPos["relPoint"], tXOff, tYOff);

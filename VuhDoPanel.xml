@@ -207,7 +207,7 @@
 				</Layers>
 				<Frames>
 					<StatusBar name="$parentHlBar" setAllPoints="true" inherits="VuhDoStatusBar">
-					</StatusBar>
+						<Frames>
 
 							<StatusBar name="$parentMaBar" hidden="true" inherits="VuhDoStatusBar">
 								<Anchors>
@@ -220,74 +220,77 @@
 								<Scripts>
 									<OnLoad>
 										self.statusTexture = self:GetStatusBarTexture();
-										self.addLevel = 2;
+										self.addLevel = 1;
 									</OnLoad>
 								</Scripts>
 							</StatusBar>
 
-							<Frame name="$parentTxPnl">
-								<Anchors>
-									<Anchor point="CENTER" relativePoint="CENTER">
+						</Frames>
+					</StatusBar>
+
+					<Frame name="$parentTxPnl">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+
+						<Layers>
+							<Layer>
+
+								<FontString name="$parentUnN" inherits="GameFontNormalSmall">
+									<FontHeight>
+										<AbsValue val="9" />
+									</FontHeight>
+								</FontString>
+
+								<FontString name="$parentUnNSolo" inherits="GameFontNormalSmall">
+									<FontHeight>
+										<AbsValue val="9" />
+									</FontHeight>
+								</FontString>
+
+								<FontString name="$parentLife" inherits="GameFontNormalSmall">
+									<FontHeight>
+										<AbsValue val="9" />
+									</FontHeight>
+								</FontString>
+
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad>
+								self.addLevel = 3;
+							</OnLoad>
+						</Scripts>
+					</Frame>
+
+					<Frame name="$parentOvhPnl">
+						<Anchors>
+							<Anchor point="CENTER" relativePoint="CENTER">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="OVERLAY">
+								<FontString name="$parentT" inherits="SystemFont_Tiny">
+								<FontHeight>
+										<AbsValue val="9" />
+									</FontHeight>
+									<Shadow>
+										<Color r="0" g="0" b="0" />
 										<Offset>
-											<AbsDimension x="0" y="0"/>
+											<AbsDimension x="1" y="-1" />
 										</Offset>
-									</Anchor>
-								</Anchors>
-
-								<Layers>
-									<Layer>
-
-										<FontString name="$parentUnN" inherits="GameFontNormalSmall">
-											<FontHeight>
-												<AbsValue val="9" />
-											</FontHeight>
-										</FontString>
-
-										<FontString name="$parentUnNSolo" inherits="GameFontNormalSmall">
-											<FontHeight>
-												<AbsValue val="9" />
-											</FontHeight>
-										</FontString>
-
-										<FontString name="$parentLife" inherits="GameFontNormalSmall">
-											<FontHeight>
-												<AbsValue val="9" />
-											</FontHeight>
-										</FontString>
-
-									</Layer>
-								</Layers>
-								<Scripts>
-									<OnLoad>
-										self.addLevel = 3;
-									</OnLoad>
-								</Scripts>
-							</Frame>
-
-							<Frame name="$parentOvhPnl">
-								<Anchors>
-									<Anchor point="CENTER" relativePoint="CENTER">
-										<Offset>
-											<AbsDimension x="0" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Layers>
-									<Layer level="OVERLAY">
-										<FontString name="$parentT" inherits="SystemFont_Tiny">
-										<FontHeight>
-												<AbsValue val="9" />
-											</FontHeight>
-											<Shadow>
-												<Color r="0" g="0" b="0" />
-												<Offset>
-													<AbsDimension x="1" y="-1" />
-												</Offset>
-											</Shadow>
-										</FontString>
-									</Layer>
-								</Layers>
-							</Frame>
+									</Shadow>
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
 
 				</Frames>
 			</StatusBar>
@@ -355,6 +358,25 @@
 							</Offset>
 						</Anchor>
 					</Anchors>
+					<Frames>
+
+						<StatusBar name="$parentMaBar" hidden="true" inherits="VuhDoStatusBar">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Scripts>
+								<OnLoad>
+									self.statusTexture = self:GetStatusBarTexture();
+									self.addLevel = 1;
+								</OnLoad>
+							</Scripts>
+						</StatusBar>
+
+					</Frames>
 					<Layers>
 						<Layer level="OVERLAY" textureSubLevel="6">
 							<Texture name="$parentAggro" hidden="true" file="Interface\AddOns\VuhDo\Images\aggro">
@@ -371,22 +393,6 @@
 						</Layer>
 					</Layers>
 				</StatusBar>
-
-						<StatusBar name="$parentMaBar" hidden="true" inherits="VuhDoStatusBar">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT">
-									<Offset>
-										<AbsDimension x="0" y="0"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-							<Scripts>
-								<OnLoad>
-									self.statusTexture = self:GetStatusBarTexture();
-									self.addLevel = 2;
-								</OnLoad>
-							</Scripts>
-						</StatusBar>
 
 						<StatusBar name="$parentLsBar" hidden="true" inherits="VuhDoStatusBar">
 							<Scripts>
@@ -574,8 +580,8 @@
 
 				<Frame name="$parentClipBar" clipChildren="true">
 					<Anchors>
-						<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
-						<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT"/>
+						<Anchor point="TOPLEFT" relativeTo="$parentHlBar" relativePoint="TOPLEFT"/>
+						<Anchor point="BOTTOMRIGHT" relativeTo="$parentHlBar" relativePoint="BOTTOMRIGHT"/>
 					</Anchors>
 					<Frames>
 
