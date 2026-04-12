@@ -7,7 +7,6 @@ Known issues:
 --   Overheal text provider and Life Text highlight are not yet working
 --   Many Hitpoints option (e.g. Show Effective) are not yet working
 --   Overshield Bar will only display when the unit is at full health
---   Buff Watch is only partially working
 --   Raid Icon bar and text color filtring are not yet working
 --   Emergency Mode is not yet working
 --   Swiftmendable bouquet is not yet working
