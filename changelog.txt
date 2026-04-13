@@ -27,6 +27,7 @@ Improvements:
 -- Added new bouquet validator 'Flag: Aura Group Active'  
 -- Added new health loss bar for temporary max health reduction  
 -- Added target by role for unique cast spells in Buff Watch  
+-- Added target by focus or target unit for unique cast spells in Buff Watch  
   
   
 --------------------------------------------------------------  
