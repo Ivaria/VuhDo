@@ -300,14 +300,26 @@ end
 
 --
 local function VUHDO_outsideZoneValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	return not VUHDO_isInSameZone(anInfo["unit"]), nil, -1, -1, -1;
+
 end
 
 
 
 --
 local function VUHDO_insideZoneValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	return VUHDO_isInSameZone(anInfo["unit"]), nil, -1, -1, -1;
+
 end
 
 
@@ -340,6 +352,11 @@ end
 
 --
 local function VUHDO_isPhasedValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	if VUHDO_unitPhaseReason(anInfo["unit"]) then
 		return true, "Interface\\TargetingFrame\\UI-PhasingIcon", 
 			-1, -1, -1, nil, nil, 0.15625, 0.84375, 0.15625, 0.84375;
@@ -352,6 +369,10 @@ end
 
 --
 local function VUHDO_isWarModePhasedValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
 
 	local tPhaseReason = VUHDO_unitPhaseReason(anInfo["unit"]);
 
@@ -369,6 +390,11 @@ end
 --
 local tDistance;
 local function VUHDO_inYardsRangeValidator(anInfo, aSomeCustom)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tDistance = VUHDO_getDistanceBetween("player", anInfo["unit"]);
 	return tDistance and (tDistance <= aSomeCustom["custom"][1]), nil, -1, -1, -1;
 end
@@ -377,7 +403,13 @@ end
 
 --
 local function VUHDO_swiftmendValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	return VUHDO_isUnitSwiftmendable(anInfo["unit"]), nil, -1, -1, -1;
+
 end
 
 
@@ -385,6 +417,11 @@ end
 --
 local tOPHotInfo;
 local function VUHDO_otherPlayersHotsValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tOPHotInfo = VUHDO_getOtherPlayersHotInfo(anInfo["unit"]);
 	return tOPHotInfo[1] ~= nil, tOPHotInfo[1], -1, tOPHotInfo[2], -1;
 end
@@ -395,6 +432,10 @@ end
 local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffMagicValidator(anInfo, _, aSecretContext)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
 
 	tDebuffInfo = VUHDO_getUnitDebuffSchoolInfos(anInfo["unit"], VUHDO_DEBUFF_TYPE_MAGIC);
 
@@ -425,6 +466,10 @@ local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffDiseaseValidator(anInfo, _, aSecretContext)
 
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tDebuffInfo = VUHDO_getUnitDebuffSchoolInfos(anInfo["unit"], VUHDO_DEBUFF_TYPE_DISEASE);
 
 	if not tDebuffInfo[2] then
@@ -453,6 +498,10 @@ end
 local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffPoisonValidator(anInfo, _, aSecretContext)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
 
 	tDebuffInfo = VUHDO_getUnitDebuffSchoolInfos(anInfo["unit"], VUHDO_DEBUFF_TYPE_POISON);
 
@@ -483,6 +532,10 @@ local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffCurseValidator(anInfo, _, aSecretContext)
 
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tDebuffInfo = VUHDO_getUnitDebuffSchoolInfos(anInfo["unit"], VUHDO_DEBUFF_TYPE_CURSE);
 
 	if not tDebuffInfo[2] then
@@ -512,6 +565,10 @@ local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffBleedValidator(anInfo, _, aSecretContext)
 
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tDebuffInfo = VUHDO_getUnitDebuffSchoolInfos(anInfo["unit"], VUHDO_DEBUFF_TYPE_BLEED);
 
 	if not tDebuffInfo[2] then
@@ -540,6 +597,10 @@ end
 local tDebuffInfo;
 local tAuraInstanceId;
 local function VUHDO_debuffEnrageValidator(anInfo, _, aSecretContext)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
 
 	tDebuffInfo = VUHDO_getUnitDebuffSchoolInfos(anInfo["unit"], VUHDO_DEBUFF_TYPE_ENRAGE);
 
@@ -573,6 +634,10 @@ local tCurve;
 local tCanColorBar;
 local tCanColorText;
 local function VUHDO_debuffBarColorValidator(anInfo, _, aSecretContext)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
 
 	if not sSecretsEnabled or VUHDO_isConfigDemoUsers() then
 		if anInfo["charmed"] then
@@ -721,6 +786,10 @@ local function VUHDO_auraGroupActiveValidator(anInfo, aItem)
 		return false, nil, -1, -1, -1;
 	end
 
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tGroupColor = VUHDO_getAuraGroupActiveColor(anInfo["unit"], tGroupId);
 
 	if not tGroupColor then
@@ -809,6 +878,11 @@ end
 --
 local tNumInCluster;
 local function VUHDO_numInClusterValidator(anInfo, aSomeCustom)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tNumInCluster = VUHDO_getNumInUnitCluster(anInfo["unit"]);
 	return tNumInCluster >= aSomeCustom["custom"][1], nil, -1, tNumInCluster, -1;
 end
@@ -817,7 +891,13 @@ end
 
 --
 local function VUHDO_mouseClusterValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	return VUHDO_getIsInHiglightCluster(anInfo["unit"]), nil, -1, -1, -1;
+
 end
 
 
@@ -894,7 +974,13 @@ end
 
 --
 local function VUHDO_resurrectionValidator(anInfo, aSomeCustom)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	return anInfo["dead"] and UnitHasIncomingResurrection(anInfo["unit"]), "Interface\\RaidFrame\\Raid-Icon-Rez", -1, -1, -1;
+
 end
 
 
@@ -907,6 +993,11 @@ end
 
 --
 local function VUHDO_hasSummonIconValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	if C_IncomingSummon.HasIncomingSummon(anInfo["unit"]) then
 		local status = C_IncomingSummon.IncomingSummonStatus(anInfo["unit"]);
 
@@ -940,6 +1031,10 @@ end
 --
 local tIndex;
 local function VUHDO_raidIconValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
 
 	tIndex = GetRaidTargetIndex(anInfo["unit"]);
 
@@ -1098,6 +1193,11 @@ end
 --
 local tIcon, tExpiry, tStacks, tDuration;
 local function VUHDO_customDebuffIconValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tIcon, tExpiry, tStacks, tDuration = VUHDO_getLatestCustomDebuff(anInfo["unit"]);
 	if tIcon then
 		return true, tIcon, tExpiry - GetTime(), tStacks, tDuration;
@@ -1111,6 +1211,11 @@ end
 --
 local tIsLeader;
 local function VUHDO_leaderIconValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tIsLeader = VUHDO_getUnitGroupPrivileges(anInfo["unit"]);
 	if tIsLeader then
 		return true, "Interface\\groupframe\\ui-group-leadericon", -1, -1, -1;
@@ -1124,6 +1229,11 @@ end
 --
 local tIsAssistant;
 local function VUHDO_assistantIconValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	_, tIsAssistant = VUHDO_getUnitGroupPrivileges(anInfo["unit"]);
 	if tIsAssistant then
 		return true, "Interface\\groupframe\\ui-group-assistanticon", -1, -1, -1;
@@ -1137,6 +1247,11 @@ end
 --
 local tIsMasterLooter
 local function VUHDO_masterLooterIconValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	_, _, tIsMasterLooter = VUHDO_getUnitGroupPrivileges(anInfo["unit"]);
 	if tIsMasterLooter then
 		return true, "Interface\\groupframe\\ui-group-masterlooter", -1, -1, -1;
@@ -1149,6 +1264,11 @@ end
 
 --
 local function VUHDO_pvpIconValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	if UnitIsPVP(anInfo["unit"]) then
 		if "Alliance" == (UnitFactionGroup(anInfo["unit"])) then
 			return true, "Interface\\groupframe\\ui-group-pvp-alliance", -1, -1, -1;
@@ -1162,12 +1282,26 @@ end
 
 --
 local function VUHDO_friendValidator(anInfo, _)
-  return UnitIsFriend("player", anInfo["unit"]), nil, -1, -1, -1;
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
+	return UnitIsFriend("player", anInfo["unit"]), nil, -1, -1, -1;
+
 end
+
+
 
 --
 local function VUHDO_foeValidator(anInfo, _)
-  return not UnitIsFriend("player", anInfo["unit"]), nil, -1, -1, -1;
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
+	return not UnitIsFriend("player", anInfo["unit"]), nil, -1, -1, -1;
+
 end
 
 
@@ -1179,6 +1313,11 @@ local tColor = { ["useBackground"] = true, ["noStacksColor"] = true };
 local tDefaultColor = { ["R"] = 1, ["G"] = 0.4, ["B"] = 0.4, ["O"] = 1, ["useBackground"] = true, ["useSlotColor"] = true }
 local tDistance;
 local function VUHDO_directionArrowValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tUnit = anInfo["unit"];
 
 	if not VUHDO_shouldDisplayArrow(tUnit) then
@@ -1255,6 +1394,11 @@ end
 --
 local tUnit;
 local function VUHDO_tappedValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tUnit = anInfo["unit"];
 
 	if not UnitIsPlayer(tUnit) and UnitIsTapDenied(tUnit) then
@@ -1436,6 +1580,11 @@ end
 --
 local tUnit;
 local function VUHDO_enemyStateValidator(anInfo, _)
+
+	if not anInfo["unit"] then
+		return false, nil, -1, -1, -1;
+	end
+
 	tUnit = anInfo["unit"];
 	if UnitIsFriend("player", tUnit) then
 		return true, nil, -1, -1, -1,
@@ -1473,6 +1622,10 @@ do
 	local tTimer;
 	local tDuration;
 	VUHDO_chiHarmonyIconValidator = function(anInfo, aSourceType)
+
+		if not anInfo["unit"] then
+			return false, nil, -1, -1, -1;
+		end
 
 		tUnitHotList, tUnitHotCount = VUHDO_getUnitHot(anInfo["unit"], "Renewing Mist", aSourceType);
 
