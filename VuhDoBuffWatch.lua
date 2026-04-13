@@ -87,6 +87,8 @@ local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local VUHDO_BUFF_TARGET_MODE_STANDARD;
 local VUHDO_BUFF_TARGET_MODE_NAME;
 local VUHDO_BUFF_TARGET_MODE_ROLE;
+local VUHDO_BUFF_TARGET_MODE_TARGET;
+local VUHDO_BUFF_TARGET_MODE_FOCUS;
 
 local sTimeAbbrevData = {
 	["breakpointData"] = {
@@ -141,6 +143,8 @@ function VUHDO_buffWatchInitLocalOverrides()
 	VUHDO_BUFF_TARGET_MODE_STANDARD = _G["VUHDO_BUFF_TARGET_MODE_STANDARD"];
 	VUHDO_BUFF_TARGET_MODE_NAME = _G["VUHDO_BUFF_TARGET_MODE_NAME"];
 	VUHDO_BUFF_TARGET_MODE_ROLE = _G["VUHDO_BUFF_TARGET_MODE_ROLE"];
+	VUHDO_BUFF_TARGET_MODE_TARGET = _G["VUHDO_BUFF_TARGET_MODE_TARGET"];
+	VUHDO_BUFF_TARGET_MODE_FOCUS = _G["VUHDO_BUFF_TARGET_MODE_FOCUS"];
 
 	sConfig = VUHDO_BUFF_SETTINGS["CONFIG"];
 	sRebuffSecs = sConfig["REBUFF_MIN_MINUTES"] * 60;
@@ -362,7 +366,9 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 	else
 		VuhDoBuffSelectDropdown:Hide();
 
-		if VUHDO_BUFF_TARGET_MODE_NAME == VUHDO_CLICKED_TARGET_MODE then
+		if VUHDO_BUFF_TARGET_MODE_TARGET == VUHDO_CLICKED_TARGET_MODE
+			or VUHDO_BUFF_TARGET_MODE_FOCUS == VUHDO_CLICKED_TARGET_MODE then
+		elseif VUHDO_BUFF_TARGET_MODE_NAME == VUHDO_CLICKED_TARGET_MODE then
 			tDdSelName = nil;
 			tDdNextSel = false;
 
@@ -653,7 +659,7 @@ local tIsAvailable;
 local tIsNotInBattleground;
 local tBuffGroup;
 local tSpellInRange;
-local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppressMissBuff)
+local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppressMissBuff, aTargetMode)
 
 	tCategName = aCategSpec;
 
@@ -680,7 +686,8 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 	for _, tUnit in pairs(someUnits) do
 		tInfo = VUHDO_RAID[tUnit];
 
-		if "focus" == tUnit or "target" == tUnit or tInfo == nil or tInfo["isPet"] then
+		if (("focus" == tUnit or "target" == tUnit) and VUHDO_BUFF_TARGET_MODE_TARGET ~= aTargetMode and VUHDO_BUFF_TARGET_MODE_FOCUS ~= aTargetMode)
+			or tInfo == nil or tInfo["isPet"] then
 			tIsWatchUnit = false;
 		elseif "player" == tUnit then
 			tIsWatchUnit = true;
@@ -860,6 +867,12 @@ local function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCa
 		tDestGroup = tNameGroup;
 	elseif VUHDO_BUFF_TARGET_MODE_ROLE == aTargetMode then
 		tDestGroup = (VUHDO_GROUPS or sEmpty)[aTarget] or sEmpty;
+	elseif VUHDO_BUFF_TARGET_MODE_TARGET == aTargetMode then
+		tNameGroup[1] = VUHDO_RAID["target"] and "target" or nil;
+		tDestGroup = tNameGroup;
+	elseif VUHDO_BUFF_TARGET_MODE_FOCUS == aTargetMode then
+		tNameGroup[1] = VUHDO_RAID["focus"] and "focus" or nil;
+		tDestGroup = tNameGroup;
 	else
 		tTargetType = aBuffInfo[2];
 
@@ -926,7 +939,7 @@ local function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCa
 		end
 	end
 
-	return VUHDO_getMissingBuffs(aBuffInfo, tDestGroup or sEmpty, aCategSpec, anSuppressMissBuff);
+	return VUHDO_getMissingBuffs(aBuffInfo, tDestGroup or sEmpty, aCategSpec, anSuppressMissBuff, aTargetMode);
 end
 
 
@@ -1107,6 +1120,24 @@ function VUHDO_updateBuffSwatch(aSwatch)
 
 				return;
 			end
+		elseif VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode or VUHDO_BUFF_TARGET_MODE_FOCUS == tTargetMode then
+			tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
+
+			if not VUHDO_RAID[VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and "target" or "focus"] then
+				VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
+				VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_N_A);
+				VUHDO_setBuffSwatchCount(tSwatchName, "");
+				VUHDO_setBuffSwatchTimer(tSwatchName, nil);
+				tGroupLabel:SetText(VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS);
+				VUHDO_safeSetAttribute(aSwatch, "lowtarget", nil);
+				VUHDO_safeSetAttribute(aSwatch, "goodtarget", nil);
+				VUHDO_NUM_LOWS[tSwatchName] = 0;
+
+				return;
+			end
+
+			tGroupLabel:SetText((VUHDO_RAID[VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and "target" or "focus"] or sEmpty)["name"]
+				or (VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS));
 		end
 
 		tIsSpellAuraSecret = ShouldSpellAuraBeSecret and ShouldSpellAuraBeSecret(VUHDO_BUFFS[tRefSpell]["id"]);

@@ -149,6 +149,12 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 			if tRoleIdBuild then
 				tSwatch = VUHDO_addBuffSwatch(tBuffPanel, VUHDO_HEADER_TEXTS[tRoleIdBuild], tFirstVariant,
 					VUHDO_BUFF_TARGET_MODE_ROLE, tRoleIdBuild, aCategorySpec);
+			elseif tTargetModeStr == "target" then
+				tSwatch = VUHDO_addBuffSwatch(tBuffPanel, VUHDO_I18N_BW_TARGET, tFirstVariant,
+					VUHDO_BUFF_TARGET_MODE_TARGET, "target", aCategorySpec);
+			elseif tTargetModeStr == "focus" then
+				tSwatch = VUHDO_addBuffSwatch(tBuffPanel, VUHDO_I18N_BW_FOCUS, tFirstVariant,
+					VUHDO_BUFF_TARGET_MODE_FOCUS, "focus", aCategorySpec);
 			else
 				tSwatch = VUHDO_addBuffSwatch(tBuffPanel, tSettings["name"], tFirstVariant,
 					VUHDO_BUFF_TARGET_MODE_NAME, tSettings["name"], aCategorySpec);

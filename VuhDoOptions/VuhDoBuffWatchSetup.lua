@@ -18,7 +18,11 @@ local tUniqueModeTable;
 local function VUHDO_buffWatchSetupGetTargetModeTable()
 
 	if not tUniqueModeTable then
-		tUniqueModeTable = { { "name", VUHDO_I18N_BW_TARGET_BY_NAME } };
+		tUniqueModeTable = {
+			{ "name", VUHDO_I18N_BW_TARGET_BY_NAME },
+			{ "target", VUHDO_I18N_BW_TARGET },
+			{ "focus", VUHDO_I18N_BW_FOCUS },
+		};
 
 		for _, tFilter in pairs(VUHDO_BUFF_FILTER_COMBO_TABLE) do
 			if tFilter[1] >= VUHDO_ID_MELEE_TANK and tFilter[1] <= VUHDO_ID_RANGED_HEAL then
