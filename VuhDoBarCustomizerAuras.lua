@@ -2022,6 +2022,7 @@ do
 		tIconFrame:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tIconFrame, tAnchor, aButton, tRelPoint, tPosX, tPosY);
 		VUHDO_PixelUtil.SetSize(tIconFrame, aWidth or 16, aHeight or 16);
+		VUHDO_PixelUtil.SetFrameLevel(tIconFrame, tIconFrame:GetParent():GetFrameLevel() + 11);
 		tIconFrame:SetAlpha(1);
 		tIconFrame:Show();
 
@@ -2215,6 +2216,15 @@ do
 
 
 	--
+	function VUHDO_isAuraDisplaySuspended()
+
+		return sAurasSuspended;
+
+	end
+
+
+
+	--
 	function VUHDO_hideAllAuras()
 
 		for tButtonName, tButtonFrames in pairs(VUHDO_AURA_FRAMES) do
@@ -2263,6 +2273,8 @@ do
 
 	--
 	function VUHDO_showAllAuras()
+
+		sEntrySettingsVersion = sEntrySettingsVersion + 1;
 
 		for tUnit, _ in pairs(VUHDO_RAID) do
 			VUHDO_updateAuraDisplaysForUnit(tUnit);
@@ -3307,6 +3319,10 @@ local tAnchorSlots;
 local tSlots;
 local tMaxSlots;
 function VUHDO_updateInferredAuraDisplaysForUnit(aUnit)
+
+	if sAurasSuspended then
+		return;
+	end
 
 	if not aUnit then
 		return;

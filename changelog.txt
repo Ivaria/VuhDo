@@ -21,6 +21,7 @@ Bugfixes:
 -- Fixed Smart Cast for missing Buff Watch buffs  
 -- Fixed heal absorb bar sizing relative to current health  
 -- Fixed heal absorb bar when using inverted health  
+-- Fixed right-click roster icons for in range group members  
   
   
 Improvements:  

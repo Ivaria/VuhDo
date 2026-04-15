@@ -22,6 +22,7 @@ local VUHDO_getDispelAbilities;
 local VUHDO_getPurgeAbilities;
 local VUHDO_isConfigDemoUsers;
 local VUHDO_displayAurasAtAnchorFromCache;
+local VUHDO_isAuraDisplaySuspended;
 local VUHDO_getSlotData;
 local VUHDO_getAuraGroupRaw;
 local VUHDO_getAuraBarColorType;
@@ -164,6 +165,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
 	VUHDO_getAuraGroupRaw = _G["VUHDO_getAuraGroupRaw"];
 	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
+	VUHDO_isAuraDisplaySuspended = _G["VUHDO_isAuraDisplaySuspended"];
 	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
 	VUHDO_getAuraBarColorType = _G["VUHDO_getAuraBarColorType"];
 	VUHDO_getAuraTextColorType = _G["VUHDO_getAuraTextColorType"];
@@ -3367,7 +3369,7 @@ do
 			tTier = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit];
 		end
 
-		if aUnit and VUHDO_displayAurasAtAnchorFromCache then
+		if aUnit and VUHDO_displayAurasAtAnchorFromCache and not VUHDO_isAuraDisplaySuspended() then
 			for _, tMapping in ipairs(tSlotMappings) do
 				tAnchorConfig = VUHDO_PANEL_SETUP[tMapping["panelNum"]] and
 					VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"] and
