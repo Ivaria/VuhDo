@@ -97,18 +97,21 @@ local sTimeAbbrevData = {
 			["abbreviation"] = "h",
 			["significandDivisor"] = 60,
 			["fractionDivisor"] = 60,
+			["abbreviationIsGlobal"] = false,
 		},
 		{
 			["breakpoint"] = 60,
 			["abbreviation"] = "m",
 			["significandDivisor"] = 60,
 			["fractionDivisor"] = 1,
+			["abbreviationIsGlobal"] = false,
 		},
 		{
 			["breakpoint"] = 0,
 			["abbreviation"] = "s",
 			["significandDivisor"] = 1,
 			["fractionDivisor"] = 1,
+			["abbreviationIsGlobal"] = false,
 		},
 	},
 };
@@ -1021,7 +1024,7 @@ local function VUHDO_getSpellCooldown(aSpellName)
 	if sSecretsEnabled then
 		tStart, tDurationRemaining, _, _, tIsOnGCD, tDuration = GetSpellCooldown(tSpellId);
 
-		if tIsOnGCD == nil or tIsOnGCD == true then
+		if tIsOnGCD == true or not tDuration or (not tDuration:HasSecretValues() and tDuration:IsZero()) then
 			return 0, 0, nil;
 		end
 
@@ -1063,6 +1066,8 @@ local tTargetMode;
 local tTarget;
 local tSuppressMiss;
 local tUniqueRoleOkay;
+local tIsUniqueRole;
+local tUniqueRoleLow;
 local tRoleId;
 local tPinnedUnit;
 local tBuffSettings;
@@ -1070,6 +1075,7 @@ local tStaleName;
 local tGroupLabel;
 local tRoleTotal;
 local tIsSpellAuraSecret;
+local tInfo;
 function VUHDO_updateBuffSwatch(aSwatch)
 
 	tSwatchName = aSwatch:GetName();
@@ -1078,12 +1084,17 @@ function VUHDO_updateBuffSwatch(aSwatch)
 	tTarget = aSwatch:GetAttribute("target");
 	tCategSpec = aSwatch:GetAttribute("buffName");
 
-	if not tTargetMode or not tVariant then return; end
+	if not tTargetMode or not tVariant then
+		return;
+	end
+
 	tLowestUnit, tGoodTarget = nil, nil;
 
 	tRefSpell = tVariant[1];
 
-	if not VUHDO_BUFFS[tRefSpell] or not VUHDO_BUFFS[tRefSpell]["id"] then return; end
+	if not VUHDO_BUFFS[tRefSpell] or not VUHDO_BUFFS[tRefSpell]["id"] then
+		return;
+	end
 
 	tCooldown, tTotalCd, tSpellCdDuration = VUHDO_getSpellCooldown(tRefSpell);
 
@@ -1097,10 +1108,14 @@ function VUHDO_updateBuffSwatch(aSwatch)
 		VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_CD);
 		VUHDO_setBuffSwatchCount(tSwatchName, "");
 		VUHDO_setBuffSwatchTimer(tSwatchName, tCooldown, nil);
-		if tTotalCd > 59 then VUHDO_BUFFS[tRefSpell]["wasOnCd"] = true; end
+
+		if tTotalCd > 59 then
+			VUHDO_BUFFS[tRefSpell]["wasOnCd"] = true;
+		end
 	else
 		if VUHDO_BUFFS[tRefSpell]["wasOnCd"] and VUHDO_BUFF_SETTINGS["CONFIG"]["HIGHLIGHT_COOLDOWN"] then
 			VUHDO_UIFrameFlash(aSwatch, 0.3, 0.3, 5, true, 0, 0.3);
+
 			VUHDO_BUFFS[tRefSpell]["wasOnCd"] = false;
 		end
 
@@ -1116,6 +1131,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 				tGroupLabel:SetTextColor(1, 0.2, 0.2);
 				VUHDO_safeSetAttribute(aSwatch, "lowtarget", nil);
 				VUHDO_safeSetAttribute(aSwatch, "goodtarget", nil);
+
 				VUHDO_NUM_LOWS[tSwatchName] = 0;
 
 				return;
@@ -1131,6 +1147,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 				tGroupLabel:SetText(VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS);
 				VUHDO_safeSetAttribute(aSwatch, "lowtarget", nil);
 				VUHDO_safeSetAttribute(aSwatch, "goodtarget", nil);
+
 				VUHDO_NUM_LOWS[tSwatchName] = 0;
 
 				return;
@@ -1152,16 +1169,16 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			tPinnedUnit = VUHDO_RAID_NAMES[(tBuffSettings or sEmpty)["name"]];
 
 			if tPinnedUnit and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
-				for _, tRU in pairs(tMissGroup) do
-					if tRU == tPinnedUnit then
+				for _, tRoleUnit in pairs(tMissGroup) do
+					if tRoleUnit == tPinnedUnit then
 						tGoodTarget = tPinnedUnit;
 
 						break;
 					end
 				end
 
-				for _, tRU in pairs(tLowGroup) do
-					if tRU == tPinnedUnit then
+				for _, tRoleUnit in pairs(tLowGroup) do
+					if tRoleUnit == tPinnedUnit then
 						tLowestUnit = tPinnedUnit;
 
 						break;
@@ -1186,6 +1203,20 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			end
 		end
 
+		tIsUniqueRole = (VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2]);
+
+		if tIsUniqueRole and (#tOkayGroup > 0 or #tLowGroup > 0) then
+			for _, tRoleUnit in pairs(tMissGroup) do
+				tInfo = VUHDO_RAID[tRoleUnit];
+
+				if tInfo and tInfo["mibucateg"] == tCategSpec then
+					tInfo["missbuff"] = nil;
+					tInfo["mibucateg"] = nil;
+					tInfo["mibuvariants"] = nil;
+				end
+			end
+		end
+
 		if VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] and tIsSpellAuraSecret and #tMissGroup > 0 then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
 			VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_LOCK);
@@ -1193,12 +1224,14 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			VUHDO_setBuffSwatchTimer(tSwatchName, nil);
 			VUHDO_safeSetAttribute(aSwatch, "lowtarget", tLowestUnit);
 			VUHDO_safeSetAttribute(aSwatch, "goodtarget", tGoodTarget);
+
 			VUHDO_NUM_LOWS[tSwatchName] = #(tMissGroup or sEmpty);
 
 			return;
 		end
 
-		tUniqueRoleOkay = (VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] and #tOkayGroup > 0 and #tLowGroup == 0);
+		tUniqueRoleOkay = (tIsUniqueRole and #tOkayGroup > 0 and #tLowGroup == 0);
+		tUniqueRoleLow = (tIsUniqueRole and #tLowGroup > 0);
 
 		if tUniqueRoleOkay then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
@@ -1217,6 +1250,16 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			else
 				VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount);
 			end
+		elseif tUniqueRoleLow then
+			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_LOW"], VUHDO_BS_COLOR_LOW);
+			VUHDO_setBuffSwatchInfo(tSwatchName, tGoodTarget and VUHDO_I18N_BW_LOW or VUHDO_I18N_BW_RNG_RED);
+
+			tRoleTotal = #tOkayGroup + #tLowGroup + #tMissGroup;
+
+			VUHDO_setBuffSwatchCount(tSwatchName,
+				format("%d/%d", #tOkayGroup + #tLowGroup,
+					tRoleTotal > 0 and tRoleTotal or (#tOkayGroup + #tLowGroup)));
+			VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount);
 		elseif #tMissGroup > 0 then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OUT"], VUHDO_BS_COLOR_MISSING);
 
@@ -1226,14 +1269,15 @@ function VUHDO_updateBuffSwatch(aSwatch)
 				VUHDO_setBuffSwatchTimer(tSwatchName, 0, tMaxCount, nil);
 			else
 				VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_GO);
+
 				if #tOorGroup > 0 then
 					VUHDO_setBuffSwatchCount(tSwatchName, format("%d/%d", #tMissGroup + #tLowGroup - #tOorGroup, #tMissGroup + #tLowGroup));
 				else
 					VUHDO_setBuffSwatchCount(tSwatchName, format("%d", #tMissGroup + #tLowGroup));
 				end
+
 				VUHDO_setBuffSwatchTimer(tSwatchName, 0, nil);
 			end
-
 		elseif #tLowGroup > 0 then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_LOW"], VUHDO_BS_COLOR_LOW);
 			VUHDO_setBuffSwatchInfo(tSwatchName, tGoodTarget and VUHDO_I18N_BW_LOW or VUHDO_I18N_BW_RNG_RED);
@@ -1243,6 +1287,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			else
 				VUHDO_setBuffSwatchCount(tSwatchName, format("%d", #tLowGroup));
 			end
+
 			VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount);
 		else
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
@@ -1256,6 +1301,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			end
 
 			VUHDO_setBuffSwatchCount(tSwatchName, #tOkayGroup);
+
 			if tLowestRest == 0 then
 				VUHDO_setBuffSwatchTimer(tSwatchName, nil);
 			else
