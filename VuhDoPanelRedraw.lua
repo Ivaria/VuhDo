@@ -2070,6 +2070,7 @@ do
 	local tGroupArray;
 	local tTotalButtons;
 	local tCycleId;
+	local tCachedGroupArrays = { };
 	function VUHDO_deferPositionAllHealButtons(aPanel, aPanelNum, aCycleId)
 
 		if not sButtonPositionTimeouts[aPanelNum] then
@@ -2082,8 +2083,11 @@ do
 		tButtonIndex = 1;
 		tTotalButtons = 0;
 
+		twipe(tCachedGroupArrays);
+
 		for tModelIndex, tModelId in ipairs(tModelArray) do
 			tGroupArray = VUHDO_getGroupMembersSorted(tModelId, sPanelConfig[aPanelNum]["sortCriterion"], aPanelNum, tModelIndex);
+			tCachedGroupArrays[tModelIndex] = tGroupArray;
 			tTotalButtons = tTotalButtons + #tGroupArray;
 		end
 
@@ -2098,7 +2102,7 @@ do
 		tButtonIndex = 1;
 
 		for tModelIndex, tModelId in ipairs(tModelArray) do
-			tGroupArray = VUHDO_getGroupMembersSorted(tModelId, sPanelConfig[aPanelNum]["sortCriterion"], aPanelNum, tModelIndex);
+			tGroupArray = tCachedGroupArrays[tModelIndex];
 
 			for tGroupIndex, tUnit in ipairs(tGroupArray) do
 				VUHDO_deferTask(VUHDO_DEFER_POSITION_HEAL_BUTTON, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, aPanelNum, tButtonIndex, tModelIndex, tModelId, tGroupIndex, tColumnIndex);

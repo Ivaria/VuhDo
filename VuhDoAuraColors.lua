@@ -64,6 +64,8 @@ local sAuraColorWinnerPool;
 local sCanColorBarGroupPool;
 local sAuraGroupActiveColorPool;
 
+local sFilterResultCache = { };
+
 local sEmpty = { };
 
 local sDispelColorBuffer = {
@@ -674,6 +676,34 @@ do
 
 
 	--
+	local function VUHDO_resetFilterResultCache()
+
+		twipe(sFilterResultCache);
+
+		return;
+
+	end
+
+
+
+	--
+	local tResult;
+	local function VUHDO_getCachedFilteredAuras(aUnit, aFilter)
+
+		if sFilterResultCache[aFilter] ~= nil then
+			return sFilterResultCache[aFilter];
+		end
+
+		tResult = GetUnitAuras(aUnit, aFilter, 40, Enum.UnitAuraSortRule.Default, 1);
+		sFilterResultCache[aFilter] = tResult or false;
+
+		return sFilterResultCache[aFilter];
+
+	end
+
+
+
+	--
 	local tBarWinnerSet;
 	local tTextWinnerSet;
 	local tCanColorGroup;
@@ -689,7 +719,7 @@ do
 		elseif tCanColorGroup["isInferred"] then
 			tIsGroupActiveForBouquet = VUHDO_hasInferredAura(aUnit) and VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tCanColorGroup["inferredType"]];
 		elseif tCanColorGroup["filter"] then
-			tAuras = GetUnitAuras(aUnit, tCanColorGroup["filter"], 1, Enum.UnitAuraSortRule.Default, 1);
+			tAuras = VUHDO_getCachedFilteredAuras(aUnit, tCanColorGroup["filter"]);
 
 			tIsGroupActiveForBouquet = tAuras and #tAuras > 0;
 		end
@@ -984,7 +1014,7 @@ do
 		local tFoundDispelAuraId;
 		local tNewWinner;
 
-		tAuras = GetUnitAuras(aUnit, tCanColorGroup["filter"], 40, Enum.UnitAuraSortRule.Default, 1);
+		tAuras = VUHDO_getCachedFilteredAuras(aUnit, tCanColorGroup["filter"]);
 
 		if tAuras then
 			for tIdx = 1, #tAuras do
@@ -1048,7 +1078,7 @@ do
 		local tFoundDispelAuraId;
 		local tNewWinner;
 
-		tAuras = GetUnitAuras(aUnit, tCanColorGroup["filter"], 1, Enum.UnitAuraSortRule.Default, 1);
+		tAuras = VUHDO_getCachedFilteredAuras(aUnit, tCanColorGroup["filter"]);
 
 		if tAuras and #tAuras > 0 then
 			tAura = tAuras[1];
@@ -1179,6 +1209,8 @@ do
 		sGlowWinnerSet = false;
 
 		VUHDO_resetUnitAuraGroupActiveSubtable(aUnit);
+
+		VUHDO_resetFilterResultCache();
 
 		for tCnt = 1, #sCanColorBarGroups do
 			tCanColorGroup = sCanColorBarGroups[tCnt];

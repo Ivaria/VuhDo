@@ -107,6 +107,8 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 	tColIdx = 1;
 	tButtonIdx = 1;
 
+	VUHDO_initLocalVars(aPanelNum);
+
 	for tModelIndex, tModelId in ipairs(tModels) do
 		tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, aPanelNum, tModelIndex);
 
