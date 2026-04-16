@@ -22,6 +22,7 @@ Bugfixes:
 -- Fixed heal absorb bar sizing relative to current health  
 -- Fixed heal absorb bar when using inverted health  
 -- Fixed right-click roster icons for in range group members  
+-- Fixed target and target-of-target width after profile change  
   
   
 Improvements:  

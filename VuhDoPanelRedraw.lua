@@ -1311,7 +1311,7 @@ do
 
 			tTgHealthBar:SetValue(tTgHealthBar["isInverted"] and 0 or 1);
 
-			VUHDO_PixelUtil.SetHeight(tTgHealthBar, sPanelConfig[aPanelNum]["barHeight"]);
+			VUHDO_PixelUtil.SetSize(tTgHealthBar, sPanelConfig[aPanelNum]["barScaling"]["targetWidth"], sPanelConfig[aPanelNum]["barHeight"]);
 
 			VUHDO_initBackgroundBar(VUHDO_getHealthBar(aButton, 12), aPanelNum);
 			VUHDO_initManaBar(tTgButton, VUHDO_getHealthBar(aButton, 13), sPanelConfig[aPanelNum]["barScaling"]["targetWidth"], true, aPanelNum);
@@ -1368,7 +1368,7 @@ do
 
 			tTgHealthBar:SetValue(tTgHealthBar["isInverted"] and 0 or 1);
 
-			VUHDO_PixelUtil.SetHeight(tTgHealthBar, sPanelConfig[aPanelNum]["barHeight"]);
+			VUHDO_PixelUtil.SetSize(tTgHealthBar, sPanelConfig[aPanelNum]["barScaling"]["totWidth"], sPanelConfig[aPanelNum]["barHeight"]);
 
 			VUHDO_initBackgroundBar(VUHDO_getHealthBar(aButton, 15), aPanelNum);
 			VUHDO_initManaBar(tTotButton, VUHDO_getHealthBar(aButton, 16), sPanelConfig[aPanelNum]["barScaling"]["totWidth"], true, aPanelNum);
@@ -2832,6 +2832,7 @@ do
 
 		VUHDO_setupAllButtonsUnitWatch(VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers());
 		VUHDO_updateAllRaidBars();
+		VUHDO_rebuildTargets();
 
 		if VUHDO_isShowGcd() then
 			tGcdCol = VUHDO_PANEL_SETUP["BAR_COLORS"]["GCD_BAR"];
