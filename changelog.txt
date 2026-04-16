@@ -20,6 +20,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Druid spell 'Omen of Clarity' to Buff Watch  
   
   
 --------------------------------------------------------------  
