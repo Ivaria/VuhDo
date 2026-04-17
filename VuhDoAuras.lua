@@ -40,8 +40,6 @@ local VUHDO_generateUUID;
 local VUHDO_determineAura;
 local VUHDO_updateAuraDisplaysForUnit;
 local VUHDO_updateEventBouquet;
-local VUHDO_strempty;
-local VUHDO_decompressIfCompressed;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
@@ -241,8 +239,6 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_updateAuraDisplaysForUnit"];
 	VUHDO_updateEventBouquet = _G["VUHDO_updateEventBouquet"];
-	VUHDO_strempty = _G["VUHDO_strempty"];
-	VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
 
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_deferUpdateAuraDisplaysForUnit"];
 
@@ -3163,6 +3159,10 @@ do
 
 		if tCurrentMigrationVersion == 0 then
 			for tPanelNum = 1, 10 do
+				if tPanelSetup[tPanelNum] and (not tPanelSetup[tPanelNum]["AURA_ANCHORS"] or not next(tPanelSetup[tPanelNum]["AURA_ANCHORS"])) then
+					tPanelSetup[tPanelNum]["AURA_ANCHORS"] = VUHDO_deepCopyTable(VUHDO_DEFAULT_AURA_ANCHORS);
+				end
+
 				VUHDO_migrateHotsToAuraAnchors(tPanelNum);
 				VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum);
 			end
