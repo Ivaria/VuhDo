@@ -24,6 +24,8 @@ local VUHDO_setupSmartCast;
 local VUHDO_updateDirectionFrame;
 local VUHDO_getCurrentKeyModifierString;
 local VUHDO_redrawAllPanels;
+local VUHDO_getAllActionPanels;
+local VUHDO_buffWatchOnMouseUp;
 
 
 
@@ -46,6 +48,8 @@ function VUHDO_actionEventHandlerInitLocalOverrides()
 	VUHDO_updateDirectionFrame = _G["VUHDO_updateDirectionFrame"];
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getCurrentKeyModifierString = _G["VUHDO_getCurrentKeyModifierString"];
+	VUHDO_getAllActionPanels = _G["VUHDO_getAllActionPanels"];
+	VUHDO_buffWatchOnMouseUp = _G["VUHDO_buffWatchOnMouseUp"];
 
 	VUHDO_SPELL_CONFIG = _G["VUHDO_SPELL_CONFIG"];
 	VUHDO_SPELL_ASSIGNMENTS = _G["VUHDO_SPELL_ASSIGNMENTS"];
@@ -410,6 +414,25 @@ function VUHDO_stopMoving(aPanel)
 
 		VUHDO_hideAllPlayerIcons();
 		VUHDO_initAllEventBouquets();
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_stopMovingAllPanels()
+
+	for _, tPanel in pairs(VUHDO_getAllActionPanels()) do
+		if tPanel["isMoving"] then
+			VUHDO_stopMoving(tPanel);
+		end
+	end
+
+	if VuhDoBuffWatchMainFrame and VuhDoBuffWatchMainFrame["isMoving"] then
+		VUHDO_buffWatchOnMouseUp(VuhDoBuffWatchMainFrame);
 	end
 
 	return;
