@@ -138,8 +138,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			VUHDO_addUnitButton(tButton, aPanelNum);
 			if not tButton:IsShown() then tButton:Show(); end -- Wg. Secure handlers?
 
-			-- Bei Profil-Wechseln existiert der Button schon, hat aber die falsche Grÿÿe
-			VUHDO_initLocalVars(aPanelNum);
+			-- On profile switches the button already exists but has the wrong size
 			VUHDO_initHealButton(tButton, aPanelNum);
 			VUHDO_positionHealButton(tButton, aPanelNum);
 		end
