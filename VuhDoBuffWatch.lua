@@ -1207,7 +1207,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 
 			tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
 
-			if tPinnedUnit and VUHDO_RAID[tPinnedUnit] then
+			if tPinnedUnit and VUHDO_RAID[tPinnedUnit] and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
 				tGroupLabel:SetText(VUHDO_RAID[tPinnedUnit]["name"]);
 			elseif tLowestUnit and VUHDO_RAID[tLowestUnit] then
 				tGroupLabel:SetText(VUHDO_RAID[tLowestUnit]["name"] or VUHDO_HEADER_TEXTS[tRoleId]);
