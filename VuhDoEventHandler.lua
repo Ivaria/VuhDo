@@ -66,6 +66,7 @@ local VUHDO_updateHealth;
 local VUHDO_updateHealthBarsFor;
 local VUHDO_setHealth;
 local VUHDO_initAllEventBouquets;
+local VUHDO_redisplayAllUnitAuras;
 local VUHDO_updateBouquetsForEvent;
 local VUHDO_updateAllHoTs;
 local VUHDO_updateAllCyclicBouquets;
@@ -587,6 +588,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateSpellTrace = _G["VUHDO_deferUpdateSpellTrace"];
 	VUHDO_updateAllRaidBars = _G["VUHDO_deferUpdateAllRaidBars"];
 	VUHDO_initAllEventBouquets = _G["VUHDO_deferInitAllEventBouquets"];
+	VUHDO_redisplayAllUnitAuras = _G["VUHDO_redisplayAllUnitAuras"];
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
 	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
@@ -2119,6 +2121,10 @@ do
 				VUHDO_buildGenericTargetHealthBouquet();
 				VUHDO_registerAllBouquets(false);
 				VUHDO_initAllEventBouquets();
+
+				if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+					VUHDO_redisplayAllUnitAuras();
+				end
 
 				VUHDO_PROHIBIT_REPOS = false;
 			end

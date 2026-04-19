@@ -3199,6 +3199,12 @@ function VUHDO_initAuraAnchorFrames(aButton, aPanelNum, anAnchorIndex, anAnchorC
 		end
 
 		if tFrame then
+			tFrame["lastAuraInstanceId"] = nil;
+			tFrame["lastExpirationTime"] = nil;
+			tFrame["lastApplications"] = nil;
+			tFrame["lastIcon"] = nil;
+			tFrame["lastSettingsVersion"] = nil;
+
 			VUHDO_positionAuraFrame(tFrame, aButton, anAnchorConfig, tSlotIndex, anAnchorIndex);
 
 			tFrame:SetAlpha(0);
@@ -4599,6 +4605,23 @@ function VUHDO_updateAuraDisplaysForUnit(aUnit)
 		if tUnitPanels[tPanelNum] then
 			VUHDO_updateAurasForAnchors(aUnit, tPanelNum);
 		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_redisplayAllUnitAuras()
+
+	if not VUHDO_RAID then
+		return;
+	end
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_updateAuraDisplaysForUnit(tUnit);
 	end
 
 	return;
