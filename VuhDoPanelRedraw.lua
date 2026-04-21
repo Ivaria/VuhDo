@@ -723,7 +723,7 @@ do
 		VUHDO_PixelUtil.SetWidth(aManaBar, aWidth);
 
 		aButton["regularHeight"] = sPanelConfig[aPanelNum]["barScaling"]["barHeight"];
-		aButton["manaBarLayoutHeight"] = tManaHeight;
+		aButton["manaBarLayoutHeight"] = 0;
 
 		if tIsManaBouquet then
 			VUHDO_PixelUtil.Show(aManaBar);

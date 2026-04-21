@@ -3179,6 +3179,48 @@ end
 
 
 --
+local tButtonName;
+local tButtonFrames;
+local tPanelAnchors;
+local tAnchorConfig;
+function VUHDO_repositionAuraFramesForButton(aButton, aPanelNum)
+
+	if not aButton or not aPanelNum then
+		return;
+	end
+
+	tButtonName = aButton:GetName();
+	tButtonFrames = VUHDO_AURA_FRAMES[tButtonName];
+
+	if not tButtonFrames then
+		return;
+	end
+
+	tPanelAnchors = VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"];
+
+	if not tPanelAnchors then
+		return;
+	end
+
+	for tAnchorIndex, tAnchorFrames in pairs(tButtonFrames) do
+		tAnchorConfig = tPanelAnchors[tAnchorIndex];
+
+		if tAnchorConfig then
+			for tSlotIndex, tFrame in pairs(tAnchorFrames) do
+				if tFrame then
+					VUHDO_positionAuraFrame(tFrame, aButton, tAnchorConfig, tSlotIndex, tAnchorIndex);
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tFrame;
 local tMaxSlots;
 function VUHDO_initAuraAnchorFrames(aButton, aPanelNum, anAnchorIndex, anAnchorConfig)

@@ -1026,6 +1026,9 @@ do
 		elseif "PLAYER_REGEN_ENABLED" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_updateAllAggro();
+
+				VUHDO_updateBouquetsForEvent("target", 13); -- VUHDO_UPDATE_MANA
+				VUHDO_updateBouquetsForEvent("focus",  13); -- VUHDO_UPDATE_MANA
 			end
 
 			if VUHDO_OPTIONS_SHOW_AFTER_BATTLE and VuhDoNewOptionsTabbedFrame and not VuhDoNewOptionsTabbedFrame:IsShown() then
