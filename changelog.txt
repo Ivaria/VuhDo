@@ -1,3 +1,53 @@
+Version 3.204-tbcc  
+  
+  
+Known issues:  
+-- Spells by rank can be specified using a rank suffix:  
+--  Example: Lesser Heal(Rank 1)  
+-- Debuff tooltips are currently bugged when using ElvUI  
+--   Deselect 'VuhDo Options > Panels > Tooltips > Tooltips > Debuffs'  
+-- Shield bar is not working due to unavailable Blizzard APIs  
+-- Spell trace only works for known spells in the player's spellbook  
+-- Group roster changes will not be reflected during combat  
+--   Swapping a player between groups during combat will cause  
+--   unpredictable, negative results.  Be warned!  
+-- Built-in Blizzard APIs for incoming healing only partially working  
+--   If other healers are using LibHealComm enable it under:  
+--   'VuhDo Options > General > Threat / Incoming > Incoming Heal > Use LibHealComm'  
+  
+  
+Bugfixes:  
+  
+  
+Improvements:  
+  
+  
+--------------------------------------------------------------  
+Version 3.204  
+  
+  
+Known issues:  
+-- Midnight add-on restrictions mean some features are not yet available:
+--   Text provider formatting e.g. +<#n>K is only partially working
+--   Overheal text provider and Life Text highlight are not yet working
+--   Many Hitpoints option (e.g. Show Effective) are not yet working
+--   Overshield Bar will only display when the unit is at full health
+--   Raid Icon bar and text color filtring are not yet working
+--   Emergency Mode is not yet working
+--   Swiftmendable bouquet is not yet working
+--   Incoming Spell Trace (i.e. targeted spells) is not yet working
+-- Blizzard continues to have a bug that breaks proper spell targeting.  
+--   Under 'Game Menu > Options > Gameplay > Combat' deselect 'Auto Self Cast'  
+--   and set 'Self Cast Key' to 'None'  
+  
+  
+Bugfixes:  
+  
+  
+Improvements:  
+  
+  
+--------------------------------------------------------------  
 Version 3.203-tbcc  
   
   
@@ -33,7 +83,6 @@ Known issues:
 --   Overheal text provider and Life Text highlight are not yet working
 --   Many Hitpoints option (e.g. Show Effective) are not yet working
 --   Overshield Bar will only display when the unit is at full health
---   Buff Watch is only partially working
 --   Raid Icon bar and text color filtring are not yet working
 --   Emergency Mode is not yet working
 --   Swiftmendable bouquet is not yet working
@@ -44,9 +93,21 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed Buff Watch missing buff bar and text color  
+-- Fixed Smart Cast for missing Buff Watch buffs  
+-- Fixed heal absorb bar sizing relative to current health  
+-- Fixed heal absorb bar when using inverted health  
+-- Fixed right-click roster icons for in range group members  
+-- Fixed target and target-of-target width after profile change  
+-- Fixed persistence of aura anchors on profile change  
   
   
 Improvements:  
+-- Bump TOC interface for 12.0.5  
+-- Added new bouquet validator 'Flag: Aura Group Active'  
+-- Added new health loss bar for temporary max health reduction  
+-- Added target by role for unique cast spells in Buff Watch  
+-- Added target by focus or target unit for unique cast spells in Buff Watch  
   
   
 --------------------------------------------------------------  
