@@ -589,7 +589,7 @@ do
 						tBaseColor = tClassColor or tItem["color"];
 					end
 				else
-					tHighColor = tItem["color"];
+					tHighColor = tItem["custom"]["grad_high"] or tItem["color"];
 					tMedColor = tItem["custom"]["grad_med"];
 					tLowColor = tItem["custom"]["grad_low"];
 				end
@@ -2091,7 +2091,7 @@ do
 			tFair = anEntry["custom"]["grad_med"];
 
 			if tModi > 1 then
-				tGood = anEntry["color"];
+				tGood = anEntry["custom"]["grad_high"] or anEntry["color"];
 				tR1, tG1, tB1, tO1 = tGood["R"], tGood["G"], tGood["B"], tGood["O"];
 				tR2, tG2, tB2, tO2 = tFair["R"], tFair["G"], tFair["B"], tFair["O"];
 				tModi = tModi - 1;
@@ -3626,6 +3626,7 @@ do
 			VUHDO_compressAllBouquets();
 		end
 
+		VUHDO_clearCurveCache();
 		VUHDO_initSecretColorConstants();
 		VUHDO_buildAllBouquetCurves();
 
