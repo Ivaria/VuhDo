@@ -318,199 +318,6 @@ end
 
 
 --
-local tDdCategName;
-local tDdCateg;
-local tDdSettings;
-local tDdTargetType;
-local tDdDropInfo;
-local tDdText;
-local tDdRoleIdR;
-local tDdUnbuffedList;
-local tDdAllRoleList;
-local tDdPickList;
-local tDdNextName;
-local tDdFoundCur;
-local tDdUnitId;
-local tDdSelName;
-local tDdNextSel;
-local tDdEffectiveName;
-local tDdNameInPickList;
-local tDdMissGroup;
-local tDdLowGroup;
-local tDdOkayGroup;
-local tDdBuffedUnit;
-function VUHDO_buffSelectDropdown_Initialize(_, _)
-
-	if VUHDO_CLICKED_BUFF == nil or VUHDO_CLICKED_TARGET_MODE == nil or InCombatLockdown() then
-		return;
-	end
-
-	tDdCategName = VUHDO_getBuffCategoryName(VUHDO_CLICKED_BUFF[1], VUHDO_CLICKED_BUFF[2]);
-	tDdCateg = VUHDO_getPlayerClassBuffs()[tDdCategName];
-	tDdSettings = VUHDO_BUFF_SETTINGS[tDdCategName];
-	tDdTargetType = tDdCateg[1][2];
-
-	if #tDdCateg > 1 then
-		for _, tCategBuff in ipairs(tDdCateg) do
-			if VUHDO_BUFFS[tCategBuff[1]] then
-				tDdDropInfo = UIDropDownMenu_CreateInfo();
-				tDdDropInfo["text"] = tCategBuff[1];
-				tDdDropInfo["keepShownOnClick"] = false;
-				tDdDropInfo["icon"] = VUHDO_BUFFS[tCategBuff[1]]["icon"];
-				tDdDropInfo["arg1"] = tDdCategName;
-				tDdDropInfo["func"] = VUHDO_buffSelectDropdownBuffSelected;
-				tDdDropInfo["arg2"] = tCategBuff[1];
-
-				tDdDropInfo["checked"] = tDdSettings["buff"] == tCategBuff[1];
-				UIDropDownMenu_AddButton(tDdDropInfo);
-			end
-		end
-
-	elseif VUHDO_BUFF_TARGET_RAID == tDdTargetType or VUHDO_BUFF_TARGET_SINGLE == tDdTargetType then
-		tDdDropInfo = UIDropDownMenu_CreateInfo();
-		tDdDropInfo["text"] = VUHDO_I18N_TRACK_BUFFS_FOR;
-		tDdDropInfo["isTitle"] = true;
-		tDdDropInfo["notCheckable"] = true;
-		UIDropDownMenu_AddButton(tDdDropInfo);
-
-		for _, tFilter in pairs(VUHDO_BUFF_FILTER_COMBO_TABLE) do
-			tDdDropInfo = UIDropDownMenu_CreateInfo();
-			tDdText = tFilter[2];
-			tDdDropInfo["text"] = tDdText;
-			tDdDropInfo["checked"] = VUHDO_BUFF_SETTINGS[tDdCategName]["filter"][tFilter[1]];
-			tDdDropInfo["arg1"] = tDdCategName;
-			tDdDropInfo["arg2"] = tFilter[1];
-			tDdDropInfo["func"] = VUHDO_buffSelectDropdownFilterSelected;
-			tDdDropInfo["isTitle"] = false;
-			tDdDropInfo["disabled"] = false;
-
-			UIDropDownMenu_AddButton(tDdDropInfo);
-		end
-
-	else
-		VuhDoBuffSelectDropdown:Hide();
-
-		if VUHDO_BUFF_TARGET_MODE_TARGET == VUHDO_CLICKED_TARGET_MODE
-			or VUHDO_BUFF_TARGET_MODE_FOCUS == VUHDO_CLICKED_TARGET_MODE then
-		elseif VUHDO_BUFF_TARGET_MODE_NAME == VUHDO_CLICKED_TARGET_MODE then
-			tDdSelName = nil;
-			tDdNextSel = false;
-
-			if VUHDO_RAID_NAMES[tDdSettings["name"]] then
-				for tName, _ in pairs(VUHDO_RAID_NAMES) do
-					if tName ~= "player" then
-						if tDdSelName == nil or tDdNextSel then
-							tDdSelName = tName;
-
-							if tDdNextSel then
-								break;
-							end
-						end
-
-						if tName == tDdSettings["name"] then
-							tDdNextSel = true;
-						end
-					end
-				end
-
-				tDdSettings["name"] = tDdSelName;
-				VUHDO_reloadBuffPanel();
-			else
-				tDdSettings["name"] = VUHDO_PLAYER_NAME;
-			end
-
-		elseif VUHDO_BUFF_TARGET_MODE_ROLE == VUHDO_CLICKED_TARGET_MODE then
-			tDdRoleIdR = VUHDO_CLICKED_TARGET;
-			tDdUnbuffedList = { };
-			tDdAllRoleList = { };
-
-			for _, tUnitId in pairs((VUHDO_GROUPS or sEmpty)[tDdRoleIdR] or sEmpty) do
-				if VUHDO_RAID[tUnitId] and not VUHDO_RAID[tUnitId]["isPet"] then
-					tinsert(tDdAllRoleList, tUnitId);
-
-					if not VUHDO_unitHasBuffVariant(tUnitId, VUHDO_CLICKED_BUFF) then
-						tinsert(tDdUnbuffedList, tUnitId);
-					end
-				end
-			end
-
-			tDdPickList = (#tDdUnbuffedList > 0) and tDdUnbuffedList or tDdAllRoleList;
-			tDdEffectiveName = tDdSettings["name"];
-			tDdNameInPickList = false;
-
-			for tIdx = 1, #tDdPickList do
-				tDdUnitId = tDdPickList[tIdx];
-
-				if (VUHDO_RAID[tDdUnitId] or sEmpty)["name"] == tDdSettings["name"] then
-					tDdNameInPickList = true;
-
-					break;
-				end
-			end
-
-			if not tDdNameInPickList then
-				tDdMissGroup, tDdLowGroup, _, _, _, tDdOkayGroup
-					= VUHDO_getMissingBuffsForCode(VUHDO_CLICKED_TARGET_MODE, tDdRoleIdR, VUHDO_CLICKED_BUFF, tDdCategName, false);
-
-				tDdBuffedUnit = nil;
-
-				for tIdx = 1, #(tDdOkayGroup or sEmpty) do
-					tDdBuffedUnit = tDdOkayGroup[tIdx];
-
-					break;
-				end
-
-				if not tDdBuffedUnit then
-					for tIdx = 1, #(tDdLowGroup or sEmpty) do
-						tDdBuffedUnit = tDdLowGroup[tIdx];
-
-						break;
-					end
-				end
-
-				if tDdBuffedUnit and VUHDO_RAID[tDdBuffedUnit] then
-					tDdEffectiveName = VUHDO_RAID[tDdBuffedUnit]["name"];
-				elseif #tDdPickList > 0 then
-					tDdUnitId = tDdPickList[1];
-					tDdEffectiveName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
-				end
-			end
-
-			tDdNextName = nil;
-			tDdFoundCur = false;
-
-			for tIdx = 1, #tDdPickList do
-				tDdUnitId = tDdPickList[tIdx];
-
-				if tDdFoundCur then
-					tDdNextName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
-					break;
-				end
-
-				if (VUHDO_RAID[tDdUnitId] or sEmpty)["name"] == tDdEffectiveName then
-					tDdFoundCur = true;
-				end
-			end
-
-			if not tDdNextName and #tDdPickList > 0 then
-				tDdUnitId = tDdPickList[1];
-				tDdNextName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
-			end
-
-			if tDdNextName then
-				tDdSettings["name"] = tDdNextName;
-				VUHDO_reloadBuffPanel();
-			end
-		end
-	end
-
-	return;
-
-end
-
-
-
---
 function VUHDO_buffSelectDropdownBuffSelected(_, aCategoryName, aBuffName)
 	if aCategoryName then
 		VUHDO_BUFF_SETTINGS[aCategoryName]["buff"] = aBuffName;
@@ -925,7 +732,7 @@ local tCategName;
 local tNameGroup = { };
 local tIsActive;
 local tStart, tDuration, tRest, tName, tTexture;
-local function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
+function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
 
 	if VUHDO_BUFF_TARGET_MODE_NAME == aTargetMode then
 		tNameGroup[1] = VUHDO_RAID_NAMES[aTarget];
@@ -1005,6 +812,199 @@ local function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCa
 	end
 
 	return VUHDO_getMissingBuffs(aBuffInfo, tDestGroup or sEmpty, aCategSpec, anSuppressMissBuff, aTargetMode);
+end
+
+
+
+--
+local tDdCategName;
+local tDdCateg;
+local tDdSettings;
+local tDdTargetType;
+local tDdDropInfo;
+local tDdText;
+local tDdRoleIdR;
+local tDdUnbuffedList;
+local tDdAllRoleList;
+local tDdPickList;
+local tDdNextName;
+local tDdFoundCur;
+local tDdUnitId;
+local tDdSelName;
+local tDdNextSel;
+local tDdEffectiveName;
+local tDdNameInPickList;
+local tDdMissGroup;
+local tDdLowGroup;
+local tDdOkayGroup;
+local tDdBuffedUnit;
+function VUHDO_buffSelectDropdown_Initialize(_, _)
+
+	if VUHDO_CLICKED_BUFF == nil or VUHDO_CLICKED_TARGET_MODE == nil or InCombatLockdown() then
+		return;
+	end
+
+	tDdCategName = VUHDO_getBuffCategoryName(VUHDO_CLICKED_BUFF[1], VUHDO_CLICKED_BUFF[2]);
+	tDdCateg = VUHDO_getPlayerClassBuffs()[tDdCategName];
+	tDdSettings = VUHDO_BUFF_SETTINGS[tDdCategName];
+	tDdTargetType = tDdCateg[1][2];
+
+	if #tDdCateg > 1 then
+		for _, tCategBuff in ipairs(tDdCateg) do
+			if VUHDO_BUFFS[tCategBuff[1]] then
+				tDdDropInfo = UIDropDownMenu_CreateInfo();
+				tDdDropInfo["text"] = tCategBuff[1];
+				tDdDropInfo["keepShownOnClick"] = false;
+				tDdDropInfo["icon"] = VUHDO_BUFFS[tCategBuff[1]]["icon"];
+				tDdDropInfo["arg1"] = tDdCategName;
+				tDdDropInfo["func"] = VUHDO_buffSelectDropdownBuffSelected;
+				tDdDropInfo["arg2"] = tCategBuff[1];
+
+				tDdDropInfo["checked"] = tDdSettings["buff"] == tCategBuff[1];
+				UIDropDownMenu_AddButton(tDdDropInfo);
+			end
+		end
+
+	elseif VUHDO_BUFF_TARGET_RAID == tDdTargetType or VUHDO_BUFF_TARGET_SINGLE == tDdTargetType then
+		tDdDropInfo = UIDropDownMenu_CreateInfo();
+		tDdDropInfo["text"] = VUHDO_I18N_TRACK_BUFFS_FOR;
+		tDdDropInfo["isTitle"] = true;
+		tDdDropInfo["notCheckable"] = true;
+		UIDropDownMenu_AddButton(tDdDropInfo);
+
+		for _, tFilter in pairs(VUHDO_BUFF_FILTER_COMBO_TABLE) do
+			tDdDropInfo = UIDropDownMenu_CreateInfo();
+			tDdText = tFilter[2];
+			tDdDropInfo["text"] = tDdText;
+			tDdDropInfo["checked"] = VUHDO_BUFF_SETTINGS[tDdCategName]["filter"][tFilter[1]];
+			tDdDropInfo["arg1"] = tDdCategName;
+			tDdDropInfo["arg2"] = tFilter[1];
+			tDdDropInfo["func"] = VUHDO_buffSelectDropdownFilterSelected;
+			tDdDropInfo["isTitle"] = false;
+			tDdDropInfo["disabled"] = false;
+
+			UIDropDownMenu_AddButton(tDdDropInfo);
+		end
+
+	else
+		VuhDoBuffSelectDropdown:Hide();
+
+		if VUHDO_BUFF_TARGET_MODE_TARGET == VUHDO_CLICKED_TARGET_MODE
+			or VUHDO_BUFF_TARGET_MODE_FOCUS == VUHDO_CLICKED_TARGET_MODE then
+		elseif VUHDO_BUFF_TARGET_MODE_NAME == VUHDO_CLICKED_TARGET_MODE then
+			tDdSelName = nil;
+			tDdNextSel = false;
+
+			if VUHDO_RAID_NAMES[tDdSettings["name"]] then
+				for tName, _ in pairs(VUHDO_RAID_NAMES) do
+					if tName ~= "player" then
+						if tDdSelName == nil or tDdNextSel then
+							tDdSelName = tName;
+
+							if tDdNextSel then
+								break;
+							end
+						end
+
+						if tName == tDdSettings["name"] then
+							tDdNextSel = true;
+						end
+					end
+				end
+
+				tDdSettings["name"] = tDdSelName;
+				VUHDO_reloadBuffPanel();
+			else
+				tDdSettings["name"] = VUHDO_PLAYER_NAME;
+			end
+
+		elseif VUHDO_BUFF_TARGET_MODE_ROLE == VUHDO_CLICKED_TARGET_MODE then
+			tDdRoleIdR = VUHDO_CLICKED_TARGET;
+			tDdUnbuffedList = { };
+			tDdAllRoleList = { };
+
+			for _, tUnitId in pairs((VUHDO_GROUPS or sEmpty)[tDdRoleIdR] or sEmpty) do
+				if VUHDO_RAID[tUnitId] and not VUHDO_RAID[tUnitId]["isPet"] then
+					tinsert(tDdAllRoleList, tUnitId);
+
+					if not VUHDO_unitHasBuffVariant(tUnitId, VUHDO_CLICKED_BUFF) then
+						tinsert(tDdUnbuffedList, tUnitId);
+					end
+				end
+			end
+
+			tDdPickList = (#tDdUnbuffedList > 0) and tDdUnbuffedList or tDdAllRoleList;
+			tDdEffectiveName = tDdSettings["name"];
+			tDdNameInPickList = false;
+
+			for tIdx = 1, #tDdPickList do
+				tDdUnitId = tDdPickList[tIdx];
+
+				if (VUHDO_RAID[tDdUnitId] or sEmpty)["name"] == tDdSettings["name"] then
+					tDdNameInPickList = true;
+
+					break;
+				end
+			end
+
+			if not tDdNameInPickList then
+				tDdMissGroup, tDdLowGroup, _, _, _, tDdOkayGroup
+					= VUHDO_getMissingBuffsForCode(VUHDO_CLICKED_TARGET_MODE, tDdRoleIdR, VUHDO_CLICKED_BUFF, tDdCategName, false);
+
+				tDdBuffedUnit = nil;
+
+				for tIdx = 1, #(tDdOkayGroup or sEmpty) do
+					tDdBuffedUnit = tDdOkayGroup[tIdx];
+
+					break;
+				end
+
+				if not tDdBuffedUnit then
+					for tIdx = 1, #(tDdLowGroup or sEmpty) do
+						tDdBuffedUnit = tDdLowGroup[tIdx];
+
+						break;
+					end
+				end
+
+				if tDdBuffedUnit and VUHDO_RAID[tDdBuffedUnit] then
+					tDdEffectiveName = VUHDO_RAID[tDdBuffedUnit]["name"];
+				elseif #tDdPickList > 0 then
+					tDdUnitId = tDdPickList[1];
+					tDdEffectiveName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
+				end
+			end
+
+			tDdNextName = nil;
+			tDdFoundCur = false;
+
+			for tIdx = 1, #tDdPickList do
+				tDdUnitId = tDdPickList[tIdx];
+
+				if tDdFoundCur then
+					tDdNextName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
+					break;
+				end
+
+				if (VUHDO_RAID[tDdUnitId] or sEmpty)["name"] == tDdEffectiveName then
+					tDdFoundCur = true;
+				end
+			end
+
+			if not tDdNextName and #tDdPickList > 0 then
+				tDdUnitId = tDdPickList[1];
+				tDdNextName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
+			end
+
+			if tDdNextName then
+				tDdSettings["name"] = tDdNextName;
+				VUHDO_reloadBuffPanel();
+			end
+		end
+	end
+
+	return;
+
 end
 
 
