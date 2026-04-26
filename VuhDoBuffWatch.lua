@@ -181,7 +181,7 @@ local tBuffTex;
 local tBuffGroup;
 local function VUHDO_unitHasBuffVariant(aUnit, aBuffInfo)
 
-	_, tBuffTex = VUHDO_unitBuff(aUnit, aBuffInfo[1]);
+	_, tBuffTex = VUHDO_unitBuffAllowSecret(aUnit, aBuffInfo[1]);
 
 	if tBuffTex then
 		return true;
@@ -195,7 +195,7 @@ local function VUHDO_unitHasBuffVariant(aUnit, aBuffInfo)
 		end
 
 		for _, tSameBuff in pairs(tBuffGroup) do
-			_, tBuffTex = VUHDO_unitBuff(aUnit, tSameBuff);
+			_, tBuffTex = VUHDO_unitBuffAllowSecret(aUnit, tSameBuff);
 
 			if tBuffTex then
 				return true;
@@ -256,9 +256,15 @@ end
 
 --
 function VUHDO_isUseSingleBuff(aSwatch)
-	if VUHDO_BUFF_TARGET_SINGLE ~= aSwatch:GetAttribute("buff")[2] then	return false;
-	elseif aSwatch:GetAttribute("lowtarget") == nil or InCombatLockdown() then return 2;
-	else return true; end
+
+	if VUHDO_BUFF_TARGET_SINGLE ~= aSwatch:GetAttribute("buff")[2] then
+		return false;
+	elseif aSwatch:GetAttribute("lowtarget") == nil then
+		return 2;
+	else
+		return true;
+	end
+
 end
 
 
@@ -411,7 +417,10 @@ end
 --
 function VUHDO_initBuffsFromSpellBook()
 
-	local tParentSpellName, tChildSpellName, tSpellId, tIcon;
+	local tParentSpellName;
+	local tChildSpellName;
+	local tSpellId;
+	local tIcon;
 
 	-- Patch 6.0.2 broke the spell book for a certain class of spells which 'transform' into other spells 
 	-- eg. Lightning Shield becomes Water Shield, Seal of Command becomes Seal of Truth
@@ -511,7 +520,9 @@ end
 
 
 --
-local tTexture, tStart, tRest;
+local tTexture;
+local tStart;
+local tRest;
 local tMissGroup = { };
 local tLowGroup = { };
 local tOkayGroup = { };
@@ -531,6 +542,8 @@ local tIsAvailable;
 local tIsNotInBattleground;
 local tBuffGroup;
 local tSpellInRange;
+local tIsLowByTime;
+local tIsLow;
 local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppressMissBuff, aTargetMode)
 
 	tCategName = aCategSpec;
@@ -577,7 +590,7 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 
 			tIsAvailable = tInfo["connected"] and not tInfo["dead"];
 
-			_, tTexture, tCount, _, tStart, tRest, _, _ = VUHDO_unitBuff(tUnit, aBuffInfo[1]);
+			_, tTexture, tCount, _, tStart, tRest, _, _ = VUHDO_unitBuffAllowSecret(tUnit, aBuffInfo[1]);
 
 			if not tTexture then
 				for tCnt = 3, 10 do
@@ -588,7 +601,7 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 					end
 
 					for _, tSameGroupBuff in pairs(tBuffGroup) do
-						_, tTexture, tCount, _, tStart, tRest, _, _ = VUHDO_unitBuff(tUnit, tSameGroupBuff);
+						_, tTexture, tCount, _, tStart, tRest, _, _ = VUHDO_unitBuffAllowSecret(tUnit, tSameGroupBuff);
 
 						if tTexture then
 							break;
@@ -617,7 +630,15 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 					tStart = tStart or 0;
 					tRest = tRest and tRest - tNow or 0;
 
-					if (tRest < sRebuffSecs or tRest / tStart < sRebuffPerc) and tRest > 0 then
+					tIsLowByTime = tRest < sRebuffSecs;
+
+					if tStart and tStart > 0 and (not tIsLowByTime) and not issecretvalue(tStart) and not issecretvalue(tRest) then
+						tIsLowByTime = tRest / tStart < sRebuffPerc;
+					end
+
+					tIsLow = tIsLowByTime and tRest > 0;
+
+					if tIsLow then
 						tLowGroup[#tLowGroup + 1] = tUnit;
 
 						if not tInRange and tIsAvailable then
@@ -731,7 +752,11 @@ local tHasEnchant;
 local tCategName;
 local tNameGroup = { };
 local tIsActive;
-local tStart, tDuration, tRest, tName, tTexture;
+local tStart;
+local tDuration;
+local tRest;
+local tName;
+local tTexture;
 function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
 
 	if VUHDO_BUFF_TARGET_MODE_NAME == aTargetMode then
@@ -812,6 +837,7 @@ function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpe
 	end
 
 	return VUHDO_getMissingBuffs(aBuffInfo, tDestGroup or sEmpty, aCategSpec, anSuppressMissBuff, aTargetMode);
+
 end
 
 
@@ -1075,22 +1101,47 @@ local tDurationRemaining;
 local tSpellId;
 local tIsOnGCD;
 local tDuration;
-local function VUHDO_getSpellCooldown(aSpellName)
+local tRemainingNumeric;
+local function VUHDO_buffWatchGetSpellCooldown(aSpellName)
 
 	tSpellId = sCooldownAliases[aSpellName] or (VUHDO_BUFFS[aSpellName] and VUHDO_BUFFS[aSpellName]["id"]);
 
 	if not tSpellId then
-		return 0, 0, nil;
+		return 0, 0, nil, true;
 	end
 
 	if sSecretsEnabled then
 		tStart, tDurationRemaining, _, _, tIsOnGCD, tDuration = GetSpellCooldown(tSpellId);
 
-		if tIsOnGCD == true or not tDuration or (not tDuration:HasSecretValues() and tDuration:IsZero()) then
-			return 0, 0, nil;
+		if tIsOnGCD == true then
+			return 0, 0, nil, true;
 		end
 
-		return -1, -1, tDuration;
+		if tDurationRemaining and (not issecretvalue(tDurationRemaining)) then
+			if (tDurationRemaining or 0) == 0 then
+				return 0, 0, nil, true;
+			end
+
+			if tStart and (not issecretvalue(tStart)) then
+				tRemainingNumeric = (tStart or 0) + tDurationRemaining - GetTime();
+
+				if tRemainingNumeric > 1.5 then
+					return tRemainingNumeric, tDurationRemaining, nil, tRemainingNumeric <= 1.5;
+				else
+					return 0, 0, nil, true;
+				end
+			end
+		end
+
+		if not tDuration or (not tDuration:HasSecretValues() and tDuration:IsZero()) then
+			return 0, 0, nil, true;
+		end
+
+		if ShouldSpellAuraBeSecret(aSpellName) then
+			return nil, nil, tDuration, nil;
+		end
+
+		return 0, 0, nil, true;
 	end
 
 	if sCooldownAliases[aSpellName] then
@@ -1100,9 +1151,11 @@ local function VUHDO_getSpellCooldown(aSpellName)
 	end
 
 	if (tDurationRemaining or 0) == 0 then
-		return 0, 0, nil;
+		return 0, 0, nil, true;
 	else
-		return (tStart or 0) + tDurationRemaining - GetTime(), tDurationRemaining, nil;
+		tRemainingNumeric = (tStart or 0) + tDurationRemaining - GetTime();
+
+		return tRemainingNumeric, tDurationRemaining, nil, tRemainingNumeric <= 1.5;
 	end
 
 end
@@ -1117,8 +1170,12 @@ local tLowestRest;
 local tLowestUnit;
 local tOkayGroup;
 local tOorGroup;
-local tCooldown, tTotalCd;
+local tCooldown;
+local tTotalCd;
 local tSpellCdDuration;
+local tShowCd;
+local tShowKnownCd;
+local tShowLock;
 local tRefSpell;
 local tSwatchName;
 local tMaxCount;
@@ -1126,7 +1183,6 @@ local tCategSpec;
 local tVariant;
 local tTargetMode;
 local tTarget;
-local tSuppressMiss;
 local tUniqueRoleOkay;
 local tIsUniqueRole;
 local tUniqueRoleLow;
@@ -1135,10 +1191,44 @@ local tPinnedUnit;
 local tBuffSettings;
 local tStaleName;
 local tGroupLabel;
+local tColor;
 local tRoleTotal;
-local tIsSpellAuraSecret;
 local tInfo;
 local tBuffedRoleUnit;
+local tSyncBtn;
+local tSyncG;
+local tSyncVar;
+
+
+
+--
+function VUHDO_buffWatchUpdateGlassButton(aSwatch)
+
+	if InCombatLockdown() then
+		return;
+	end
+
+	tSyncBtn = _G[aSwatch:GetName() .. "GlassButton"];
+	tSyncVar = aSwatch:GetAttribute("buff");
+
+	if not tSyncBtn or not tSyncVar then
+		return;
+	end
+
+	if true == VUHDO_isUseSingleBuff(aSwatch) then
+		tSyncG = aSwatch:GetAttribute("lowtarget");
+	else
+		tSyncG = aSwatch:GetAttribute("goodtarget");
+	end
+
+	VUHDO_setupAllBuffButtonsTo(tSyncBtn, tSyncVar[1], tSyncG, tSyncVar[2]);
+
+	return;
+
+end
+
+
+
 function VUHDO_updateBuffSwatch(aSwatch)
 
 	tSwatchName = aSwatch:GetName();
@@ -1159,167 +1249,145 @@ function VUHDO_updateBuffSwatch(aSwatch)
 		return;
 	end
 
-	tCooldown, tTotalCd, tSpellCdDuration = VUHDO_getSpellCooldown(tRefSpell);
+	tCooldown, tTotalCd, tSpellCdDuration, _ = VUHDO_buffWatchGetSpellCooldown(tRefSpell);
 
-	if tCooldown == -1 then
-		VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_COOLDOWN"], VUHDO_BS_COLOR_CD);
-		VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_CD);
-		VUHDO_setBuffSwatchCount(tSwatchName, "");
-		VUHDO_setBuffSwatchTimer(tSwatchName, nil, nil, tSpellCdDuration);
-	elseif tCooldown > 1.5 then
-		VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_COOLDOWN"], VUHDO_BS_COLOR_CD);
-		VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_CD);
-		VUHDO_setBuffSwatchCount(tSwatchName, "");
-		VUHDO_setBuffSwatchTimer(tSwatchName, tCooldown, nil);
+	tShowKnownCd = tCooldown and tCooldown > 1.5;
+	tShowLock = tSpellCdDuration and tCooldown == nil;
+	tShowCd = tShowKnownCd or tShowLock;
 
-		if tTotalCd > 59 then
-			VUHDO_BUFFS[tRefSpell]["wasOnCd"] = true;
-		end
-	else
-		if VUHDO_BUFFS[tRefSpell]["wasOnCd"] and VUHDO_BUFF_SETTINGS["CONFIG"]["HIGHLIGHT_COOLDOWN"] then
-			VUHDO_UIFrameFlash(aSwatch, 0.3, 0.3, 5, true, 0, 0.3);
+	if not tShowCd and VUHDO_BUFFS[tRefSpell]["wasOnCd"] and VUHDO_BUFF_SETTINGS["CONFIG"]["HIGHLIGHT_COOLDOWN"] then
+		VUHDO_UIFrameFlash(aSwatch, 0.3, 0.3, 5, true, 0, 0.3);
 
-			VUHDO_BUFFS[tRefSpell]["wasOnCd"] = false;
-		end
+		VUHDO_BUFFS[tRefSpell]["wasOnCd"] = false;
+	end
 
-		if VUHDO_BUFF_TARGET_MODE_NAME == tTargetMode then
-			tStaleName = tTarget;
+	if VUHDO_BUFF_TARGET_MODE_NAME == tTargetMode then
+		tStaleName = tTarget;
 
-			if not VUHDO_RAID_NAMES[tStaleName] then
-				VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OUT"], VUHDO_BS_COLOR_MISSING);
-				VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_MISS);
-				VUHDO_setBuffSwatchCount(tSwatchName, "");
-				VUHDO_setBuffSwatchTimer(tSwatchName, nil);
-				tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
-				tGroupLabel:SetTextColor(1, 0.2, 0.2);
-				VUHDO_safeSetAttribute(aSwatch, "lowtarget", nil);
-				VUHDO_safeSetAttribute(aSwatch, "goodtarget", nil);
-
-				VUHDO_NUM_LOWS[tSwatchName] = 0;
-
-				return;
-			end
-		elseif VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode or VUHDO_BUFF_TARGET_MODE_FOCUS == tTargetMode then
+		if not VUHDO_RAID_NAMES[tStaleName] then
+			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OUT"], VUHDO_BS_COLOR_MISSING);
+			VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_MISS);
+			VUHDO_setBuffSwatchCount(tSwatchName, "");
+			VUHDO_setBuffSwatchTimer(tSwatchName, nil);
 			tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
+			tGroupLabel:SetTextColor(1, 0.2, 0.2);
+			VUHDO_safeSetAttribute(aSwatch, "lowtarget", nil);
+			VUHDO_safeSetAttribute(aSwatch, "goodtarget", nil);
 
-			if not VUHDO_RAID[VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and "target" or "focus"] then
-				VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
-				VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_N_A);
-				VUHDO_setBuffSwatchCount(tSwatchName, "");
-				VUHDO_setBuffSwatchTimer(tSwatchName, nil);
-				tGroupLabel:SetText(VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS);
-				VUHDO_safeSetAttribute(aSwatch, "lowtarget", nil);
-				VUHDO_safeSetAttribute(aSwatch, "goodtarget", nil);
+			VUHDO_NUM_LOWS[tSwatchName] = 0;
 
-				VUHDO_NUM_LOWS[tSwatchName] = 0;
+			VUHDO_buffWatchUpdateGlassButton(aSwatch);
 
-				return;
-			end
+			return;
+		end
+	elseif VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode or VUHDO_BUFF_TARGET_MODE_FOCUS == tTargetMode then
+		tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
 
-			tGroupLabel:SetText((VUHDO_RAID[VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and "target" or "focus"] or sEmpty)["name"]
-				or (VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS));
+		if not VUHDO_RAID[VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and "target" or "focus"] then
+			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
+			VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_N_A);
+			VUHDO_setBuffSwatchCount(tSwatchName, "");
+			VUHDO_setBuffSwatchTimer(tSwatchName, nil);
+			tGroupLabel:SetText(VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS);
+			VUHDO_safeSetAttribute(aSwatch, "lowtarget", nil);
+			VUHDO_safeSetAttribute(aSwatch, "goodtarget", nil);
+
+			VUHDO_NUM_LOWS[tSwatchName] = 0;
+
+			VUHDO_buffWatchUpdateGlassButton(aSwatch);
+
+			return;
 		end
 
-		tIsSpellAuraSecret = ShouldSpellAuraBeSecret and ShouldSpellAuraBeSecret(VUHDO_BUFFS[tRefSpell]["id"]);
-		tSuppressMiss = VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] and tIsSpellAuraSecret;
+		tGroupLabel:SetText((VUHDO_RAID[VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and "target" or "focus"] or sEmpty)["name"]
+			or (VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS));
+	end
 
-		tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tMaxCount
-			= VUHDO_getMissingBuffsForCode(tTargetMode, tTarget, tVariant, tCategSpec, tSuppressMiss);
+	tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tMaxCount
+		= VUHDO_getMissingBuffsForCode(tTargetMode, tTarget, tVariant, tCategSpec, false);
 
-		if VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] then
-			tRoleId = tTarget;
-			tBuffSettings = VUHDO_BUFF_SETTINGS[tCategSpec];
-			tPinnedUnit = VUHDO_RAID_NAMES[(tBuffSettings or sEmpty)["name"]];
-			tBuffedRoleUnit = nil;
+	if VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] then
+		tRoleId = tTarget;
+		tBuffSettings = VUHDO_BUFF_SETTINGS[tCategSpec];
+		tPinnedUnit = VUHDO_RAID_NAMES[(tBuffSettings or sEmpty)["name"]];
+		tBuffedRoleUnit = nil;
 
-			for _, tRoleUnit in ipairs(tOkayGroup) do
+		for _, tRoleUnit in ipairs(tOkayGroup) do
+			if VUHDO_isUnitInRoleGroup(tRoleUnit, tRoleId) then
+				tBuffedRoleUnit = tRoleUnit;
+
+				break;
+			end
+		end
+
+		if not tBuffedRoleUnit then
+			for _, tRoleUnit in ipairs(tLowGroup) do
 				if VUHDO_isUnitInRoleGroup(tRoleUnit, tRoleId) then
 					tBuffedRoleUnit = tRoleUnit;
 
 					break;
 				end
 			end
-
-			if not tBuffedRoleUnit then
-				for _, tRoleUnit in ipairs(tLowGroup) do
-					if VUHDO_isUnitInRoleGroup(tRoleUnit, tRoleId) then
-						tBuffedRoleUnit = tRoleUnit;
-
-						break;
-					end
-				end
-			end
-
-			if tPinnedUnit and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
-				for _, tRoleUnit in pairs(tMissGroup) do
-					if tRoleUnit == tPinnedUnit then
-						tGoodTarget = tPinnedUnit;
-
-						break;
-					end
-				end
-
-				for _, tRoleUnit in pairs(tLowGroup) do
-					if tRoleUnit == tPinnedUnit then
-						tLowestUnit = tPinnedUnit;
-
-						break;
-					end
-				end
-
-				if not tGoodTarget and not tLowestUnit then
-					tGoodTarget = tPinnedUnit;
-				end
-			elseif tBuffedRoleUnit then
-				tGoodTarget = tBuffedRoleUnit;
-				tLowestUnit = tBuffedRoleUnit;
-			end
-
-			tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
-
-			if tPinnedUnit and VUHDO_RAID[tPinnedUnit] and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
-				tGroupLabel:SetText(VUHDO_RAID[tPinnedUnit]["name"]);
-			elseif tBuffedRoleUnit and VUHDO_RAID[tBuffedRoleUnit] then
-				tGroupLabel:SetText(VUHDO_RAID[tBuffedRoleUnit]["name"]);
-			elseif tLowestUnit and VUHDO_RAID[tLowestUnit] then
-				tGroupLabel:SetText(VUHDO_RAID[tLowestUnit]["name"] or VUHDO_HEADER_TEXTS[tRoleId]);
-			elseif tGoodTarget and VUHDO_RAID[tGoodTarget] then
-				tGroupLabel:SetText(VUHDO_RAID[tGoodTarget]["name"] or VUHDO_HEADER_TEXTS[tRoleId]);
-			else
-				tGroupLabel:SetText(VUHDO_HEADER_TEXTS[tRoleId]);
-			end
 		end
 
-		tIsUniqueRole = (VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2]);
-
-		if tIsUniqueRole and (#tOkayGroup > 0 or #tLowGroup > 0) then
+		if tPinnedUnit and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
 			for _, tRoleUnit in pairs(tMissGroup) do
-				tInfo = VUHDO_RAID[tRoleUnit];
+				if tRoleUnit == tPinnedUnit then
+					tGoodTarget = tPinnedUnit;
 
-				if tInfo and tInfo["mibucateg"] == tCategSpec then
-					tInfo["missbuff"] = nil;
-					tInfo["mibucateg"] = nil;
-					tInfo["mibuvariants"] = nil;
+					break;
 				end
 			end
+
+			for _, tRoleUnit in pairs(tLowGroup) do
+				if tRoleUnit == tPinnedUnit then
+					tLowestUnit = tPinnedUnit;
+
+					break;
+				end
+			end
+
+			if not tGoodTarget and not tLowestUnit then
+				tGoodTarget = tPinnedUnit;
+			end
+		elseif tBuffedRoleUnit then
+			tGoodTarget = tBuffedRoleUnit;
+			tLowestUnit = tBuffedRoleUnit;
 		end
 
-		if VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] and tIsSpellAuraSecret and #tMissGroup > 0 then
-			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
-			VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_LOCK);
-			VUHDO_setBuffSwatchCount(tSwatchName, "");
-			VUHDO_setBuffSwatchTimer(tSwatchName, nil);
-			VUHDO_safeSetAttribute(aSwatch, "lowtarget", tLowestUnit);
-			VUHDO_safeSetAttribute(aSwatch, "goodtarget", tGoodTarget);
+		tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
 
-			VUHDO_NUM_LOWS[tSwatchName] = #(tMissGroup or sEmpty);
-
-			return;
+		if tPinnedUnit and VUHDO_RAID[tPinnedUnit] and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
+			tGroupLabel:SetText(VUHDO_RAID[tPinnedUnit]["name"]);
+		elseif tBuffedRoleUnit and VUHDO_RAID[tBuffedRoleUnit] then
+			tGroupLabel:SetText(VUHDO_RAID[tBuffedRoleUnit]["name"]);
+		elseif tLowestUnit and VUHDO_RAID[tLowestUnit] then
+			tGroupLabel:SetText(VUHDO_RAID[tLowestUnit]["name"] or VUHDO_HEADER_TEXTS[tRoleId]);
+		elseif tGoodTarget and VUHDO_RAID[tGoodTarget] then
+			tGroupLabel:SetText(VUHDO_RAID[tGoodTarget]["name"] or VUHDO_HEADER_TEXTS[tRoleId]);
+		else
+			tGroupLabel:SetText(VUHDO_HEADER_TEXTS[tRoleId]);
 		end
+	end
 
-		tUniqueRoleOkay = (tIsUniqueRole and #tOkayGroup > 0 and #tLowGroup == 0);
-		tUniqueRoleLow = (tIsUniqueRole and #tLowGroup > 0);
+	tIsUniqueRole = (VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2]);
 
+	if tIsUniqueRole and (#tOkayGroup > 0 or #tLowGroup > 0) then
+		for _, tRoleUnit in pairs(tMissGroup) do
+			tInfo = VUHDO_RAID[tRoleUnit];
+
+			if tInfo and tInfo["mibucateg"] == tCategSpec then
+				tInfo["missbuff"] = nil;
+				tInfo["mibucateg"] = nil;
+				tInfo["mibuvariants"] = nil;
+			end
+		end
+	end
+
+	tUniqueRoleOkay = (tIsUniqueRole and #tOkayGroup > 0 and #tLowGroup == 0);
+	tUniqueRoleLow = (tIsUniqueRole and #tLowGroup > 0);
+
+	if not tShowCd then
 		if tUniqueRoleOkay then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
 
@@ -1397,10 +1465,37 @@ function VUHDO_updateBuffSwatch(aSwatch)
 		end
 	end
 
+	if tShowKnownCd then
+		VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_COOLDOWN"], VUHDO_BS_COLOR_CD);
+		VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_CD);
+		VUHDO_setBuffSwatchCount(tSwatchName, "");
+		VUHDO_setBuffSwatchTimer(tSwatchName, tCooldown, nil);
+
+		if tTotalCd and tTotalCd > 59 then
+			VUHDO_BUFFS[tRefSpell]["wasOnCd"] = true;
+		end
+	elseif tShowLock then
+		VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OUT"], VUHDO_BS_COLOR_MISSING);
+		VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_LOCK);
+
+		_G[tSwatchName .. "MessageLabelLabel"]:SetTextColor(1, 1, 1, 1);
+
+		VUHDO_setBuffSwatchCount(tSwatchName, "");
+		VUHDO_setBuffSwatchTimer(tSwatchName, nil, nil, tSpellCdDuration);
+
+		_G[tSwatchName .. "TimerLabelLabel"]:SetTextColor(1, 1, 1, 1);
+
+		tColor = VUHDO_brightenTextColor(VUHDO_copyColor(sConfig["SWATCH_COLOR_BUFF_OKAY"]), 0.2);
+
+		_G[tSwatchName .. "GroupLabelLabel"]:SetTextColor(VUHDO_textColor(tColor));
+	end
+
 	VUHDO_safeSetAttribute(aSwatch, "lowtarget", tLowestUnit);
 	VUHDO_safeSetAttribute(aSwatch, "goodtarget", tVariant[2] == VUHDO_BUFF_TARGET_SELF and "player" or tGoodTarget);
 
 	VUHDO_NUM_LOWS[tSwatchName] = #(tLowGroup or sEmpty) + #(tMissGroup or sEmpty);
+
+	VUHDO_buffWatchUpdateGlassButton(aSwatch);
 
 	return;
 
@@ -1439,8 +1534,10 @@ end
 
 --
 function VUHDO_execSmartBuffPre(self)
+
 	if InCombatLockdown() then
 		UIErrorsFrame:AddMessage(VUHDO_I18N_SMARTBUFF_ERR_1, 1, 0.1, 0.1, 1);
+
 		return false;
 	end
 
@@ -1453,9 +1550,14 @@ function VUHDO_execSmartBuffPre(self)
 	local tMaxLowSpell = nil;
 	local tMaxLowTarget = nil;
 	local tCategSpec;
-	local tMissGroup, tLowGroup, tGoodTarget, tLowestUnit, tOorGroup;
+	local tMissGroup;
+	local tLowGroup;
+	local tGoodTarget;
+	local tLowestUnit;
+	local tOorGroup;
 	local tNumLow;
-	local tCooldown;
+	local tIsEffectiveOffCooldown;
+	local tUseSingle;
 
 	for _, tCheckSwatch in ipairs(tAllSwatches) do
 		if tCheckSwatch:IsShown() then
@@ -1466,23 +1568,24 @@ function VUHDO_execSmartBuffPre(self)
 			tRefSpell = tVariants[1];
 
 			tMissGroup, tLowGroup, tGoodTarget,	_, tLowestUnit, _,	tOorGroup, _
-					= VUHDO_getMissingBuffsForCode(tTargetMode, tTarget, tVariants, tCategSpec);
+					= VUHDO_getMissingBuffsForCode(tTargetMode, tTarget, tVariants, tCategSpec, false);
 
 			tNumLow = #tMissGroup + #tLowGroup;
-			if not VUHDO_BUFFS[tRefSpell] or not VUHDO_BUFFS[tRefSpell]["id"] then
-				tCooldown = 0;
-			else
-				tCooldown = VUHDO_getSpellCooldown(tRefSpell);
+			tIsEffectiveOffCooldown = true;
+
+			if VUHDO_BUFFS[tRefSpell] and VUHDO_BUFFS[tRefSpell]["id"] then
+				_, _, _, tIsEffectiveOffCooldown = VUHDO_buffWatchGetSpellCooldown(tRefSpell);
 			end
 
-			if tNumLow > tMaxLow and tCooldown <= 1.5 and VUHDO_BUFF_TARGET_HOSTILE ~= tVariants[2] then
+			if tNumLow > tMaxLow and tIsEffectiveOffCooldown ~= false and VUHDO_BUFF_TARGET_HOSTILE ~= tVariants[2] then
 				if (tGoodTarget == nil) then
 					UIErrorsFrame:AddMessage(VUHDO_I18N_SMARTBUFF_ERR_2 .. tRefSpell, 1, 0.1, 0.1, 1);
 				elseif #tOorGroup > 0 then
 					UIErrorsFrame:AddMessage("VuhDo: " .. #tOorGroup .. VUHDO_I18N_SMARTBUFF_ERR_3 .. tRefSpell, 1, 0.1, 0.1, 1);
 				else
 					tMaxLow = tNumLow;
-					tMaxLowTarget = VUHDO_isUseSingleBuff(tCheckSwatch)	and tLowestUnit or tGoodTarget;
+					tUseSingle = VUHDO_isUseSingleBuff(tCheckSwatch);
+					tMaxLowTarget = (true == tUseSingle) and tLowestUnit or tGoodTarget;
 					tMaxLowSpell = tVariants[1];
 				end
 			end
@@ -1491,23 +1594,30 @@ function VUHDO_execSmartBuffPre(self)
 
 	if not tMaxLowSpell then
 		UIErrorsFrame:AddMessage(VUHDO_I18N_SMARTBUFF_ERR_4, 1, 1, 0.1, 1);
+
 		return;
 	end
 
-	if not VUHDO_BUFFS[tMaxLowSpell] or not VUHDO_BUFFS[tMaxLowSpell]["id"] then
-		tCooldown = 0;
-	else
-		tCooldown = VUHDO_getSpellCooldown(tMaxLowSpell);
+	tIsEffectiveOffCooldown = true;
+
+	if VUHDO_BUFFS[tMaxLowSpell] and VUHDO_BUFFS[tMaxLowSpell]["id"] then
+		_, _, _, tIsEffectiveOffCooldown = VUHDO_buffWatchGetSpellCooldown(tMaxLowSpell);
 	end
 
-	if tCooldown > 0 then return; end
+	if tIsEffectiveOffCooldown == false then
+		return;
+	end
 
 	local tName = VUHDO_RAID_NAMES[tMaxLowTarget] or VUHDO_RAID[tMaxLowTarget]["name"];
 
 	UIErrorsFrame:AddMessage(VUHDO_I18N_SMARTBUFF_OKAY_1 .. tMaxLowSpell .. VUHDO_I18N_SMARTBUFF_OKAY_2 .. tName, 0.1, 1, 0.1, 1);
+
 	VUHDO_safeSetAttribute(VuhDoSmartCastGlassButton, "unit", tMaxLowTarget);
 	VUHDO_safeSetAttribute(VuhDoSmartCastGlassButton, "type1", "spell");
 	VUHDO_safeSetAttribute(VuhDoSmartCastGlassButton, "spell1", tMaxLowSpell);
+
+	return;
+
 end
 
 
