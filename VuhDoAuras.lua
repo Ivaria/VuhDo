@@ -1808,6 +1808,7 @@ do
 					tCachedData["applications"] = tAura["applications"];
 					tCachedData["duration"] = tAura["duration"];
 					tCachedData["expirationTime"] = tAura["expirationTime"];
+					tCachedData["icon"] = tAura["icon"];
 				end
 
 				if tAura then
