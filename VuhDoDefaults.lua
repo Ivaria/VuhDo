@@ -938,8 +938,6 @@ local VUHDO_DEFAULT_CONFIG = {
 		["scaleChangeDelay"] = 0.1,
 		["logScaleChanges"] = false,
 		["autoRefresh"] = true,
-		["debounceTime"] = 0.5,
-		["testMode"] = false,
 	},
 };
 
@@ -3035,6 +3033,8 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["DEBUFF" .. VUHDO_DEBUFF_TYPE_ENRAGE] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["DEBUFF_BAR_GLOW"] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["DEBUFF_ICON_GLOW"] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
+		["showDispelOverlay"] = false,
+		["dispelIndicatorType"] = 1,
 		["CHARMED"] = VUHDO_makeFullColor(0.51, 0.082, 0.263, 1,   1, 0.31, 0.31, 1),
 
 		["AURA_BAR_DEFAULT"] = {
@@ -4279,7 +4279,9 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["maxColumns"] = 3,
 		["maxRows"] = 2,
 		["showTooltip"] = false,
-		["VERSION"] = 3,
+		["showDispelOverlay"] = true,
+		["dispelIndicatorType"] = 1,
+		["VERSION"] = 4,
 	},
 
 	["RAID_ICON"] = {
@@ -4427,6 +4429,18 @@ function VUHDO_loadDefaultPanelSetup()
 				tPrivateAura["showDuration"] = false;
 
 				tPrivateAura["VERSION"] = 3;
+			end
+
+			if (tPrivateAura["VERSION"] or 0) < 4 then
+				if VUHDO_PANEL_SETUP["PRIVATE_AURA_SHOW_DISPEL_TYPE"] == false then
+					tPrivateAura["showDispelOverlay"] = false;
+					tPrivateAura["dispelIndicatorType"] = 0;
+				else
+					tPrivateAura["showDispelOverlay"] = true;
+					tPrivateAura["dispelIndicatorType"] = 1;
+				end
+
+				tPrivateAura["VERSION"] = 4;
 			end
 		end
 

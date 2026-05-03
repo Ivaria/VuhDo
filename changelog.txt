@@ -21,6 +21,8 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Blizzard dispel overlay for private auras  
+-- Added Blizzard dispel overlay for standard auras  
   
   
 --------------------------------------------------------------  
