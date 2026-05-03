@@ -9,7 +9,6 @@ local InCombatLockdown = InCombatLockdown;
 local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor;
 local AddPrivateAuraAnchor = C_UnitAuras and C_UnitAuras.AddPrivateAuraAnchor;
 local TriggerPrivateAuraShowDispelType = C_UnitAuras and C_UnitAuras.TriggerPrivateAuraShowDispelType;
-local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex;
 
 local VUHDO_CONFIG;
 local VUHDO_PANEL_SETUP;
@@ -42,6 +41,7 @@ local VUHDO_getCurrentGroupType;
 local VUHDO_isSpecialUnit;
 local VUHDO_getPrivateAuraIcon;
 local VUHDO_hasDispellableAura;
+local VUHDO_hasAnyDispellableAura;
 local VUHDO_getUnitButtons;
 local VUHDO_deferTask;
 
@@ -84,6 +84,7 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
 	VUHDO_getPrivateAuraIcon = _G["VUHDO_getPrivateAuraIcon"];
 	VUHDO_hasDispellableAura = _G["VUHDO_hasDispellableAura"];
+	VUHDO_hasAnyDispellableAura = _G["VUHDO_hasAnyDispellableAura"];
 	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
 	VUHDO_deferTask = _G["VUHDO_deferTask"];
 
@@ -398,7 +399,7 @@ local function VUHDO_updatePrivateAuraDispelOverlayVisibility(aUnit, aButton, aD
 	end
 
 	if aDispelOverlay and aDispelIndicatorType == 2 then
-		tHasRegular = GetAuraDataByIndex(aUnit, 1, "HARMFUL|DISPELLABLE") ~= nil;
+		tHasRegular = VUHDO_hasAnyDispellableAura(aUnit);
 	else
 		tHasRegular = VUHDO_hasDispellableAura(aUnit);
 	end
@@ -482,7 +483,7 @@ function VUHDO_showPrivateAuraDispelOverlay(aButton, aUnit)
 	tShowActivePrivateDispelIndicatorType = (tShowPrivateDispelOverlay and tShowPrivateDispelIndicatorType > 0) and tShowPrivateDispelIndicatorType or 0;
 
 	if tShowActiveDispelIndicatorType == 2 then
-		tShowHasRegularNow = GetAuraDataByIndex(aUnit, 1, "HARMFUL|DISPELLABLE") ~= nil;
+		tShowHasRegularNow = VUHDO_hasAnyDispellableAura(aUnit);
 	else
 		tShowHasRegularNow = VUHDO_hasDispellableAura(aUnit);
 	end

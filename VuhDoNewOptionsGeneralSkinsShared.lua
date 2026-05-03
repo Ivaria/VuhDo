@@ -2845,6 +2845,7 @@ function VUHDO_loadProfile(aName)
 	VUHDO_clearBackdropCache();
 	VUHDO_initAllBurstCaches();
 	VUHDO_loadVariables();
+	VUHDO_resolveAllAuraGroupFilters();
 	VUHDO_initPanelModels();
 	VUHDO_initDynamicPanelModels();
 	VUHDO_registerAllBouquets(false);

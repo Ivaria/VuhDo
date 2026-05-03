@@ -887,6 +887,7 @@ VUHDO_I18N_TT.K822 = "Show the Blizzard private aura dispel overlay.";
 VUHDO_I18N_TT.K823 = "Select when to show a dispel border or overlay (e.g. only dispellable by you).";
 VUHDO_I18N_TT.K824 = "Show the Blizzard private aura dispel overlay for standard dispellable auras (Magic, Curse, etc.).";
 VUHDO_I18N_TT.K825 = "Select when to show a dispel overlay (e.g. only dispellable by you).";
+VUHDO_I18N_TT.K826 = "Shows every dispellable harmful aura (Magic, Curse, etc.) regardless of whether your current class/spec can dispel it.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Profil par d\195\169faut";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposition \npar d\195\169faut";
@@ -1604,3 +1605,5 @@ VUHDO_I18N_PRIVATE_AURA_DISPEL_TYPE = "Dispel Type";
 VUHDO_I18N_PRIVATE_AURA_DISPEL_DISABLED = "Disabled";
 VUHDO_I18N_PRIVATE_AURA_DISPEL_BY_ME = "My Dispellable Debuffs";
 VUHDO_I18N_PRIVATE_AURA_DISPEL_ALL = "All Dispellable Debuffs";
+
+VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE = "All Dispellable";
