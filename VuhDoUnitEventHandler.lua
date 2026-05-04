@@ -26,6 +26,7 @@ local VUHDO_quickRaidReload;
 local VUHDO_normalRaidReload;
 local VUHDO_isAnyoneInterestedIn;
 local VUHDO_updateHandlerOnEventMetrics;
+local VUHDO_onUnitInRangeUpdate;
 
 local VUHDO_RAID;
 local VUHDO_CONFIG;
@@ -61,6 +62,7 @@ local sAllUnitEventNames = {
 	"UNIT_ABSORB_AMOUNT_CHANGED",
 	"UNIT_HEAL_ABSORB_AMOUNT_CHANGED",
 	"UNIT_MAX_HEALTH_MODIFIERS_CHANGED",
+	"UNIT_IN_RANGE_UPDATE",
 };
 
 local sPlayerPowerResourceBouquetModes = {
@@ -111,6 +113,7 @@ function VUHDO_unitEventHandlerInitLocalOverrides()
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_updateUnitAggro = _G["VUHDO_deferUpdateUnitAggro"];
+	VUHDO_onUnitInRangeUpdate = _G["VUHDO_deferOnUnitInRangeUpdate"];
 
 	return;
 
@@ -206,6 +209,11 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 	elseif "UNIT_THREAT_SITUATION_UPDATE" == anEvent then
 		if VUHDO_VARIABLES_LOADED then
 			VUHDO_updateUnitAggro(anArg1);
+		end
+
+	elseif "UNIT_IN_RANGE_UPDATE" == anEvent then
+		if VUHDO_RAID and VUHDO_RAID[anArg1] then
+			VUHDO_onUnitInRangeUpdate(anArg1, anArg2);
 		end
 
 	elseif "UNIT_MAXHEALTH" == anEvent then
@@ -479,6 +487,7 @@ local function VUHDO_applyCoreUnitRegistrations(aFrame, aUnit)
 	aFrame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_EXITING_VEHICLE", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", aUnit);
 
 	if VUHDO_getThreatEventsInterest() then
 		aFrame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", aUnit);
