@@ -17,8 +17,6 @@ local floor = math.floor;
 local abs = math.abs;
 local InCombatLockdown = InCombatLockdown;
 
-
-
 VUHDO_DEFERRED_TASK_PRIORITY_LOW = 1;
 VUHDO_DEFERRED_TASK_PRIORITY_NORMAL = 2;
 VUHDO_DEFERRED_TASK_PRIORITY_HIGH = 3;
@@ -160,6 +158,8 @@ local VUHDO_TASK_TYPE_DEFAULT_COSTS = {
 	[30] = 200,
 	[31] = 50,
 	[32] = 10,
+	[33] = 15,
+	[34] = 15,
 };
 
 local VUHDO_DEFERRED_TASK_STATE = {
