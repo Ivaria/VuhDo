@@ -105,6 +105,7 @@ function VUHDO_unitEventHandlerInitLocalOverrides()
 	VUHDO_normalRaidReload = _G["VUHDO_normalRaidReload"];
 	VUHDO_isAnyoneInterestedIn = _G["VUHDO_isAnyoneInterestedIn"];
 	VUHDO_updateHandlerOnEventMetrics = _G["VUHDO_updateHandlerOnEventMetrics"];
+	VUHDO_onUnitInRangeUpdate = _G["VUHDO_onUnitInRangeUpdate"];
 
 	VUHDO_updateHealth = _G["VUHDO_deferUpdateHealth"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
@@ -113,7 +114,6 @@ function VUHDO_unitEventHandlerInitLocalOverrides()
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_updateUnitAggro = _G["VUHDO_deferUpdateUnitAggro"];
-	VUHDO_onUnitInRangeUpdate = _G["VUHDO_deferOnUnitInRangeUpdate"];
 
 	return;
 

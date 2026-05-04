@@ -273,17 +273,6 @@ end
 
 
 --
-function VUHDO_deferOnUnitInRangeUpdate(aUnit, anIsInRange, aPriority)
-
-	VUHDO_deferTask(VUHDO_DEFER_ON_UNIT_IN_RANGE_UPDATE, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aUnit, anIsInRange);
-
-	return;
-
-end
-
-
-
---
 local tUnitInfo;
 local tIsCharmed;
 function VUHDO_updateUnitVisibilityCharmRange(aUnit)
