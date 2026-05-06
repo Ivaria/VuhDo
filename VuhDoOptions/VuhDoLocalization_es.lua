@@ -389,7 +389,7 @@ VUHDO_I18N_TT.K298 = "Activa automaticamente esta disposici\195\179n cuando est\
 VUHDO_I18N_TT.K299 = "Activa automaticamente esta disposici\195\179n en grupos de hasta 5 jugadores.";
 VUHDO_I18N_TT.K300 = "Activa automaticamente esta disposici\195\179n en bandas de hasta 10 jugadores.";
 VUHDO_I18N_TT.K301 = "Activa automaticamente esta disposici\195\179n en bandas de hasta 25 jugadores.";
-VUHDO_I18N_TT.K302 = "Activa automaticamente esta disposici\195\179n en bandas de mas de 25 jugadores.";
+VUHDO_I18N_TT.K302 = "Activa automaticamente esta disposici\195\179n en bandas de hasta 40 jugadores.";
 VUHDO_I18N_TT.K306 = "Cambia el color fijo de las barras de salud.";
 VUHDO_I18N_TT.K307 = "Hace que las barras crezcan en lugar de reducirse al recibir da\195\177o.";
 VUHDO_I18N_TT.K308 = "Hace que las barras crezcan verticalmente en lugar de horizontalmente.";
@@ -977,7 +977,7 @@ VUHDO_I18N_HOSTILE_ADVICE_2 = "¡NO introduzcas nombres de macros u otras consta
 VUHDO_I18N_HOSTILE_ADVICE_3 = "¡Abalorios/Instant\195\161neos NO se activar\195\161n autom\195\161ticamente!";
 -- Slider
 VUHDO_I18N_WARN_PREC_AT = "Avisar / precisi\195\179n en";
-VUHDO_I18N_MAX_NO_DE_BUFFS = "M\195\161x. numero de (de)buffs";
+VUHDO_I18N_MAX_NO_DE_BUFFS = "M\195\161x. numero de beneficios o perjuicios";
 VUHDO_I18N_BRIGHTNESS = "Brillo";
 VUHDO_I18N_RAID_ICON_SCALE = "Escala de iconos de banda";
 VUHDO_I18N_NAME_TEXT_SIZE = "Tama\195\177o del texto del nombre";
@@ -1040,7 +1040,7 @@ VUHDO_I18N_20 = " 20";
 VUHDO_I18N_25 = " 25";
 VUHDO_I18N_30 = " 30";
 VUHDO_I18N_40 = " 40";
-VUHDO_I18N_DEBUFF_DEFAULTS = "Valores predeterminados de (de)buffs";
+VUHDO_I18N_DEBUFF_DEFAULTS = "Valores predeterminados de beneficios o perjuicios";
 VUHDO_I18N_ITEXTUREI = "[Textura]";
 VUHDO_I18N_BAR = "Barra";
 VUHDO_I18N_HOTS_2 = "HoTs #2";
@@ -1057,7 +1057,6 @@ VUHDO_I18N_EXPIRY_WARNING = "Aviso de expiraci\195\179n";
 VUHDO_I18N_COUNTDOWN_OFF = "Cuenta atr\195\161s: Apagado";
 VUHDO_I18N_SECS = "seg";
 VUHDO_I18N_SECS_10 = "seg/10";
-VUHDO_I18N_FULL_DURATION = "duraci\195\179n completa";
 VUHDO_I18N_TOOLS = "Herramientas";
 VUHDO_I18N_TIMER = "Temporizador";
 VUHDO_I18N_SOUND = "Sonido";
@@ -1118,7 +1117,7 @@ VUHDO_I18N_BOTTOM = "Inferior";
 VUHDO_I18N_PET_OWNERS = "Due\195\177o de mascota";
 VUHDO_I18N_BATTLE_REZ = "Resurrecci\195\179n de batalla";
 -- #+1.232
-VUHDO_I18N_DEBUFF_LIST = "Lista de (De)Buffs";
+VUHDO_I18N_DEBUFF_LIST = "Lista de beneficios y perjuicios";
 VUHDO_I18N_DEBUFF_EDIT_BOX = "Introduce nuevo Beneficio o Perjuicio";
 -- #+1.233
 VUHDO_I18N_BUTTON = "Bot\195\179n";
@@ -1243,11 +1242,11 @@ VUHDO_I18N_DISTANCE = "Distancia";
 VUHDO_I18N_DEAD_ONLY = "Solo muertos";
 VUHDO_I18N_DIRECTION = "Direcci\195\179n";
 VUHDO_I18N_IF_OOR_SHOW = "Si la unidad est\195\161 fuera de alcance, mostrar...";
-VUHDO_I18N_DEBUFF_NAME = "Nombre del\ndebuff";
+VUHDO_I18N_DEBUFF_NAME = "Nombre del\nperjuicio";
 -- 2.18
 VUHDO_I18N_DISABLE = "Desactivar";
 VUHDO_I18N_DC_RESTORE = "Escudo al reconectar";
-VUHDO_I18N_EXPORT_CUSTOM_DEBUFFS = "Exportar debuffs personalizados";
+VUHDO_I18N_EXPORT_CUSTOM_DEBUFFS = "Exportar perjuicios personalizados";
 VUHDO_I18N_EXPORT_TO_PROFILE = "Exportar al perfil:";
 VUHDO_I18N_THIS_TOONS = "De este personaje";
 VUHDO_I18N_SELECTED = "Seleccionado";
@@ -1320,7 +1319,6 @@ VUHDO_I18N_LKA_EDITED_MACRO = "Macro editada: ";
 VUHDO_I18N_FLASH = "Destello";
 
 VUHDO_I18N_SHOW_TOTAL = "Mostrar total";
-VUHDO_I18N_ALIVE_TIME = "Tiempo\nde vida";
 VUHDO_I18N_PARSE = "Analizar";
 VUHDO_I18N_TEXT_SHADOW = "Texto/Sombra";
 VUHDO_I18N_COMBAT_LOG = "Registro de combate";
@@ -1328,10 +1326,10 @@ VUHDO_I18N_ICON_TEXT_SETTINGS = "Opciones de texto:";
 VUHDO_I18N_DISCARD_CHANGES_CONFIRM = "Has realizado un total de %d cambios en la configuraci\195\179n.\n¿Seguro que quieres DESCARTARLOS?";
 
 VUHDO_I18N_PROFILE_NOT_EXISTS = "Error: No existe ning\195\186n perfil llamado \"%s\".";
-VUHDO_I18N_PROFILE_EXPORTED_TO = "Debuffs personalizados exportados al perfil %s";
+VUHDO_I18N_PROFILE_EXPORTED_TO = "Perjuicios personalizados exportados al perfil %s";
 VUHDO_I18N_ADDED_X_TO_Y = "A\195\177adido %s a %s.";
 VUHDO_I18N_NOT_SELECTED = "<no seleccionado>";
-VUHDO_I18N_CUDE_EXPORT_DONE = "Exportaci\195\179n de debuffs personalizados completada.";
+VUHDO_I18N_CUDE_EXPORT_DONE = "Exportaci\195\179n de perjuicios personalizados completada.";
 VUHDO_I18N_REALLY_EXPORT_CUDES = "¿Seguro que deseas exportar al/los perfil(es)?";
 VUHDO_I18N_KEY_LAYOUTS = "Distribuci\195\179n de teclas";
 VUHDO_I18N_EXPORT = "Exportar";
@@ -1412,15 +1410,15 @@ VUHDO_I18N_PLAYER = "Unidad del jugador";
 VUHDO_I18N_TARGET = "Unidad objetivo";
 VUHDO_I18N_TARGET_TARGET = "Unidad objetivo del objetivo";
 VUHDO_I18N_FOCUS_UNIT = "Unidad foco";
-VUHDO_I18N_MOUSEOVER = "Unidad al pasar el rat\195\179n";
-VUHDO_I18N_MOUSEOVER_TARGET = "Unidad objetivo al pasar el rat\195\179n";
-VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Unidad objetivo del objetivo al pasar el rat\195\179n";
+VUHDO_I18N_MOUSEOVER = "Unidad mouseover";
+VUHDO_I18N_MOUSEOVER_TARGET = "Unidad objetivo mouseover";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET = "Unidad objetivo del objetivo mouseover";
 VUHDO_I18N_TARGET_HARM = "Unidad objetivo (solo hostil)";
 VUHDO_I18N_TARGET_TARGET_HARM = "Unidad objetivo del objetivo (solo hostil)";
 VUHDO_I18N_FOCUS_HARM = "Unidad foco (solo hostil)";
-VUHDO_I18N_MOUSEOVER_HARM = "Unidad al pasar el rat\195\179n (solo hostil)";
-VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Unidad objetivo al pasar el rat\195\179n (solo hostil)";
-VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Unidad objetivo del objetivo al pasar el rat\195\179n (solo hostil)";
+VUHDO_I18N_MOUSEOVER_HARM = "Unidad mouseover (solo hostil)";
+VUHDO_I18N_MOUSEOVER_TARGET_HARM = "Unidad objetivo mouseover (solo hostil)";
+VUHDO_I18N_MOUSEOVER_TARGET_TARGET_HARM = "Unidad objetivo del objetivo mouseover (solo hostil)";
 
 VUHDO_I18N_CLOCK = "Reloj";
 
@@ -1453,7 +1451,7 @@ VUHDO_I18N_PRIVATE_AURA_DURATION_LABEL = "Timer Position";
 VUHDO_I18N_PETS_LAST = "Mascotas al final";
 
 VUHDO_I18N_SHOW_EFFECTIVE = "Mostrar\nefectivo";
-VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "La lista de ignorados de debuffs se import\195\179 correctamente.";
+VUHDO_I18N_DEBUFF_IGNORE_IMPORTED = "La lista de perjuicios ignorados se import\195\179 correctamente.";
 
 VUHDO_I18N_BLEED = "Sangrado";
 
@@ -1475,16 +1473,16 @@ VUHDO_I18N_PURGEABLE_BUFFS = "Beneficios\ndisipables";
 
 VUHDO_I18N_LOAD_AURAS_ONLY_ANCHORS = "Solo ranuras";
 
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Este debuff est\195\161 en la lista de ignorados y se ocultar\195\161.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignorar \"%s\" anula la configuraci\195\179n existente del debuff personalizado.";
-VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "Al eliminar \"%s\" de la lista de ignorados se permitir\195\161 que la configuraci\195\179n del debuff personalizado tenga efecto.";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "El debuff personalizado \"%s\" est\195\161 en la lista de ignorados y se ocultar\195\161.";
-VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "Se elimin\195\179 el debuff personalizado \"%s\" que estaba en la lista de ignorados y permanecer\195\161 oculto.";
-VUHDO_I18N_DEBUFF_ADDED_TO_IGNORE_LIST = "(De)Buff \"%s\" a\195\177adido a la lista de ignorados.";
-VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST = "(De)Buff \"%s\" eliminado de la lista de ignorados.";
-VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM = "(De)Buff \"%s\" a\195\177adido a los debuffs personalizados.";
-VUHDO_I18N_DEBUFF_REMOVED_FROM_CUSTOM = "(De)Buff \"%s\" eliminado de los debuffs personalizados.";
-VUHDO_I18N_DEBUFF_DOES_NOT_EXIST = "El (De)Buff \"%s\" no existe.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_WARNING = "Este perjuicio est\195\161 en la lista de ignorados y se ocultar\195\161.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_WARNING = "Ignorar \"%s\" anula la configuraci\195\179n existente del perjuicio personalizado.";
+VUHDO_I18N_IGNORE_LIST_CUSTOM_DEBUFF_REMOVED_WARNING = "Al eliminar \"%s\" de la lista de ignorados se permitir\195\161 que la configuraci\195\179n del perjuicio personalizado tenga efecto.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_CONFLICT = "El perjuicio personalizado \"%s\" est\195\161 en la lista de ignorados y se ocultar\195\161.";
+VUHDO_I18N_CUSTOM_DEBUFF_IGNORE_LIST_REMOVED = "Se elimin\195\179 el perjuicio personalizado \"%s\" que estaba en la lista de ignorados y permanecer\195\161 oculto.";
+VUHDO_I18N_DEBUFF_ADDED_TO_IGNORE_LIST = "Beneficio o perjuicio \"%s\" a\195\177adido a la lista de ignorados.";
+VUHDO_I18N_DEBUFF_REMOVED_FROM_IGNORE_LIST = "Beneficio o perjuicio \"%s\" eliminado de la lista de ignorados.";
+VUHDO_I18N_DEBUFF_ADDED_TO_CUSTOM = "Beneficio o perjuicio \"%s\" a\195\177adido a los debuffs personalizados.";
+VUHDO_I18N_DEBUFF_REMOVED_FROM_CUSTOM = "Beneficio o perjuicio \"%s\" eliminado de los debuffs personalizados.";
+VUHDO_I18N_DEBUFF_DOES_NOT_EXIST = "El Beneficio o perjuicio \"%s\" no existe.";
 
 VUHDO_I18N_AURAS = "Auras";
 VUHDO_I18N_AURA_GROUP = "Grupo de auras";
@@ -1492,8 +1490,8 @@ VUHDO_I18N_AURA_GROUPS = "Grupos";
 VUHDO_I18N_AURA_GROUP_ENTRY_SPELL = "Hechizo";
 VUHDO_I18N_AURA_GROUP_ENTRY_BOUQUET = "Ramo";
 VUHDO_I18N_AURA_ANCHORS = "Anclajes de auras";
-VUHDO_I18N_AURA_FILTER_HELPFUL = "Beneficios (HELPFUL)";
-VUHDO_I18N_AURA_FILTER_HARMFUL = "Perjuicios (HARMFUL)";
+VUHDO_I18N_AURA_FILTER_HELPFUL = "Beneficios (Beneficioso)";
+VUHDO_I18N_AURA_FILTER_HARMFUL = "Perjuicios (Perjudicial)";
 VUHDO_I18N_AURA_FILTER_HELPFUL_PLAYER = "Mis beneficios";
 VUHDO_I18N_AURA_FILTER_HELPFUL_RAID = "Beneficios de banda";
 VUHDO_I18N_AURA_FILTER_HARMFUL_DISPELLABLE = "Disipables";
@@ -1581,22 +1579,22 @@ VUHDO_I18N_SORT_EXPIRATION_ONLY = "Solo por expiraci\195\179n";
 VUHDO_I18N_SORT_NAME = "Por nombre";
 VUHDO_I18N_SORT_NAME_ONLY = "Solo por nombre";
 
-VUHDO_I18N_SPELL_SOURCE = "Spell Source";
-VUHDO_I18N_FULL_DURATION = "duraci\195\179n completa";
-VUHDO_I18N_ALIVE_TIME = "Tiempo\nde vida";
-VUHDO_I18N_TIMER_THRESHOLD = "Show Timer";
-VUHDO_I18N_GLOW_ICON = "Glow Icon";
-VUHDO_I18N_COLOR_ICON = "Color Icon";
-VUHDO_I18N_SPELL_SETTINGS = "Spell Settings";
-VUHDO_I18N_DISPLAY_OVERRIDES = "Display Overrides";
+VUHDO_I18N_SPELL_SOURCE = "Fuente del hechizo";
+VUHDO_I18N_FULL_DURATION = "Duración completa";
+VUHDO_I18N_ALIVE_TIME = "Tiempo con vida";
+VUHDO_I18N_TIMER_THRESHOLD = "Mostrar temporizador";
+VUHDO_I18N_GLOW_ICON = "Icono brillante";
+VUHDO_I18N_COLOR_ICON = "Icono en color";
+VUHDO_I18N_SPELL_SETTINGS = "Configuraci\195\179n de hechizos";
+VUHDO_I18N_DISPLAY_OVERRIDES = "Anulaciones de visualizaci\195\179n";
 
-VUHDO_I18N_NO_ICON = "No Icon";
+VUHDO_I18N_NO_ICON = "Sin icono";
 
 VUHDO_I18N_ARENA = "Arena";
-VUHDO_I18N_SMOOTH = "Smooth";
+VUHDO_I18N_SMOOTH = "Suavizado";
 
-VUHDO_I18N_SHOW_HEALTH_LOSS = "Show\nHealth Loss";
-VUHDO_I18N_HEALTH_LOSS_BAR = "Health Loss Bar";
+VUHDO_I18N_SHOW_HEALTH_LOSS = "Mostrar\np\195\169rdida de vida";
+VUHDO_I18N_HEALTH_LOSS_BAR = "Barra de p\195\169rdida de vida";
 
 VUHDO_I18N_PRIVATE_AURA_DISPEL_OVERLAY = "Show Dispel\nOverlay";
 VUHDO_I18N_PRIVATE_AURA_DISPEL_TYPE = "Dispel Type";
@@ -1605,3 +1603,4 @@ VUHDO_I18N_PRIVATE_AURA_DISPEL_BY_ME = "My Dispellable Debuffs";
 VUHDO_I18N_PRIVATE_AURA_DISPEL_ALL = "All Dispellable Debuffs";
 
 VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE = "All Dispellable";
+

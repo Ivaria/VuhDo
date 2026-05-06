@@ -49,7 +49,7 @@ VUHDO_I18N_SHAMANS = "Shamans";
 VUHDO_I18N_DRUIDS = "Druides";
 VUHDO_I18N_PRIESTS = "Pr\195\170tres";
 VUHDO_I18N_DEATH_KNIGHT = "Chevaliers de la Mort";
-VUHDO_I18N_MONKS = "Monks";
+VUHDO_I18N_MONKS = "Moines";
 -- Group Model Names
 -- @EXACT = false
 VUHDO_I18N_GROUP = "Groupe";
@@ -58,7 +58,7 @@ VUHDO_I18N_OWN_GROUP = "Mon Groupe";
 -- @EXACT = false
 VUHDO_I18N_PETS = "Familiers";
 VUHDO_I18N_MAINTANKS = "Tanks \nprincipaux";
-VUHDO_I18N_PRIVATE_TANKS = "Cibles personalis\195\169es";
+VUHDO_I18N_PRIVATE_TANKS = "Cibles personnalis\195\169es";
 -- General Labels
 -- @EXACT = false
 VUHDO_I18N_OKAY = "Valider";
@@ -110,8 +110,8 @@ VUHDO_I18N_MTS_BROADCASTED = "Les tanks principaux ont \195\169t\195\169 diffus\
 VUHDO_I18N_PANELS_SHOWN = "Les panneaux de soins sont maintenant |cffffe566shown|r.";
 VUHDO_I18N_PANELS_HIDDEN = "Les panneaux de soins sont maintenant |cffffe566hidden|r.";
 VUHDO_I18N_LOCK_PANELS_PRE = "La position des panneaux est maintenant ";
-VUHDO_I18N_LOCK_PANELS_LOCKED = "|cffffe566v\195\169rouill\195\169|r.";
-VUHDO_I18N_LOCK_PANELS_UNLOCKED = "|cffffe566d\195\169v\195\169rouill\195\169|r.";
+VUHDO_I18N_LOCK_PANELS_LOCKED = "|cffffe566verrouill\195\169e|r.";
+VUHDO_I18N_LOCK_PANELS_UNLOCKED = "|cffffe566d\195\169verrouill\195\169e|r.";
 VUHDO_I18N_PANELS_RESET = "La position des panneaux a \195\169t\195\169 r\195\169initialis\195\169e.";
 -- Config Pop-Up
 -- @EXACT = false
@@ -155,7 +155,7 @@ VUHDO_I18N_BUFFC_SHOUT = "Cri";
 -- Hunter
 VUHDO_I18N_BUFFC_ASPECT = "Aspect";
 -- Monk
-VUHDO_I18N_BUFFC_STANCE = "Stance";
+VUHDO_I18N_BUFFC_STANCE = "Posture";
 
 -- Key Binding Headers/Names
 -- @EXACT = false
@@ -180,8 +180,8 @@ BINDING_NAME_VUHDO_KEY_ASSIGN_SMART_BUFF = "Buff Intelligent";
 VUHDO_I18N_MOUSE_OVER_BINDING = "Raccourcis clavier";
 VUHDO_I18N_UNASSIGNED = "(non assign\195\169)";
 -- #+V1.89
-VUHDO_I18N_NO = "No";
-VUHDO_I18N_UP = "up";
+VUHDO_I18N_NO = "Non";
+VUHDO_I18N_UP = "Haut";
 VUHDO_I18N_VEHICLES = "V\195\169hicules";
 -- #+v1.94
 VUHDO_I18N_DEFAULT_RES_ANNOUNCE = "Come to life, vuhdo, you b00n!";
@@ -195,10 +195,10 @@ VUHDO_I18N_BW_N_A = "|cffff0000N/A|r";
 VUHDO_I18N_BW_RNG_RED = "|cffff0000RNG|r";
 VUHDO_I18N_BW_OK = "OK";
 VUHDO_I18N_BW_RNG_YELLOW = "|cffffff00RNG|r";
-VUHDO_I18N_PROMOTE_RAID_LEADER = "Promote to Raid Leader";
-VUHDO_I18N_PROMOTE_ASSISTANT = "Promote to Assistant";
-VUHDO_I18N_DEMOTE_ASSISTANT = "Demote from Assistant";
-VUHDO_I18N_PROMOTE_MASTER_LOOTER = "Promote to Master Looter";
+VUHDO_I18N_PROMOTE_RAID_LEADER = "Promouvoir Chef de raid";
+VUHDO_I18N_PROMOTE_ASSISTANT = "Promouvoir Assistant";
+VUHDO_I18N_DEMOTE_ASSISTANT = "R\195\169trograder Assistant";
+VUHDO_I18N_PROMOTE_MASTER_LOOTER = "Promouvoir Ma\195\174tre du butin";
 VUHDO_I18N_MT_NUMBER = "MT #";
 VUHDO_I18N_ROLE_OVERRIDE = "Remplacement de rôle";
 VUHDO_I18N_MELEE_TANK = "M\195\169l\195\169e - Tank";
@@ -304,9 +304,9 @@ VUHDO_I18N_PROFILE_LOADED = "Profil charg\195\169 avec succ\195\168s : ";
 VUHDO_I18N_PROFILE_SAVED = "Profil enregistr\195\169 avec succ\195\168s : ";
 VUHDO_I18N_PROFILE_OVERWRITE_1 = "Profil";
 VUHDO_I18N_PROFILE_OVERWRITE_2 = "est actuellement poss\195\169d\195\169 par\nun autre personnage";
-VUHDO_I18N_PROFILE_OVERWRITE_3 = "\n- \195\130craser : Le profil existant sera \195\169cras\195\169.\n- Copier : Cr\195\169er et enregistrer une copie. Conserver le profil existant.";
+VUHDO_I18N_PROFILE_OVERWRITE_3 = "\n- \195\137craser : Le profil existant sera \195\169cras\195\169.\n- Copier : Cr\195\169er et enregistrer une copie. Conserver le profil existant.";
 VUHDO_I18N_COPY = "Copier";
-VUHDO_I18N_OVERWRITE = "\195\130craser";
+VUHDO_I18N_OVERWRITE = "\195\137craser";
 VUHDO_I18N_DISCARD = "Abandonner";
 -- 2.0, alpha #2
 VUHDO_I18N_DEF_BAR_BACKGROUND_SOLID = "Arri\195\168re-plan : Plein";
@@ -431,7 +431,7 @@ VUHDO_I18N_BOUQUET_STACKS = "Drapeau : Cumuls >";
 VUHDO_I18N_DEF_PLAYER_CHI = "\195\130nergie du joueur";
 
 VUHDO_I18N_BOUQUET_TARGET_RAID_ICON = "Ic\195\180ne : Symbole de raid de la cible";
-VUHDO_I18N_BOUQUET_OWN_CHI_EQUALS = "Drapeau : \195\130nergie personnelle ==";
+VUHDO_I18N_BOUQUET_OWN_CHI_EQUALS = "Drapeau : \195\137nergie personnelle ==";
 VUHDO_I18N_CUSTOM_ICON_FOUR_THIRDS = "Tiers : Quatre";
 VUHDO_I18N_CUSTOM_ICON_FIVE_THIRDS = "Tiers : Cinq";
 VUHDO_I18N_DEF_RAID_CDS = "Temps de recharge de raid";
@@ -558,7 +558,7 @@ VUHDO_I18N_TEXT_PROVIDER_INCOMING_HEAL = "Soin entrant : <#nk>";
 VUHDO_I18N_TEXT_PROVIDER_SHIELD_ABSORB = "Absorption de bouclier totale : <#nk>";
 VUHDO_I18N_TEXT_PROVIDER_HEAL_ABSORB = "Absorption de soin totale : <#nk>";
 VUHDO_I18N_TEXT_PROVIDER_THREAT = "Menace : <#n>%";
-VUHDO_I18N_TEXT_PROVIDER_CHI = "\195\130nergie : <#n>";
+VUHDO_I18N_TEXT_PROVIDER_CHI = "\195\137nergie : <#n>";
 VUHDO_I18N_TEXT_PROVIDER_HOLY_POWER = "Pouvoir sacr\195\169 : <#n>";
 VUHDO_I18N_TEXT_PROVIDER_COMBO_POINTS = "Points de combo : <#n>";
 VUHDO_I18N_TEXT_PROVIDER_SOUL_SHARDS = "Fragments d'\195\130me : <#n>";
@@ -651,4 +651,5 @@ VUHDO_I18N_BW_TARGET_BY_NAME = "Player name";
 VUHDO_I18N_BW_TARGET = "Target";
 VUHDO_I18N_BW_FOCUS = "Focus";
 
-VUHDO_I18N_AURA_GROUP_ALL_DISPELLABLE = "All Dispellable Debuffs";
+VUHDO_I18N_AURA_GROUP_ALL_DISPELLABLE = "Tous les debuffs dissipables";
+
