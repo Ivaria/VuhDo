@@ -66,12 +66,15 @@ local VUHDO_updateHealth;
 local VUHDO_updateHealthBarsFor;
 local VUHDO_setHealth;
 local VUHDO_initAllEventBouquets;
+local VUHDO_redisplayAllUnitAuras;
 local VUHDO_updateBouquetsForEvent;
 local VUHDO_updateAllHoTs;
 local VUHDO_updateAllCyclicBouquets;
 local VUHDO_updateAllDebuffIcons;
 local VUHDO_updateAllAggro;
 local VUHDO_updateAllRange;
+local VUHDO_updateUnitRange;
+local VUHDO_updateAllVisibilityCharmRange;
 local VUHDO_updateAllClusters;
 local VUHDO_updateClusterHighlights;
 local VUHDO_aoeUpdateAll;
@@ -522,6 +525,7 @@ local sIsDirectionArrow = false;
 local sHotToggleUpdateSecs = 1;
 local sAggroRefreshSecs = 1;
 local sRangeRefreshSecs = 1.1;
+local sRangeFallbackSecs = 1;
 local sClusterRefreshSecs = 1.2;
 local sAoeRefreshSecs = 1.3;
 local sBuffsRefreshSecs;
@@ -567,6 +571,8 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_initAllEventBouquets = _G["VUHDO_initAllEventBouquets"];
 	VUHDO_updateAllAggro = _G["VUHDO_updateAllAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_updateAllRange"];
+	VUHDO_updateUnitRange = _G["VUHDO_updateUnitRange"];
+	VUHDO_updateAllVisibilityCharmRange = _G["VUHDO_updateAllVisibilityCharmRange"];
 	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
 	VUHDO_clearAllSpellTraces = _G["VUHDO_clearAllSpellTraces"];
 	VUHDO_unregisterUnitForEvents = _G["VUHDO_unregisterUnitForEvents"];
@@ -582,11 +588,13 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_updateAllDebuffIcons = _G["VUHDO_deferUpdateAllDebuffIcons"];
 	VUHDO_updateAllAggro = _G["VUHDO_deferUpdateAllAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_deferUpdateAllRange"];
+	VUHDO_updateAllVisibilityCharmRange = _G["VUHDO_deferUpdateAllVisibilityCharmRange"];
 	VUHDO_updateAllClusters = _G["VUHDO_deferUpdateAllClusters"];
 	VUHDO_aoeUpdateAll = _G["VUHDO_deferAoeUpdateAll"];
 	VUHDO_updateSpellTrace = _G["VUHDO_deferUpdateSpellTrace"];
 	VUHDO_updateAllRaidBars = _G["VUHDO_deferUpdateAllRaidBars"];
 	VUHDO_initAllEventBouquets = _G["VUHDO_deferInitAllEventBouquets"];
+	VUHDO_redisplayAllUnitAuras = _G["VUHDO_redisplayAllUnitAuras"];
 	VUHDO_setHealth = _G["VUHDO_deferSetHealth"];
 	VUHDO_updateClusterHighlights = _G["VUHDO_deferUpdateClusterHighlights"];
 	VUHDO_handleScaleChange = _G["VUHDO_deferHandleScaleChange"];
@@ -604,6 +612,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	sHotToggleUpdateSecs = VUHDO_CONFIG["UPDATE_HOTS_MS"] * 0.00033;
 	sAggroRefreshSecs = VUHDO_CONFIG["THREAT"]["AGGRO_REFRESH_MS"] * 0.001;
 	sRangeRefreshSecs = VUHDO_CONFIG["RANGE_CHECK_DELAY"] * 0.001;
+	sRangeFallbackSecs = VUHDO_CONFIG["RANGE_FALLBACK_DELAY"] * 0.001;
 	sClusterRefreshSecs = VUHDO_CONFIG["CLUSTER"]["REFRESH"] * 0.001;
 	sAoeRefreshSecs = VUHDO_CONFIG["AOE_ADVISOR"]["refresh"] * 0.001;
 	sBuffsRefreshSecs = VUHDO_BUFF_SETTINGS["CONFIG"]["REFRESH_SECS"];
@@ -646,6 +655,7 @@ VUHDO_TIMERS = {
 	["REFRESH_TOOLTIP"] = 2.3,
 	["UPDATE_AGGRO"] = 0,
 	["UPDATE_RANGE"] = 1,
+	["UPDATE_VISIBILITY_CHARM_RANGE"] = 1,
 	["UPDATE_HOTS"] = 0.25,
 	["REFRESH_TARGETS"] = 0.51,
 	["RELOAD_RAID"] = 0,
@@ -918,6 +928,7 @@ local function VUHDO_init()
 
 	VUHDO_loadVariables(); -- 2. umgekehrt undefiniertes Verhalten (VUHDO_CONFIG ist nil etc.)
 	VUHDO_initAllBurstCaches();
+	VUHDO_resolveAllAuraGroupFilters();
 	VUHDO_initDefaultProfiles();
 
 	VUHDO_VARIABLES_LOADED = true;
@@ -1024,6 +1035,9 @@ do
 		elseif "PLAYER_REGEN_ENABLED" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_updateAllAggro();
+
+				VUHDO_updateBouquetsForEvent("target", 13); -- VUHDO_UPDATE_MANA
+				VUHDO_updateBouquetsForEvent("focus",  13); -- VUHDO_UPDATE_MANA
 			end
 
 			if VUHDO_OPTIONS_SHOW_AFTER_BATTLE and VuhDoNewOptionsTabbedFrame and not VuhDoNewOptionsTabbedFrame:IsShown() then
@@ -1035,6 +1049,8 @@ do
 			VUHDO_setIsOutOfCombat(true);
 
 		elseif "PLAYER_REGEN_DISABLED" == anEvent then
+			VUHDO_stopMovingAllPanels();
+
 			if VuhDoNewOptionsTabbedFrame and VuhDoNewOptionsTabbedFrame:IsShown() then
 				VuhDoNewOptionsTabbedFrame:SetShown(false);
 
@@ -1068,6 +1084,8 @@ do
 				VUHDO_cancelPendingTargetFocusInspect("focus");
 
 				if VUHDO_RAID["focus"] then
+					VUHDO_updateUnitRange("focus");
+
 					VUHDO_determineIncHeal("focus");
 					VUHDO_updateHealth("focus", 9); -- VUHDO_UPDATE_INC
 				end
@@ -1118,6 +1136,7 @@ do
 				VUHDO_updateBouquetsForEvent("focus", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
 
 				VUHDO_updatePanelVisibility();
+
 			end
 
 		elseif "PARTY_MEMBER_ENABLE" == anEvent or "PARTY_MEMBER_DISABLE" == anEvent then
@@ -2118,6 +2137,10 @@ do
 				VUHDO_registerAllBouquets(false);
 				VUHDO_initAllEventBouquets();
 
+				if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+					VUHDO_redisplayAllUnitAuras();
+				end
+
 				VUHDO_PROHIBIT_REPOS = false;
 			end
 		end
@@ -2238,9 +2261,14 @@ do
 			VUHDO_updateAllAggro();
 		end
 
-		-- refresh range?
-		if VUHDO_checkResetTimer("UPDATE_RANGE", sRangeRefreshSecs) then
+		-- refresh range fallback (slow, range only)
+		if VUHDO_checkResetTimer("UPDATE_RANGE", sRangeFallbackSecs) then
 			VUHDO_updateAllRange();
+		end
+
+		-- refresh visibility / charm / baseRange (fast)
+		if VUHDO_checkResetTimer("UPDATE_VISIBILITY_CHARM_RANGE", sRangeRefreshSecs) then
+			VUHDO_updateAllVisibilityCharmRange();
 		end
 
 		-- Refresh Cluster

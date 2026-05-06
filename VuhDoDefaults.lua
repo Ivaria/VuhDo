@@ -1,8 +1,8 @@
-local GetSpellName = C_Spell.GetSpellName;
-local pairs = pairs;
-local min = math.min;
-local max = math.max;
 local _;
+
+local pairs = pairs;
+
+local GetSpellName = C_Spell.GetSpellName;
 
 VUHDO_GLOBAL_CONFIG = {
 	["PROFILES_VERSION"] = 1;
@@ -705,6 +705,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["SHOW_HEALTH_LOSS_BAR"] = true,
 
 	["RANGE_CHECK_DELAY"] = 260,
+	["RANGE_FALLBACK_DELAY"] = 1000,
 
 	["SOUND_DEBUFF"] = nil,
 	["SOUND_DEBUFF_REMOVABLE_ONLY"] = false,
@@ -938,8 +939,6 @@ local VUHDO_DEFAULT_CONFIG = {
 		["scaleChangeDelay"] = 0.1,
 		["logScaleChanges"] = false,
 		["autoRefresh"] = true,
-		["debounceTime"] = 0.5,
-		["testMode"] = false,
 	},
 };
 
@@ -3035,6 +3034,8 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["DEBUFF" .. VUHDO_DEBUFF_TYPE_ENRAGE] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["DEBUFF_BAR_GLOW"] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["DEBUFF_ICON_GLOW"] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
+		["showDispelOverlay"] = false,
+		["dispelIndicatorType"] = 1,
 		["CHARMED"] = VUHDO_makeFullColor(0.51, 0.082, 0.263, 1,   1, 0.31, 0.31, 1),
 
 		["AURA_BAR_DEFAULT"] = {
@@ -3227,6 +3228,22 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["colorType"] = VUHDO_AURA_GROUP_COLOR_DISPEL,
 		["canColorBar"] = true,
 		["canColorText"] = true,
+		["canGlowBar"] = false,
+		["glowBarColor"] = nil,
+		["enabled"] = true,
+		["ignoreList"] = { },
+		["sound"] = nil,
+	},
+	["ALL_DISPELLABLE"] = {
+		["type"] = 1,
+		["filter"] = "HARMFUL|VUHDO_ALL_DISPELLABLE",
+		["resolvedFilter"] = "HARMFUL",
+		["dispellableOnly"] = true,
+		["excludeFilter"] = nil,
+		["priority"] = 1,
+		["colorType"] = VUHDO_AURA_GROUP_COLOR_DISPEL,
+		["canColorBar"] = false,
+		["canColorText"] = false,
 		["canGlowBar"] = false,
 		["glowBarColor"] = nil,
 		["enabled"] = true,
@@ -3892,6 +3909,175 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 
 
 
+VUHDO_DEFAULT_AURA_ANCHORS = {
+	["1"] = {
+		["groupId"] = "MY_HOTS",
+		["enabled"] = true,
+		["radioValue"] = 13,
+		["offsetX"] = 0,
+		["offsetY"] = 0,
+		["maxDisplay"] = 9,
+		["maxColumns"] = 9,
+		["maxRows"] = 1,
+		["sortRule"] = 3,
+		["sortDir"] = 0,
+		["size"] = 20,
+		["barWidth"] = 100,
+		["barHeight"] = 12,
+		["barVertical"] = false,
+		["barTurnAxis"] = false,
+		["barInvertGrowth"] = false,
+		["spacing"] = nil,
+		["style"] = "icons",
+		["growthDir"] = "RIGHT",
+		["wrapDir"] = "UP",
+		["showTimer"] = 2,
+		["showStacks"] = 2,
+		["showClock"] = 2,
+		["showTooltip"] = 2,
+		["fadeOnLow"] = 2,
+		["flashOnLow"] = 2,
+		["dispelBorder"] = 2,
+		["colorMode"] = "default",
+		["iconType"] = 1,
+		["stackType"] = 1,
+		["fixedSlots"] = false,
+		["TIMER_TEXT"] = {
+			["ANCHOR"] = "BOTTOMRIGHT",
+			["X_ADJUST"] = 25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 40,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1),
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+		["COUNTER_TEXT"] = {
+			["ANCHOR"] = "TOP",
+			["X_ADJUST"] = -25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 40,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1),
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+	},
+	["2"] = {
+		["groupId"] = "DISPELLABLE",
+		["enabled"] = true,
+		["radioValue"] = 17,
+		["offsetX"] = 0,
+		["offsetY"] = 0,
+		["maxDisplay"] = 3,
+		["maxColumns"] = 3,
+		["maxRows"] = 1,
+		["sortRule"] = 0,
+		["sortDir"] = 0,
+		["size"] = 20,
+		["barWidth"] = 100,
+		["barHeight"] = 12,
+		["barVertical"] = false,
+		["barTurnAxis"] = false,
+		["barInvertGrowth"] = false,
+		["spacing"] = nil,
+		["style"] = "icons",
+		["growthDir"] = "LEFT",
+		["wrapDir"] = "DOWN",
+		["showTimer"] = 2,
+		["showStacks"] = 2,
+		["showTooltip"] = 2,
+		["showClock"] = 2,
+		["fadeOnLow"] = 2,
+		["flashOnLow"] = 2,
+		["dispelBorder"] = 1,
+		["colorMode"] = "default",
+		["iconType"] = 1,
+		["stackType"] = 1,
+		["fixedSlots"] = false,
+		["TIMER_TEXT"] = {
+			["ANCHOR"] = "BOTTOMRIGHT",
+			["X_ADJUST"] = 25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 40,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1),
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+		["COUNTER_TEXT"] = {
+			["ANCHOR"] = "TOP",
+			["X_ADJUST"] = -25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 40,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1),
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+	},
+	["3"] = {
+		["groupId"] = "BIG_DEFENSIVES",
+		["enabled"] = true,
+		["radioValue"] = 16,
+		["position"] = "CENTER",
+		["offsetX"] = 0,
+		["offsetY"] = 0,
+		["maxDisplay"] = 3,
+		["maxColumns"] = 3,
+		["maxRows"] = 1,
+		["sortRule"] = 0,
+		["sortDir"] = 0,
+		["size"] = 45,
+		["barWidth"] = 100,
+		["barHeight"] = 12,
+		["spacing"] = nil,
+		["style"] = "icons",
+		["growthDir"] = "RIGHT",
+		["wrapDir"] = "DOWN",
+		["showTimer"] = 3,
+		["showStacks"] = 3,
+		["showTooltip"] = 2,
+		["showClock"] = 1,
+		["fadeOnLow"] = 2,
+		["flashOnLow"] = 2,
+		["dispelBorder"] = 2,
+		["colorMode"] = "default",
+		["iconType"] = 1,
+		["stackType"] = 1,
+		["fixedSlots"] = false,
+		["TIMER_TEXT"] = {
+			["ANCHOR"] = "BOTTOMRIGHT",
+			["X_ADJUST"] = 25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 40,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1),
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+		["COUNTER_TEXT"] = {
+			["ANCHOR"] = "TOP",
+			["X_ADJUST"] = -25,
+			["Y_ADJUST"] = 0,
+			["SCALE"] = 40,
+			["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
+			["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1),
+			["USE_SHADOW"] = false,
+			["USE_OUTLINE"] = true,
+			["USE_MONO"] = false,
+		},
+	},
+};
+local VUHDO_DEFAULT_AURA_ANCHORS = VUHDO_DEFAULT_AURA_ANCHORS;
+
+
+
 local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 	["HOTS"] = {
 		["size"] = 40,
@@ -4110,7 +4296,9 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["maxColumns"] = 3,
 		["maxRows"] = 2,
 		["showTooltip"] = false,
-		["VERSION"] = 3,
+		["showDispelOverlay"] = true,
+		["dispelIndicatorType"] = 1,
+		["VERSION"] = 4,
 	},
 
 	["RAID_ICON"] = {
@@ -4131,179 +4319,15 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 
 	["frameStrata"] = "MEDIUM",
 
-	["AURA_ANCHORS"] = {
-		["1"] = {
-			["groupId"] = "MY_HOTS",
-			["enabled"] = true,
-			["radioValue"] = 13,
-			["offsetX"] = 0,
-			["offsetY"] = 0,
-			["maxDisplay"] = 9,
-			["maxColumns"] = 9,
-			["maxRows"] = 1,
-			["sortRule"] = 3,
-			["sortDir"] = 0,
-			["size"] = 20,
-			["barWidth"] = 100,
-			["barHeight"] = 12,
-			["barVertical"] = false,
-			["barTurnAxis"] = false,
-			["barInvertGrowth"] = false,
-			["spacing"] = nil,
-			["style"] = "icons",
-			["growthDir"] = "RIGHT",
-			["wrapDir"] = "UP",
-			["showTimer"] = 2,
-			["showStacks"] = 2,
-			["showClock"] = 2,
-			["showTooltip"] = 2,
-			["fadeOnLow"] = 2,
-			["flashOnLow"] = 2,
-			["dispelBorder"] = 2,
-			["colorMode"] = "default",
-			["iconType"] = 1,
-			["stackType"] = 1,
-			["fixedSlots"] = false,
-			["TIMER_TEXT"] = {
-				["ANCHOR"] = "BOTTOMRIGHT",
-				["X_ADJUST"] = 25,
-				["Y_ADJUST"] = 0,
-				["SCALE"] = 40,
-				["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-				["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1),
-				["USE_SHADOW"] = false,
-				["USE_OUTLINE"] = true,
-				["USE_MONO"] = false,
-			},
-			["COUNTER_TEXT"] = {
-				["ANCHOR"] = "TOP",
-				["X_ADJUST"] = -25,
-				["Y_ADJUST"] = 0,
-				["SCALE"] = 40,
-				["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-				["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1),
-				["USE_SHADOW"] = false,
-				["USE_OUTLINE"] = true,
-				["USE_MONO"] = false,
-			},
-		},
-		["2"] = {
-			["groupId"] = "DISPELLABLE",
-			["enabled"] = true,
-			["radioValue"] = 17,
-			["offsetX"] = 0,
-			["offsetY"] = 0,
-			["maxDisplay"] = 3,
-			["maxColumns"] = 3,
-			["maxRows"] = 1,
-			["sortRule"] = 0,
-			["sortDir"] = 0,
-			["size"] = 20,
-			["barWidth"] = 100,
-			["barHeight"] = 12,
-			["barVertical"] = false,
-			["barTurnAxis"] = false,
-			["barInvertGrowth"] = false,
-			["spacing"] = nil,
-			["style"] = "icons",
-			["growthDir"] = "LEFT",
-			["wrapDir"] = "DOWN",
-			["showTimer"] = 2,
-			["showStacks"] = 2,
-			["showTooltip"] = 2,
-			["showClock"] = 2,
-			["fadeOnLow"] = 2,
-			["flashOnLow"] = 2,
-			["dispelBorder"] = 1,
-			["colorMode"] = "default",
-			["iconType"] = 1,
-			["stackType"] = 1,
-			["fixedSlots"] = false,
-			["TIMER_TEXT"] = {
-				["ANCHOR"] = "BOTTOMRIGHT",
-				["X_ADJUST"] = 25,
-				["Y_ADJUST"] = 0,
-				["SCALE"] = 40,
-				["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-				["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1),
-				["USE_SHADOW"] = false,
-				["USE_OUTLINE"] = true,
-				["USE_MONO"] = false,
-			},
-			["COUNTER_TEXT"] = {
-				["ANCHOR"] = "TOP",
-				["X_ADJUST"] = -25,
-				["Y_ADJUST"] = 0,
-				["SCALE"] = 40,
-				["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-				["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1),
-				["USE_SHADOW"] = false,
-				["USE_OUTLINE"] = true,
-				["USE_MONO"] = false,
-			},
-		},
-		["3"] = {
-			["groupId"] = "BIG_DEFENSIVES",
-			["enabled"] = true,
-			["radioValue"] = 16,
-			["position"] = "CENTER",
-			["offsetX"] = 0,
-			["offsetY"] = 0,
-			["maxDisplay"] = 3,
-			["maxColumns"] = 3,
-			["maxRows"] = 1,
-			["sortRule"] = 0,
-			["sortDir"] = 0,
-			["size"] = 45,
-			["barWidth"] = 100,
-			["barHeight"] = 12,
-			["spacing"] = nil,
-			["style"] = "icons",
-			["growthDir"] = "RIGHT",
-			["wrapDir"] = "DOWN",
-			["showTimer"] = 3,
-			["showStacks"] = 3,
-			["showTooltip"] = 2,
-			["showClock"] = 1,
-			["fadeOnLow"] = 2,
-			["flashOnLow"] = 2,
-			["dispelBorder"] = 2,
-			["colorMode"] = "default",
-			["iconType"] = 1,
-			["stackType"] = 1,
-			["fixedSlots"] = false,
-			["TIMER_TEXT"] = {
-				["ANCHOR"] = "BOTTOMRIGHT",
-				["X_ADJUST"] = 25,
-				["Y_ADJUST"] = 0,
-				["SCALE"] = 40,
-				["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-				["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 1, 1, 1, 1),
-				["USE_SHADOW"] = false,
-				["USE_OUTLINE"] = true,
-				["USE_MONO"] = false,
-			},
-			["COUNTER_TEXT"] = {
-				["ANCHOR"] = "TOP",
-				["X_ADJUST"] = -25,
-				["Y_ADJUST"] = 0,
-				["SCALE"] = 40,
-				["FONT"] = "Interface\\AddOns\\VuhDo\\Fonts\\ariblk.ttf",
-				["COLOR"] = VUHDO_makeFullColor(0, 0, 0, 1, 0, 1, 0, 1),
-				["USE_SHADOW"] = false,
-				["USE_OUTLINE"] = true,
-				["USE_MONO"] = false,
-			},
-		},
-	},
+	["AURA_ANCHORS"] = { },
 };
 
 
 
 --
+local tAktPanel;
+local tPrivateAura;
 function VUHDO_loadDefaultPanelSetup()
-	local tAktPanel;
-	local tPrivateAura;
 
 	if not VUHDO_PANEL_SETUP then
 		VUHDO_PANEL_SETUP = VUHDO_decompressOrCopy(VUHDO_DEFAULT_PANEL_SETUP);
@@ -4314,6 +4338,7 @@ function VUHDO_loadDefaultPanelSetup()
 			VUHDO_PANEL_SETUP[tPanelNum] = VUHDO_decompressOrCopy(VUHDO_DEFAULT_PER_PANEL_SETUP);
 
 			tAktPanel = VUHDO_PANEL_SETUP[tPanelNum];
+			tAktPanel["AURA_ANCHORS"] = VUHDO_deepCopyTable(VUHDO_DEFAULT_AURA_ANCHORS);
 			tAktPanel["MODEL"]["groups"] = VUHDO_DEFAULT_MODELS[tPanelNum];
 
 			if VUHDO_DEFAULT_MODELS[tPanelNum] and VUHDO_ID_PRIVATE_TANKS == VUHDO_DEFAULT_MODELS[tPanelNum][1] then
@@ -4422,6 +4447,18 @@ function VUHDO_loadDefaultPanelSetup()
 
 				tPrivateAura["VERSION"] = 3;
 			end
+
+			if (tPrivateAura["VERSION"] or 0) < 4 then
+				if VUHDO_PANEL_SETUP["PRIVATE_AURA_SHOW_DISPEL_TYPE"] == false then
+					tPrivateAura["showDispelOverlay"] = false;
+					tPrivateAura["dispelIndicatorType"] = 0;
+				else
+					tPrivateAura["showDispelOverlay"] = true;
+					tPrivateAura["dispelIndicatorType"] = 1;
+				end
+
+				tPrivateAura["VERSION"] = 4;
+			end
 		end
 
 		if VUHDO_PANEL_SETUP["PRIVATE_AURA_SHOW_DISPEL_TYPE"] == nil then
@@ -4442,6 +4479,7 @@ function VUHDO_loadDefaultPanelSetup()
 	VUHDO_DEFAULT_PER_PANEL_SETUP = VUHDO_compressAndPackTable(VUHDO_DEFAULT_PER_PANEL_SETUP);
 
 	VUHDO_fixHotSettings();
+
 end
 
 

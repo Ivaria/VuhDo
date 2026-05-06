@@ -177,7 +177,7 @@ function VUHDO_getSpellCooldown(aSpellId)
 		return;
 	end
 
-if sSecretsEnabled then
+	if sSecretsEnabled then
 		tDuration = GetSpellCooldownDuration(aSpellId);
 
 		return tSpellCooldown.startTime, tSpellCooldown.duration, tSpellCooldown.isEnabled, tSpellCooldown.modRate, tSpellCooldown.isOnGCD, tDuration;
@@ -661,7 +661,8 @@ local tIsGuessRange;
 local tRangeSpell;
 local tUnitReaction;
 local tIsSpellInRange;
-function VUHDO_isInRange(aUnit)
+local tUnitInfo;
+function VUHDO_isInRange(aUnit, anIsForceUpdate)
 
 	if not aUnit then
 		return nil;
@@ -669,6 +670,14 @@ function VUHDO_isInRange(aUnit)
 
 	if "player" == aUnit or VUHDO_unitIsUnit(aUnit, "player") then
 		return true;
+	end
+
+	if not anIsForceUpdate and VUHDO_RAID then
+		tUnitInfo = VUHDO_RAID[aUnit];
+
+		if tUnitInfo and tUnitInfo["isEventRange"] then
+			return tUnitInfo["range"];
+		end
 	end
 
 	if VUHDO_unitPhaseReason(aUnit) then
@@ -1657,9 +1666,9 @@ local UnpackAuraData = VUHDO_unpackAuraData;
 --
 local tSpellId;
 local tAuraData;
-function VUHDO_unitAura(aUnit, aSpell, aFilter)
+function VUHDO_unitAura(aUnit, aSpell, aFilter, anAllowSecret)
 
-	if ShouldSpellAuraBeSecret(aSpell) then
+	if not anAllowSecret and ShouldSpellAuraBeSecret(aSpell) then
 		return nil;
 	end
 
@@ -1699,6 +1708,19 @@ end
 function VUHDO_unitBuff(aUnit, aSpell)
 
 	return VUHDO_unitAura(aUnit, aSpell, "HELPFUL");
+
+end
+
+
+
+--
+function VUHDO_unitBuffAllowSecret(aUnit, aSpell)
+
+	if not aUnit or not aSpell then
+		return;
+	end
+
+	return VUHDO_unitAura(aUnit, aSpell, "HELPFUL", true);
 
 end
 

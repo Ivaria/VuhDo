@@ -7,6 +7,7 @@ local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
 local strfind = string.find;
+local gsub = string.gsub;
 local strsub = string.sub;
 local format = string.format;
 
@@ -26,6 +27,7 @@ local VUHDO_AURA_IGNORE_LIST;
 local VUHDO_DEFAULT_AURA_GROUPS;
 local VUHDO_PANEL_MODELS;
 local VUHDO_PANEL_SETUP;
+local VUHDO_UNIT_BUTTONS_PANEL;
 local VUHDO_RAID;
 local VUHDO_I18N_AURA_GROUP_NAMES;
 local VUHDO_BOUQUETS;
@@ -39,8 +41,6 @@ local VUHDO_generateUUID;
 local VUHDO_determineAura;
 local VUHDO_updateAuraDisplaysForUnit;
 local VUHDO_updateEventBouquet;
-local VUHDO_strempty;
-local VUHDO_decompressIfCompressed;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
@@ -75,6 +75,8 @@ local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
 VUHDO_AURA_GROUP_COLOR_DISPEL = 2;
 VUHDO_AURA_GROUP_COLOR_CUSTOM = 3;
+
+local VUHDO_ALL_DISPELLABLE_TOKEN = "VUHDO_ALL_DISPELLABLE";
 
 local VUHDO_HOTS_RADIOVALUE_GROWTH = {
 	[1] = "LEFT",
@@ -141,6 +143,11 @@ local sAssignedAuras = { };
 local sSlotsToClear = { };
 local sSlotsToClearCount = 0;
 local sFilteredAuras = { };
+
+local sIsBatchingListAnchors = false;
+local sPendingListAnchors = { };
+
+local sDispellableFilteredResult = { };
 
 local sAuraDataPool;
 local sSlotIndexPool;
@@ -226,6 +233,7 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
 	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+	VUHDO_UNIT_BUTTONS_PANEL = _G["VUHDO_UNIT_BUTTONS_PANEL"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_I18N_AURA_GROUP_NAMES = _G["VUHDO_I18N_AURA_GROUP_NAMES"];
 	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
@@ -239,8 +247,6 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_updateAuraDisplaysForUnit"];
 	VUHDO_updateEventBouquet = _G["VUHDO_updateEventBouquet"];
-	VUHDO_strempty = _G["VUHDO_strempty"];
-	VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
 
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_deferUpdateAuraDisplaysForUnit"];
 
@@ -809,11 +815,95 @@ end
 
 
 --
+local tFilter;
+local tNative;
+function VUHDO_resolveAuraGroupFilter(aGroup)
+
+	if not aGroup then
+		return;
+	end
+
+	tFilter = aGroup["filter"];
+
+	if not tFilter then
+		aGroup["resolvedFilter"] = nil;
+		aGroup["dispellableOnly"] = nil;
+
+		return;
+	end
+
+	if strfind(tFilter, VUHDO_ALL_DISPELLABLE_TOKEN, 1, true) then
+		tNative = gsub(tFilter, "|" .. VUHDO_ALL_DISPELLABLE_TOKEN, "");
+		tNative = gsub(tNative, VUHDO_ALL_DISPELLABLE_TOKEN .. "|?", "");
+
+		if tNative == "" then
+			tNative = "HARMFUL";
+		end
+
+		aGroup["resolvedFilter"] = tNative;
+		aGroup["dispellableOnly"] = true;
+	else
+		aGroup["resolvedFilter"] = tFilter;
+		aGroup["dispellableOnly"] = nil;
+	end
+
+	return;
+
+end
+
+
+
+--
+local tAuraGroups;
+function VUHDO_resolveAllAuraGroupFilters()
+
+	for _, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
+		VUHDO_resolveAuraGroupFilter(tGroup);
+	end
+
+	tAuraGroups = VUHDO_CONFIG and VUHDO_CONFIG["AURA_GROUPS"];
+
+	for _, tGroup in pairs(tAuraGroups or sEmpty) do
+		VUHDO_resolveAuraGroupFilter(tGroup);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tAuras;
-function VUHDO_getFilteredAuras(aUnit, aFilter, aMaxCount, aSortRule, aSortDir)
+local tLimit;
+local tCnt;
+function VUHDO_getFilteredAuras(aUnit, aFilter, aMaxCount, aSortRule, aSortDir, anIsDispellableOnly)
 
 	if not aUnit or not aFilter then
 		return { };
+	end
+
+	if anIsDispellableOnly then
+		tAuras = GetUnitAuras(aUnit, aFilter, 40, aSortRule or 0, aSortDir or 0);
+
+		twipe(sDispellableFilteredResult);
+
+		tLimit = aMaxCount or 40;
+		tCnt = 0;
+
+		for _, tAura in ipairs(tAuras or sEmpty) do
+			if tAura["dispelName"] then
+				tinsert(sDispellableFilteredResult, tAura);
+
+				tCnt = tCnt + 1;
+
+				if tCnt >= tLimit then
+					break;
+				end
+			end
+		end
+
+		return sDispellableFilteredResult;
 	end
 
 	tAuras = GetUnitAuras(aUnit, aFilter, aMaxCount or 40, aSortRule or 0, aSortDir or 0);
@@ -825,8 +915,8 @@ end
 
 
 --
-local tMatches;
-function VUHDO_auraMatchesFilter(aUnit, anAuraInstanceId, aFilter)
+local tAuraMatchData;
+function VUHDO_auraMatchesFilter(aUnit, anAuraInstanceId, aFilter, anIsDispellableOnly)
 
 	if not aUnit or not anAuraInstanceId or not aFilter then
 		return false;
@@ -836,9 +926,43 @@ function VUHDO_auraMatchesFilter(aUnit, anAuraInstanceId, aFilter)
 		return false;
 	end
 
-	tMatches = not IsAuraFilteredOutByInstanceID(aUnit, anAuraInstanceId, aFilter);
+	if IsAuraFilteredOutByInstanceID(aUnit, anAuraInstanceId, aFilter) then
+		return false;
+	end
 
-	return tMatches;
+	if anIsDispellableOnly then
+		tAuraMatchData = GetAuraDataByAuraInstanceID(aUnit, anAuraInstanceId);
+
+		return tAuraMatchData ~= nil and tAuraMatchData["dispelName"] ~= nil;
+	end
+
+	return true;
+
+end
+
+
+
+--
+local tCache;
+function VUHDO_hasAnyDispellableAura(aUnit)
+
+	if not aUnit then
+		return false;
+	end
+
+	tCache = VUHDO_UNIT_AURA_CACHE[aUnit];
+
+	if not tCache then
+		return false;
+	end
+
+	for _, tAura in pairs(tCache) do
+		if tAura["isHarmful"] and tAura["dispelName"] then
+			return true;
+		end
+	end
+
+	return false;
 
 end
 
@@ -1531,6 +1655,63 @@ end
 
 
 --
+local function VUHDO_markPendingListAnchor(aPanelNum, anAnchorIndex, anAnchorConfig)
+
+	if not aPanelNum or not anAnchorIndex then
+		return;
+	end
+
+	if not sPendingListAnchors[aPanelNum] then
+		sPendingListAnchors[aPanelNum] = { };
+	end
+
+	sPendingListAnchors[aPanelNum][anAnchorIndex] = anAnchorConfig;
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_refreshListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig)
+
+	if sIsBatchingListAnchors then
+		VUHDO_markPendingListAnchor(aPanelNum, anAnchorIndex, anAnchorConfig);
+
+		return;
+	end
+
+	VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig);
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_drainPendingListAnchors(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	for tPanelNum, tAnchorMap in pairs(sPendingListAnchors) do
+		for tAnchorIndex, tAnchorConfig in pairs(tAnchorMap) do
+			VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+		end
+
+		twipe(tAnchorMap);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tTriValue;
 function VUHDO_getAnchorTriStateBool(anAnchorConfig, aFieldName, aDefaultValue)
 
@@ -1607,8 +1788,10 @@ function VUHDO_fullAuraRefresh(aUnit)
 		end
 	end
 
-	for tPanelNum = 1, 10 do
-		VUHDO_rebuildSlotAssignmentsForPanel(aUnit, tPanelNum);
+	if VUHDO_UNIT_BUTTONS_PANEL[aUnit] then
+		for tPanelNum, _ in pairs(VUHDO_UNIT_BUTTONS_PANEL[aUnit]) do
+			VUHDO_rebuildSlotAssignmentsForPanel(aUnit, tPanelNum);
+		end
 	end
 
 	VUHDO_updateAuraDisplaysForUnit(aUnit);
@@ -1665,6 +1848,9 @@ do
 			return;
 		end
 
+		twipe(sPendingListAnchors);
+		sIsBatchingListAnchors = true;
+
 		if aUpdateInfo["addedAuras"] then
 			for _, tAura in pairs(aUpdateInfo["addedAuras"]) do
 				if VUHDO_shouldCacheAura(aUnit, tAura) then
@@ -1685,6 +1871,7 @@ do
 					tCachedData["applications"] = tAura["applications"];
 					tCachedData["duration"] = tAura["duration"];
 					tCachedData["expirationTime"] = tAura["expirationTime"];
+					tCachedData["icon"] = tAura["icon"];
 				end
 
 				if tAura then
@@ -1703,6 +1890,10 @@ do
 			end
 		end
 
+		sIsBatchingListAnchors = false;
+
+		VUHDO_drainPendingListAnchors(aUnit);
+
 		VUHDO_updateAuraDisplaysForUnit(aUnit);
 
 		return;
@@ -1720,9 +1911,11 @@ do
 
 		VUHDO_checkAuraGroupSounds(aUnit, anAuraData);
 
-		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			if VUHDO_PANEL_MODELS[tPanelNum] then
-				VUHDO_checkAuraForPanelAnchors(aUnit, tPanelNum, anAuraData);
+		if VUHDO_UNIT_BUTTONS_PANEL[aUnit] then
+			for tPanelNum, _ in pairs(VUHDO_UNIT_BUTTONS_PANEL[aUnit]) do
+				if VUHDO_PANEL_MODELS[tPanelNum] then
+					VUHDO_checkAuraForPanelAnchors(aUnit, tPanelNum, anAuraData);
+				end
 			end
 		end
 
@@ -1741,17 +1934,19 @@ do
 			return;
 		end
 
-		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			if VUHDO_PANEL_MODELS[tPanelNum] then
-				tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+		if VUHDO_UNIT_BUTTONS_PANEL[aUnit] then
+			for tPanelNum, _ in pairs(VUHDO_UNIT_BUTTONS_PANEL[aUnit]) do
+				if VUHDO_PANEL_MODELS[tPanelNum] then
+					tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-				if tPanelAnchors then
-					for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
-						if tAnchorConfig["enabled"] ~= false then
-							tGroup = VUHDO_getAuraGroupRaw(tAnchorConfig["groupId"]);
+					if tPanelAnchors then
+						for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
+							if tAnchorConfig["enabled"] ~= false then
+								tGroup = VUHDO_getAuraGroupRaw(tAnchorConfig["groupId"]);
 
-							if tGroup and tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
-								VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+								if tGroup and tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
+									VUHDO_refreshListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfig);
+								end
 							end
 						end
 					end
@@ -1809,17 +2004,19 @@ do
 			end
 		end
 
-		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			if VUHDO_PANEL_MODELS[tPanelNum] then
-				tPanelAnchorsRemove = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+		if VUHDO_UNIT_BUTTONS_PANEL[aUnit] then
+			for tPanelNum, _ in pairs(VUHDO_UNIT_BUTTONS_PANEL[aUnit]) do
+				if VUHDO_PANEL_MODELS[tPanelNum] then
+					tPanelAnchorsRemove = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
-				if tPanelAnchorsRemove then
-					for tAnchorIndex, tAnchorConfigRemove in pairs(tPanelAnchorsRemove) do
-						if tAnchorConfigRemove["enabled"] ~= false then
-							tGroupRemove = VUHDO_getAuraGroup(tAnchorConfigRemove["groupId"]);
+					if tPanelAnchorsRemove then
+						for tAnchorIndex, tAnchorConfigRemove in pairs(tPanelAnchorsRemove) do
+							if tAnchorConfigRemove["enabled"] ~= false then
+								tGroupRemove = VUHDO_getAuraGroup(tAnchorConfigRemove["groupId"]);
 
-							if tGroupRemove and (tGroupRemove["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
-								VUHDO_updateListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfigRemove);
+								if tGroupRemove and (tGroupRemove["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
+									VUHDO_refreshListSlotsForAnchor(aUnit, tPanelNum, tAnchorIndex, tAnchorConfigRemove);
+								end
 							end
 						end
 					end
@@ -1860,8 +2057,8 @@ do
 
 				if tGroup then
 					if tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
-						VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig);
-					elseif VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["filter"]) then
+						VUHDO_refreshListSlotsForAnchor(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig);
+					elseif VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["resolvedFilter"], tGroup["dispellableOnly"]) then
 						if (not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["excludeFilter"]))
 							and not VUHDO_isAuraIgnored(anAuraData, tAnchorConfig["groupId"]) then
 							VUHDO_tryAddAuraToAnchor(aUnit, aPanelNum, tAnchorIndex, tAnchorConfig, anAuraData);
@@ -2006,7 +2203,7 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 	end
 
 	if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
-		VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig);
+		VUHDO_refreshListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig);
 
 		return;
 	end
@@ -2039,7 +2236,7 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 
 				if tInstanceId then
 					if tUnitCache and tUnitCache[tInstanceId] then
-						if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["filter"]) then
+						if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["resolvedFilter"], tGroup["dispellableOnly"]) then
 							if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["excludeFilter"]) then
 								if not VUHDO_isAuraIgnored(tUnitCache[tInstanceId], anAnchorConfig["groupId"]) then
 									sAssignedAuras[tInstanceId] = true;
@@ -2062,7 +2259,7 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 		if tUnitCache then
 			for tInstanceId, tAuraData in pairs(tUnitCache) do
 				if not sAssignedAuras[tInstanceId] then
-					if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["filter"]) then
+					if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["resolvedFilter"], tGroup["dispellableOnly"]) then
 						if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["excludeFilter"]) then
 							if not VUHDO_isAuraIgnored(tAuraData, anAnchorConfig["groupId"]) then
 								for tSlotIdx = 1, tMaxSlots do
@@ -2091,7 +2288,7 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 
 		if tUnitCache then
 			for tInstanceId, tAuraData in pairs(tUnitCache) do
-				if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["filter"]) then
+				if VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["resolvedFilter"], tGroup["dispellableOnly"]) then
 					if not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, tInstanceId, tGroup["excludeFilter"]) then
 						if not VUHDO_isAuraIgnored(tAuraData, anAnchorConfig["groupId"]) then
 							tSlotIndex = tSlotIndex + 1;
@@ -2264,7 +2461,7 @@ do
 			return;
 		end
 
-		tAuras = VUHDO_getFilteredAuras(aUnit, tGroup["filter"], tAnchorConfig["maxDisplay"], tAnchorConfig["sortRule"], tAnchorConfig["sortDir"]);
+		tAuras = VUHDO_getFilteredAuras(aUnit, tGroup["resolvedFilter"], tAnchorConfig["maxDisplay"], tAnchorConfig["sortRule"], tAnchorConfig["sortDir"], tGroup["dispellableOnly"]);
 
 		twipe(sFilteredAuras);
 
@@ -3153,6 +3350,10 @@ do
 
 		if tCurrentMigrationVersion == 0 then
 			for tPanelNum = 1, 10 do
+				if tPanelSetup[tPanelNum] and (not tPanelSetup[tPanelNum]["AURA_ANCHORS"] or not next(tPanelSetup[tPanelNum]["AURA_ANCHORS"])) then
+					tPanelSetup[tPanelNum]["AURA_ANCHORS"] = VUHDO_deepCopyTable(VUHDO_DEFAULT_AURA_ANCHORS);
+				end
+
 				VUHDO_migrateHotsToAuraAnchors(tPanelNum);
 				VUHDO_migrateCustomDebuffsToAuraAnchors(tPanelNum);
 			end

@@ -133,7 +133,7 @@
 
 			<Frame name="$parentEmergencyModePanel" inherits="VuhDoPanelTemplate">
 				<Size>
-					<AbsDimension x="240" y="95" />
+					<AbsDimension x="168" y="104" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="$parentLifeLeftPanel" relativePoint="TOPRIGHT">
@@ -157,7 +157,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="20" y="-43" />
+									<AbsDimension x="34" y="-26" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -174,7 +174,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="130" y="-43" />
+									<AbsDimension x="34" y="-64" />
 								</Offset>
 							</Anchor>
 						</Anchors>

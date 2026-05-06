@@ -79,8 +79,11 @@ function VUHDO_activateLayout(aName)
 
 	VUHDO_activateLayoutNoInit(aName);
 
+	VUHDO_incrementAuraAnchorConfigVersion();
+
 	VUHDO_loadVariables();
 	VUHDO_initAllBurstCaches();
+	VUHDO_resolveAllAuraGroupFilters();
 	VUHDO_initFromSpellbook();
 	VUHDO_registerAllBouquets(false);
 	VUHDO_initBuffs();

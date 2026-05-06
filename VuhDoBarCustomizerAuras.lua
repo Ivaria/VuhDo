@@ -2022,6 +2022,7 @@ do
 		tIconFrame:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(tIconFrame, tAnchor, aButton, tRelPoint, tPosX, tPosY);
 		VUHDO_PixelUtil.SetSize(tIconFrame, aWidth or 16, aHeight or 16);
+		VUHDO_PixelUtil.SetFrameLevel(tIconFrame, tIconFrame:GetParent():GetFrameLevel() + 11);
 		tIconFrame:SetAlpha(1);
 		tIconFrame:Show();
 
@@ -2215,6 +2216,15 @@ do
 
 
 	--
+	function VUHDO_isAuraDisplaySuspended()
+
+		return sAurasSuspended;
+
+	end
+
+
+
+	--
 	function VUHDO_hideAllAuras()
 
 		for tButtonName, tButtonFrames in pairs(VUHDO_AURA_FRAMES) do
@@ -2263,6 +2273,8 @@ do
 
 	--
 	function VUHDO_showAllAuras()
+
+		sEntrySettingsVersion = sEntrySettingsVersion + 1;
 
 		for tUnit, _ in pairs(VUHDO_RAID) do
 			VUHDO_updateAuraDisplaysForUnit(tUnit);
@@ -3167,6 +3179,48 @@ end
 
 
 --
+local tButtonName;
+local tButtonFrames;
+local tPanelAnchors;
+local tAnchorConfig;
+function VUHDO_repositionAuraFramesForButton(aButton, aPanelNum)
+
+	if not aButton or not aPanelNum then
+		return;
+	end
+
+	tButtonName = aButton:GetName();
+	tButtonFrames = VUHDO_AURA_FRAMES[tButtonName];
+
+	if not tButtonFrames then
+		return;
+	end
+
+	tPanelAnchors = VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"];
+
+	if not tPanelAnchors then
+		return;
+	end
+
+	for tAnchorIndex, tAnchorFrames in pairs(tButtonFrames) do
+		tAnchorConfig = tPanelAnchors[tAnchorIndex];
+
+		if tAnchorConfig then
+			for tSlotIndex, tFrame in pairs(tAnchorFrames) do
+				if tFrame then
+					VUHDO_positionAuraFrame(tFrame, aButton, tAnchorConfig, tSlotIndex, tAnchorIndex);
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tFrame;
 local tMaxSlots;
 function VUHDO_initAuraAnchorFrames(aButton, aPanelNum, anAnchorIndex, anAnchorConfig)
@@ -3187,6 +3241,12 @@ function VUHDO_initAuraAnchorFrames(aButton, aPanelNum, anAnchorIndex, anAnchorC
 		end
 
 		if tFrame then
+			tFrame["lastAuraInstanceId"] = nil;
+			tFrame["lastExpirationTime"] = nil;
+			tFrame["lastApplications"] = nil;
+			tFrame["lastIcon"] = nil;
+			tFrame["lastSettingsVersion"] = nil;
+
 			VUHDO_positionAuraFrame(tFrame, aButton, anAnchorConfig, tSlotIndex, anAnchorIndex);
 
 			tFrame:SetAlpha(0);
@@ -3307,6 +3367,10 @@ local tAnchorSlots;
 local tSlots;
 local tMaxSlots;
 function VUHDO_updateInferredAuraDisplaysForUnit(aUnit)
+
+	if sAurasSuspended then
+		return;
+	end
 
 	if not aUnit then
 		return;
@@ -4583,6 +4647,23 @@ function VUHDO_updateAuraDisplaysForUnit(aUnit)
 		if tUnitPanels[tPanelNum] then
 			VUHDO_updateAurasForAnchors(aUnit, tPanelNum);
 		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_redisplayAllUnitAuras()
+
+	if not VUHDO_RAID then
+		return;
+	end
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_updateAuraDisplaysForUnit(tUnit);
 	end
 
 	return;

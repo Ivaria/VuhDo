@@ -883,6 +883,11 @@ VUHDO_I18N_TT.K818 = "Assombrit une partie de la barre quand un debuff r\195\169
 VUHDO_I18N_TT.K819 = "Active les barres d'absorption (boucliers). D\195\169cochez pour masquer les absorptions.";
 VUHDO_I18N_TT.K820 = "Quand les boucliers d\195\169passent la vie manquante, affiche le surplus via une barre (overshield).";
 VUHDO_I18N_TT.K821 = "Affiche une barre pour l'absorption de soins. Les soins re\195\167us sont r\195\169duits jusqu'\195\160 expiration.";
+VUHDO_I18N_TT.K822 = "Show the Blizzard private aura dispel overlay.";
+VUHDO_I18N_TT.K823 = "Select when to show a dispel border or overlay (e.g. only dispellable by you).";
+VUHDO_I18N_TT.K824 = "Show the Blizzard private aura dispel overlay for standard dispellable auras (Magic, Curse, etc.).";
+VUHDO_I18N_TT.K825 = "Select when to show a dispel overlay (e.g. only dispellable by you).";
+VUHDO_I18N_TT.K826 = "Shows every dispellable harmful aura (Magic, Curse, etc.) regardless of whether your current class/spec can dispel it.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Profil par d\195\169faut";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposition \npar d\195\169faut";
@@ -1594,3 +1599,11 @@ VUHDO_I18N_SMOOTH = "Lisse";
 
 VUHDO_I18N_SHOW_HEALTH_LOSS = "Voir perte\nde vie";
 VUHDO_I18N_HEALTH_LOSS_BAR = "Barre de perte de vie";
+
+VUHDO_I18N_PRIVATE_AURA_DISPEL_OVERLAY = "Show Dispel\nOverlay";
+VUHDO_I18N_PRIVATE_AURA_DISPEL_TYPE = "Dispel Type";
+VUHDO_I18N_PRIVATE_AURA_DISPEL_DISABLED = "Disabled";
+VUHDO_I18N_PRIVATE_AURA_DISPEL_BY_ME = "My Dispellable Debuffs";
+VUHDO_I18N_PRIVATE_AURA_DISPEL_ALL = "All Dispellable Debuffs";
+
+VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE = "All Dispellable";

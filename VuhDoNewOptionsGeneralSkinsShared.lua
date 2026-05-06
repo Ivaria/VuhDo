@@ -257,6 +257,9 @@ local VUHDO_DEFAULT_PROFILES = {
 					["showBorder"] = false,
 					["iconSize"] = 40,
 					["frameLevel"] = 13,
+					["showDispelOverlay"] = true,
+					["dispelIndicatorType"] = 1,
+					["VERSION"] = 4,
 				},
 				["RAID_ICON"] = {
 					["show"] = true,
@@ -1019,6 +1022,9 @@ local VUHDO_DEFAULT_PROFILES = {
 					["showBorder"] = false,
 					["iconSize"] = 40,
 					["frameLevel"] = 13,
+					["showDispelOverlay"] = true,
+					["dispelIndicatorType"] = 1,
+					["VERSION"] = 4,
 				},
 				["RAID_ICON"] = {
 					["show"] = true,
@@ -1208,6 +1214,9 @@ local VUHDO_DEFAULT_PROFILES = {
 					["showBorder"] = false,
 					["iconSize"] = 40,
 					["frameLevel"] = 13,
+					["showDispelOverlay"] = true,
+					["dispelIndicatorType"] = 1,
+					["VERSION"] = 4,
 				},
 				["RAID_ICON"] = {
 					["show"] = true,
@@ -1389,6 +1398,9 @@ local VUHDO_DEFAULT_PROFILES = {
 					["showBorder"] = false,
 					["iconSize"] = 40,
 					["frameLevel"] = 13,
+					["showDispelOverlay"] = true,
+					["dispelIndicatorType"] = 1,
+					["VERSION"] = 4,
 				},
 				["RAID_ICON"] = {
 					["show"] = true,
@@ -1570,6 +1582,9 @@ local VUHDO_DEFAULT_PROFILES = {
 					["showBorder"] = false,
 					["iconSize"] = 40,
 					["frameLevel"] = 13,
+					["showDispelOverlay"] = true,
+					["dispelIndicatorType"] = 1,
+					["VERSION"] = 4,
 				},
 				["RAID_ICON"] = {
 					["show"] = true,
@@ -2773,6 +2788,10 @@ function VUHDO_loadProfileNoInit(aName)
 	end
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
+		if tProfile["PANEL_SETUP"] and tProfile["PANEL_SETUP"][tPanelNum] and tProfile["PANEL_SETUP"][tPanelNum]["AURA_ANCHORS"] and VUHDO_PANEL_SETUP[tPanelNum] then
+			VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"] = VUHDO_deepCopyTable(tProfile["PANEL_SETUP"][tPanelNum]["AURA_ANCHORS"]);
+		end
+
 		if tPanelPositions and tPanelPositions[tPanelNum] then
 			VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = VUHDO_deepCopyTable(tPanelPositions[tPanelNum]);
 		end
@@ -2820,9 +2839,13 @@ end
 function VUHDO_loadProfile(aName)
 
 	VUHDO_loadProfileNoInit(aName);
+
+	VUHDO_incrementAuraAnchorConfigVersion();
+
 	VUHDO_clearBackdropCache();
 	VUHDO_initAllBurstCaches();
 	VUHDO_loadVariables();
+	VUHDO_resolveAllAuraGroupFilters();
 	VUHDO_initPanelModels();
 	VUHDO_initDynamicPanelModels();
 	VUHDO_registerAllBouquets(false);
