@@ -73,6 +73,7 @@ local VUHDO_updateAllCyclicBouquets;
 local VUHDO_updateAllDebuffIcons;
 local VUHDO_updateAllAggro;
 local VUHDO_updateAllRange;
+local VUHDO_updateUnitRange;
 local VUHDO_updateAllVisibilityCharmRange;
 local VUHDO_updateAllClusters;
 local VUHDO_updateClusterHighlights;
@@ -570,6 +571,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_initAllEventBouquets = _G["VUHDO_initAllEventBouquets"];
 	VUHDO_updateAllAggro = _G["VUHDO_updateAllAggro"];
 	VUHDO_updateAllRange = _G["VUHDO_updateAllRange"];
+	VUHDO_updateUnitRange = _G["VUHDO_updateUnitRange"];
 	VUHDO_updateAllVisibilityCharmRange = _G["VUHDO_updateAllVisibilityCharmRange"];
 	VUHDO_cleanupSpellTraceForUnit = _G["VUHDO_cleanupSpellTraceForUnit"];
 	VUHDO_clearAllSpellTraces = _G["VUHDO_clearAllSpellTraces"];
@@ -1082,6 +1084,8 @@ do
 				VUHDO_cancelPendingTargetFocusInspect("focus");
 
 				if VUHDO_RAID["focus"] then
+					VUHDO_updateUnitRange("focus");
+
 					VUHDO_determineIncHeal("focus");
 					VUHDO_updateHealth("focus", 9); -- VUHDO_UPDATE_INC
 				end
@@ -1132,6 +1136,7 @@ do
 				VUHDO_updateBouquetsForEvent("focus", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
 
 				VUHDO_updatePanelVisibility();
+
 			end
 
 		elseif "PARTY_MEMBER_ENABLE" == anEvent or "PARTY_MEMBER_DISABLE" == anEvent then

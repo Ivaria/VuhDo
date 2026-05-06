@@ -198,6 +198,7 @@ function VUHDO_updateUnitRange(aUnit, aMode)
 			tUnitInfo["range"] = tIsInRange;
 
 			VUHDO_updateHealthBarsFor(aUnit, 5);
+			VUHDO_updateBouquetsForEvent(aUnit, 5);
 
 			if VUHDO_getIsDirectionArrow() and VUHDO_getCurrentMouseOver() == aUnit
 				and (VuhDoDirectionFrame["shown"] or VUHDO_CONFIG["DIRECTION"]["isAlways"]) then
@@ -208,6 +209,7 @@ function VUHDO_updateUnitRange(aUnit, aMode)
 				tUnitInfo["range"] = tIsInRange;
 
 				VUHDO_updateHealthBarsFor(aUnit, 5);
+				VUHDO_updateBouquetsForEvent(aUnit, 5);
 
 				if VUHDO_getIsDirectionArrow() and VUHDO_getCurrentMouseOver() == aUnit
 					and (VuhDoDirectionFrame["shown"] or (not tIsInRange or VUHDO_CONFIG["DIRECTION"]["isAlways"])) then
@@ -225,6 +227,7 @@ end
 
 --
 local tUnitInfo;
+local tPolledRange;
 function VUHDO_onUnitInRangeUpdate(aUnit, anIsInRange)
 
 	if not VUHDO_RAID then
@@ -245,9 +248,21 @@ function VUHDO_onUnitInRangeUpdate(aUnit, anIsInRange)
 	end
 
 	if sSecretsEnabled and tUnitInfo["hasSecretRange"] then
+		tPolledRange = VUHDO_isInRange(aUnit, true);
+
+		if not issecretvalue(tPolledRange) then
+			anIsInRange = tPolledRange;
+			tUnitInfo["baseRange"] = anIsInRange;
+
+			tUnitInfo["hasSecretRange"] = false;
+		end
+	end
+
+	if sSecretsEnabled and tUnitInfo["hasSecretRange"] then
 		tUnitInfo["range"] = anIsInRange;
 
 		VUHDO_updateHealthBarsFor(aUnit, 5);
+		VUHDO_updateBouquetsForEvent(aUnit, 5);
 
 		if VUHDO_getIsDirectionArrow() and VUHDO_getCurrentMouseOver() == aUnit
 			and (VuhDoDirectionFrame["shown"] or VUHDO_CONFIG["DIRECTION"]["isAlways"]) then
@@ -258,6 +273,7 @@ function VUHDO_onUnitInRangeUpdate(aUnit, anIsInRange)
 			tUnitInfo["range"] = anIsInRange;
 
 			VUHDO_updateHealthBarsFor(aUnit, 5);
+			VUHDO_updateBouquetsForEvent(aUnit, 5);
 
 			if VUHDO_getIsDirectionArrow() and VUHDO_getCurrentMouseOver() == aUnit
 				and (VuhDoDirectionFrame["shown"] or (not anIsInRange or VUHDO_CONFIG["DIRECTION"]["isAlways"])) then
@@ -291,6 +307,8 @@ function VUHDO_updateUnitVisibilityCharmRange(aUnit)
 
 	if not tUnitInfo["isEventRange"] then
 		tUnitInfo["baseRange"] = "player" == aUnit or "pet" == aUnit or UnitInRange(aUnit);
+
+		VUHDO_updateUnitRange(aUnit);
 	end
 
 	tIsCharmed = UnitIsCharmed(aUnit) and UnitCanAttack("player", aUnit) and not tUnitInfo["dead"];
