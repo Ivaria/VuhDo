@@ -218,6 +218,28 @@ end
 
 ----------------------------------------------------
 
+--
+function VUHDO_getPlayerUnit()
+
+	return VUHDO_PLAYER_RAID_ID or "player";
+
+end
+
+
+
+--
+local tPlayerUnit;
+function VUHDO_getPlayerRaidInfo()
+
+	tPlayerUnit = VUHDO_PLAYER_RAID_ID or "player";
+
+	return VUHDO_RAID[tPlayerUnit];
+
+end
+
+
+
+--
 local VUHDO_UNIT_AFK_DC = { };
 
 
@@ -691,9 +713,12 @@ end
 
 
 -- Add to groups 1-8
+local tPlayerUnit;
 local function VUHDO_addUnitToGroup(aUnit, aGroupNum)
 
-	if "player" ~= aUnit or not VUHDO_CONFIG["OMIT_SELF"] then
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
+	if tPlayerUnit ~= aUnit or not VUHDO_CONFIG["OMIT_SELF"] then
 		if not VUHDO_CONFIG["OMIT_OWN_GROUP"] or aGroupNum ~= VUHDO_PLAYER_GROUP then
 			tinsert(VUHDO_GROUPS[aGroupNum] or {}, aUnit);
 		end
@@ -708,9 +733,12 @@ end
 
 
 --
+local tPlayerUnit;
 local function VUHDO_addUnitToClass(aUnit, aClassId)
 
-	if ("player" ~= aUnit or not VUHDO_CONFIG["OMIT_SELF"]) and aClassId then
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
+	if (tPlayerUnit ~= aUnit or not VUHDO_CONFIG["OMIT_SELF"]) and aClassId then
 		tinsert(VUHDO_GROUPS[aClassId], aUnit);
 	end
 
@@ -815,9 +843,13 @@ end
 
 
 --
+local tPlayerUnit;
 local tRole;
 local function VUHDO_addUnitToRole(aUnit)
-	if "player" == aUnit and VUHDO_CONFIG["OMIT_SELF"] then return; end
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
+	if tPlayerUnit == aUnit and VUHDO_CONFIG["OMIT_SELF"] then return; end
 
 	tRole = VUHDO_RAID[aUnit]["role"] or 62; -- -- VUHDO_ID_RANGED_DAMAGE
 
@@ -857,7 +889,7 @@ local function VUHDO_updateGroupArrays(anWasMacroRestore)
 			VUHDO_addUnitToPets(tUnit);
 		end
 	end
-	VUHDO_GROUPS[80][1] = "player"; -- VUHDO_ID_SELF
+	VUHDO_GROUPS[80][1] = VUHDO_getPlayerUnit(); -- VUHDO_ID_SELF
 	VUHDO_GROUPS[81][1] = "pet"; -- VUHDO_ID_SELF_PET
 	VUHDO_GROUPS[82][1] = "target"; -- VUHDO_ID_TARGET
 	VUHDO_GROUPS[83][1] = "focus"; -- VUHDO_ID_FOCUS
@@ -995,6 +1027,8 @@ function VUHDO_reloadRaidMembers()
 
 	VUHDO_IS_SUSPICIOUS_ROSTER = false;
 
+	VUHDO_PLAYER_RAID_ID = VUHDO_getPlayerRaidUnit();
+
 	if GetNumGroupMembers() == 0 and not UnitExists("party1") and not sIsRestoredAfterDc then
 		VUHDO_IN_COMBAT_RELOG = true;
 		tWasRestored = VUHDO_buildRaidFromMacro();
@@ -1010,7 +1044,6 @@ function VUHDO_reloadRaidMembers()
 		VUHDO_updateAllRaidNames();
 
 	else
-		VUHDO_PLAYER_RAID_ID = VUHDO_getPlayerRaidUnit();
 		VUHDO_IN_COMBAT_RELOG = false;
 		sIsRestoredAfterDc = true;
 		tUnit, tPetUnit = VUHDO_getUnitIds();
@@ -1024,13 +1057,15 @@ function VUHDO_reloadRaidMembers()
 
 		for tCnt = 1, tMaxMembers do
 			tPlayer = tUnit .. tCnt;
-			if UnitExists(tPlayer) and tPlayer ~= VUHDO_PLAYER_RAID_ID then
+			if UnitExists(tPlayer) and (tPlayer ~= VUHDO_PLAYER_RAID_ID or (IsInRaid() and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"])) then
 				VUHDO_setHealth(tPlayer, 1); -- VUHDO_UPDATE_ALL
 				VUHDO_setHealthSafe(tPetUnit .. tCnt, 1); -- VUHDO_UPDATE_ALL
 			end
 		end
 
-		VUHDO_setHealthSafe("player", 1); -- VUHDO_UPDATE_ALL
+		if not (IsInRaid() and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"]) then
+			VUHDO_setHealthSafe("player", 1); -- VUHDO_UPDATE_ALL
+		end
 		VUHDO_setHealthSafe("pet", 1); -- VUHDO_UPDATE_ALL
 		VUHDO_setHealthSafe("focus", 1); -- VUHDO_UPDATE_ALL
 
@@ -1120,7 +1155,7 @@ function VUHDO_refreshRaidMembers()
 	for tCnt = 1, tMaxMembers do
 		tPlayer = tUnitType .. tCnt;
 
-		if UnitExists(tPlayer) and tPlayer ~= VUHDO_PLAYER_RAID_ID then
+		if UnitExists(tPlayer) and (tPlayer ~= VUHDO_PLAYER_RAID_ID or (VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] and IsInRaid())) then
 			tInfo = VUHDO_RAID[tPlayer];
 			tGuid = UnitGUID(tPlayer);
 
@@ -1167,7 +1202,9 @@ function VUHDO_refreshRaidMembers()
 		end
 	end
 
-	VUHDO_setHealthSafe("player", 1); -- VUHDO_UPDATE_ALL
+	if not (VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] and IsInRaid()) then
+		VUHDO_setHealthSafe("player", 1); -- VUHDO_UPDATE_ALL
+	end
 	VUHDO_setHealthSafe("pet", 1); -- VUHDO_UPDATE_ALL
 	VUHDO_setHealthSafe("focus", 1); -- VUHDO_UPDATE_ALL
 

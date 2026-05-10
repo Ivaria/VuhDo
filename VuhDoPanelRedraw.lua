@@ -12,6 +12,8 @@ local max = math.max;
 
 local InCombatLockdown = InCombatLockdown;
 local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor;
+local UnitIsUnit = UnitIsUnit;
+local IsInRaid = IsInRaid;
 
 local VUHDO_getFont;
 local VUHDO_getHealthBar;
@@ -628,6 +630,7 @@ do
 	local tButtonIndex;
 	local tModelArray;
 	local tPanelName;
+	local tButtonUnit;
 	function VUHDO_positionAllHealButtons(aPanel, aPanelNum)
 
 		tModelArray = VUHDO_getDynamicModelArray(aPanelNum);
@@ -2273,6 +2276,7 @@ do
 	local tXPos;
 	local tYPos;
 	local tPanel;
+	local tButtonUnit;
 	function VUHDO_deferPositionHealButtonDelegate(aUnit, aPanelNum, aButtonIndex, aModelIndex, aModelId, aGroupIndex, aColumnIndex)
 
 		tHealButton = VUHDO_getOrCreateHealButton(aButtonIndex, aPanelNum);

@@ -1,5 +1,8 @@
 local _;
 
+local UnitIsUnit = UnitIsUnit;
+local IsInRaid = IsInRaid;
+
 -- BURST CACHE ---------------------------------------------------
 local _G = _G;
 
@@ -148,6 +151,7 @@ local tFallbackRow;
 local tCleanupButton;
 local tFallbackUnit;
 local tDebuffFrame;
+local tButtonUnit;
 local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 	if InCombatLockdown() then
@@ -169,20 +173,20 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 
 		for tGroupIdx, tUnit in ipairs(tGroupArray) do
 
-			tButton = VUHDO_getOrCreateHealButton(tButtonIdx, aPanelNum);
-			tButtonIdx = tButtonIdx + 1;
+		tButton = VUHDO_getOrCreateHealButton(tButtonIdx, aPanelNum);
+		tButtonIdx = tButtonIdx + 1;
 
-			if tButton["raidid"] ~= tUnit then
-				VUHDO_setupAllHealButtonAttributes(tButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
+		if tButton["raidid"] ~= tUnit then
+			VUHDO_setupAllHealButtonAttributes(tButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
 
-				if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
-					VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tButton), tUnit);
-				end
-
-				if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
-					VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tButton), tUnit);
-				end
+			if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
+				VUHDO_setupAllTargetButtonAttributes(VUHDO_getTargetButton(tButton), tUnit);
 			end
+
+			if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTot"] then
+				VUHDO_setupAllTotButtonAttributes(VUHDO_getTotButton(tButton), tUnit);
+			end
+		end
 
 			tX, tY = VUHDO_getHealButtonPos(tColIdx, tGroupIdx, aPanelNum);
 			if VUHDO_isDifferentButtonPoint(tButton, tX, -tY) then

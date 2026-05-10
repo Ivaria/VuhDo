@@ -97,15 +97,19 @@ end
 
 
 --
+local tPlayerUnit;
 local tDestCluster = { };
 local tInfo, tSrcInfo;
 local tSrcGroup;
 function VUHDO_getCustomDestCluster(aUnit, anArray, anIsSourcePlayer, anIsRadial, aRangePow, aNumMaxTargets, aHealthLimit, anIsRaid, aCdSpell, aCone, aJumpRangePow, aAreTargetsRandom)
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
 	-- If targets are random, return ALL targets in range, so the caller can determine the average heals
 	if aAreTargetsRandom then aNumMaxTargets = 100; end
 
 	twipe(anArray);
-	if anIsSourcePlayer and aUnit ~= "player" then return 0; end
+	if anIsSourcePlayer and aUnit ~= tPlayerUnit then return 0; end
 
 	tSrcInfo = VUHDO_RAID[aUnit];
 	if not tSrcInfo or tSrcInfo["isPet"] or "focus" == aUnit or "target" == aUnit then return 0; end

@@ -170,7 +170,11 @@ end
 
 
 --
+local tPlayerInfo;
 local function VUHDO_initShieldValue(aUnit, aShieldName, anAmount, aDuration)
+
+	tPlayerInfo = VUHDO_getPlayerRaidInfo();
+
 	if (anAmount or 0) == 0 then
 		--VUHDO_xMsg("ERROR: Failed to init shield " .. aShieldName .. " on " .. aUnit, anAmount);
 		return;
@@ -178,11 +182,11 @@ local function VUHDO_initShieldValue(aUnit, aShieldName, anAmount, aDuration)
 
 	VUHDO_SHIELD_LEFT[aUnit][aShieldName] = anAmount;
 
-	if sIsPumpAegis and VUHDO_PUMP_SHIELDS[aShieldName] then
-		if sSecretsEnabled and VUHDO_RAID["player"] and VUHDO_RAID["player"]["hasSecretHealthMax"] then
+	if sIsPumpAegis and VUHDO_PUMP_SHIELDS[aShieldName] and tPlayerInfo then
+		if sSecretsEnabled and tPlayerInfo["hasSecretHealthMax"] then
 			VUHDO_SHIELD_SIZE[aUnit][aShieldName] = 0;
 		else
-			VUHDO_SHIELD_SIZE[aUnit][aShieldName] = VUHDO_RAID["player"]["healthmax"] * VUHDO_PUMP_SHIELDS[aShieldName];
+			VUHDO_SHIELD_SIZE[aUnit][aShieldName] = tPlayerInfo["healthmax"] * VUHDO_PUMP_SHIELDS[aShieldName];
 		end
 	else
 		VUHDO_SHIELD_SIZE[aUnit][aShieldName] = anAmount;

@@ -179,14 +179,17 @@ end
 
 
 --
+local tPlayerUnit;
 function VUHDO_tryInspectNext()
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		if VUHDO_shouldBeInspected(tUnit) then
 			VUHDO_NEXT_INSPECT_TIME_OUT = GetTime() + VUHDO_INSPECT_TIMEOUT;
 			VUHDO_NEXT_INSPECT_UNIT = tUnit;
 
-			if "player" == tUnit then
+			if tPlayerUnit == tUnit then
 				VUHDO_inspectLockRole();
 			else
 				NotifyInspect(tUnit);
@@ -251,6 +254,7 @@ end
 
 
 --
+local tPlayerUnit;
 local tActiveTree;
 local tInfo;
 local tClassId;
@@ -258,13 +262,15 @@ local tRole;
 local tTreeId;
 function VUHDO_inspectRole(aUnit)
 
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
 	tInfo = VUHDO_RAID[aUnit];
 
 	if not tInfo then 
 		return VUHDO_ID_UNDEFINED;
 	end
 
-	if "player" == aUnit then
+	if tPlayerUnit == aUnit then
 		tActiveTree = GetSpecialization();
 
 		if not tActiveTree then

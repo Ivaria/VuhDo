@@ -366,9 +366,13 @@ end
 
 
 --
+local tPlayerUnit;
 local tIsRuneReady;
 local function VUHDO_runesEqualsValidator(anInfo, aSomeCustom)
-	if anInfo["unit"] ~= "player" then
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
+	if anInfo["unit"] ~= tPlayerUnit then
 		return false, nil, -1, -1, -1;
 	elseif anInfo["connected"] and not anInfo["dead"] then
 		tPower = 0;

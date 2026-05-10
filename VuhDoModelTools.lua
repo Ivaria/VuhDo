@@ -151,13 +151,16 @@ local VUHDO_isUnitInModelIterative = VUHDO_isUnitInModelIterative;
 
 
 --
+local tPlayerUnit;
 local tModelType;
 function VUHDO_isUnitInModel(aUnit, aModelId)
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
 
 	tModelType = VUHDO_getModelType(aModelId);
 
 	if 2 == tModelType then -- VUHDO_ID_TYPE_GROUP
-		if aModelId == VUHDO_ID_GROUP_OWN and aUnit == "player" then
+		if aModelId == VUHDO_ID_GROUP_OWN and aUnit == tPlayerUnit then
 			return true;
 		end
 

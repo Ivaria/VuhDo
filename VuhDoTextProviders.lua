@@ -203,12 +203,15 @@ end
 
 
 --
+local tPlayerUnit;
 local tReadyRuneCount;
 local tReadyRuneMax;
 local tIsRuneReady;
 local function VUHDO_runesCalculator(anInfo)
 
-	if anInfo["connected"] and not anInfo["dead"] and anInfo["unit"] == "player" then
+	tPlayerUnit = VUHDO_getPlayerUnit();
+
+	if anInfo["connected"] and not anInfo["dead"] and anInfo["unit"] == tPlayerUnit then
 		tReadyRuneCount = 0;
 
 		for i = 1, 6 do

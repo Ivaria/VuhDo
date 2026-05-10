@@ -137,6 +137,7 @@ end
 
 --
 local tSuccess;
+local tPlayerInfo;
 local tInfo;
 local tLocalClass;
 local tClassName;
@@ -147,6 +148,8 @@ local function VUHDO_fillCustomInfo(aUnit)
 	if not aUnit then
 		return;
 	end
+
+	tPlayerInfo = VUHDO_getPlayerRaidInfo();
 
 	tSuccess, tLocalClass, tClassName = pcall(UnitClass, aUnit);
 
@@ -200,7 +203,7 @@ local function VUHDO_fillCustomInfo(aUnit)
 
 	tInfo["classId"] = VUHDO_CLASS_IDS[tClassName];
 	tInfo["fullName"] = tName;
-	tInfo["zone"], tInfo["map"] = (VUHDO_RAID["player"] or { })["zone"], (VUHDO_RAID["player"] or { })["map"];
+	tInfo["zone"], tInfo["map"] = (tPlayerInfo or { })["zone"], (tPlayerInfo or { })["map"];
 	tInfo["fixResolveId"] = nil;
 
 	tInfo["raidIcon"] = VUHDO_safeCall(GetRaidTargetIndex, aUnit, nil);

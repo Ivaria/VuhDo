@@ -189,7 +189,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	sValidatorEntryPool = VUHDO_createTablePool("ValidatorEntry", 200);
 	sUnitBouquetActivePool = VUHDO_createTablePool("UnitBouquetActive", 50);
 
-	sPlayerArray["player"] = VUHDO_RAID["player"];
+	sPlayerArray["player"] = VUHDO_getPlayerRaidInfo();
 
 	return;
 
