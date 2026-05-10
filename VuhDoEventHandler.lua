@@ -1694,6 +1694,27 @@ do
 				VUHDO_auraHelp();
 			end
 
+		elseif strfind(tCommandWord, "shad") then
+			if not VUHDO_CONFIG or not VUHDO_CONFIG["COMBAT_ROSTER"] then
+				VUHDO_Msg("Combat roster configuration not available.", 1, 0.4, 0.4);
+
+				return;
+			end
+
+			if InCombatLockdown() then
+				VUHDO_Msg("Command not available during combat.", 1, 0.4, 0.4);
+
+				return;
+			end
+
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "debug" then
+				VUHDO_setSecureDebugEnabled(not VUHDO_CONFIG["COMBAT_ROSTER"]["debug"]);
+			else
+				VUHDO_debugSecureEnvironment();
+			end
+
 		elseif tCommandWord == "ab" or tCommandWord == "about" then
 			VUHDO_printAbout();
 
