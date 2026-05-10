@@ -872,6 +872,13 @@ local VUHDO_DEFAULT_CONFIG = {
 	["IS_SCAN_TALENTS"] = true,
 	["IS_CLIQUE_COMPAT_MODE"] = false,
 	["IS_CLIQUE_PASSTHROUGH"] = false,
+
+	["COMBAT_ROSTER"] = {
+		["enabled"] = true,
+		["fallbackPanels"] = { 1 },
+		["debug"] = false,
+	},
+
 	["DIRECTION"] = {
 		["enable"] = true,
 		["isDistanceText"] = false,

@@ -11,6 +11,7 @@
 	<Script file="VuhDoBarCustomizerTarget.lua" />
 	<Script file="VuhDoBarCustomizerThreat.lua" />
 	<Script file="VuhDoPanel.lua" />
+	<Script file="VuhDoSecureShadowHeader.lua" />
 	<Script file="VuhDoPanelRefresh.lua" />
 	<Script file="VuhDoPanelRedrawCustomDebuffs.lua" />
 	<Script file="VuhDoPanelRedrawHeaders.lua" />
@@ -821,5 +822,18 @@
 			</OnMouseUp>
 		 </Scripts>
 	</Frame>
+
+	<Frame name="VuhDoSecureManagerFrame" parent="UIParent" hidden="false" inherits="SecureHandlerBaseTemplate,SecureHandlerAttributeTemplate,SecureHandlerStateTemplate">
+	</Frame>
+
+	<Button name="VuhDoShadowButtonTemplate" virtual="true" inherits="SecureUnitButtonTemplate,SecureHandlerAttributeTemplate">
+		<Size>
+			<AbsDimension x="0" y="0"/>
+		</Size>
+	</Button>
+
+	<Frame name="VuhDoShadowGroupHeader" parent="UIParent" inherits="SecureGroupHeaderTemplate">
+	</Frame>
+
 </Ui>
 

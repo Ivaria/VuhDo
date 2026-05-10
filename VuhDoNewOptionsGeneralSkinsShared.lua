@@ -109,6 +109,11 @@ local VUHDO_DEFAULT_PROFILES = {
 				["showIncomingBossOnly"] = false,
 			},
 			["SHOW_TEXT_OVERHEAL"] = true,
+			["COMBAT_ROSTER"] = {
+				["enabled"] = true,
+				["fallbackPanels"] = { 1 },
+				["debug"] = false,
+			},
 		},
 
 		["LOCKED"] = false,
@@ -823,6 +828,11 @@ local VUHDO_DEFAULT_PROFILES = {
 			["USE_DEFERRED_REDRAW"] = true,
 			["LOCK_CLICKS_THROUGH"] = false,
 			["SHOW_TEXT_OVERHEAL"] = true,
+			["COMBAT_ROSTER"] = {
+				["enabled"] = true,
+				["fallbackPanels"] = { 1 },
+				["debug"] = false,
+			},
 			["SPELL_TRACE"] = {
 				["isMine"] = true,
 				["isOthers"] = false,

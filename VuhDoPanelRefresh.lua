@@ -1,3 +1,6 @@
+local _;
+
+-- BURST CACHE ---------------------------------------------------
 local _G = _G;
 
 local table = table;
@@ -90,6 +93,8 @@ function VUHDO_panelRefreshInitLocalOverrides()
 
 	sShowPanels = VUHDO_CONFIG["SHOW_PANELS"];
 
+	return;
+
 end
 
 
@@ -118,8 +123,34 @@ local tX;
 local tY;
 local tButton;
 local tGroupArray;
+local tFallbackPanels;
+local tIsFallbackPanel;
+local tFallbackStartIdx;
+local tUnitType;
+local tPetUnitType;
+local tMaxGroupMembers;
+local tMaxRows;
+local tLastModelIndex;
+local tLastModelId;
+local tLastGroupArray;
+local tLastColumnUnits;
+local tFallbackStartCol;
+local tFallbackStartRow;
+local tTotalFallbackButtons;
+local tFallbackStart;
+local tFallbackCount;
+local tUnitPrefix;
+local tFallbackButtonIndex;
+local tFallbackCol;
+local tFallbackRow;
+local tCleanupButton;
+local tFallbackUnit;
 local tDebuffFrame;
 local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
+
+	if InCombatLockdown() then
+		return;
+	end
 
 	tSetup = VUHDO_PANEL_SETUP[aPanelNum];
 	tModels = VUHDO_getDynamicModelArray(aPanelNum);
@@ -168,18 +199,101 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 		tColIdx = tColIdx + 1;
 	end
 
-	while true do
-		tButton = VUHDO_getHealButton(tButtonIdx, aPanelNum);
+	if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
+		tFallbackPanels = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanels"] or { 1 };
+		tIsFallbackPanel = false;
 
-		if not tButton then
+		for tFallbackIdx = 1, #tFallbackPanels do
+			if tFallbackPanels[tFallbackIdx] == aPanelNum then
+				tIsFallbackPanel = true;
+				break;
+			end
+		end
+
+		if tIsFallbackPanel then
+			if not VUHDO_isSecureShadowHeaderReady() then
+				return;
+			end
+
+			tFallbackStartIdx = tButtonIdx;
+
+			tUnitType, tPetUnitType = VUHDO_getUnitIds();
+
+			if tUnitType == "raid" then
+				tMaxGroupMembers = GetNumGroupMembers();
+			elseif tUnitType == "party" then
+				tMaxGroupMembers = 4;
+			else
+				tMaxGroupMembers = 0;
+			end
+
+			if VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["arrangeHorizontal"] then
+				tMaxRows = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["maxColumnsWhenStructured"];
+			else
+				tMaxRows = VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["maxRowsWhenLoose"];
+			end
+
+			tLastModelIndex = #tModels;
+			tLastModelId = tModels[tLastModelIndex];
+			tLastGroupArray = VUHDO_getGroupMembersSorted(tLastModelId, tSortBy, aPanelNum, tLastModelIndex);
+			tLastColumnUnits = #tLastGroupArray;
+
+			tFallbackStartCol = tColIdx - 1;
+			tFallbackStartRow = tLastColumnUnits + 1;
+
+			tTotalFallbackButtons = 0;
+			tFallbackStart = tMaxGroupMembers + 1;
+			tFallbackCount = 40 - tMaxGroupMembers;
+			tUnitPrefix = (tUnitType == "raid") and "raid" or "party";
+
+			if tFallbackStart and tFallbackCount > 0 then
+				for tUnitIdx = tFallbackStart, tFallbackStart + tFallbackCount - 1 do
+					tFallbackUnit = tUnitPrefix .. tUnitIdx;
+					tButtonIdx = tFallbackStartIdx + tTotalFallbackButtons;
+					tTotalFallbackButtons = tTotalFallbackButtons + 1;
+
+					tButton = VUHDO_getOrCreateHealButton(tButtonIdx, aPanelNum);
+
+					VUHDO_initLocalVars(aPanelNum);
+					VUHDO_initHealButton(tButton, aPanelNum);
+					VUHDO_positionHealButton(tButton, aPanelNum);
+					VUHDO_setupAllHealButtonAttributes(tButton, nil, false, false, false, false);
+
+					tButton["raidid"] = nil;
+
+					tFallbackButtonIndex = tTotalFallbackButtons;
+					tFallbackCol = tFallbackStartCol;
+					tFallbackRow = tFallbackStartRow + tFallbackButtonIndex - 1;
+
+					tX, tY = VUHDO_getHealButtonPos(tFallbackCol, tFallbackRow, aPanelNum);
+
+					if VUHDO_isDifferentButtonPoint(tButton, tX, -tY) then
+						tButton:ClearAllPoints();
+						VUHDO_PixelUtil.SetPoint(tButton, "TOPLEFT", tPanelName, "TOPLEFT", tX, -tY);
+					end
+
+					tButton:Hide();
+				end
+			end
+
+			VUHDO_setSecureFallbackButtonStart(aPanelNum, tFallbackStartIdx);
+
+			tButtonIdx = tFallbackStartIdx + tTotalFallbackButtons;
+		end
+	end
+
+	while true do
+		tCleanupButton = VUHDO_getHealButton(tButtonIdx, aPanelNum);
+
+		if not tCleanupButton then
 			break;
 		end
 
-		tButton["raidid"] = nil;
-		VUHDO_safeSetAttribute(tButton, "unit", nil);
+		tCleanupButton["raidid"] = nil;
+		VUHDO_safeSetAttribute(tCleanupButton, "unit", nil);
 
 		for tDebuffCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-			tDebuffFrame = VUHDO_getBarIconFrame(tButton, tDebuffCnt);
+			tDebuffFrame = VUHDO_getBarIconFrame(tCleanupButton, tDebuffCnt);
 
 			if tDebuffFrame then
 				VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
@@ -187,9 +301,10 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			end
 		end
 
-		VUHDO_clearUnitAuraFrames(tButton);
+		VUHDO_clearUnitAuraFrames(tCleanupButton);
 
-		VUHDO_PixelUtil.Hide(tButton);
+		VUHDO_PixelUtil.Hide(tCleanupButton);
+
 		tButtonIdx = tButtonIdx + 1;
 	end
 
@@ -293,6 +408,11 @@ function VUHDO_refreshUI()
 	VUHDO_IS_RELOADING = true;
 
 	VUHDO_reloadRaidMembers();
+
+	if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] and not InCombatLockdown() then
+		VUHDO_computeAndPushSecureMappings();
+	end
+
 	VUHDO_refreshUiNoMembers();
 
 	VUHDO_IS_RELOADING = false;
@@ -857,4 +977,76 @@ function VUHDO_removePrivateAuras(aButton)
 
 	return;
 
+end
+
+
+
+--
+do
+	--
+	local tUnitMappings = { };
+	local tFallbackPanels;
+	local tModels;
+	local tSetup;
+	local tSortBy;
+	local tButtonIdx;
+	local tColIdx;
+	local tGroupArray;
+	local tUnitCount;
+	function VUHDO_computeAndPushSecureMappings()
+
+		if InCombatLockdown() then
+			return false;
+		end
+
+		VUHDO_clearSecureMappings();
+
+		table.wipe(tUnitMappings);
+
+		tFallbackPanels = VUHDO_CONFIG["COMBAT_ROSTER"]["fallbackPanels"] or { 1 };
+
+		VUHDO_setSecureFallbackPanels(tFallbackPanels);
+
+		for tPanelNum = 1, 10 do
+			if VUHDO_isPanelVisible(tPanelNum) then
+				tModels = VUHDO_getDynamicModelArray(tPanelNum);
+				tSetup = VUHDO_PANEL_SETUP[tPanelNum];
+				tSortBy = tSetup["MODEL"]["sort"];
+
+				tButtonIdx = 1;
+				tColIdx = 1;
+
+				for tModelIndex, tModelId in ipairs(tModels) do
+					tGroupArray = VUHDO_getGroupMembersSorted(tModelId, tSortBy, tPanelNum, tModelIndex);
+
+					for _, tUnit in ipairs(tGroupArray) do
+						if not tUnitMappings[tUnit] then
+							tUnitMappings[tUnit] = {};
+						end
+
+						table.insert(tUnitMappings[tUnit], {tPanelNum, tButtonIdx});
+
+						tButtonIdx = tButtonIdx + 1;
+					end
+
+					tColIdx = tColIdx + 1;
+				end
+			end
+		end
+
+		tUnitCount = 0;
+
+		for tUnit, tMappings in pairs(tUnitMappings) do
+			VUHDO_pushSecureUnitMapping(tUnit, tMappings);
+
+			tUnitCount = tUnitCount + 1;
+		end
+
+		if VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] then
+			VUHDO_debugSecureEnvironment();
+		end
+
+		return true;
+
+	end
 end

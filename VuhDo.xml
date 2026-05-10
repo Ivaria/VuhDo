@@ -32,6 +32,7 @@
 	<Script file="VuhDoModelTools.lua" />
 	<Script file="VuhDoPixelUtil.lua" />
 	<Script file="VuhDoPanelConvenience.lua" />
+	<Script file="VuhDoSecureShadowHeader.lua" />
 	<Script file="VuhDoSizeCalculator.lua" />
 	<Script file="VuhDoSizeCalculatorHor.lua" />
 	<Script file="VuhDoSizeCalculatorVer.lua" />

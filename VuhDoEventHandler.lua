@@ -946,6 +946,11 @@ local function VUHDO_init()
 	VUHDO_registerAllBouquets(true);
 	VUHDO_initSpecialUnitAuraSlots();
 	VUHDO_initUnitEventHandler();
+
+	if not InCombatLockdown() then
+		VUHDO_initSecureShadowHeader();
+	end
+
 	VUHDO_reloadUI(false);
 	VUHDO_startAuraPoolPrewarm();
 	VUHDO_getAutoProfile();
@@ -989,6 +994,8 @@ do
 	local tEmptyRaid = { };
 	local tSpecNumber;
 	local tBestProfileName;
+	local tButton;
+	local tUnit;
 	function VUHDO_OnEvent(anInstance, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
@@ -1044,6 +1051,25 @@ do
 				VuhDoNewOptionsTabbedFrame:SetShown(true);
 
 				VUHDO_OPTIONS_SHOW_AFTER_BATTLE = false;
+			end
+
+			if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] and not InCombatLockdown() then
+				VUHDO_computeAndPushSecureMappings();
+				VUHDO_refreshUI();
+
+				for tPanelNum = 1, 10 do
+					for tButtonIdx = 1, 50 do
+						tButton = VUHDO_getHealButton(tButtonIdx, tPanelNum);
+
+						if tButton then
+							tUnit = tButton:GetAttribute("unit");
+
+							if tUnit and tButton["raidid"] ~= tUnit then
+								tButton["raidid"] = tUnit;
+							end
+						end
+					end
+				end
 			end
 
 			VUHDO_setIsOutOfCombat(true);
