@@ -167,8 +167,6 @@ local tDebuffOnLeaveSnippet = [[
 		end
 	end
 ]]
-local tPanelNum;
-local tButtonNum;
 function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 
 	if not VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] then
@@ -218,15 +216,6 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 				VUHDO_safeWrapScript(tHeaderFrame, tBarIconFrame, "OnLeave", tDebuffOnLeaveSnippet);
 
 				VUHDO_safeSetAttribute(tBarIconFrame, "vuhdo_secureheader_wrap", true);
-			end
-		end
-
-		if not InCombatLockdown() and VUHDO_isSecureShadowHeaderReady() then
-			tPanelNum = aButton["panelNum"];
-			tButtonNum = aButton["buttonNum"];
-
-			if tPanelNum and tButtonNum then
-				VUHDO_registerSecureDebuffFrame(tPanelNum, tButtonNum, anIconNumber, tBarIconFrame);
 			end
 		end
 

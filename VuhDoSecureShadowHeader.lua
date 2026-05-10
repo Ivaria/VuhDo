@@ -10,7 +10,9 @@ local sInitialized = false;
 
 local VUHDO_Msg;
 local VUHDO_getPanelButtons;
-local VUHDO_getBarIconFrame;
+
+local VUHDO_AURA_FRAMES;
+local VUHDO_safeSetAttribute;
 
 local VUHDO_INTERNAL_TOGGLES;
 local VUHDO_CONFIG;
@@ -25,13 +27,61 @@ function VUHDO_secureShadowHeaderInitLocalOverrides()
 
 	VUHDO_Msg = _G["VUHDO_Msg"];
 	VUHDO_getPanelButtons = _G["VUHDO_getPanelButtons"];
-	VUHDO_getBarIconFrame = _G["VUHDO_getBarIconFrame"];
+
+	VUHDO_AURA_FRAMES = _G["VUHDO_AURA_FRAMES"];
+	VUHDO_safeSetAttribute = _G["VUHDO_safeSetAttribute"];
 
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
 	VUHDO_UPDATE_PETS = _G["VUHDO_UPDATE_PETS"];
+
+	return;
+
+end
+
+
+
+--
+local tRealButtonsForPanel;
+local tRealButton;
+local tButtonName;
+local tButtonAuraFrames;
+local tNewUnit;
+local function VUHDO_refreshAuraFramesForButton(aPanelNum, aButtonNum)
+
+	if not aPanelNum or not aButtonNum then
+		return;
+	end
+
+	tRealButtonsForPanel = VUHDO_getPanelButtons(aPanelNum);
+	tRealButton = tRealButtonsForPanel and tRealButtonsForPanel[aButtonNum];
+
+	if not tRealButton then
+		return;
+	end
+
+	tNewUnit = tRealButton:GetAttribute("unit");
+
+	tRealButton["raidid"] = tNewUnit;
+
+	tButtonName = tRealButton:GetName();
+	tButtonAuraFrames = tButtonName and VUHDO_AURA_FRAMES[tButtonName];
+
+	if not tButtonAuraFrames then
+		return;
+	end
+
+	for tAnchorIndex, tAnchorFrames in pairs(tButtonAuraFrames) do
+		for tSlotIndex, tFrame in pairs(tAnchorFrames) do
+			if tFrame then
+				VUHDO_safeSetAttribute(tFrame, "unit", tNewUnit);
+
+				tFrame["raidid"] = tNewUnit;
+			end
+		end
+	end
 
 	return;
 
@@ -226,6 +276,14 @@ function VUHDO_initSecureShadowHeader()
 
 	end
 
+	function sManagerFrame:RefreshAuraFramesForButton(aPanelNum, aButtonNum)
+
+		VUHDO_refreshAuraFramesForButton(aPanelNum, aButtonNum);
+
+		return;
+
+	end
+
 	function sShadowHeader:Execute(aBody)
 
 		return SecureHandlerExecute(self, aBody);
@@ -271,12 +329,10 @@ function VUHDO_initSecureShadowHeader()
 		end
 
 		sRealButtons = newtable();
-		sDebuffFrames = newtable();
 		sButtonToUnit = newtable();
 
 		for tPanelNum = 1, 10 do
 			sRealButtons[tPanelNum] = newtable();
-			sDebuffFrames[tPanelNum] = newtable();
 			sButtonToUnit[tPanelNum] = newtable();
 		end
 
@@ -460,14 +516,7 @@ function VUHDO_initSecureShadowHeader()
 				sButtonToUnit[tPanelNum][tButtonNum] = nil;
 			end
 
-			local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-			local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
-
-			if tDebuffFrames then
-				for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-					tDebuffFrame:SetAttribute("unit", nil);
-				end
-			end
+			sManager:CallMethod("RefreshAuraFramesForButton", tPanelNum, tButtonNum);
 
 			if tPanelNum == sFallbackPanel and tOldUnit then
 				local tIsPetUnit = string.find(strlower(tOldUnit), "pet") ~= nil;
@@ -533,14 +582,7 @@ function VUHDO_initSecureShadowHeader()
 
 			sButtonToUnit[tPanelNum][tButtonNum] = tUnit;
 
-			local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-			local tDebuffFrames = tPanelDebuffFrames and tButtonNum and tPanelDebuffFrames[tButtonNum];
-
-			if tDebuffFrames then
-				for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-					tDebuffFrame:SetAttribute("unit", tUnit);
-				end
-			end
+			sManager:CallMethod("RefreshAuraFramesForButton", tPanelNum, tButtonNum);
 
 			if anIsShow then
 				tRealButton:Show();
@@ -686,14 +728,7 @@ function VUHDO_initSecureShadowHeader()
 					sButtonToUnit[tFallbackPanel][tButtonIndex] = tUnit;
 				end
 
-				local tPanelDebuffFrames = sDebuffFrames[tFallbackPanel];
-				local tDebuffFrames = tPanelDebuffFrames and tPanelDebuffFrames[tButtonIndex];
-
-				if tDebuffFrames then
-					for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-						tDebuffFrame:SetAttribute("unit", tUnit);
-					end
-				end
+				sManager:CallMethod("RefreshAuraFramesForButton", tFallbackPanel, tButtonIndex);
 
 				tButton:Show();
 
@@ -727,14 +762,7 @@ function VUHDO_initSecureShadowHeader()
 						sButtonToUnit[tFallbackPanel][tButtonIndex] = tUnit;
 					end
 
-					local tPanelDebuffFrames = sDebuffFrames[tFallbackPanel];
-					local tDebuffFrames = tPanelDebuffFrames and tPanelDebuffFrames[tButtonIndex];
-
-					if tDebuffFrames then
-						for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-							tDebuffFrame:SetAttribute("unit", tUnit);
-						end
-					end
+					sManager:CallMethod("RefreshAuraFramesForButton", tFallbackPanel, tButtonIndex);
 
 					tButton:Show();
 
@@ -797,14 +825,7 @@ function VUHDO_initSecureShadowHeader()
 
 							tCheckButton:SetAttribute("unit", nil);
 
-							local tPanelDebuffFrames = tPanelNum and sDebuffFrames[tPanelNum];
-							local tDebuffFrames = tPanelDebuffFrames and tButtonIndex and tPanelDebuffFrames[tButtonIndex];
-
-							if tDebuffFrames then
-								for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-									tDebuffFrame:SetAttribute("unit", nil);
-								end
-							end
+							sManager:CallMethod("RefreshAuraFramesForButton", tPanelNum, tButtonIndex);
 
 							sButtonToUnit[tPanelNum][tButtonIndex] = nil;
 
@@ -1873,41 +1894,8 @@ end
 
 
 --
-function VUHDO_registerSecureDebuffFrame(aPanelNum, aButtonNum, anIconNum, aDebuffFrame)
-
-	if not sInitialized or InCombatLockdown() then
-		return false;
-	end
-
-	sManagerFrame:SetFrameRef("sDebuffFrame", aDebuffFrame);
-
-	sManagerFrame:Execute(format([=[
-		local tPanelNum = %d;
-		local tButtonNum = %d;
-		local tIconNum = %d;
-		local tDebuffFrame = self:GetFrameRef("sDebuffFrame");
-
-		if not sDebuffFrames[tPanelNum] then
-			sDebuffFrames[tPanelNum] = newtable();
-		end
-
-		if not sDebuffFrames[tPanelNum][tButtonNum] then
-			sDebuffFrames[tPanelNum][tButtonNum] = newtable();
-		end
-
-		sDebuffFrames[tPanelNum][tButtonNum][tIconNum] = tDebuffFrame;
-	]=], aPanelNum, aButtonNum, anIconNum));
-
-	return true;
-
-end
-
-
-
---
 local tPanelButtons;
 local tButton;
-local tDebuffFrame;
 function VUHDO_registerAllSecureButtons()
 
 	if not sInitialized or InCombatLockdown() then
@@ -1923,14 +1911,6 @@ function VUHDO_registerAllSecureButtons()
 
 				if tButton then
 					VUHDO_registerSecureRealButton(tPanelNum, tButtonIdx, tButton);
-
-					for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-						tDebuffFrame = VUHDO_getBarIconFrame(tButton, tCnt);
-
-						if tDebuffFrame then
-							VUHDO_registerSecureDebuffFrame(tPanelNum, tButtonIdx, tCnt, tDebuffFrame);
-						end
-					end
 				end
 			end
 		end
@@ -1950,6 +1930,14 @@ local tPlayerShadowButtons;
 local tPlayerShadowButtonsWithUnits;
 local tPetShadowButtons;
 local tPetShadowButtonsWithUnits;
+local tDebugPanelNum;
+local tDebugPanelButtons;
+local tDebugButtonIdx;
+local tDebugHealButton;
+local tDebugButtonName;
+local tDebugAuraByAnchor;
+local tDebugButtonCount;
+local tDebugAuraCount;
 function VUHDO_debugSecureEnvironment()
 
 	if not sInitialized then
@@ -2013,28 +2001,40 @@ function VUHDO_debugSecureEnvironment()
 		end
 	end
 
-	sManagerFrame:Execute([=[
-		local tFrameCount = 0;
-		local tDebuffFrameCount = 0;
+	tDebugButtonCount = 0;
+	tDebugAuraCount = 0;
 
-		for tPanel = 1, 10 do
-			if sRealButtons[tPanel] then
-				for tButtonIndex = 1, 40 do
-					if sRealButtons[tPanel][tButtonIndex] then
-						tFrameCount = tFrameCount + 1;
-					end
+	for tDebugPanelNum = 1, VUHDO_MAX_PANELS do
+		tDebugPanelButtons = VUHDO_getPanelButtons(tDebugPanelNum);
 
-					if sDebuffFrames[tPanel] and sDebuffFrames[tPanel][tButtonIndex] then
-						for tIconNum, tDebuffFrame in pairs(sDebuffFrames[tPanel][tButtonIndex]) do
-							if tDebuffFrame then
-								tDebuffFrameCount = tDebuffFrameCount + 1;
+		if tDebugPanelButtons then
+			for tDebugButtonIdx = 1, #tDebugPanelButtons do
+				tDebugHealButton = tDebugPanelButtons[tDebugButtonIdx];
+
+				if tDebugHealButton then
+					tDebugButtonCount = tDebugButtonCount + 1;
+
+					tDebugButtonName = tDebugHealButton:GetName();
+					tDebugAuraByAnchor = tDebugButtonName and VUHDO_AURA_FRAMES[tDebugButtonName];
+
+					if tDebugAuraByAnchor then
+						for tAnchorIndex, tAnchorFrames in pairs(tDebugAuraByAnchor) do
+							for tSlotIndex, tDebugAuraSlotFrame in pairs(tAnchorFrames) do
+								if tDebugAuraSlotFrame then
+									tDebugAuraCount = tDebugAuraCount + 1;
+								end
 							end
 						end
 					end
 				end
 			end
 		end
+	end
 
+	VUHDO_Msg(format("|cffFFA500** Real Frames:|r |cffB0E0E6Buttons:|r %d, |cffB0E0E6Aura Frames:|r %d",
+		tDebugButtonCount, tDebugAuraCount));
+
+	sManagerFrame:Execute([=[
 		local tPlayerShadowMappingCount = 0;
 		local tPetShadowMappingCount = 0;
 
@@ -2066,7 +2066,6 @@ function VUHDO_debugSecureEnvironment()
 		print(format("|cffffe566[VuhDo]|r |cffFFA500** Shadow Mappings:|r |cffB0E0E6Player:|r %d, |cffB0E0E6Pet:|r %d (|cffB0E0E6Total:|r %d) | |cffB0E0E6Fallback:|r |cffB0E0E6Player:|r %d, |cffB0E0E6Pet:|r %d (|cffB0E0E6Total:|r %d)",
 			tPlayerShadowMappingCount, tPetShadowMappingCount, tPlayerShadowMappingCount + tPetShadowMappingCount,
 			tPlayerFallbackMappingCount, tPetFallbackMappingCount, tPlayerFallbackMappingCount + tPetFallbackMappingCount));
-		print(format("|cffffe566[VuhDo]|r |cffFFA500** Real Frames:|r |cffB0E0E6Buttons:|r %d, |cffB0E0E6Debuff Frames:|r %d", tFrameCount, tDebuffFrameCount));
 	]=]);
 
 	VUHDO_Msg("|cffFFD100--- End of Debug ---|r");
@@ -2218,14 +2217,7 @@ local function VUHDO_clearSecureMappings()
 							if tUnit then
 								tButton:SetAttribute("unit", nil);
 
-								local tPanelDebuffFrames = sDebuffFrames[tPanelNum];
-								local tDebuffFrames = tPanelDebuffFrames and tPanelDebuffFrames[tButtonIdx];
-
-								if tDebuffFrames then
-									for tIconNum, tDebuffFrame in pairs(tDebuffFrames) do
-										tDebuffFrame:SetAttribute("unit", nil);
-									end
-								end
+								sManager:CallMethod("RefreshAuraFramesForButton", tPanelNum, tButtonIdx);
 
 								tPanelClearedCount = tPanelClearedCount + 1;
 							end
@@ -2520,7 +2512,6 @@ end
 local tPanelButtons;
 local tButton;
 local tUnit;
-local tDebuffFrame;
 function VUHDO_syncPanelButtonRaidIds()
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
@@ -2535,18 +2526,6 @@ function VUHDO_syncPanelButtonRaidIds()
 
 					if tUnit and tButton["raidid"] ~= tUnit then
 						tButton["raidid"] = tUnit;
-					end
-
-					for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-						tDebuffFrame = VUHDO_getBarIconFrame(tButton, tCnt);
-
-						if tDebuffFrame then
-							tUnit = tDebuffFrame:GetAttribute("unit");
-
-							if tUnit and tDebuffFrame["raidid"] ~= tUnit then
-								tDebuffFrame["raidid"] = tUnit;
-							end
-						end
 					end
 				end
 			end
