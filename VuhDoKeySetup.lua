@@ -542,6 +542,21 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 				end
 			end
 		end
+
+	elseif not anIsIcButton then
+		VUHDO_safeSetAttribute(aButton, "unit", nil);
+		aButton["raidid"] = nil;
+
+		if not anIsTgButton then
+			for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+				tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+
+				if tDebuffFrame then
+					VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+					tDebuffFrame["raidid"] = nil;
+				end
+			end
+		end
 	end
 
 	if not aButton:GetAttribute("vuhdo_tooltip_hook") then

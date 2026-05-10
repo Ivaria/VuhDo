@@ -47,6 +47,7 @@ local VUHDO_hasDispellableAura;
 local VUHDO_hasAnyDispellableAura;
 local VUHDO_getUnitButtons;
 local VUHDO_deferTask;
+local VUHDO_computeAndPushSecureMappings;
 
 local sShowPanels;
 local sDurationAnchor = { };
@@ -90,6 +91,7 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_hasAnyDispellableAura = _G["VUHDO_hasAnyDispellableAura"];
 	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
 	VUHDO_deferTask = _G["VUHDO_deferTask"];
+	VUHDO_computeAndPushSecureMappings = _G["VUHDO_computeAndPushSecureMappings"];
 
 	sShowPanels = VUHDO_CONFIG["SHOW_PANELS"];
 
@@ -192,6 +194,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			if not tButton:IsShown() then tButton:Show(); end -- Wg. Secure handlers?
 
 			-- On profile switches the button already exists but has the wrong size
+			VUHDO_initLocalVars(aPanelNum);
 			VUHDO_initHealButton(tButton, aPanelNum);
 			VUHDO_positionHealButton(tButton, aPanelNum);
 		end
@@ -409,11 +412,11 @@ function VUHDO_refreshUI()
 
 	VUHDO_reloadRaidMembers();
 
+	VUHDO_refreshUiNoMembers();
+
 	if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] and not InCombatLockdown() then
 		VUHDO_computeAndPushSecureMappings();
 	end
-
-	VUHDO_refreshUiNoMembers();
 
 	VUHDO_IS_RELOADING = false;
 
