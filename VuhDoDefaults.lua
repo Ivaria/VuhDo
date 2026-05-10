@@ -875,7 +875,7 @@ local VUHDO_DEFAULT_CONFIG = {
 
 	["COMBAT_ROSTER"] = {
 		["enabled"] = true,
-		["fallbackPanels"] = { 1 },
+		["fallbackPanel"] = 1,
 		["debug"] = false,
 	},
 
