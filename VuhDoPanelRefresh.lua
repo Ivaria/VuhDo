@@ -277,6 +277,7 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 			parent = tPrivateAura,
 			showCountdownFrame = true,
 			showCountdownNumbers = true,
+			isContainer = false,
 			iconInfo = {
 				iconWidth = tBarScaling["barHeight"],
 				iconHeight = tBarScaling["barHeight"],
