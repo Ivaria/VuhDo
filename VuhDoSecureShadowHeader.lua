@@ -79,6 +79,14 @@ end
 
 
 --
+-- Shadow Button ID Scheme:
+--
+-- Player shadow buttons: Internal IDs 1-40, child frames "child1" to "child40"
+-- Pet shadow buttons:    Internal IDs 41-80, child frames "child1" to "child40"
+--
+-- Pet buttons use IDs 41-80 (instead of 1-40) to prevent key collisions in shared data structures.
+-- Convert when accessing pet child frames: childFrame = GetAttribute("child" .. (shadowButtonId - 40))
+--
 local tInitConfigFunc = [=[
 	tinsert(sShadowButtons, self);
 
@@ -168,6 +176,7 @@ local tOnPetAttributeChanged = [=[
 ]=];
 local tChild;
 local tFallbackPanel;
+local tHasPetHeader;
 function VUHDO_initSecureShadowHeader()
 
 	if InCombatLockdown() or not VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
@@ -249,10 +258,17 @@ function VUHDO_initSecureShadowHeader()
 		sManagerFrame:SetFrameRef("sShadowPetHeader", sShadowPetHeader);
 	end
 
-	sManagerFrame:Execute([=[
+	tHasPetHeader = sShadowPetHeader ~= nil;
+
+	sManagerFrame:Execute(format([=[
 		sManager = self;
 		sShadowHeader = self:GetFrameRef("sShadowHeader");
-		sShadowPetHeader = self:GetFrameRef("sShadowPetHeader");
+
+		if %s then
+			sShadowPetHeader = self:GetFrameRef("sShadowPetHeader");
+		else
+			sShadowPetHeader = nil;
+		end
 
 		sRealButtons = newtable();
 		sDebuffFrames = newtable();
@@ -335,7 +351,7 @@ function VUHDO_initSecureShadowHeader()
 
 		sIsDebugEnabled = false;
 		sUnitToPoolIndex = newtable();
-	]=]);
+	]=], tostring(tHasPetHeader)));
 
 	VUHDO_updateSecureFallbackConfig();
 
@@ -916,15 +932,6 @@ function VUHDO_initSecureShadowHeader()
 		end
 	]=]);
 
-	-- Shadow Button ID Scheme:
-	--
-	-- Player shadow buttons: Internal IDs 1-40, child frames "child1" to "child40"
-	-- Pet shadow buttons:    Internal IDs 41-80, child frames "child1" to "child40"
-	--
-	-- Pet buttons use IDs 41-80 (instead of 1-40) to prevent key collisions in shared
-	-- data structures.
-	--
-	-- When accessing pet child frames, convert: childFrame = GetAttribute("child" .. (shadowButtonId - 40))
 	sManagerFrame:SetAttribute("vuhdo_process_pet_clear_queue_method", [=[
 		if not sShadowPetHeader or not sPetClearQueue then
 			return;
@@ -2093,6 +2100,29 @@ function VUHDO_setSecureDebugEnabled(anIsEnabled)
 		VUHDO_Msg("Secure shadow header debug is now |cff00ff00enabled|r.");
 	else
 		VUHDO_Msg("Secure shadow header debug is now |cffff0000disabled|r.");
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_setCombatRosterEnabled(anIsEnabled)
+
+	if InCombatLockdown() then
+		VUHDO_Msg("Cannot modify combat roster setting during combat.");
+
+		return;
+	end
+
+	VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] = anIsEnabled;
+
+	if anIsEnabled then
+		VUHDO_Msg("Combat roster is now |cff00ff00enabled|r.");
+	else
+		VUHDO_Msg("Combat roster is now |cffff0000disabled|r.");
 	end
 
 	return;
