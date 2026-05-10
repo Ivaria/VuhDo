@@ -131,7 +131,6 @@ local tLastColumnUnits;
 local tFallbackStartCol;
 local tFallbackStartRow;
 local tTotalFallbackButtons;
-local tFallbackStart;
 local tFallbackCount;
 local tFallbackButtonIndex;
 local tFallbackCol;
@@ -190,10 +189,9 @@ local function VUHDO_refreshPositionFallbackButtons(aPanel, aPanelNum, aModels, 
 		tFallbackStartRow = 1;
 	end
 
-	tFallbackStart = tMaxGroupMembers + 1;
-	tFallbackCount = 40 - tMaxGroupMembers;
+	tFallbackCount = 80 - tMaxGroupMembers;
 
-	if tFallbackStart and tFallbackCount > 0 then
+	if tFallbackCount > 0 then
 		for tCnt = 1, tFallbackCount do
 			tButtonIdx = tFallbackStartIdx + tCnt - 1;
 

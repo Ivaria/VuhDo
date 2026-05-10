@@ -738,6 +738,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_combatLogInitLocalOverrides();
 	VUHDO_eventHandlerInitLocalOverrides();
 	VUHDO_unitEventHandlerInitLocalOverrides();
+	VUHDO_secureShadowHeaderInitLocalOverrides();
 	VUHDO_customHealthInitLocalOverrides();
 	VUHDO_customHealthTextInitLocalOverrides();
 	VUHDO_customManaInitLocalOverrides();
@@ -1054,7 +1055,6 @@ do
 			end
 
 			if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
-				VUHDO_computeAndPushSecureMappings();
 				VUHDO_refreshUI();
 				VUHDO_syncPanelButtonRaidIds();
 			end
@@ -1799,9 +1799,15 @@ function VUHDO_updateGlobalToggles()
 
 	VUHDO_TIMERS["REFRESH_INSPECT"] = VUHDO_CONFIG["IS_SCAN_TALENTS"] and 1 or -1
 
+	local tWasPetsEnabled = VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS] or false;
+
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS]
 		= VUHDO_isModelConfigured(VUHDO_ID_PETS)
 		or VUHDO_isModelConfigured(VUHDO_ID_SELF_PET); -- Event nicht deregistrieren => Problem mit manchen Vehikeln
+
+	if tWasPetsEnabled ~= VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS] and not InCombatLockdown() and VUHDO_isSecureShadowHeaderReady() then
+		VUHDO_initSecureShadowHeader();
+	end
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PLAYER_TARGET]
 		= (VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_TARGET"])
