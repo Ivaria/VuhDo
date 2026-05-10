@@ -207,7 +207,7 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 				else
 					-- build a spell macro
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit));
+					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit, aUseMouseover));
 				end
 			else
 				tMacroId = GetMacroIndexByName(anAction);
@@ -215,7 +215,7 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 				if tMacroId ~= 0 then -- Macro?
 					_, _, tMacroText = GetMacroInfo(tMacroId);
 
-					tMacroText = VUHDO_replaceMacroTemplates(tMacroText, tUnit);
+					tMacroText = VUHDO_replaceMacroTemplates(tMacroText, tUnit, aUseMouseover);
 
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, tMacroText);
@@ -391,7 +391,7 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 
 		if (tHostSpell or "") ~= "" or (tActionLow or "") ~= "" then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell));
+				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell, aUseMouseover));
 		else
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, nil);
 		end
@@ -641,7 +641,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			_VUHDO_setupHealButtonAttributes("",  "-ik" .. tIndex, tEntries[1], aButton, anIsTgButton, tIndex, tUseMouseover);
 		else
 			VUHDO_safeSetAttribute(aButton, "type-ik" .. tIndex, "macro");
-			VUHDO_safeSetAttribute(aButton, "macrotext-ik" .. tIndex, VUHDO_replaceMacroTemplates(tEntries[3] or "", aUnit));
+			VUHDO_safeSetAttribute(aButton, "macrotext-ik" .. tIndex, VUHDO_replaceMacroTemplates(tEntries[3] or "", aUnit, tUseMouseover));
 		end
 	end
 

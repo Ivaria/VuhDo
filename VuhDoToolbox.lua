@@ -1281,10 +1281,22 @@ local VUHDO_setMapToCurrentZone = VUHDO_setMapToCurrentZone;
 
 --
 local tInfo;
-function VUHDO_replaceMacroTemplates(aText, aUnit)
+function VUHDO_replaceMacroTemplates(aText, aUnit, aUseMouseover)
+
+	if not aText then
+		return;
+	end
+
+	if aUseMouseover then
+		aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", "mouseover");
+		aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", "mouseoverpet");
+		aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", "mouseovertarget");
+	end
 
 	if aUnit then
-		aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", aUnit);
+		if not aUseMouseover then
+			aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", aUnit);
+		end
 
 		tInfo = VUHDO_RAID[aUnit];
 
@@ -1293,12 +1305,14 @@ function VUHDO_replaceMacroTemplates(aText, aUnit)
 				aText = gsub(aText, "[Vv][Dd][Nn][Aa][Mm][Ee]", tInfo["name"]);
 			end
 
-			if tInfo["petUnit"] then
-				aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", tInfo["petUnit"]);
-			end
+			if not aUseMouseover then
+				if tInfo["petUnit"] then
+					aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", tInfo["petUnit"]);
+				end
 
-			if tInfo["targetUnit"] then
-				aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", tInfo["targetUnit"]);
+				if tInfo["targetUnit"] then
+					aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", tInfo["targetUnit"]);
+				end
 			end
 		end
 	end
