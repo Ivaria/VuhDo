@@ -1994,7 +1994,9 @@ local function VUHDO_doReloadRoster(anIsQuick)
 				VUHDO_updateAllRaidBars();
 				VUHDO_initAllEventBouquets();
 
-				VUHDO_updatePanelVisibility();
+				if not VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
+					VUHDO_updatePanelVisibility();
+				end
 
 				VUHDO_IS_RELOADING = false;
 			else
