@@ -340,7 +340,6 @@ function VUHDO_initSecureShadowHeader()
 			sShadowButtonHasMapping[tShadowId] = false;
 		end
 
-		sNextFallbackButton = newtable();
 		sFallbackButtonStart = newtable();
 
 		sProcessQueue = newtable();
@@ -385,7 +384,6 @@ function VUHDO_initSecureShadowHeader()
 			local tPoolEntry = newtable();
 			tPoolEntry[1] = tMapping;
 			tPoolEntry[2] = tMappings;
-			tPoolEntry["inUse"] = false;
 
 			tinsert(sFallbackMappingPool, tPoolEntry);
 
@@ -408,9 +406,8 @@ function VUHDO_initSecureShadowHeader()
 	VUHDO_updateSecureFallbackConfig();
 
 	sManagerFrame:Execute(format([=[
-		sNextFallbackButton[%d] = 1;
 		sFallbackButtonStart[%d] = 1;
-	]=], tFallbackPanel, tFallbackPanel));
+	]=], tFallbackPanel));
 
 	if VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] then
 		sManagerFrame:Execute([=[
@@ -784,7 +781,6 @@ function VUHDO_initSecureShadowHeader()
 		local tPoolIdx = sUnitToPoolIndex[tUnit];
 
 		if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
-			sFallbackMappingPool[tPoolIdx]["inUse"] = false;
 			tinsert(sFreePoolIndices, tPoolIdx);
 
 			if sIsDebugEnabled then
@@ -1325,7 +1321,6 @@ function VUHDO_initSecureShadowHeader()
 
 										tNewPoolEntry[1] = tTempMapping;
 										tNewPoolEntry[2] = tTempMappings;
-										tNewPoolEntry["inUse"] = true;
 
 										local tNewPoolIdx = #sFallbackMappingPool + 1;
 										sFallbackMappingPool[tNewPoolIdx] = tNewPoolEntry;
@@ -1337,8 +1332,6 @@ function VUHDO_initSecureShadowHeader()
 											print("[VuhDo] Pool exhausted, grew pool to:", tNewPoolIdx, "for unit:", tUnit, "panel:", tAssignedPanel, "button:", tAssignedButtonIndex);
 										end
 									else
-										tPoolEntry["inUse"] = true;
-
 										local tTempMapping = tPoolEntry[1];
 										local tTempMappings = tPoolEntry[2];
 
@@ -1627,7 +1620,6 @@ function VUHDO_initSecureShadowHeader()
 
 									tNewPoolEntry[1] = tTempMapping;
 									tNewPoolEntry[2] = tTempMappings;
-									tNewPoolEntry["inUse"] = true;
 
 									local tNewPoolIdx = #sFallbackMappingPool + 1;
 									sFallbackMappingPool[tNewPoolIdx] = tNewPoolEntry;
@@ -1639,8 +1631,6 @@ function VUHDO_initSecureShadowHeader()
 										print("[VuhDo] Pool exhausted, grew pool to:", tNewPoolIdx, "for pet unit:", tUnit, "panel:", tAssignedPanel, "button:", tAssignedButtonIndex);
 									end
 								else
-									tPoolEntry["inUse"] = true;
-
 									local tTempMapping = tPoolEntry[1];
 									local tTempMappings = tPoolEntry[2];
 
@@ -2091,6 +2081,8 @@ function VUHDO_setSecureDebugEnabled(anIsEnabled)
 
 	VUHDO_CONFIG["COMBAT_ROSTER"]["debug"] = anIsEnabled;
 
+	VUHDO_saveCurrentProfile();
+
 	if anIsEnabled then
 		VUHDO_Msg("Secure shadow header debug is now |cff00ff00enabled|r.");
 	else
@@ -2135,8 +2127,7 @@ function VUHDO_setSecureFallbackButtonStart(aPanelNum, aButtonStart)
 
 	sManagerFrame:Execute(format([=[
 		sFallbackButtonStart[%d] = %d;
-		sNextFallbackButton[%d] = %d;
-	]=], aPanelNum, aButtonStart, aPanelNum, aButtonStart));
+	]=], aPanelNum, aButtonStart));
 
 	return true;
 
@@ -2184,7 +2175,6 @@ local function VUHDO_clearSecureMappings()
 
 		for tUnit, tPoolIdx in pairs(sUnitToPoolIndex) do
 			if tPoolIdx and sFallbackMappingPool[tPoolIdx] then
-				sFallbackMappingPool[tPoolIdx]["inUse"] = false;
 				tReleasedCount = tReleasedCount + 1;
 			end
 		end
@@ -2234,10 +2224,6 @@ local function VUHDO_clearSecureMappings()
 
 		wipe(sUnitToPoolIndex);
 		wipe(sUnitMap);
-
-		if sFallbackPanel then
-			sNextFallbackButton[sFallbackPanel] = sFallbackButtonStart[sFallbackPanel];
-		end
 	]=]);
 
 	return true;
@@ -2501,10 +2487,6 @@ end
 
 
 --
-
-
-
---
 local tPanelButtons;
 local tButton;
 local tUnit;
@@ -2529,33 +2511,5 @@ function VUHDO_syncPanelButtonRaidIds()
 	end
 
 	return;
-
-end
-
-
-
---
-function VUHDO_clearSecurePetMappings()
-
-	if not sInitialized or InCombatLockdown() then
-		return false;
-	end
-
-	if not sShadowPetHeader then
-		return true;
-	end
-
-	sManagerFrame:Execute([=[
-		for tShadowId = 41, 80 do
-			sShadowButtonHasMapping[tShadowId] = false;
-			sShadowToRealMap[tShadowId] = nil;
-		end
-
-		if sIsDebugEnabled then
-			print("[VuhDo] Cleared pet mappings");
-		end
-	]=]);
-
-	return true;
 
 end

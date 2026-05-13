@@ -11,7 +11,6 @@
 	<Script file="VuhDoBarCustomizerTarget.lua" />
 	<Script file="VuhDoBarCustomizerThreat.lua" />
 	<Script file="VuhDoPanel.lua" />
-	<Script file="VuhDoSecureShadowHeader.lua" />
 	<Script file="VuhDoPanelRefresh.lua" />
 	<Script file="VuhDoPanelRedrawCustomDebuffs.lua" />
 	<Script file="VuhDoPanelRedrawHeaders.lua" />
