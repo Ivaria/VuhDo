@@ -1002,6 +1002,25 @@ function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
 
 							if tPanelNum then
 								VUHDO_addUnitButton(self, tPanelNum);
+
+								if type(value) == "string" then
+									local tButtonAuraFrames = VUHDO_AURA_FRAMES[tButtonName];
+
+									if tButtonAuraFrames then
+										for tAnchorIndex, tAnchorFrames in pairs(tButtonAuraFrames) do
+											for tSlotIndex, tFrame in pairs(tAnchorFrames) do
+												if tFrame then
+													tFrame["lastAuraInstanceId"] = nil;
+													tFrame["lastExpirationTime"] = nil;
+													tFrame["lastApplications"] = nil;
+													tFrame["lastIcon"] = nil;
+												end
+											end
+										end
+									end
+
+									VUHDO_fullAuraRefresh(value);
+								end
 							end
 						end
 					end

@@ -18,6 +18,7 @@ local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplic
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
 local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
 local UnitIsUnit = UnitIsUnit;
+local UnitGUID = UnitGUID;
 local issecretvalue = issecretvalue;
 local next = next;
 
@@ -44,6 +45,9 @@ local VUHDO_updateEventBouquet;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
+
+VUHDO_UNIT_AURA_CACHE_GUID = VUHDO_UNIT_AURA_CACHE_GUID or { };
+local VUHDO_UNIT_AURA_CACHE_GUID = VUHDO_UNIT_AURA_CACHE_GUID;
 
 VUHDO_UNIT_AURA_SLOTS = VUHDO_UNIT_AURA_SLOTS or { };
 local VUHDO_UNIT_AURA_SLOTS = VUHDO_UNIT_AURA_SLOTS;
@@ -1437,6 +1441,8 @@ function VUHDO_clearUnitAuraCache(aUnit)
 		VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] = nil;
 	end
 
+	VUHDO_UNIT_AURA_CACHE_GUID[aUnit] = nil;
+
 	VUHDO_clearUnitBouquetActiveCache(aUnit);
 
 	return;
@@ -1745,6 +1751,8 @@ function VUHDO_onUnitAura(aUnit, aUpdateInfo)
 	end
 
 	if not aUpdateInfo or aUpdateInfo["isFullUpdate"] then
+		VUHDO_UNIT_AURA_CACHE_GUID[aUnit] = nil;
+
 		VUHDO_fullAuraRefresh(aUnit);
 	else
 		VUHDO_incrementalAuraUpdate(aUnit, aUpdateInfo);
@@ -1760,9 +1768,18 @@ end
 
 --
 local tAuras;
+local tNewGuid;
 function VUHDO_fullAuraRefresh(aUnit)
 
 	if not aUnit then
+		return;
+	end
+
+	tNewGuid = UnitGUID(aUnit);
+
+	if tNewGuid and VUHDO_UNIT_AURA_CACHE_GUID[aUnit] == tNewGuid then
+		VUHDO_updateAuraDisplaysForUnit(aUnit);
+
 		return;
 	end
 
@@ -1794,6 +1811,8 @@ function VUHDO_fullAuraRefresh(aUnit)
 			VUHDO_rebuildSlotAssignmentsForPanel(aUnit, tPanelNum);
 		end
 	end
+
+	VUHDO_UNIT_AURA_CACHE_GUID[aUnit] = tNewGuid;
 
 	VUHDO_updateAuraDisplaysForUnit(aUnit);
 

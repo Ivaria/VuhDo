@@ -1161,6 +1161,8 @@ function VUHDO_refreshRaidMembers()
 
 			if not tInfo or (tGuid and not (sSecretsEnabled and issecretvalue(tGuid)) and VUHDO_RAID_GUIDS[tGuid] ~= tPlayer) then
 				VUHDO_setHealth(tPlayer, 1); -- VUHDO_UPDATE_ALL
+
+				VUHDO_fullAuraRefresh(tPlayer);
 			else
 				tInfo["group"] = VUHDO_getUnitGroup(tPlayer, false);
 
@@ -1220,6 +1222,8 @@ function VUHDO_refreshRaidMembers()
 			-- FIXME: cannot track boss identity when GUID is secret
 			if not tInfo or (tGuid and not (sSecretsEnabled and issecretvalue(tGuid)) and VUHDO_RAID_GUIDS[tGuid] ~= tBossUnitId) then
 				VUHDO_setHealth(tBossUnitId, 1); -- VUHDO_UPDATE_ALL
+
+				VUHDO_fullAuraRefresh(tBossUnitId);
 			else
 				tInfo["group"] = VUHDO_getUnitGroup(tBossUnitId, false);
 				tInfo["isVehicle"] = UnitHasVehicleUI(tBossUnitId);

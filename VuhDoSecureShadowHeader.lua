@@ -8,10 +8,7 @@ local sShadowHeader;
 local sShadowPetHeader;
 local sInitialized = false;
 
-local VUHDO_Msg;
 local VUHDO_getPanelButtons;
-
-local VUHDO_AURA_FRAMES;
 local VUHDO_safeSetAttribute;
 
 local VUHDO_INTERNAL_TOGGLES;
@@ -19,23 +16,22 @@ local VUHDO_CONFIG;
 local VUHDO_PANEL_SETUP;
 local VUHDO_MAX_PANELS;
 local VUHDO_UPDATE_PETS;
+local VUHDO_AURA_FRAMES;
 
 
 
 --
 function VUHDO_secureShadowHeaderInitLocalOverrides()
 
-	VUHDO_Msg = _G["VUHDO_Msg"];
-	VUHDO_getPanelButtons = _G["VUHDO_getPanelButtons"];
-
-	VUHDO_AURA_FRAMES = _G["VUHDO_AURA_FRAMES"];
-	VUHDO_safeSetAttribute = _G["VUHDO_safeSetAttribute"];
-
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
 	VUHDO_UPDATE_PETS = _G["VUHDO_UPDATE_PETS"];
+	VUHDO_AURA_FRAMES = _G["VUHDO_AURA_FRAMES"];
+
+	VUHDO_getPanelButtons = _G["VUHDO_getPanelButtons"];
+	VUHDO_safeSetAttribute = _G["VUHDO_safeSetAttribute"];
 
 	return;
 
