@@ -1777,6 +1777,10 @@ function VUHDO_fullAuraRefresh(aUnit)
 
 	tNewGuid = UnitGUID(aUnit);
 
+	if tNewGuid and issecretvalue(tNewGuid) then
+		tNewGuid = nil;
+	end
+
 	if tNewGuid and VUHDO_UNIT_AURA_CACHE_GUID[aUnit] == tNewGuid then
 		VUHDO_updateAuraDisplaysForUnit(aUnit);
 
