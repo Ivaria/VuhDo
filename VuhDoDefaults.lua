@@ -4298,7 +4298,7 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["showTooltip"] = false,
 		["showDispelOverlay"] = true,
 		["dispelIndicatorType"] = 1,
-		["VERSION"] = 5,
+		["VERSION"] = 6,
 	},
 
 	["RAID_ICON"] = {
@@ -4328,6 +4328,12 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 local tAktPanel;
 local tPrivateAura;
 local tBarColors;
+local tMigrateFactors;
+local tMigrateIconPercent;
+local tMigrateMinX;
+local tMigrateMinY;
+local tMigrateMaxX;
+local tMigrateMaxY;
 function VUHDO_loadDefaultPanelSetup()
 
 	if not VUHDO_PANEL_SETUP then
@@ -4468,6 +4474,26 @@ function VUHDO_loadDefaultPanelSetup()
 				end
 
 				tPrivateAura["VERSION"] = 5;
+			end
+
+			if (tPrivateAura["VERSION"] or 0) < 6 then
+				tMigrateFactors = VUHDO_PRIVATE_AURA_ANCHOR_FACTORS[tPrivateAura["point"] or "TOPLEFT"]
+					or VUHDO_PRIVATE_AURA_ANCHOR_FACTORS["TOPLEFT"];
+
+				tMigrateIconPercent = tPrivateAura["iconSize"] or 40;
+
+				if tMigrateIconPercent <= 0 or tMigrateIconPercent > 100 then
+					tMigrateIconPercent = 100;
+				end
+
+				tMigrateMinX, tMigrateMinY, tMigrateMaxX, tMigrateMaxY = VUHDO_getPrivateAuraOffsetBounds(tPrivateAura["growthDir"], tPrivateAura["wrapDir"], tPrivateAura["maxColumns"], tPrivateAura["numAuras"], tPrivateAura["spacing"]);
+
+				if tMigrateMinX then
+					tPrivateAura["xAdjust"] = (tPrivateAura["xAdjust"] or 0) + tMigrateFactors[1] * ((tMigrateMaxX - tMigrateMinX) - 32) * tMigrateIconPercent / 32;
+					tPrivateAura["yAdjust"] = (tPrivateAura["yAdjust"] or 0) - tMigrateFactors[2] * ((tMigrateMaxY - tMigrateMinY) - 32) * tMigrateIconPercent / 32;
+				end
+
+				tPrivateAura["VERSION"] = 6;
 			end
 		end
 
