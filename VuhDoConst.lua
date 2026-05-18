@@ -14,6 +14,19 @@ VUHDO_NO = 2;
 VUHDO_MAX_PANELS = 10;
 VUHDO_MAX_BOSS_FRAMES = 8;
 VUHDO_MAX_PRIVATE_AURAS = 6;
+
+VUHDO_PRIVATE_AURA_ANCHOR_FACTORS = {
+	["TOPLEFT"] = { 0, 0 },
+	["TOP"] = { 0.5, 0 },
+	["TOPRIGHT"] = { 1, 0 },
+	["LEFT"] = { 0, 0.5 },
+	["CENTER"] = { 0.5, 0.5 },
+	["RIGHT"] = { 1, 0.5 },
+	["BOTTOMLEFT"] = { 0, 1 },
+	["BOTTOM"] = { 0.5, 1 },
+	["BOTTOMRIGHT"] = { 1, 1 },
+};
+
 --VUHDO_MAX_GROUPS_PER_PANEL = 15; -- Maximum number of Models (Groups) per Panel
 
 --VUHDO_MAX_MTS = 8;
