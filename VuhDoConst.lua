@@ -382,6 +382,7 @@ VUHDO_UNIT_POWER_HOLY_POWER = Enum.PowerType.HolyPower;
 VUHDO_UNIT_POWER_SOUL_SHARDS = Enum.PowerType.SoulShards;
 VUHDO_UNIT_POWER_RUNES = Enum.PowerType.Runes;
 VUHDO_UNIT_POWER_ARCANE_CHARGES = Enum.PowerType.ArcaneCharges;
+VUHDO_UNIT_POWER_ESSENCE = Enum.PowerType.Essence;
 
 
 

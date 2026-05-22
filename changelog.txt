@@ -3,7 +3,6 @@ Version 3.207
   
 Known issues:  
 -- Midnight add-on restrictions mean some features are not yet available:  
---   Text provider formatting e.g. +<#n>K is only partially working  
 --   Overheal text provider and Life Text highlight are not yet working  
 --   Many Hitpoints option (e.g. Show Effective) are not yet working  
 --   Overshield Bar will only display when the unit is at full health  
@@ -20,9 +19,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed text provider formatting  
   
   
 Improvements:  
+-- Added all power types as text provider sources  
   
   
 --------------------------------------------------------------  
