@@ -3868,7 +3868,7 @@ end
 
 --
 local tName;
-local function VUHDO_isBouquetInterestedInEvent(aBouquetName, anEventType)
+function VUHDO_isBouquetInterestedInEvent(aBouquetName, anEventType)
 
 	if not VUHDO_EVENT_BOUQUETS[aBouquetName][anEventType] then
 		VUHDO_EVENT_BOUQUETS[aBouquetName][anEventType] = 0;
