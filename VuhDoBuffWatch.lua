@@ -1074,19 +1074,25 @@ end
 local tCountStr;
 local tRemainingSeconds;
 local tDurationText;
+local tTimerLabel;
 local function VUHDO_setBuffSwatchTimer(aSwatchName, aSecsNum, aCount, aDuration)
+
+	tTimerLabel = _G[aSwatchName .. "TimerLabelLabel"];
 
 	if aDuration then
 		tRemainingSeconds = aDuration:GetRemainingDuration();
 		tDurationText = AbbreviateNumbers(tRemainingSeconds, sTimeAbbrevData);
 
-		_G[aSwatchName .. "TimerLabelLabel"]:SetText(tDurationText or "");
+		tTimerLabel:SetText(tDurationText or "");
+		tTimerLabel:SetAlpha(tRemainingSeconds or 0);
 	elseif (aSecsNum or -1) >= 0 then
 		tCountStr = ((issecretvalue(aCount) and sSecretsEnabled) or (not issecretvalue(aCount) and (aCount or 0) > 0 and not VUHDO_BUFF_SETTINGS["CONFIG"]["HIDE_CHARGES"]))
 			and format("|cffffffff%dx |r", aCount) or "";
-		_G[aSwatchName .. "TimerLabelLabel"]:SetText(format("%s%d:%02d", tCountStr, aSecsNum / 60, aSecsNum % 60));
+		tTimerLabel:SetText(format("%s%d:%02d", tCountStr, aSecsNum / 60, aSecsNum % 60));
+		tTimerLabel:SetAlpha(1);
 	else
-		_G[aSwatchName .. "TimerLabelLabel"]:SetText("");
+		tTimerLabel:SetText("");
+		tTimerLabel:SetAlpha(1);
 	end
 
 	return;

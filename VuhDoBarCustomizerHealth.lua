@@ -1063,6 +1063,7 @@ end
 local tRatio, tBar, tScale;
 local tPanelNum;
 local tIndicatorConfig;
+local tFontString;
 function VUHDO_overhealTextCallback(aUnit, aProviderName, aValue, anIndicatorName, ...)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
@@ -1071,8 +1072,10 @@ function VUHDO_overhealTextCallback(aUnit, aProviderName, aValue, anIndicatorNam
 
 		if VUHDO_getResolvedTextProvider(tIndicatorConfig["TEXT_PROVIDER_SOURCE"], tIndicatorConfig["TEXT_PROVIDER_FORMAT"]) == aProviderName then
 			tBar = VUHDO_getHealthBar(tButton, 1);
+			tFontString = VUHDO_getOverhealText(tBar);
 
-			VUHDO_getOverhealText(tBar):SetText(format(...));
+			tFontString:SetText(format(...));
+			tFontString:SetAlpha(type(aValue) == "string" and 0 or aValue);
 
 			if aProviderName["sourceKey"] == "OVERHEAL" then
 				tInfo = VUHDO_RAID[aUnit];
