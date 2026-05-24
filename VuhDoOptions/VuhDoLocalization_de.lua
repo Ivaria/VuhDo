@@ -879,6 +879,7 @@ VUHDO_I18N_TT.K823 = "Select when to show a dispel border or overlay (e.g. only 
 VUHDO_I18N_TT.K824 = "Show the Blizzard private aura dispel overlay for standard dispellable auras (Magic, Curse, etc.).";
 VUHDO_I18N_TT.K825 = "Select when to show a dispel overlay (e.g. only dispellable by you).";
 VUHDO_I18N_TT.K826 = "Shows every dispellable harmful aura (Magic, Curse, etc.) regardless of whether your current class/spec can dispel it.";
+VUHDO_I18N_TT.K827 = "Scale of stack and clock text on private aura icons.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Default Profile";
 VUHDO_I18N_DEFAULT_LAYOUT = "Default Layout";
@@ -1591,3 +1592,5 @@ VUHDO_I18N_PRIVATE_AURA_DISPEL_ALL = "All Dispellable Debuffs";
 VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE = "All Dispellable";
 
 VUHDO_I18N_AURA_COLOR_ALL_DISPEL = "All Dispels";
+
+VUHDO_I18N_PRIVATE_AURA_TEXT_SCALE = "Text Scale";

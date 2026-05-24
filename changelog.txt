@@ -24,6 +24,7 @@ Bugfixes:
   
 Improvements:  
 -- Added all power types as text provider sources  
+-- Added text scale adjustment for private aura icons  
   
   
 --------------------------------------------------------------  
