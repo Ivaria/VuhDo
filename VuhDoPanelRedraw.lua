@@ -1130,7 +1130,10 @@ do
 	local tContainerH;
 	local tAnchorDeltaX;
 	local tAnchorDeltaY;
+	local tTextScale;
 	local function VUHDO_initPrivateAura(aHealthBar, aButton, anAuraIndex, aPanelNum)
+
+		tTextScale = (sPanelConfig[aPanelNum]["privateAura"]["textScale"] or 100) * 0.01;
 
 		tPrivateAura = VUHDO_getPrivateAuraIcon(aButton, anAuraIndex);
 
@@ -1169,27 +1172,27 @@ do
 
 		if not InCombatLockdown() then
 			if sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
-				VUHDO_PixelUtil.SetPoint(tPrivateAura, "TOPLEFT", tPrivateAuraContainer, "TOPLEFT", tX, tY);
+				VUHDO_PixelUtil.SetPoint(tPrivateAura, "TOPLEFT", tPrivateAuraContainer, "TOPLEFT", tX / tTextScale, tY / tTextScale);
 			else
-				tPrivateAura:SetPoint("TOPLEFT", tPrivateAuraContainer, "TOPLEFT", tX + tFrameSize * 0.5, tY - tFrameSize * 0.5);
+				tPrivateAura:SetPoint("TOPLEFT", tPrivateAuraContainer, "TOPLEFT", (tX + tFrameSize * 0.5) / tTextScale, (tY - tFrameSize * 0.5) / tTextScale);
 			end
 		end
 
 		if sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
-			VUHDO_PixelUtil.SetSize(tPrivateAura, tFrameSize, tFrameSize);
-			VUHDO_PixelUtil.SetScale(tPrivateAura, 1);
+			VUHDO_PixelUtil.SetSize(tPrivateAura, tFrameSize / tTextScale, tFrameSize / tTextScale);
+			VUHDO_PixelUtil.SetScale(tPrivateAura, tTextScale);
 
 			if tDurationFrame then
 				VUHDO_PixelUtil.Hide(tDurationFrame);
 			end
 		else
 			tPrivateAura:SetSize(0.001, 0.001);
-			VUHDO_PixelUtil.SetScale(tPrivateAura, 1);
+			VUHDO_PixelUtil.SetScale(tPrivateAura, tTextScale);
 
 			if tDurationFrame then
 				tDurationFrame:ClearAllPoints();
 				tDurationFrame:SetPoint("TOPLEFT", tPrivateAuraContainer, "TOPLEFT", tX, tY);
-				VUHDO_PixelUtil.SetSize(tDurationFrame, tFrameSize, tFrameSize);
+				VUHDO_PixelUtil.SetSize(tDurationFrame, tFrameSize / tTextScale, tFrameSize / tTextScale);
 				VUHDO_PixelUtil.Show(tDurationFrame);
 			end
 		end

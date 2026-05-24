@@ -4305,7 +4305,8 @@ local VUHDO_DEFAULT_PER_PANEL_SETUP = {
 		["showTooltip"] = false,
 		["showDispelOverlay"] = true,
 		["dispelIndicatorType"] = 1,
-		["VERSION"] = 6,
+		["textScale"] = 100,
+		["VERSION"] = 7,
 	},
 
 	["RAID_ICON"] = {
@@ -4501,6 +4502,14 @@ function VUHDO_loadDefaultPanelSetup()
 				end
 
 				tPrivateAura["VERSION"] = 6;
+			end
+
+			if (tPrivateAura["VERSION"] or 0) < 7 then
+				if tPrivateAura["textScale"] == nil then
+					tPrivateAura["textScale"] = 100;
+				end
+
+				tPrivateAura["VERSION"] = 7;
 			end
 		end
 

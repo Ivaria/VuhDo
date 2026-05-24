@@ -1563,6 +1563,7 @@ end
 --
 local tPanelNum;
 local tIndicatorConfig;
+local tFontString;
 function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aValue, anIndicatorName, ...)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
@@ -1570,7 +1571,10 @@ function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aValue, anIn
 		tIndicatorConfig = VUHDO_INDICATOR_CONFIG[tPanelNum]["TEXT_INDICATORS"][anIndicatorName];
 
 		if VUHDO_getResolvedTextProvider(tIndicatorConfig["TEXT_PROVIDER_SOURCE"], tIndicatorConfig["TEXT_PROVIDER_FORMAT"]) == aProviderName then
-			VUHDO_getHealthBarText(tButton, aBarNum):SetText(format(...));
+			tFontString = VUHDO_getHealthBarText(tButton, aBarNum);
+
+			tFontString:SetText(format(...));
+			tFontString:SetAlpha(type(aValue) == "string" and 0 or aValue);
 		end
 	end
 

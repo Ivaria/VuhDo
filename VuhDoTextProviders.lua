@@ -523,6 +523,10 @@ local function VUHDO_percentValidator(anInfo, aValue, aMaxValue)
 
 	tIsHealth = (not anInfo["powertype"] or anInfo["powertype"] == -1);
 
+	if not tIsHealth and not issecretvalue(aMaxValue) and aMaxValue == 0 then
+		return "%s", "";
+	end
+
 	if sSecretsEnabled then
 		if not anInfo["unit"] then
 			return "%s", "";
