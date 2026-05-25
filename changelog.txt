@@ -25,6 +25,7 @@ Bugfixes:
 Improvements:  
 -- Added all power types as text provider sources  
 -- Added text scale adjustment for private aura icons  
+-- Added 'Emergency Soul Link' item to Smart Cast battle resurrection  
   
   
 --------------------------------------------------------------  
@@ -4710,4 +4711,4 @@ Improvements:
 Changes:  
   
   
-Features:  
+Features:  
