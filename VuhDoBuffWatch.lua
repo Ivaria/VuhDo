@@ -68,9 +68,11 @@ local VUHDO_isConfigDemoUsers;
 local VUHDO_determineAura;
 local VUHDO_textColor;
 
+local MAX_TOTEMS = MAX_TOTEMS;
+
 local GetTotemInfo = GetTotemInfo;
-local table = table;
-local GetTime = GetTime;
+local GetTotemDuration = GetTotemDuration;
+local ShouldTotemSlotBeSecret = C_Secrets and C_Secrets.ShouldTotemSlotBeSecret;
 local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
 local GetSpellInfo = GetSpellInfo or VUHDO_getSpellInfo;
 local InCombatLockdown = InCombatLockdown;
@@ -89,6 +91,9 @@ local VUHDO_BUFF_TARGET_MODE_NAME;
 local VUHDO_BUFF_TARGET_MODE_ROLE;
 local VUHDO_BUFF_TARGET_MODE_TARGET;
 local VUHDO_BUFF_TARGET_MODE_FOCUS;
+
+local VUHDO_INTERNAL_TOGGLES;
+local VUHDO_UPDATE_TOTEM;
 
 local sTimeAbbrevData = {
 	["breakpointData"] = {
@@ -116,11 +121,21 @@ local sTimeAbbrevData = {
 	},
 };
 
+local table = table;
+local GetTime = GetTime;
 local pairs = pairs;
 local ipairs = ipairs;
+local next = next;
 local twipe = table.wipe;
 local tinsert = table.insert;
+local tremove = table.remove;
 local format = format;
+
+local sTotemSlotCache = { };
+local sPendingTotemCasts = { };
+local sKnownTotemSpellIds = { };
+local sPendingCastTimeoutSecs = 3;
+local sTotemScratch = { };
 
 local sConfig = { };
 local sRebuffSecs;
@@ -148,6 +163,9 @@ function VUHDO_buffWatchInitLocalOverrides()
 	VUHDO_BUFF_TARGET_MODE_ROLE = _G["VUHDO_BUFF_TARGET_MODE_ROLE"];
 	VUHDO_BUFF_TARGET_MODE_TARGET = _G["VUHDO_BUFF_TARGET_MODE_TARGET"];
 	VUHDO_BUFF_TARGET_MODE_FOCUS = _G["VUHDO_BUFF_TARGET_MODE_FOCUS"];
+
+	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
+	VUHDO_UPDATE_TOTEM = _G["VUHDO_UPDATE_TOTEM"];
 
 	sConfig = VUHDO_BUFF_SETTINGS["CONFIG"];
 	sRebuffSecs = sConfig["REBUFF_MIN_MINUTES"] * 60;
@@ -745,6 +763,188 @@ end
 
 
 --
+local function VUHDO_trimPendingTotemCasts()
+
+	for tTotemCnt = #sPendingTotemCasts, 1, -1 do
+		sTotemScratch["entry"] = sPendingTotemCasts[tTotemCnt];
+
+		if GetTime() - sTotemScratch["entry"]["castTime"] > sPendingCastTimeoutSecs then
+			tremove(sPendingTotemCasts, tTotemCnt);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_shiftTotemSlotCacheDown(aFromSlot)
+
+	for tTotemCnt = aFromSlot, MAX_TOTEMS - 1 do
+		sTotemSlotCache[tTotemCnt] = sTotemSlotCache[tTotemCnt + 1];
+	end
+
+	sTotemSlotCache[MAX_TOTEMS] = nil;
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_resolveTotemSpellNameFromInfo(aSpellId, aTotemName, anIcon)
+
+	if aSpellId and not (sSecretsEnabled and issecretvalue(aSpellId)) then
+		sTotemScratch["resolved"] = sKnownTotemSpellIds[aSpellId];
+
+		if sTotemScratch["resolved"] then
+			return sTotemScratch["resolved"];
+		end
+	end
+
+	if anIcon and not (sSecretsEnabled and issecretvalue(anIcon)) then
+		for tTotemCnt, tTotemShift in pairs(sKnownTotemSpellIds) do
+			sTotemScratch["spellName"] = tTotemShift;
+
+			if VUHDO_BUFFS[sTotemScratch["spellName"]] and VUHDO_BUFFS[sTotemScratch["spellName"]]["icon"] == anIcon then
+				return sTotemScratch["spellName"];
+			end
+		end
+	end
+
+	if aTotemName and not (sSecretsEnabled and issecretvalue(aTotemName)) and aTotemName ~= "" then
+		if VUHDO_BUFFS[aTotemName] then
+			return aTotemName;
+		end
+
+		for _, tTotemShift in pairs(sKnownTotemSpellIds) do
+			if tTotemShift == aTotemName then
+				return aTotemName;
+			end
+		end
+	end
+
+	VUHDO_trimPendingTotemCasts();
+
+	if #sPendingTotemCasts > 0 then
+		sTotemScratch["entry"] = tremove(sPendingTotemCasts);
+
+		return sTotemScratch["entry"]["spellName"];
+	end
+
+	return nil;
+
+end
+
+
+
+--
+function VUHDO_rebuildKnownTotemSpellIndex()
+
+	twipe(sKnownTotemSpellIds);
+
+	for _, tTotemCnt in pairs(VUHDO_getPlayerClassBuffs()) do
+		for tTotemShift = 1, #tTotemCnt do
+			if VUHDO_BUFF_TARGET_TOTEM == tTotemCnt[tTotemShift][2] then
+				sTotemScratch["spellName"] = tTotemCnt[tTotemShift][1];
+				sTotemScratch["spellId"] = VUHDO_BUFFS[sTotemScratch["spellName"]] and VUHDO_BUFFS[sTotemScratch["spellName"]]["id"];
+
+				if sTotemScratch["spellId"] then
+					sKnownTotemSpellIds[sTotemScratch["spellId"]] = sTotemScratch["spellName"];
+				end
+			end
+		end
+	end
+
+	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_TOTEM] = next(sKnownTotemSpellIds) ~= nil;
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_onTotemSpellCast(aSpellId, aCastTime)
+
+	sTotemScratch["spellName"] = sKnownTotemSpellIds[aSpellId];
+
+	if not sTotemScratch["spellName"] then
+		return;
+	end
+
+	tinsert(sPendingTotemCasts, { ["spellName"] = sTotemScratch["spellName"], ["castTime"] = aCastTime });
+
+	VUHDO_trimPendingTotemCasts();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_onTotemUpdate(aSlot)
+
+	if not aSlot or aSlot < 1 or aSlot > MAX_TOTEMS then
+		return;
+	end
+
+	sTotemScratch["haveTotem"], sTotemScratch["spellName"], _, _, sTotemScratch["icon"], _, sTotemScratch["spellId"] = GetTotemInfo(aSlot);
+
+	if sSecretsEnabled and issecretvalue(sTotemScratch["haveTotem"]) then
+		sTotemScratch["resolved"] = VUHDO_resolveTotemSpellNameFromInfo(sTotemScratch["spellId"], sTotemScratch["spellName"], sTotemScratch["icon"]);
+
+		if sTotemScratch["resolved"] then
+			sTotemSlotCache[aSlot] = { ["spellName"] = sTotemScratch["resolved"] };
+		end
+
+		return;
+	end
+
+	if not sTotemScratch["haveTotem"] then
+		if sTotemSlotCache[aSlot] then
+			VUHDO_shiftTotemSlotCacheDown(aSlot);
+		else
+			sTotemSlotCache[aSlot] = nil;
+		end
+
+		return;
+	end
+
+	sTotemScratch["resolved"] = VUHDO_resolveTotemSpellNameFromInfo(sTotemScratch["spellId"], sTotemScratch["spellName"], sTotemScratch["icon"]);
+
+	if sTotemScratch["resolved"] then
+		sTotemSlotCache[aSlot] = { ["spellName"] = sTotemScratch["resolved"] };
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_getTotemSlotForBuff(aBuffName)
+
+	for tTotemCnt = 1, MAX_TOTEMS do
+		sTotemScratch["entry"] = sTotemSlotCache[tTotemCnt];
+
+		if sTotemScratch["entry"] and sTotemScratch["entry"]["spellName"] == aBuffName then
+			return tTotemCnt;
+		end
+	end
+
+	return nil;
+
+end
+
+
+
+--
 local tDestGroup;
 local tTargetType;
 local tEnchantDuration;
@@ -757,6 +957,7 @@ local tDuration;
 local tRest;
 local tName;
 local tTexture;
+local tTotemCount;
 function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
 
 	if VUHDO_BUFF_TARGET_MODE_NAME == aTargetMode then
@@ -788,48 +989,82 @@ function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpe
 			for tCnt = 1, NUM_STANCE_SLOTS do
 				_, tName, tIsActive = GetShapeshiftFormInfo(tCnt);
 				if tIsActive and tName == aBuffInfo[1] then
-					return sEmpty, sEmpty, "player", 0, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+					return sEmpty, sEmpty, "player", 0, "player", VUHDO_PLAYER_GROUP, sEmpty, 0, nil;
 				end
 			end
 
 			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0, nil;
 
 		elseif VUHDO_BUFF_TARGET_ENCHANT == tTargetType then
 			tHasEnchant, tEnchantDuration = GetWeaponEnchantInfo();
 			if tHasEnchant and (not sGermanOrEnglish or strfind(aBuffInfo[1], VUHDO_getWeaponEnchantName(16), 1, true)) then
-				return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+				return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0, nil;
 			end
 
 			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0, nil;
 
 		elseif VUHDO_BUFF_TARGET_ENCHANT_OFF == tTargetType then
 			_, _, _, _, tHasEnchant, tEnchantDuration = GetWeaponEnchantInfo();
 
 			if tHasEnchant and (not sGermanOrEnglish or strfind(aBuffInfo[1], VUHDO_getWeaponEnchantName(17), 1, true)) then
-				return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+				return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0, nil;
 			end
 
 			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0, nil;
 
 		elseif VUHDO_BUFF_TARGET_TOTEM == tTargetType then
-			for tTotemNum = 1, 4 do
-				_, tName, tStart, tDuration, tTexture = GetTotemInfo(tTotemNum);
-				if tTexture == VUHDO_BUFFS[aBuffInfo[1]]["icon"] then
-					if tName ~= aBuffInfo[1] then
-						sCooldownAliases[aBuffInfo[1]] = tName;
-					end
-					tRest = tDuration - (GetTime() - tStart);
-					if tRest < 0 then tRest = 0; end
+			tTotemCount = VUHDO_getTotemSlotForBuff(aBuffInfo[1]);
 
-					return sEmpty, sEmpty, "player", tRest, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+			if tTotemCount then
+				return sEmpty, sEmpty, "player", 0, "player", VUHDO_PLAYER_GROUP, sEmpty, 0, GetTotemDuration(tTotemCount);
+			end
+
+			tEnchantDuration = VUHDO_BUFFS[aBuffInfo[1]] and VUHDO_BUFFS[aBuffInfo[1]]["id"];
+
+			for tTotemNum = 1, MAX_TOTEMS do
+				if not (sSecretsEnabled and ShouldTotemSlotBeSecret(tTotemNum)) then
+					tIsActive, tName, tStart, tDuration, tTexture, _, sTotemScratch["spellId"] = GetTotemInfo(tTotemNum);
+
+					if not (sSecretsEnabled and issecretvalue(tIsActive)) and tIsActive then
+						tIsActive = false;
+
+						if sTotemScratch["spellId"] and tEnchantDuration and not (sSecretsEnabled and issecretvalue(sTotemScratch["spellId"]))
+							and sTotemScratch["spellId"] == tEnchantDuration then
+							tIsActive = true;
+						elseif tTexture and VUHDO_BUFFS[aBuffInfo[1]]
+							and not (sSecretsEnabled and issecretvalue(tTexture)) and tTexture == VUHDO_BUFFS[aBuffInfo[1]]["icon"] then
+							tIsActive = true;
+						elseif tName and not (sSecretsEnabled and issecretvalue(tName)) and tName == aBuffInfo[1] then
+							tIsActive = true;
+						end
+
+						if tIsActive then
+							if tName and not (sSecretsEnabled and issecretvalue(tName)) and tName ~= aBuffInfo[1] then
+								sCooldownAliases[aBuffInfo[1]] = tName;
+							end
+
+							if tStart and tDuration and not (sSecretsEnabled and issecretvalue(tStart))
+								and not (sSecretsEnabled and issecretvalue(tDuration)) then
+								tRest = tDuration - (GetTime() - tStart);
+
+								if tRest < 0 then
+									tRest = 0;
+								end
+							else
+								tRest = 0;
+							end
+
+							return sEmpty, sEmpty, "player", tRest, "player", VUHDO_PLAYER_GROUP, sEmpty, 0, GetTotemDuration(tTotemNum);
+						end
+					end
 				end
 			end
 
 			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0, nil;
 		else
 			-- If self we only care if buff isn't on player
 			tDestGroup = VUHDO_PLAYER_GROUP;
@@ -1258,7 +1493,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 	tCooldown, tTotalCd, tSpellCdDuration, _ = VUHDO_buffWatchGetSpellCooldown(tRefSpell);
 
 	tShowKnownCd = tCooldown and tCooldown > 1.5;
-	tShowLock = tSpellCdDuration and tCooldown == nil;
+	tShowLock = tSpellCdDuration and tCooldown == nil and VUHDO_BUFF_TARGET_TOTEM ~= tVariant[2];
 	tShowCd = tShowKnownCd or tShowLock;
 
 	if not tShowCd and VUHDO_BUFFS[tRefSpell]["wasOnCd"] and VUHDO_BUFF_SETTINGS["CONFIG"]["HIGHLIGHT_COOLDOWN"] then
@@ -1309,7 +1544,11 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			or (VUHDO_BUFF_TARGET_MODE_TARGET == tTargetMode and VUHDO_I18N_BW_TARGET or VUHDO_I18N_BW_FOCUS));
 	end
 
-	tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tMaxCount
+	if tShowLock then
+		tTotalCd = tSpellCdDuration;
+	end
+
+	tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tMaxCount, tSpellCdDuration
 		= VUHDO_getMissingBuffsForCode(tTargetMode, tTarget, tVariant, tCategSpec, false);
 
 	if VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] then
@@ -1406,10 +1645,10 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			tRoleTotal = #tOkayGroup + #tMissGroup;
 			VUHDO_setBuffSwatchCount(tSwatchName, format("%d/%d", #tOkayGroup, tRoleTotal > 0 and tRoleTotal or #tOkayGroup));
 
-			if tLowestRest == 0 then
+			if tLowestRest == 0 and not tSpellCdDuration then
 				VUHDO_setBuffSwatchTimer(tSwatchName, nil);
 			else
-				VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount);
+				VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest == 0 and nil or tLowestRest, tMaxCount, tSpellCdDuration);
 			end
 		elseif tUniqueRoleLow then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_LOW"], VUHDO_BS_COLOR_LOW);
@@ -1420,7 +1659,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 			VUHDO_setBuffSwatchCount(tSwatchName,
 				format("%d/%d", #tOkayGroup + #tLowGroup,
 					tRoleTotal > 0 and tRoleTotal or (#tOkayGroup + #tLowGroup)));
-			VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount);
+			VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount, tSpellCdDuration);
 		elseif #tMissGroup > 0 then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OUT"], VUHDO_BS_COLOR_MISSING);
 
@@ -1449,7 +1688,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 				VUHDO_setBuffSwatchCount(tSwatchName, format("%d", #tLowGroup));
 			end
 
-			VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount);
+			VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount, tSpellCdDuration);
 		else
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OKAY"], VUHDO_BS_COLOR_OKAY);
 
@@ -1463,10 +1702,10 @@ function VUHDO_updateBuffSwatch(aSwatch)
 
 			VUHDO_setBuffSwatchCount(tSwatchName, #tOkayGroup);
 
-			if tLowestRest == 0 then
+			if tLowestRest == 0 and not tSpellCdDuration then
 				VUHDO_setBuffSwatchTimer(tSwatchName, nil);
 			else
-				VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest, tMaxCount);
+				VUHDO_setBuffSwatchTimer(tSwatchName, tLowestRest == 0 and nil or tLowestRest, tMaxCount, tSpellCdDuration);
 			end
 		end
 	end
@@ -1487,7 +1726,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 		_G[tSwatchName .. "MessageLabelLabel"]:SetTextColor(1, 1, 1, 1);
 
 		VUHDO_setBuffSwatchCount(tSwatchName, "");
-		VUHDO_setBuffSwatchTimer(tSwatchName, nil, nil, tSpellCdDuration);
+		VUHDO_setBuffSwatchTimer(tSwatchName, nil, nil, tTotalCd);
 
 		_G[tSwatchName .. "TimerLabelLabel"]:SetTextColor(1, 1, 1, 1);
 
