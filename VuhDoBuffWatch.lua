@@ -757,6 +757,7 @@ local tDuration;
 local tRest;
 local tName;
 local tTexture;
+local tHadSecretSlot;
 function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
 
 	if VUHDO_BUFF_TARGET_MODE_NAME == aTargetMode then
@@ -815,17 +816,35 @@ function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpe
 			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
 
 		elseif VUHDO_BUFF_TARGET_TOTEM == tTargetType then
+			tHadSecretSlot = false;
+
 			for tTotemNum = 1, 4 do
 				_, tName, tStart, tDuration, tTexture = GetTotemInfo(tTotemNum);
-				if tTexture == VUHDO_BUFFS[aBuffInfo[1]]["icon"] then
-					if tName ~= aBuffInfo[1] then
+
+				if sSecretsEnabled and issecretvalue(tTexture) then
+					tHadSecretSlot = true;
+				elseif tTexture == VUHDO_BUFFS[aBuffInfo[1]]["icon"] then
+					if tName ~= aBuffInfo[1]
+						and not (sSecretsEnabled and issecretvalue(tName)) then
 						sCooldownAliases[aBuffInfo[1]] = tName;
 					end
-					tRest = tDuration - (GetTime() - tStart);
-					if tRest < 0 then tRest = 0; end
+
+					if not (sSecretsEnabled and (issecretvalue(tStart) or issecretvalue(tDuration))) then
+						tRest = tDuration - (GetTime() - tStart);
+
+						if tRest < 0 then
+							tRest = 0;
+						end
+					else
+						tRest = 0;
+					end
 
 					return sEmpty, sEmpty, "player", tRest, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
 				end
+			end
+
+			if tHadSecretSlot then
+				return sEmpty, sEmpty, "player", 0, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
 			end
 
 			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
