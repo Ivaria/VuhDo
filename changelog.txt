@@ -24,7 +24,6 @@ Version 3.207
   
 Known issues:  
 -- Midnight add-on restrictions mean some features are not yet available:  
---   Text provider formatting e.g. +<#n>K is only partially working  
 --   Overheal text provider and Life Text highlight are not yet working  
 --   Many Hitpoints option (e.g. Show Effective) are not yet working  
 --   Overshield Bar will only display when the unit is at full health  
@@ -38,9 +37,13 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed text provider formatting  
   
   
 Improvements:  
+-- Added all power types as text provider sources  
+-- Added text scale adjustment for private aura icons  
+-- Added 'Emergency Soul Link' item to Smart Cast battle resurrection  
   
   
 --------------------------------------------------------------  
@@ -133,6 +136,9 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Blizzard dispel overlay for private auras  
+-- Added Blizzard dispel overlay for standard auras  
+-- Added default aura group for all dispellable debuffs  
   
   
 --------------------------------------------------------------  
@@ -176,6 +182,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed fallback when settings reference nonexistent font  
   
   
 Improvements:  
