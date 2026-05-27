@@ -12,9 +12,6 @@ Known issues:
 --   unpredictable, negative results.  Be warned!  
   
   
-  
-  
-  
 Bugfixes:  
   
   
@@ -40,9 +37,6 @@ Known issues:
 --   and set 'Self Cast Key' to 'None'  
   
   
-  
-  
-  
 Bugfixes:  
   
   
@@ -62,8 +56,6 @@ Known issues:
 -- Group roster changes will not be reflected during combat  
 --   Swapping a player between groups during combat will cause  
 --   unpredictable, negative results.  Be warned!  
-  
-  
   
   
 Bugfixes:  
@@ -91,8 +83,6 @@ Known issues:
 --   and set 'Self Cast Key' to 'None'  
   
   
-  
-  
 Bugfixes:  
   
   
@@ -112,7 +102,6 @@ Known issues:
 -- Group roster changes will not be reflected during combat  
 --   Swapping a player between groups during combat will cause  
 --   unpredictable, negative results.  Be warned!  
-  
   
   
 Bugfixes:  
@@ -138,7 +127,6 @@ Known issues:
 -- Blizzard continues to have a bug that breaks proper spell targeting.  
 --   Under 'Game Menu > Options > Gameplay > Combat' deselect 'Auto Self Cast'  
 --   and set 'Self Cast Key' to 'None'  
-  
   
   
 Bugfixes:  
@@ -6842,4 +6830,4 @@ Improvements:
 Changes:  
   
   
-Features:  
+Features:  
