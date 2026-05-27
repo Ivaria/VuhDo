@@ -15,9 +15,6 @@ Known issues:
 --   and set 'Self Cast Key' to 'None'  
   
   
-  
-  
-  
 Bugfixes:  
 -- Fixed text provider formatting  
   
@@ -47,8 +44,6 @@ Known issues:
 --   and set 'Self Cast Key' to 'None'  
   
   
-  
-  
 Bugfixes:  
   
   
@@ -72,7 +67,6 @@ Known issues:
 -- Blizzard continues to have a bug that breaks proper spell targeting.  
 --   Under 'Game Menu > Options > Gameplay > Combat' deselect 'Auto Self Cast'  
 --   and set 'Self Cast Key' to 'None'  
-  
   
   
 Bugfixes:  
