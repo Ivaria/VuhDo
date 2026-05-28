@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed global cooldown bar  
   
   
 Improvements:  
