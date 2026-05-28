@@ -22,7 +22,7 @@ local VUHDO_getUnitOverallShieldRemain;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sHealPredictionCalculator;
-local sScaleTo10CeilCurve;
+local sScaleTo10Curve;
 local sScaleTo100CeilCurve;
 
 
@@ -46,13 +46,13 @@ function VUHDO_textProvidersInitLocalOverrides()
 			sHealPredictionCalculator:SetIncomingHealOverflowPercent(1.0);
 		end
 
-		sScaleTo10CeilCurve = CreateCurve and CreateCurve();
+		sScaleTo10Curve = CreateCurve and CreateCurve();
 
-		if sScaleTo10CeilCurve then
-			sScaleTo10CeilCurve:SetType(Enum.LuaCurveType.Linear);
+		if sScaleTo10Curve then
+			sScaleTo10Curve:SetType(Enum.LuaCurveType.Linear);
 
-			sScaleTo10CeilCurve:AddPoint(0.0, 0.99999);
-			sScaleTo10CeilCurve:AddPoint(1.0, 10.99999);
+			sScaleTo10Curve:AddPoint(0.0, 0);
+			sScaleTo10Curve:AddPoint(1.0, 10);
 		end
 
 		sScaleTo100CeilCurve = CreateCurve and CreateCurve();
@@ -579,7 +579,7 @@ local function VUHDO_tenthPercentValidator(anInfo, aValue, aMaxValue)
 			return "%s", "";
 		end
 
-		tPercent = UnitPowerPercent(anInfo["unit"], anInfo["powertype"] or 0, false, sScaleTo10CeilCurve);
+		tPercent = UnitPowerPercent(anInfo["unit"], anInfo["powertype"] or 0, false, sScaleTo10Curve);
 
 		return "%d", tPercent;
 	end
