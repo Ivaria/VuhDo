@@ -51,8 +51,8 @@ function VUHDO_textProvidersInitLocalOverrides()
 		if sScaleTo10Curve then
 			sScaleTo10Curve:SetType(Enum.LuaCurveType.Linear);
 
-			sScaleTo10Curve:AddPoint(0.0, 0);
-			sScaleTo10Curve:AddPoint(1.0, 10);
+			sScaleTo10Curve:AddPoint(0.0, 0.099999);
+			sScaleTo10Curve:AddPoint(1.0, 10.099999);
 		end
 
 		sScaleTo100CeilCurve = CreateCurve and CreateCurve();
