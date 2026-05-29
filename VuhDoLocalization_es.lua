@@ -36,13 +36,13 @@ VUHDO_I18N_OWN_GROUP = "Mi Grupo";
 -- Special Model Names
 -- @EXACT = false
 VUHDO_I18N_PETS = "Mascotas";
-VUHDO_I18N_MAINTANKS = "Tanques Principales";
+VUHDO_I18N_MAINTANKS = "Tanques\nPrincipales";
 VUHDO_I18N_PRIVATE_TANKS = "Tanques Privados";
 -- General Labels
 -- @EXACT = false
 VUHDO_I18N_OKAY = "Aceptar";
 VUHDO_I18N_CLASS = "Clase";
-VUHDO_I18N_PLAYER = "Jugador";
+VUHDO_I18N_PLAYER = "jugador";
 -- VuhDoTooltip.lua
 -- @EXACT = false
 VUHDO_I18N_TT_POSITION = "|cffffb233Posici\195\179n:|r";
@@ -102,7 +102,7 @@ VUHDO_I18N_VUHDO_OPTIONS = "Opciones de VuhDo";
 VUHDO_I18N_PANEL_SETUP = "Opciones";
 VUHDO_I18N_MM_TOOLTIP = "Izquierdo: Configurar Panel\nDerecho: Men\195\186";
 VUHDO_I18N_TOGGLES = "Interruptores";
-VUHDO_I18N_LOCK_PANELS = "Bloquear Paneles";
+VUHDO_I18N_LOCK_PANELS = "Lock Panels";
 VUHDO_I18N_SHOW_PANELS = "Mostrar Paneles";
 VUHDO_I18N_MM_BUTTON = "Bot\195\179n del Minimap";
 VUHDO_I18N_CLOSE = "Cerrar";
@@ -163,7 +163,7 @@ VUHDO_I18N_VEHICLES = "Veh\195\173culos";
 -- #+v1.94
 VUHDO_I18N_DEFAULT_RES_ANNOUNCE = "¡Vuelve a la vida, vuhdo!";
 -- #v+1.151
-VUHDO_I18N_MAIN_ASSISTS = "Asistentes Principales";
+VUHDO_I18N_MAIN_ASSISTS = "Asistentes\nPrincipales";
 -- #+v1.184
 VUHDO_I18N_BW_CD = "CD";
 VUHDO_I18N_BW_GO = "¡YA!";
@@ -338,7 +338,7 @@ VUHDO_I18N_FOC = "foc";
 VUHDO_I18N_TAR = "obj";
 VUHDO_I18N_VEHICLE = "O-O";
 -- 2.67
-VUHDO_I18N_BUFF_WATCH = "Monitor de Beneficios";
+VUHDO_I18N_BUFF_WATCH = "Monitor de\nbeneficios";
 VUHDO_I18N_HOTS = "HoTs";
 VUHDO_I18N_DEBUFFS = "Perjuicios";
 VUHDO_I18N_BOUQUET_PLAYER_FOCUS = "Indicador: Foco del Jugador";
@@ -381,7 +381,7 @@ VUHDO_I18N_FRIEND_STATUS = "Indicador: Amigo";
 VUHDO_I18N_FOE_STATUS = "Indicador: Enemigo";
 VUHDO_I18N_BOUQUET_STATUS_ALWAYS_FULL = "Barra de estado: Siempre llena";
 VUHDO_I18N_BOUQUET_STATUS_FULL_IF_ACTIVE = "Barra de estado: Llena si activo";
-VUHDO_I18N_AOE_ADVICE = "Icono: Aviso AOE";
+VUHDO_I18N_AOE_ADVICE = "Asesor\nde AoE";
 VUHDO_I18N_DEF_AOE_ADVICE = "AOE Advice";
 VUHDO_I18N_BOUQUET_DURATION_ABOVE = "Indicador: Duraci\195\179n > seg";
 VUHDO_I18N_BOUQUET_DURATION_BELOW = "Indicador: Duraci\195\179n < seg";
@@ -465,7 +465,7 @@ VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "¡Lanzando resurrecci\195\179n en masa!"
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "Overflow Mythic+ Affix";
 
 -- 3.82
-VUHDO_I18N_SPELL_TRACE = "Icono: Rastrear Hechizo";
+VUHDO_I18N_SPELL_TRACE = "Seguimiento\nde hechizos";
 VUHDO_I18N_DEF_SPELL_TRACE = "Spell Trace";
 VUHDO_I18N_TRAIL_OF_LIGHT = "Icono: Estela de Luz";
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "Trail of Light";
