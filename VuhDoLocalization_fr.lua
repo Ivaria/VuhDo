@@ -63,7 +63,7 @@ VUHDO_I18N_PRIVATE_TANKS = "Cibles personnalis\195\169es";
 -- @EXACT = false
 VUHDO_I18N_OKAY = "Valider";
 VUHDO_I18N_CLASS = "Classe";
-VUHDO_I18N_PLAYER = "Joueur";
+VUHDO_I18N_PLAYER = "du joueur";
 -- VuhDoTooltip.lua
 -- @EXACT = false
 VUHDO_I18N_TT_POSITION = "|cffffb233Position:|r";
@@ -124,7 +124,7 @@ VUHDO_I18N_VUHDO_OPTIONS = "Options de VuhDo";
 VUHDO_I18N_PANEL_SETUP = "Options";
 VUHDO_I18N_MM_TOOLTIP = "Gauche: D\195\169finition des Panneaux\nDroite: Menu";
 VUHDO_I18N_TOGGLES = "Etats";
-VUHDO_I18N_LOCK_PANELS = "V\195\169rouiller Panneaux";
+VUHDO_I18N_LOCK_PANELS = "Lock Panels";
 VUHDO_I18N_SHOW_PANELS = "Afficher les panneaux";
 VUHDO_I18N_MM_BUTTON = "Bouton de la minimap";
 VUHDO_I18N_CLOSE = "Fermer";
@@ -358,7 +358,7 @@ VUHDO_I18N_FOC = "foc";
 VUHDO_I18N_TAR = "tar";
 VUHDO_I18N_VEHICLE = "O-O";
 -- 2.67
-VUHDO_I18N_BUFF_WATCH = "Surveillance des buffs";
+VUHDO_I18N_BUFF_WATCH = "Buff Watch";
 VUHDO_I18N_HOTS = "HoTs";
 VUHDO_I18N_DEBUFFS = "D\195\169buffs";
 VUHDO_I18N_BOUQUET_PLAYER_FOCUS = "Drapeau : Focus du joueur";
@@ -488,7 +488,7 @@ VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "Lancement de la r\195\169surrection de m
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "Affix de d\195\169bordement mythique+";
 
 -- 3.82
-VUHDO_I18N_SPELL_TRACE = "Ic\195\180ne : Trace de sort";
+VUHDO_I18N_SPELL_TRACE = "Trace\nde sort";
 VUHDO_I18N_DEF_SPELL_TRACE = "Trace de sort";
 VUHDO_I18N_TRAIL_OF_LIGHT = "Ic\195\180ne : Tra\195\174n\195\169e de lumi\195\168re";
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "Tra\195\174n\195\169e de lumi\195\168re";

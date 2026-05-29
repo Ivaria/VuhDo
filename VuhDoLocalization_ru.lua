@@ -529,7 +529,7 @@ VUHDO_I18N_DEFAULT_RES_ANNOUNCE_MASS = "Использую массовое во
 VUHDO_I18N_BOUQUET_OVERFLOW_COUNTER = "Переполняющий М+ аффикс";
 
 -- 3.82
-VUHDO_I18N_SPELL_TRACE = "Иконка: Отслеживание";
+VUHDO_I18N_SPELL_TRACE = "Отслеж.\nзаклин.";
 VUHDO_I18N_DEF_SPELL_TRACE = "Отслеживание";
 VUHDO_I18N_TRAIL_OF_LIGHT = "Иконка: Дорога Света";
 VUHDO_I18N_DEF_TRAIL_OF_LIGHT = "Дорога Света";

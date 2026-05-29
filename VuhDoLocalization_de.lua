@@ -30,7 +30,7 @@ VUHDO_I18N_PRIVATE_TANKS = "Privat-Tanks";
 -- @EXACT = false
 VUHDO_I18N_OKAY = "Okay";
 VUHDO_I18N_CLASS = "Klasse";
-VUHDO_I18N_PLAYER = "Spieler";
+VUHDO_I18N_PLAYER = "Player unit";
 -- VuhDoTooltip.lua
 -- @EXACT = false
 VUHDO_I18N_TT_POSITION = "|cffffb233Position:|r";
