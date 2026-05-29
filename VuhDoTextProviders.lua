@@ -23,7 +23,7 @@ local VUHDO_getUnitOverallShieldRemain;
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sHealPredictionCalculator;
 local sScaleTo10Curve;
-local sScaleTo100Curve;
+local sScaleTo100CeilCurve;
 
 
 
@@ -51,17 +51,17 @@ function VUHDO_textProvidersInitLocalOverrides()
 		if sScaleTo10Curve then
 			sScaleTo10Curve:SetType(Enum.LuaCurveType.Linear);
 
-			sScaleTo10Curve:AddPoint(0.0, 0.099999);
-			sScaleTo10Curve:AddPoint(1.0, 10.099999);
+			sScaleTo10Curve:AddPoint(0.0, 0);
+			sScaleTo10Curve:AddPoint(1.0, 10);
 		end
 
-		sScaleTo100Curve = CreateCurve and CreateCurve();
+		sScaleTo100CeilCurve = CreateCurve and CreateCurve();
 
-		if sScaleTo100Curve then
-			sScaleTo100Curve:SetType(Enum.LuaCurveType.Linear);
+		if sScaleTo100CeilCurve then
+			sScaleTo100CeilCurve:SetType(Enum.LuaCurveType.Linear);
 
-			sScaleTo100Curve:AddPoint(0.0, 0.99999);
-			sScaleTo100Curve:AddPoint(1.0, 100.99999);
+			sScaleTo100CeilCurve:AddPoint(0.0, 0.99999);
+			sScaleTo100CeilCurve:AddPoint(1.0, 100.99999);
 		end
 	end
 
@@ -551,11 +551,11 @@ local function VUHDO_percentValidator(anInfo, aValue, aMaxValue)
 		end
 
 		if tIsHealth and anInfo["hasSecretHealth"] then
-			tPercent = UnitHealthPercent(anInfo["unit"], true, sScaleTo100Curve);
+			tPercent = UnitHealthPercent(anInfo["unit"], true, sScaleTo100CeilCurve);
 
 			return "%d%%", tPercent;
 		elseif not tIsHealth and anInfo["hasSecretPower"] then
-			tPercent = UnitPowerPercent(anInfo["unit"], anInfo["powertype"] or 0, false, sScaleTo100Curve);
+			tPercent = UnitPowerPercent(anInfo["unit"], anInfo["powertype"] or 0, false, CurveConstants.ScaleTo100);
 
 			return "%d%%", tPercent;
 		elseif issecretvalue(aValue) or issecretvalue(aMaxValue) then
