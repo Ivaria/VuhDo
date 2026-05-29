@@ -17,6 +17,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed text provider formatting  
+-- Fixed role detection for Devourer Demon Hunters  
   
   
 Improvements:  
