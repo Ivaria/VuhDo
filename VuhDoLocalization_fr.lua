@@ -124,7 +124,7 @@ VUHDO_I18N_VUHDO_OPTIONS = "Options de VuhDo";
 VUHDO_I18N_PANEL_SETUP = "Options";
 VUHDO_I18N_MM_TOOLTIP = "Gauche: D\195\169finition des Panneaux\nDroite: Menu";
 VUHDO_I18N_TOGGLES = "Etats";
-VUHDO_I18N_LOCK_PANELS = "Lock Panels";
+VUHDO_I18N_LOCK_PANELS = "Verr. Panneaux";
 VUHDO_I18N_SHOW_PANELS = "Afficher les panneaux";
 VUHDO_I18N_MM_BUTTON = "Bouton de la minimap";
 VUHDO_I18N_CLOSE = "Fermer";
@@ -667,3 +667,4 @@ VUHDO_I18N_TEXT_PROVIDER_FORMAT_NK = "<#nk>";
 VUHDO_I18N_TEXT_PROVIDER_FORMAT_NK_PLUS = "+<#nk>";
 VUHDO_I18N_TEXT_PROVIDER_SOURCE_LABEL = "Text Source";
 VUHDO_I18N_TEXT_PROVIDER_FORMAT_LABEL = "Text Format";
+
