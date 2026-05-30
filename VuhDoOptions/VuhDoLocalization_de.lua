@@ -1569,7 +1569,7 @@ VUHDO_I18N_SORT_NAME_ONLY = "Nur Name";
 
 VUHDO_I18N_SPELL_SOURCE = "Zauberquelle";
 VUHDO_I18N_FULL_DURATION = "Gesamte Dauer";
-VUHDO_I18N_ALIVE_TIME = "Lebenszeit";
+VUHDO_I18N_ALIVE_TIME_INLINE = "Lebenszeit";
 VUHDO_I18N_TIMER_THRESHOLD = "Timer anzeigen";
 VUHDO_I18N_GLOW_ICON = "Symbol-Aufleuchten";
 VUHDO_I18N_COLOR_ICON = "Symbol färben";

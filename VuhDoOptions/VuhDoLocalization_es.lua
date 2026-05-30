@@ -1320,6 +1320,7 @@ VUHDO_I18N_LKA_EDITED_MACRO = "Macro editada: ";
 VUHDO_I18N_FLASH = "Destello";
 
 VUHDO_I18N_SHOW_TOTAL = "Mostrar\ntotal";
+VUHDO_I18N_ALIVE_TIME = "Tiempo\ncon vida";
 VUHDO_I18N_PARSE = "Analizar";
 VUHDO_I18N_TEXT_SHADOW = "Texto/Sombra";
 VUHDO_I18N_COMBAT_LOG = "Combat Log";
@@ -1582,7 +1583,7 @@ VUHDO_I18N_SORT_NAME_ONLY = "Solo por nombre";
 
 VUHDO_I18N_SPELL_SOURCE = "Fuente del hechizo";
 VUHDO_I18N_FULL_DURATION = "Duraci\195\179n\ncompleta";
-VUHDO_I18N_ALIVE_TIME = "Tiempo\ncon vida";
+VUHDO_I18N_ALIVE_TIME_INLINE = "Tiempo con vida";
 VUHDO_I18N_TIMER_THRESHOLD = "Mostrar temporizador";
 VUHDO_I18N_GLOW_ICON = "Icono\nbrillante";
 VUHDO_I18N_COLOR_ICON = "Icono\nen color";
