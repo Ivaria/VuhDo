@@ -10,7 +10,6 @@ local VUHDO_TEXT_PROVIDER_SOURCES;
 local VUHDO_TEXT_PROVIDER_FORMATS;
 local VUHDO_INDICATOR_CONFIG;
 local VUHDO_PANEL_MODELS;
-local VUHDO_ID_RANGED_HEAL;
 
 local VUHDO_tableGetKeyFromValue;
 local VUHDO_getRegisteredBouquets;
@@ -18,6 +17,7 @@ local VUHDO_getRegisteredBouquetIndicators;
 local VUHDO_updateBouquetsForEvent;
 local VUHDO_isBouquetInterestedInEvent;
 local VUHDO_strempty;
+local VUHDO_getActiveBouquets;
 
 VUHDO_TEXT_PROVIDER_SOURCE_COMBO_MODEL = { };
 local VUHDO_TEXT_PROVIDER_SOURCE_COMBO_MODEL = VUHDO_TEXT_PROVIDER_SOURCE_COMBO_MODEL;
@@ -47,7 +47,6 @@ function VUHDO_textProviderHandlersInitLocalOverrides()
 	VUHDO_TEXT_PROVIDER_FORMATS = _G["VUHDO_TEXT_PROVIDER_FORMATS"];
 	VUHDO_INDICATOR_CONFIG = _G["VUHDO_INDICATOR_CONFIG"];
 	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
-	VUHDO_ID_RANGED_HEAL = _G["VUHDO_ID_RANGED_HEAL"];
 
 	VUHDO_tableGetKeyFromValue = _G["VUHDO_tableGetKeyFromValue"];
 	VUHDO_getRegisteredBouquets = _G["VUHDO_getRegisteredBouquets"];
@@ -55,6 +54,7 @@ function VUHDO_textProviderHandlersInitLocalOverrides()
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
 	VUHDO_isBouquetInterestedInEvent = _G["VUHDO_isBouquetInterestedInEvent"];
 	VUHDO_strempty = _G["VUHDO_strempty"];
+	VUHDO_getActiveBouquets = _G["VUHDO_getActiveBouquets"];
 
 	return;
 
@@ -111,6 +111,39 @@ end
 
 
 --
+local tBouquets;
+local tActiveBouquets;
+local tIsInactive;
+local function VUHDO_isIndicatorBouquetInactive(aUnit, anIndicatorName)
+
+	if not aUnit then
+		return false;
+	end
+
+	tBouquets = VUHDO_getRegisteredBouquetIndicators(anIndicatorName);
+
+	if not tBouquets then
+		return false;
+	end
+
+	tActiveBouquets = ((VUHDO_getActiveBouquets() or sEmpty)[aUnit] or sEmpty);
+	tIsInactive = false;
+
+	for tBouquetName, _ in pairs(tBouquets) do
+		if tActiveBouquets[tBouquetName] then
+			return false;
+		end
+
+		tIsInactive = true;
+	end
+
+	return tIsInactive;
+
+end
+
+
+
+--
 local tInfo;
 local tIndicators;
 local tValue;
@@ -129,8 +162,7 @@ function VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName,
 					if VUHDO_INDICATOR_TEXT_PROVIDERS[tIndicatorName] then
 						for tResolved, tFunction in pairs(VUHDO_INDICATOR_TEXT_PROVIDERS[tIndicatorName]) do
 							if VUHDO_isTextProviderInterestedInEvent(tResolved, anEventType) then
-								if not anIsActive or
-									(aBouquetName == VUHDO_I18N_DEF_BOUQUET_BAR_MANA_HEALER_ONLY and tInfo["role"] ~= VUHDO_ID_RANGED_HEAL) then
+								if not anIsActive then
 									tFunction(aUnit, tResolved, "", tIndicatorName, "%s", "");
 								else
 									tValue, tMaxValue = tResolved["source"]["calculator"](tInfo);
@@ -148,10 +180,14 @@ function VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName,
 				if VUHDO_isTextProviderInterestedInEvent(tResolved, anEventType) then
 					for tIndicatorName, tFunction in pairs(tAllIndicators) do
 						if not VUHDO_isAnyIndicatorBouquetInterestedIn(tIndicatorName, anEventType) then
-							tValue, tMaxValue = tResolved["source"]["calculator"](tInfo);
+							if VUHDO_isIndicatorBouquetInactive(aUnit, tIndicatorName) then
+								tFunction(aUnit, tResolved, "", tIndicatorName, "%s", "");
+							else
+								tValue, tMaxValue = tResolved["source"]["calculator"](tInfo);
 
-							tFunction(aUnit, tResolved, tValue, tIndicatorName,
-								tResolved["format"]["validator"](tInfo, tValue, tMaxValue));
+								tFunction(aUnit, tResolved, tValue, tIndicatorName,
+									tResolved["format"]["validator"](tInfo, tValue, tMaxValue));
+							end
 						end
 					end
 				end
