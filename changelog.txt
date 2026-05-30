@@ -18,6 +18,7 @@ Known issues:
 Bugfixes:  
 -- Fixed text provider formatting  
 -- Fixed role detection for Devourer Demon Hunters  
+-- Fixed mana bar indicator opacity when out of range  
   
   
 Improvements:  
