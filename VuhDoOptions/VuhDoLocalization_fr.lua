@@ -1586,7 +1586,7 @@ VUHDO_I18N_SORT_NAME_ONLY = "Nom uniquement";
 
 VUHDO_I18N_SPELL_SOURCE = "Source du sort";
 VUHDO_I18N_FULL_DURATION = "Dur\195\169e\ntotale";
-VUHDO_I18N_ALIVE_TIME = "Temps actif";
+VUHDO_I18N_ALIVE_TIME_INLINE = "Temps actif";
 VUHDO_I18N_TIMER_THRESHOLD = "Afficher chrono";
 VUHDO_I18N_GLOW_ICON = "Brillance\nic\195\180ne";
 VUHDO_I18N_COLOR_ICON = "Couleur\nic\195\180ne";
