@@ -38,10 +38,13 @@ Known issues:
   
 Bugfixes:  
 -- Fixed text provider formatting  
+-- Fixed role detection for Devourer Demon Hunters  
+-- Fixed mana bar indicator opacity when out of range  
   
   
 Improvements:  
 -- Added all power types as text provider sources  
+-- Added new compound text provider formats  
 -- Added text scale adjustment for private aura icons  
 -- Added 'Emergency Soul Link' item to Smart Cast battle resurrection  
   
@@ -6842,4 +6845,4 @@ Improvements:
 Changes:  
   
   
-Features:  
+Features:  
