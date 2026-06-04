@@ -13,6 +13,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed fallback when settings reference non-existant font  
   
   
 Improvements:  
