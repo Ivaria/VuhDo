@@ -94,69 +94,6 @@ local sGrowthOffsets = {
 
 
 --
-local tBoundsGrowth;
-local tBoundsWrap;
-local tBoundsStep;
-local tBoundsCols;
-local tBoundsNum;
-local tBoundsCol;
-local tBoundsRow;
-local tBoundsMinX;
-local tBoundsMaxX;
-local tBoundsMinY;
-local tBoundsMaxY;
-local tBoundsOffX;
-local tBoundsOffY;
-local tBoundsRightX;
-local tBoundsBottomY;
-function VUHDO_getPrivateAuraOffsetBounds(aGrowthDirName, aWrapDirName, aMaxCols, aNumAuras, aSpacing)
-
-	tBoundsGrowth = sGrowthOffsets[aGrowthDirName] or sGrowthOffsets["RIGHT"];
-	tBoundsWrap = sGrowthOffsets[aWrapDirName] or sGrowthOffsets["DOWN"];
-
-	tBoundsStep = 32 + (aSpacing or 0);
-
-	tBoundsCols = aMaxCols or 3;
-	tBoundsNum = aNumAuras or 3;
-
-	tBoundsMinX = nil;
-	tBoundsMaxX = nil;
-
-	tBoundsMinY = nil;
-	tBoundsMaxY = nil;
-
-	for tIdx = 1, tBoundsNum do
-		tBoundsCol = (tIdx - 1) % tBoundsCols;
-		tBoundsRow = floor((tIdx - 1) / tBoundsCols);
-
-		tBoundsOffX = tBoundsCol * tBoundsStep * tBoundsGrowth[1] + tBoundsRow * tBoundsStep * tBoundsWrap[1];
-		tBoundsOffY = tBoundsCol * tBoundsStep * tBoundsGrowth[2] + tBoundsRow * tBoundsStep * tBoundsWrap[2];
-
-		tBoundsRightX = tBoundsOffX + 32;
-		tBoundsBottomY = tBoundsOffY + 32;
-
-		if not tBoundsMinX then
-			tBoundsMinX = tBoundsOffX;
-			tBoundsMaxX = tBoundsRightX;
-
-			tBoundsMinY = tBoundsOffY;
-			tBoundsMaxY = tBoundsBottomY;
-		else
-			tBoundsMinX = min(tBoundsMinX, tBoundsOffX);
-			tBoundsMaxX = max(tBoundsMaxX, tBoundsRightX);
-
-			tBoundsMinY = min(tBoundsMinY, tBoundsOffY);
-			tBoundsMaxY = max(tBoundsMaxY, tBoundsBottomY);
-		end
-	end
-
-	return tBoundsMinX, tBoundsMinY, tBoundsMaxX, tBoundsMaxY;
-
-end
-
-
-
---
 function VUHDO_panelRedrawInitLocalOverrides()
 
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
@@ -458,10 +395,8 @@ function VUHDO_initLocalVars(aPanelNum)
 
 	sPanelConfig[aPanelNum]["privateAuraHeight"] = tIconSize;
 
-	sPanelConfig[aPanelNum]["privateAuraFrameSize"] = 32;
-
 	tSpacing = sPanelConfig[aPanelNum]["privateAura"]["spacing"] or 0;
-	sPanelConfig[aPanelNum]["privateAuraStep"] = sPanelConfig[aPanelNum]["privateAuraFrameSize"] + tSpacing;
+	sPanelConfig[aPanelNum]["privateAuraStep"] = sPanelConfig[aPanelNum]["privateAuraHeight"] + tSpacing;
 
 	sPanelConfig[aPanelNum]["privateAuraXOffset"] = sPanelConfig[aPanelNum]["privateAura"]["xAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barWidth"] * 0.01;
 	sPanelConfig[aPanelNum]["privateAuraYOffset"] = -sPanelConfig[aPanelNum]["privateAura"]["yAdjust"] * sPanelConfig[aPanelNum]["barScaling"]["barHeight"] * 0.01;
@@ -1101,8 +1036,6 @@ do
 	local tPrivateAura;
 	local tPrivateAuraContainer;
 	local tDurationFrame;
-	local tX;
-	local tY;
 	local tNumAuras;
 	local tFrameLevel;
 	local tGrowthDir;
@@ -1111,23 +1044,15 @@ do
 	local tCol;
 	local tRow;
 	local tStep;
-	local tMinOffsetX;
-	local tMinOffsetY;
-	local tMaxOffsetX;
-	local tMaxOffsetY;
-	local tOffsetX;
-	local tOffsetY;
-	local tRightX;
-	local tBottomY;
-	local tFrameSize;
-	local tAnchorPoint;
-	local tAnchorFactors;
-	local tContainerScale;
-	local tContainerW;
-	local tContainerH;
-	local tAnchorDeltaX;
-	local tAnchorDeltaY;
+	local tGridX;
+	local tGridY;
+	local tVisualSize;
+	local tPoint;
+	local tFactors;
+	local tHalfX;
+	local tHalfY;
 	local tTextScale;
+	local tEffectiveScale;
 	local function VUHDO_initPrivateAura(aHealthBar, aButton, anAuraIndex, aPanelNum)
 
 		tTextScale = (sPanelConfig[aPanelNum]["privateAura"]["textScale"] or 100) * 0.01;
@@ -1156,40 +1081,43 @@ do
 		tMaxCols = sPanelConfig[aPanelNum]["privateAura"]["maxColumns"] or 3;
 
 		tStep = sPanelConfig[aPanelNum]["privateAuraStep"];
-		tFrameSize = sPanelConfig[aPanelNum]["privateAuraFrameSize"];
+		tVisualSize = sPanelConfig[aPanelNum]["privateAuraHeight"];
+		tPoint = sPanelConfig[aPanelNum]["privateAura"]["point"] or "TOPLEFT";
+		tEffectiveScale = (tVisualSize / 32) * tTextScale;
 
 		tCol = (anAuraIndex - 1) % tMaxCols;
 		tRow = floor((anAuraIndex - 1) / tMaxCols);
 
-		tOffsetX = tCol * tStep * tGrowthDir[1] + tRow * tStep * tWrapDir[1];
-		tOffsetY = tCol * tStep * tGrowthDir[2] + tRow * tStep * tWrapDir[2];
-
-		tX = tOffsetX - tMinOffsetX;
-		tY = tOffsetY - tMaxOffsetY + tFrameSize;
-
-		if not InCombatLockdown() then
-			if sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
-				VUHDO_PixelUtil.SetPoint(tPrivateAura, "TOPLEFT", tPrivateAuraContainer, "TOPLEFT", tX / tTextScale, tY / tTextScale);
-			else
-				tPrivateAura:SetPoint("TOPLEFT", tPrivateAuraContainer, "TOPLEFT", (tX + tFrameSize * 0.5) / tTextScale, (tY - tFrameSize * 0.5) / tTextScale);
-			end
-		end
+		tGridX = tCol * tStep * tGrowthDir[1] + tRow * tStep * tWrapDir[1];
+		tGridY = tCol * tStep * tGrowthDir[2] + tRow * tStep * tWrapDir[2];
 
 		if sPanelConfig[aPanelNum]["privateAura"]["showTooltip"] then
-			VUHDO_PixelUtil.SetSize(tPrivateAura, tFrameSize / tTextScale, tFrameSize / tTextScale);
-			VUHDO_PixelUtil.SetScale(tPrivateAura, tTextScale);
+			VUHDO_PixelUtil.SetSize(tPrivateAura, 32 / tTextScale, 32 / tTextScale);
+			VUHDO_PixelUtil.SetScale(tPrivateAura, tEffectiveScale);
+
+			if not InCombatLockdown() then
+				VUHDO_PixelUtil.SetPoint(tPrivateAura, tPoint, tPrivateAuraContainer, tPoint, tGridX / tEffectiveScale, tGridY / tEffectiveScale);
+			end
 
 			if tDurationFrame then
 				VUHDO_PixelUtil.Hide(tDurationFrame);
 			end
 		else
 			tPrivateAura:SetSize(0.001, 0.001);
-			VUHDO_PixelUtil.SetScale(tPrivateAura, tTextScale);
+			VUHDO_PixelUtil.SetScale(tPrivateAura, tEffectiveScale);
+
+			tFactors = VUHDO_PRIVATE_AURA_ANCHOR_FACTORS[tPoint] or VUHDO_PRIVATE_AURA_ANCHOR_FACTORS["TOPLEFT"];
+			tHalfX = -(tFactors[1] - 0.5) * tVisualSize;
+			tHalfY = (tFactors[2] - 0.5) * tVisualSize;
+
+			if not InCombatLockdown() then
+				tPrivateAura:SetPoint(tPoint, tPrivateAuraContainer, tPoint, (tGridX + tHalfX) / tEffectiveScale, (tGridY + tHalfY) / tEffectiveScale);
+			end
 
 			if tDurationFrame then
 				tDurationFrame:ClearAllPoints();
-				tDurationFrame:SetPoint("TOPLEFT", tPrivateAuraContainer, "TOPLEFT", tX, tY);
-				VUHDO_PixelUtil.SetSize(tDurationFrame, tFrameSize / tTextScale, tFrameSize / tTextScale);
+				tDurationFrame:SetPoint(tPoint, tPrivateAuraContainer, tPoint, tGridX / tEffectiveScale, tGridY / tEffectiveScale);
+				VUHDO_PixelUtil.SetSize(tDurationFrame, 32 / tTextScale, 32 / tTextScale);
 				VUHDO_PixelUtil.Show(tDurationFrame);
 			end
 		end
@@ -1211,18 +1139,7 @@ do
 			return;
 		end
 
-		tStep = sPanelConfig[aPanelNum]["privateAuraStep"];
-		tFrameSize = sPanelConfig[aPanelNum]["privateAuraFrameSize"];
-
-		tMinOffsetX, tMinOffsetY, tMaxOffsetX, tMaxOffsetY = VUHDO_getPrivateAuraOffsetBounds(
-			sPanelConfig[aPanelNum]["privateAura"]["growthDir"],
-			sPanelConfig[aPanelNum]["privateAura"]["wrapDir"],
-			sPanelConfig[aPanelNum]["privateAura"]["maxColumns"],
-			tNumAuras,
-			sPanelConfig[aPanelNum]["privateAura"]["spacing"] or 0
-		);
-
-		if not tMinOffsetX then
+		if tNumAuras <= 0 then
 			VUHDO_PixelUtil.Hide(tPrivateAuraContainer);
 
 			for tAuraIndex = 1, VUHDO_MAX_PRIVATE_AURAS do
@@ -1248,6 +1165,9 @@ do
 			return;
 		end
 
+		tVisualSize = sPanelConfig[aPanelNum]["privateAuraHeight"];
+		tPoint = sPanelConfig[aPanelNum]["privateAura"]["point"] or "TOPLEFT";
+
 		tFrameLevel = sPanelConfig[aPanelNum]["privateAura"]["frameLevel"] or 13;
 		tPrivateAuraContainer["addLevel"] = tFrameLevel;
 
@@ -1255,22 +1175,10 @@ do
 		VUHDO_PixelUtil.SetFrameStrata(tPrivateAuraContainer, aHealthBar:GetFrameStrata());
 		VUHDO_PixelUtil.SetFrameLevel(tPrivateAuraContainer, aHealthBar:GetFrameLevel() + tFrameLevel);
 
-		VUHDO_PixelUtil.SetSize(tPrivateAuraContainer, tMaxOffsetX - tMinOffsetX, tMaxOffsetY - tMinOffsetY);
-		VUHDO_PixelUtil.SetScale(tPrivateAuraContainer, sPanelConfig[aPanelNum]["privateAuraHeight"] / 32);
+		VUHDO_PixelUtil.SetSize(tPrivateAuraContainer, tVisualSize, tVisualSize);
 
 		if not InCombatLockdown() then
-			tAnchorPoint = sPanelConfig[aPanelNum]["privateAura"]["point"];
-			tAnchorFactors = VUHDO_PRIVATE_AURA_ANCHOR_FACTORS[tAnchorPoint] or VUHDO_PRIVATE_AURA_ANCHOR_FACTORS["TOPLEFT"];
-
-			tContainerScale = sPanelConfig[aPanelNum]["privateAuraHeight"] / 32;
-
-			tContainerW = tMaxOffsetX - tMinOffsetX;
-			tContainerH = tMaxOffsetY - tMinOffsetY;
-
-			tAnchorDeltaX = tAnchorFactors[1] * (tContainerW - 32) * tContainerScale;
-			tAnchorDeltaY = -tAnchorFactors[2] * (tContainerH - 32) * tContainerScale;
-
-			VUHDO_PixelUtil.SetPoint(tPrivateAuraContainer, tAnchorPoint, aHealthBar:GetName(), tAnchorPoint, sPanelConfig[aPanelNum]["privateAuraXOffset"] + tAnchorDeltaX, sPanelConfig[aPanelNum]["privateAuraYOffset"] + tAnchorDeltaY);
+			VUHDO_PixelUtil.SetPoint(tPrivateAuraContainer, tPoint, aHealthBar:GetName(), tPoint, sPanelConfig[aPanelNum]["privateAuraXOffset"], sPanelConfig[aPanelNum]["privateAuraYOffset"]);
 		end
 
 		VUHDO_PixelUtil.Show(tPrivateAuraContainer);
