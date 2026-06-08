@@ -63,6 +63,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed private aura icon positioning  
   
   
 Improvements:  
