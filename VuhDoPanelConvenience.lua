@@ -881,6 +881,9 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BARS_PER_BUTTON[tButton][22] = _G[tButtonName .. "BgBarHlLossBar"];
 	VUHDO_BARS_PER_BUTTON[tTargetButton][22] = VuhDoDummyStatusBar;
 	VUHDO_BARS_PER_BUTTON[tTotButton][22] = VuhDoDummyStatusBar;
+	VUHDO_BARS_PER_BUTTON[tButton][23] = _G[tButtonName .. "BgBarOvsOffsBar"];
+	VUHDO_BARS_PER_BUTTON[tTargetButton][23] = VuhDoDummyStatusBar;
+	VUHDO_BARS_PER_BUTTON[tTotButton][23] = VuhDoDummyStatusBar;
 
 	VUHDO_HEALTH_BAR_TEXT[tButton] = { };
 

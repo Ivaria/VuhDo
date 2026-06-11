@@ -1429,6 +1429,97 @@ do
 	--
 	local tPredHealthBar;
 	local tPredIncBar;
+	local tPredOvershieldBar;
+	local tPredOffsetBar;
+	local tPredOrientation;
+	local tPredIsInverted;
+	local tPredIsFlipped;
+	local tHealthTexture;
+	local tPredOffsetTexture;
+	local tPredOvershieldMask;
+	local tUseIncExtension;
+	function VUHDO_updateOvershieldMaskAnchors(aButton, aPanelNum)
+
+		if not sSecretsEnabled then
+			return;
+		end
+
+		tPredHealthBar = VUHDO_getHealthBar(aButton, 1);
+		tPredIncBar = VUHDO_getHealthBar(aButton, 6);
+		tPredOvershieldBar = VUHDO_getHealthBar(aButton, 20);
+		tPredOffsetBar = VUHDO_getHealthBar(aButton, 23);
+
+		if not tPredHealthBar or not tPredIncBar or not tPredOvershieldBar or not tPredOffsetBar then
+			return;
+		end
+
+		tPredOvershieldMask = tPredOvershieldBar["overshieldMask"];
+
+		if not tPredOvershieldMask then
+			tPredOvershieldMask = tPredOvershieldBar:CreateMaskTexture();
+
+			tPredOvershieldMask:SetTexture("Interface\\TargetingFrame\\UI-StatusBar", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE");
+			tPredOvershieldBar:GetStatusBarTexture():AddMaskTexture(tPredOvershieldMask);
+
+			tPredOvershieldBar["overshieldMask"] = tPredOvershieldMask;
+		end
+
+		VUHDO_PixelUtil.SetFrameLevel(tPredOvershieldBar, tPredHealthBar:GetFrameLevel() + 1);
+
+		tPredOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
+		tPredIsInverted = VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["invertGrowth"];
+
+		tPredOffsetBar:ClearAllPoints();
+		tPredOffsetBar:SetAllPoints(tPredHealthBar);
+		tPredOffsetBar:SetOrientation(tPredOvershieldBar:GetOrientation());
+		tPredOffsetBar:SetReverseFill(tPredOvershieldBar:GetReverseFill());
+
+		tHealthTexture = tPredHealthBar:GetStatusBarTexture();
+
+		tPredOvershieldMask:ClearAllPoints();
+		tPredOvershieldMask:SetAllPoints(tHealthTexture);
+
+		tUseIncExtension = (VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"]) and tPredIncBar:IsShown();
+
+		if not tUseIncExtension then
+			tPredOvershieldBar:ClearAllPoints();
+			tPredOvershieldBar:SetAllPoints(tPredHealthBar);
+		else
+			tPredOffsetTexture = tPredOffsetBar:GetStatusBarTexture();
+
+			tPredIsFlipped = (tPredOrientation == "HORIZONTAL_INV" or tPredOrientation == "VERTICAL_INV") ~= tPredIsInverted;
+
+			tPredOvershieldBar:ClearAllPoints();
+			VUHDO_PixelUtil.SetSize(tPredOvershieldBar, tPredHealthBar:GetWidth(), tPredHealthBar:GetHeight());
+
+			if tPredOrientation == "HORIZONTAL" or tPredOrientation == "HORIZONTAL_INV" then
+				if tPredIsFlipped then
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "TOPLEFT", tPredOffsetTexture, "TOPRIGHT", 0, 0);
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "BOTTOMLEFT", tPredOffsetTexture, "BOTTOMRIGHT", 0, 0);
+				else
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "TOPRIGHT", tPredOffsetTexture, "TOPLEFT", 0, 0);
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "BOTTOMRIGHT", tPredOffsetTexture, "BOTTOMLEFT", 0, 0);
+				end
+			else
+				if tPredIsFlipped then
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "BOTTOMLEFT", tPredOffsetTexture, "TOPLEFT", 0, 0);
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "BOTTOMRIGHT", tPredOffsetTexture, "TOPRIGHT", 0, 0);
+				else
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "TOPLEFT", tPredOffsetTexture, "BOTTOMLEFT", 0, 0);
+					VUHDO_PixelUtil.SetPoint(tPredOvershieldBar, "TOPRIGHT", tPredOffsetTexture, "BOTTOMRIGHT", 0, 0);
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tPredHealthBar;
+	local tPredIncBar;
 	local tPredShieldBar;
 	local tPredOvershieldBar;
 	local tPredHealAbsorbBar;
@@ -1441,8 +1532,8 @@ do
 	local tPredTurnAxisHealthLoss;
 	local tPredOvershieldDerived;
 	local tPredHealAbsorbDerived;
-	local tPredHealthLossDerived;
 	local tHealthTexture;
+	local tPredHealthLossDerived;
 	local tAnchorFrom;
 	local tAnchorTo;
 	function VUHDO_initPredictionBarAnchors(aButton, aPanelNum)
@@ -1515,6 +1606,8 @@ do
 			tPredOvershieldBar:SetAllPoints(tPredHealthBar);
 			VUHDO_setStatusBarOrientation(tPredOvershieldBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 			tPredOvershieldBar:SetReverseFill(tPredIsInverted == (tPredOvershieldDerived == "HORIZONTAL_INV" or tPredOvershieldDerived == "VERTICAL_INV"));
+
+			VUHDO_updateOvershieldMaskAnchors(aButton, aPanelNum);
 		end
 
 		if tPredHealAbsorbBar then

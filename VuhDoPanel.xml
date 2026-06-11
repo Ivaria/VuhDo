@@ -609,6 +609,17 @@
 						</Frames>
 					</Frame>
 
+					<StatusBar name="$parentOvsOffsBar" alpha="0" inherits="VuhDoStatusBar">
+						<Scripts>
+							<OnLoad>
+								self.statusTexture = self:GetStatusBarTexture();
+								self:SetMinMaxValues(0, 1);
+								self:SetValue(0);
+								self.addLevel = 1;
+							</OnLoad>
+						</Scripts>
+					</StatusBar>
+
 					<StatusBar name="$parentOvsBar" hidden="true" inherits="VuhDoStatusBar">
 						<Scripts>
 							<OnLoad>
