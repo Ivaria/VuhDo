@@ -1436,7 +1436,7 @@ do
 	local tPredIsFlipped;
 	local tHealthTexture;
 	local tPredOffsetTexture;
-	local tPredOvershieldMask;
+	local tPredOvershieldClipFrame;
 	local tUseIncExtension;
 	function VUHDO_updateOvershieldMaskAnchors(aButton, aPanelNum)
 
@@ -1453,17 +1453,14 @@ do
 			return;
 		end
 
-		tPredOvershieldMask = tPredOvershieldBar["overshieldMask"];
+		tPredOvershieldClipFrame = tPredOvershieldBar:GetParent();
 
-		if not tPredOvershieldMask then
-			tPredOvershieldMask = tPredOvershieldBar:CreateMaskTexture();
+		tHealthTexture = tPredHealthBar:GetStatusBarTexture();
 
-			tPredOvershieldMask:SetTexture("Interface\\TargetingFrame\\UI-StatusBar", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE");
-			tPredOvershieldBar:GetStatusBarTexture():AddMaskTexture(tPredOvershieldMask);
+		tPredOvershieldClipFrame:ClearAllPoints();
+		tPredOvershieldClipFrame:SetAllPoints(tHealthTexture);
 
-			tPredOvershieldBar["overshieldMask"] = tPredOvershieldMask;
-		end
-
+		VUHDO_PixelUtil.SetFrameLevel(tPredOvershieldClipFrame, tPredHealthBar:GetFrameLevel() + 1);
 		VUHDO_PixelUtil.SetFrameLevel(tPredOvershieldBar, tPredHealthBar:GetFrameLevel() + 1);
 
 		tPredOrientation = VUHDO_getStatusbarOrientationString("HEALTH_BAR", aPanelNum);
@@ -1473,11 +1470,6 @@ do
 		tPredOffsetBar:SetAllPoints(tPredHealthBar);
 		tPredOffsetBar:SetOrientation(tPredOvershieldBar:GetOrientation());
 		tPredOffsetBar:SetReverseFill(tPredOvershieldBar:GetReverseFill());
-
-		tHealthTexture = tPredHealthBar:GetStatusBarTexture();
-
-		tPredOvershieldMask:ClearAllPoints();
-		tPredOvershieldMask:SetAllPoints(tHealthTexture);
 
 		tUseIncExtension = (VUHDO_CONFIG["SHOW_INCOMING"] or VUHDO_CONFIG["SHOW_OWN_INCOMING"]) and tPredIncBar:IsShown();
 
