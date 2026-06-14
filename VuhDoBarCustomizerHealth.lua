@@ -207,15 +207,20 @@ end
 
 --
 local tCurve;
+local tShieldBarColor;
+local tLowAlpha;
 function VUHDO_buildHideWhenFullHealthCurve()
 
 	if not sSecretsEnabled then
 		return nil;
 	end
 
+	tShieldBarColor = VUHDO_PANEL_SETUP["BAR_COLORS"]["SHIELD"];
+	tLowAlpha = (tShieldBarColor and tShieldBarColor["useOpacity"] and tShieldBarColor["O"]) or 1;
+
 	tCurve = CreateColorCurve();
 	tCurve:SetType(Enum.LuaCurveType.Step);
-	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
+	tCurve:AddPoint(0.0, CreateColor(1, 1, 1, tLowAlpha));
 	tCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
 
 	return tCurve;
@@ -396,6 +401,8 @@ do
 				tAlpha = UnitHealthPercent(aUnit, true, sHideWhenFullHealthCurve);
 				tShieldBar:SetAlpha(tAlpha and tAlpha["a"] or 1);
 			end
+
+			VUHDO_updateIncShieldMaskAnchors(tButton, tPanelNum);
 
 			if VUHDO_CONFIG["SHOW_OVERSHIELD_BAR"] then
 				tOvershieldBar:SetMinMaxValues(0, tHealthMax);

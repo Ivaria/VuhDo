@@ -5,7 +5,6 @@ Known issues:
 -- Midnight add-on restrictions mean some features are not yet available:  
 --   Overheal text provider and Life Text highlight are not yet working  
 --   Many Hitpoints option (e.g. Show Effective) are not yet working  
---   Overshield Bar will only display when the unit is at full health  
 --   Raid Icon bar and text color filtring are not yet working  
 --   Emergency Mode is not yet working  
 --   Swiftmendable bouquet is not yet working  
@@ -17,6 +16,8 @@ Known issues:
   
 Bugfixes:  
 -- Fixed private aura icon positioning  
+-- Fixed overshield bar to dislay when units are not at full health  
+-- Fixed incoming heal bar and shield bar when health is inverted  
   
   
 Improvements:  
