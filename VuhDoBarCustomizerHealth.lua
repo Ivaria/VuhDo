@@ -699,6 +699,8 @@ do
 
 		if sShieldCalculator and sTotalShieldCalculator then
 			VUHDO_updateShieldBarSecret(aUnit, aIncHealAmount, tInfo, tAllButtons);
+		elseif sSecretsEnabled and tInfo["hasSecretHealthMax"] then
+			VUHDO_hideShieldBarsForButtons(tAllButtons);
 		else
 			VUHDO_updateShieldBarNonSecret(aUnit, aIncHealAmount, tInfo, tAllButtons);
 		end
@@ -821,6 +823,10 @@ function VUHDO_updateHealAbsorbBar(aUnit)
 			end
 
 			tHealAbsorbBar:Show();
+		end
+	elseif sSecretsEnabled and tInfo["hasSecretHealthMax"] then
+		for _, tButton in pairs(tAllButtons) do
+			VUHDO_getHealAbsorbBar(VUHDO_getHealthBar(tButton, 1)):Hide();
 		end
 	else
 		tHealAbsorbRemain = min(UnitGetTotalHealAbsorbs(aUnit) or 0, tInfo["health"]);
