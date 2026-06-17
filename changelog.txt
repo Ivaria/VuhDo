@@ -61,6 +61,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed binding of Blizzard dropdown menu  
   
   
 Improvements:  
