@@ -32,6 +32,7 @@ local sDarkSkin = {
 	["toggleStyle"] = "box",
 	["checkFaceHidden"] = true,
 	["badgeOnlyButtons"] = true,
+	["font"] = "Interface\\AddOns\\VuhDo\\Fonts\\TitilliumWeb-SemiBold.ttf",
 	["imagesPath"] = sDarkImagesPath,
 	["indicatorPlate"] = { 0.278, 0.298, 0.357, 1 },
 	["textures"] = {
@@ -86,10 +87,30 @@ local sDarkSkin = {
 		{ 0.90, 0.45, 0.45, 1 },
 	},
 	["fontColors"] = {
-		["normal"] = { ["TR"] = 0.91, ["TG"] = 0.92, ["TB"] = 0.94, ["TO"] = 1 },
-		["title"] = { ["TR"] = 0.91, ["TG"] = 0.92, ["TB"] = 0.94, ["TO"] = 1 },
-		["active"] = { ["TR"] = 0.82, ["TG"] = 0.84, ["TB"] = 0.87, ["TO"] = 1 },
-		["value"] = { ["TR"] = 0.75, ["TG"] = 0.78, ["TB"] = 0.82, ["TO"] = 1 },
+		["normal"] = {
+			["TR"] = 0.91,
+			["TG"] = 0.92,
+			["TB"] = 0.94,
+			["TO"] = 1,
+		},
+		["title"] = {
+			["TR"] = 0.91,
+			["TG"] = 0.92,
+			["TB"] = 0.94,
+			["TO"] = 1,
+		},
+		["active"] = {
+			["TR"] = 0.82,
+			["TG"] = 0.84,
+			["TB"] = 0.87,
+			["TO"] = 1,
+		},
+		["value"] = {
+			["TR"] = 0.75,
+			["TG"] = 0.78,
+			["TB"] = 0.82,
+			["TO"] = 1,
+		},
 	},
 	["sliderArrowColor"] = { 1, 1, 1, 1 },
 	["accentColor"] = { 0.45, 0.68, 0.95, 1 },
@@ -97,8 +118,18 @@ local sDarkSkin = {
 	["swatchBorderColor"] = { 0.45, 0.48, 0.53, 1 },
 	["glyphColor"] = { 0.55, 0.58, 0.63, 1 },
 	["tabLabelColors"] = {
-		["active"] = { ["TR"] = 0.95, ["TG"] = 0.96, ["TB"] = 0.98, ["TO"] = 1 },
-		["inactive"] = { ["TR"] = 0.55, ["TG"] = 0.58, ["TB"] = 0.63, ["TO"] = 1 },
+		["active"] = {
+			["TR"] = 0.95,
+			["TG"] = 0.96,
+			["TB"] = 0.98,
+			["TO"] = 1,
+		},
+		["inactive"] = {
+			["TR"] = 0.55,
+			["TG"] = 0.58,
+			["TB"] = 0.63,
+			["TO"] = 1,
+		},
 	},
 	["radioSwatchOffsetY"] = 3,
 };
@@ -216,6 +247,7 @@ local sKnownSkinKeys = {
 	["triStateValueColors"] = true,
 	["tabLabelColors"] = true,
 	["radioSwatchOffsetY"] = true,
+	["font"] = true,
 };
 
 local sValidComboItemColorKeys = {
@@ -724,9 +756,46 @@ local function VUHDO_lnfSkinSnapshotFontString(aRegion)
 		["a"] = tNativeA,
 	};
 
+	if aRegion.GetFont then
+		tEntry["fontPath"], tEntry["fontSize"], tEntry["fontFlags"] = aRegion:GetFont();
+	end
+
 	sNativeFontStrings[aRegion] = tEntry;
 
 	return tEntry;
+
+end
+
+
+
+--
+local function VUHDO_lnfSkinStyleFontFace(aRegion)
+
+	if not aRegion or not aRegion.SetFont then
+		return;
+	end
+
+	tName = GetLocale();
+
+	if tName == "zhCN" or tName == "zhTW" or tName == "koKR" then
+		return;
+	end
+
+	tEntry = VUHDO_lnfSkinSnapshotFontString(aRegion);
+
+	if not tEntry or not tEntry["fontSize"] then
+		return;
+	end
+
+	tPath = VUHDO_lnfSkinGetActiveEntry()["font"];
+
+	if tPath then
+		aRegion:SetFont(tPath, tEntry["fontSize"], tEntry["fontFlags"] or "");
+	else
+		aRegion:SetFont(tEntry["fontPath"], tEntry["fontSize"], tEntry["fontFlags"] or "");
+	end
+
+	return;
 
 end
 
@@ -757,6 +826,8 @@ local function VUHDO_lnfSkinStyleFontString(aRegion, aRole)
 	else
 		aRegion:SetTextColor(tEntry["r"], tEntry["g"], tEntry["b"], tEntry["a"]);
 	end
+
+	VUHDO_lnfSkinStyleFontFace(aRegion);
 
 	return;
 
@@ -2032,6 +2103,8 @@ local function VUHDO_lnfSkinApplyEditTextures(aEditBox)
 		aEditBox:SetTextColor(tEntry["r"], tEntry["g"], tEntry["b"], tEntry["a"]);
 	end
 
+	VUHDO_lnfSkinStyleFontFace(aEditBox);
+
 	return;
 
 end
@@ -3274,6 +3347,12 @@ local function VUHDO_lnfSkinValidate(aName, aSkinData)
 
 	if aSkinData["badgeOnlyButtons"] ~= nil and type(aSkinData["badgeOnlyButtons"]) ~= "boolean" then
 		VUHDO_Msg(format("Skin \"%s\": badgeOnlyButtons must be boolean", aName), 1, 0.4, 0.4);
+
+		return false;
+	end
+
+	if aSkinData["font"] and type(aSkinData["font"]) ~= "string" then
+		VUHDO_Msg(format("Skin \"%s\": font must be a string", aName), 1, 0.4, 0.4);
 
 		return false;
 	end
