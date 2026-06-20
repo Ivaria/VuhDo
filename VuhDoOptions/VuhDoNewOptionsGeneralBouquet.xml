@@ -324,6 +324,9 @@
 					</Frame>
 
 							<Button name="$parentUpButton" enableMouse="true">
+								<KeyValues>
+									<KeyValue key="skinNormalKey" value="icon_arrow_up" type="string"/>
+								</KeyValues>
 								<Size>
 									<AbsDimension x="32" y="32" />
 								</Size>
@@ -352,6 +355,9 @@
 							</Button>
 
 							<Button name="$parentDownButton" enableMouse="true">
+								<KeyValues>
+									<KeyValue key="skinNormalKey" value="icon_arrow_down" type="string"/>
+								</KeyValues>
 								<Size>
 									<AbsDimension x="32" y="32" />
 								</Size>
@@ -429,6 +435,9 @@
 					</Frame>
 
 					<Button name="$parentAddButton" text="VUHDO_I18N_ADD" inherits="VuhDoAddItemButtonTemplate">
+						<KeyValues>
+							<KeyValue key="skinIconKey" value="icon_plus" type="string"/>
+						</KeyValues>
 						<Size>
 							<AbsDimension x="90" y="32" />
 						</Size>
@@ -447,6 +456,9 @@
 					</Button>
 
 					<Button name="$parentRemoveButton" text="VUHDO_I18N_REMOVE" inherits="VuhDoRemoveItemButtonTemplate">
+						<KeyValues>
+							<KeyValue key="skinIconKey" value="icon_cancel" type="string"/>
+						</KeyValues>
 						<Size>
 							<AbsDimension x="90" y="32" />
 						</Size>

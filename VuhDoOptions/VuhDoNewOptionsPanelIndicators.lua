@@ -10,6 +10,9 @@ local VUHDO_ANCHOR_CONSTRAINTS = 5;
 
 local sAnchorPoints = { "Top", "TopLeft", "TopRight", "Bottom", "BottomLeft", "BottomRight", "Left", "Right" };
 
+local sIndicatorTexLeft = 18 / 128;
+local sIndicatorTexRight = 108 / 128;
+
 --
 local sIndicatorMetaModel = {
 	{ -- Outer Border
@@ -458,12 +461,30 @@ end
 
 --
 local tCombo;
+local tLabelPlate;
+local tSchemaPlate;
+local tSchemaTexture;
+local tPR;
+local tPG;
+local tPB;
+local tPO;
 local function VUHDO_setBouquetSelectorModel(aPanel, aText, aModel, aTexture)
+
 	_G[aPanel:GetName() .. "SelectLabelLabel"]:SetText(aText);
-	_G[aPanel:GetName() .. "SchemaTexture"]:SetTexture("Interface\\AddOns\\VuhDoOptions\\Images\\" .. aTexture);
+	tSchemaTexture = _G[aPanel:GetName() .. "SchemaTexture"];
+	tSchemaTexture:SetTexture(VUHDO_lnfSkinResolveOptionsImage(aTexture));
+	tSchemaTexture:SetTexCoord(sIndicatorTexLeft, sIndicatorTexRight, 0, 1);
+	tPR, tPG, tPB, tPO = VUHDO_lnfSkinGetIndicatorPlateColor();
+	tSchemaPlate = _G[aPanel:GetName() .. "SchemaPlate"];
+	tSchemaPlate:SetVertexColor(tPR or 1, tPG or 1, tPB or 1, tPR and tPO or 0);
+	tLabelPlate = _G[aPanel:GetName() .. "SelectLabelTexture"];
+	tLabelPlate:SetAlpha(tPR and 0 or 0.9);
 	tCombo = _G[aPanel:GetName() .. "SelectComboBox"];
 	VUHDO_setComboModel(tCombo, aModel, VUHDO_BOUQUET_SLOTS_COMBO_MODEL);
 	VUHDO_lnfComboBoxInitFromModel(tCombo);
+
+	return;
+
 end
 
 

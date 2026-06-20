@@ -256,7 +256,19 @@ function VUHDO_initOptionsSettings()
 	if (VUHDO_OPTIONS_SETTINGS == nil) then
 		VUHDO_OPTIONS_SETTINGS = {
 			["scale"] = 1;
+			["SKIN"] = "Classic";
+			["SKIN_TINTS"] = { };
 		};
+	end
+
+	if (VUHDO_OPTIONS_SETTINGS["SKIN"] == nil) then
+		VUHDO_OPTIONS_SETTINGS["SKIN"] = "Classic";
+	elseif (VUHDO_OPTIONS_SETTINGS["SKIN"] == "Default") then
+		VUHDO_OPTIONS_SETTINGS["SKIN"] = "Classic";
+	end
+
+	if (VUHDO_OPTIONS_SETTINGS["SKIN_TINTS"] == nil) then
+		VUHDO_OPTIONS_SETTINGS["SKIN_TINTS"] = { };
 	end
 
 	VUHDO_lnfInitSearchIndex();
