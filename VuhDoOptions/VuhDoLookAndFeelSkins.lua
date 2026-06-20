@@ -3087,6 +3087,20 @@ function VUHDO_lnfSkinApplyToComponent(aComponent, aLabelName)
 		return;
 	end
 
+	tName = aComponent;
+
+	for _ = 1, 32 do
+		if not tName then
+			break;
+		end
+
+		if tName == VuhDoBuffWatchMainFrame then
+			return;
+		end
+
+		tName = tName.GetParent and tName:GetParent() or nil;
+	end
+
 	tObjectType = aComponent:GetObjectType();
 
 	if tObjectType == "Button" then
