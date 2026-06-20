@@ -77,7 +77,7 @@ BACKDROP_VUHDO_WHITE_SQUARE_16_16_0000 = {
 };
 
 BACKDROP_VUHDO_PANEL_SCROLL_BAR_8_8_1111 = {
-	bgFile = "Interface\\AddOns\\VuhDoOptions\\Images\\blue_dk_square_16_16",
+	bgFile = "Interface\\AddOns\\VuhDoOptions\\Images\\scroll_bar_bg_16_16",
 	edgeFile = "Interface\\AddOns\\VuhDoOptions\\Images\\panel_edges_3",
 	tile = true,
 	tileSize = 8,
@@ -267,33 +267,58 @@ end
 
 
 --
+local tName;
+local tTR;
+local tTG;
+local tTB;
+local tTO;
 function VUHDO_lnfCheckButtonOnEnter(aCheckButton)
-	local tName = aCheckButton:GetName();
+
+	tName = aCheckButton:GetName();
 	_G[tName .. "TextureActiveSwatch"]:Show();
 
+	tTR, tTG, tTB, tTO = VUHDO_lnfSkinGetFontColor("active");
+
+	if not tTR then
+		tTR, tTG, tTB, tTO = VUHDO_textColor(VUHDO_ACTIVE_LABEL_COLOR);
+	end
+
 	if _G[tName .. "Label"] then
-		_G[tName .. "Label"]:SetTextColor(VUHDO_textColor(VUHDO_ACTIVE_LABEL_COLOR));
+		_G[tName .. "Label"]:SetTextColor(tTR, tTG, tTB, tTO);
 	end
 
 	if _G[tName .. "Label2"] then
-		_G[tName .. "Label2"]:SetTextColor(VUHDO_textColor(VUHDO_ACTIVE_LABEL_COLOR));
+		_G[tName .. "Label2"]:SetTextColor(tTR, tTG, tTB, tTO);
 	end
+
+	return;
+
 end
 
 
 
 --
 function VUHDO_lnfCheckButtonOnLeave(aCheckButton)
-	local tName = aCheckButton:GetName();
+
+	tName = aCheckButton:GetName();
 	_G[tName .. "TextureActiveSwatch"]:Hide();
 
+	tTR, tTG, tTB, tTO = VUHDO_lnfSkinGetFontColor("normal");
+
+	if not tTR then
+		tTR, tTG, tTB, tTO = VUHDO_textColor(VUHDO_NORMAL_LABEL_COLOR);
+	end
+
 	if _G[tName .. "Label"] then
-		_G[tName .. "Label"]:SetTextColor(VUHDO_textColor(VUHDO_NORMAL_LABEL_COLOR));
+		_G[tName .. "Label"]:SetTextColor(tTR, tTG, tTB, tTO);
 	end
 
 	if _G[tName .. "Label2"] then
-		_G[tName .. "Label2"]:SetTextColor(VUHDO_textColor(VUHDO_NORMAL_LABEL_COLOR));
+		_G[tName .. "Label2"]:SetTextColor(tTR, tTG, tTB, tTO);
 	end
+
+	return;
+
 end
 
 
