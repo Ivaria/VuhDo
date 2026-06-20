@@ -775,9 +775,7 @@ local function VUHDO_lnfSkinStyleFontFace(aRegion)
 		return;
 	end
 
-	tName = GetLocale();
-
-	if tName == "zhCN" or tName == "zhTW" or tName == "koKR" then
+	if GetLocale() == "zhCN" or GetLocale() == "zhTW" or GetLocale() == "koKR" then
 		return;
 	end
 
