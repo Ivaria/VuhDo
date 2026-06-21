@@ -1791,6 +1791,8 @@ local function VUHDO_lnfSkinApplyComboItemBackdrop(aComboItem)
 		return;
 	end
 
+	VUHDO_lnfSkinSnapshotBackdrop(aComboItem);
+
 	VUHDO_lnfSkinStyleComboItemCheck(aComboItem);
 
 	if tComboParent["isScrollable"] then
