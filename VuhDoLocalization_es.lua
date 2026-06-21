@@ -646,3 +646,5 @@ VUHDO_I18N_TEXT_PROVIDER_FORMAT_NK_PERCENT = "<#nk> (<#n>%)";
 VUHDO_I18N_TEXT_PROVIDER_FORMAT_KILO_OF_KILO_PERCENT = "<#nk>/<#nk> (<#n>%)";
 VUHDO_I18N_TEXT_PROVIDER_SOURCE_LABEL = "Text Source";
 VUHDO_I18N_TEXT_PROVIDER_FORMAT_LABEL = "Text Format";
+
+VUHDO_I18N_BLIZZ_RESTORE_RELOAD = "Recarga tu interfaz (/reload) para restaurar los marcos de Blizzard ocultos.";

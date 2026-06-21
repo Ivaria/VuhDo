@@ -670,3 +670,4 @@ VUHDO_I18N_TEXT_PROVIDER_FORMAT_KILO_OF_KILO_PERCENT = "<#nk>/<#nk> (<#n>%)";
 VUHDO_I18N_TEXT_PROVIDER_SOURCE_LABEL = "Text Source";
 VUHDO_I18N_TEXT_PROVIDER_FORMAT_LABEL = "Text Format";
 
+VUHDO_I18N_BLIZZ_RESTORE_RELOAD = "Rechargez votre interface (/reload) pour restaurer les cadres Blizzard masqués.";

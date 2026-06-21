@@ -635,3 +635,5 @@ VUHDO_I18N_TEXT_PROVIDER_FORMAT_NK_PERCENT = "<#nk> (<#n>%)";
 VUHDO_I18N_TEXT_PROVIDER_FORMAT_KILO_OF_KILO_PERCENT = "<#nk>/<#nk> (<#n>%)";
 VUHDO_I18N_TEXT_PROVIDER_SOURCE_LABEL = "Textquelle";
 VUHDO_I18N_TEXT_PROVIDER_FORMAT_LABEL = "Textformat";
+
+VUHDO_I18N_BLIZZ_RESTORE_RELOAD = "Lade dein UI neu (/reload), um die versteckten Blizzard-Rahmen wiederherzustellen.";
