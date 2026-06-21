@@ -31,6 +31,7 @@ local sDarkSkin = {
 	["tabStyle"] = "pill",
 	["toggleStyle"] = "box",
 	["checkFaceHidden"] = true,
+	["checkLabelLeft"] = true,
 	["badgeOnlyButtons"] = true,
 	["font"] = "Interface\\AddOns\\VuhDo\\Fonts\\TitilliumWeb-Bold.ttf",
 	["imagesPath"] = sDarkImagesPath,
@@ -229,6 +230,8 @@ local sKnownSkinKeys = {
 	["tabStyle"] = true,
 	["toggleStyle"] = true,
 	["checkFaceHidden"] = true,
+	["checkLabelLeft"] = true,
+	["checkGroupPlate"] = true,
 	["badgeOnlyButtons"] = true,
 	["displayName"] = true,
 	["imagesPath"] = true,
@@ -1274,6 +1277,22 @@ local function VUHDO_lnfSkinApplyFrameBackdrop(aFrame)
 		end
 	end
 
+	for tBackdropName, tColorKey in pairs(sBackdropGlobals) do
+		tBackdrop = _G[tBackdropName];
+		tOriginal = sOriginalBackdropFiles[tBackdropName];
+
+		if tBackdrop and (
+			(tOriginal and tBackdropInfo["bgFile"] == tOriginal["bgFile"] and tBackdropInfo["edgeFile"] == tOriginal["edgeFile"])
+			or (tBackdropInfo["bgFile"] == tBackdrop["bgFile"] and tBackdropInfo["edgeFile"] == tBackdrop["edgeFile"])
+		) then
+			aFrame["backdropInfo"] = tBackdrop;
+			aFrame:ApplyBackdrop(tBackdrop);
+			VUHDO_lnfSkinApplyBackdropColors(aFrame, tColorKey);
+
+			return;
+		end
+	end
+
 	return;
 
 end
@@ -2248,10 +2267,22 @@ local function VUHDO_lnfSkinApplyCheckTextures(aButton)
 			tPushed = aButton:GetPushedTexture();
 
 			if VUHDO_lnfSkinGetActiveEntry()["checkFaceHidden"] then
-				tNormal:SetAlpha(0);
+				tBorder = VUHDO_lnfSkinGetActiveEntry()["checkGroupPlate"];
 
-				if tPushed then
-					tPushed:SetAlpha(0);
+				if tBorder and tNormal then
+					tNormal:SetAlpha(1);
+					VUHDO_lnfSkinStyleTextureKeyed(tNormal, "button_normal_128_32");
+					tNormal:SetVertexColor(tBorder[1], tBorder[2], tBorder[3], tBorder[4] or 1);
+
+					if tPushed then
+						tPushed:SetAlpha(0);
+					end
+				else
+					tNormal:SetAlpha(0);
+
+					if tPushed then
+						tPushed:SetAlpha(0);
+					end
 				end
 			else
 				tNormal:SetAlpha(1);
@@ -2282,12 +2313,24 @@ local function VUHDO_lnfSkinApplyCheckTextures(aButton)
 		tPushed = aButton:GetPushedTexture();
 
 		if VUHDO_lnfSkinGetActiveEntry()["checkFaceHidden"] and not aButton["tabPanel"] then
-			if tNormal then
-				tNormal:SetAlpha(0);
-			end
+			tBorder = VUHDO_lnfSkinGetActiveEntry()["checkGroupPlate"];
 
-			if tPushed then
-				tPushed:SetAlpha(0);
+			if tBorder and tNormal then
+				tNormal:SetAlpha(1);
+				VUHDO_lnfSkinStyleTextureKeyed(tNormal, "button_normal_128_32");
+				tNormal:SetVertexColor(tBorder[1], tBorder[2], tBorder[3], tBorder[4] or 1);
+
+				if tPushed then
+					tPushed:SetAlpha(0);
+				end
+			else
+				if tNormal then
+					tNormal:SetAlpha(0);
+				end
+
+				if tPushed then
+					tPushed:SetAlpha(0);
+				end
 			end
 		else
 			if tNormal then
@@ -2797,7 +2840,13 @@ function VUHDO_lnfSkinOnCheckButtonEnter(aButton)
 		return;
 	end
 
-	tNativeR, tNativeG, tNativeB, tNativeA = VUHDO_lnfSkinGetFontColor("active");
+	tAccentColor = VUHDO_lnfSkinGetActiveEntry()["accentColor"];
+
+	if tAccentColor then
+		tNativeR, tNativeG, tNativeB, tNativeA = tAccentColor[1], tAccentColor[2], tAccentColor[3], tAccentColor[4] or 1;
+	else
+		tNativeR, tNativeG, tNativeB, tNativeA = VUHDO_lnfSkinGetFontColor("active");
+	end
 
 	if not tNativeR then
 		return;
@@ -3075,6 +3124,64 @@ end
 
 
 --
+function VUHDO_lnfSkinApplyCheckLabelAnchors(aButton)
+
+	if not sSkinReady or not VUHDO_OPTIONS_SETTINGS or not aButton then
+		return;
+	end
+
+	if VUHDO_lnfSkinIsTriState(aButton) or aButton["tabPanel"] then
+		return;
+	end
+
+	tName = aButton:GetName();
+
+	if not tName then
+		return;
+	end
+
+	tRegion = _G[tName .. "Label"];
+	tLabel = _G[tName .. "Label2"];
+
+	if tRegion and tRegion.ClearAllPoints then
+		VUHDO_lnfSkinSnapshotSliderLabel(tRegion);
+	end
+
+	if tLabel and tLabel.ClearAllPoints then
+		VUHDO_lnfSkinSnapshotSliderLabel(tLabel);
+	end
+
+	if VUHDO_lnfSkinGetActiveEntry()["checkLabelLeft"] then
+		tOffsetY = (tLabel and tLabel.GetText and (tLabel:GetText() or "") ~= "") and 1 or 0;
+
+		if tRegion and tRegion.ClearAllPoints then
+			tRegion:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tRegion, "LEFT", aButton, "LEFT", 40, tOffsetY ~= 0 and 7 or 0);
+		end
+
+		if tLabel and tLabel.ClearAllPoints and tOffsetY ~= 0 then
+			tLabel:ClearAllPoints();
+			VUHDO_PixelUtil.SetPoint(tLabel, "LEFT", aButton, "LEFT", 40, -7);
+		elseif tLabel and tLabel.ClearAllPoints then
+			VUHDO_lnfSkinRestoreSliderLabelAnchors(tLabel);
+		end
+	else
+		if tRegion and tRegion.ClearAllPoints then
+			VUHDO_lnfSkinRestoreSliderLabelAnchors(tRegion);
+		end
+
+		if tLabel and tLabel.ClearAllPoints then
+			VUHDO_lnfSkinRestoreSliderLabelAnchors(tLabel);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tSliderParent;
 local tObjectType;
 function VUHDO_lnfSkinApplyToComponent(aComponent, aLabelName)
@@ -3104,22 +3211,28 @@ function VUHDO_lnfSkinApplyToComponent(aComponent, aLabelName)
 	tObjectType = aComponent:GetObjectType();
 
 	if tObjectType == "Button" then
-		if aComponent["skinListEntry"] then
-			VUHDO_lnfSkinStyleListEntry(aComponent, aComponent["skinListEntrySelected"]);
-		elseif VUHDO_lnfSkinIsTriState(aComponent) then
-			VUHDO_lnfSkinApplyTriStateDot(aComponent);
-		elseif VUHDO_lnfSkinIsComboBody(aComponent) then
-			VUHDO_lnfSkinApplyComboTextures(aComponent);
-		elseif VUHDO_lnfSkinIsComboArrow(aComponent) then
-			return;
-		else
-			VUHDO_lnfSkinApplyButtonTextures(aComponent);
+		tSliderParent = aComponent:GetParent();
+		tName = tSliderParent and tSliderParent.GetName and tSliderParent:GetName();
+
+		if not (tName and _G[tName .. "Slider"] and (aComponent == _G[tName .. "DecLeft"] or aComponent == _G[tName .. "DecRight"])) then
+			if aComponent["skinListEntry"] then
+				VUHDO_lnfSkinStyleListEntry(aComponent, aComponent["skinListEntrySelected"]);
+			elseif VUHDO_lnfSkinIsTriState(aComponent) then
+				VUHDO_lnfSkinApplyTriStateDot(aComponent);
+			elseif VUHDO_lnfSkinIsComboBody(aComponent) then
+				VUHDO_lnfSkinApplyComboTextures(aComponent);
+			elseif VUHDO_lnfSkinIsComboArrow(aComponent) then
+				return;
+			else
+				VUHDO_lnfSkinApplyButtonTextures(aComponent);
+			end
 		end
 	elseif tObjectType == "EditBox" then
 		VUHDO_lnfSkinApplyEditTextures(aComponent);
 	elseif tObjectType == "CheckButton" then
 		if not VUHDO_lnfSkinIsTriState(aComponent) then
 			VUHDO_lnfSkinApplyCheckTextures(aComponent);
+			VUHDO_lnfSkinApplyCheckLabelAnchors(aComponent);
 		end
 
 		if aComponent["tabPanel"] then
@@ -3219,6 +3332,14 @@ function VUHDO_lnfSkinApplyAll()
 
 	if VuhDoNewColorPicker then
 		VUHDO_lnfSkinApplyToFrameTree(VuhDoNewColorPicker);
+	end
+
+	if VuhDoLnfIconTextDialog then
+		VUHDO_lnfSkinApplyToFrameTree(VuhDoLnfIconTextDialog);
+	end
+
+	if VuhDoLnfShareDialog then
+		VUHDO_lnfSkinApplyToFrameTree(VuhDoLnfShareDialog);
 	end
 
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
@@ -3357,6 +3478,12 @@ local function VUHDO_lnfSkinValidate(aName, aSkinData)
 		return false;
 	end
 
+	if aSkinData["checkLabelLeft"] ~= nil and type(aSkinData["checkLabelLeft"]) ~= "boolean" then
+		VUHDO_Msg(format("Skin \"%s\": checkLabelLeft must be boolean", aName), 1, 0.4, 0.4);
+
+		return false;
+	end
+
 	if aSkinData["badgeOnlyButtons"] ~= nil and type(aSkinData["badgeOnlyButtons"]) ~= "boolean" then
 		VUHDO_Msg(format("Skin \"%s\": badgeOnlyButtons must be boolean", aName), 1, 0.4, 0.4);
 
@@ -3415,6 +3542,12 @@ local function VUHDO_lnfSkinValidate(aName, aSkinData)
 
 	if aSkinData["indicatorPlate"] then
 		if not VUHDO_lnfSkinValidateColorArray(aSkinData["indicatorPlate"], format("\"%s\".indicatorPlate", aName)) then
+			return false;
+		end
+	end
+
+	if aSkinData["checkGroupPlate"] then
+		if not VUHDO_lnfSkinValidateColorArray(aSkinData["checkGroupPlate"], format("\"%s\".checkGroupPlate", aName)) then
 			return false;
 		end
 	end
@@ -3756,6 +3889,7 @@ function VUHDO_lnfSkinInit()
 		hooksecurefunc("VUHDO_lnfCheckButtonOnLeave", VUHDO_lnfSkinOnCheckButtonLeave);
 		hooksecurefunc("VUHDO_lnfTabCheckButtonOnEnter", VUHDO_lnfSkinRefreshTabButton);
 		hooksecurefunc("VUHDO_lnfTabCheckButtonOnLeave", VUHDO_lnfSkinRefreshTabButton);
+		hooksecurefunc("VUHDO_lnfCheckButtonOnLoad", VUHDO_lnfSkinApplyCheckLabelAnchors);
 
 		sTabGlyphHooked = true;
 	end

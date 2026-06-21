@@ -1511,6 +1511,7 @@ do
 		end
 
 		if tTooltip ~= nil then
+			VuhDoOptionsTooltip:SetScale((VUHDO_OPTIONS_SETTINGS and VUHDO_OPTIONS_SETTINGS["scale"]) or 1);
 			VuhDoOptionsTooltipTextText:SetText(tTooltip);
 
 			VUHDO_PixelUtil.SetHeight(VuhDoOptionsTooltip, VuhDoOptionsTooltipTextText:GetHeight() + 10);
@@ -2020,10 +2021,24 @@ end
 
 --
 function VUHDO_lnfShareButtonClicked(aButton)
+
 	if VuhDoLnfShareDialog:IsShown() then
 		VuhDoLnfShareDialog:Hide();
 	else
 		VUHDO_lnfSetModel(VuhDoLnfShareDialog, aButton:GetAttribute("model"));
+
+		VuhDoLnfShareDialog:ClearAllPoints();
+
+		if VuhDoNewOptionsTabbedFrame and VuhDoNewOptionsTabbedFrame:IsShown() then
+			VUHDO_PixelUtil.SetPoint(VuhDoLnfShareDialog, "CENTER", VuhDoNewOptionsTabbedFrame, "CENTER", 0, 0);
+		else
+			VUHDO_PixelUtil.SetPoint(VuhDoLnfShareDialog, "CENTER", "UIParent", "CENTER", 0, 0);
+		end
+
 		VuhDoLnfShareDialog:Show();
+		VUHDO_lnfSkinApplyToFrameTree(VuhDoLnfShareDialog);
 	end
+
+	return;
+
 end
