@@ -524,8 +524,6 @@ local function VUHDO_registerOriginalEvents(anIsShow, ...)
 				for _, tEvent in pairs(VUHDO_FIX_EVENTS) do
 					tFrame:RegisterEvent(tEvent);
 				end
-			else -- must not happen
-				tFrame:RegisterAllEvents();
 			end
 
 			if anIsShow then 
