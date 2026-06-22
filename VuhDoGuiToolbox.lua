@@ -693,8 +693,6 @@ local function VUHDO_registerOriginalEvents(anIsShow, ...)
 				for _, tEvent in pairs(VUHDO_FIX_EVENTS) do
 					tFrame:RegisterEvent(tEvent);
 				end
-			else
-				tFrame:RegisterAllEvents();
 			end
 
 			if VUHDO_shouldRestoreBlizzFrameParent(tFrame, anIsShow) then
