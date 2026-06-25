@@ -930,6 +930,7 @@ local VUHDO_DEFAULT_CONFIG = {
 	["IS_USE_BUTTON_FACADE"] = false,
 	["IS_SHARE"] = true,
 	["IS_READY_CHECK_DISABLED"] = false,
+	["SYNC_SUMMARY_LEVEL"] = 1,
 
 	["SHOW_SPELL_TRACE"] = false,
 

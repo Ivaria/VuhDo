@@ -23,6 +23,9 @@ local sClassicSkin = {
 	["displayName"] = VUHDO_I18N_SKIN_CLASSIC,
 	["sliderStyle"] = "classic",
 	["tabStyle"] = "pill",
+	["textureTints"] = {
+		["icon_tree_expand"] = { 0.30, 0.47, 0.80, 1 },
+	},
 };
 
 local sDarkSkin = {
@@ -47,6 +50,7 @@ local sDarkSkin = {
 		["icon_back"] = sDarkImagesPath .. "icon_back",
 		["icon_arrow_up"] = sDarkImagesPath .. "icon_arrow_up",
 		["icon_arrow_down"] = sDarkImagesPath .. "icon_arrow_down",
+		["icon_arrow_right"] = sDarkImagesPath .. "icon_arrow_right",
 	},
 	["textureTints"] = {
 		["icon_red"] = { 0.85, 0.25, 0.25, 1 },
@@ -55,6 +59,7 @@ local sDarkSkin = {
 		["icon_white_square"] = { 0.75, 0.78, 0.82, 1 },
 		["icon_check_2"] = { 0.75, 0.78, 0.82, 1 },
 		["bar_example"] = { 0.25, 0.27, 0.31, 1 },
+		["icon_tree_expand"] = { 1, 1, 1, 1 },
 	},
 	["backdropColors"] = {
 		["slider"] = {
@@ -152,6 +157,8 @@ local sDefaultTextures = {
 	["icon_aura"] = sImagesPath .. "icon_aura",
 	["icon_blue_square"] = sImagesPath .. "icon_blue_square",
 	["icon_check"] = sImagesPath .. "icon_check",
+	["icon_check_tri"] = sImagesPath .. "icon_check_tri",
+	["icon_tree_expand"] = sImagesPath .. "icon_tree_expand",
 	["icon_white"] = sImagesPath .. "icon_white",
 	["status_dot"] = sImagesPath .. "status_dot",
 	["input_border_1"] = sImagesPath .. "input_border_1",
@@ -287,6 +294,7 @@ local tDarkTextureNames = {
 	"icon_aura",
 	"icon_blue_square",
 	"icon_check",
+	"icon_tree_expand",
 	"icon_white",
 	"status_dot",
 	"combo_select_dot",
@@ -305,6 +313,8 @@ local tDarkTextureNames = {
 for tCnt = 1, #tDarkTextureNames do
 	sDarkSkin["textures"][tDarkTextureNames[tCnt]] = sDarkImagesPath .. tDarkTextureNames[tCnt];
 end
+
+sDarkSkin["textures"]["icon_check_tri"] = sDarkImagesPath .. "icon_check";
 
 
 
@@ -483,6 +493,26 @@ function VUHDO_lnfSkinResolveTexture(aKey)
 	end
 
 	return sDefaultTextures[aKey];
+
+end
+
+
+
+do
+
+	--
+	local tTints;
+	function VUHDO_lnfSkinResolveTint(aKey)
+
+		tTints = VUHDO_lnfSkinGetActiveEntry()["textureTints"];
+
+		if tTints and tTints[aKey] then
+			return tTints[aKey];
+		end
+
+		return nil;
+
+	end
 
 end
 
@@ -1891,6 +1921,70 @@ local function VUHDO_lnfSkinOnComboItemOnLeave(aComboItem)
 	aComboItem:SetBackdropColor(tComboItemColor[1], tComboItemColor[2], tComboItemColor[3], tComboItemColor[4] or 1);
 
 	return;
+
+end
+
+
+
+do
+
+	--
+	local tCheckTreeBackdrop;
+	function VUHDO_lnfSkinApplyCheckTreeRowBackdrop(aRow)
+
+		if not sSkinReady or not aRow then
+			return;
+		end
+
+		tCheckTreeBackdrop = _G[aRow:GetName() .. "Backdrop"];
+
+		if not tCheckTreeBackdrop or not tCheckTreeBackdrop.SetBackdropColor then
+			return;
+		end
+
+		VUHDO_lnfSkinSnapshotBackdrop(tCheckTreeBackdrop);
+		tCheckTreeBackdrop:SetBackdropColor(0, 0, 0, 0);
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_lnfSkinOnCheckTreeRowOnEnter(aRow)
+
+		if not sSkinReady or not aRow then
+			return;
+		end
+
+		tCheckTreeBackdrop = _G[aRow:GetName() .. "Backdrop"];
+
+		if not tCheckTreeBackdrop then
+			return;
+		end
+
+		tComboItemColors = VUHDO_lnfSkinGetActiveEntry()["comboItemColors"];
+		tComboItemColor = tComboItemColors and tComboItemColors["hover"];
+
+		if not tComboItemColor then
+			return;
+		end
+
+		tCheckTreeBackdrop:SetBackdropColor(tComboItemColor[1], tComboItemColor[2], tComboItemColor[3], tComboItemColor[4] or 1);
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_lnfSkinOnCheckTreeRowOnLeave(aRow)
+
+		return;
+
+	end
 
 end
 
@@ -3908,6 +4002,8 @@ function VUHDO_lnfSkinInit()
 		hooksecurefunc("VUHDO_lnfComboItemOnEnter", VUHDO_lnfSkinOnComboItemOnEnter);
 		hooksecurefunc("VUHDO_lnfComboItemOnLeave", VUHDO_lnfSkinOnComboItemOnLeave);
 		hooksecurefunc("VUHDO_lnfComboButtonClicked", VUHDO_lnfSkinOnComboButtonClicked);
+		hooksecurefunc("VUHDO_lnfCheckTreeRowOnEnter", VUHDO_lnfSkinOnCheckTreeRowOnEnter);
+		hooksecurefunc("VUHDO_lnfCheckTreeRowOnLeave", VUHDO_lnfSkinOnCheckTreeRowOnLeave);
 
 		sComboHooked = true;
 	end

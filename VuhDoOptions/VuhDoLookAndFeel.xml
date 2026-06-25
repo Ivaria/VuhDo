@@ -2489,6 +2489,130 @@
 
 
 
+<Button name="VuhDoCheckTreeRowTemplate" enableMouse="true" virtual="true">
+	<Size>
+		<AbsDimension x="200" y="18" />
+	</Size>
+	<Layers>
+		<Layer level="ARTWORK">
+			<FontString name="$parentLabel" inherits="VuDoDefaultFontTemplate" justifyH="LEFT" text="">
+				<Size>
+					<AbsDimension x="150" y="14" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT">
+						<Offset>
+							<AbsDimension x="40" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</FontString>
+		</Layer>
+	</Layers>
+	<Frames>
+
+		<Frame name="$parentBackdrop" inherits="BackdropTemplate" mixin="BackdropTemplateMixin" enableMouse="false" frameLevel="1">
+			<KeyValues>
+				<KeyValue key="backdropInfo" value="BACKDROP_VUHDO_WHITE_SQUARE_16_16_0000" type="global" />
+			</KeyValues>
+			<Anchors>
+				<Anchor point="TOPLEFT" />
+				<Anchor point="BOTTOMRIGHT" />
+			</Anchors>
+		</Frame>
+
+		<Button name="$parentExpand" hidden="true">
+			<Size>
+				<AbsDimension x="16" y="16" />
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="2" y="0" />
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<KeyValues>
+				<KeyValue key="skinNormalKey" value="icon_tree_expand" type="string" />
+			</KeyValues>
+			<NormalTexture name="$parentNormalTexture" file="Interface\AddOns\VuhDoOptions\Images\icon_tree_expand">
+				<TexCoords left="0" right="1" top="0" bottom="1" />
+			</NormalTexture>
+			<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD" />
+			<Scripts>
+				<OnClick>
+					VUHDO_lnfCheckTreeExpandClicked(self:GetParent());
+				</OnClick>
+			</Scripts>
+		</Button>
+
+		<Frame name="$parentCheck">
+			<Size>
+				<AbsDimension x="14" y="14" />
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="21" y="0" />
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<Layers>
+				<Layer level="BORDER">
+					<Texture name="$parentBox" setAllPoints="true" file="Interface\AddOns\VuhDoOptions\Images\icon_blue_square">
+						<TexCoords left="0" right="1" top="0" bottom="1" />
+					</Texture>
+				</Layer>
+				<Layer level="OVERLAY">
+					<Texture name="$parentMark" setAllPoints="true" hidden="true" file="Interface\AddOns\VuhDoOptions\Images\icon_check">
+						<TexCoords left="0" right="1" top="0" bottom="1" />
+					</Texture>
+				</Layer>
+			</Layers>
+		</Frame>
+
+	</Frames>
+	<Scripts>
+		<OnClick>
+			VUHDO_lnfCheckTreeRowClicked(self);
+		</OnClick>
+		<OnEnter>
+			VUHDO_lnfCheckTreeRowOnEnter(self);
+		</OnEnter>
+		<OnLeave>
+			VUHDO_lnfCheckTreeRowOnLeave(self);
+		</OnLeave>
+	</Scripts>
+</Button>
+
+
+
+<ScrollFrame name="VuhDoCheckTreeTemplate" virtual="true" inherits="VuhDoScrollPanelTemplate2">
+	<ScrollChild>
+
+		<Frame name="$parentSelectPanel" mixin="BackdropTemplateMixin">
+			<Size>
+				<AbsDimension x="1" y="1" />
+			</Size>
+			<Anchors>
+				<Anchor point="TOPLEFT">
+					<Offset>
+						<AbsDimension x="0" y="0" />
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</Frame>
+
+	</ScrollChild>
+	<Scripts>
+		<OnShow>
+			VUHDO_lnfCheckTreeInitFromModel(self);
+		</OnShow>
+	</Scripts>
+</ScrollFrame>
+
+
+
 <Button name="VuhDoScrollComboBoxTemplate" enableMouse="false" virtual="true">
 	<Size>
 		<AbsDimension x="120" y="24" />
