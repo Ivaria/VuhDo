@@ -1487,6 +1487,15 @@ function VUHDO_lnfColorSwatchShowColorPicker(aColorSwatch, aMouseButton)
 	end
 
 	VuhDoNewColorPicker:SetAttribute("swatch", aColorSwatch);
+
+	VuhDoNewColorPicker:ClearAllPoints();
+
+	if VuhDoNewOptionsTabbedFrame and VuhDoNewOptionsTabbedFrame:IsShown() then
+		VUHDO_PixelUtil.SetPoint(VuhDoNewColorPicker, "CENTER", VuhDoNewOptionsTabbedFrame, "CENTER", 0, 0);
+	else
+		VUHDO_PixelUtil.SetPoint(VuhDoNewColorPicker, "CENTER", "UIParent", "CENTER", 0, 0);
+	end
+
 	VuhDoNewColorPicker:Show();
 
 	return;
