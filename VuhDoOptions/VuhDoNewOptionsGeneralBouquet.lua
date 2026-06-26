@@ -991,7 +991,7 @@ function VUHDO_bouquetDeleteButtonClicked(aPanel)
 	tName = VUHDO_getCurrentBouquetName();
 	if (tName ~= nil) then
 		if (VUHDO_BOUQUETS["STORED"][tName] ~= nil) then
-			VuhDoYesNoFrameText:SetText("Really delete bouquet\n'" .. tName .. "'?");
+			VuhDoYesNoFrameText:SetText(format(VUHDO_I18N_DELETE_BOUQUET_CONFIRM, tName));
 			VuhDoYesNoFrame:SetAttribute("callback",
 				function(aDecision)
 					if (VUHDO_YES == aDecision) then

@@ -3438,6 +3438,10 @@ function VUHDO_lnfSkinApplyAll()
 		VUHDO_lnfSkinApplyToFrameTree(VuhDoLnfShareDialog);
 	end
 
+	if VuhDoYesNoFrame then
+		VUHDO_lnfSkinApplyToFrameTree(VuhDoYesNoFrame);
+	end
+
 	for tPanelNum = 1, VUHDO_MAX_PANELS do
 		VUHDO_lnfSkinStyleMovePanelConfigIcons(tPanelNum);
 	end
