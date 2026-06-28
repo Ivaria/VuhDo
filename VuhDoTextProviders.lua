@@ -1,6 +1,7 @@
 local _;
 
 local floor = floor;
+local format = string.format;
 
 local UnitGetTotalHealAbsorbs = UnitGetTotalHealAbsorbs;
 local UnitPower = UnitPower;
@@ -11,6 +12,7 @@ local UnitPowerPercent = UnitPowerPercent;
 local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction;
 local CreateUnitHealPredictionCalculator = CreateUnitHealPredictionCalculator;
 local CurveConstants = CurveConstants;
+local CreateCurve = C_CurveUtil and C_CurveUtil.CreateCurve;
 local TruncateWhenZero = C_StringUtil and C_StringUtil.TruncateWhenZero;
 local FloorToNearestString = C_StringUtil and C_StringUtil.FloorToNearestString;
 local WrapString = C_StringUtil and C_StringUtil.WrapString;
@@ -21,6 +23,8 @@ local VUHDO_getUnitOverallShieldRemain;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sHealPredictionCalculator;
+local sScaleTo10Curve;
+local sScaleTo100CeilCurve;
 
 
 
@@ -41,6 +45,24 @@ function VUHDO_textProvidersInitLocalOverrides()
 			sHealPredictionCalculator:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MaximumHealth);
 			sHealPredictionCalculator:SetHealAbsorbMode(Enum.UnitHealAbsorbMode.Total);
 			sHealPredictionCalculator:SetIncomingHealOverflowPercent(1.0);
+		end
+
+		sScaleTo10Curve = CreateCurve and CreateCurve();
+
+		if sScaleTo10Curve then
+			sScaleTo10Curve:SetType(Enum.LuaCurveType.Linear);
+
+			sScaleTo10Curve:AddPoint(0.0, 0);
+			sScaleTo10Curve:AddPoint(1.0, 10);
+		end
+
+		sScaleTo100CeilCurve = CreateCurve and CreateCurve();
+
+		if sScaleTo100CeilCurve then
+			sScaleTo100CeilCurve:SetType(Enum.LuaCurveType.Linear);
+
+			sScaleTo100CeilCurve:AddPoint(0.0, 0.99999);
+			sScaleTo100CeilCurve:AddPoint(1.0, 100.99999);
 		end
 	end
 
@@ -533,13 +555,13 @@ local function VUHDO_percentValidator(anInfo, aValue, aMaxValue)
 		end
 
 		if tIsHealth and anInfo["hasSecretHealth"] then
-			tPercent = UnitHealthPercent(anInfo["unit"], true, CurveConstants.ScaleTo100);
+			tPercent = UnitHealthPercent(anInfo["unit"], true, sScaleTo100CeilCurve);
 
-			return "%.0f%%", tPercent;
+			return "%d%%", tPercent;
 		elseif not tIsHealth and anInfo["hasSecretPower"] then
 			tPercent = UnitPowerPercent(anInfo["unit"], anInfo["powertype"] or 0, false, CurveConstants.ScaleTo100);
 
-			return "%.0f%%", tPercent;
+			return "%d%%", tPercent;
 		elseif issecretvalue(aValue) or issecretvalue(aMaxValue) then
 			return "%s", "";
 		end
@@ -561,9 +583,9 @@ local function VUHDO_tenthPercentValidator(anInfo, aValue, aMaxValue)
 			return "%s", "";
 		end
 
-		tPercent = UnitPowerPercent(anInfo["unit"], anInfo["powertype"] or 0, false, CurveConstants.ScaleTo100);
+		tPercent = UnitPowerPercent(anInfo["unit"], anInfo["powertype"] or 0, false, sScaleTo10Curve);
 
-		return "%.0f", tPercent;
+		return "%d", tPercent;
 	end
 
 	if aMaxValue and aMaxValue > 0 then
@@ -630,6 +652,32 @@ local function VUHDO_absoluteValidator(anInfo, aValue)
 	end
 
 	return "%s", "";
+
+end
+
+
+
+--
+local tKiloStr;
+local tPercentStr;
+local function VUHDO_kiloPercentValidator(anInfo, aValue, aMaxValue)
+
+	tKiloStr = format(VUHDO_kiloValidator(anInfo, aValue));
+	tPercentStr = format(VUHDO_percentValidator(anInfo, aValue, aMaxValue));
+
+	return "%s (%s)", tKiloStr, tPercentStr;
+
+end
+
+
+
+--
+local function VUHDO_kiloOfKiloPercentValidator(anInfo, aValue, aMaxValue)
+
+	tKiloStr = format(VUHDO_kiloOfKiloValidator(anInfo, aValue, aMaxValue));
+	tPercentStr = format(VUHDO_percentValidator(anInfo, aValue, aMaxValue));
+
+	return "%s (%s)", tKiloStr, tPercentStr;
 
 end
 
@@ -810,84 +858,84 @@ VUHDO_TEXT_PROVIDER_SOURCES = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_MANA,
 		["calculator"] = VUHDO_manaCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["RAGE"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_RAGE,
 		["calculator"] = VUHDO_rageCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["FOCUS"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_FOCUS,
 		["calculator"] = VUHDO_focusCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["ENERGY"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_ENERGY,
 		["calculator"] = VUHDO_energyCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["RUNIC_POWER"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_RUNIC_POWER,
 		["calculator"] = VUHDO_runicPowerCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["LUNAR_POWER"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_LUNAR_POWER,
 		["calculator"] = VUHDO_lunarPowerCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["MAELSTROM"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_MAELSTROM,
 		["calculator"] = VUHDO_maelstromCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["INSANITY"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_INSANITY,
 		["calculator"] = VUHDO_insanityCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["FURY"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_FURY,
 		["calculator"] = VUHDO_furyCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["PAIN"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_PAIN,
 		["calculator"] = VUHDO_painCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["ESSENCE"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_ESSENCE,
 		["calculator"] = VUHDO_essenceCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["ALL_POWERS"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_SOURCE_ALL_POWERS,
 		["calculator"] = VUHDO_allPowersCalculator,
 		["interests"] = { VUHDO_UPDATE_MANA, VUHDO_UPDATE_OTHER_POWERS, VUHDO_UPDATE_DC, VUHDO_UPDATE_ALIVE },
-		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK" },
+		["supportedFormats"] = { "PERCENT", "PERCENT_TENTH", "UNIT_OF_UNIT", "KILO_OF_KILO", "N", "NK", "NK_PERCENT", "KILO_OF_KILO_PERCENT" },
 		["defaultFormat"] = "PERCENT",
 	},
 	["CHI"] = {
@@ -997,5 +1045,13 @@ VUHDO_TEXT_PROVIDER_FORMATS = {
 	["NK_PLUS"] = {
 		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_FORMAT_NK_PLUS,
 		["validator"] = VUHDO_plusKiloValidator,
+	},
+	["NK_PERCENT"] = {
+		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_FORMAT_NK_PERCENT,
+		["validator"] = VUHDO_kiloPercentValidator,
+	},
+	["KILO_OF_KILO_PERCENT"] = {
+		["displayName"] = VUHDO_I18N_TEXT_PROVIDER_FORMAT_KILO_OF_KILO_PERCENT,
+		["validator"] = VUHDO_kiloOfKiloPercentValidator,
 	},
 };

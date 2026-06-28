@@ -298,9 +298,14 @@ function VUHDO_inspectRole(aUnit)
 			or VUHDO_ID_ROGUES == tClassId
 			or VUHDO_ID_PALADINS == tClassId
 			or VUHDO_ID_MONKS == tClassId
-			or VUHDO_ID_DEATH_KNIGHT == tClassId 
-			or VUHDO_ID_DEMON_HUNTERS == tClassId then
+			or VUHDO_ID_DEATH_KNIGHT == tClassId then
 			return VUHDO_ID_MELEE_DAMAGE;
+		elseif VUHDO_ID_DEMON_HUNTERS == tClassId then
+			if 1480 == tTreeId then -- Devourer
+				return VUHDO_ID_RANGED_DAMAGE;
+			else
+				return VUHDO_ID_MELEE_DAMAGE;
+			end
 		elseif VUHDO_ID_SHAMANS == tClassId then
 			if 263 == tTreeId then -- Enhancement
 				return VUHDO_ID_MELEE_DAMAGE;
@@ -405,7 +410,6 @@ local function VUHDO_determineDfToolRole(anInfo)
 			or anInfo["classId"] == VUHDO_ID_PALADINS
 			or anInfo["classId"] == VUHDO_ID_DEATH_KNIGHT
 			or anInfo["classId"] == VUHDO_ID_MONKS 
-			or anInfo["classId"] == VUHDO_ID_DEMON_HUNTERS 
 			or anInfo["classId"] == VUHDO_ID_ROGUES 
 			or (anInfo["classId"] == VUHDO_ID_DRUIDS
 				and not UnitPowerType(anInfo["unit"]) == VUHDO_UNIT_POWER_LUNAR_POWER) then
@@ -426,6 +430,10 @@ local function VUHDO_determineDfToolRole(anInfo)
 		elseif anInfo["classId"] == VUHDO_ID_HUNTERS then
 			-- Hunters default to ranged but require inspect to determine spec ID so no return
 			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_RANGED_DAMAGE;
+			tReturnRole = nil;
+		elseif anInfo["classId"] == VUHDO_ID_DEMON_HUNTERS then
+			-- Demon Hunters default to melee but require inspect to distinguish Devourer (ranged) so no return
+			VUHDO_DF_TOOL_ROLES[tName] = VUHDO_ID_MELEE_DAMAGE;
 			tReturnRole = nil;
 		else
 			-- Shaman default to melee but require inspect to determine spec ID so no return
@@ -481,7 +489,6 @@ function VUHDO_determineRole(aUnit)
 				or tClassId == VUHDO_ID_PALADINS
 				or tClassId == VUHDO_ID_DEATH_KNIGHT
 				or tClassId == VUHDO_ID_MONKS
-				or tClassId == VUHDO_ID_DEMON_HUNTERS
 				or tClassId == VUHDO_ID_ROGUES then
 				return 61;
 			elseif tClassId == VUHDO_ID_PRIESTS
@@ -492,6 +499,17 @@ function VUHDO_determineRole(aUnit)
 			elseif tClassId == VUHDO_ID_HUNTERS
 				or tClassId == VUHDO_ID_SHAMANS then
 				return 62;
+			elseif tClassId == VUHDO_ID_DEMON_HUNTERS then
+				tIntellect = UnitStat(tInfo["unit"], 4);
+				tAgility = UnitStat(tInfo["unit"], 2);
+
+				if sSecretsEnabled and (issecretvalue(tIntellect) or issecretvalue(tAgility)) then
+					return 61;
+				elseif tIntellect > tAgility then
+					return 62;
+				else
+					return 61;
+				end
 			elseif tClassId == VUHDO_ID_DRUIDS then
 				if UnitPowerType(tInfo["unit"]) == VUHDO_UNIT_POWER_LUNAR_POWER then
 					return 62;
@@ -559,7 +577,6 @@ function VUHDO_determineRole(aUnit)
 				or tClassId == VUHDO_ID_PALADINS
 				or tClassId == VUHDO_ID_DEATH_KNIGHT
 				or tClassId == VUHDO_ID_MONKS
-				or tClassId == VUHDO_ID_DEMON_HUNTERS
 				or tClassId == VUHDO_ID_ROGUES then
 				return 61;
 			elseif tClassId == VUHDO_ID_PRIESTS
@@ -570,6 +587,17 @@ function VUHDO_determineRole(aUnit)
 			elseif tClassId == VUHDO_ID_HUNTERS
 				or tClassId == VUHDO_ID_SHAMANS then
 				return 62;
+			elseif tClassId == VUHDO_ID_DEMON_HUNTERS then
+				tIntellect = UnitStat(aUnit, 4);
+				tAgility = UnitStat(aUnit, 2);
+
+				if issecretvalue(tIntellect) or issecretvalue(tAgility) then
+					return 61;
+				elseif tIntellect > tAgility then
+					return 62;
+				else
+					return 61;
+				end
 			elseif tClassId == VUHDO_ID_DRUIDS then
 				return 61;
 			end
@@ -649,9 +677,15 @@ function VUHDO_determineRole(aUnit)
 
 	elseif 31 == tClassId then -- VUHDO_ID_DEMON_HUNTERS
 		tPowerType = UnitPowerType(aUnit);
+		tIntellect = UnitStat(aUnit, 4);
+		tAgility = UnitStat(aUnit, 2);
 
 		if VUHDO_UNIT_POWER_PAIN == tPowerType then
 			return 60; -- VUHDO_ID_MELEE_TANK
+		elseif sSecretsEnabled and (issecretvalue(tIntellect) or issecretvalue(tAgility)) then
+			return 61; -- VUHDO_ID_MELEE_DAMAGE
+		elseif tIntellect > tAgility then
+			return 62; -- VUHDO_ID_RANGED_DAMAGE
 		else
 			return 61; -- VUHDO_ID_MELEE_DAMAGE
 		end

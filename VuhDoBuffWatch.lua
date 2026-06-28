@@ -544,6 +544,7 @@ local tBuffGroup;
 local tSpellInRange;
 local tIsLowByTime;
 local tIsLow;
+local tIsSecretBuff;
 local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppressMissBuff, aTargetMode)
 
 	tCategName = aCategSpec;
@@ -567,6 +568,8 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 	end
 
 	tIsNotInBattleground = not VUHDO_isInBattleground();
+
+	tIsSecretBuff = sSecretsEnabled and aBuffInfo[1] and ShouldSpellAuraBeSecret(aBuffInfo[1]);
 
 	for _, tUnit in pairs(someUnits) do
 		tInfo = VUHDO_RAID[tUnit];
@@ -660,19 +663,23 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 
 			if tIsAvailable then
 				if not tTexture then
-					tMissGroup[#tMissGroup + 1] = tUnit;
+					if tIsSecretBuff then
+						tOkayGroup[#tOkayGroup + 1] = tUnit;
+					else
+						tMissGroup[#tMissGroup + 1] = tUnit;
 
-					if not tInRange and tIsAvailable then
-						tOorGroup[#tOorGroup + 1] = tUnit;
-					end
+						if not tInRange and tIsAvailable then
+							tOorGroup[#tOorGroup + 1] = tUnit;
+						end
 
-					if not anSuppressMissBuff then
-						VUHDO_setUnitMissBuff(tUnit, aCategSpec, aBuffInfo, tCategName);
-					end
+						if not anSuppressMissBuff then
+							VUHDO_setUnitMissBuff(tUnit, aCategSpec, aBuffInfo, tCategName);
+						end
 
-					if tInRange and (tLowestRest == nil or tLowestRest > 0) then
-						tLowestUnit = tUnit;
-						tLowestRest = 0;
+						if tInRange and (tLowestRest == nil or tLowestRest > 0) then
+							tLowestUnit = tUnit;
+							tLowestRest = 0;
+						end
 					end
 				end
 
@@ -759,6 +766,7 @@ local tDuration;
 local tRest;
 local tName;
 local tTexture;
+local tHadSecretSlot;
 function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
 
 	tPlayerUnit = VUHDO_getPlayerUnit();
@@ -820,20 +828,39 @@ function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpe
 			return VUHDO_PLAYER_GROUP, sEmpty, tPlayerUnit, 0, tPlayerUnit, sEmpty, sEmpty, 0;
 
 		elseif VUHDO_BUFF_TARGET_TOTEM == tTargetType then
+			tHadSecretSlot = false;
+
 			for tTotemNum = 1, 4 do
 				_, tName, tStart, tDuration, tTexture = GetTotemInfo(tTotemNum);
-				if tTexture == VUHDO_BUFFS[aBuffInfo[1]]["icon"] then
-					if tName ~= aBuffInfo[1] then
+
+				if sSecretsEnabled and issecretvalue(tTexture) then
+					tHadSecretSlot = true;
+				elseif tTexture == VUHDO_BUFFS[aBuffInfo[1]]["icon"] then
+					if tName ~= aBuffInfo[1]
+						and not (sSecretsEnabled and issecretvalue(tName)) then
 						sCooldownAliases[aBuffInfo[1]] = tName;
 					end
-					tRest = tDuration - (GetTime() - tStart);
-					if tRest < 0 then tRest = 0; end
+
+					if not (sSecretsEnabled and (issecretvalue(tStart) or issecretvalue(tDuration))) then
+						tRest = tDuration - (GetTime() - tStart);
+
+						if tRest < 0 then
+							tRest = 0;
+						end
+					else
+						tRest = 0;
+					end
 
 					return sEmpty, sEmpty, tPlayerUnit, tRest, tPlayerUnit, VUHDO_PLAYER_GROUP, sEmpty, 0;
 				end
 			end
 
+			if tHadSecretSlot then
+				return sEmpty, sEmpty, "player", 0, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+			end
+
 			VUHDO_setUnitMissBuff(tPlayerUnit, aCategSpec, aBuffInfo, aCategSpec);
+
 			return VUHDO_PLAYER_GROUP, sEmpty, tPlayerUnit, 0, tPlayerUnit, sEmpty, sEmpty, 0;
 		else
 			-- If self we only care if buff isn't on player
