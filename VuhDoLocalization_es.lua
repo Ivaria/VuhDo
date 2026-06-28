@@ -211,7 +211,7 @@ VUHDO_I18N_OPTIONS_NOT_LOADED = ">>> ¡Plugin de Opciones de VuhDo no cargado! <
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_1 = "Error: La distribuci\195\179n de hechizos \"";
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_2 = "\" no existe.";
 VUHDO_I18N_AUTO_ARRANG_1 = "N\195\186mero de miembros del grupo cambiado a ";
-VUHDO_I18N_AUTO_ARRANG_2 = ". Activando arreglo autom\195\161tico: \"";
+VUHDO_I18N_AUTO_ARRANG_2 = ". Activando perfil autom\195\161tico: \"";
 -- #+1.209
 VUHDO_I18N_TRACK_BUFFS_FOR = "Rastrear beneficio para ...";
 VUHDO_I18N_OWN_GROUP_LONG = "Mi grupo";

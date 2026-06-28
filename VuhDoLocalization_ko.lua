@@ -201,7 +201,7 @@ VUHDO_I18N_OPTIONS_NOT_LOADED = ">>> VuhDo 옵션 애드온이 로딩되지 않�
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_1 = "오류: 주문 레이아웃 \"";
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_2 = "\" 존재하지 않음."; -- 임의 수정
 VUHDO_I18N_AUTO_ARRANG_1 = "파티원의 수가 변경되었습니다. ";
-VUHDO_I18N_AUTO_ARRANG_2 = ". 자동 맞물림 배치: \"";
+VUHDO_I18N_AUTO_ARRANG_2 = ". 자동 적용 프로필: \"";
 -- #+1.209
 VUHDO_I18N_OWN_GROUP_LONG = "자신의 그룹";
 VUHDO_I18N_TRACK_BUFFS_FOR = "버프 추적 - ...";

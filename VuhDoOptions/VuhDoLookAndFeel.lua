@@ -457,6 +457,7 @@ function VUHDO_lnfComboItemOnEnter(aComboItem)
 	tTooltip = aComboItem:GetAttribute("tooltip");
 
 	if tTooltip then
+		VuhDoOptionsTooltip:SetScale(((VUHDO_OPTIONS_SETTINGS and VUHDO_OPTIONS_SETTINGS["scale"]) or 1) * 0.75);
 		VuhDoOptionsTooltipTextText:SetText(tTooltip);
 
 		VUHDO_PixelUtil.SetHeight(VuhDoOptionsTooltip, VuhDoOptionsTooltipTextText:GetHeight() + 10);
@@ -1526,7 +1527,7 @@ do
 		end
 
 		if tTooltip ~= nil then
-			VuhDoOptionsTooltip:SetScale((VUHDO_OPTIONS_SETTINGS and VUHDO_OPTIONS_SETTINGS["scale"]) or 1);
+			VuhDoOptionsTooltip:SetScale(((VUHDO_OPTIONS_SETTINGS and VUHDO_OPTIONS_SETTINGS["scale"]) or 1) * 0.75);
 			VuhDoOptionsTooltipTextText:SetText(tTooltip);
 
 			VUHDO_PixelUtil.SetHeight(VuhDoOptionsTooltip, VuhDoOptionsTooltipTextText:GetHeight() + 10);

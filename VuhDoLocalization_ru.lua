@@ -238,7 +238,7 @@ VUHDO_I18N_OPTIONS_NOT_LOADED = ">>> Модуль настроек VuhDo не з
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_1 = "Ошибка: Раскладка способностей \"";
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_2 = "\" не существует.";
 VUHDO_I18N_AUTO_ARRANG_1 = "Количество участников группы изменено на: ";
-VUHDO_I18N_AUTO_ARRANG_2 = ". Автоприменение расположения: \"";
+VUHDO_I18N_AUTO_ARRANG_2 = ". Автоприменение профиля: \"";
 
 -- #+1.209
 VUHDO_I18N_OWN_GROUP_LONG = "Свою группу";

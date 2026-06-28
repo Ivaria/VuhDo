@@ -197,7 +197,7 @@ VUHDO_I18N_OPTIONS_NOT_LOADED = ">>> VuhDo Options plugin not loaded! <<<";
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_1 = "Error: Spell layout \"";
 VUHDO_I18N_SPELL_LAYOUT_NOT_EXIST_2 = "\" doesn't exist.";
 VUHDO_I18N_AUTO_ARRANG_1 = "Number of Party members has changed to ";
-VUHDO_I18N_AUTO_ARRANG_2 = ". Auto-engaging arrangement: \"";
+VUHDO_I18N_AUTO_ARRANG_2 = ". Auto-engaging profile: \"";
 -- #+1.209
 VUHDO_I18N_OWN_GROUP_LONG = "Own Group";
 VUHDO_I18N_TRACK_BUFFS_FOR = "Track buff for ...";
