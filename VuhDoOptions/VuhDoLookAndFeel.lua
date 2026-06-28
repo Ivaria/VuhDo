@@ -2050,6 +2050,7 @@ function VUHDO_lnfShareButtonClicked(aButton)
 			VUHDO_PixelUtil.SetPoint(VuhDoLnfShareDialog, "CENTER", "UIParent", "CENTER", 0, 0);
 		end
 
+		VuhDoLnfShareDialog:SetScale((VUHDO_OPTIONS_SETTINGS and VUHDO_OPTIONS_SETTINGS["scale"]) or 1);
 		VuhDoLnfShareDialog:Show();
 		VUHDO_lnfSkinApplyToFrameTree(VuhDoLnfShareDialog);
 	end

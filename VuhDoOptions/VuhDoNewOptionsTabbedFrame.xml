@@ -417,6 +417,10 @@
 					</OnValueChanged>
 					<OnMouseUp>
 						VuhDoNewOptionsTabbedFrame:SetScale(VUHDO_OPTIONS_SETTINGS.scale);
+
+						if VuhDoLnfShareDialog and VuhDoLnfShareDialog:IsShown() then
+							VuhDoLnfShareDialog:SetScale(VUHDO_OPTIONS_SETTINGS.scale);
+						end
 					</OnMouseUp>
 					<OnShow>VUHDO_lnfPatchFont(self, "Title"); VUHDO_lnfPatchFont(self, "Value"); VUHDO_lnfSliderInitFromModel(self)</OnShow>
 					<OnEnter>VUHDO_lnfShowTooltip(self:GetParent())</OnEnter>
