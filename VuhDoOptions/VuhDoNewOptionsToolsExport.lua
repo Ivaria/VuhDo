@@ -612,6 +612,22 @@ end
 
 
 --
+local tSnap;
+local function VUHDO_syncSnapshotParts(aParts)
+
+	tSnap = { };
+
+	for tKey, tValue in pairs(aParts) do
+		tSnap[tKey] = VUHDO_deepCopyTable(tValue);
+	end
+
+	return tSnap;
+
+end
+
+
+
+--
 local tGlobalNodes = { };
 local tPanelNodes = { };
 local tSelectedSrcPanels = { };
@@ -979,6 +995,11 @@ function VUHDO_syncApply(anIsReplace)
 	if not tSource then
 		VUHDO_Msg(format(VUHDO_I18N_PROFILE_NOT_EXISTS, VUHDO_SYNC_SOURCE_PROFILE));
 		return;
+	end
+
+	if tDestProfiles[VUHDO_SYNC_SOURCE_PROFILE]
+		and VUHDO_SYNC_SOURCE_PROFILE == VUHDO_CONFIG["CURRENT_PROFILE"] then
+		tSource = VUHDO_syncSnapshotParts(tSource);
 	end
 
 	tNeedReload = false;
