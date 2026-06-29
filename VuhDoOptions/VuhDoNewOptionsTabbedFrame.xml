@@ -324,6 +324,7 @@
 				if (DESIGN_MISC_PANEL_NUM == nil) then
 					VUHDO_newOptionsPanelFindDefaultPanel();
 				end
+				VUHDO_newOptionsIndicatorsEnsureBuilt();
 				VUHDO_newOptionsBufferVars();
 				if (VUHDO_CONFIG["IS_CLIQUE_COMPAT_MODE"]) then
 					VuhDoNewOptionsTabbedFrameTabsPanelSpellsRadioButton:Hide();

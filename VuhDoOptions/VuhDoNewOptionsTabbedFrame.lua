@@ -201,6 +201,7 @@ function VUHDO_yesNoDiscardChangesCallback(aDecision)
 
 		VUHDO_initAllBurstCaches();
 		VUHDO_initBouquetComboModel();
+		VUHDO_newOptionsIndicatorsInvalidate();
 		VUHDO_reloadUI(true);
 		VUHDO_B_CONFIG = nil;
 		VUHDO_B_INDICATOR_CONFIG = nil;

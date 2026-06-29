@@ -305,13 +305,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						local tMorePanel = _G[self:GetParent():GetName() .. "MorePanel"];
-						if (tMorePanel:IsShown()) then
-							tMorePanel:Hide();
-						else
-							VUHDO_hideAllMorePanels();
-							tMorePanel:Show();
-						end
+						VUHDO_newOptionsIndicatorsShowMore(self);
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -392,7 +386,7 @@
 				</Anchors>
 				<Scripts>
 					<OnShow>
-						VUHDO_newOptionsIndicatorsBuildScrollChild(self);
+						VUHDO_newOptionsIndicatorsOnShow(self);
 					</OnShow>
 				</Scripts>
 			</Frame>

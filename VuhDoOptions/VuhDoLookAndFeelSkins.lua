@@ -2021,21 +2021,6 @@ end
 
 
 --
-function VUHDO_lnfSkinOnIndicatorsBuild(aScrollChild)
-
-	if not sSkinReady then
-		return;
-	end
-
-	VUHDO_lnfSkinApplyToFrameTree(aScrollChild);
-
-	return;
-
-end
-
-
-
---
 function VUHDO_lnfSkinStyleMovePanelConfigIcons(aPanelNum)
 
 	if not sSkinReady then
@@ -4021,7 +4006,6 @@ function VUHDO_lnfSkinInit()
 	if not sAuraGroupsHooked then
 		hooksecurefunc("VUHDO_auraGroupsRefreshListEntries", VUHDO_lnfSkinOnAuraGroupsRefresh);
 		hooksecurefunc("VUHDO_buildAllBuffSetupGenerericPanel", VUHDO_lnfSkinOnBuffWatchRefresh);
-		hooksecurefunc("VUHDO_newOptionsIndicatorsBuildScrollChild", VUHDO_lnfSkinOnIndicatorsBuild);
 		hooksecurefunc("VUHDO_positionAllGroupConfigPanels", VUHDO_lnfSkinStyleMovePanelConfigIcons);
 		hooksecurefunc("VUHDO_lnfColorSwatchInitFromModel", VUHDO_lnfSkinStyleColorSwatch);
 

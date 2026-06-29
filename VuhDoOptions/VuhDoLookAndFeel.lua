@@ -541,6 +541,15 @@ function VUHDO_lnfComboButtonClicked(aButton)
 		if not tComboBox["prohibitCloseExtensions"] then
 			VUHDO_hideAllComponentExtensions(tComboBox);
 		end
+
+		if tComboBox["lazyItems"] and not tComboBox["itemsBuilt"] then
+			VUHDO_lnfComboInitItems(tComboBox);
+
+			tComboBox["itemsBuilt"] = true;
+
+			VUHDO_lnfComboSetSelectedValue(tComboBox, VUHDO_lnfGetValueFromModel(tComboBox));
+		end
+
 		tSelectPanel:Show();
 	end
 end
@@ -1316,6 +1325,30 @@ do
 		tTable = aComboBox:GetAttribute("combo_table");
 		if not tTable then return; end
 
+		if aComboBox["lazyItems"] and not aComboBox["itemsBuilt"] and not aComboBox["isMulti"] then
+			if _G[aComboBox:GetName() .. "EditBox"] then
+				for tIndex, tInfo in ipairs(tTable) do
+					if aValue == tInfo[1] then
+						_G[aComboBox:GetName() .. "EditBox"]:SetText(tInfo[2]);
+
+						return;
+					end
+				end
+			else
+				for tIndex, tInfo in ipairs(tTable) do
+					if aValue == tInfo[1] then
+						_G[aComboBox:GetName() .. "Text"]:SetText(tInfo[2]);
+
+						return;
+					end
+				end
+
+				_G[aComboBox:GetName() .. "Text"]:SetText(VUHDO_I18N_SELECT);
+			end
+
+			return;
+		end
+
 		if aComboBox["isMulti"] then
 			tArrayModel = VUHDO_lnfGetValueFromModel(aComboBox);
 
@@ -1391,6 +1424,23 @@ do
 
 		tValue = VUHDO_lnfGetValueFromModel(aComboBox);
 		aComboBox["isMulti"] = "table" == type(tValue);
+
+		if aComboBox["lazyItems"] and not aComboBox["itemsBuilt"] then
+			tTitle = aComboBox:GetAttribute("title");
+
+			if tTitle then
+				_G[aComboBox:GetName() .. "Text"]:SetText(tTitle);
+			end
+
+			if aComboBox["isMulti"] then
+				VUHDO_lnfComboSetSelectedValue(aComboBox, nil);
+			else
+				VUHDO_lnfComboSetSelectedValue(aComboBox, tValue);
+			end
+
+			return;
+		end
+
 		VUHDO_lnfComboInitItems(aComboBox);
 
 		tTitle = aComboBox:GetAttribute("title");
