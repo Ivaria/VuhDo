@@ -39,6 +39,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added new profile sync to selectively copy settings across profiles  
   
   
 --------------------------------------------------------------  
