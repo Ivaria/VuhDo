@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed incoming heal display when using inverted health bar  
   
   
 Improvements:  
