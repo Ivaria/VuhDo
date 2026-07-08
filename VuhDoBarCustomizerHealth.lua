@@ -643,11 +643,11 @@ local function VUHDO_updateIncHeal(aUnit)
 
 	for _, tButton in pairs(tAllButtons) do
 		tIncBar = VUHDO_getHealthBar(tButton, 6);
+		tHealthBar = VUHDO_getHealthBar(tButton, 1);
 
 		if tAmountInc > 0 and tInfo["healthmax"] > 0 then
 			tIncBar:SetValueRange(tInfo["health"] / tInfo["healthmax"], tHealthPlusInc);
 			
-			tHealthBar = VUHDO_getHealthBar(tButton, 1);
  			tIncColor["R"], tIncColor["G"], tIncColor["B"], tOpacity = tHealthBar:GetStatusBarColor();
  			tIncColor = VUHDO_getDiffColor(tIncColor, VUHDO_getStatusBarColor("INCOMING", aUnit));
  			
@@ -658,6 +658,10 @@ local function VUHDO_updateIncHeal(aUnit)
 			VUHDO_setStatusBarColor(tIncBar, tIncColor);
 		else
 			tIncBar:SetValueRange(0,0);
+		end
+
+		if sIsInvertGrowth[VUHDO_BUTTON_CACHE[tButton]] then
+			tHealthBar:SetValue(tHealthPlusInc);
 		end
 	end
 

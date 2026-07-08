@@ -18,6 +18,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed fallback when settings reference nonexistent font  
+-- Fixed incoming heal display when using inverted health bar  
   
   
 Improvements:  
