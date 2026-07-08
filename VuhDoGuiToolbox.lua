@@ -10,6 +10,7 @@ local format = format;
 local GetLocale = GetLocale;
 local InCombatLockdown = InCombatLockdown;
 local UnitExists = UnitExists;
+local pcall = pcall;
 local sIsNotInChina = GetLocale() ~= "zhCN" and GetLocale() ~= "zhTW" and GetLocale() ~= "koKR";
 local sIsManaBar = { };
 local sIsSideBarLeft = { };
@@ -18,6 +19,8 @@ local sShowPanels;
 local sIsHideEmptyAndClickThrough;
 local sIsPartyFrameHooked;
 local sEmpty = { };
+local sFontTestRegion;
+local sFontValidationCache = { };
 
 local tEmptyColor = { };
 
@@ -331,15 +334,60 @@ end
 
 
 
+--
+local tIsValid;
+function VUHDO_isValidFontPath(aFontPath)
+
+	if (aFontPath or "") == "" then
+		return false;
+	end
+
+	tIsValid = sFontValidationCache[aFontPath];
+
+	if tIsValid ~= nil then
+		return tIsValid;
+	end
+
+	if not sFontTestRegion then
+		sFontTestRegion = UIParent:CreateFontString(nil, "BACKGROUND");
+	end
+
+	tIsValid = pcall(sFontTestRegion.SetFont, sFontTestRegion, aFontPath, 10, "");
+
+	sFontValidationCache[aFontPath] = tIsValid;
+
+	return tIsValid;
+
+end
+
+
+
+--
+function VUHDO_getSafeFontPath(aFontPath)
+
+	if VUHDO_isValidFontPath(aFontPath) then
+		return aFontPath;
+	end
+
+	return GameFontNormal:GetFont();
+
+end
+
+
+
 -- Liefert sicheren Fontnamen. Falls in LSM nicht (mehr) vorhanden oder
 function VUHDO_getFont(aFont)
+
 	if (aFont or "") ~= "" then
 		for _, tFontInfo in pairs(VUHDO_FONTS) do
-			if aFont == tFontInfo[1] then return aFont; end
+			if aFont == tFontInfo[1] then
+				return VUHDO_getSafeFontPath(aFont);
+			end
 		end
 	end
 
 	return GameFontNormal:GetFont();
+
 end
 
 
@@ -954,7 +1002,13 @@ end
 
 --
 function VUHDO_lnfPatchFont(aComponent, aLabelName)
-	if not sIsNotInChina then _G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_OPTIONS_FONT_NAME, 12, ""); end
+
+	if not sIsNotInChina then
+		_G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME), 12, "");
+	end
+
+	return;
+
 end
 
 
@@ -1028,7 +1082,7 @@ function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
 		aLabel:SetShadowColor(0, 0, 0, tShadowAlpha);
 	end
 
-	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline or "");
+	aLabel:SetFont(VUHDO_getSafeFontPath(aSetup["FONT"]), tFactor * aSetup["SCALE"], tOutline or "");
 	
 	aLabel:SetShadowOffset(1, -1);
 

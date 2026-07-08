@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed fallback when settings reference nonexistent font  
   
   
 Improvements:  
