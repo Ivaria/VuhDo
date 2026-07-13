@@ -275,6 +275,7 @@ function VUHDO_refreshPrivateAuras(aPanelNum, aButton, aUnit)
 			unitToken = aUnit,
 			auraIndex = tAuraIndex,
 			parent = tPrivateAura,
+			isContainer = false,
 			showCountdownFrame = true,
 			showCountdownNumbers = true,
 			iconInfo = {

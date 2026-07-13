@@ -8,6 +8,7 @@ local strsub = strsub;
 local pairs = pairs;
 local format = format;
 local GetLocale = GetLocale;
+local GetCVar = GetCVar;
 local InCombatLockdown = InCombatLockdown;
 local UnitExists = UnitExists;
 local sIsNotInChina = GetLocale() ~= "zhCN" and GetLocale() ~= "zhTW" and GetLocale() ~= "koKR";
@@ -18,6 +19,33 @@ local sShowPanels;
 local sIsHideEmptyAndClickThrough;
 local sIsPartyFrameHooked;
 local sEmpty = { };
+
+local MEMBERS_PER_RAID_GROUP = MEMBERS_PER_RAID_GROUP or 5;
+
+local hooksecurefunc = hooksecurefunc;
+local CreateFrame = CreateFrame;
+local tinsert = table.insert;
+local twipe = table.wipe;
+local pcall = pcall;
+
+local sParentHooked = { };
+local sParentBlocked = { };
+local sPendingReparentFrames = { };
+local sIsUnregistering = false;
+local sCompactUnitFrameHooked = false;
+local sCompactPartyOnShowHooked = false;
+local sFontTestRegion;
+local sFontValidationCache = { };
+
+local sBlizzRaidFrame = CompactRaidFrameManager and CompactRaidFrameManager.container or CompactRaidFrameContainer;
+local sPartyFrame = _G["PartyFrame"];
+local sUsesPartyFramePool = sPartyFrame and sPartyFrame.PartyMemberFramePool ~= nil;
+local sHasEditModeManagerFrame = EditModeManagerFrame ~= nil;
+local sTargetHealthBar = TargetFrame and TargetFrame.TargetFrameContent and TargetFrame.TargetFrameContent.TargetFrameContentMain and TargetFrame.TargetFrameContent.TargetFrameContentMain.HealthBar or TargetFrameHealthBar;
+local sTargetManaBar = TargetFrame and TargetFrame.TargetFrameContent and TargetFrame.TargetFrameContent.TargetFrameContentMain and TargetFrame.TargetFrameContent.TargetFrameContentMain.ManaBar or TargetFrameManaBar;
+local sFocusHealthBar = FocusFrame and FocusFrame.TargetFrameContent and FocusFrame.TargetFrameContent.TargetFrameContentMain and FocusFrame.TargetFrameContent.TargetFrameContentMain.HealthBar or FocusFrameHealthBar;
+local sFocusManaBar = FocusFrame and FocusFrame.TargetFrameContent and FocusFrame.TargetFrameContent.TargetFrameContentMain and FocusFrame.TargetFrameContent.TargetFrameContentMain.ManaBar or FocusFrameManaBar;
+local sCompactPartyFrame = CompactPartyFrame;
 
 local tEmptyColor = { };
 
@@ -331,15 +359,60 @@ end
 
 
 
+--
+local tIsValid;
+function VUHDO_isValidFontPath(aFontPath)
+
+	if (aFontPath or "") == "" then
+		return false;
+	end
+
+	tIsValid = sFontValidationCache[aFontPath];
+
+	if tIsValid ~= nil then
+		return tIsValid;
+	end
+
+	if not sFontTestRegion then
+		sFontTestRegion = UIParent:CreateFontString(nil, "BACKGROUND");
+	end
+
+	tIsValid = pcall(sFontTestRegion.SetFont, sFontTestRegion, aFontPath, 10, "");
+
+	sFontValidationCache[aFontPath] = tIsValid;
+
+	return tIsValid;
+
+end
+
+
+
+--
+function VUHDO_getSafeFontPath(aFontPath)
+
+	if VUHDO_isValidFontPath(aFontPath) then
+		return aFontPath;
+	end
+
+	return GameFontNormal:GetFont();
+
+end
+
+
+
 -- Liefert sicheren Fontnamen. Falls in LSM nicht (mehr) vorhanden oder
 function VUHDO_getFont(aFont)
+
 	if (aFont or "") ~= "" then
 		for _, tFontInfo in pairs(VUHDO_FONTS) do
-			if aFont == tFontInfo[1] then return aFont; end
+			if aFont == tFontInfo[1] then
+				return VUHDO_getSafeFontPath(aFont);
+			end
 		end
 	end
 
 	return GameFontNormal:GetFont();
+
 end
 
 
@@ -443,6 +516,85 @@ local sFrameOrigParents = {};
 
 
 --
+local function VUHDO_resetParentToHidden(aFrame, aParent)
+
+	if sIsUnregistering then
+		return;
+	end
+
+	if sParentBlocked[aFrame] and aParent ~= sFrameHideParents[aFrame] then
+		if InCombatLockdown() and aFrame:IsProtected() then
+			sPendingReparentFrames[aFrame] = true;
+		else
+			sIsUnregistering = true;
+
+			aFrame:SetParent(sFrameHideParents[aFrame]);
+
+			sIsUnregistering = false;
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_onReparentManagerEvent()
+
+	for tFrame in next, sPendingReparentFrames do
+		if sParentBlocked[tFrame] and sFrameHideParents[tFrame] then
+			tFrame:SetParent(sFrameHideParents[tFrame]);
+		end
+	end
+
+	twipe(sPendingReparentFrames);
+
+	return;
+
+end
+
+
+
+--
+local sReparentManager = CreateFrame("Frame");
+sReparentManager:RegisterEvent("PLAYER_REGEN_ENABLED");
+sReparentManager:SetScript("OnEvent", VUHDO_onReparentManagerEvent);
+
+
+
+--
+local function VUHDO_onCompactUnitFrameUpdateUnitEvents(aFrame)
+
+	if sParentBlocked[aFrame] then
+		aFrame:UnregisterAllEvents();
+	end
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_initCompactUnitFrameHook()
+
+	if sCompactUnitFrameHooked then
+		return;
+	end
+
+	sCompactUnitFrameHooked = true;
+
+	hooksecurefunc("CompactUnitFrame_UpdateUnitEvents", VUHDO_onCompactUnitFrameUpdateUnitEvents);
+
+	return;
+
+end
+
+
+
+--
 local function VUHDO_hideFrame(aFrame)
 
 	if not sFrameHideParents[aFrame] then
@@ -478,7 +630,24 @@ end
 
 
 --
-local function VUHDO_unregisterAndSaveEvents(anIsHide, ...)
+local function VUHDO_shouldRestoreBlizzFrameParent(aFrame, anIsShow)
+
+	if anIsShow then
+		return true;
+	end
+
+	if aFrame == sBlizzRaidFrame or aFrame == CompactRaidFrameManager then
+		return false;
+	end
+
+	return true;
+
+end
+
+
+
+--
+local function VUHDO_unregisterAndSaveEvents(_, ...)
 
 	local tFrame;
 
@@ -499,9 +668,15 @@ local function VUHDO_unregisterAndSaveEvents(anIsHide, ...)
 
 			tFrame:UnregisterAllEvents();
 
-			if anIsHide then
-				VUHDO_hideFrame(tFrame);
+			if not sParentHooked[tFrame] then
+				hooksecurefunc(tFrame, "SetParent", VUHDO_resetParentToHidden);
+
+				sParentHooked[tFrame] = true;
 			end
+
+			sParentBlocked[tFrame] = true;
+
+			VUHDO_hideFrame(tFrame);
 		end
 	end
 
@@ -518,6 +693,8 @@ local function VUHDO_registerOriginalEvents(anIsShow, ...)
 		tFrame = select(tCnt, ...);
 
 		if tFrame then
+			sParentBlocked[tFrame] = nil;
+
 			if sEventsPerFrame[tFrame] then
 				for _, tIndex in pairs(sEventsPerFrame[tFrame]) do
 					tFrame:RegisterEvent(VUHDO_BLIZZ_EVENTS[tIndex]);
@@ -528,7 +705,7 @@ local function VUHDO_registerOriginalEvents(anIsShow, ...)
 				end
 			end
 
-			if anIsShow then 
+			if VUHDO_shouldRestoreBlizzFrameParent(tFrame, anIsShow) then
 				VUHDO_showFrame(tFrame);
 			end
 		end
@@ -539,9 +716,25 @@ end
 
 
 --
+local function VUHDO_onCompactPartyFrameShow(aFrame)
+
+	if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 and not InCombatLockdown() then
+		VUHDO_unregisterAndSaveEvents(true, aFrame);
+	end
+
+	return;
+
+end
+
+
+
+--
 local function VUHDO_hideBlizzRaid()
 
-	VUHDO_unregisterAndSaveEvents(true, CompactRaidFrameContainer);
+	VUHDO_initCompactUnitFrameHook();
+	VUHDO_unregisterAndSaveEvents(true, sBlizzRaidFrame);
+
+	return;
 
 end
 
@@ -550,7 +743,7 @@ end
 --
 local function VUHDO_showBlizzRaid()
 
-	VUHDO_registerOriginalEvents(VUHDO_GROUP_TYPE_SOLO ~= VUHDO_getCurrentGroupType(), CompactRaidFrameContainer);
+	VUHDO_registerOriginalEvents(VUHDO_GROUP_TYPE_SOLO ~= VUHDO_getCurrentGroupType(), sBlizzRaidFrame);
 
 end
 
@@ -576,8 +769,8 @@ end
 --
 function VUHDO_hideBlizzCompactPartyFrame()
 
-	if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 and not InCombatLockdown() and CompactPartyFrame and CompactPartyFrame:IsVisible() then
-		VUHDO_unregisterAndSaveEvents(true, CompactPartyFrame);
+	if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 and not InCombatLockdown() and sCompactPartyFrame and sCompactPartyFrame:IsVisible() then
+		VUHDO_unregisterAndSaveEvents(true, sCompactPartyFrame);
 	end
 
 end
@@ -591,13 +784,27 @@ local function VUHDO_updateBlizzPartyFrames()
 		return;
 	end
 
-	if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 then
-		for tCnt = 1, 4 do
-			VUHDO_hideFrame(_G["PartyMemberFrame" .. tCnt]);
+	if sUsesPartyFramePool then
+		if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 then
+			sPartyFrame:HidePartyFrames();
+		elseif VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 1 then
+			for tPartyMemberFrame in sPartyFrame.PartyMemberFramePool:EnumerateActive() do
+				tPartyMemberFrame:Show();
+				tPartyMemberFrame:UpdateMember();
+			end
+
+			sPartyFrame:UpdatePartyMemberBackground();
+			sPartyFrame:Layout();
 		end
-	elseif VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 1 then
-		for tCnt = 1, 4 do
-			VUHDO_showFrame(_G["PartyMemberFrame" .. tCnt]);
+	else
+		if VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 3 then
+			for tCnt = 1, 4 do
+				VUHDO_hideFrame(_G["PartyMemberFrame" .. tCnt]);
+			end
+		elseif VUHDO_CONFIG["BLIZZ_UI_HIDE_PARTY"] == 1 then
+			for tCnt = 1, 4 do
+				VUHDO_showFrame(_G["PartyMemberFrame" .. tCnt]);
+			end
 		end
 	end
 
@@ -606,28 +813,77 @@ end
 
 
 --
+local tMemberFrame;
+local tPartyFrame;
 local function VUHDO_hideBlizzParty()
 
-	HIDE_PARTY_INTERFACE = "1";
+	VUHDO_initCompactUnitFrameHook();
 
-	if not sIsPartyFrameHooked then
-		hooksecurefunc("ShowPartyFrame", VUHDO_updateBlizzPartyFrames);
+	if sUsesPartyFramePool then
+		if not sHasEditModeManagerFrame or not EditModeManagerFrame:UseRaidStylePartyFrames() then
+			tPartyFrame = sPartyFrame;
 
-		sIsPartyFrameHooked = true;
+			if not sIsPartyFrameHooked then
+				hooksecurefunc(tPartyFrame, "UpdatePartyFrames", VUHDO_updateBlizzPartyFrames);
+
+				sIsPartyFrameHooked = true;
+			end
+
+			for tPartyMemberFrame in tPartyFrame.PartyMemberFramePool:EnumerateActive() do
+				VUHDO_unregisterAndSaveEvents(false, tPartyMemberFrame, tPartyMemberFrame.HealthBar, tPartyMemberFrame.ManaBar);
+			end
+
+			for tCnt = 1, MEMBERS_PER_RAID_GROUP do
+				tMemberFrame = _G["CompactPartyFrameMember" .. tCnt];
+
+				if tMemberFrame then
+					VUHDO_unregisterAndSaveEvents(false, tMemberFrame);
+				end
+			end
+		else
+			if sCompactPartyFrame ~= nil then
+				if sCompactPartyFrame:IsVisible() then
+					VUHDO_unregisterAndSaveEvents(true, sCompactPartyFrame);
+				end
+
+				if not sCompactPartyOnShowHooked then
+					sCompactPartyFrame:HookScript("OnShow", VUHDO_onCompactPartyFrameShow);
+
+					sCompactPartyOnShowHooked = true;
+				end
+			end
+
+			for tCnt = 1, MEMBERS_PER_RAID_GROUP do
+				tMemberFrame = _G["CompactPartyFrameMember" .. tCnt];
+
+				if tMemberFrame then
+					VUHDO_unregisterAndSaveEvents(false, tMemberFrame);
+				end
+			end
+		end
+	else
+		HIDE_PARTY_INTERFACE = "1";
+
+		if not sIsPartyFrameHooked then
+			hooksecurefunc("ShowPartyFrame", VUHDO_updateBlizzPartyFrames);
+
+			sIsPartyFrameHooked = true;
+		end
+
+		for tCnt = 1, 4 do
+			tPartyFrame = _G["PartyMemberFrame" .. tCnt];
+			VUHDO_unregisterAndSaveEvents(false,
+				tPartyFrame, _G["PartyMemberFrame" .. tCnt .. "HealthBar"], _G["PartyMemberFrame" .. tCnt .. "ManaBar"]
+			);
+			VUHDO_hideFrame(tPartyFrame);
+		end
+
+		if sCompactPartyFrame ~= nil and sCompactPartyFrame:IsVisible() then
+			VUHDO_unregisterAndSaveEvents(true, sCompactPartyFrame);
+		end
 	end
 
-	local tPartyFrame;
-	for tCnt = 1, 4 do
-		tPartyFrame = _G["PartyMemberFrame" .. tCnt];
-		VUHDO_unregisterAndSaveEvents(false,
-			tPartyFrame, _G["PartyMemberFrame" .. tCnt .. "HealthBar"], _G["PartyMemberFrame" .. tCnt .. "ManaBar"]
-		);
-		VUHDO_hideFrame(tPartyFrame);
-	end
-
-	if (CompactPartyFrame ~= nil and CompactPartyFrame:IsVisible()) then
-		VUHDO_unregisterAndSaveEvents(true, CompactPartyFrame);
-	end
+	return;
 
 end
 
@@ -636,32 +892,67 @@ end
 --
 local function VUHDO_showBlizzParty()
 
-	if VUHDO_GROUP_TYPE_PARTY ~= VUHDO_getCurrentGroupType() then 
+	if VUHDO_GROUP_TYPE_PARTY ~= VUHDO_getCurrentGroupType() then
 		return;
 	end
 
-	if tonumber(GetCVar("useCompactPartyFrames")) == 0 then
-		HIDE_PARTY_INTERFACE = "0";
+	if sUsesPartyFramePool then
+		if not sHasEditModeManagerFrame or not EditModeManagerFrame:UseRaidStylePartyFrames() then
+			tPartyFrame = sPartyFrame;
 
-		if not sIsPartyFrameHooked then
-			hooksecurefunc("ShowPartyFrame", VUHDO_updateBlizzPartyFrames);
+			if not sIsPartyFrameHooked then
+				hooksecurefunc(tPartyFrame, "UpdatePartyFrames", VUHDO_updateBlizzPartyFrames);
 
-			sIsPartyFrameHooked = true;
-		end
+				sIsPartyFrameHooked = true;
+			end
 
-		local tPartyFrame;
-		for tCnt = 1, 4 do
-			tPartyFrame = _G["PartyMemberFrame" .. tCnt];
-			VUHDO_registerOriginalEvents(false,
-				tPartyFrame, _G["PartyMemberFrame" .. tCnt .. "HealthBar"], _G["PartyMemberFrame" .. tCnt .. "ManaBar"]);
+			for tPartyMemberFrame in tPartyFrame.PartyMemberFramePool:EnumerateActive() do
+				VUHDO_registerOriginalEvents(false, tPartyMemberFrame, tPartyMemberFrame.HealthBar, tPartyMemberFrame.ManaBar);
+			end
 
-			if (UnitExists("party" .. tCnt)) then
-				VUHDO_showFrame(tPartyFrame);
+			for tCnt = 1, MEMBERS_PER_RAID_GROUP do
+				tMemberFrame = _G["CompactPartyFrameMember" .. tCnt];
+
+				if tMemberFrame then
+					VUHDO_registerOriginalEvents(false, tMemberFrame);
+				end
+			end
+		else
+			VUHDO_registerOriginalEvents(true, sCompactPartyFrame);
+
+			for tCnt = 1, MEMBERS_PER_RAID_GROUP do
+				tMemberFrame = _G["CompactPartyFrameMember" .. tCnt];
+
+				if tMemberFrame then
+					VUHDO_registerOriginalEvents(false, tMemberFrame);
+				end
 			end
 		end
 	else
-		VUHDO_registerOriginalEvents(true, CompactPartyFrame);
+		if tonumber(GetCVar("useCompactPartyFrames")) == 0 then
+			HIDE_PARTY_INTERFACE = "0";
+
+			if not sIsPartyFrameHooked then
+				hooksecurefunc("ShowPartyFrame", VUHDO_updateBlizzPartyFrames);
+
+				sIsPartyFrameHooked = true;
+			end
+
+			for tCnt = 1, 4 do
+				tPartyFrame = _G["PartyMemberFrame" .. tCnt];
+				VUHDO_registerOriginalEvents(false,
+					tPartyFrame, _G["PartyMemberFrame" .. tCnt .. "HealthBar"], _G["PartyMemberFrame" .. tCnt .. "ManaBar"]);
+
+				if UnitExists("party" .. tCnt) then
+					VUHDO_showFrame(tPartyFrame);
+				end
+			end
+		else
+			VUHDO_registerOriginalEvents(true, sCompactPartyFrame);
+		end
 	end
+
+	return;
 
 end
 
@@ -681,7 +972,6 @@ end
 local function VUHDO_showBlizzPlayer()
 
 	VUHDO_registerOriginalEvents(false, PlayerFrame, PlayerFrameHealthBar, PlayerFrameManaBar);
-	VUHDO_showFrame(PlayerFrame);
 
 	if "DEATHKNIGHT" == VUHDO_PLAYER_CLASS then
 		VUHDO_registerOriginalEvents(true, RuneFrame);
@@ -695,7 +985,7 @@ end
 local function VUHDO_hideBlizzTarget()
 
 	VUHDO_unregisterAndSaveEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
-	VUHDO_unregisterAndSaveEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+	VUHDO_unregisterAndSaveEvents(false, sTargetHealthBar, sTargetManaBar);
 
 	ComboFrame:ClearAllPoints();
 
@@ -707,7 +997,7 @@ end
 local function VUHDO_showBlizzTarget()
 
 	VUHDO_registerOriginalEvents(true, TargetFrame, TargetFrameToT, FocusFrameToT);
-	VUHDO_registerOriginalEvents(false, TargetFrameHealthBar, TargetFrameManaBar);
+	VUHDO_registerOriginalEvents(false, sTargetHealthBar, sTargetManaBar);
 
 	VUHDO_PixelUtil.SetPoint(ComboFrame, "TOPRIGHT", "TargetFrame", "TOPRIGHT", -44, -9);
 
@@ -736,7 +1026,7 @@ end
 local function VUHDO_hideBlizzFocus()
 
 	VUHDO_unregisterAndSaveEvents(true, FocusFrame);
-	VUHDO_unregisterAndSaveEvents(false, FocusFrameHealthBar, FocusFrameManaBar);
+	VUHDO_unregisterAndSaveEvents(false, sFocusHealthBar, sFocusManaBar);
 
 end
 
@@ -746,7 +1036,7 @@ end
 local function VUHDO_showBlizzFocus()
 
 	VUHDO_registerOriginalEvents(true, FocusFrame);
-	VUHDO_registerOriginalEvents(false, FocusFrameHealthBar, FocusFrameManaBar);
+	VUHDO_registerOriginalEvents(false, sFocusHealthBar, sFocusManaBar);
 
 end
 
@@ -936,7 +1226,13 @@ end
 
 --
 function VUHDO_lnfPatchFont(aComponent, aLabelName)
-	if not sIsNotInChina then _G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_OPTIONS_FONT_NAME, 12, ""); end
+
+	if not sIsNotInChina then
+		_G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME), 12, "");
+	end
+
+	return;
+
 end
 
 
@@ -1010,8 +1306,8 @@ function VUHDO_customizeIconText(aParent, aHeight, aLabel, aSetup)
 		aLabel:SetShadowColor(0, 0, 0, tShadowAlpha);
 	end
 
-	aLabel:SetFont(aSetup["FONT"], tFactor * aSetup["SCALE"], tOutline or "");
-	
+	aLabel:SetFont(VUHDO_getSafeFontPath(aSetup["FONT"]), tFactor * aSetup["SCALE"], tOutline or "");
+
 	aLabel:SetShadowOffset(1, -1);
 
 	aLabel:SetText("");

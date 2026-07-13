@@ -17,9 +17,11 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed fallback when settings reference nonexistent font  
   
   
 Improvements:  
+-- Bump TOC interface for 1.15.9  
   
   
 --------------------------------------------------------------  
