@@ -17,6 +17,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed stance based abilities in Buff Watch  
   
   
 Improvements:  
