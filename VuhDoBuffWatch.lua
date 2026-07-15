@@ -74,6 +74,7 @@ local GetWeaponEnchantInfo = GetWeaponEnchantInfo;
 local UnitOnTaxi = UnitOnTaxi;
 local IsSpellInRange = IsSpellInRange or VUHDO_isSpellInRange;
 local GetShapeshiftFormInfo = GetShapeshiftFormInfo;
+local GetNumShapeshiftForms = GetNumShapeshiftForms;
 
 local pairs = pairs;
 local ipairs = ipairs;
@@ -747,7 +748,7 @@ local function VUHDO_getMissingBuffsForCode(aTargetCode, aBuffInfo, aCategSpec)
 			tDestGroup = VUHDO_GROUPS[(VUHDO_RAID["player"] or {})["group"] or 1];
 
 		elseif VUHDO_BUFF_TARGET_STANCE == tTargetType then
-			for tCnt = 1, NUM_STANCE_SLOTS do
+			for tCnt = 1, (GetNumShapeshiftForms() or NUM_STANCE_SLOTS) or 0 do
 				_, tName, tIsActive = GetShapeshiftFormInfo(tCnt);
 				if tIsActive and tName == aBuffInfo[1] then
 					return sEmpty, sEmpty, "player", 0, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;

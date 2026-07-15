@@ -18,6 +18,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed fallback when settings reference nonexistent font  
+-- Fixed stance based abilities in Buff Watch  
   
   
 Improvements:  
