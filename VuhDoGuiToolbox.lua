@@ -1664,3 +1664,16 @@ function VUHDO_getOrCreateCachedColor(aR, aG, aB, aO)
 	end
 
 end
+
+
+
+--
+function VUHDO_getManaAdjustedYOffset(aButton, aRelPoint, aYOff)
+
+	if aRelPoint and aButton then
+		return (aYOff or 0) + (aButton["manaBarLayoutHeight"] or 0) * (VUHDO_REL_POINT_MANA_FACTOR[aRelPoint] or 0);
+	end
+
+	return aYOff or 0;
+
+end

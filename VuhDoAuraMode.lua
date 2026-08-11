@@ -1,11 +1,13 @@
 local _;
 
 local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret;
+local issecretvalue = issecretvalue;
 local pairs = pairs;
 
 local VUHDO_RAID;
 local VUHDO_CONFIG;
 local VUHDO_AURA_GROUP_TYPE_FILTER;
+local VUHDO_AURA_GROUP_TYPE_LIST;
 
 local VUHDO_hideAllAuras;
 local VUHDO_syncOverlaysForUnit;
@@ -32,6 +34,7 @@ function VUHDO_auraModeInitLocalOverrides()
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_AURA_GROUP_TYPE_FILTER = _G["VUHDO_AURA_GROUP_TYPE_FILTER"];
+	VUHDO_AURA_GROUP_TYPE_LIST = _G["VUHDO_AURA_GROUP_TYPE_LIST"];
 
 	VUHDO_hideAllAuras = _G["VUHDO_hideAllAuras"];
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
@@ -75,8 +78,6 @@ function VUHDO_initAuraModeSelection()
 
 	if VUHDO_FORCE_AURA_MODE == 0 then
 		VUHDO_AURA_MODE_CONTAINERS = false;
-	elseif VUHDO_FORCE_AURA_MODE == 1 then
-		VUHDO_AURA_MODE_CONTAINERS = VUHDO_AURA_MODE_CAPABILITY == true;
 	else
 		VUHDO_AURA_MODE_CONTAINERS = VUHDO_AURA_MODE_CAPABILITY == true;
 	end
@@ -90,7 +91,7 @@ end
 --
 local tSound;
 local tGroupType;
-function VUHDO_hasFilterBasedAuraGroupSounds()
+function VUHDO_hasConfiguredAuraGroupSounds()
 
 	if not VUHDO_CONFIG or not VUHDO_CONFIG["AURA_GROUPS"] then
 		return false;
@@ -102,13 +103,22 @@ function VUHDO_hasFilterBasedAuraGroupSounds()
 		if (tSound or "") ~= "" then
 			tGroupType = tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
 
-			if tGroupType == VUHDO_AURA_GROUP_TYPE_FILTER then
+			if tGroupType == VUHDO_AURA_GROUP_TYPE_FILTER or tGroupType == VUHDO_AURA_GROUP_TYPE_LIST then
 				return true;
 			end
 		end
 	end
 
 	return false;
+
+end
+
+
+
+--
+function VUHDO_hasFilterBasedAuraGroupSounds()
+
+	return VUHDO_hasConfiguredAuraGroupSounds();
 
 end
 
@@ -129,7 +139,7 @@ function VUHDO_needsUnitAuraEvent()
 		return true;
 	end
 
-	if VUHDO_hasFilterBasedAuraGroupSounds() then
+	if VUHDO_hasConfiguredAuraGroupSounds() then
 		return true;
 	end
 
@@ -151,6 +161,27 @@ function VUHDO_isAuraDataRestricted()
 	end
 
 	if sSecretsEnabled and ShouldAurasBeSecret() then
+		return true;
+	end
+
+	return false;
+
+end
+
+
+
+--
+function VUHDO_shouldDropRestrictedAuraEvent(aUpdateInfo)
+
+	if VUHDO_isAuraDataRestricted() then
+		VUHDO_checkAuraDataRestrictedState(false);
+
+		return true;
+	end
+
+	if aUpdateInfo and issecretvalue(aUpdateInfo["isFullUpdate"]) then
+		VUHDO_checkAuraDataRestrictedState(true);
+
 		return true;
 	end
 
@@ -296,19 +327,6 @@ end
 
 
 --
-function VUHDO_setForceAuraDataRestricted(anIsRestricted)
-
-	VUHDO_FORCE_AURA_DATA_RESTRICTED = anIsRestricted and true or false;
-
-	VUHDO_updateAuraDataRestrictedState(true);
-
-	return;
-
-end
-
-
-
---
 function VUHDO_setForceAuraMode(aMode)
 
 	if aMode == 1 then
@@ -324,6 +342,8 @@ function VUHDO_setForceAuraMode(aMode)
 
 		VUHDO_FORCE_AURA_DATA_RESTRICTED = false;
 	end
+
+	VUHDO_updateAuraDataRestrictedState(true);
 
 	return;
 

@@ -1,11 +1,10 @@
 local _;
 
 local pairs = pairs;
-local tonumber = tonumber;
+local ipairs = ipairs;
 local twipe = table.wipe;
 
 local GetTime = GetTime;
-local UnitIsUnit = UnitIsUnit;
 local issecretvalue = issecretvalue;
 
 local AddAuraSound = (C_UnitAuras and C_UnitAuras.AddAuraSound) or function() return nil; end;
@@ -23,6 +22,7 @@ local VUHDO_AURA_LIST_ENTRY_SPELL;
 local VUHDO_getAuraGroup;
 local VUHDO_getAllAuraGroups;
 local VUHDO_auraMatchesFilter;
+local VUHDO_auraSourceMatchesFilter;
 local VUHDO_isAuraIgnored;
 local VUHDO_playSoundFile;
 local VUHDO_resolveAuraContainerSpellId;
@@ -50,6 +50,7 @@ function VUHDO_auraSoundsInitLocalOverrides()
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_getAllAuraGroups = _G["VUHDO_getAllAuraGroups"];
 	VUHDO_auraMatchesFilter = _G["VUHDO_auraMatchesFilter"];
+	VUHDO_auraSourceMatchesFilter = _G["VUHDO_auraSourceMatchesFilter"];
 	VUHDO_isAuraIgnored = _G["VUHDO_isAuraIgnored"];
 	VUHDO_playSoundFile = _G["VUHDO_playSoundFile"];
 	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
@@ -117,7 +118,6 @@ end
 
 --
 local tDefaultSound;
-local tSettings;
 function VUHDO_syncNativeAuraSoundsForUnit(aUnit)
 
 	if not VUHDO_isAuraModeContainers() or not aUnit then
@@ -228,10 +228,6 @@ local tEntries;
 local tValue;
 local tSpellId;
 local tName;
-local tSourceUnit;
-local tIsPlayer;
-local tMatchesMine;
-local tMatchesOthers;
 local function VUHDO_auraMatchesListGroup(anAuraData, aGroup)
 
 	if not anAuraData or not aGroup then
@@ -251,31 +247,12 @@ local function VUHDO_auraMatchesListGroup(anAuraData, aGroup)
 		tName = nil;
 	end
 
-	tSourceUnit = anAuraData["sourceUnit"];
-
-	if issecretvalue(tSourceUnit) then
-		tIsPlayer = false;
-	else
-		tIsPlayer = UnitIsUnit(tSourceUnit or "", "player");
-	end
-
 	for _, tEntry in ipairs(tEntries) do
 		if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
 			tValue = tEntry["value"];
 
 			if tValue == tSpellId or tValue == tName then
-				tMatchesMine = tEntry["mine"];
-				tMatchesOthers = tEntry["others"];
-
-				if tMatchesMine and tMatchesOthers then
-					return true;
-				end
-
-				if tMatchesMine and tIsPlayer then
-					return true;
-				end
-
-				if tMatchesOthers and not tIsPlayer then
+				if VUHDO_auraSourceMatchesFilter(anAuraData, tEntry) then
 					return true;
 				end
 			end
@@ -316,7 +293,7 @@ function VUHDO_checkAuraGroupSounds(aUnit, anAuraData)
 				tGroupType = tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
 
 				if tGroupType == VUHDO_AURA_GROUP_TYPE_FILTER then
-					if tGroup["filter"] and VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["resolvedFilter"], tGroup["dispellableOnly"]) then
+					if tGroup["filter"] and VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["resolvedFilter"]) then
 						if (not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["excludeFilter"]))
 							and not VUHDO_isAuraIgnored(anAuraData, tGroupId) then
 							VUHDO_playAuraGroupSound(tGroupId);

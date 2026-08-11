@@ -15,9 +15,6 @@ local VUHDO_DEFAULT_AURA_GLOW_STYLE;
 local VUHDO_LibOrbitGlow;
 local VUHDO_PixelUtil;
 
-local VUHDO_getAuraBarColor;
-local VUHDO_getDispellableAuraId;
-local VUHDO_getDispelCurveForUnit;
 local VUHDO_getDispelTypeColorMapOpaque;
 
 local sResolvedGlowVisuals = { };
@@ -121,7 +118,6 @@ local sGlowPackStyleDefs = {
 	},
 };
 
-local sUnitButtonGlowProcOptions = { };
 local sUnitGlowColorArray = { 0.95, 0.95, 0.32, 1 };
 
 
@@ -228,9 +224,6 @@ function VUHDO_auraContainerGlowInitLocalOverrides()
 	VUHDO_LibOrbitGlow = _G["VUHDO_LibOrbitGlow"];
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 
-	VUHDO_getAuraBarColor = _G["VUHDO_getAuraBarColor"];
-	VUHDO_getDispellableAuraId = _G["VUHDO_getDispellableAuraId"];
-	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 	VUHDO_getDispelTypeColorMapOpaque = _G["VUHDO_getDispelTypeColorMapOpaque"];
 
 	VUHDO_initAuraGlowStyles();
@@ -395,6 +388,32 @@ end
 
 
 --
+local function VUHDO_applyGlowVisualToTexture(aTexture, aGlowVisual, aColorR, aColorG, aColorB, aColorO, anIsCore)
+
+	if anIsCore then
+		aTexture:SetTexture(aGlowVisual["corePath"]);
+		aTexture:SetBlendMode(aGlowVisual["coreBlend"] or "ADD");
+		aTexture:SetVertexColor(0.6 + 0.4 * aColorR, 0.6 + 0.4 * aColorG, 0.6 + 0.4 * aColorB, aColorO);
+	else
+		if "atlas" == aGlowVisual["mode"] then
+			aTexture:SetAtlas(aGlowVisual["atlas"]);
+			aTexture:SetDesaturated(aGlowVisual["desaturated"] ~= false);
+			aTexture:SetBlendMode(aGlowVisual["blendMode"] or "ADD");
+		else
+			aTexture:SetTexture(aGlowVisual["bodyPath"]);
+			aTexture:SetBlendMode(aGlowVisual["bodyBlend"] or "ADD");
+		end
+
+		aTexture:SetVertexColor(aColorR, aColorG, aColorB, aColorO);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tGlowShapes;
 local function VUHDO_resolveGlowShape(aGlowDef)
 
@@ -542,23 +561,203 @@ end
 
 
 --
+local tInPlaceGlowEntry;
+local tInPlaceBodyAnim;
+local tInPlaceCoreAnim;
+local tInPlaceBodyTexture;
+local tInPlaceCoreTexture;
+local function VUHDO_stopInPlaceFrameGlow(aFrame, aFieldPrefix)
+
+	if not aFrame then
+		return;
+	end
+
+	tInPlaceGlowEntry = aFrame[(aFieldPrefix or "vuhdo") .. "Glow"];
+
+	if not tInPlaceGlowEntry then
+		return;
+	end
+
+	tInPlaceBodyAnim = tInPlaceGlowEntry["bodyAnim"];
+
+	if tInPlaceBodyAnim then
+		tInPlaceBodyAnim:Stop();
+	end
+
+	tInPlaceBodyTexture = tInPlaceGlowEntry["body"];
+
+	if tInPlaceBodyTexture then
+		tInPlaceBodyTexture:Hide();
+	end
+
+	tInPlaceCoreAnim = tInPlaceGlowEntry["coreAnim"];
+
+	if tInPlaceCoreAnim then
+		tInPlaceCoreAnim:Stop();
+	end
+
+	tInPlaceCoreTexture = tInPlaceGlowEntry["core"];
+
+	if tInPlaceCoreTexture then
+		tInPlaceCoreTexture:Hide();
+	end
+
+	aFrame[(aFieldPrefix or "vuhdo") .. "Glow"] = nil;
+
+	return;
+
+end
+
+
+
+--
+local tFrameGlowProcOptions = { };
+local tFrameGlowDef;
+function VUHDO_stopFrameGlow(aFrame, aGlowKey, aFieldPrefix)
+
+	if not aFrame then
+		return;
+	end
+
+	aFieldPrefix = aFieldPrefix or "vuhdo";
+
+	if aGlowKey and "auraGroupBar" == aFieldPrefix then
+		if not aFrame["hasAuraGroupBarGlow"] then
+			return;
+		end
+
+		tFrameGlowProcOptions["glow"] = aFrame["auraGroupBarGlowStyle"];
+		tFrameGlowProcOptions["key"] = aGlowKey;
+
+		VUHDO_LibOrbitGlow.Proc:Clear(aFrame, tFrameGlowProcOptions);
+
+		aFrame["hasAuraGroupBarGlow"] = nil;
+		aFrame["auraGroupBarGlowStyle"] = nil;
+		aFrame["auraGroupBarGlowKey"] = nil;
+
+		return;
+	end
+
+	VUHDO_stopInPlaceFrameGlow(aFrame, aFieldPrefix);
+
+	return;
+
+end
+
+
+
+--
+local tFrameGlowStyle;
+local tFrameGlowVisual;
+local tFrameGlowTexture;
+local tFrameGlowCoreTexture;
+local tFrameGlowBodyAnim;
+local tFrameGlowCoreAnim;
+local tFrameGlowEntry;
+local tFrameGlowHost;
+local tFrameGlowR;
+local tFrameGlowG;
+local tFrameGlowB;
+local tFrameGlowO;
+function VUHDO_startFrameGlow(aFrame, aStyle, aColorArray, aGlowKey, aFrameLevel, aFieldPrefix)
+
+	if not aFrame then
+		return;
+	end
+
+	aFieldPrefix = aFieldPrefix or "vuhdo";
+	tFrameGlowStyle = aStyle or VUHDO_DEFAULT_AURA_GLOW_STYLE;
+
+	if aGlowKey and "auraGroupBar" == aFieldPrefix then
+		if aFrame["hasAuraGroupBarGlow"] and (aFrame["auraGroupBarGlowStyle"] ~= tFrameGlowStyle or aFrame["auraGroupBarGlowKey"] ~= aGlowKey) then
+			VUHDO_stopFrameGlow(aFrame, aGlowKey, aFieldPrefix);
+		end
+
+		tFrameGlowProcOptions["glow"] = tFrameGlowStyle;
+		tFrameGlowProcOptions["key"] = aGlowKey;
+		tFrameGlowProcOptions["color"] = aColorArray;
+		tFrameGlowProcOptions["frameLevel"] = aFrameLevel or 8;
+
+		tFrameGlowDef = VUHDO_LibOrbitGlow:GetGlowInfo(tFrameGlowStyle);
+		tFrameGlowProcOptions["loopDuration"] = (tFrameGlowDef and tFrameGlowDef["duration"]) or 1.0;
+
+		VUHDO_LibOrbitGlow.Proc:Loop(aFrame, tFrameGlowProcOptions);
+
+		aFrame["hasAuraGroupBarGlow"] = true;
+		aFrame["auraGroupBarGlowStyle"] = tFrameGlowStyle;
+		aFrame["auraGroupBarGlowKey"] = aGlowKey;
+
+		return;
+	end
+
+	tFrameGlowEntry = aFrame[aFieldPrefix .. "Glow"];
+
+	if tFrameGlowEntry and tFrameGlowEntry["style"] == tFrameGlowStyle then
+		return;
+	end
+
+	if tFrameGlowEntry then
+		VUHDO_stopInPlaceFrameGlow(aFrame, aFieldPrefix);
+	end
+
+	tFrameGlowHost = aFrame["IconFrame"] or aFrame;
+	tFrameGlowR = aColorArray[1] or 1;
+	tFrameGlowG = aColorArray[2] or 1;
+	tFrameGlowB = aColorArray[3] or 0;
+	tFrameGlowO = aColorArray[4] or 1;
+
+	tFrameGlowVisual = VUHDO_resolveGlowVisual(tFrameGlowStyle);
+
+	tFrameGlowTexture = tFrameGlowHost:CreateTexture(nil, "OVERLAY", nil, 1);
+
+	VUHDO_anchorInPlaceGlowTexture(tFrameGlowTexture, tFrameGlowHost, tFrameGlowVisual);
+	VUHDO_applyGlowVisualToTexture(tFrameGlowTexture, tFrameGlowVisual, tFrameGlowR, tFrameGlowG, tFrameGlowB, tFrameGlowO);
+
+	tFrameGlowBodyAnim = VUHDO_playInPlaceFlipbookGlow(tFrameGlowTexture, tFrameGlowVisual);
+
+	tFrameGlowCoreTexture = nil;
+	tFrameGlowCoreAnim = nil;
+
+	if "path" == tFrameGlowVisual["mode"] and tFrameGlowVisual["corePath"] then
+		tFrameGlowCoreTexture = tFrameGlowHost:CreateTexture(nil, "OVERLAY", nil, 2);
+
+		VUHDO_PixelUtil.SetPoint(tFrameGlowCoreTexture, "TOPLEFT", tFrameGlowTexture, "TOPLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tFrameGlowCoreTexture, "BOTTOMRIGHT", tFrameGlowTexture, "BOTTOMRIGHT", 0, 0);
+
+		VUHDO_applyGlowVisualToTexture(tFrameGlowCoreTexture, tFrameGlowVisual, tFrameGlowR, tFrameGlowG, tFrameGlowB, tFrameGlowO, true);
+
+		tFrameGlowCoreAnim = VUHDO_playInPlaceFlipbookGlow(tFrameGlowCoreTexture, tFrameGlowVisual);
+	end
+
+	aFrame[aFieldPrefix .. "Glow"] = {
+		["style"] = tFrameGlowStyle,
+		["body"] = tFrameGlowTexture,
+		["core"] = tFrameGlowCoreTexture,
+		["bodyAnim"] = tFrameGlowBodyAnim,
+		["coreAnim"] = tFrameGlowCoreAnim,
+	};
+
+	return;
+
+end
+
+
+
+--
 local tGlowColor;
-local tGlowFrame;
 local tGlowR;
 local tGlowG;
 local tGlowB;
 local tGlowO;
 local tGlowStyleName;
-local tGlowVisual;
-local tTexture;
-local tCoreTexture;
 function VUHDO_startAuraButtonGlow(aAuraButton, anButtonSetup)
 
-	if aAuraButton["vuhdoGlow"] then
+	if not aAuraButton or not anButtonSetup or not anButtonSetup["glowIcon"] then
+		VUHDO_stopInPlaceFrameGlow(aAuraButton, "vuhdo");
+
 		return;
 	end
 
-	tGlowFrame = aAuraButton["IconFrame"] or aAuraButton;
 	tGlowColor = anButtonSetup["glowColor"];
 
 	if tGlowColor then
@@ -575,46 +774,25 @@ function VUHDO_startAuraButtonGlow(aAuraButton, anButtonSetup)
 		tGlowO = tGlowColor["O"];
 	end
 
+	sUnitGlowColorArray[1] = tGlowR;
+	sUnitGlowColorArray[2] = tGlowG;
+	sUnitGlowColorArray[3] = tGlowB;
+	sUnitGlowColorArray[4] = tGlowO;
+
 	tGlowStyleName = anButtonSetup["glowStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
 
-	tGlowVisual = VUHDO_resolveGlowVisual(tGlowStyleName);
+	VUHDO_startFrameGlow(aAuraButton, tGlowStyleName, sUnitGlowColorArray, nil, nil, "vuhdo");
 
-	tTexture = tGlowFrame:CreateTexture(nil, "OVERLAY", nil, 1);
+	return;
 
-	VUHDO_anchorInPlaceGlowTexture(tTexture, tGlowFrame, tGlowVisual);
+end
 
-	if "atlas" == tGlowVisual["mode"] then
-		tTexture:SetAtlas(tGlowVisual["atlas"]);
-		tTexture:SetDesaturated(tGlowVisual["desaturated"] ~= false);
-		tTexture:SetBlendMode(tGlowVisual["blendMode"] or "ADD");
-		tTexture:SetVertexColor(tGlowR, tGlowG, tGlowB, tGlowO);
-	else
-		tTexture:SetTexture(tGlowVisual["bodyPath"]);
-		tTexture:SetBlendMode(tGlowVisual["bodyBlend"] or "ADD");
-		tTexture:SetVertexColor(tGlowR, tGlowG, tGlowB, tGlowO);
-	end
 
-	VUHDO_playInPlaceFlipbookGlow(tTexture, tGlowVisual);
 
-	tCoreTexture = nil;
+--
+function VUHDO_stopAuraButtonGlow(aAuraButton)
 
-	if "path" == tGlowVisual["mode"] and tGlowVisual["corePath"] then
-		tCoreTexture = tGlowFrame:CreateTexture(nil, "OVERLAY", nil, 2);
-
-		VUHDO_PixelUtil.SetPoint(tCoreTexture, "TOPLEFT", tTexture, "TOPLEFT", 0, 0);
-		VUHDO_PixelUtil.SetPoint(tCoreTexture, "BOTTOMRIGHT", tTexture, "BOTTOMRIGHT", 0, 0);
-
-		tCoreTexture:SetTexture(tGlowVisual["corePath"]);
-		tCoreTexture:SetBlendMode(tGlowVisual["coreBlend"] or "ADD");
-		tCoreTexture:SetVertexColor(0.6 + 0.4 * tGlowR, 0.6 + 0.4 * tGlowG, 0.6 + 0.4 * tGlowB, tGlowO);
-
-		VUHDO_playInPlaceFlipbookGlow(tCoreTexture, tGlowVisual);
-	end
-
-	aAuraButton["vuhdoGlow"] = {
-		["body"] = tTexture,
-		["core"] = tCoreTexture,
-	};
+	VUHDO_stopInPlaceFrameGlow(aAuraButton, "vuhdo");
 
 	return;
 
@@ -630,7 +808,7 @@ local tBarGlowClipFrame;
 local tBarGlowHolderFrame;
 local tTexture;
 local tCoreTexture;
-local function VUHDO_stopAuraButtonAuraGroupBarGlow(aAuraButton)
+function VUHDO_stopAuraButtonAuraGroupBarGlow(aAuraButton)
 
 	tBarGlowEntry = aAuraButton["vuhdoAuraGroupBarGlow"];
 
@@ -732,32 +910,19 @@ local function VUHDO_startAuraButtonAuraGroupBarGlow(aAuraButton, anButtonSetup,
 
 	tTexture:SetAllPoints(tBarGlowHolderFrame);
 
-	tCoreTexture = nil;
-
 	if "path" == tGlowVisual["mode"] and tGlowVisual["corePath"] then
 		tCoreTexture = tBarGlowHolderFrame:CreateTexture(nil, "OVERLAY", nil, 2);
 
 		tCoreTexture:SetAllPoints(tBarGlowHolderFrame);
 	end
 
-	if "atlas" == tGlowVisual["mode"] then
-		tTexture:SetAtlas(tGlowVisual["atlas"]);
-		tTexture:SetDesaturated(tGlowVisual["desaturated"] ~= false);
-		tTexture:SetBlendMode(tGlowVisual["blendMode"] or "ADD");
-	else
-		tTexture:SetTexture(tGlowVisual["bodyPath"]);
-		tTexture:SetBlendMode(tGlowVisual["bodyBlend"] or "ADD");
-	end
-
-	tTexture:SetVertexColor(aColorR, aColorG, aColorB, aColorO);
+	VUHDO_applyGlowVisualToTexture(tTexture, tGlowVisual, aColorR, aColorG, aColorB, aColorO);
 	tTexture:Show();
 
 	tBarGlowBodyAnim = VUHDO_playInPlaceFlipbookGlow(tTexture, tGlowVisual);
 
 	if tCoreTexture then
-		tCoreTexture:SetTexture(tGlowVisual["corePath"]);
-		tCoreTexture:SetBlendMode(tGlowVisual["coreBlend"] or "ADD");
-		tCoreTexture:SetVertexColor(0.6 + 0.4 * aColorR, 0.6 + 0.4 * aColorG, 0.6 + 0.4 * aColorB, aColorO);
+		VUHDO_applyGlowVisualToTexture(tCoreTexture, tGlowVisual, aColorR, aColorG, aColorB, aColorO, true);
 		tCoreTexture:Show();
 
 		tBarGlowCoreAnim = VUHDO_playInPlaceFlipbookGlow(tCoreTexture, tGlowVisual);
@@ -786,131 +951,38 @@ end
 --
 function VUHDO_stopUnitButtonAuraGroupGlow(aButton, aGlowKey)
 
-	if not aButton or not aButton["hasAuraGroupBarGlow"] then
+	VUHDO_stopFrameGlow(aButton, aGlowKey, "auraGroupBar");
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_startUnitButtonAuraGroupGlow(aButton, aStyle, aColorArray, aGlowKey)
+
+	VUHDO_startFrameGlow(aButton, aStyle, aColorArray, aGlowKey, 8, "auraGroupBar");
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_releaseAuraButtonGlowState(aAuraButton)
+
+	if not aAuraButton then
 		return;
 	end
 
-	sUnitButtonGlowProcOptions["glow"] = aButton["auraGroupBarGlowStyle"];
-	sUnitButtonGlowProcOptions["key"] = aGlowKey;
+	VUHDO_stopInPlaceFrameGlow(aAuraButton, "vuhdo");
+	VUHDO_stopAuraButtonAuraGroupBarGlow(aAuraButton);
 
-	VUHDO_LibOrbitGlow.Proc:Clear(aButton, sUnitButtonGlowProcOptions);
-
-	aButton["hasAuraGroupBarGlow"] = nil;
-	aButton["auraGroupBarGlowStyle"] = nil;
-	aButton["auraGroupBarGlowKey"] = nil;
+	aAuraButton["vuhdoAuraGroupBarGlowActive"] = nil;
 
 	return;
-
-end
-
-
-
---
-local tUnitGlowDef;
-function VUHDO_startUnitButtonAuraGroupGlow(aButton, aStyle, aColorArray, aGlowKey)
-
-	if aButton["hasAuraGroupBarGlow"] and (aButton["auraGroupBarGlowStyle"] ~= aStyle or aButton["auraGroupBarGlowKey"] ~= aGlowKey) then
-		VUHDO_stopUnitButtonAuraGroupGlow(aButton, aGlowKey);
-	end
-
-	sUnitButtonGlowProcOptions["glow"] = aStyle;
-	sUnitButtonGlowProcOptions["key"] = aGlowKey;
-	sUnitButtonGlowProcOptions["color"] = aColorArray;
-	sUnitButtonGlowProcOptions["frameLevel"] = 8;
-
-	tUnitGlowDef = VUHDO_LibOrbitGlow:GetGlowInfo(aStyle);
-	sUnitButtonGlowProcOptions["loopDuration"] = (tUnitGlowDef and tUnitGlowDef["duration"]) or 1.0;
-
-	VUHDO_LibOrbitGlow.Proc:Loop(aButton, sUnitButtonGlowProcOptions);
-
-	aButton["hasAuraGroupBarGlow"] = true;
-	aButton["auraGroupBarGlowStyle"] = aStyle;
-	aButton["auraGroupBarGlowKey"] = aGlowKey;
-
-	return;
-
-end
-
-
-
---
-local tUnitGlowColor;
-local tUnitDefaultGlow;
-local tUnitDispelCurve;
-local tUnitDispelColorMixin;
-local tUnitBarColor;
-local tUnitDispelAuraId;
-function VUHDO_resolveAuraGroupBarGlowColorArray(aUnit, aGlowMeta)
-
-	if (aGlowMeta["glowColorType"] == VUHDO_AURA_GROUP_COLOR_DISPEL or aGlowMeta["glowColorType"] == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL) then
-		tUnitBarColor = VUHDO_getAuraBarColor(aUnit);
-
-		if tUnitBarColor and tUnitBarColor["R"] then
-			sUnitGlowColorArray[1] = tUnitBarColor["R"];
-			sUnitGlowColorArray[2] = tUnitBarColor["G"];
-			sUnitGlowColorArray[3] = tUnitBarColor["B"];
-			sUnitGlowColorArray[4] = tUnitBarColor["O"] or 1;
-
-			return sUnitGlowColorArray;
-		end
-
-		tUnitDispelAuraId = VUHDO_getDispellableAuraId(aUnit);
-
-		if tUnitDispelAuraId and tUnitDispelAuraId > 0 then
-			tUnitDispelCurve = VUHDO_getDispelCurveForUnit(aUnit, true);
-
-			if tUnitDispelCurve then
-				tUnitDispelColorMixin = GetAuraDispelTypeColor(aUnit, tUnitDispelAuraId, tUnitDispelCurve);
-
-				if tUnitDispelColorMixin then
-					sUnitGlowColorArray[1] = tUnitDispelColorMixin.r;
-					sUnitGlowColorArray[2] = tUnitDispelColorMixin.g;
-					sUnitGlowColorArray[3] = tUnitDispelColorMixin.b;
-					sUnitGlowColorArray[4] = tUnitDispelColorMixin.a or 1;
-
-					return sUnitGlowColorArray;
-				end
-			end
-		end
-
-		tUnitDefaultGlow = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"] and VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"];
-
-		if tUnitDefaultGlow then
-			sUnitGlowColorArray[1] = tUnitDefaultGlow["R"];
-			sUnitGlowColorArray[2] = tUnitDefaultGlow["G"];
-			sUnitGlowColorArray[3] = tUnitDefaultGlow["B"];
-			sUnitGlowColorArray[4] = tUnitDefaultGlow["O"] or 1;
-
-			return sUnitGlowColorArray;
-		end
-
-		return nil;
-	end
-
-	tUnitGlowColor = aGlowMeta["glowColor"];
-
-	if tUnitGlowColor and tUnitGlowColor["R"] then
-		sUnitGlowColorArray[1] = tUnitGlowColor["R"];
-		sUnitGlowColorArray[2] = tUnitGlowColor["G"];
-		sUnitGlowColorArray[3] = tUnitGlowColor["B"];
-		sUnitGlowColorArray[4] = tUnitGlowColor["O"] or 1;
-	else
-		tUnitDefaultGlow = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"] and VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"];
-
-		if tUnitDefaultGlow then
-			sUnitGlowColorArray[1] = tUnitDefaultGlow["R"];
-			sUnitGlowColorArray[2] = tUnitDefaultGlow["G"];
-			sUnitGlowColorArray[3] = tUnitDefaultGlow["B"];
-			sUnitGlowColorArray[4] = tUnitDefaultGlow["O"] or 1;
-		else
-			sUnitGlowColorArray[1] = 0.95;
-			sUnitGlowColorArray[2] = 0.95;
-			sUnitGlowColorArray[3] = 0.32;
-			sUnitGlowColorArray[4] = 1;
-		end
-	end
-
-	return sUnitGlowColorArray;
 
 end
 
@@ -1040,34 +1112,6 @@ function VUHDO_applyAuraGroupBarGlowFromAuraButton(aAuraButton, anButtonSetup)
 
 	tUnitButton[VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY] = true;
 	aAuraButton["vuhdoAuraGroupBarGlowActive"] = true;
-
-	return;
-
-end
-
-
-
---
-local tUnitButton;
-function VUHDO_clearAuraGroupBarGlowFromAuraButton(aAuraButton, anButtonSetup)
-
-	if not anButtonSetup or not anButtonSetup["auraGroupBarGlow"] then
-		return;
-	end
-
-	tUnitButton = anButtonSetup["unitButton"];
-
-	if not tUnitButton then
-		return;
-	end
-
-	if tUnitButton["hasAuraGroupBarGlow"] then
-		VUHDO_stopUnitButtonAuraGroupGlow(tUnitButton, VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY);
-	end
-
-	if aAuraButton then
-		aAuraButton["vuhdoAuraGroupBarGlowActive"] = nil;
-	end
 
 	return;
 

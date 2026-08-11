@@ -14,7 +14,7 @@ local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
 local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFilteredOutByInstanceID;
 
-local VUHDO_isAuraDataRestricted;
+local VUHDO_shouldDropRestrictedAuraEvent;
 
 local VUHDO_CONFIG;
 local VUHDO_PLAYER_CLASS;
@@ -150,7 +150,7 @@ VUHDO_INFERRED_AURAS = { };
 --
 function VUHDO_auraInferenceInitLocalOverrides()
 
-	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
+	VUHDO_shouldDropRestrictedAuraEvent = _G["VUHDO_shouldDropRestrictedAuraEvent"];
 
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_PLAYER_CLASS = _G["VUHDO_PLAYER_CLASS"];
@@ -226,11 +226,7 @@ function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 		return false;
 	end
 
-	if VUHDO_isAuraDataRestricted() then
-		return false;
-	end
-
-	if aUpdateInfo and issecretvalue(aUpdateInfo["isFullUpdate"]) then
+	if VUHDO_shouldDropRestrictedAuraEvent(aUpdateInfo) then
 		return false;
 	end
 
@@ -649,77 +645,5 @@ function VUHDO_getInferredAura(aUnit, aGroupId)
 	end
 
 	return VUHDO_INFERRED_AURAS[aUnit][tInferredType];
-
-end
-
-
-
---
-local tInferredType;
-local tCandidates = { };
-local tBestGroup;
-local tBestPriority;
-local tPriority;
-function VUHDO_getInferredAuraGroup(aUnit)
-
-	if sDisabled then
-		return nil;
-	end
-
-	if not aUnit then
-		return nil;
-	end
-
-	tInferredType = VUHDO_getCurrentInferredType();
-
-	if not tInferredType then
-		return nil;
-	end
-
-	if not VUHDO_INFERRED_AURAS[aUnit] or not VUHDO_INFERRED_AURAS[aUnit][tInferredType] then
-		return nil;
-	end
-
-	twipe(tCandidates);
-
-	for tGroupId, tGroup in pairs(VUHDO_AURA_GROUPS or sEmpty) do
-		if tGroup["isInferred"] and tGroup["inferredType"] == tInferredType then
-			if tGroup["enabled"] ~= false and tGroup["canColorBar"] then
-				tinsert(tCandidates, tGroup);
-			end
-		end
-	end
-
-	for tGroupId, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
-		if tGroup["isInferred"] and tGroup["inferredType"] == tInferredType then
-			if not tGroup["playerClassRequired"] or tGroup["playerClassRequired"] == VUHDO_PLAYER_CLASS then
-				if tGroup["enabled"] ~= false then
-					if not (VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][tGroupId]) then
-						if tGroup["canColorBar"] then
-							tinsert(tCandidates, tGroup);
-						end
-					end
-				end
-			end
-		end
-	end
-
-	if #tCandidates == 0 then
-		return nil;
-	end
-
-	tBestGroup = tCandidates[1];
-	tBestPriority = tBestGroup["priority"] or 50;
-
-	for tCnt = 2, #tCandidates do
-		tPriority = tCandidates[tCnt]["priority"] or 50;
-
-		if tPriority < tBestPriority then
-			tBestGroup = tCandidates[tCnt];
-			tBestPriority = tPriority;
-		end
-	end
-
-	return tBestGroup;
 
 end

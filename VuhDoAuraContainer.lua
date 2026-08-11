@@ -31,7 +31,6 @@ local VUHDO_AURA_CONTAINER_TEMPLATE = "VuhDoAuraContainerTemplate";
 local VUHDO_FILL_CHAIN_CONTAINER_TEMPLATE = "VuhDoFillChainAuraContainerTemplate";
 VUHDO_AURA_BUTTON_ICON_TEMPLATE = "VuhDoAuraButtonIconTemplate";
 VUHDO_AURA_BUTTON_BAR_TEMPLATE = "VuhDoAuraButtonBarTemplate";
-local VUHDO_AURA_BUTTON_ICON_TEMPLATE = VUHDO_AURA_BUTTON_ICON_TEMPLATE;
 VUHDO_AURA_BUTTON_DISPEL_OVERLAY_TEMPLATE = "VuhDoAuraButtonDispelOverlayTemplate";
 
 VUHDO_AURA_CONTAINER_TEMPLATE_CACHE = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE or { };
@@ -153,6 +152,7 @@ local VUHDO_getDispelTypeColorMap;
 local VUHDO_getDispelTypeColorMapOpaque;
 local VUHDO_getDispelColorGeneration;
 local VUHDO_applyAuraGroupBarGlowFromAuraButton;
+local VUHDO_getManaAdjustedYOffset;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -192,16 +192,31 @@ local sPendingClassColors = { };
 local sHasPendingBuilds = false;
 local sContainerClassColorBars = { };
 
-local sRelPointManaFactor = {
-	["TOPLEFT"] = 0,
-	["TOP"] = 0,
-	["TOPRIGHT"] = 0,
-	["LEFT"] = 0.5,
-	["CENTER"] = 0.5,
-	["RIGHT"] = 0.5,
-	["BOTTOMLEFT"] = 1,
-	["BOTTOM"] = 1,
-	["BOTTOMRIGHT"] = 1,
+local sAuraBarIconLayouts = {
+	["vt"] = {
+		["iconPoint"] = "TOP",
+		["barPoint"] = "TOP",
+		["barRelPoint"] = "BOTTOM",
+		["useBarWidth"] = false,
+	},
+	["vf"] = {
+		["iconPoint"] = "BOTTOM",
+		["barPoint"] = "BOTTOM",
+		["barRelPoint"] = "TOP",
+		["useBarWidth"] = false,
+	},
+	["ht"] = {
+		["iconPoint"] = "RIGHT",
+		["barPoint"] = "RIGHT",
+		["barRelPoint"] = "LEFT",
+		["useBarWidth"] = true,
+	},
+	["hf"] = {
+		["iconPoint"] = "LEFT",
+		["barPoint"] = "LEFT",
+		["barRelPoint"] = "RIGHT",
+		["useBarWidth"] = true,
+	},
 };
 
 local sAuraTimerFormatterFull;
@@ -346,6 +361,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_getDispelTypeColorMapOpaque = _G["VUHDO_getDispelTypeColorMapOpaque"];
 	VUHDO_getDispelColorGeneration = _G["VUHDO_getDispelColorGeneration"];
 	VUHDO_applyAuraGroupBarGlowFromAuraButton = _G["VUHDO_applyAuraGroupBarGlowFromAuraButton"];
+	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
 
 	if not sAuraTimerColorCurveFull then
 		sAuraTimerColorCurveFull = CreateColorCurve();
@@ -431,6 +447,9 @@ local tDurationBar;
 local tIconTexture;
 local tIconColorOverlay;
 local tDurationCooldown;
+local tLayoutKey;
+local tLayoutSpec;
+local tDurationBarWidth;
 local function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton)
 
 	if not anButtonSetup["durationBar"] or not aAuraButton["IconFrame"] then
@@ -484,50 +503,19 @@ local function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton)
 	tIconFrame:ClearAllPoints();
 	tIconFrame:Show();
 
-	if tBarVertical then
-		if tBarTurnAxis then
-			VUHDO_PixelUtil.SetPoint(tIconFrame, "TOP", aAuraButton, "TOP", 0, 0);
-			VUHDO_PixelUtil.SetSize(tIconFrame, tIconSize, tIconSize);
+	tLayoutKey = (tBarVertical and "v" or "h") .. (tBarTurnAxis and "t" or "f");
+	tLayoutSpec = sAuraBarIconLayouts[tLayoutKey];
 
-			if tDurationBar then
-				tDurationBar:ClearAllPoints();
+	VUHDO_PixelUtil.SetPoint(tIconFrame, tLayoutSpec["iconPoint"], aAuraButton, tLayoutSpec["iconPoint"], 0, 0);
+	VUHDO_PixelUtil.SetSize(tIconFrame, tIconSize, tIconSize);
 
-				VUHDO_PixelUtil.SetPoint(tDurationBar, "TOP", tIconFrame, "BOTTOM", 0, 0);
-				VUHDO_PixelUtil.SetSize(tDurationBar, tIconSize, tBarHeight);
-			end
-		else
-			VUHDO_PixelUtil.SetPoint(tIconFrame, "BOTTOM", aAuraButton, "BOTTOM", 0, 0);
-			VUHDO_PixelUtil.SetSize(tIconFrame, tIconSize, tIconSize);
+	if tDurationBar then
+		tDurationBarWidth = tLayoutSpec["useBarWidth"] and tBarWidth or tIconSize;
 
-			if tDurationBar then
-				tDurationBar:ClearAllPoints();
+		tDurationBar:ClearAllPoints();
 
-				VUHDO_PixelUtil.SetPoint(tDurationBar, "BOTTOM", tIconFrame, "TOP", 0, 0);
-				VUHDO_PixelUtil.SetSize(tDurationBar, tIconSize, tBarHeight);
-			end
-		end
-	else
-		if tBarTurnAxis then
-			VUHDO_PixelUtil.SetPoint(tIconFrame, "RIGHT", aAuraButton, "RIGHT", 0, 0);
-			VUHDO_PixelUtil.SetSize(tIconFrame, tIconSize, tIconSize);
-
-			if tDurationBar then
-				tDurationBar:ClearAllPoints();
-
-				VUHDO_PixelUtil.SetPoint(tDurationBar, "RIGHT", tIconFrame, "LEFT", 0, 0);
-				VUHDO_PixelUtil.SetSize(tDurationBar, tBarWidth, tBarHeight);
-			end
-		else
-			VUHDO_PixelUtil.SetPoint(tIconFrame, "LEFT", aAuraButton, "LEFT", 0, 0);
-			VUHDO_PixelUtil.SetSize(tIconFrame, tIconSize, tIconSize);
-
-			if tDurationBar then
-				tDurationBar:ClearAllPoints();
-
-				VUHDO_PixelUtil.SetPoint(tDurationBar, "LEFT", tIconFrame, "RIGHT", 0, 0);
-				VUHDO_PixelUtil.SetSize(tDurationBar, tBarWidth, tBarHeight);
-			end
-		end
+		VUHDO_PixelUtil.SetPoint(tDurationBar, tLayoutSpec["barPoint"], tIconFrame, tLayoutSpec["barRelPoint"], 0, 0);
+		VUHDO_PixelUtil.SetSize(tDurationBar, tDurationBarWidth, tBarHeight);
 	end
 
 	if tIconTexture then
@@ -606,8 +594,6 @@ end
 
 
 --
-local tVolatileMainTexture;
-local tVolatileStaticColor;
 local tVolatileShadowBar;
 local tVolatileShadowBackground;
 local tVolatileShadowTexture;
@@ -615,28 +601,11 @@ local tVolatileFillTexture;
 local tVolatileFillBackground;
 local tVolatileFillMask;
 local tVolatileOcclusionColor;
+local tVolatileStaticColor;
 local tVolatileStaticAlpha;
 function VUHDO_applyAuraButtonVolatileSetup(anButtonSetup, aAuraButton)
 
-	if not anButtonSetup or not aAuraButton then
-		return;
-	end
-
-	tVolatileMainTexture = aAuraButton["IconTexture"] or aAuraButton["FillTexture"];
-
-	if anButtonSetup["staticColor"] and tVolatileMainTexture and not anButtonSetup["shadowBar"] and not anButtonSetup["border"] then
-		tVolatileStaticColor = anButtonSetup["staticColor"];
-
-		if anButtonSetup["staticIcon"] then
-			tVolatileMainTexture:SetVertexColor(tVolatileStaticColor["R"] or 1, tVolatileStaticColor["G"] or 1, tVolatileStaticColor["B"] or 1, tVolatileStaticColor["O"] or 1);
-		else
-			tVolatileMainTexture:SetColorTexture(tVolatileStaticColor["R"] or 1, tVolatileStaticColor["G"] or 1, tVolatileStaticColor["B"] or 1, tVolatileStaticColor["O"] or 1);
-		end
-
-		tVolatileMainTexture:Show();
-	end
-
-	if not anButtonSetup["shadowBar"] or not aAuraButton["ShadowBar"] then
+	if not anButtonSetup or not aAuraButton or not aAuraButton["ShadowBar"] then
 		return;
 	end
 
@@ -1054,10 +1023,6 @@ local function VUHDO_applyAuraButtonSetup(anButtonSetup, aAuraButton)
 		end
 	end
 
-	if anButtonSetup["fillBlendMode"] and aAuraButton["FillTexture"] then
-		aAuraButton["FillTexture"]:SetBlendMode(anButtonSetup["fillBlendMode"]);
-	end
-
 	if anButtonSetup["shadowBar"] and aAuraButton["ShadowBar"] then
 		tShadowBar = aAuraButton["ShadowBar"];
 
@@ -1320,10 +1285,16 @@ local function VUHDO_applyAuraButtonSetup(anButtonSetup, aAuraButton)
 
 	if anButtonSetup["glowIcon"] then
 		VUHDO_startAuraButtonGlow(aAuraButton, anButtonSetup);
+	else
+		VUHDO_stopAuraButtonGlow(aAuraButton);
 	end
 
 	if anButtonSetup["auraGroupBarGlow"] then
 		VUHDO_applyAuraGroupBarGlowFromAuraButton(aAuraButton, anButtonSetup);
+	else
+		VUHDO_stopAuraButtonAuraGroupBarGlow(aAuraButton);
+
+		aAuraButton["vuhdoAuraGroupBarGlowActive"] = nil;
 	end
 
 	return;
@@ -1533,7 +1504,6 @@ local tMode;
 local tRelFrame;
 local tRelPoint;
 local tYOff;
-local tManaFactor;
 local tLevelBase;
 local tOffsetX;
 local tOffsetY;
@@ -1572,9 +1542,8 @@ local function VUHDO_applyAuraContainerAnchor(aContainer, anAnchor, aParent)
 
 			if tPoint["relFrame"] == "HealthBar" then
 				tRelPoint = tPoint["relativePoint"] or tPoint["point"] or "TOPLEFT";
-				tManaFactor = sRelPointManaFactor[tRelPoint] or 0;
 
-				tYOff = tYOff + (aParent["manaBarLayoutHeight"] or 0) * tManaFactor;
+				tYOff = VUHDO_getManaAdjustedYOffset(aParent, tRelPoint, tYOff);
 			end
 
 			VUHDO_PixelUtil.SetPoint(aContainer, tPoint["point"] or "TOPLEFT", tRelFrame, tPoint["relativePoint"] or tPoint["point"] or "TOPLEFT", tPoint["x"] or 0, tYOff);
@@ -2113,6 +2082,23 @@ do
 
 
 
+	local function VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aScratch, aButtonSetup)
+
+		tinsert(aScratch, aButtonSetup["shadowBar"] and "1" or "0");
+		tinsert(aScratch, aButtonSetup["dispelFill"] and "1" or "0");
+		tinsert(aScratch, aButtonSetup["dispelBorder"] and "1" or "0");
+		tinsert(aScratch, aButtonSetup["border"] and "1" or "0");
+		tinsert(aScratch, format("%d", aButtonSetup["borderWidth"] or 0));
+		tinsert(aScratch, aButtonSetup["borderFile"] or "");
+		tinsert(aScratch, aButtonSetup["glowIcon"] and "1" or "0");
+		tinsert(aScratch, aButtonSetup["dispelOverlayChrome"] and "1" or "0");
+
+		VUHDO_appendAuraContainerPoolKeyExtras(aScratch, aButtonSetup);
+
+	end
+
+
+
 	--
 	local tContainerLayout;
 	local tParentName;
@@ -2184,16 +2170,8 @@ do
 
 			if tButtonSetup and not tSlot["isStaticBouquetSlot"] then
 				tinsert(sPoolKeyScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
-				tinsert(sPoolKeyScratch, tButtonSetup["shadowBar"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["dispelFill"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["dispelBorder"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["border"] and "1" or "0");
-				tinsert(sPoolKeyScratch, format("%d", tButtonSetup["borderWidth"] or 0));
-				tinsert(sPoolKeyScratch, tButtonSetup["borderFile"] or "");
-				tinsert(sPoolKeyScratch, tButtonSetup["glowIcon"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["dispelOverlayChrome"] and "1" or "0");
 
-				VUHDO_appendAuraContainerPoolKeyExtras(sPoolKeyScratch, tButtonSetup);
+				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(sPoolKeyScratch, tButtonSetup);
 			end
 		end
 
@@ -2223,17 +2201,9 @@ do
 				tinsert(sPoolKeyScratch, format("%d", tGroup["fixedBarWidth"] or 0));
 				tinsert(sPoolKeyScratch, format("%d", tGroup["fixedBarHeight"] or 0));
 				tinsert(sPoolKeyScratch, format("%d", tGroup["fixedIconSize"] or 0));
-				tinsert(sPoolKeyScratch, tButtonSetup["shadowBar"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["dispelFill"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["dispelBorder"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["border"] and "1" or "0");
-				tinsert(sPoolKeyScratch, format("%d", tButtonSetup["borderWidth"] or 0));
-				tinsert(sPoolKeyScratch, tButtonSetup["borderFile"] or "");
-				tinsert(sPoolKeyScratch, tButtonSetup["glowIcon"] and "1" or "0");
-				tinsert(sPoolKeyScratch, tButtonSetup["dispelOverlayChrome"] and "1" or "0");
 				tinsert(sPoolKeyScratch, tButtonSetup["auraSymbol"] and "1" or "0");
 
-				VUHDO_appendAuraContainerPoolKeyExtras(sPoolKeyScratch, tButtonSetup);
+				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(sPoolKeyScratch, tButtonSetup);
 			end
 		end
 
@@ -2369,6 +2339,8 @@ do
 	local tContainer;
 	local tOverlayTargetBar;
 	local tContainerParent;
+	local tUsesDispelTextures;
+	local tDispelColorGen;
 	function VUHDO_acquireAuraContainer(aButton, aContainerTemplate)
 
 		if not aButton or not aContainerTemplate then
@@ -2396,6 +2368,8 @@ do
 		aContainerTemplate["parent"] = tContainerParent;
 
 		tPoolKey = VUHDO_getAuraContainerPoolKey(aContainerTemplate);
+		tUsesDispelTextures = VUHDO_containerTemplateUsesDispelTextures(aContainerTemplate);
+		tDispelColorGen = tUsesDispelTextures and VUHDO_getDispelColorGeneration() or nil;
 		tPool = tPoolKey and sAuraContainerPool[tPoolKey];
 
 		if tPool and #tPool > 0 then
@@ -2404,8 +2378,8 @@ do
 			while #tPool > 0 do
 				tContainerData = tremove(tPool);
 
-				if VUHDO_containerTemplateUsesDispelTextures(aContainerTemplate) then
-					if not tContainerData["dispelColorGen"] or tContainerData["dispelColorGen"] ~= VUHDO_getDispelColorGeneration() then
+				if tUsesDispelTextures then
+					if not tContainerData["dispelColorGen"] or tContainerData["dispelColorGen"] ~= tDispelColorGen then
 						tContainerData = nil;
 					else
 						break;
@@ -2439,7 +2413,6 @@ do
 				tContainerData["lastSyncedUnit"] = nil;
 				tContainerData["lastSyncedRestricted"] = nil;
 				tContainerData["lastSyncedEnabled"] = nil;
-				tContainerData["lastSyncedFriendlyOnlySuppress"] = nil;
 				tContainerData["lastSyncedAssistOnly"] = nil;
 				tContainerData["lastSlotSuppress"] = nil;
 				tContainerData["mixedPriorityCutoffs"] = nil;
@@ -2455,6 +2428,7 @@ do
 				end
 
 				tContainerData["lastSyncedGroupEnabled"] = nil;
+				tContainerData["poolKey"] = tPoolKey;
 			end
 
 			if tContainerData and tContainerData["container"] then
@@ -2470,6 +2444,7 @@ do
 
 		if tContainerData then
 			tContainerData["fromPool"] = false;
+			tContainerData["poolKey"] = tPoolKey;
 		end
 
 		return tContainerData;
@@ -2552,7 +2527,7 @@ do
 
 		tContainer:SetParent(nil);
 
-		tPoolKey = VUHDO_getAuraContainerPoolKey(aContainerData["containerTemplate"]);
+		tPoolKey = aContainerData["poolKey"] or VUHDO_getAuraContainerPoolKey(aContainerData["containerTemplate"]);
 
 		if tPoolKey then
 			if VUHDO_containerTemplateUsesDispelTextures(aContainerData["containerTemplate"]) then
@@ -2813,6 +2788,14 @@ local tContainerData;
 function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 
 	if not aButton or not aPanelNum then
+		return;
+	end
+
+	if not aButton:CanBeAccessedInContext() then
+		sPendingContainerBuilds[aButton] = aPanelNum;
+
+		sHasPendingBuilds = true;
+
 		return;
 	end
 
@@ -3150,8 +3133,6 @@ function VUHDO_applyAuraContainerSlotFilters(aContainer, aContainerData, anIsHos
 		end
 	end
 
-	aContainerData["lastSyncedFriendlyOnlySuppress"] = anIsHostile;
-
 	return;
 
 end
@@ -3215,6 +3196,23 @@ end
 
 
 --
+function VUHDO_syncAuraContainersForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+		VUHDO_syncAuraContainersForButton(tButton, aUnit);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tButtonName;
 local tContainer;
 function VUHDO_clearAuraContainersForButton(aButton)
@@ -3264,83 +3262,6 @@ function VUHDO_releaseAuraContainersForButton(aButton)
 	end
 
 	VUHDO_AURA_CONTAINERS[tButtonName] = nil;
-
-	return;
-
-end
-
-
-
---
-local tButtonName;
-local tContainer;
-function VUHDO_refreshAuraContainersForUnit(aUnit)
-
-	if not aUnit then
-		return;
-	end
-
-	if not VUHDO_isAuraModeContainers() and not VUHDO_isAuraDataRestricted() then
-		return;
-	end
-
-	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
-		tButtonName = tButton:GetName();
-
-		if tButtonName then
-			if VUHDO_AURA_CONTAINERS[tButtonName] then
-				for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
-					tContainer = tContainerData and tContainerData["container"];
-
-					VUHDO_refreshAuraContainer(tContainer);
-				end
-			end
-
-			if VUHDO_OVERLAY_CONTAINERS[tButtonName] then
-				for _, tIndicatorEntry in pairs(VUHDO_OVERLAY_CONTAINERS[tButtonName]) do
-					for _, tContainerData in pairs(tIndicatorEntry) do
-						tContainer = tContainerData and tContainerData["container"];
-
-						VUHDO_refreshAuraContainer(tContainer);
-					end
-				end
-			end
-		end
-	end
-
-	return;
-
-end
-
-
-
---
-function VUHDO_syncAuraContainersForUnit(aUnit)
-
-	if not aUnit then
-		return;
-	end
-
-	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
-		VUHDO_syncAuraContainersForButton(tButton, aUnit);
-	end
-
-	return;
-
-end
-
-
-
---
-function VUHDO_syncAllAuraContainerUnits()
-
-	if not VUHDO_RAID then
-		return;
-	end
-
-	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_syncAuraContainersForUnit(tUnit);
-	end
 
 	return;
 

@@ -18,8 +18,6 @@ local issecretvalue = issecretvalue;
 local ShouldUnitAuraInstanceBeSecret = C_Secrets and C_Secrets.ShouldUnitAuraInstanceBeSecret;
 
 local VUHDO_copyColorTo;
-local VUHDO_getDispelAbilities;
-local VUHDO_getPurgeAbilities;
 local VUHDO_isConfigDemoUsers;
 local VUHDO_displayAurasAtAnchorFromCache;
 local VUHDO_isAuraDisplaySuspended;
@@ -54,7 +52,6 @@ local VUHDO_MAX_PANELS;
 local VUHDO_AURA_GROUP_TYPE_LIST;
 local VUHDO_AURA_LIST_ENTRY_BOUQUET;
 local VUHDO_AURA_LIST_ENTRY_SPELL;
-local VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET;
 local VUHDO_BOUQUET_RESTRICTED_NON_AURA;
 local VUHDO_SECRET_TYPE_DISPEL;
 local VUHDO_SECRET_TYPE_DURATION;
@@ -84,7 +81,6 @@ local VUHDO_REGISTERED_BOUQUET_INDICATORS = { };
 local VUHDO_CYCLIC_BOUQUETS = { };
 
 VUHDO_UNIT_AURA_BOUQUET_ACTIVE = { };
-VUHDO_LIST_GROUP_COLOR_BOUQUETS = { };
 VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS = { };
 
 local VUHDO_CUSTOM_BOUQUETS = {
@@ -92,12 +88,6 @@ local VUHDO_CUSTOM_BOUQUETS = {
 };
 
 VUHDO_DISPEL_COLOR_GENERATION = 0;
-
-VUHDO_AURA_ICON_DISPEL_BORDER_OPTIONS = {
-	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
-	["showWhenHarmful"] = true,
-	["showWhenHelpful"] = true,
-};
 
 local sAuraIconDispelBorderOptionsBind = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -108,10 +98,10 @@ local sAuraIconDispelBorderOptionsBind = {
 local sAuraIconDispelBorderInset = 2;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
+local sEmpty = { };
 
 local sDebuffTypeCurves;
 local sPlayerArray = { };
-local sDurationCurves = { };
 local sBouquetLayerTemplates = { };
 local sBouquetCurves = { };
 local sBouquetColors = { };
@@ -128,7 +118,6 @@ local sValidatorEntryPool;
 local sGroupsWithEnabledAnchorReusable = { };
 
 local sDispelTypeCurve;
-local sDispelTypeCurveOpaque;
 local sDispelTypeBorderCurve;
 local sDispelTypeTextCurve;
 local sDispelTypeColorMap = { };
@@ -154,34 +143,27 @@ local sDispelNameColorKeyMap = {
 	["Enrage"] = "DEBUFF9",
 };
 
-local sDebuffDurationCurve;
+local sDispelTypeCurvePointKeys = {
+	{ 0, "DEBUFF0" },
+	{ 1, "DEBUFF3" },
+	{ 2, "DEBUFF4" },
+	{ 3, "DEBUFF2" },
+	{ 4, "DEBUFF1" },
+	{ 6, "DEBUFF6" },
+	{ 8, "DEBUFF8" },
+	{ 9, "DEBUFF9" },
+	{ 11, "DEBUFF8" },
+};
+
 local sMagicDispelCurve;
 local sDiseaseDispelCurve;
 local sPoisonDispelCurve;
 local sCurseDispelCurve;
 local sBleedDispelCurve;
 local sEnrageDispelCurve;
-local sFriendlyDispelCurve;
-local sHostilePurgeCurve;
 
 local sTransparentColor;
 local sWhiteColor;
-
-local VUHDO_BLIZZARD_DISPEL_TYPE_MAP = {
-	[1] = 4,
-	[2] = 3,
-	[3] = 1,
-	[4] = 2,
-	[9] = 9,
-};
-
-local VUHDO_DISPEL_TYPE_COLOR_KEY_MAP = {
-	[1] = "DEBUFF1",
-	[2] = "DEBUFF2",
-	[3] = "DEBUFF3",
-	[4] = "DEBUFF4",
-	[9] = "DEBUFF9",
-};
 
 local sIsDispelColorType = { };
 
@@ -206,7 +188,6 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_AURA_GROUP_TYPE_LIST = _G["VUHDO_AURA_GROUP_TYPE_LIST"];
 	VUHDO_AURA_LIST_ENTRY_BOUQUET = _G["VUHDO_AURA_LIST_ENTRY_BOUQUET"];
 	VUHDO_AURA_LIST_ENTRY_SPELL = _G["VUHDO_AURA_LIST_ENTRY_SPELL"];
-	VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET = _G["VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET"];
 	VUHDO_BOUQUET_RESTRICTED_NON_AURA = _G["VUHDO_BOUQUET_RESTRICTED_NON_AURA"];
 	VUHDO_SECRET_TYPE_DISPEL = _G["VUHDO_SECRET_TYPE_DISPEL"];
 	VUHDO_SECRET_TYPE_DURATION = _G["VUHDO_SECRET_TYPE_DURATION"];
@@ -226,8 +207,6 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR = _G["VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR"];
 
 	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
-	VUHDO_getDispelAbilities = _G["VUHDO_getDispelAbilities"];
-	VUHDO_getPurgeAbilities = _G["VUHDO_getPurgeAbilities"];
 	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
 	VUHDO_getAuraGroupRaw = _G["VUHDO_getAuraGroupRaw"];
 	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
@@ -372,6 +351,7 @@ end
 local tPopulateColors;
 local tPopulateDefaultColor;
 local tPopulateTransparent;
+local tPointEntry;
 function VUHDO_populateDispelTypeBackgroundCurves(aFillCurve, aBackingCurve, aBrightness, anOpacityProduct)
 
 	tPopulateColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
@@ -385,24 +365,12 @@ function VUHDO_populateDispelTypeBackgroundCurves(aFillCurve, aBackingCurve, aBr
 		return;
 	end
 
-	aFillCurve:AddPoint(0, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF0"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(0, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF0"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(1, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF3"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(1, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF3"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(2, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF4"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(2, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF4"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(3, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF2"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(3, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF2"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(4, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF1"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(4, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF1"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(6, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF6"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(6, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF6"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(8, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF8"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(8, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF8"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(9, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF9"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(9, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF9"], tPopulateTransparent, aBrightness, anOpacityProduct));
-	aFillCurve:AddPoint(11, VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors["DEBUFF8"], tPopulateDefaultColor, aBrightness, anOpacityProduct));
-	aBackingCurve:AddPoint(11, VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors["DEBUFF8"], tPopulateTransparent, aBrightness, anOpacityProduct));
+	for tIdx = 1, #sDispelTypeCurvePointKeys do
+		tPointEntry = sDispelTypeCurvePointKeys[tIdx];
+
+		aFillCurve:AddPoint(tPointEntry[1], VUHDO_safeBackgroundDispelColorFromTable(tPopulateColors[tPointEntry[2]], tPopulateDefaultColor, aBrightness, anOpacityProduct));
+		aBackingCurve:AddPoint(tPointEntry[1], VUHDO_safeBackgroundDispelBackingColorFromTable(tPopulateColors[tPointEntry[2]], tPopulateTransparent, aBrightness, anOpacityProduct));
+	end
 
 	return;
 
@@ -452,19 +420,6 @@ end
 
 
 --
-function VUHDO_safeBrightColorFromTable(aColorTable, aFallback, aBrightness)
-
-	if aColorTable and aColorTable["R"] and aColorTable["G"] and aColorTable["B"] then
-		return CreateColor((aColorTable["R"] or 0) * aBrightness, (aColorTable["G"] or 0) * aBrightness, (aColorTable["B"] or 0) * aBrightness, aColorTable["O"] or 1);
-	end
-
-	return aFallback or sTransparentColor;
-
-end
-
-
-
---
 function VUHDO_safeBrightOpaqueDispelColorFromTable(aColorTable, aFallback, aBrightness)
 
 	if not aColorTable or not aColorTable["useBackground"] then
@@ -505,233 +460,68 @@ do
 	local tG;
 	local tB;
 	local tO;
+	local tPointEntry;
+	local tCache;
+	function VUHDO_getOrBuildDispelBrightnessCurve(aBaseCurve, aBrightness, aCurveType, anIsText)
+
+		if not aBrightness or aBrightness >= 1 then
+			return aBaseCurve;
+		end
+
+		tBrightCacheKey = (anIsText and "text_" or "") .. aCurveType .. "_" .. tostring(aBrightness);
+		tCache = anIsText and sTextBrightnessCurveCache or sBrightnessCurveCache;
+
+		if tCache[tBrightCacheKey] then
+			return tCache[tBrightCacheKey];
+		end
+
+		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+		tTransparent = CreateColor(0, 0, 0, 0);
+
+		tNewCurve = CreateColorCurve();
+		tNewCurve:SetType(Enum.LuaCurveType.Step);
+		tNewCurve:AddPoint(0, tTransparent);
+
+		if tColors then
+			for tIdx = 1, #sDispelTypeCurvePointKeys do
+				tPointEntry = sDispelTypeCurvePointKeys[tIdx];
+				tTypeColor = tColors[tPointEntry[2]];
+
+				if tTypeColor then
+					if anIsText then
+						tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
+					else
+						tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
+					end
+
+					tNewCurve:AddPoint(tPointEntry[1], CreateColor(tR, tG, tB, tO));
+				end
+			end
+		end
+
+		tCache[tBrightCacheKey] = tNewCurve;
+
+		return tNewCurve;
+
+	end
+
+
+
+	--
 	function VUHDO_getOrBuildBrightnessCurve(aBaseCurve, aBrightness, aCurveType)
 
-		if not aBrightness or aBrightness >= 1 then
-			return aBaseCurve;
-		end
-
-		tBrightCacheKey = aCurveType .. "_" .. tostring(aBrightness);
-
-		if sBrightnessCurveCache[tBrightCacheKey] then
-			return sBrightnessCurveCache[tBrightCacheKey];
-		end
-
-		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
-		tTransparent = CreateColor(0, 0, 0, 0);
-
-		tNewCurve = CreateColorCurve();
-		tNewCurve:SetType(Enum.LuaCurveType.Step);
-		tNewCurve:AddPoint(0, tTransparent);
-
-		if tColors then
-			tTypeColor = tColors["DEBUFF0"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(0, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF3"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(1, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF4"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(2, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF2"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(3, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF1"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(4, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF6"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(6, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF8"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(8, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF9"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(9, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF8"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["R"] or 0) * aBrightness, (tTypeColor["G"] or 0) * aBrightness, (tTypeColor["B"] or 0) * aBrightness, tTypeColor["O"] or 1;
-
-				tNewCurve:AddPoint(11, CreateColor(tR, tG, tB, tO));
-			end
-		end
-
-		sBrightnessCurveCache[tBrightCacheKey] = tNewCurve;
-
-		return tNewCurve;
+		return VUHDO_getOrBuildDispelBrightnessCurve(aBaseCurve, aBrightness, aCurveType, false);
 
 	end
-end
 
 
 
-do
 	--
-	local tBrightCacheKey;
-	local tColors;
-	local tTransparent;
-	local tNewCurve;
-	local tTypeColor;
-	local tR;
-	local tG;
-	local tB;
-	local tO;
 	function VUHDO_getOrBuildTextBrightnessCurve(aBaseCurve, aBrightness, aCurveType)
 
-		if not aBrightness or aBrightness >= 1 then
-			return aBaseCurve;
-		end
-
-		tBrightCacheKey = "text_" .. aCurveType .. "_" .. tostring(aBrightness);
-
-		if sTextBrightnessCurveCache[tBrightCacheKey] then
-			return sTextBrightnessCurveCache[tBrightCacheKey];
-		end
-
-		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
-		tTransparent = CreateColor(0, 0, 0, 0);
-
-		tNewCurve = CreateColorCurve();
-		tNewCurve:SetType(Enum.LuaCurveType.Step);
-		tNewCurve:AddPoint(0, tTransparent);
-
-		if tColors then
-			tTypeColor = tColors["DEBUFF0"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(0, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF3"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(1, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF4"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(2, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF2"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(3, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF1"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(4, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF6"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(6, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF8"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(8, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF9"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(9, CreateColor(tR, tG, tB, tO));
-			end
-
-			tTypeColor = tColors["DEBUFF8"];
-
-			if tTypeColor then
-				tR, tG, tB, tO = (tTypeColor["TR"] or 0) * aBrightness, (tTypeColor["TG"] or 0) * aBrightness, (tTypeColor["TB"] or 0) * aBrightness, tTypeColor["TO"] or 1;
-
-				tNewCurve:AddPoint(11, CreateColor(tR, tG, tB, tO));
-			end
-		end
-
-		sTextBrightnessCurveCache[tBrightCacheKey] = tNewCurve;
-
-		return tNewCurve;
+		return VUHDO_getOrBuildDispelBrightnessCurve(aBaseCurve, aBrightness, aCurveType, true);
 
 	end
-end
-
-
-
---
-local tBouquetCurves;
-function VUHDO_getBouquetCurve(aBouquetName, aCurveType)
-
-	tBouquetCurves = sBouquetCurves[aBouquetName];
-
-	if tBouquetCurves then
-		return tBouquetCurves[aCurveType];
-	end
-
-	return nil;
-
 end
 
 
@@ -768,24 +558,6 @@ end
 function VUHDO_getDispelTypeCurve()
 
 	return sDispelTypeCurve;
-
-end
-
-
-
---
-function VUHDO_getDispelTypeCurveOpaque()
-
-	return sDispelTypeCurveOpaque;
-
-end
-
-
-
---
-function VUHDO_getDispelTypeBorderColorCurve()
-
-	return sDispelTypeBorderCurve;
 
 end
 
@@ -868,141 +640,94 @@ end
 
 
 
---
-local tBrightKey;
-local tOpacityKey;
-function VUHDO_getDispelTypeColorMap(aBright, aOpacity)
+do
+	--
+	local tBrightKey;
+	local tOpacityKey;
+	local function VUHDO_getOrBuildDispelBrightOpacityVariant(aBaseValue, aCacheTable, aBright, anOpacity, aBuildDelegate)
 
-	tBrightKey = aBright or 1;
-	tOpacityKey = aOpacity or 1;
+		tBrightKey = aBright or 1;
+		tOpacityKey = anOpacity or 1;
 
-	if tBrightKey >= 1 and tOpacityKey >= 1 then
-		return sDispelTypeColorMap;
+		if tBrightKey >= 1 and tOpacityKey >= 1 then
+			return aBaseValue;
+		end
+
+		if not aCacheTable[tBrightKey] then
+			aCacheTable[tBrightKey] = { };
+		end
+
+		if not aCacheTable[tBrightKey][tOpacityKey] then
+			aBuildDelegate(tBrightKey, tOpacityKey);
+		end
+
+		return aCacheTable[tBrightKey][tOpacityKey];
+
 	end
 
-	if not sDispelTypeColorMapVariantCache[tBrightKey] then
-		sDispelTypeColorMapVariantCache[tBrightKey] = { };
+
+
+	--
+	function VUHDO_getDispelTypeColorMap(aBright, aOpacity)
+
+		return VUHDO_getOrBuildDispelBrightOpacityVariant(sDispelTypeColorMap, sDispelTypeColorMapVariantCache, aBright, aOpacity, VUHDO_buildDispelTypeColorMapVariant);
+
 	end
 
-	if not sDispelTypeColorMapVariantCache[tBrightKey][tOpacityKey] then
-		VUHDO_buildDispelTypeColorMapVariant(tBrightKey, tOpacityKey);
+
+
+	--
+	function VUHDO_getDispelTypeColorMapOpaque(aBright)
+
+		tBrightKey = aBright or 1;
+
+		if tBrightKey >= 1 then
+			return sDispelTypeColorMapOpaque;
+		end
+
+		if not sDispelTypeColorMapOpaqueBrightCache[tBrightKey] then
+			VUHDO_buildDispelTypeColorMapVariant(tBrightKey, 1);
+		end
+
+		return sDispelTypeColorMapOpaqueBrightCache[tBrightKey];
+
 	end
 
-	return sDispelTypeColorMapVariantCache[tBrightKey][tOpacityKey];
-
-end
 
 
+	--
+	function VUHDO_getDispelTypeBackgroundFillColorMap(aBright, aOpacity)
 
---
-function VUHDO_getDispelTypeColorMapOpaque(aBright)
+		return VUHDO_getOrBuildDispelBrightOpacityVariant(sDispelTypeBackgroundFillColorMap, sDispelTypeBackgroundFillBrightCache, aBright, aOpacity, VUHDO_buildDispelTypeColorMapVariant);
 
-	if not aBright or aBright >= 1 then
-		return sDispelTypeColorMapOpaque;
 	end
 
-	if not sDispelTypeColorMapOpaqueBrightCache[aBright] then
-		VUHDO_buildDispelTypeColorMapVariant(aBright, 1);
+
+
+	--
+	function VUHDO_getDispelTypeBackgroundBackingColorMap(aBright, aOpacity)
+
+		return VUHDO_getOrBuildDispelBrightOpacityVariant(sDispelTypeBackgroundBackingColorMap, sDispelTypeBackgroundBackingBrightCache, aBright, aOpacity, VUHDO_buildDispelTypeColorMapVariant);
+
 	end
 
-	return sDispelTypeColorMapOpaqueBrightCache[aBright];
-
-end
 
 
+	--
+	function VUHDO_getDispelTypeBackgroundFillCurve(aBright, aOpacity)
 
---
-function VUHDO_getDispelTypeBackgroundFillColorMap(aBright, aOpacity)
+		return VUHDO_getOrBuildDispelBrightOpacityVariant(sDispelTypeBackgroundFillCurve, sDispelTypeBackgroundFillCurveCache, aBright, aOpacity, VUHDO_buildDispelTypeBackgroundCurveVariant);
 
-	tBrightKey = aBright or 1;
-	tOpacityKey = aOpacity or 1;
-
-	if tBrightKey >= 1 and tOpacityKey >= 1 then
-		return sDispelTypeBackgroundFillColorMap;
 	end
 
-	if not sDispelTypeBackgroundFillBrightCache[tBrightKey] then
-		sDispelTypeBackgroundFillBrightCache[tBrightKey] = { };
+
+
+	--
+	function VUHDO_getDispelTypeBackgroundBackingCurve(aBright, aOpacity)
+
+		return VUHDO_getOrBuildDispelBrightOpacityVariant(sDispelTypeBackgroundBackingCurve, sDispelTypeBackgroundBackingCurveCache, aBright, aOpacity, VUHDO_buildDispelTypeBackgroundCurveVariant);
+
 	end
-
-	if not sDispelTypeBackgroundFillBrightCache[tBrightKey][tOpacityKey] then
-		VUHDO_buildDispelTypeColorMapVariant(tBrightKey, tOpacityKey);
-	end
-
-	return sDispelTypeBackgroundFillBrightCache[tBrightKey][tOpacityKey];
-
-end
-
-
-
---
-function VUHDO_getDispelTypeBackgroundBackingColorMap(aBright, aOpacity)
-
-	tBrightKey = aBright or 1;
-	tOpacityKey = aOpacity or 1;
-
-	if tBrightKey >= 1 and tOpacityKey >= 1 then
-		return sDispelTypeBackgroundBackingColorMap;
-	end
-
-	if not sDispelTypeBackgroundBackingBrightCache[tBrightKey] then
-		sDispelTypeBackgroundBackingBrightCache[tBrightKey] = { };
-	end
-
-	if not sDispelTypeBackgroundBackingBrightCache[tBrightKey][tOpacityKey] then
-		VUHDO_buildDispelTypeColorMapVariant(tBrightKey, tOpacityKey);
-	end
-
-	return sDispelTypeBackgroundBackingBrightCache[tBrightKey][tOpacityKey];
-
-end
-
-
-
---
-function VUHDO_getDispelTypeBackgroundFillCurve(aBright, aOpacity)
-
-	tBrightKey = aBright or 1;
-	tOpacityKey = aOpacity or 1;
-
-	if tBrightKey >= 1 and tOpacityKey >= 1 then
-		return sDispelTypeBackgroundFillCurve;
-	end
-
-	if not sDispelTypeBackgroundFillCurveCache[tBrightKey] then
-		sDispelTypeBackgroundFillCurveCache[tBrightKey] = { };
-	end
-
-	if not sDispelTypeBackgroundFillCurveCache[tBrightKey][tOpacityKey] then
-		VUHDO_buildDispelTypeBackgroundCurveVariant(tBrightKey, tOpacityKey);
-	end
-
-	return sDispelTypeBackgroundFillCurveCache[tBrightKey][tOpacityKey];
-
-end
-
-
-
---
-function VUHDO_getDispelTypeBackgroundBackingCurve(aBright, aOpacity)
-
-	tBrightKey = aBright or 1;
-	tOpacityKey = aOpacity or 1;
-
-	if tBrightKey >= 1 and tOpacityKey >= 1 then
-		return sDispelTypeBackgroundBackingCurve;
-	end
-
-	if not sDispelTypeBackgroundBackingCurveCache[tBrightKey] then
-		sDispelTypeBackgroundBackingCurveCache[tBrightKey] = { };
-	end
-
-	if not sDispelTypeBackgroundBackingCurveCache[tBrightKey][tOpacityKey] then
-		VUHDO_buildDispelTypeBackgroundCurveVariant(tBrightKey, tOpacityKey);
-	end
-
-	return sDispelTypeBackgroundBackingCurveCache[tBrightKey][tOpacityKey];
-
 end
 
 
@@ -1020,15 +745,6 @@ end
 function VUHDO_getDispelTypeTextCurve()
 
 	return sDispelTypeTextCurve;
-
-end
-
-
-
---
-function VUHDO_getDebuffDurationCurve()
-
-	return sDebuffDurationCurve;
 
 end
 
@@ -1456,13 +1172,11 @@ do
 	local tTransparent;
 	local tDispelName;
 	local tColorKey;
+	local tPointEntry;
 	function VUHDO_buildDispelTypeCurve()
 
 		sDispelTypeCurve = CreateColorCurve();
 		sDispelTypeCurve:SetType(Enum.LuaCurveType.Step);
-
-		sDispelTypeCurveOpaque = CreateColorCurve();
-		sDispelTypeCurveOpaque:SetType(Enum.LuaCurveType.Step);
 
 		sDispelTypeTextCurve = CreateColorCurve();
 		sDispelTypeTextCurve:SetType(Enum.LuaCurveType.Step);
@@ -1493,7 +1207,6 @@ do
 
 		if not tColors then
 			sDispelTypeCurve:AddPoint(0, tDefaultColor);
-			sDispelTypeCurveOpaque:AddPoint(0, tDefaultColor);
 			sDispelTypeTextCurve:AddPoint(0, tDefaultColor);
 
 			sDispelTypeBackgroundFillCurve = CreateColorCurve();
@@ -1511,34 +1224,12 @@ do
 			return;
 		end
 
-		sDispelTypeCurve:AddPoint(0, VUHDO_safeColorFromTable(tColors["DEBUFF0"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(0, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF0"], tTransparent));
-		sDispelTypeCurve:AddPoint(1, VUHDO_safeColorFromTable(tColors["DEBUFF3"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(1, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF3"], tTransparent));
-		sDispelTypeCurve:AddPoint(2, VUHDO_safeColorFromTable(tColors["DEBUFF4"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(2, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF4"], tTransparent));
-		sDispelTypeCurve:AddPoint(3, VUHDO_safeColorFromTable(tColors["DEBUFF2"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(3, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF2"], tTransparent));
-		sDispelTypeCurve:AddPoint(4, VUHDO_safeColorFromTable(tColors["DEBUFF1"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(4, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF1"], tTransparent));
-		sDispelTypeCurve:AddPoint(6, VUHDO_safeColorFromTable(tColors["DEBUFF6"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(6, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF6"], tTransparent));
-		sDispelTypeCurve:AddPoint(8, VUHDO_safeColorFromTable(tColors["DEBUFF8"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(8, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF8"], tTransparent));
-		sDispelTypeCurve:AddPoint(9, VUHDO_safeColorFromTable(tColors["DEBUFF9"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(9, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF9"], tTransparent));
-		sDispelTypeCurve:AddPoint(11, VUHDO_safeColorFromTable(tColors["DEBUFF8"], tDefaultColor));
-		sDispelTypeCurveOpaque:AddPoint(11, VUHDO_safeOpaqueDispelColorFromTable(tColors["DEBUFF8"], tTransparent));
+		for tIdx = 1, #sDispelTypeCurvePointKeys do
+			tPointEntry = sDispelTypeCurvePointKeys[tIdx];
 
-		sDispelTypeTextCurve:AddPoint(0, VUHDO_safeTextColorFromTable(tColors["DEBUFF0"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(1, VUHDO_safeTextColorFromTable(tColors["DEBUFF3"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(2, VUHDO_safeTextColorFromTable(tColors["DEBUFF4"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(3, VUHDO_safeTextColorFromTable(tColors["DEBUFF2"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(4, VUHDO_safeTextColorFromTable(tColors["DEBUFF1"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(6, VUHDO_safeTextColorFromTable(tColors["DEBUFF6"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(8, VUHDO_safeTextColorFromTable(tColors["DEBUFF8"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(9, VUHDO_safeTextColorFromTable(tColors["DEBUFF9"], tDefaultColor));
-		sDispelTypeTextCurve:AddPoint(11, VUHDO_safeTextColorFromTable(tColors["DEBUFF8"], tDefaultColor));
+			sDispelTypeCurve:AddPoint(tPointEntry[1], VUHDO_safeColorFromTable(tColors[tPointEntry[2]], tDefaultColor));
+			sDispelTypeTextCurve:AddPoint(tPointEntry[1], VUHDO_safeTextColorFromTable(tColors[tPointEntry[2]], tDefaultColor));
+		end
 
 		sDispelTypeBackgroundFillCurve = CreateColorCurve();
 		sDispelTypeBackgroundFillCurve:SetType(Enum.LuaCurveType.Step);
@@ -1563,10 +1254,6 @@ do
 	--
 	local tColors;
 	local tTransparent;
-	local tDispelAbilities;
-	local tPurgeAbilities;
-	local tBlizzType;
-	local tColorKey;
 	function VUHDO_buildSingleDispelTypeCurves()
 
 		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
@@ -1612,40 +1299,6 @@ do
 			[VUHDO_DEBUFF_TYPE_ENRAGE] = sEnrageDispelCurve,
 		};
 
-		tDispelAbilities = VUHDO_getDispelAbilities();
-
-		sFriendlyDispelCurve = CreateColorCurve();
-		sFriendlyDispelCurve:SetType(Enum.LuaCurveType.Step);
-		sFriendlyDispelCurve:AddPoint(0, tTransparent);
-
-		for tVuhDoType, tAbility in pairs(tDispelAbilities) do
-			if tAbility then
-				tBlizzType = VUHDO_BLIZZARD_DISPEL_TYPE_MAP[tVuhDoType];
-				tColorKey = VUHDO_DISPEL_TYPE_COLOR_KEY_MAP[tVuhDoType];
-
-				if tBlizzType and tColors and tColors[tColorKey] then
-					sFriendlyDispelCurve:AddPoint(tBlizzType, VUHDO_safeColorFromTable(tColors[tColorKey], tTransparent));
-				end
-			end
-		end
-
-		tPurgeAbilities = VUHDO_getPurgeAbilities();
-
-		sHostilePurgeCurve = CreateColorCurve();
-		sHostilePurgeCurve:SetType(Enum.LuaCurveType.Step);
-		sHostilePurgeCurve:AddPoint(0, tTransparent);
-
-		for tVuhDoType, tAbility in pairs(tPurgeAbilities) do
-			if tAbility then
-				tBlizzType = VUHDO_BLIZZARD_DISPEL_TYPE_MAP[tVuhDoType];
-				tColorKey = VUHDO_DISPEL_TYPE_COLOR_KEY_MAP[tVuhDoType];
-
-				if tBlizzType and tColors and tColors[tColorKey] then
-					sHostilePurgeCurve:AddPoint(tBlizzType, VUHDO_safeColorFromTable(tColors[tColorKey], tTransparent));
-				end
-			end
-		end
-
 		twipe(sBrightnessCurveCache);
 		twipe(sTextBrightnessCurveCache);
 
@@ -1656,83 +1309,12 @@ end
 
 
 
---
-function VUHDO_getMagicDispelCurve()
-
-	return sMagicDispelCurve;
-
-end
-
-
-
---
-function VUHDO_getDiseaseDispelCurve()
-
-	return sDiseaseDispelCurve;
-
-end
-
-
-
---
-function VUHDO_getPoisonDispelCurve()
-
-	return sPoisonDispelCurve;
-
-end
-
-
-
---
-function VUHDO_getCurseDispelCurve()
-
-	return sCurseDispelCurve;
-
-end
-
-
-
---
-function VUHDO_getBleedDispelCurve()
-
-	return sBleedDispelCurve;
-
-end
-
-
-
---
-function VUHDO_getEnrageDispelCurve()
-
-	return sEnrageDispelCurve;
-
-end
-
-
-
---
-function VUHDO_getFriendlyDispelCurve()
-
-	return sFriendlyDispelCurve;
-
-end
-
-
-
---
-function VUHDO_getHostilePurgeCurve()
-
-	return sHostilePurgeCurve;
-
-end
-
-
-
 do
 	--
 	local tInfo;
 	local tCanAttack;
-	function VUHDO_getDispelCurveForUnit(aUnit, anIsHarmful)
+	local tCurve;
+	function VUHDO_getDispelCurveForUnit(aUnit, anIsHarmful, anIsText)
 
 		if not aUnit then
 			return nil;
@@ -1745,108 +1327,28 @@ do
 		end
 
 		tCanAttack = tInfo["canAttack"];
+		tCurve = anIsText and sDispelTypeTextCurve or sDispelTypeCurve;
 
 		if not tCanAttack and anIsHarmful then
-			return sDispelTypeCurve;
+			return tCurve;
 		end
 
 		if tCanAttack and not anIsHarmful then
-			return sDispelTypeCurve;
+			return tCurve;
 		end
 
 		return nil;
 
 	end
-end
 
 
 
-do
 	--
-	local tInfo;
-	local tCanAttack;
 	function VUHDO_getDispelTextCurveForUnit(aUnit, anIsHarmful)
 
-		if not aUnit then
-			return nil;
-		end
-
-		tInfo = VUHDO_RAID[aUnit];
-
-		if not tInfo then
-			return nil;
-		end
-
-		tCanAttack = tInfo["canAttack"];
-
-		if not tCanAttack and anIsHarmful then
-			return sDispelTypeTextCurve;
-		end
-
-		if tCanAttack and not anIsHarmful then
-			return sDispelTypeTextCurve;
-		end
-
-		return nil;
+		return VUHDO_getDispelCurveForUnit(aUnit, anIsHarmful, true);
 
 	end
-end
-
-
-
-do
-	--
-	local tDurationCurve;
-	local tDurationColorMixin;
-	function VUHDO_buildDurationThresholdCurve(aKey, aThresholdSeconds, aActiveColor, anIsBelow)
-
-		if sDurationCurves[aKey] then
-			return sDurationCurves[aKey];
-		end
-
-		tDurationCurve = CreateColorCurve();
-		tDurationCurve:SetType(Enum.LuaCurveType.Linear);
-
-		tDurationColorMixin = CreateColor(
-			aActiveColor["R"], aActiveColor["G"],
-			aActiveColor["B"], aActiveColor["O"] or 1);
-
-		if anIsBelow then
-			tDurationCurve:AddPoint(0, tDurationColorMixin);
-			tDurationCurve:AddPoint(aThresholdSeconds - 0.1, tDurationColorMixin);
-			tDurationCurve:AddPoint(aThresholdSeconds, sTransparentColor);
-			tDurationCurve:AddPoint(9999, sTransparentColor);
-		else
-			tDurationCurve:AddPoint(0, sTransparentColor);
-			tDurationCurve:AddPoint(aThresholdSeconds - 0.1, sTransparentColor);
-			tDurationCurve:AddPoint(aThresholdSeconds, tDurationColorMixin);
-			tDurationCurve:AddPoint(9999, tDurationColorMixin);
-		end
-
-		sDurationCurves[aKey] = tDurationCurve;
-
-		return tDurationCurve;
-
-	end
-end
-
-
-
---
-function VUHDO_buildDebuffDurationCurve()
-
-	sDebuffDurationCurve = CreateColorCurve();
-	sDebuffDurationCurve:SetType(Enum.LuaCurveType.Linear);
-
-	sDebuffDurationCurve:AddPoint(0, CreateColor(1, 0, 0, 1));
-	sDebuffDurationCurve:AddPoint(3, CreateColor(1, 0.5, 0, 1));
-
-	sDebuffDurationCurve:AddPoint(10, CreateColor(1, 1, 0, 1));
-
-	sDebuffDurationCurve:AddPoint(30, CreateColor(1, 1, 1, 1));
-
-	return;
-
 end
 
 
@@ -1922,7 +1424,6 @@ do
 
 		VUHDO_buildDispelTypeCurve();
 		VUHDO_buildSingleDispelTypeCurves();
-		VUHDO_buildDebuffDurationCurve();
 
 		return;
 
@@ -2437,21 +1938,6 @@ do
 
 
 	--
-	function VUHDO_buildAllBouquetLayerTemplates()
-
-		twipe(sBouquetLayerTemplates);
-
-		for tBouquetName, _ in pairs(VUHDO_BOUQUETS["STORED"]) do
-			VUHDO_buildBouquetLayerTemplate(tBouquetName);
-		end
-
-		return;
-
-	end
-
-
-
-	--
 	function VUHDO_getBouquetLayerTemplate(aBouquetName)
 
 		return sBouquetLayerTemplates[aBouquetName];
@@ -2476,97 +1962,21 @@ end
 
 do
 	--
-	local tValidatorEntry;
 	local tValidators;
-	local function VUHDO_findResultSlot(aLayerTemplate, aValidatorsKey, aResultsKey, aPriorityIndex)
+	local tValidatorEntry;
+	function VUHDO_findDispelValidatorEntry(aLayerTemplate, aPriorityIndex)
 
-		tValidators = aLayerTemplate[aValidatorsKey];
+		tValidators = aLayerTemplate["dispelValidators"];
 
 		for tIdx = 1, #tValidators do
 			tValidatorEntry = tValidators[tIdx];
+
 			if tValidatorEntry["index"] == aPriorityIndex then
-				return aLayerTemplate[aResultsKey][tIdx];
+				return tValidatorEntry;
 			end
 		end
 
 		return nil;
-
-	end
-
-
-
-	--
-	function VUHDO_findNonSecretResultSlot(aLayerTemplate, aPriorityIndex)
-
-		return VUHDO_findResultSlot(aLayerTemplate, "nonSecretValidators", "nonSecretResults", aPriorityIndex);
-
-	end
-
-
-
-	--
-	function VUHDO_findAuraResultSlot(aLayerTemplate, aPriorityIndex)
-
-		return VUHDO_findResultSlot(aLayerTemplate, "auraValidators", "auraResults", aPriorityIndex);
-
-	end
-
-
-
-	--
-	function VUHDO_findCurveResultSlot(aLayerTemplate, aPriorityIndex)
-
-		return VUHDO_findResultSlot(aLayerTemplate, "curveValidators", "curveResults", aPriorityIndex);
-
-	end
-
-
-
-	--
-	function VUHDO_findBoolResultSlot(aLayerTemplate, aPriorityIndex)
-
-		return VUHDO_findResultSlot(aLayerTemplate, "booleanValidators", "booleanResults", aPriorityIndex);
-
-	end
-
-
-
-	--
-	function VUHDO_findDispelResultSlot(aLayerTemplate, aPriorityIndex)
-
-		return VUHDO_findResultSlot(aLayerTemplate, "dispelValidators", "dispelResults", aPriorityIndex);
-
-	end
-
-
-
-	do
-		--
-		local tValidators;
-		local tValidatorEntry;
-		function VUHDO_findDispelValidatorEntry(aLayerTemplate, aPriorityIndex)
-
-			tValidators = aLayerTemplate["dispelValidators"];
-
-			for tIdx = 1, #tValidators do
-				tValidatorEntry = tValidators[tIdx];
-
-				if tValidatorEntry["index"] == aPriorityIndex then
-					return tValidatorEntry;
-				end
-			end
-
-			return nil;
-
-		end
-	end
-
-
-
-	--
-	function VUHDO_findSpriteCellResultSlot(aLayerTemplate, aPriorityIndex)
-
-		return VUHDO_findResultSlot(aLayerTemplate, "spriteCellValidators", "spriteCellResults", aPriorityIndex);
 
 	end
 end
@@ -2853,18 +2263,6 @@ function VUHDO_getCurrentBouquetColor()
 
 end
 
-
-
---
-function VUHDO_getCurrentBouquetMaxColor()
-
-	if not txState["isMaxColorInit"] then
-		twipe(txState["maxColor"]);
-	end
-
-	return txState["maxColor"];
-
-end
 
 
 --
@@ -4512,7 +3910,7 @@ do
 
 		if not tHasAuraItem then
 			tClass = VUHDO_BOUQUET_RESTRICTED_NON_AURA;
-		elseif tHasAuraItem and tHasNonAuraItem then
+		elseif tHasNonAuraItem then
 			tClass = VUHDO_BOUQUET_RESTRICTED_MIXED;
 		elseif tHasUnsupportedAuraItem then
 			tClass = VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED;
@@ -4936,15 +4334,6 @@ do
 											["anchorKey"] = tKey,
 											["entryIndex"] = tEntryIndex,
 										});
-
-										if VUHDO_classifyBouquetRestrictedMode(tBouquetName) == VUHDO_BOUQUET_RESTRICTED_NON_AURA
-											or VUHDO_classifyBouquetRestrictedMode(tBouquetName) == VUHDO_BOUQUET_RESTRICTED_MIXED then
-											if not VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET[tPanelNum] then
-												VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET[tPanelNum] = { };
-											end
-
-											VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET[tPanelNum][tKey] = true;
-										end
 									end
 								end
 							end
@@ -4972,8 +4361,6 @@ do
 									VUHDO_listAuraGroupBouquetColorOnlyCallback,
 									anAlreadyRegistered
 								);
-
-								VUHDO_LIST_GROUP_COLOR_BOUQUETS[tBouquetName] = true;
 							end
 						end
 					end
@@ -5002,8 +4389,6 @@ do
 									VUHDO_listAuraGroupBouquetColorOnlyCallback,
 									anAlreadyRegistered
 								);
-
-								VUHDO_LIST_GROUP_COLOR_BOUQUETS[tBouquetName] = true;
 							end
 						end
 					end
@@ -5026,9 +4411,7 @@ do
 		twipe(VUHDO_CYCLIC_BOUQUETS);
 		twipe(VUHDO_REGISTERED_BOUQUET_INDICATORS);
 		twipe(VUHDO_AURA_LIST_BOUQUETS);
-		twipe(VUHDO_LIST_GROUP_COLOR_BOUQUETS);
 		twipe(VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS);
-		twipe(VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET);
 
 		VUHDO_invalidateBouquetRestrictedModeCache();
 		VUHDO_invalidateAuraContainerTemplateCache();
@@ -5316,26 +4699,14 @@ do
 			return;
 		end
 
-		if tHasChanged or tIsActive then
-			for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
-				tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-					tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime);
-			end
-
-			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = tIsActive;
-
-			VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, tIsActive);
-		elseif VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] then
-
-			for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
-				tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-					tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime);
-			end
-
-			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = false;
-
-			VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, false);
+		for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
+			tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
+				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime);
 		end
+
+		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = tIsActive;
+
+		VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName, tIsActive);
 
 		return;
 
@@ -5387,16 +4758,8 @@ function VUHDO_updateBouquetsForEvent(aUnit, anEventType)
 	if aUnit then
 		tInterestedBouquets = VUHDO_EVENT_INTEREST_CACHE[anEventType];
 
-		if tInterestedBouquets then
-			for tName, _ in pairs(tInterestedBouquets) do
-				VUHDO_updateEventBouquet(aUnit, tName, anEventType);
-			end
-		else
-			for tName, _ in pairs(VUHDO_REGISTERED_BOUQUETS) do
-				if VUHDO_isBouquetInterestedInEvent(tName, anEventType) then
-					VUHDO_updateEventBouquet(aUnit, tName, anEventType);
-				end
-			end
+		for tName, _ in pairs(tInterestedBouquets) do
+			VUHDO_updateEventBouquet(aUnit, tName, anEventType);
 		end
 	end
 
@@ -5438,8 +4801,8 @@ function VUHDO_deferInitAllEventBouquetsDelegate()
 		VUHDO_deferUpdateBouquetsForEvent(tUnit, 1); -- VUHDO_UPDATE_ALL
 	end
 
-	VUHDO_deferUpdateBouquetsForEvent("focus", 19); -- VUHDO_UPDATE_DC
-	VUHDO_deferUpdateBouquetsForEvent("target", 19); -- VUHDO_UPDATE_DC
+	VUHDO_deferUpdateBouquetsForEvent("focus", 1); -- VUHDO_UPDATE_ALL
+	VUHDO_deferUpdateBouquetsForEvent("target", 1); -- VUHDO_UPDATE_ALL
 
 	VUHDO_registerAllTextIndicators();
 
@@ -5488,6 +4851,7 @@ end
 local tRefreshBouquetName;
 local tRefreshLastEval;
 local tRefreshIsRestricted;
+local tRefreshRestrictedMode;
 function VUHDO_refreshListBouquetsForUnit(aUnit)
 
 	if not aUnit or not VUHDO_RAID[aUnit] then
@@ -5497,8 +4861,10 @@ function VUHDO_refreshListBouquetsForUnit(aUnit)
 	tRefreshIsRestricted = VUHDO_isAuraDataRestricted();
 
 	for tRefreshBouquetName, _ in pairs(VUHDO_AURA_LIST_BOUQUETS or sEmpty) do
-		if not tRefreshIsRestricted or VUHDO_classifyBouquetRestrictedMode(tRefreshBouquetName) == VUHDO_BOUQUET_RESTRICTED_NON_AURA
-			or VUHDO_classifyBouquetRestrictedMode(tRefreshBouquetName) == VUHDO_BOUQUET_RESTRICTED_MIXED then
+		tRefreshRestrictedMode = VUHDO_classifyBouquetRestrictedMode(tRefreshBouquetName);
+
+		if not tRefreshIsRestricted or tRefreshRestrictedMode == VUHDO_BOUQUET_RESTRICTED_NON_AURA
+			or tRefreshRestrictedMode == VUHDO_BOUQUET_RESTRICTED_MIXED then
 			tRefreshLastEval = VUHDO_LAST_EVALUATED_BOUQUETS[tRefreshBouquetName] and VUHDO_LAST_EVALUATED_BOUQUETS[tRefreshBouquetName][aUnit];
 
 			if tRefreshLastEval then

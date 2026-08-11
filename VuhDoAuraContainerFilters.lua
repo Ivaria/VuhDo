@@ -36,6 +36,7 @@ local VUHDO_AURA_GROUP_TYPE_FILTER;
 local VUHDO_AURA_GROUP_TYPE_LIST;
 local VUHDO_AURA_LIST_ENTRY_SPELL;
 local VUHDO_AURA_LIST_ENTRY_BOUQUET;
+local VUHDO_AURA_LIST_ENTRY_EMPTY;
 local VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER;
 local VUHDO_BOUQUET_RESTRICTED_NON_AURA;
 local VUHDO_BOUQUET_RESTRICTED_MIXED;
@@ -47,13 +48,13 @@ local VUHDO_AURA_FIXED_DIAGONAL_POSITIONS;
 local VUHDO_PANEL_SETUP;
 local VUHDO_BUTTON_CACHE;
 local VUHDO_AURA_CONTAINER_TEMPLATE_CACHE;
-local VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION;
 local VUHDO_AURA_GROWTH_OFFSETS;
 local VUHDO_AURA_BUTTON_ICON_TEMPLATE;
 local VUHDO_AURA_BUTTON_BAR_TEMPLATE;
 local VUHDO_DEBUFF_TYPES;
 local VUHDO_PLAYER_DISPEL_ABILITIES;
 local VUHDO_PLAYER_PURGE_ABILITIES;
+local VUHDO_DEFAULT_AURA_GLOW_STYLE;
 
 local VUHDO_getAuraGroup;
 local VUHDO_classifyBouquetRestrictedMode;
@@ -71,6 +72,8 @@ local VUHDO_getAuraBarWidthPixels;
 local VUHDO_getAuraBarHeightPixels;
 local VUHDO_getAuraBarWidthPixelsVertical;
 local VUHDO_getAuraBarHeightPixelsVertical;
+local VUHDO_getManaAdjustedYOffset;
+local VUHDO_deepCopyTable;
 
 local sEmpty = { };
 
@@ -101,18 +104,6 @@ local sFlowVertical = {
 	["DOWN"] = AnchorUtil.FlowDirection.Down,
 };
 
-local sRelPointManaFactor = {
-	["TOPLEFT"] = 0,
-	["TOP"] = 0,
-	["TOPRIGHT"] = 0,
-	["LEFT"] = 0.5,
-	["CENTER"] = 0.5,
-	["RIGHT"] = 0.5,
-	["BOTTOMLEFT"] = 1,
-	["BOTTOM"] = 1,
-	["BOTTOMRIGHT"] = 1,
-};
-
 
 
 --
@@ -135,13 +126,13 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
 	VUHDO_AURA_CONTAINER_TEMPLATE_CACHE = _G["VUHDO_AURA_CONTAINER_TEMPLATE_CACHE"];
-	VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION = _G["VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION"];
 	VUHDO_AURA_GROWTH_OFFSETS = _G["VUHDO_AURA_GROWTH_OFFSETS"];
 	VUHDO_AURA_BUTTON_ICON_TEMPLATE = _G["VUHDO_AURA_BUTTON_ICON_TEMPLATE"];
 	VUHDO_AURA_BUTTON_BAR_TEMPLATE = _G["VUHDO_AURA_BUTTON_BAR_TEMPLATE"];
 	VUHDO_DEBUFF_TYPES = _G["VUHDO_DEBUFF_TYPES"];
 	VUHDO_PLAYER_DISPEL_ABILITIES = _G["VUHDO_PLAYER_DISPEL_ABILITIES"];
 	VUHDO_PLAYER_PURGE_ABILITIES = _G["VUHDO_PLAYER_PURGE_ABILITIES"];
+	VUHDO_DEFAULT_AURA_GLOW_STYLE = _G["VUHDO_DEFAULT_AURA_GLOW_STYLE"];
 
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_classifyBouquetRestrictedMode = _G["VUHDO_classifyBouquetRestrictedMode"];
@@ -159,6 +150,8 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_getAuraBarHeightPixels = _G["VUHDO_getAuraBarHeightPixels"];
 	VUHDO_getAuraBarWidthPixelsVertical = _G["VUHDO_getAuraBarWidthPixelsVertical"];
 	VUHDO_getAuraBarHeightPixelsVertical = _G["VUHDO_getAuraBarHeightPixelsVertical"];
+	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
+	VUHDO_deepCopyTable = _G["VUHDO_deepCopyTable"];
 
 	VUHDO_rebuildDispelTypeNameMaps();
 
@@ -683,28 +676,10 @@ do
 	function VUHDO_resolveFixedAuraSlotPlacement(aRadioValue, aSlotIndex, aBarWidth, aBarHeight, anAnchorConfig, aButton, anIconSize)
 
 		tNumBasePositions = 9;
-
-		if aSlotIndex <= tNumBasePositions then
-			if 30 == aRadioValue then
-				tPositionTable = VUHDO_AURA_FIXED_STRAIGHT_POSITIONS;
-			else
-				tPositionTable = VUHDO_AURA_FIXED_DIAGONAL_POSITIONS;
-			end
-
-			tSlotPos = tPositionTable[aSlotIndex];
-			tLayerIndex = 0;
-		else
-			tBaseAnchor = ((aSlotIndex - 1) % tNumBasePositions) + 1;
-			tLayerIndex = floor((aSlotIndex - 1) / tNumBasePositions);
-
-			if 30 == aRadioValue then
-				tPositionTable = VUHDO_AURA_FIXED_STRAIGHT_POSITIONS;
-			else
-				tPositionTable = VUHDO_AURA_FIXED_DIAGONAL_POSITIONS;
-			end
-
-			tSlotPos = tPositionTable[tBaseAnchor];
-		end
+		tPositionTable = (30 == aRadioValue) and VUHDO_AURA_FIXED_STRAIGHT_POSITIONS or VUHDO_AURA_FIXED_DIAGONAL_POSITIONS;
+		tBaseAnchor = ((aSlotIndex - 1) % tNumBasePositions) + 1;
+		tLayerIndex = floor((aSlotIndex - 1) / tNumBasePositions);
+		tSlotPos = tPositionTable[tBaseAnchor];
 
 		if not tSlotPos then
 			return nil;
@@ -715,7 +690,7 @@ do
 
 		tSize = anIconSize or aBarWidth;
 
-		if tLayerIndex and tLayerIndex > 0 then
+		if tLayerIndex > 0 then
 			tGrowthDir = VUHDO_AURA_GROWTH_OFFSETS[anAnchorConfig["growthDir"]] or VUHDO_AURA_GROWTH_OFFSETS["RIGHT"];
 			tWrapDir = VUHDO_AURA_GROWTH_OFFSETS[anAnchorConfig["wrapDir"]] or VUHDO_AURA_GROWTH_OFFSETS["DOWN"];
 
@@ -737,7 +712,7 @@ do
 			tYOff = tYOff + tGrowthYOff;
 		end
 
-		tYOff = tYOff + (aButton["manaBarLayoutHeight"] or 0) * (sRelPointManaFactor[tSlotPos["relPoint"]] or 0);
+		tYOff = VUHDO_getManaAdjustedYOffset(aButton, tSlotPos["relPoint"], tYOff);
 
 		return {
 			["anchor"] = tSlotPos["anchor"],
@@ -779,14 +754,9 @@ end
 
 
 --
-local tSlotX;
-local tSlotY;
 local tSpellId;
 local tSlotCandidateFilters;
 local tExcludeIds;
-local tSlotTemplate;
-local tBouquetSlotTemplate;
-local tSlots;
 local tSlotButtonSetup;
 local tSlotEntryDurationMode;
 local tSlotEntryTimerThreshold;
@@ -802,14 +772,178 @@ local tResolvedShowStacks;
 local tResolvedShowClock;
 local tEffectiveDurationMode;
 local tEffectiveTimerThreshold;
+local tColorCopy;
+local tSlotX;
+local tSlotY;
+local tSlotTemplate;
+local tBouquetSlotTemplate;
+local tSlots;
 local tMixedSlotTemplates;
 local tFixedPlacement;
-local tColorCopy;
 local function VUHDO_applyListSlotLayoutFlags(aSlotTemplate, anEntryIndex)
 
 	aSlotTemplate["entryIndex"] = anEntryIndex;
 
 	return aSlotTemplate;
+
+end
+
+
+
+--
+function VUHDO_buildListEntrySlotButtonSetup(aGroup, anEntry, aAnchorButtonSetup, anIsBar, anExcludeSpellIds)
+
+	tSpellId = VUHDO_resolveAuraContainerSpellId(anEntry["value"]);
+
+	if not tSpellId then
+		return nil, nil;
+	end
+
+	tSlotCandidateFilters = {
+		["includeSpellIDs"] = {
+			[tSpellId] = true,
+		},
+	};
+
+	if anExcludeSpellIds then
+		tSlotCandidateFilters["excludeSpellIDs"] = anExcludeSpellIds;
+	end
+
+	tAnchorDurationMode = aAnchorButtonSetup["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
+	tAnchorTimerThreshold = aAnchorButtonSetup["timerThreshold"] or 9.99;
+	tAnchorShowTimer = aAnchorButtonSetup["durationText"];
+
+	tSlotEntryDurationMode = anEntry["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
+	tSlotEntryTimerThreshold = anEntry["timerThreshold"] or 9.99;
+
+	tSlotEntryShowTimer = VUHDO_getAnchorTriStateBool(anEntry, "showTimer", nil);
+	tSlotEntryShowStacks = VUHDO_getAnchorTriStateBool(anEntry, "showStacks", nil);
+	tSlotEntryShowClock = VUHDO_getAnchorTriStateBool(anEntry, "showClock", nil);
+
+	tNeedsSlotButtonCopy = tSlotEntryDurationMode ~= tAnchorDurationMode
+		or tSlotEntryTimerThreshold ~= tAnchorTimerThreshold
+		or (tSlotEntryShowTimer ~= nil and tSlotEntryShowTimer ~= tAnchorShowTimer)
+		or (tSlotEntryShowStacks ~= nil and tSlotEntryShowStacks ~= aAnchorButtonSetup["applicationCount"])
+		or (tSlotEntryShowClock ~= nil and tSlotEntryShowClock ~= aAnchorButtonSetup["durationCooldown"])
+		or (anEntry["colorIcon"] and anEntry["colorIconColor"])
+		or anEntry["glowIcon"] == true;
+
+	if tNeedsSlotButtonCopy then
+		tSlotButtonSetup = { };
+
+		for tKey, tValue in pairs(aAnchorButtonSetup) do
+			tSlotButtonSetup[tKey] = tValue;
+		end
+
+		tSlotButtonSetup["durationMode"] = tSlotEntryDurationMode;
+		tSlotButtonSetup["timerThreshold"] = tSlotEntryTimerThreshold;
+
+		if tSlotEntryShowTimer ~= nil then
+			tResolvedShowTimer = tSlotEntryShowTimer;
+		else
+			tResolvedShowTimer = tAnchorShowTimer;
+		end
+
+		tSlotButtonSetup["durationText"] = tResolvedShowTimer;
+
+		if tSlotEntryShowStacks ~= nil then
+			tResolvedShowStacks = tSlotEntryShowStacks;
+		else
+			tResolvedShowStacks = aAnchorButtonSetup["applicationCount"];
+		end
+
+		tSlotButtonSetup["applicationCount"] = tResolvedShowStacks;
+
+		if tSlotEntryShowClock ~= nil then
+			tResolvedShowClock = tSlotEntryShowClock;
+		else
+			tResolvedShowClock = aAnchorButtonSetup["durationCooldown"];
+		end
+
+		tSlotButtonSetup["durationCooldown"] = tResolvedShowClock;
+
+		if tResolvedShowTimer then
+			tEffectiveDurationMode = tSlotEntryDurationMode;
+			tEffectiveTimerThreshold = tSlotEntryTimerThreshold;
+
+			tSlotButtonSetup["durationTextOptions"] = {
+				["textFormatter"] = VUHDO_getAuraTimerFormatter(tEffectiveDurationMode, tEffectiveTimerThreshold),
+				["textColor"] = {
+					["curve"] = VUHDO_getAuraTimerColorCurve(tEffectiveDurationMode, tEffectiveTimerThreshold),
+					["property"] = Enum.DurationTextBindingProperty.RemainingDuration,
+				},
+			};
+		else
+			tSlotButtonSetup["durationTextOptions"] = nil;
+		end
+	else
+		tSlotButtonSetup = aAnchorButtonSetup;
+	end
+
+	if anEntry["colorIcon"] and anEntry["colorIconColor"] then
+		tColorCopy = VUHDO_deepCopyTable(anEntry["colorIconColor"]);
+
+		if anIsBar then
+			tSlotButtonSetup["barColor"] = tColorCopy;
+
+			if tSlotButtonSetup["staticIcon"] then
+				tSlotButtonSetup["staticColor"] = tColorCopy;
+			elseif not tSlotButtonSetup["hideIcon"] then
+				tSlotButtonSetup["iconColor"] = tColorCopy;
+			end
+		elseif tSlotButtonSetup["staticIcon"] then
+			tSlotButtonSetup["staticColor"] = tColorCopy;
+		else
+			tSlotButtonSetup["iconColor"] = tColorCopy;
+		end
+	end
+
+	if anEntry["glowIcon"] == true then
+		tSlotButtonSetup["glowIcon"] = true;
+
+		tSlotButtonSetup["glowColor"] = anEntry["glowIconColor"];
+		tSlotButtonSetup["glowStyle"] = anEntry["glowIconStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
+	end
+
+	return tSlotButtonSetup, tSlotCandidateFilters;
+
+end
+
+
+
+--
+function VUHDO_applyBouquetSlotButtonSetup(aBouquetSlotTemplate, anAnchorConfig, aPixelWidth, aPixelHeight, aAnchorButtonSetup, anIsBar)
+
+	aBouquetSlotTemplate["buttonSetup"]["width"] = aPixelWidth;
+	aBouquetSlotTemplate["buttonSetup"]["height"] = aPixelHeight;
+	aBouquetSlotTemplate["buttonSetup"]["textSize"] = aAnchorButtonSetup["textSize"];
+	aBouquetSlotTemplate["buttonSetup"]["textConfig"] = aAnchorButtonSetup["textConfig"];
+	aBouquetSlotTemplate["buttonSetup"]["durationText"] = aAnchorButtonSetup["durationText"];
+	aBouquetSlotTemplate["buttonSetup"]["durationCooldown"] = aAnchorButtonSetup["durationCooldown"];
+	aBouquetSlotTemplate["buttonSetup"]["applicationCount"] = aAnchorButtonSetup["applicationCount"];
+	aBouquetSlotTemplate["buttonSetup"]["mouseMotion"] = aAnchorButtonSetup["mouseMotion"];
+	aBouquetSlotTemplate["buttonSetup"]["durationTextOptions"] = aAnchorButtonSetup["durationTextOptions"];
+
+	if anIsBar then
+		VUHDO_applyBarButtonSetupFields(aBouquetSlotTemplate["buttonSetup"], anAnchorConfig);
+
+		aBouquetSlotTemplate["buttonSetup"]["barVertical"] = aAnchorButtonSetup["barVertical"];
+		aBouquetSlotTemplate["buttonSetup"]["barTurnAxis"] = aAnchorButtonSetup["barTurnAxis"];
+		aBouquetSlotTemplate["buttonSetup"]["iconType"] = aAnchorButtonSetup["iconType"];
+		aBouquetSlotTemplate["buttonSetup"]["barSegmentWidth"] = aAnchorButtonSetup["barSegmentWidth"];
+		aBouquetSlotTemplate["buttonSetup"]["barSegmentHeight"] = aAnchorButtonSetup["barSegmentHeight"];
+		aBouquetSlotTemplate["buttonSetup"]["iconTextSize"] = aAnchorButtonSetup["iconTextSize"];
+		aBouquetSlotTemplate["buttonSetup"]["barColorMode"] = aAnchorButtonSetup["barColorMode"];
+		aBouquetSlotTemplate["buttonSetup"]["barTexture"] = aAnchorButtonSetup["barTexture"];
+
+		if aBouquetSlotTemplate["buttonSetup"]["staticColor"] then
+			aBouquetSlotTemplate["buttonSetup"]["barColor"] = aBouquetSlotTemplate["buttonSetup"]["staticColor"];
+		else
+			aBouquetSlotTemplate["buttonSetup"]["barColor"] = aAnchorButtonSetup["barColor"];
+		end
+	end
+
+	return;
 
 end
 
@@ -829,9 +963,7 @@ function VUHDO_buildListAnchorEntryGroups(aGroup, anAnchorConfig, aPixelWidth, a
 		return tGroups;
 	end
 
-	tAnchorDurationMode = aAnchorButtonSetup["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
-	tAnchorTimerThreshold = aAnchorButtonSetup["timerThreshold"] or 9.99;
-	tAnchorShowTimer = aAnchorButtonSetup["durationText"];
+	tExcludeIds = VUHDO_resolveGroupExcludeSpellIDs(aGroup);
 
 	for tEntryIndex, tEntry in ipairs(aGroup["entries"] or sEmpty) do
 		if tEntryIndex > aMaxFrameCount then
@@ -841,121 +973,9 @@ function VUHDO_buildListAnchorEntryGroups(aGroup, anAnchorConfig, aPixelWidth, a
 		if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
 			tPendingSpacer = tPendingSpacer + aPixelWidth + aSpacing;
 		elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
-			tSpellId = VUHDO_resolveAuraContainerSpellId(tEntry["value"]);
+			tSlotButtonSetup, tSlotCandidateFilters = VUHDO_buildListEntrySlotButtonSetup(aGroup, tEntry, aAnchorButtonSetup, anIsBar, tExcludeIds);
 
-			if tSpellId then
-				tSlotCandidateFilters = {
-					["includeSpellIDs"] = {
-						[tSpellId] = true,
-					},
-				};
-
-				tExcludeIds = VUHDO_resolveGroupExcludeSpellIDs(aGroup);
-
-				if tExcludeIds then
-					tSlotCandidateFilters["excludeSpellIDs"] = tExcludeIds;
-				end
-
-				tSlotEntryDurationMode = tEntry["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
-				tSlotEntryTimerThreshold = tEntry["timerThreshold"] or 9.99;
-
-				tSlotEntryShowTimer = VUHDO_getAnchorTriStateBool(tEntry, "showTimer", nil);
-				tSlotEntryShowStacks = VUHDO_getAnchorTriStateBool(tEntry, "showStacks", nil);
-				tSlotEntryShowClock = VUHDO_getAnchorTriStateBool(tEntry, "showClock", nil);
-
-				tNeedsSlotButtonCopy = tSlotEntryDurationMode ~= tAnchorDurationMode
-					or tSlotEntryTimerThreshold ~= tAnchorTimerThreshold
-					or (tSlotEntryShowTimer ~= nil and tSlotEntryShowTimer ~= tAnchorShowTimer)
-					or (tSlotEntryShowStacks ~= nil and tSlotEntryShowStacks ~= aAnchorButtonSetup["applicationCount"])
-					or (tSlotEntryShowClock ~= nil and tSlotEntryShowClock ~= aAnchorButtonSetup["durationCooldown"])
-					or (tEntry["colorIcon"] and tEntry["colorIconColor"])
-					or tEntry["glowIcon"] == true;
-
-				if tNeedsSlotButtonCopy then
-					tSlotButtonSetup = { };
-
-					for tKey, tValue in pairs(aAnchorButtonSetup) do
-						tSlotButtonSetup[tKey] = tValue;
-					end
-
-					tSlotButtonSetup["durationMode"] = tSlotEntryDurationMode;
-					tSlotButtonSetup["timerThreshold"] = tSlotEntryTimerThreshold;
-
-					if tSlotEntryShowTimer ~= nil then
-						tResolvedShowTimer = tSlotEntryShowTimer;
-					else
-						tResolvedShowTimer = tAnchorShowTimer;
-					end
-
-					tSlotButtonSetup["durationText"] = tResolvedShowTimer;
-
-					if tSlotEntryShowStacks ~= nil then
-						tResolvedShowStacks = tSlotEntryShowStacks;
-					else
-						tResolvedShowStacks = aAnchorButtonSetup["applicationCount"];
-					end
-
-					tSlotButtonSetup["applicationCount"] = tResolvedShowStacks;
-
-					if tSlotEntryShowClock ~= nil then
-						tResolvedShowClock = tSlotEntryShowClock;
-					else
-						tResolvedShowClock = aAnchorButtonSetup["durationCooldown"];
-					end
-
-					tSlotButtonSetup["durationCooldown"] = tResolvedShowClock;
-
-					if tResolvedShowTimer then
-						tEffectiveDurationMode = tSlotEntryDurationMode;
-						tEffectiveTimerThreshold = tSlotEntryTimerThreshold;
-
-						tSlotButtonSetup["durationTextOptions"] = {
-							["textFormatter"] = VUHDO_getAuraTimerFormatter(tEffectiveDurationMode, tEffectiveTimerThreshold),
-							["textColor"] = {
-								["curve"] = VUHDO_getAuraTimerColorCurve(tEffectiveDurationMode, tEffectiveTimerThreshold),
-								["property"] = Enum.DurationTextBindingProperty.RemainingDuration,
-							},
-						};
-					else
-						tSlotButtonSetup["durationTextOptions"] = nil;
-					end
-				else
-					tSlotButtonSetup = aAnchorButtonSetup;
-				end
-
-				if ((tEntry["colorIcon"] and tEntry["colorIconColor"]) or tEntry["glowIcon"] == true) and tSlotButtonSetup == aAnchorButtonSetup then
-					tSlotButtonSetup = { };
-
-					for tKey, tValue in pairs(aAnchorButtonSetup) do
-						tSlotButtonSetup[tKey] = tValue;
-					end
-				end
-
-				if tEntry["colorIcon"] and tEntry["colorIconColor"] then
-					tColorCopy = VUHDO_deepCopyTable(tEntry["colorIconColor"]);
-
-					if anIsBar then
-						tSlotButtonSetup["barColor"] = tColorCopy;
-
-						if tSlotButtonSetup["staticIcon"] then
-							tSlotButtonSetup["staticColor"] = tColorCopy;
-						elseif not tSlotButtonSetup["hideIcon"] then
-							tSlotButtonSetup["iconColor"] = tColorCopy;
-						end
-					elseif tSlotButtonSetup["staticIcon"] then
-						tSlotButtonSetup["staticColor"] = tColorCopy;
-					else
-						tSlotButtonSetup["iconColor"] = tColorCopy;
-					end
-				end
-
-				if tEntry["glowIcon"] == true then
-					tSlotButtonSetup["glowIcon"] = true;
-
-					tSlotButtonSetup["glowColor"] = tEntry["glowIconColor"];
-					tSlotButtonSetup["glowStyle"] = tEntry["glowIconStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
-				end
-
+			if tSlotButtonSetup then
 				tGroupLayout = {
 					["elementWidth"] = aPixelWidth,
 					["elementHeight"] = aPixelHeight,
@@ -987,34 +1007,7 @@ function VUHDO_buildListAnchorEntryGroups(aGroup, anAnchorConfig, aPixelWidth, a
 			tBouquetSlotTemplate = VUHDO_buildListEntryContainerGroupTemplate(tEntry["value"]);
 
 			if tBouquetSlotTemplate then
-				tBouquetSlotTemplate["buttonSetup"]["width"] = aPixelWidth;
-				tBouquetSlotTemplate["buttonSetup"]["height"] = aPixelHeight;
-				tBouquetSlotTemplate["buttonSetup"]["textSize"] = aAnchorButtonSetup["textSize"];
-				tBouquetSlotTemplate["buttonSetup"]["textConfig"] = aAnchorButtonSetup["textConfig"];
-				tBouquetSlotTemplate["buttonSetup"]["durationText"] = aAnchorButtonSetup["durationText"];
-				tBouquetSlotTemplate["buttonSetup"]["durationCooldown"] = aAnchorButtonSetup["durationCooldown"];
-				tBouquetSlotTemplate["buttonSetup"]["applicationCount"] = aAnchorButtonSetup["applicationCount"];
-				tBouquetSlotTemplate["buttonSetup"]["mouseMotion"] = aAnchorButtonSetup["mouseMotion"];
-				tBouquetSlotTemplate["buttonSetup"]["durationTextOptions"] = aAnchorButtonSetup["durationTextOptions"];
-
-				if anIsBar then
-					VUHDO_applyBarButtonSetupFields(tBouquetSlotTemplate["buttonSetup"], anAnchorConfig);
-
-					tBouquetSlotTemplate["buttonSetup"]["barVertical"] = aAnchorButtonSetup["barVertical"];
-					tBouquetSlotTemplate["buttonSetup"]["barTurnAxis"] = aAnchorButtonSetup["barTurnAxis"];
-					tBouquetSlotTemplate["buttonSetup"]["iconType"] = aAnchorButtonSetup["iconType"];
-					tBouquetSlotTemplate["buttonSetup"]["barSegmentWidth"] = aAnchorButtonSetup["barSegmentWidth"];
-					tBouquetSlotTemplate["buttonSetup"]["barSegmentHeight"] = aAnchorButtonSetup["barSegmentHeight"];
-					tBouquetSlotTemplate["buttonSetup"]["iconTextSize"] = aAnchorButtonSetup["iconTextSize"];
-					tBouquetSlotTemplate["buttonSetup"]["barColorMode"] = aAnchorButtonSetup["barColorMode"];
-					tBouquetSlotTemplate["buttonSetup"]["barTexture"] = aAnchorButtonSetup["barTexture"];
-
-					if tBouquetSlotTemplate["buttonSetup"]["staticColor"] then
-						tBouquetSlotTemplate["buttonSetup"]["barColor"] = tBouquetSlotTemplate["buttonSetup"]["staticColor"];
-					else
-						tBouquetSlotTemplate["buttonSetup"]["barColor"] = aAnchorButtonSetup["barColor"];
-					end
-				end
+				VUHDO_applyBouquetSlotButtonSetup(tBouquetSlotTemplate, anAnchorConfig, aPixelWidth, aPixelHeight, aAnchorButtonSetup, anIsBar);
 
 				tGroupLayout = {
 					["elementWidth"] = aPixelWidth,
@@ -1052,7 +1045,8 @@ end
 
 
 
-function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelHeight, aSpacing, aMaxCols, aMaxFrameCount, aTemplateName, aAnchorButtonSetup, anIsBar, aGrowthDir, aWrapDir, anIsFixedLayout, aFixedRadioValue, aBarWidth, aBarHeight, aButton, aUseFixedSlots)
+--
+function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelHeight, aSpacing, aMaxCols, aMaxFrameCount, aTemplateName, aAnchorButtonSetup, anIsBar, aGrowthDir, aWrapDir, anIsFixedLayout, aFixedRadioValue, aBarWidth, aBarHeight, aButton)
 
 	tSlots = { };
 
@@ -1060,9 +1054,7 @@ function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelH
 		return tSlots;
 	end
 
-	tAnchorDurationMode = aAnchorButtonSetup["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
-	tAnchorTimerThreshold = aAnchorButtonSetup["timerThreshold"] or 9.99;
-	tAnchorShowTimer = aAnchorButtonSetup["durationText"];
+	tExcludeIds = VUHDO_resolveGroupExcludeSpellIDs(aGroup);
 
 	for tEntryIndex, tEntry in ipairs(aGroup["entries"] or sEmpty) do
 		if tEntryIndex > aMaxFrameCount then
@@ -1087,121 +1079,9 @@ function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelH
 		end
 
 		if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
-			tSpellId = VUHDO_resolveAuraContainerSpellId(tEntry["value"]);
+			tSlotButtonSetup, tSlotCandidateFilters = VUHDO_buildListEntrySlotButtonSetup(aGroup, tEntry, aAnchorButtonSetup, anIsBar, tExcludeIds);
 
-			if tSpellId then
-				tSlotCandidateFilters = {
-					["includeSpellIDs"] = {
-						[tSpellId] = true,
-					},
-				};
-
-				tExcludeIds = VUHDO_resolveGroupExcludeSpellIDs(aGroup);
-
-				if tExcludeIds then
-					tSlotCandidateFilters["excludeSpellIDs"] = tExcludeIds;
-				end
-
-				tSlotEntryDurationMode = tEntry["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
-				tSlotEntryTimerThreshold = tEntry["timerThreshold"] or 9.99;
-
-				tSlotEntryShowTimer = VUHDO_getAnchorTriStateBool(tEntry, "showTimer", nil);
-				tSlotEntryShowStacks = VUHDO_getAnchorTriStateBool(tEntry, "showStacks", nil);
-				tSlotEntryShowClock = VUHDO_getAnchorTriStateBool(tEntry, "showClock", nil);
-
-				tNeedsSlotButtonCopy = tSlotEntryDurationMode ~= tAnchorDurationMode
-					or tSlotEntryTimerThreshold ~= tAnchorTimerThreshold
-					or (tSlotEntryShowTimer ~= nil and tSlotEntryShowTimer ~= tAnchorShowTimer)
-					or (tSlotEntryShowStacks ~= nil and tSlotEntryShowStacks ~= aAnchorButtonSetup["applicationCount"])
-					or (tSlotEntryShowClock ~= nil and tSlotEntryShowClock ~= aAnchorButtonSetup["durationCooldown"])
-					or (tEntry["colorIcon"] and tEntry["colorIconColor"])
-					or tEntry["glowIcon"] == true;
-
-				if tNeedsSlotButtonCopy then
-					tSlotButtonSetup = { };
-
-					for tKey, tValue in pairs(aAnchorButtonSetup) do
-						tSlotButtonSetup[tKey] = tValue;
-					end
-
-					tSlotButtonSetup["durationMode"] = tSlotEntryDurationMode;
-					tSlotButtonSetup["timerThreshold"] = tSlotEntryTimerThreshold;
-
-					if tSlotEntryShowTimer ~= nil then
-						tResolvedShowTimer = tSlotEntryShowTimer;
-					else
-						tResolvedShowTimer = tAnchorShowTimer;
-					end
-
-					tSlotButtonSetup["durationText"] = tResolvedShowTimer;
-
-					if tSlotEntryShowStacks ~= nil then
-						tResolvedShowStacks = tSlotEntryShowStacks;
-					else
-						tResolvedShowStacks = aAnchorButtonSetup["applicationCount"];
-					end
-
-					tSlotButtonSetup["applicationCount"] = tResolvedShowStacks;
-
-					if tSlotEntryShowClock ~= nil then
-						tResolvedShowClock = tSlotEntryShowClock;
-					else
-						tResolvedShowClock = aAnchorButtonSetup["durationCooldown"];
-					end
-
-					tSlotButtonSetup["durationCooldown"] = tResolvedShowClock;
-
-					if tResolvedShowTimer then
-						tEffectiveDurationMode = tSlotEntryDurationMode;
-						tEffectiveTimerThreshold = tSlotEntryTimerThreshold;
-
-						tSlotButtonSetup["durationTextOptions"] = {
-							["textFormatter"] = VUHDO_getAuraTimerFormatter(tEffectiveDurationMode, tEffectiveTimerThreshold),
-							["textColor"] = {
-								["curve"] = VUHDO_getAuraTimerColorCurve(tEffectiveDurationMode, tEffectiveTimerThreshold),
-								["property"] = Enum.DurationTextBindingProperty.RemainingDuration,
-							},
-						};
-					else
-						tSlotButtonSetup["durationTextOptions"] = nil;
-					end
-				else
-					tSlotButtonSetup = aAnchorButtonSetup;
-				end
-
-				if ((tEntry["colorIcon"] and tEntry["colorIconColor"]) or tEntry["glowIcon"] == true) and tSlotButtonSetup == aAnchorButtonSetup then
-					tSlotButtonSetup = { };
-
-					for tKey, tValue in pairs(aAnchorButtonSetup) do
-						tSlotButtonSetup[tKey] = tValue;
-					end
-				end
-
-				if tEntry["colorIcon"] and tEntry["colorIconColor"] then
-					tColorCopy = VUHDO_deepCopyTable(tEntry["colorIconColor"]);
-
-					if anIsBar then
-						tSlotButtonSetup["barColor"] = tColorCopy;
-
-						if tSlotButtonSetup["staticIcon"] then
-							tSlotButtonSetup["staticColor"] = tColorCopy;
-						elseif not tSlotButtonSetup["hideIcon"] then
-							tSlotButtonSetup["iconColor"] = tColorCopy;
-						end
-					elseif tSlotButtonSetup["staticIcon"] then
-						tSlotButtonSetup["staticColor"] = tColorCopy;
-					else
-						tSlotButtonSetup["iconColor"] = tColorCopy;
-					end
-				end
-
-				if tEntry["glowIcon"] == true then
-					tSlotButtonSetup["glowIcon"] = true;
-
-					tSlotButtonSetup["glowColor"] = tEntry["glowIconColor"];
-					tSlotButtonSetup["glowStyle"] = tEntry["glowIconStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
-				end
-
+			if tSlotButtonSetup then
 				tSlotTemplate = {
 					["key"] = "slot" .. tEntryIndex,
 					["filterString"] = VUHDO_resolveListEntrySlotFilter(aGroup, tEntry),
@@ -1264,34 +1144,7 @@ function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelH
 			tBouquetSlotTemplate = VUHDO_buildListEntryContainerGroupTemplate(tEntry["value"]);
 
 			if tBouquetSlotTemplate then
-				tBouquetSlotTemplate["buttonSetup"]["width"] = aPixelWidth;
-				tBouquetSlotTemplate["buttonSetup"]["height"] = aPixelHeight;
-				tBouquetSlotTemplate["buttonSetup"]["textSize"] = aAnchorButtonSetup["textSize"];
-				tBouquetSlotTemplate["buttonSetup"]["textConfig"] = aAnchorButtonSetup["textConfig"];
-				tBouquetSlotTemplate["buttonSetup"]["durationText"] = aAnchorButtonSetup["durationText"];
-				tBouquetSlotTemplate["buttonSetup"]["durationCooldown"] = aAnchorButtonSetup["durationCooldown"];
-				tBouquetSlotTemplate["buttonSetup"]["applicationCount"] = aAnchorButtonSetup["applicationCount"];
-				tBouquetSlotTemplate["buttonSetup"]["mouseMotion"] = aAnchorButtonSetup["mouseMotion"];
-				tBouquetSlotTemplate["buttonSetup"]["durationTextOptions"] = aAnchorButtonSetup["durationTextOptions"];
-
-				if anIsBar then
-					VUHDO_applyBarButtonSetupFields(tBouquetSlotTemplate["buttonSetup"], anAnchorConfig);
-
-					tBouquetSlotTemplate["buttonSetup"]["barVertical"] = aAnchorButtonSetup["barVertical"];
-					tBouquetSlotTemplate["buttonSetup"]["barTurnAxis"] = aAnchorButtonSetup["barTurnAxis"];
-					tBouquetSlotTemplate["buttonSetup"]["iconType"] = aAnchorButtonSetup["iconType"];
-					tBouquetSlotTemplate["buttonSetup"]["barSegmentWidth"] = aAnchorButtonSetup["barSegmentWidth"];
-					tBouquetSlotTemplate["buttonSetup"]["barSegmentHeight"] = aAnchorButtonSetup["barSegmentHeight"];
-					tBouquetSlotTemplate["buttonSetup"]["iconTextSize"] = aAnchorButtonSetup["iconTextSize"];
-					tBouquetSlotTemplate["buttonSetup"]["barColorMode"] = aAnchorButtonSetup["barColorMode"];
-					tBouquetSlotTemplate["buttonSetup"]["barTexture"] = aAnchorButtonSetup["barTexture"];
-
-					if tBouquetSlotTemplate["buttonSetup"]["staticColor"] then
-						tBouquetSlotTemplate["buttonSetup"]["barColor"] = tBouquetSlotTemplate["buttonSetup"]["staticColor"];
-					else
-						tBouquetSlotTemplate["buttonSetup"]["barColor"] = aAnchorButtonSetup["barColor"];
-					end
-				end
+				VUHDO_applyBouquetSlotButtonSetup(tBouquetSlotTemplate, anAnchorConfig, aPixelWidth, aPixelHeight, aAnchorButtonSetup, anIsBar);
 
 				tSlotTemplate = {
 					["key"] = "slot" .. tEntryIndex,
@@ -1422,7 +1275,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 	if tPanelNum then
 		tCachedEntry = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE[tPanelNum] and VUHDO_AURA_CONTAINER_TEMPLATE_CACHE[tPanelNum][anAnchorIndex];
 
-		if tCachedEntry and tCachedEntry["generation"] == VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION then
+		if tCachedEntry then
 			tCachedTemplate = tCachedEntry["template"];
 
 			return {
@@ -1467,21 +1320,6 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 	tHealthBarWidthPx = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
 	tHealthBarHeightPx = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
 
-	tContainerLayout["slotSpacing"] = (tGroupLayout or sEmpty)["spacing"] or 2;
-	tContainerLayout["slotMaxColumns"] = tContainerLayout["maxColumns"] or 5;
-	tContainerLayout["slotPixelWidth"] = tPixelWidth;
-	tContainerLayout["slotPixelHeight"] = tPixelHeight;
-
-	if tIsFixedLayout then
-		tContainerLayout["fixedBarWidth"] = tHealthBarWidthPx;
-		tContainerLayout["fixedBarHeight"] = tHealthBarHeightPx;
-		tContainerLayout["fixedIconSize"] = tPixelWidth;
-		tContainerLayout["fixedSpacing"] = (tGroupLayout or sEmpty)["spacing"] or 2;
-		tContainerLayout["fixedMaxColumns"] = tContainerLayout["maxColumns"] or 5;
-		tContainerLayout["fixedGrowthDir"] = anAnchorConfig["growthDir"] or "RIGHT";
-		tContainerLayout["fixedWrapDir"] = anAnchorConfig["wrapDir"] or "DOWN";
-	end
-
 	tOffsetX = (anAnchorConfig["offsetX"] or 0) * tHealthBarWidthPx * 0.01;
 	tOffsetY = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeightPx * 0.01;
 
@@ -1515,9 +1353,6 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 	tMaxCols = tContainerLayout["maxColumns"] or 5;
 	tGrowthDir = VUHDO_AURA_GROWTH_OFFSETS[anAnchorConfig["growthDir"]] or VUHDO_AURA_GROWTH_OFFSETS["RIGHT"];
 	tWrapDir = VUHDO_AURA_GROWTH_OFFSETS[anAnchorConfig["wrapDir"]] or VUHDO_AURA_GROWTH_OFFSETS["DOWN"];
-
-	tContainerLayout["slotGrowthDir"] = tGrowthDir;
-	tContainerLayout["slotWrapDir"] = tWrapDir;
 
 	if tType ~= VUHDO_AURA_GROUP_TYPE_LIST then
 		tGroupTemplate = {
@@ -1555,7 +1390,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 		if VUHDO_isListCollapseEligible(tGroup, tUseFixedSlots, tIsFixedLayout) then
 			tGroups = VUHDO_buildListAnchorEntryGroups(tGroup, anAnchorConfig, tPixelWidth, tPixelHeight, tSpacing, tMaxFrameCount, tTemplateName, tAnchorButtonSetup, tIsBar);
 		else
-			tSlots = VUHDO_buildListAnchorSlots(tGroup, anAnchorConfig, tPixelWidth, tPixelHeight, tSpacing, tMaxCols, tMaxFrameCount, tTemplateName, tAnchorButtonSetup, tIsBar, tGrowthDir, tWrapDir, tIsFixedLayout, tFixedRadioValue, tHealthBarWidthPx, tHealthBarHeightPx, aButton, tUseFixedSlots);
+			tSlots = VUHDO_buildListAnchorSlots(tGroup, anAnchorConfig, tPixelWidth, tPixelHeight, tSpacing, tMaxCols, tMaxFrameCount, tTemplateName, tAnchorButtonSetup, tIsBar, tGrowthDir, tWrapDir, tIsFixedLayout, tFixedRadioValue, tHealthBarWidthPx, tHealthBarHeightPx, aButton);
 		end
 	end
 
@@ -1593,7 +1428,6 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 		end
 
 		VUHDO_AURA_CONTAINER_TEMPLATE_CACHE[tPanelNum][anAnchorIndex] = {
-			["generation"] = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION,
 			["template"] = tCachedTemplate,
 		};
 	end
@@ -1691,7 +1525,6 @@ local tContainerLayout;
 local tGroupLayout;
 local tGrowthDir;
 local tWrapDir;
-local tIsBar;
 local tRadioValue;
 local tPos;
 local tPosition;
@@ -1701,7 +1534,6 @@ function VUHDO_resolveAnchorLayout(anAnchorConfig)
 		return nil, nil;
 	end
 
-	tIsBar = anAnchorConfig["style"] == "bars";
 	tRadioValue = anAnchorConfig["radioValue"];
 
 	if tRadioValue and tRadioValue <= 17 then
@@ -1766,9 +1598,6 @@ function VUHDO_resolveAnchorLayout(anAnchorConfig)
 
 	tGroupLayout = {
 		["spacing"] = anAnchorConfig["spacing"] or 2,
-		["isBar"] = tIsBar,
-		["width"] = tIsBar and (anAnchorConfig["barWidth"] or 100) or (anAnchorConfig["size"] or 40),
-		["height"] = tIsBar and (anAnchorConfig["barHeight"] or 30) or (anAnchorConfig["size"] or 40),
 	};
 
 	return tContainerLayout, tGroupLayout;

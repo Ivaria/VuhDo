@@ -43,10 +43,11 @@ local VUHDO_STATUSBAR_RIGHT_TO_LEFT;
 local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
 local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
 
-local VUHDO_LibOrbitGlow;
 local VUHDO_PixelUtil;
 local VUHDO_UIFrameFlash;
 local VUHDO_UIFrameFlashStop;
+local VUHDO_startFrameGlow;
+local VUHDO_stopFrameGlow;
 
 local VUHDO_safeSetAttribute;
 local VUHDO_getUnitButtonsPanel;
@@ -72,6 +73,7 @@ local VUHDO_isAuraModeContainers;
 local VUHDO_syncAuraContainersForUnit;
 local VUHDO_clearAuraContainersForButton;
 local VUHDO_initAuraContainersForButton;
+local VUHDO_getManaAdjustedYOffset;
 
 VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES or { };
 local VUHDO_AURA_FRAMES = VUHDO_AURA_FRAMES;
@@ -108,58 +110,6 @@ local sEntrySettingsCache = {
 };
 
 local sGlowColorArray = { 1, 1, 0, 1 };
-local sGlowProcOptions = { };
-local tGlowDef;
-
-
-
---
-local function VUHDO_stopEntryGlowFrame(aGlowFrame)
-
-	if not aGlowFrame or not aGlowFrame["hasEntryGlow"] then
-		return;
-	end
-
-	sGlowProcOptions["glow"] = aGlowFrame["entryGlowStyle"];
-	sGlowProcOptions["key"] = aGlowFrame["entryGlowKey"];
-	VUHDO_LibOrbitGlow.Proc:Clear(aGlowFrame, sGlowProcOptions);
-
-	aGlowFrame["hasEntryGlow"] = nil;
-	aGlowFrame["entryGlowKey"] = nil;
-	aGlowFrame["entryGlowStyle"] = nil;
-
-	return;
-
-end
-
-
-
---
-local function VUHDO_startEntryGlowFrame(aGlowFrame, aStyle, aGlowKey)
-
-	if aGlowFrame["hasEntryGlow"] and (aGlowFrame["entryGlowStyle"] ~= aStyle or aGlowFrame["entryGlowKey"] ~= aGlowKey) then
-		VUHDO_stopEntryGlowFrame(aGlowFrame);
-	end
-
-	sGlowProcOptions["glow"] = aStyle;
-	sGlowProcOptions["key"] = aGlowKey;
-	sGlowProcOptions["color"] = sGlowColorArray;
-	sGlowProcOptions["frameLevel"] = 1;
-
-	tGlowDef = VUHDO_LibOrbitGlow:GetGlowInfo(aStyle);
-	sGlowProcOptions["loopDuration"] = (tGlowDef and tGlowDef["duration"]) or 1.0;
-
-	VUHDO_LibOrbitGlow.Proc:Loop(aGlowFrame, sGlowProcOptions);
-
-	aGlowFrame["hasEntryGlow"] = true;
-	aGlowFrame["entryGlowKey"] = aGlowKey;
-	aGlowFrame["entryGlowStyle"] = aStyle;
-
-	return;
-
-end
-
-
 
 local sPanelBarHeights = { };
 
@@ -435,18 +385,6 @@ local sGrowthOffsets = {
 	["DOWN"] = { 0, -1 },
 };
 
-local sRelPointManaFactor = {
-	["TOPLEFT"] = 0,
-	["TOP"] = 0,
-	["TOPRIGHT"] = 0,
-	["LEFT"] = 0.5,
-	["CENTER"] = 0.5,
-	["RIGHT"] = 0.5,
-	["BOTTOMLEFT"] = 1,
-	["BOTTOM"] = 1,
-	["BOTTOMRIGHT"] = 1,
-};
-
 local sTimeAbbrevData = {
 	["breakpointData"] = {
 		{
@@ -543,10 +481,11 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_AURA_GROUP_TYPE_LIST = _G["VUHDO_AURA_GROUP_TYPE_LIST"];
 	VUHDO_ATLAS_TEXTURES = _G["VUHDO_ATLAS_TEXTURES"];
 
-	VUHDO_LibOrbitGlow = _G["VUHDO_LibOrbitGlow"];
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 	VUHDO_UIFrameFlash = _G["VUHDO_UIFrameFlash"];
 	VUHDO_UIFrameFlashStop = _G["VUHDO_UIFrameFlashStop"];
+	VUHDO_startFrameGlow = _G["VUHDO_startFrameGlow"];
+	VUHDO_stopFrameGlow = _G["VUHDO_stopFrameGlow"];
 
 	VUHDO_safeSetAttribute = _G["VUHDO_safeSetAttribute"];
 	VUHDO_getUnitButtonsPanel = _G["VUHDO_getUnitButtonsPanel"];
@@ -572,6 +511,7 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
 	VUHDO_clearAuraContainersForButton = _G["VUHDO_clearAuraContainersForButton"];
 	VUHDO_initAuraContainersForButton = _G["VUHDO_initAuraContainersForButton"];
+	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
 
 	sAuraPools["slotDataAsAura"] = VUHDO_createTablePool("SlotDataAsAura", 500);
 	sAuraPools["slotAssignment"] = VUHDO_createTablePool("SlotAssignment", 200);
@@ -695,15 +635,6 @@ function VUHDO_incrementAuraAnchorConfigVersion()
 	sAuraAnchorConfigVersion = sAuraAnchorConfigVersion + 1;
 
 	return;
-
-end
-
-
-
---
-function VUHDO_getAuraAnchorConfigVersion()
-
-	return sAuraAnchorConfigVersion;
 
 end
 
@@ -1177,69 +1108,6 @@ do
 		return;
 
 	end
-
-
-
-	--
-	function VUHDO_getAuraDispelCurve()
-
-		return sCurves["dispel"];
-
-	end
-
-
-
-	--
-	local tGroup;
-	local tCanAttack;
-	local tInfo;
-	function VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig)
-
-		if not aUnit or not anAnchorConfig then
-			return nil;
-		end
-
-		tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
-
-		if not tGroup then
-			return nil;
-		end
-
-		tInfo = VUHDO_RAID[aUnit];
-
-		if not tInfo then
-			return nil;
-		end
-
-		tCanAttack = tInfo["canAttack"];
-
-		if tGroup["isHarmful"] ~= tCanAttack then
-			return sCurves["dispel"];
-		end
-
-		return nil;
-
-	end
-
-
-
-	--
-	local tGroup;
-	function VUHDO_getDispelCurveForContext(aUnit, anAnchorConfig)
-
-		if not aUnit or not anAnchorConfig then
-			return nil;
-		end
-
-		tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
-
-		if not tGroup then
-			return nil;
-		end
-
-		return VUHDO_getDispelCurveForUnit(aUnit, tGroup["isHarmful"]);
-
-	end
 end
 
 
@@ -1537,10 +1405,10 @@ do
 			VUHDO_unregisterAuraFadeTexture(aFrame["iconFrame"]["textureI"]);
 		end
 
-		if aFrame["hasEntryGlow"] then
-			VUHDO_stopEntryGlowFrame(aFrame);
-		elseif aFrame["iconFrame"] and aFrame["iconFrame"]["hasEntryGlow"] then
-			VUHDO_stopEntryGlowFrame(aFrame["iconFrame"]);
+		if aFrame["hasAuraGroupBarGlow"] then
+			VUHDO_stopFrameGlow(aFrame, aFrame["auraGroupBarGlowKey"], "auraGroupBar");
+		elseif aFrame["iconFrame"] and aFrame["iconFrame"]["hasAuraGroupBarGlow"] then
+			VUHDO_stopFrameGlow(aFrame["iconFrame"], aFrame["iconFrame"]["auraGroupBarGlowKey"], "auraGroupBar");
 		end
 
 		if aFrame["childB"] and aFrame["childB"]["chargeTexture"] then
@@ -1925,68 +1793,6 @@ do
 	--
 	local tFrame;
 	local tFrameName;
-	function VUHDO_releaseAuraFrame(aButton, anAnchorIndex, aSlotIndex, anIsBar)
-
-		if not aButton or not anAnchorIndex or not aSlotIndex then
-			return;
-		end
-
-		tFrameName = aButton:GetName();
-
-		if not VUHDO_AURA_FRAMES[tFrameName] then
-			return;
-		end
-
-		if not VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex] then
-			return;
-		end
-
-		tFrame = VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex][aSlotIndex];
-
-		if not tFrame then
-			return;
-		end
-
-		if tFrame["childB"] and tFrame["childB"]["timerText"] then
-			VUHDO_unregisterAuraTimerText(tFrame["childB"]["timerText"]);
-		end
-
-		VUHDO_unregisterAuraFlashFrame(tFrame);
-
-		if tFrame["childB"] and tFrame["childB"]["textureI"] then
-			VUHDO_unregisterAuraFadeTexture(tFrame["childB"]["textureI"]);
-		end
-
-		if tFrame["iconFrame"] and tFrame["iconFrame"]["textureI"] then
-			VUHDO_unregisterAuraFadeTexture(tFrame["iconFrame"]["textureI"]);
-		end
-
-		if tFrame["childBar"] then
-			VUHDO_unregisterAuraFadeTexture(tFrame["childBar"]);
-		end
-
-		if anIsBar then
-			sAuraPools["bar"]:Release(tFrame);
-		else
-			sAuraPools["icon"]:Release(tFrame);
-		end
-
-		VUHDO_AURA_FRAMES[tFrameName][anAnchorIndex][aSlotIndex] = nil;
-
-		return;
-
-	end
-
-
-
-	--
-	local tIconFrame;
-	local tChild;
-	local tTexture;
-	local tPosX;
-	local tPosY;
-	local tAnchor;
-	local tRelPoint;
 	function VUHDO_displayPlayerIcon(aButton, aSlotIndex, aTexture, aTexCoords, aWidth, aHeight, aPositionIndex)
 
 		if not aButton or not aSlotIndex or not aTexture then
@@ -2219,34 +2025,16 @@ do
 
 
 	--
-	function VUHDO_releaseAllAuraFrames()
+	function VUHDO_resetAuraFrameDisplayCache(aFrame)
 
-		if sAuraTimer["animGroup"] then
-			sAuraTimer["animGroup"]:Stop();
+		if not aFrame then
+			return;
 		end
 
-		twipe(sAuraTimer["data"]);
-		twipe(sAuraTimer["isAlive"]);
-		twipe(sAuraTimer["durationMode"]);
-		twipe(sAuraTimer["timerThreshold"]);
-		twipe(sAuraTimer["flashData"]);
-		twipe(sAuraTimer["flashThreshold"]);
-		twipe(sAuraTimer["fadeData"]);
-		twipe(sAuraTimer["fadeThreshold"]);
-
-		sAuraTimer["count"] = 0;
-		sAuraTimer["flashCount"] = 0;
-		sAuraTimer["fadeCount"] = 0;
-
-		if sAuraPools["icon"] then
-			sAuraPools["icon"]:ReleaseAll();
-		end
-
-		if sAuraPools["bar"] then
-			sAuraPools["bar"]:ReleaseAll();
-		end
-
-		twipe(VUHDO_AURA_FRAMES);
+		aFrame["lastAuraInstanceId"] = nil;
+		aFrame["lastExpirationTime"] = nil;
+		aFrame["lastApplications"] = nil;
+		aFrame["lastIcon"] = nil;
 
 		return;
 
@@ -2281,10 +2069,7 @@ do
 			for tAnchorIndex, tAnchorFrames in pairs(tButtonFrames) do
 				for tSlotIndex, tFrame in pairs(tAnchorFrames) do
 					if tFrame then
-						tFrame["lastAuraInstanceId"] = nil;
-						tFrame["lastExpirationTime"] = nil;
-						tFrame["lastApplications"] = nil;
-						tFrame["lastIcon"] = nil;
+						VUHDO_resetAuraFrameDisplayCache(tFrame);
 
 						tFrame:SetAlpha(0);
 					end
@@ -2577,7 +2362,7 @@ do
 		end
 
 		if "HealthBar" == tPos["relFrame"] then
-			tBaseY = tBaseY + (aButton["manaBarLayoutHeight"] or 0) * (sRelPointManaFactor[tPos["relPoint"]] or 0);
+			tBaseY = VUHDO_getManaAdjustedYOffset(aButton, tPos["relPoint"], tBaseY);
 		end
 
 		tGrowthDir = sGrowthOffsets[anAnchorConfig["growthDir"]] or sGrowthOffsets["RIGHT"];
@@ -2894,7 +2679,7 @@ do
 			tYOff = tYOff + tGrowthYOff;
 		end
 
-		tYOff = tYOff + (aButton["manaBarLayoutHeight"] or 0) * (sRelPointManaFactor[tSlotPos["relPoint"]] or 0);
+		tYOff = VUHDO_getManaAdjustedYOffset(aButton, tSlotPos["relPoint"], tYOff);
 
 		aFrame:ClearAllPoints();
 		VUHDO_PixelUtil.SetPoint(aFrame, tSlotPos["anchor"], tRelFrame, tSlotPos["relPoint"], tXOff, tYOff);
@@ -3316,10 +3101,7 @@ function VUHDO_initAuraAnchorFrames(aButton, aPanelNum, anAnchorIndex, anAnchorC
 		end
 
 		if tFrame then
-			tFrame["lastAuraInstanceId"] = nil;
-			tFrame["lastExpirationTime"] = nil;
-			tFrame["lastApplications"] = nil;
-			tFrame["lastIcon"] = nil;
+			VUHDO_resetAuraFrameDisplayCache(tFrame);
 			tFrame["lastSettingsVersion"] = nil;
 
 			VUHDO_positionAuraFrame(tFrame, aButton, anAnchorConfig, tSlotIndex, anAnchorIndex);
@@ -3653,6 +3435,8 @@ do
 	local tDispelB;
 	local tDispelA;
 	local tDispelCurve;
+	local tDispelGroup;
+	local tDispelInfo;
 	local tColorMode;
 	local tClassColor;
 	local tIconColor;
@@ -3860,7 +3644,13 @@ do
 		tDispelBorder = (aPanelNum and anAnchorIndex and sAnchorSettingsCache["dispelBorder"][aPanelNum] and sAnchorSettingsCache["dispelBorder"][aPanelNum][anAnchorIndex]) or VUHDO_resolveAuraTriState(anAnchorConfig["dispelBorder"], "dispelBorder");
 
 		if aBackdropFrame and aBackdropFrame.SetBackdropBorderColor then
-			tDispelCurve = VUHDO_getAuraDispelCurveForContext(aUnit, anAnchorConfig);
+			tDispelGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+			tDispelInfo = aUnit and VUHDO_RAID[aUnit];
+			tDispelCurve = nil;
+
+			if tDispelGroup and tDispelInfo and tDispelGroup["isHarmful"] ~= tDispelInfo["canAttack"] then
+				tDispelCurve = sCurves["dispel"];
+			end
 
 			if tDispelBorder and aUnit and tDispelCurve and anAuraData["auraInstanceID"] and anAuraData["auraInstanceID"] >= 0 then
 				tColorMixin = GetAuraDispelTypeColor(aUnit, anAuraData["auraInstanceID"], tDispelCurve);
@@ -4185,9 +3975,9 @@ do
 				tGlowKey = format("VdAuraGlow_%d_%d_%d", aPanelNum or 0, anAnchorIndex, aSlotIndex);
 				tStyle = sEntrySettingsCache["glowStyle"][tGroupId] and sEntrySettingsCache["glowStyle"][tGroupId][tEntryIndex];
 
-				VUHDO_startEntryGlowFrame(tIconFrame, tStyle, tGlowKey);
-			elseif tIconFrame["hasEntryGlow"] then
-				VUHDO_stopEntryGlowFrame(tIconFrame);
+				VUHDO_startFrameGlow(tIconFrame, tStyle, sGlowColorArray, tGlowKey, 1, "auraGroupBar");
+			elseif tIconFrame["hasAuraGroupBarGlow"] then
+				VUHDO_stopFrameGlow(tIconFrame, tIconFrame["auraGroupBarGlowKey"], "auraGroupBar");
 			end
 
 			tGroupId = anAuraData["groupId"];
@@ -4259,10 +4049,10 @@ do
 			tGlowFrame = aBarFrame["iconFrame"];
 
 			if tGlowFrame then
-				VUHDO_startEntryGlowFrame(tGlowFrame, tStyle, tGlowKey);
+				VUHDO_startFrameGlow(tGlowFrame, tStyle, sGlowColorArray, tGlowKey, 1, "auraGroupBar");
 			end
-		elseif aBarFrame["iconFrame"] and aBarFrame["iconFrame"]["hasEntryGlow"] then
-			VUHDO_stopEntryGlowFrame(aBarFrame["iconFrame"]);
+		elseif aBarFrame["iconFrame"] and aBarFrame["iconFrame"]["hasAuraGroupBarGlow"] then
+			VUHDO_stopFrameGlow(aBarFrame["iconFrame"], aBarFrame["iconFrame"]["auraGroupBarGlowKey"], "auraGroupBar");
 		end
 
 		return;
@@ -4607,10 +4397,10 @@ do
 
 			VUHDO_UIFrameFlashStop(tFrame);
 
-			if tFrame["hasEntryGlow"] then
-				VUHDO_stopEntryGlowFrame(tFrame);
-			elseif tFrame["iconFrame"] and tFrame["iconFrame"]["hasEntryGlow"] then
-				VUHDO_stopEntryGlowFrame(tFrame["iconFrame"]);
+			if tFrame["hasAuraGroupBarGlow"] then
+				VUHDO_stopFrameGlow(tFrame, tFrame["auraGroupBarGlowKey"], "auraGroupBar");
+			elseif tFrame["iconFrame"] and tFrame["iconFrame"]["hasAuraGroupBarGlow"] then
+				VUHDO_stopFrameGlow(tFrame["iconFrame"], tFrame["iconFrame"]["auraGroupBarGlowKey"], "auraGroupBar");
 			end
 
 			if tFrame["iconFrame"] then
@@ -4621,13 +4411,12 @@ do
 				tFrame["auraInstanceId"] = nil;
 			end
 
-			tFrame["lastAuraInstanceId"] = nil;
-			tFrame["lastExpirationTime"] = nil;
-			tFrame["lastApplications"] = nil;
-			tFrame["lastIcon"] = nil;
+			tFrame["lastSettingsVersion"] = nil;
 			tFrame["maxObservedDuration"] = nil;
 			tFrame["baseDuration"] = nil;
 			tFrame["durationObj"] = nil;
+
+			VUHDO_resetAuraFrameDisplayCache(tFrame);
 
 			tFrame:SetAlpha(0);
 		end

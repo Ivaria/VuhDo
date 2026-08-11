@@ -331,6 +331,7 @@ do
 		VUHDO_xMsg("combatLockdown:", InCombatLockdown());
 		VUHDO_xMsg("containerBuilds:", VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0);
 		VUHDO_xMsg("containerReleases:", VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0);
+		VUHDO_xMsg("containerPoolHits:", VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] or 0);
 
 		VUHDO_xMsg("pendingContainerBuilds:", VUHDO_getPendingContainerBuildCount());
 
@@ -829,7 +830,7 @@ do
 			sSmokeTestContainer = nil;
 		end
 
-		tContainer = CreateFrame("AuraContainer", "VuhDoAuraSmokeTest", tButton, VUHDO_AURA_CONTAINER_TEMPLATE);
+		tContainer = CreateFrame("AuraContainer", "VuhDoAuraSmokeTest", tButton, "VuhDoAuraContainerTemplate");
 
 		tContainer:ClearAllPoints();
 

@@ -54,6 +54,7 @@ local VUHDO_isAuraDataRestricted;
 local VUHDO_isAuraModeContainers;
 local VUHDO_syncAllOverlayUnits;
 local VUHDO_buildAuraGroupNativeFilterString;
+local VUHDO_auraSourceMatchesFilter;
 
 local sUnitDispellableAuraId = { };
 local sUnitAuraCanColorBar = { };
@@ -214,6 +215,7 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
 	VUHDO_buildAuraGroupNativeFilterString = _G["VUHDO_buildAuraGroupNativeFilterString"];
+	VUHDO_auraSourceMatchesFilter = _G["VUHDO_auraSourceMatchesFilter"];
 
 	sAuraColorWinnerPool = VUHDO_createTablePool("AuraColorWinner", 100, VUHDO_createAuraColorWinnerDelegate, VUHDO_cleanupAuraColorWinnerDelegate);
 	sCanColorBarGroupPool = VUHDO_createTablePool("CanColorBarGroup", 50, VUHDO_createCanColorBarGroupDelegate, VUHDO_cleanupCanColorBarGroupDelegate);
@@ -520,8 +522,6 @@ do
 	local tBouquetActive;
 	local tCachedAura;
 	local tAuraInstanceId;
-	local tSourceUnit;
-	local tIsMine;
 	local function VUHDO_isListGroupActiveForUnit(aUnit, aEntries)
 
 		if not aEntries then
@@ -541,28 +541,8 @@ do
 								tAuraInstanceId = tAuraInstances[tCnt];
 								tCachedAura = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
 
-								if tCachedAura then
-									if tEntry["mine"] and tEntry["others"] then
-										return true;
-									end
-
-									tSourceUnit = tCachedAura["sourceUnit"];
-
-									if issecretvalue(tSourceUnit) then
-										if tEntry["mine"] == true or tEntry["others"] == true then
-											return true;
-										end
-									else
-										tIsMine = UnitIsUnit(tSourceUnit or "", "player");
-
-										if tEntry["mine"] and tIsMine then
-											return true;
-										end
-
-										if tEntry["others"] and not tIsMine then
-											return true;
-										end
-									end
+								if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tEntry) then
+									return true;
 								end
 							end
 						end
@@ -1377,24 +1357,6 @@ do
 	function VUHDO_hasDispellableAura(aUnit)
 
 		return sUnitDispellableAuraId[aUnit] ~= nil;
-
-	end
-
-
-
-	--
-	function VUHDO_getAuraColorType(aUnit)
-
-		return sUnitAuraColorType[aUnit];
-
-	end
-
-
-
-	--
-	function VUHDO_getAuraCustomColor(aUnit)
-
-		return sUnitAuraCustomColor[aUnit];
 
 	end
 
