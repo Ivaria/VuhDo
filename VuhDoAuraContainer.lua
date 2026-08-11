@@ -3177,9 +3177,14 @@ function VUHDO_refreshAuraContainer(aContainer)
 		return;
 	end
 
-	aContainer:UpdateAllAuras();
+	if InCombatLockdown() then
+		aContainer:UpdateAllAuras();
 
-	aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
+		aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
+	else
+		aContainer:Hide();
+		aContainer:Show();
+	end
 
 	return;
 
