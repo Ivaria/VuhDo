@@ -14,6 +14,8 @@ local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
 local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFilteredOutByInstanceID;
 
+local VUHDO_isAuraDataRestricted;
+
 local VUHDO_CONFIG;
 local VUHDO_PLAYER_CLASS;
 local VUHDO_AURA_GROUPS;
@@ -148,6 +150,8 @@ VUHDO_INFERRED_AURAS = { };
 --
 function VUHDO_auraInferenceInitLocalOverrides()
 
+	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
+
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_PLAYER_CLASS = _G["VUHDO_PLAYER_CLASS"];
 	VUHDO_AURA_GROUPS = VUHDO_CONFIG and VUHDO_CONFIG["AURA_GROUPS"];
@@ -219,6 +223,14 @@ local tOldSynthetic;
 function VUHDO_onUnitAuraInference(aUnit, aUpdateInfo)
 
 	if sDisabled then
+		return false;
+	end
+
+	if VUHDO_isAuraDataRestricted() then
+		return false;
+	end
+
+	if aUpdateInfo and issecretvalue(aUpdateInfo["isFullUpdate"]) then
 		return false;
 	end
 

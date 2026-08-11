@@ -10,16 +10,15 @@ local strfind = string.find;
 local gsub = string.gsub;
 local strsub = string.sub;
 local format = string.format;
+local next = next;
 
 local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
 local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFilteredOutByInstanceID;
 local GetAuraApplicationDisplayCount = C_UnitAuras and C_UnitAuras.GetAuraApplicationDisplayCount;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
-local GetSpellAuraSecrecy = C_Secrets and C_Secrets.GetSpellAuraSecrecy;
 local UnitIsUnit = UnitIsUnit;
 local issecretvalue = issecretvalue;
-local next = next;
 
 local VUHDO_CONFIG;
 local VUHDO_AURA_GROUPS;
@@ -32,6 +31,8 @@ local VUHDO_RAID;
 local VUHDO_I18N_AURA_GROUP_NAMES;
 local VUHDO_BOUQUETS;
 local VUHDO_BOUQUET_BUFFS_SPECIAL;
+local VUHDO_AURA_FRAMES;
+local VUHDO_UPDATE_DEBUFF;
 
 local VUHDO_UNIT_AURA_SOURCE_MINE;
 local VUHDO_UNIT_AURA_SOURCE_OTHERS;
@@ -41,6 +42,19 @@ local VUHDO_generateUUID;
 local VUHDO_determineAura;
 local VUHDO_updateAuraDisplaysForUnit;
 local VUHDO_updateEventBouquet;
+local VUHDO_refreshListBouquetsForUnit;
+local VUHDO_isAuraDataRestricted;
+local VUHDO_isAuraModeContainers;
+local VUHDO_needsUnitAuraEvent;
+local VUHDO_checkAuraGroupSounds;
+local VUHDO_checkAuraDataRestrictedState;
+local VUHDO_syncAuraContainersForUnit;
+local VUHDO_displayAurasAtAnchorFromCache;
+local VUHDO_classifyBouquetRestrictedMode;
+local VUHDO_getBouquetLayerTemplate;
+local VUHDO_getUnitButtonsPanel;
+local VUHDO_updateAllRaidBars;
+local VUHDO_updateHealthBarsFor;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
@@ -60,6 +74,9 @@ local VUHDO_UNIT_AURA_LIST_SLOTS = VUHDO_UNIT_AURA_LIST_SLOTS;
 VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS or { };
 local VUHDO_AURA_LIST_BOUQUETS = VUHDO_AURA_LIST_BOUQUETS;
 
+VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET = VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET or { };
+local VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET = VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET;
+
 VUHDO_ACTIVE_AURA_SPELLS = { };
 local VUHDO_ACTIVE_AURA_SPELLS = VUHDO_ACTIVE_AURA_SPELLS;
 
@@ -69,7 +86,7 @@ local VUHDO_ACTIVE_AURA_FILTERS = VUHDO_ACTIVE_AURA_FILTERS;
 VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS or { };
 local VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS;
 
-VUHDO_AURA_MIGRATION_VERSION = 5;
+VUHDO_AURA_MIGRATION_VERSION = 6;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
@@ -239,6 +256,8 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_I18N_AURA_GROUP_NAMES = _G["VUHDO_I18N_AURA_GROUP_NAMES"];
 	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
 	VUHDO_BOUQUET_BUFFS_SPECIAL = _G["VUHDO_BOUQUET_BUFFS_SPECIAL"];
+	VUHDO_AURA_FRAMES = _G["VUHDO_AURA_FRAMES"];
+	VUHDO_UPDATE_DEBUFF = _G["VUHDO_UPDATE_DEBUFF"];
 
 	VUHDO_UNIT_AURA_SOURCE_MINE = _G["VUHDO_UNIT_AURA_SOURCE_MINE"];
 	VUHDO_UNIT_AURA_SOURCE_OTHERS = _G["VUHDO_UNIT_AURA_SOURCE_OTHERS"];
@@ -248,8 +267,22 @@ function VUHDO_aurasInitLocalOverrides()
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_updateAuraDisplaysForUnit"];
 	VUHDO_updateEventBouquet = _G["VUHDO_updateEventBouquet"];
+	VUHDO_refreshListBouquetsForUnit = _G["VUHDO_refreshListBouquetsForUnit"];
+	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
+	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
+	VUHDO_needsUnitAuraEvent = _G["VUHDO_needsUnitAuraEvent"];
+	VUHDO_checkAuraGroupSounds = _G["VUHDO_checkAuraGroupSounds"];
+	VUHDO_checkAuraDataRestrictedState = _G["VUHDO_checkAuraDataRestrictedState"];
+	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
+	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
+	VUHDO_classifyBouquetRestrictedMode = _G["VUHDO_classifyBouquetRestrictedMode"];
+	VUHDO_getBouquetLayerTemplate = _G["VUHDO_getBouquetLayerTemplate"];
+	VUHDO_getUnitButtonsPanel = _G["VUHDO_getUnitButtonsPanel"];
+	VUHDO_updateAllRaidBars = _G["VUHDO_updateAllRaidBars"];
+	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 
 	VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_deferUpdateAuraDisplaysForUnit"];
+	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
 	sAuraDataPool = VUHDO_createTablePool("AuraData", 500);
 	sSlotIndexPool = VUHDO_createTablePool("SlotIndex", 200);
@@ -285,6 +318,164 @@ function VUHDO_releaseSlotData(aSlotData)
 
 	return;
 
+end
+
+
+
+do
+	--
+	local tSecretTemplate;
+	local tSecretValidatorEntry;
+	local tSecretIsActive;
+	local tSecretBool;
+	local tSecretPlainActive;
+	local function VUHDO_getNonAuraSlotTrigger(aBouquetName, anInfo)
+
+		tSecretTemplate = VUHDO_getBouquetLayerTemplate(aBouquetName);
+
+		if not tSecretTemplate or not tSecretTemplate["hasBools"] or not anInfo then
+			return false;
+		end
+
+		tSecretPlainActive = true;
+
+		for tIdx = 1, #tSecretTemplate["booleanValidators"] do
+			tSecretValidatorEntry = tSecretTemplate["booleanValidators"][tIdx];
+
+			tSecretIsActive, _, _, _, _, _, _, _, _, _, _, tSecretBool = tSecretValidatorEntry["special"]["validator"](anInfo, tSecretValidatorEntry["item"]);
+
+			if issecretvalue(tSecretBool) then
+				return true, nil, tSecretBool, tSecretValidatorEntry["special"]["isInverted"] == true;
+			end
+
+			if not tSecretIsActive then
+				tSecretPlainActive = false;
+			end
+		end
+
+		return true, tSecretPlainActive, nil, false;
+
+	end
+
+
+
+	--
+	local tNonAuraEntries;
+	local tNonAuraInfo;
+	local tNonAuraIsFixed;
+	local tNonAuraButtonName;
+	local tNonAuraButtonFrames;
+	local tNonAuraDisplaySlot;
+	local tNonAuraSlotData;
+	local tNonAuraActualSlot;
+	local tNonAuraSlotFrame;
+	local tNonAuraEntry;
+	local tNonAuraHasBools;
+	local tNonAuraPlainActive;
+	local tNonAuraSecretBool;
+	local tNonAuraIsInverted;
+	local function VUHDO_applyNonAuraSecretSlotAlpha(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig, aGroup, aListSlots, aMaxSlots, aPanelUnitButtons)
+
+		if not aListSlots then
+			return;
+		end
+
+		tNonAuraEntries = aGroup["entries"];
+
+		if not tNonAuraEntries then
+			return;
+		end
+
+		tNonAuraInfo = VUHDO_RAID[aUnit];
+		tNonAuraIsFixed = anAnchorConfig["fixedSlots"];
+
+		for _, tButton in pairs(aPanelUnitButtons or sEmpty) do
+			tNonAuraButtonName = tButton:GetName();
+			tNonAuraButtonFrames = VUHDO_AURA_FRAMES[tNonAuraButtonName] and VUHDO_AURA_FRAMES[tNonAuraButtonName][anAnchorIndex];
+
+			if tNonAuraButtonFrames then
+				tNonAuraDisplaySlot = 0;
+
+				for tSlotIndex = 1, aMaxSlots do
+					tNonAuraSlotData = aListSlots[tSlotIndex];
+
+					if tNonAuraSlotData and tNonAuraSlotData["isActive"] then
+						tNonAuraDisplaySlot = tNonAuraDisplaySlot + 1;
+						tNonAuraActualSlot = tNonAuraIsFixed and tSlotIndex or tNonAuraDisplaySlot;
+
+						tNonAuraSlotFrame = tNonAuraButtonFrames[tNonAuraActualSlot];
+						tNonAuraEntry = tNonAuraEntries[tSlotIndex];
+
+						if tNonAuraSlotFrame and tNonAuraEntry and tNonAuraEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET
+							and VUHDO_classifyBouquetRestrictedMode(tNonAuraEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_NON_AURA then
+							tNonAuraHasBools, tNonAuraPlainActive, tNonAuraSecretBool, tNonAuraIsInverted = VUHDO_getNonAuraSlotTrigger(tNonAuraEntry["value"], tNonAuraInfo);
+
+							if tNonAuraHasBools then
+								if tNonAuraPlainActive ~= nil then
+									tNonAuraSlotFrame:SetAlpha(tNonAuraPlainActive and 1 or 0);
+								elseif tNonAuraIsInverted then
+									tNonAuraSlotFrame:SetAlphaFromBoolean(tNonAuraSecretBool, 0, 1);
+								else
+									tNonAuraSlotFrame:SetAlphaFromBoolean(tNonAuraSecretBool, 1, 0);
+								end
+
+								tNonAuraSlotFrame["lastAuraInstanceId"] = nil;
+								tNonAuraSlotFrame["lastExpirationTime"] = nil;
+								tNonAuraSlotFrame["lastApplications"] = nil;
+								tNonAuraSlotFrame["lastIcon"] = nil;
+							end
+						end
+					end
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tNonAuraAnchorConfig;
+	local tNonAuraGroup;
+	local tNonAuraListSlots;
+	local tNonAuraMaxSlots;
+	local tNonAuraPanelUnitButtons;
+	function VUHDO_renderNonAuraListSlots(aUnit, aPanelNum, anAnchorIndex)
+
+		if not aUnit or not aPanelNum or not anAnchorIndex then
+			return;
+		end
+
+		tNonAuraAnchorConfig = VUHDO_PANEL_SETUP[aPanelNum]
+			and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"]
+			and VUHDO_PANEL_SETUP[aPanelNum]["AURA_ANCHORS"][anAnchorIndex];
+
+		if not tNonAuraAnchorConfig or tNonAuraAnchorConfig["enabled"] == false then
+			return;
+		end
+
+		tNonAuraGroup = VUHDO_getAuraGroup(tNonAuraAnchorConfig["groupId"]);
+
+		if not tNonAuraGroup or (tNonAuraGroup["type"] or 1) ~= VUHDO_AURA_GROUP_TYPE_LIST then
+			return;
+		end
+
+		tNonAuraListSlots = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit]
+			and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum]
+			and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex];
+
+		tNonAuraMaxSlots = tNonAuraAnchorConfig["maxDisplay"] or 5;
+		tNonAuraPanelUnitButtons = VUHDO_getUnitButtonsPanel(aUnit, aPanelNum);
+
+		VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, tNonAuraAnchorConfig, tNonAuraListSlots, tNonAuraMaxSlots);
+
+		VUHDO_applyNonAuraSecretSlotAlpha(aUnit, aPanelNum, anAnchorIndex, tNonAuraAnchorConfig, tNonAuraGroup, tNonAuraListSlots, tNonAuraMaxSlots, tNonAuraPanelUnitButtons);
+
+		return;
+
+	end
 end
 
 
@@ -347,7 +538,7 @@ function VUHDO_auraSourceMatchesFilter(aCachedAura, aLayerInfos)
 	tSourceUnit = aCachedAura["sourceUnit"];
 
 	if issecretvalue(tSourceUnit) then
-		return aLayerInfos["others"] == true;
+		return aLayerInfos["mine"] == true or aLayerInfos["others"] == true;
 	end
 
 	tIsMine = UnitIsUnit(tSourceUnit or "", "player");
@@ -833,16 +1024,20 @@ function VUHDO_resolveAuraGroupFilter(aGroup)
 		return;
 	end
 
-	if strfind(tFilter, VUHDO_ALL_DISPELLABLE_TOKEN, 1, true) then
-		tNative = gsub(tFilter, "|" .. VUHDO_ALL_DISPELLABLE_TOKEN, "");
-		tNative = gsub(tNative, VUHDO_ALL_DISPELLABLE_TOKEN .. "|?", "");
+	if strfind(tFilter, "RAID_PLAYER_DISPELLABLE", 1, true) and strfind(tFilter, "|PLAYER", 1, true) then
+		tFilter = gsub(tFilter, "|PLAYER", "");
+		aGroup["filter"] = tFilter;
+	end
 
-		if tNative == "" then
-			tNative = "HARMFUL";
+	if strfind(tFilter, VUHDO_ALL_DISPELLABLE_TOKEN, 1, true) then
+		tNative = gsub(tFilter, VUHDO_ALL_DISPELLABLE_TOKEN, "DISPELLABLE");
+
+		if tNative == "DISPELLABLE" then
+			tNative = "HARMFUL|DISPELLABLE";
 		end
 
 		aGroup["resolvedFilter"] = tNative;
-		aGroup["dispellableOnly"] = true;
+		aGroup["dispellableOnly"] = nil;
 	else
 		aGroup["resolvedFilter"] = tFilter;
 		aGroup["dispellableOnly"] = nil;
@@ -884,6 +1079,10 @@ function VUHDO_getFilteredAuras(aUnit, aFilter, aMaxCount, aSortRule, aSortDir, 
 		return { };
 	end
 
+	if VUHDO_isAuraDataRestricted() then
+		return sEmpty;
+	end
+
 	if anIsDispellableOnly then
 		tAuras = GetUnitAuras(aUnit, aFilter, 40, aSortRule or 0, aSortDir or 0);
 
@@ -920,6 +1119,10 @@ local tAuraMatchData;
 function VUHDO_auraMatchesFilter(aUnit, anAuraInstanceId, aFilter, anIsDispellableOnly)
 
 	if not aUnit or not anAuraInstanceId or not aFilter then
+		return false;
+	end
+
+	if VUHDO_isAuraDataRestricted() then
 		return false;
 	end
 
@@ -1459,6 +1662,30 @@ end
 
 
 --
+local tDegradeInfo;
+function VUHDO_degradeAuraCacheForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	tDegradeInfo = VUHDO_RAID and VUHDO_RAID[aUnit];
+
+	if tDegradeInfo then
+		tDegradeInfo["debuff"], tDegradeInfo["debuffName"] = VUHDO_determineAura(aUnit);
+
+		if not VUHDO_isAuraModeContainers() then
+			tDegradeInfo["charmed"] = nil;
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_refreshAllUnitAuras()
 
 	if not VUHDO_RAID then
@@ -1531,6 +1758,10 @@ end
 
 --
 function VUHDO_initSpecialUnitAuraSlots()
+
+	if VUHDO_isAuraModeContainers() then
+		return;
+	end
 
 	for _, tUnit in ipairs(sSpecialAuraUnits) do
 		VUHDO_initUnitAuraSlots(tUnit);
@@ -1731,6 +1962,31 @@ end
 
 
 --
+local tRestrictedPanelAnchors;
+local tRestrictedPanelLookup;
+function VUHDO_renderRestrictedListAnchorsForUnit(aUnit)
+
+	if not aUnit or not VUHDO_UNIT_BUTTONS_PANEL[aUnit] then
+		return;
+	end
+
+	for tPanelNum, _ in pairs(VUHDO_UNIT_BUTTONS_PANEL[aUnit]) do
+		tRestrictedPanelLookup = VUHDO_AURA_ANCHORS_WITH_NON_AURA_BOUQUET[tPanelNum];
+
+		if tRestrictedPanelLookup then
+			for tAnchorIndex, _ in pairs(tRestrictedPanelLookup) do
+				VUHDO_renderNonAuraListSlots(aUnit, tPanelNum, tAnchorIndex);
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tInfo;
 function VUHDO_onUnitAura(aUnit, aUpdateInfo)
 
@@ -1741,6 +1997,46 @@ function VUHDO_onUnitAura(aUnit, aUpdateInfo)
 	tInfo = (VUHDO_RAID or sEmpty)[aUnit];
 
 	if not tInfo then
+		return;
+	end
+
+	if VUHDO_isAuraModeContainers() then
+		if not VUHDO_needsUnitAuraEvent() then
+			return;
+		end
+
+		if VUHDO_isAuraDataRestricted() then
+			VUHDO_checkAuraDataRestrictedState(false);
+
+			return;
+		end
+
+		if aUpdateInfo and issecretvalue(aUpdateInfo["isFullUpdate"]) then
+			VUHDO_checkAuraDataRestrictedState(true);
+
+			return;
+		end
+
+		tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(aUnit, aUpdateInfo);
+
+		if aUpdateInfo and aUpdateInfo["addedAuras"] then
+			for _, tAura in pairs(aUpdateInfo["addedAuras"]) do
+				VUHDO_checkAuraGroupSounds(aUnit, tAura);
+			end
+		end
+
+		return;
+	end
+
+	if VUHDO_isAuraDataRestricted() then
+		VUHDO_checkAuraDataRestrictedState(false);
+
+		return;
+	end
+
+	if aUpdateInfo and issecretvalue(aUpdateInfo["isFullUpdate"]) then
+		VUHDO_checkAuraDataRestrictedState(true);
+
 		return;
 	end
 
@@ -1763,6 +2059,16 @@ local tAuras;
 function VUHDO_fullAuraRefresh(aUnit)
 
 	if not aUnit then
+		return;
+	end
+
+	if VUHDO_isAuraModeContainers() then
+		return;
+	end
+
+	if VUHDO_isAuraDataRestricted() then
+		VUHDO_checkAuraDataRestrictedState(false);
+
 		return;
 	end
 
@@ -1795,7 +2101,17 @@ function VUHDO_fullAuraRefresh(aUnit)
 		end
 	end
 
+	VUHDO_refreshListBouquetsForUnit(aUnit);
+
 	VUHDO_updateAuraDisplaysForUnit(aUnit);
+
+	tInfo = (VUHDO_RAID or sEmpty)[aUnit];
+
+	if tInfo then
+		tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(aUnit);
+
+		VUHDO_updateHealthBarsFor(aUnit, VUHDO_UPDATE_DEBUFF);
+	end
 
 	return;
 
@@ -1846,6 +2162,10 @@ do
 	function VUHDO_incrementalAuraUpdate(aUnit, aUpdateInfo)
 
 		if not aUnit or not aUpdateInfo then
+			return;
+		end
+
+		if VUHDO_isAuraModeContainers() then
 			return;
 		end
 
@@ -3048,7 +3368,6 @@ do
 		local tHots;
 		local tDebuffIgnoreList;
 		local tSpellId;
-		local tSecrecy;
 		function VUHDO_migrateHotsToAuraAnchorsV2()
 
 			tPanelSetup = _G["VUHDO_PANEL_SETUP"];
@@ -3079,17 +3398,9 @@ do
 					tSpellId = tonumber(tKey);
 
 					if tSpellId then
-						tSecrecy = GetSpellAuraSecrecy(tSpellId) or 2;
-
-						if tSecrecy == 0 then
-							tAuraIgnoreList[tSpellId] = true;
-						end
+						tAuraIgnoreList[tSpellId] = true;
 					else
-						tSecrecy = GetSpellAuraSecrecy(tKey) or 2;
-
-						if tSecrecy == 0 then
-							tAuraIgnoreList[tKey] = true;
-						end
+						tAuraIgnoreList[tKey] = true;
 					end
 				end
 			end
@@ -3338,6 +3649,33 @@ do
 
 
 	--
+	local tConfig;
+	local tGroup;
+	function VUHDO_migrateAuraGroupGlowBarStyle()
+
+		tConfig = _G["VUHDO_CONFIG"];
+
+		if not tConfig or not tConfig["AURA_GROUPS"] then
+			return;
+		end
+
+		for _, tGroup in pairs(tConfig["AURA_GROUPS"]) do
+			if tGroup then
+				if tGroup["canGlowBar"] and not tGroup["glowBarStyle"] then
+					tGroup["glowBarStyle"] = VUHDO_DEFAULT_AURA_GLOW_STYLE;
+				elseif not tGroup["canGlowBar"] then
+					tGroup["glowBarStyle"] = nil;
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tPanelSetup;
 	local tCurrentMigrationVersion;
 	function VUHDO_migrateOldConfigsToAuraAnchors()
@@ -3372,6 +3710,10 @@ do
 
 		if tCurrentMigrationVersion < 5 then
 			VUHDO_migrateAuraGroupIgnoreListKeys();
+		end
+
+		if tCurrentMigrationVersion < 6 then
+			VUHDO_migrateAuraGroupGlowBarStyle();
 		end
 
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
@@ -3485,6 +3827,12 @@ do
 
 		VUHDO_Msg("|cffFFD100--- Aura Commands ---|r");
 		VUHDO_Msg("  |cffB0E0E6/vd aura migrate|r - Re-run aura configuration migration");
+		VUHDO_Msg("  |cffB0E0E6/vd aura restrict on|off|auto|r - Force AuraContainer mode on/off and reload UI");
+		VUHDO_Msg("  |cffB0E0E6/vd aura restrict|r - Show current aura mode (on/off) and data state");
+		VUHDO_Msg("  |cffB0E0E6/vd aura audit|r - Audit bouquet/group container expressibility");
+		VUHDO_Msg("  |cffB0E0E6/vd aura dump [unit]|r - Dump aura container diagnostics");
+		VUHDO_Msg("  |cffB0E0E6/vd aura levels [unit]|r - Dump aura container frame levels");
+		VUHDO_Msg("  |cffB0E0E6/vd aura test [unit]|r - Create minimal aura container smoke test");
 		VUHDO_Msg("  |cffB0E0E6/vd aura|r - Show this help");
 		VUHDO_Msg("|cffFFD100--- End of Aura Commands ---|r");
 
