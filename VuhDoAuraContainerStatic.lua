@@ -24,9 +24,13 @@ local VUHDO_evaluateBouquetItemForStaticSlot;
 local VUHDO_applyAuraContainerSlotFilters;
 local VUHDO_getManaAdjustedYOffset;
 
+local sOwnedScratchColor = { };
+
 local sStaticSlotAuraScratch = {
-	["color"] = { },
+	["color"] = sOwnedScratchColor,
 };
+
+local sMixedSlotEvalCache = { };
 
 
 
@@ -123,10 +127,10 @@ do
 	local tXOff;
 	local tYOff;
 	local tFrameLevelOffset;
-	local tGeometryKey;
 	local tRelFrameKey;
 	local tChild;
 	local tTexture;
+	local tButtonFrameLevel;
 	local function VUHDO_applyStaticBouquetSlotGeometry(aFrame, aButton, aContainerTemplate, aStaticSlot)
 
 		if not aFrame or not aButton or not aContainerTemplate or not aStaticSlot then
@@ -139,9 +143,16 @@ do
 		tFrameLevelOffset = ((aContainerTemplate["anchor"] and aContainerTemplate["anchor"]["frameLevelOffset"]) or aFrame["addLevel"] or 10) + (aStaticSlot["frameLevelOffset"] or 0);
 
 		tRelFrameKey = (tRelFrame == aButton) and "button" or "healthBar";
-		tGeometryKey = format("%s:%s:%s:%d:%d:%d:%d:%d", tAnchorPoint or "", tRelPoint or "", tRelFrameKey, tXOff or 0, tYOff or 0, aStaticSlot["width"] or 0, aStaticSlot["height"] or 0, tFrameLevelOffset or 0);
 
-		if aFrame["staticSlotGeometryKey"] == tGeometryKey and aFrame:GetParent() == aButton then
+		if aFrame["staticSlotAnchorPoint"] == tAnchorPoint
+			and aFrame["staticSlotRelPoint"] == tRelPoint
+			and aFrame["staticSlotRelFrameKey"] == tRelFrameKey
+			and aFrame["staticSlotXOff"] == (tXOff or 0)
+			and aFrame["staticSlotYOff"] == (tYOff or 0)
+			and aFrame["staticSlotWidth"] == (aStaticSlot["width"] or 0)
+			and aFrame["staticSlotHeight"] == (aStaticSlot["height"] or 0)
+			and aFrame["staticSlotFrameLevelOffset"] == (tFrameLevelOffset or 0)
+			and aFrame:GetParent() == aButton then
 			return;
 		end
 
@@ -154,8 +165,10 @@ do
 			VUHDO_PixelUtil.SetPoint(aFrame, tAnchorPoint, tRelFrame, tRelPoint, tXOff, tYOff);
 			VUHDO_PixelUtil.SetSize(aFrame, aStaticSlot["width"] or 20, aStaticSlot["height"] or 20);
 
+			tButtonFrameLevel = aButton:GetFrameLevel();
+
 			VUHDO_PixelUtil.SetFrameStrata(aFrame, aButton:GetFrameStrata());
-			VUHDO_PixelUtil.SetFrameLevel(aFrame, aButton:GetFrameLevel() + tFrameLevelOffset);
+			VUHDO_PixelUtil.SetFrameLevel(aFrame, tButtonFrameLevel + tFrameLevelOffset);
 
 			tChild = aFrame["childB"];
 
@@ -172,7 +185,14 @@ do
 				tChild:SetAlpha(1);
 			end
 
-			aFrame["staticSlotGeometryKey"] = tGeometryKey;
+			aFrame["staticSlotAnchorPoint"] = tAnchorPoint;
+			aFrame["staticSlotRelPoint"] = tRelPoint;
+			aFrame["staticSlotRelFrameKey"] = tRelFrameKey;
+			aFrame["staticSlotXOff"] = tXOff or 0;
+			aFrame["staticSlotYOff"] = tYOff or 0;
+			aFrame["staticSlotWidth"] = aStaticSlot["width"] or 0;
+			aFrame["staticSlotHeight"] = aStaticSlot["height"] or 0;
+			aFrame["staticSlotFrameLevelOffset"] = tFrameLevelOffset or 0;
 		end
 
 		return;
@@ -204,9 +224,11 @@ do
 		if anIsColorReference then
 			tSlotDataAsAura["color"] = aColor;
 		elseif aColor then
-			VUHDO_copyColorTo(aColor, sStaticSlotAuraScratch["color"]);
+			VUHDO_copyColorTo(aColor, sOwnedScratchColor);
+			tSlotDataAsAura["color"] = sOwnedScratchColor;
 		else
-			twipe(sStaticSlotAuraScratch["color"]);
+			twipe(sOwnedScratchColor);
+			tSlotDataAsAura["color"] = sOwnedScratchColor;
 		end
 
 		return tSlotDataAsAura;
@@ -217,7 +239,6 @@ do
 
 	--
 	local tInfo;
-	local tEvalResults;
 	local tIsActive;
 	local tIcon;
 	local tTimer;
@@ -233,7 +254,8 @@ do
 	local tSlotDataAsAura;
 	local tButtonName;
 	local tAuraFrame;
-	local function VUHDO_paintMixedStaticBouquetItem(aButton, aUnit, aPanelNum, anAnchorIndex, aContainerData, anAnchorConfig, aStaticSlot, aSlotIndex)
+	local tEvalCacheEntry;
+	local function VUHDO_updateMixedStaticBouquetItem(aButton, aUnit, aPanelNum, anAnchorIndex, aContainerData, anAnchorConfig, aStaticSlot, aSlotIndex, aSlotEntryIndex)
 
 		tInfo = VUHDO_RAID[aUnit];
 
@@ -243,20 +265,25 @@ do
 			return;
 		end
 
-		tEvalResults = { VUHDO_evaluateBouquetItemForStaticSlot(aStaticSlot["bouquetName"], aStaticSlot["itemIndex"], tInfo) };
+		tEvalCacheEntry = sMixedSlotEvalCache[aSlotEntryIndex];
 
-		tIsActive = tEvalResults[1];
-		tIcon = tEvalResults[2];
-		tTimer = tEvalResults[3];
-		tCounter = tEvalResults[4];
-		tDuration = tEvalResults[5];
-		tColor = tEvalResults[6];
-		tBuffName = tEvalResults[7];
-		tClipL = tEvalResults[8];
-		tClipR = tEvalResults[9];
-		tClipT = tEvalResults[10];
-		tClipB = tEvalResults[11];
-		tSecretBool = tEvalResults[12];
+		if tEvalCacheEntry then
+			tIsActive = tEvalCacheEntry[1];
+			tIcon = tEvalCacheEntry[2];
+			tTimer = tEvalCacheEntry[3];
+			tCounter = tEvalCacheEntry[4];
+			tDuration = tEvalCacheEntry[5];
+			tColor = tEvalCacheEntry[6];
+			tBuffName = tEvalCacheEntry[7];
+			tClipL = tEvalCacheEntry[8];
+			tClipR = tEvalCacheEntry[9];
+			tClipT = tEvalCacheEntry[10];
+			tClipB = tEvalCacheEntry[11];
+			tSecretBool = tEvalCacheEntry[12];
+		else
+			tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tClipL, tClipR, tClipT, tClipB, tSecretBool
+				= VUHDO_evaluateBouquetItemForStaticSlot(aStaticSlot["bouquetName"], aStaticSlot["itemIndex"], tInfo);
+		end
 
 		if issecretvalue(tSecretBool) then
 			tSlotDataAsAura = VUHDO_fillStaticSlotScratch(tIcon or "Interface\\Icons\\INV_Misc_QuestionMark", 0, 0, 0, tBuffName, -1, tClipL, tClipR, tClipT, tClipB, tColor, anAnchorConfig["groupId"], aStaticSlot["entryIndex"]);
@@ -324,15 +351,26 @@ do
 	local tAuraFrame;
 	local tInfo;
 	local tMixedPriorityCutoffs;
-	local tEvalResults;
 	local tIsActive;
+	local tIcon;
+	local tTimer;
+	local tCounter;
+	local tDuration;
+	local tColor;
+	local tBuffName;
+	local tClipL;
+	local tClipR;
+	local tClipT;
+	local tClipB;
 	local tSecretBool;
 	local tEntryIndex;
 	local tItemIndex;
 	local tPriorityCutoff;
 	local tContainer;
 	local tCanAttack;
-	function VUHDO_paintStaticBouquetSlotsForButton(aButton, aUnit, aContainerData)
+	local tEvalCacheEntry;
+	local tSlotEntryIndex;
+	function VUHDO_updateStaticBouquetSlotsForButton(aButton, aUnit, aContainerData, aCanAttack, anIsSlotFiltersApplied)
 
 		if not aButton or not aUnit or not aContainerData then
 			return;
@@ -371,15 +409,35 @@ do
 			twipe(tMixedPriorityCutoffs);
 		end
 
+		twipe(sMixedSlotEvalCache);
+
 		tInfo = VUHDO_RAID[aUnit];
 
 		if tInfo and tInfo["connected"] and not tInfo["dead"] then
-			for _, tStaticSlot in pairs(tStaticSlots) do
+			for tSlotEntryIndex, tStaticSlot in pairs(tStaticSlots) do
 				if tStaticSlot["isMixedBouquetItem"] then
-					tEvalResults = { VUHDO_evaluateBouquetItemForStaticSlot(tStaticSlot["bouquetName"], tStaticSlot["itemIndex"], tInfo) };
+					tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tClipL, tClipR, tClipT, tClipB, tSecretBool
+						= VUHDO_evaluateBouquetItemForStaticSlot(tStaticSlot["bouquetName"], tStaticSlot["itemIndex"], tInfo);
 
-					tIsActive = tEvalResults[1];
-					tSecretBool = tEvalResults[12];
+					tEvalCacheEntry = sMixedSlotEvalCache[tSlotEntryIndex];
+
+					if not tEvalCacheEntry then
+						tEvalCacheEntry = { };
+						sMixedSlotEvalCache[tSlotEntryIndex] = tEvalCacheEntry;
+					end
+
+					tEvalCacheEntry[1] = tIsActive;
+					tEvalCacheEntry[2] = tIcon;
+					tEvalCacheEntry[3] = tTimer;
+					tEvalCacheEntry[4] = tCounter;
+					tEvalCacheEntry[5] = tDuration;
+					tEvalCacheEntry[6] = tColor;
+					tEvalCacheEntry[7] = tBuffName;
+					tEvalCacheEntry[8] = tClipL;
+					tEvalCacheEntry[9] = tClipR;
+					tEvalCacheEntry[10] = tClipT;
+					tEvalCacheEntry[11] = tClipB;
+					tEvalCacheEntry[12] = tSecretBool;
 
 					if tIsActive and not issecretvalue(tSecretBool) then
 						tEntryIndex = tStaticSlot["entryIndex"];
@@ -406,7 +464,7 @@ do
 				if tPriorityCutoff and tItemIndex and tItemIndex > tPriorityCutoff then
 					VUHDO_hideAuraSlot(aButton, tAnchorIndex, tSlotIndex, tIsBar);
 				else
-					VUHDO_paintMixedStaticBouquetItem(aButton, aUnit, tPanelNum, tAnchorIndex, aContainerData, tAnchorConfig, tStaticSlot, tSlotIndex);
+					VUHDO_updateMixedStaticBouquetItem(aButton, aUnit, tPanelNum, tAnchorIndex, aContainerData, tAnchorConfig, tStaticSlot, tSlotIndex, tSlotEntryIndex);
 				end
 			else
 				tSlotData = tListSlots and tListSlots[tStaticSlot["entryIndex"]];
@@ -432,8 +490,13 @@ do
 
 		tContainer = aContainerData["container"];
 
-		if tContainer then
-			tCanAttack = UnitCanAttack("player", aUnit);
+		if tContainer and not anIsSlotFiltersApplied then
+			if aCanAttack == nil then
+				tCanAttack = UnitCanAttack("player", aUnit);
+			else
+				tCanAttack = aCanAttack;
+			end
+
 			VUHDO_applyAuraContainerSlotFilters(tContainer, aContainerData, tCanAttack);
 		end
 
@@ -514,7 +577,7 @@ do
 				tContainerData = VUHDO_AURA_CONTAINERS[tButtonName][anAnchorIndex];
 
 				if tContainerData and tContainerData["staticSlots"] and next(tContainerData["staticSlots"]) then
-					VUHDO_paintStaticBouquetSlotsForButton(tButton, aUnit, tContainerData);
+					VUHDO_updateStaticBouquetSlotsForButton(tButton, aUnit, tContainerData);
 				end
 			end
 		end

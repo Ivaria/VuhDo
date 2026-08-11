@@ -63,7 +63,6 @@ local VUHDO_backColor;
 local VUHDO_safeColorFromTable;
 local VUHDO_resolveAuraTriState;
 local VUHDO_getAuraGroup;
-local VUHDO_getDispelCurveForUnit;
 local VUHDO_getAnchorTriStateBool;
 local VUHDO_getAllAuraGroups;
 local VUHDO_setAnchorSlotAuraId;
@@ -502,7 +501,6 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_setAnchorSlotAuraId = _G["VUHDO_setAnchorSlotAuraId"];
 	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
-	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 	VUHDO_isPanelPopulated = _G["VUHDO_isPanelPopulated"];
 	VUHDO_getAnchorTriStateBool = _G["VUHDO_getAnchorTriStateBool"];
 	VUHDO_getAllAuraGroups = _G["VUHDO_getAllAuraGroups"];
@@ -1420,7 +1418,14 @@ do
 		end
 
 		aFrame["vuhdo_button"] = nil;
-		aFrame["staticSlotGeometryKey"] = nil;
+		aFrame["staticSlotAnchorPoint"] = nil;
+		aFrame["staticSlotRelPoint"] = nil;
+		aFrame["staticSlotRelFrameKey"] = nil;
+		aFrame["staticSlotXOff"] = nil;
+		aFrame["staticSlotYOff"] = nil;
+		aFrame["staticSlotWidth"] = nil;
+		aFrame["staticSlotHeight"] = nil;
+		aFrame["staticSlotFrameLevelOffset"] = nil;
 		aFrame["isStaticSlotFrame"] = nil;
 
 		aFrame:Hide();

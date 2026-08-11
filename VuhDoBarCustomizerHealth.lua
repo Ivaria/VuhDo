@@ -1191,13 +1191,16 @@ do
 	local tGlowColor;
 	local tGlowStyle;
 	local tWasGlowActive;
+	local tUseLegacyAuraGroupGlow;
 	local function VUHDO_updateHealthBarValueForUnit(aUnit, aCurrValue, aMaxValue, aColor, aMaxColor, aBouquetName, aLayerTemplate, aCurrValue2)
 
 		tCanGlow = false;
 		tGlowColor = nil;
 		tGlowStyle = nil;
 
-		if not VUHDO_isAuraModeContainers() and not VUHDO_isAuraDataRestricted() then
+		tUseLegacyAuraGroupGlow = not VUHDO_isAuraModeContainers() and not VUHDO_isAuraDataRestricted();
+
+		if tUseLegacyAuraGroupGlow then
 			tCanGlow, tGlowColor, tGlowStyle = VUHDO_getAuraGroupGlowInfo(aUnit);
 		end
 
@@ -1234,14 +1237,10 @@ do
 					end
 				end
 
-				if not VUHDO_isAuraModeContainers() and not VUHDO_isAuraDataRestricted() then
+				if tUseLegacyAuraGroupGlow then
 					tWasGlowActive = tButton[VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY];
 
 					if tCanGlow and tGlowColor and tGlowStyle then
-						if tWasGlowActive then
-							VUHDO_stopUnitButtonAuraGroupGlow(tButton, VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY);
-						end
-
 						VUHDO_startUnitButtonAuraGroupGlow(tButton, tGlowStyle, tGlowColor, VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY);
 
 						tButton[VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY] = true;

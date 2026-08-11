@@ -73,6 +73,8 @@ function VUHDO_saveAuraIgnoreClicked(aButton)
 
 			VUHDO_initAuraIgnoreComboModel();
 
+			VUHDO_invalidateAuraGroupFilterCache();
+
 			tCombo = _G[aButton:GetParent():GetName() .. "IgnoreComboBox"];
 
 			if tCombo then
@@ -136,6 +138,8 @@ function VUHDO_deleteAuraIgnoreClicked(aButton)
 		end
 
 		VUHDO_initAuraIgnoreComboModel();
+
+		VUHDO_invalidateAuraGroupFilterCache();
 
 		tCombo = _G[aButton:GetParent():GetName() .. "IgnoreComboBox"];
 
@@ -263,6 +267,8 @@ function VUHDO_auraIgnoreImport(anEditBoxName)
 
 		VUHDO_AURA_IGNORE_LIST[tKey or tAuraIgnoreSpell] = true;
 	end
+
+	VUHDO_invalidateAuraGroupFilterCache();
 
 	VUHDO_Msg(VUHDO_I18N_AURA_IGNORE_IMPORTED);
 

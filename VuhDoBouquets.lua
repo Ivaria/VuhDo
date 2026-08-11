@@ -28,6 +28,7 @@ local VUHDO_getAuraTextColorType;
 local VUHDO_determineAura;
 local VUHDO_updateHealthBarsFor;
 local VUHDO_isAuraDataRestricted;
+local VUHDO_isAuraModeContainers;
 local VUHDO_resolveGroupCandidateFilters;
 local VUHDO_resolveAuraContainerSpellId;
 local VUHDO_getAuraGroup;
@@ -217,6 +218,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
+	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_resolveGroupCandidateFilters = _G["VUHDO_resolveGroupCandidateFilters"];
 	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
@@ -4849,9 +4851,9 @@ end
 
 --
 local tRefreshBouquetName;
-local tRefreshLastEval;
 local tRefreshIsRestricted;
 local tRefreshRestrictedMode;
+local tRefreshLastEval;
 function VUHDO_refreshListBouquetsForUnit(aUnit)
 
 	if not aUnit or not VUHDO_RAID[aUnit] then

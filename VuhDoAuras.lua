@@ -1780,6 +1780,8 @@ function VUHDO_onUnitAura(aUnit, aUpdateInfo)
 
 	if not aUpdateInfo or aUpdateInfo["isFullUpdate"] then
 		VUHDO_fullAuraRefresh(aUnit);
+
+		return;
 	else
 		VUHDO_incrementalAuraUpdate(aUnit, aUpdateInfo);
 	end

@@ -153,6 +153,7 @@ local VUHDO_getDispelTypeColorMapOpaque;
 local VUHDO_getDispelColorGeneration;
 local VUHDO_applyAuraGroupBarGlowFromAuraButton;
 local VUHDO_getManaAdjustedYOffset;
+local VUHDO_releaseAuraButtonGlowState;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -193,29 +194,29 @@ local sHasPendingBuilds = false;
 local sContainerClassColorBars = { };
 
 local sAuraBarIconLayouts = {
-	["vt"] = {
-		["iconPoint"] = "TOP",
-		["barPoint"] = "TOP",
-		["barRelPoint"] = "BOTTOM",
-		["useBarWidth"] = false,
+	[0] = {
+		["iconPoint"] = "LEFT",
+		["barPoint"] = "LEFT",
+		["barRelPoint"] = "RIGHT",
+		["useBarWidth"] = true,
 	},
-	["vf"] = {
-		["iconPoint"] = "BOTTOM",
-		["barPoint"] = "BOTTOM",
-		["barRelPoint"] = "TOP",
-		["useBarWidth"] = false,
-	},
-	["ht"] = {
+	[1] = {
 		["iconPoint"] = "RIGHT",
 		["barPoint"] = "RIGHT",
 		["barRelPoint"] = "LEFT",
 		["useBarWidth"] = true,
 	},
-	["hf"] = {
-		["iconPoint"] = "LEFT",
-		["barPoint"] = "LEFT",
-		["barRelPoint"] = "RIGHT",
-		["useBarWidth"] = true,
+	[2] = {
+		["iconPoint"] = "BOTTOM",
+		["barPoint"] = "BOTTOM",
+		["barRelPoint"] = "TOP",
+		["useBarWidth"] = false,
+	},
+	[3] = {
+		["iconPoint"] = "TOP",
+		["barPoint"] = "TOP",
+		["barRelPoint"] = "BOTTOM",
+		["useBarWidth"] = false,
 	},
 };
 
@@ -362,6 +363,10 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_getDispelColorGeneration = _G["VUHDO_getDispelColorGeneration"];
 	VUHDO_applyAuraGroupBarGlowFromAuraButton = _G["VUHDO_applyAuraGroupBarGlowFromAuraButton"];
 	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
+	VUHDO_releaseAuraButtonGlowState = _G["VUHDO_releaseAuraButtonGlowState"];
+
+	sAuraOpaqueBorderOptions["backingCurveFn"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"];
+	sAuraOpaqueBorderOptions["fillCurveFn"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"];
 
 	if not sAuraTimerColorCurveFull then
 		sAuraTimerColorCurveFull = CreateColorCurve();
@@ -447,7 +452,6 @@ local tDurationBar;
 local tIconTexture;
 local tIconColorOverlay;
 local tDurationCooldown;
-local tLayoutKey;
 local tLayoutSpec;
 local tDurationBarWidth;
 local function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton)
@@ -503,8 +507,7 @@ local function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton)
 	tIconFrame:ClearAllPoints();
 	tIconFrame:Show();
 
-	tLayoutKey = (tBarVertical and "v" or "h") .. (tBarTurnAxis and "t" or "f");
-	tLayoutSpec = sAuraBarIconLayouts[tLayoutKey];
+	tLayoutSpec = sAuraBarIconLayouts[(tBarVertical and 2 or 0) + (tBarTurnAxis and 1 or 0)];
 
 	VUHDO_PixelUtil.SetPoint(tIconFrame, tLayoutSpec["iconPoint"], aAuraButton, tLayoutSpec["iconPoint"], 0, 0);
 	VUHDO_PixelUtil.SetSize(tIconFrame, tIconSize, tIconSize);
@@ -940,21 +943,22 @@ end
 
 
 
---
-local tMainTexture;
-local tStaticColor;
-local tBarColor;
-local tIconColor;
-local tShadowBar;
-local tShadowTexture;
-local tFillTexture;
-local tFillMask;
-local tFillBackground;
-local tTexCoords;
-local tDispelIconTexture;
-local tTextOverlayFrame;
-local tBarNoIconTexts;
-local function VUHDO_applyAuraButtonSetup(anButtonSetup, aAuraButton)
+do
+	--
+	local tMainTexture;
+	local tStaticColor;
+	local tBarColor;
+	local tIconColor;
+	local tShadowBar;
+	local tShadowTexture;
+	local tFillTexture;
+	local tFillMask;
+	local tFillBackground;
+	local tTexCoords;
+	local tDispelIconTexture;
+	local tTextOverlayFrame;
+	local tBarNoIconTexts;
+	function VUHDO_applyAuraButtonSetup(anButtonSetup, aAuraButton)
 
 	if not anButtonSetup then
 		return;
@@ -1126,13 +1130,13 @@ local function VUHDO_applyAuraButtonSetup(anButtonSetup, aAuraButton)
 
 					if "cover" == anButtonSetup["shadowValueMode"] then
 						sAuraOpaqueBorderOptions["customDispelColorMap"] = nil;
-						sAuraOpaqueBorderOptions["customDispelColorCurve"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"](anButtonSetup["dispelBright"], anButtonSetup["dispelOpacity"]);
+						sAuraOpaqueBorderOptions["customDispelColorCurve"] = sAuraOpaqueBorderOptions["backingCurveFn"](anButtonSetup["dispelBright"], anButtonSetup["dispelOpacity"]);
 
 						if tFillBackground then
 							aAuraButton:AddDispelTypeTexture(tFillBackground, sAuraOpaqueBorderOptions);
 						end
 
-						sAuraOpaqueBorderOptions["customDispelColorCurve"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"](anButtonSetup["dispelBright"], anButtonSetup["dispelOpacity"]);
+						sAuraOpaqueBorderOptions["customDispelColorCurve"] = sAuraOpaqueBorderOptions["fillCurveFn"](anButtonSetup["dispelBright"], anButtonSetup["dispelOpacity"]);
 
 						aAuraButton:AddDispelTypeTexture(tFillTexture, sAuraOpaqueBorderOptions);
 					elseif anButtonSetup["dispelOpacity"] then
@@ -1301,6 +1305,8 @@ local function VUHDO_applyAuraButtonSetup(anButtonSetup, aAuraButton)
 
 end
 
+end
+
 
 
 --
@@ -1312,6 +1318,12 @@ local function VUHDO_registerContainerClassColorBar(aContainer, aDurationBar)
 
 	if not sContainerClassColorBars[aContainer] then
 		sContainerClassColorBars[aContainer] = { };
+	end
+
+	for tCnt = 1, #sContainerClassColorBars[aContainer] do
+		if sContainerClassColorBars[aContainer][tCnt] == aDurationBar then
+			return;
+		end
 	end
 
 	tinsert(sContainerClassColorBars[aContainer], aDurationBar);
@@ -1385,8 +1397,11 @@ do
 	local tGroupTemplate;
 	local tFrameIndex;
 	local tParentButton;
-	local tAnchorConfig;
-	local tFixedPlacement;
+	local tFixedAnchorConfig;
+	local tFixedAnchor;
+	local tFixedRelPoint;
+	local tFixedX;
+	local tFixedY;
 	local tSlotTemplate;
 	local tSlotButtonSetup;
 	local tSlotContainerLevel;
@@ -1411,30 +1426,22 @@ do
 
 			tParentButton = aContainer:GetParent();
 
-			tAnchorConfig = {
-				["growthDir"] = tGroupTemplate["fixedGrowthDir"] or "RIGHT",
-				["wrapDir"] = tGroupTemplate["fixedWrapDir"] or "DOWN",
-				["maxColumns"] = tGroupTemplate["fixedMaxColumns"] or 5,
-				["spacing"] = tGroupTemplate["fixedSpacing"] or 2,
-			};
+			tFixedAnchorConfig = tGroupTemplate["fixedAnchorConfig"];
 
-			tFixedPlacement = VUHDO_resolveFixedAuraSlotPlacement(
+			tFixedAnchor, tFixedRelPoint, tFixedX, tFixedY = VUHDO_resolveFixedAuraSlotPlacement(
 				tGroupTemplate["fixedRadioValue"],
 				tFrameIndex,
 				tGroupTemplate["fixedBarWidth"],
 				tGroupTemplate["fixedBarHeight"],
-				tAnchorConfig,
+				tFixedAnchorConfig,
 				tParentButton,
 				tGroupTemplate["fixedIconSize"]
 			);
 
-			if tFixedPlacement then
-				tSlotAnchor = tFixedPlacement["anchor"];
-				tSlotRelPoint = tFixedPlacement["relPoint"];
-
+			if tFixedAnchor then
 				aAuraButton:ClearAllPoints();
 
-				VUHDO_PixelUtil.SetPoint(aAuraButton, tSlotAnchor, aContainer, tSlotRelPoint, tFixedPlacement["x"] or 0, tFixedPlacement["y"] or 0);
+				VUHDO_PixelUtil.SetPoint(aAuraButton, tFixedAnchor, aContainer, tFixedRelPoint, tFixedX or 0, tFixedY or 0);
 				VUHDO_PixelUtil.SetSize(aAuraButton, tGroupTemplate["layout"] and tGroupTemplate["layout"]["elementWidth"] or 20, tGroupTemplate["layout"] and tGroupTemplate["layout"]["elementHeight"] or 20);
 			end
 
@@ -1607,6 +1614,31 @@ do
 		end
 
 		return tStaticSlots;
+
+	end
+
+
+
+	--
+	function VUHDO_finalizeCachedAuraContainerTemplate(aContainerTemplate)
+
+		if not aContainerTemplate then
+			return nil;
+		end
+
+		if not aContainerTemplate["poolKeyBase"] then
+			VUHDO_computeAuraContainerPoolKeyBase(aContainerTemplate);
+		end
+
+		if not aContainerTemplate["staticSlots"] then
+			aContainerTemplate["staticSlots"] = VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate);
+		end
+
+		if aContainerTemplate["usesDispelTextures"] == nil then
+			aContainerTemplate["usesDispelTextures"] = VUHDO_containerTemplateUsesDispelTextures(aContainerTemplate);
+		end
+
+		return aContainerTemplate;
 
 	end
 
@@ -1841,7 +1873,7 @@ do
 			["groupKeys"] = tGroupKeys,
 			["slotTemplateRefs"] = tSlotTemplateRefs,
 			["groupTemplateRefs"] = tGroupTemplateRefs,
-			["staticSlots"] = VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate),
+			["staticSlots"] = aContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate),
 			["panelNum"] = aContainerTemplate["panelNum"],
 			["anchorIndex"] = aContainerTemplate["anchorIndex"],
 			["fromPool"] = false,
@@ -1880,12 +1912,18 @@ function VUHDO_getOrCreateOverlayHostFrame(aButton, aTargetBar)
 	end
 
 	tOverlayHostFrameName = tOverlayHostTargetBarName .. "OlHost";
-	tOverlayHostFrame = _G[tOverlayHostFrameName];
+	tOverlayHostFrame = aTargetBar["VuhDoOverlayHostFrame"];
 
 	if not tOverlayHostFrame then
-		tOverlayHostFrame = CreateFrame("Frame", tOverlayHostFrameName, aButton);
+		tOverlayHostFrame = _G[tOverlayHostFrameName];
 
-		tOverlayHostFrame["addLevel"] = aTargetBar["addLevel"];
+		if not tOverlayHostFrame then
+			tOverlayHostFrame = CreateFrame("Frame", tOverlayHostFrameName, aButton);
+
+			tOverlayHostFrame["addLevel"] = aTargetBar["addLevel"];
+		end
+
+		aTargetBar["VuhDoOverlayHostFrame"] = tOverlayHostFrame;
 	end
 
 	if not InCombatLockdown() then
@@ -2103,121 +2141,156 @@ do
 	local tContainerLayout;
 	local tParentName;
 	local tButtonSetup;
+	local tPoolKeyBase;
+	local function VUHDO_appendAuraContainerPoolKeyToScratch(aScratch, aContainerTemplate)
+
+		tinsert(aScratch, aContainerTemplate["isOverlay"] and "1" or "0");
+		tinsert(aScratch, aContainerTemplate["isFillChain"] and "1" or "0");
+		tinsert(aScratch, aContainerTemplate["chainHasBaseline"] and "1" or "0");
+
+		if aContainerTemplate["anchor"] then
+			tinsert(aScratch, aContainerTemplate["anchor"]["mode"] or "");
+			tinsert(aScratch, format("%d", aContainerTemplate["anchor"]["frameLevelOffset"] or 0));
+			tinsert(aScratch, format("%d", aContainerTemplate["anchor"]["offsetX"] or 0));
+			tinsert(aScratch, format("%d", aContainerTemplate["anchor"]["offsetY"] or 0));
+		end
+
+		tContainerLayout = aContainerTemplate["containerLayout"];
+
+		if tContainerLayout then
+			tinsert(aScratch, tContainerLayout["isFixedLayout"] and "1" or "0");
+			tinsert(aScratch, format("%d", tContainerLayout["fixedRadioValue"] or 0));
+			tinsert(aScratch, tContainerLayout["useFixedSlots"] and "1" or "0");
+			tinsert(aScratch, tContainerLayout["anchorPoint"] or "");
+			tinsert(aScratch, format("%d", tContainerLayout["elementWidth"] or 0));
+			tinsert(aScratch, format("%d", tContainerLayout["maxColumns"] or 0));
+			tinsert(aScratch, format("%d", tContainerLayout["maxRows"] or 0));
+			tinsert(aScratch, format("%d", tContainerLayout["spacing"] or 0));
+		end
+
+		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
+			tinsert(aScratch, "s");
+			tinsert(aScratch, tSlot["key"] or "");
+
+			if tSlot["isStaticBouquetSlot"] then
+				tinsert(aScratch, "static");
+				tinsert(aScratch, tSlot["bouquetName"] or "");
+				tinsert(aScratch, format("%d", tSlot["entryIndex"] or 0));
+				tinsert(aScratch, format("%d", tSlot["itemIndex"] or 0));
+				tinsert(aScratch, format("%d", tSlot["frameLevelOffset"] or 0));
+				tinsert(aScratch, tSlot["isMixedBouquetItem"] and "1" or "0");
+				tinsert(aScratch, format("%d", tSlot["x"] or 0));
+				tinsert(aScratch, format("%d", tSlot["y"] or 0));
+
+				tButtonSetup = tSlot["buttonSetup"];
+
+				if tButtonSetup then
+					tinsert(aScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+				end
+			else
+				tinsert(aScratch, tSlot["templateName"] or "");
+				tinsert(aScratch, tSlot["filterString"] or "");
+			end
+
+			tinsert(aScratch, format("%d", tSlot["width"] or 0));
+			tinsert(aScratch, format("%d", tSlot["height"] or 0));
+			tinsert(aScratch, tSlot["anchor"] or "");
+			tinsert(aScratch, tSlot["relPoint"] or "");
+			tinsert(aScratch, format("%d", tSlot["x"] or 0));
+			tinsert(aScratch, format("%d", tSlot["y"] or 0));
+
+			tButtonSetup = tSlot["buttonSetup"];
+
+			if tButtonSetup and not tSlot["isStaticBouquetSlot"] then
+				tinsert(aScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+
+				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aScratch, tButtonSetup);
+			end
+		end
+
+		for _, tGroup in ipairs(aContainerTemplate["groups"] or sEmpty) do
+			tinsert(aScratch, "g");
+			tinsert(aScratch, tGroup["key"] or "");
+			tinsert(aScratch, tGroup["templateName"] or "");
+			tinsert(aScratch, tGroup["filterString"] or "");
+			tinsert(aScratch, format("%d", tGroup["maxFrameCount"] or 0));
+			tinsert(aScratch, format("%d", tGroup["sortMethod"] or 0));
+			tinsert(aScratch, format("%d", tGroup["sortDir"] or 0));
+
+			if tGroup["layout"] then
+				tinsert(aScratch, format("%d", tGroup["layout"]["elementWidth"] or 0));
+				tinsert(aScratch, format("%d", tGroup["layout"]["elementHeight"] or 0));
+				tinsert(aScratch, tGroup["layout"]["forceNewLine"] and "1" or "0");
+				tinsert(aScratch, format("%d", tGroup["layout"]["layoutIndex"] or 0));
+				tinsert(aScratch, format("%d", tGroup["layout"]["groupSpacing"] or 0));
+			end
+
+			tButtonSetup = tGroup["buttonSetup"];
+
+			if tButtonSetup then
+				tinsert(aScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+				tinsert(aScratch, tGroup["isFixedLayout"] and "1" or "0");
+				tinsert(aScratch, format("%d", tGroup["fixedRadioValue"] or 0));
+				tinsert(aScratch, format("%d", tGroup["fixedBarWidth"] or 0));
+				tinsert(aScratch, format("%d", tGroup["fixedBarHeight"] or 0));
+				tinsert(aScratch, format("%d", tGroup["fixedIconSize"] or 0));
+				tinsert(aScratch, tButtonSetup["auraSymbol"] and "1" or "0");
+
+				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aScratch, tButtonSetup);
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_computeAuraContainerPoolKeyBase(aContainerTemplate)
+
+		if not aContainerTemplate then
+			return nil;
+		end
+
+		if aContainerTemplate["poolKeyBase"] then
+			return aContainerTemplate["poolKeyBase"];
+		end
+
+		twipe(sPoolKeyScratch);
+
+		VUHDO_appendAuraContainerPoolKeyToScratch(sPoolKeyScratch, aContainerTemplate);
+
+		aContainerTemplate["poolKeyBase"] = tconcat(sPoolKeyScratch, "|");
+
+		return aContainerTemplate["poolKeyBase"];
+
+	end
+
+
+
+	--
 	local function VUHDO_getAuraContainerPoolKey(aContainerTemplate)
 
 		if not aContainerTemplate then
 			return nil;
 		end
 
-		twipe(sPoolKeyScratch);
+		tPoolKeyBase = aContainerTemplate["poolKeyBase"] or VUHDO_computeAuraContainerPoolKeyBase(aContainerTemplate);
 
-		tinsert(sPoolKeyScratch, aContainerTemplate["isOverlay"] and "1" or "0");
-		tinsert(sPoolKeyScratch, aContainerTemplate["isFillChain"] and "1" or "0");
-		tinsert(sPoolKeyScratch, aContainerTemplate["chainHasBaseline"] and "1" or "0");
-
-		if aContainerTemplate["anchor"] then
-			tinsert(sPoolKeyScratch, aContainerTemplate["anchor"]["mode"] or "");
-			tinsert(sPoolKeyScratch, format("%d", aContainerTemplate["anchor"]["frameLevelOffset"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", aContainerTemplate["anchor"]["offsetX"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", aContainerTemplate["anchor"]["offsetY"] or 0));
+		if not tPoolKeyBase then
+			return nil;
 		end
 
-		tContainerLayout = aContainerTemplate["containerLayout"];
-
-		if tContainerLayout then
-			tinsert(sPoolKeyScratch, tContainerLayout["isFixedLayout"] and "1" or "0");
-			tinsert(sPoolKeyScratch, format("%d", tContainerLayout["fixedRadioValue"] or 0));
-			tinsert(sPoolKeyScratch, tContainerLayout["useFixedSlots"] and "1" or "0");
-			tinsert(sPoolKeyScratch, tContainerLayout["anchorPoint"] or "");
-			tinsert(sPoolKeyScratch, format("%d", tContainerLayout["elementWidth"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", tContainerLayout["maxColumns"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", tContainerLayout["maxRows"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", tContainerLayout["spacing"] or 0));
-		end
-
-		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
-			tinsert(sPoolKeyScratch, "s");
-			tinsert(sPoolKeyScratch, tSlot["key"] or "");
-
-			if tSlot["isStaticBouquetSlot"] then
-				tinsert(sPoolKeyScratch, "static");
-				tinsert(sPoolKeyScratch, tSlot["bouquetName"] or "");
-				tinsert(sPoolKeyScratch, format("%d", tSlot["entryIndex"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tSlot["itemIndex"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tSlot["frameLevelOffset"] or 0));
-				tinsert(sPoolKeyScratch, tSlot["isMixedBouquetItem"] and "1" or "0");
-				tinsert(sPoolKeyScratch, format("%d", tSlot["x"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tSlot["y"] or 0));
-
-				tButtonSetup = tSlot["buttonSetup"];
-
-				if tButtonSetup then
-					tinsert(sPoolKeyScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
-				end
-			else
-				tinsert(sPoolKeyScratch, tSlot["templateName"] or "");
-				tinsert(sPoolKeyScratch, tSlot["filterString"] or "");
-			end
-
-			tinsert(sPoolKeyScratch, format("%d", tSlot["width"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", tSlot["height"] or 0));
-			tinsert(sPoolKeyScratch, tSlot["anchor"] or "");
-			tinsert(sPoolKeyScratch, tSlot["relPoint"] or "");
-			tinsert(sPoolKeyScratch, format("%d", tSlot["x"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", tSlot["y"] or 0));
-
-			tButtonSetup = tSlot["buttonSetup"];
-
-			if tButtonSetup and not tSlot["isStaticBouquetSlot"] then
-				tinsert(sPoolKeyScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
-
-				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(sPoolKeyScratch, tButtonSetup);
-			end
-		end
-
-		for _, tGroup in ipairs(aContainerTemplate["groups"] or sEmpty) do
-			tinsert(sPoolKeyScratch, "g");
-			tinsert(sPoolKeyScratch, tGroup["key"] or "");
-			tinsert(sPoolKeyScratch, tGroup["templateName"] or "");
-			tinsert(sPoolKeyScratch, tGroup["filterString"] or "");
-			tinsert(sPoolKeyScratch, format("%d", tGroup["maxFrameCount"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", tGroup["sortMethod"] or 0));
-			tinsert(sPoolKeyScratch, format("%d", tGroup["sortDir"] or 0));
-
-			if tGroup["layout"] then
-				tinsert(sPoolKeyScratch, format("%d", tGroup["layout"]["elementWidth"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tGroup["layout"]["elementHeight"] or 0));
-				tinsert(sPoolKeyScratch, tGroup["layout"]["forceNewLine"] and "1" or "0");
-				tinsert(sPoolKeyScratch, format("%d", tGroup["layout"]["layoutIndex"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tGroup["layout"]["groupSpacing"] or 0));
-			end
-
-			tButtonSetup = tGroup["buttonSetup"];
-
-			if tButtonSetup then
-				tinsert(sPoolKeyScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
-				tinsert(sPoolKeyScratch, tGroup["isFixedLayout"] and "1" or "0");
-				tinsert(sPoolKeyScratch, format("%d", tGroup["fixedRadioValue"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tGroup["fixedBarWidth"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tGroup["fixedBarHeight"] or 0));
-				tinsert(sPoolKeyScratch, format("%d", tGroup["fixedIconSize"] or 0));
-				tinsert(sPoolKeyScratch, tButtonSetup["auraSymbol"] and "1" or "0");
-
-				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(sPoolKeyScratch, tButtonSetup);
-			end
-		end
-
-		if aContainerTemplate["parent"] then
+		if aContainerTemplate["isFillChain"] and aContainerTemplate["parent"] then
 			tParentName = aContainerTemplate["parent"]:GetName();
 
-			if not tParentName then
-				return nil;
+			if tParentName and _G[tParentName] then
+				return tPoolKeyBase .. "|" .. tParentName;
 			end
-
-			tinsert(sPoolKeyScratch, tParentName);
 		end
 
-		return tconcat(sPoolKeyScratch, "|");
+		return tPoolKeyBase;
 
 	end
 
@@ -2322,7 +2395,65 @@ do
 
 
 	--
+	local tReleaseGroupKeys;
+	local tReleaseGroupKey;
+	local tReleaseGroupFrameCount;
+	local tReleaseAuraFrame;
+	local tReleaseSlotFrames;
+	local function VUHDO_releaseAuraContainerGlowState(aContainer, aContainerData)
+
+		if not aContainer or not aContainerData then
+			return;
+		end
+
+		tReleaseGroupKeys = aContainerData["groupKeys"];
+
+		if tReleaseGroupKeys then
+			for tReleaseGroupKeyCnt = 1, #tReleaseGroupKeys do
+				tReleaseGroupKey = tReleaseGroupKeys[tReleaseGroupKeyCnt];
+
+				tReleaseGroupFrameCount = aContainer:GetAuraGroupFrameCount(tReleaseGroupKey);
+
+				for tReleaseGroupFrameIndex = 1, tReleaseGroupFrameCount do
+					tReleaseAuraFrame = aContainer:GetAuraGroupFrame(tReleaseGroupKey, tReleaseGroupFrameIndex);
+
+					if tReleaseAuraFrame then
+						VUHDO_releaseAuraButtonGlowState(tReleaseAuraFrame);
+					end
+				end
+			end
+		end
+
+		tReleaseSlotFrames = aContainerData["slotFrames"];
+
+		if tReleaseSlotFrames then
+			for _, tReleaseAuraFrame in pairs(tReleaseSlotFrames) do
+				if tReleaseAuraFrame then
+					VUHDO_releaseAuraButtonGlowState(tReleaseAuraFrame);
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tWipeContainer;
 	function VUHDO_wipeAuraContainerPool()
+
+		for _, tPool in pairs(sAuraContainerPool) do
+			for tPoolCnt = 1, #tPool do
+				tWipeContainer = tPool[tPoolCnt] and tPool[tPoolCnt]["container"];
+
+				if tWipeContainer then
+					sContainerClassColorBars[tWipeContainer] = nil;
+					sPendingClassColors[tWipeContainer] = nil;
+				end
+			end
+		end
 
 		twipe(sAuraContainerPool);
 
@@ -2348,18 +2479,19 @@ do
 		end
 
 		if aContainerTemplate["isOverlay"] then
-			tOverlayTargetBar = aContainerTemplate["overlayHostFrame"];
+			tOverlayTargetBar = aContainerTemplate["overlayTargetBar"];
 
-			if tOverlayTargetBar and tOverlayTargetBar:GetName() then
-				tContainerParent = tOverlayTargetBar;
-			else
-				tOverlayTargetBar = aContainerTemplate["overlayTargetBar"];
+			if tOverlayTargetBar then
+				tContainerParent = tOverlayTargetBar["VuhDoOverlayHostFrame"] or aContainerTemplate["overlayHostFrame"];
 
-				if tOverlayTargetBar and tOverlayTargetBar:GetName() then
+				if tContainerParent and tContainerParent:GetName() then
+				elseif tOverlayTargetBar:GetName() then
 					tContainerParent = tOverlayTargetBar;
 				else
 					tContainerParent = aButton;
 				end
+			else
+				tContainerParent = aButton;
 			end
 		else
 			tContainerParent = aButton;
@@ -2368,7 +2500,12 @@ do
 		aContainerTemplate["parent"] = tContainerParent;
 
 		tPoolKey = VUHDO_getAuraContainerPoolKey(aContainerTemplate);
-		tUsesDispelTextures = VUHDO_containerTemplateUsesDispelTextures(aContainerTemplate);
+		tUsesDispelTextures = aContainerTemplate["usesDispelTextures"];
+
+		if tUsesDispelTextures == nil then
+			tUsesDispelTextures = VUHDO_containerTemplateUsesDispelTextures(aContainerTemplate);
+		end
+
 		tDispelColorGen = tUsesDispelTextures and VUHDO_getDispelColorGeneration() or nil;
 		tPool = tPoolKey and sAuraContainerPool[tPoolKey];
 
@@ -2394,6 +2531,12 @@ do
 
 				tContainer:SetParent(tContainerParent);
 
+				if sContainerClassColorBars[tContainer] then
+					twipe(sContainerClassColorBars[tContainer]);
+				end
+
+				sPendingClassColors[tContainer] = nil;
+
 				VUHDO_applyAuraContainerAnchor(tContainer, aContainerTemplate["anchor"], tContainerParent);
 
 				if aContainerTemplate["isOverlay"] then
@@ -2407,7 +2550,7 @@ do
 				tContainerData["containerTemplate"] = aContainerTemplate;
 				tContainerData["overlayTargetBar"] = aContainerTemplate["overlayTargetBar"];
 				tContainerData["overlayHostFrame"] = aContainerTemplate["overlayHostFrame"];
-				tContainerData["staticSlots"] = VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate);
+				tContainerData["staticSlots"] = aContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate);
 				tContainerData["panelNum"] = aContainerTemplate["panelNum"];
 				tContainerData["anchorIndex"] = aContainerTemplate["anchorIndex"];
 				tContainerData["lastSyncedUnit"] = nil;
@@ -2455,11 +2598,11 @@ do
 
 	--
 	local tRestoreTargetBar;
-	local tRestoreTargetTexture;
 	local tRestoreButtonName;
 	local tRestoreStoredColor;
 	local tRestoreOpacity;
 	local tChainBaselineFrame;
+	local tRestoreTargetBarTexture;
 	local function VUHDO_restoreOverlayFillChainBackground(aContainerData)
 
 		if not aContainerData or not aContainerData["backgroundFillHidden"] then
@@ -2467,9 +2610,9 @@ do
 		end
 
 		tRestoreTargetBar = aContainerData["overlayTargetBar"];
-		tRestoreTargetTexture = tRestoreTargetBar and tRestoreTargetBar:GetStatusBarTexture();
 
 		if tRestoreTargetBar then
+			tRestoreTargetBarTexture = tRestoreTargetBar:GetStatusBarTexture();
 			tRestoreButtonName = tRestoreTargetBar:GetParent() and tRestoreTargetBar:GetParent():GetName();
 			tRestoreStoredColor = tRestoreButtonName and sChainBaselineColors[tRestoreButtonName];
 
@@ -2485,8 +2628,8 @@ do
 				tRestoreTargetBar:SetStatusBarColor(0, 0, 0, 0);
 			end
 
-			if tRestoreTargetTexture then
-				tRestoreTargetTexture:SetAlpha(1);
+			if tRestoreTargetBarTexture then
+				tRestoreTargetBarTexture:SetAlpha(1);
 			end
 		end
 
@@ -2521,16 +2664,27 @@ do
 
 		tContainer = aContainerData["container"];
 
+		VUHDO_releaseAuraContainerGlowState(tContainer, aContainerData);
+
 		VUHDO_suppressAuraContainer(tContainer, aContainerData);
 
 		VUHDO_clearAuraContainerUnit(tContainer, aContainerData);
+
+		sContainerClassColorBars[tContainer] = nil;
+		sPendingClassColors[tContainer] = nil;
 
 		tContainer:SetParent(nil);
 
 		tPoolKey = aContainerData["poolKey"] or VUHDO_getAuraContainerPoolKey(aContainerData["containerTemplate"]);
 
 		if tPoolKey then
-			if VUHDO_containerTemplateUsesDispelTextures(aContainerData["containerTemplate"]) then
+			tUsesDispelTextures = aContainerData["containerTemplate"] and aContainerData["containerTemplate"]["usesDispelTextures"];
+
+			if tUsesDispelTextures == nil then
+				tUsesDispelTextures = VUHDO_containerTemplateUsesDispelTextures(aContainerData["containerTemplate"]);
+			end
+
+			if tUsesDispelTextures then
 				if not aContainerData["dispelColorGen"] or aContainerData["dispelColorGen"] ~= VUHDO_getDispelColorGeneration() then
 					return;
 				end
@@ -2583,6 +2737,14 @@ function VUHDO_setOverlayChainBaselineColor(aButton, aColor)
 	end
 
 	tBaselineStoredColor = sChainBaselineColors[tBaselineButtonName];
+
+	if tBaselineStoredColor
+		and tBaselineStoredColor["R"] == (aColor["R"] or 0)
+		and tBaselineStoredColor["G"] == (aColor["G"] or 0)
+		and tBaselineStoredColor["B"] == (aColor["B"] or 0)
+		and tBaselineStoredColor["O"] == (aColor["O"] == nil and 1 or aColor["O"]) then
+		return;
+	end
 
 	if not tBaselineStoredColor then
 		tBaselineStoredColor = { };
@@ -2903,17 +3065,17 @@ do
 	function VUHDO_applyAuraContainerAssistOnly(aContainer, aContainerData, anIsAssistRestricted)
 
 		if not aContainer or not aContainerData then
-			return;
+			return false;
 		end
 
 		if aContainerData["lastSyncedAssistOnly"] == anIsAssistRestricted then
-			return;
+			return false;
 		end
 
 		tContainerTemplate = aContainerData["containerTemplate"];
 
 		if not tContainerTemplate then
-			return;
+			return false;
 		end
 
 		tGroupKeys = aContainerData["groupKeys"];
@@ -2965,7 +3127,7 @@ do
 
 		aContainerData["lastSyncedAssistOnly"] = anIsAssistRestricted;
 
-		return;
+		return true;
 
 	end
 end
@@ -3032,6 +3194,7 @@ end
 
 --
 local tIsAuraDataRestricted;
+local tCanAttack;
 function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 
 	if not aContainer or not aContainerData or not aUnit then
@@ -3062,7 +3225,8 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 		end
 
 		if aButton then
-			VUHDO_paintStaticBouquetSlotsForButton(aButton, aUnit, aContainerData);
+			tCanAttack = UnitCanAttack("player", aUnit);
+			VUHDO_updateStaticBouquetSlotsForButton(aButton, aUnit, aContainerData, tCanAttack);
 		end
 	end
 
@@ -3083,20 +3247,22 @@ local tPriorityCutoff;
 local tShouldSuppress;
 local tLastSlotSuppress;
 local tSlotKey;
+local tIsDirty;
 function VUHDO_applyAuraContainerSlotFilters(aContainer, aContainerData, anIsHostile)
 
 	if not aContainer or not aContainerData then
-		return;
+		return false;
 	end
 
 	tContainerTemplate = aContainerData["containerTemplate"];
 
 	if not tContainerTemplate then
-		return;
+		return false;
 	end
 
 	tMixedPriorityCutoffs = aContainerData["mixedPriorityCutoffs"];
 	tLastSlotSuppress = aContainerData["lastSlotSuppress"];
+	tIsDirty = false;
 
 	for _, tSlot in ipairs(tContainerTemplate["slots"] or sEmpty) do
 		if not tSlot["isStaticBouquetSlot"] and tSlot["key"] then
@@ -3129,11 +3295,12 @@ function VUHDO_applyAuraContainerSlotFilters(aContainer, aContainerData, anIsHos
 				end
 
 				tLastSlotSuppress[tSlotKey] = tShouldSuppress;
+				tIsDirty = true;
 			end
 		end
 	end
 
-	return;
+	return tIsDirty;
 
 end
 
@@ -3146,6 +3313,8 @@ local tNeedsSync;
 local tIsAuraDataRestricted;
 local tCanAttack;
 local tIsAssistRestricted;
+local tSlotFiltersDirty;
+local tAssistOnlyDirty;
 function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 	if not aButton or not aUnit then
@@ -3162,28 +3331,38 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 	tCanAttack = UnitCanAttack("player", aUnit);
 	tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
 
+	if not UnitExists(aUnit) then
+		for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
+			tContainer = tContainerData and tContainerData["container"];
+
+			if tContainer then
+				VUHDO_clearAuraContainerUnit(tContainer, tContainerData);
+			end
+		end
+
+		return;
+	end
+
 	for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
 		tContainer = tContainerData and tContainerData["container"];
 
 		if tContainer then
-			if not UnitExists(aUnit) then
-				VUHDO_clearAuraContainerUnit(tContainer, tContainerData);
+			tSlotFiltersDirty = VUHDO_applyAuraContainerSlotFilters(tContainer, tContainerData, tCanAttack);
+
+			tAssistOnlyDirty = VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted);
+
+			tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or tContainerData["lastSyncedRestricted"] ~= tIsAuraDataRestricted
+				or not tContainer:IsEnabled() or not tContainer:IsShown();
+
+			if tNeedsSync then
+				VUHDO_bindAuraContainerUnit(tContainer, tContainerData, aUnit, aButton);
 			else
-				VUHDO_applyAuraContainerSlotFilters(tContainer, tContainerData, tCanAttack);
-
-				VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted);
-
-				tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or tContainerData["lastSyncedRestricted"] ~= tIsAuraDataRestricted
-					or not tContainer:IsEnabled() or not tContainer:IsShown();
-
-				if tNeedsSync then
-					VUHDO_bindAuraContainerUnit(tContainer, tContainerData, aUnit, aButton);
-				else
+				if tSlotFiltersDirty or tAssistOnlyDirty then
 					VUHDO_refreshAuraContainer(tContainer);
+				end
 
-					if tContainerData["staticSlots"] and next(tContainerData["staticSlots"]) then
-						VUHDO_paintStaticBouquetSlotsForButton(aButton, aUnit, tContainerData);
-					end
+				if tContainerData["staticSlots"] and next(tContainerData["staticSlots"]) then
+					VUHDO_updateStaticBouquetSlotsForButton(aButton, aUnit, tContainerData, tCanAttack, true);
 				end
 			end
 		end

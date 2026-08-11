@@ -21,9 +21,13 @@ local VUHDO_updateAllRaidBars;
 local VUHDO_initUnitAuraSlots;
 local VUHDO_refreshListBouquetsForUnit;
 local VUHDO_initNativeAuraSounds;
+local VUHDO_rebuildSoundEnabledAuraGroups;
 local VUHDO_clearNativeAuraSounds;
 
 local sSecretsEnabled = false;
+local sIsAuraDataRestricted = false;
+local sIsAuraModeContainers = false;
+local sNeedsUnitAuraEvent = true;
 local sEmpty = { };
 
 
@@ -48,6 +52,7 @@ function VUHDO_auraModeInitLocalOverrides()
 	VUHDO_initUnitAuraSlots = _G["VUHDO_initUnitAuraSlots"];
 	VUHDO_refreshListBouquetsForUnit = _G["VUHDO_refreshListBouquetsForUnit"];
 	VUHDO_initNativeAuraSounds = _G["VUHDO_initNativeAuraSounds"];
+	VUHDO_rebuildSoundEnabledAuraGroups = _G["VUHDO_rebuildSoundEnabledAuraGroups"];
 	VUHDO_clearNativeAuraSounds = _G["VUHDO_clearNativeAuraSounds"];
 
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
@@ -58,6 +63,8 @@ function VUHDO_auraModeInitLocalOverrides()
 
 	sSecretsEnabled = _G["VUHDO_SECRETS_ENABLED"] == true;
 
+	sIsAuraDataRestricted = VUHDO_AURA_DATA_RESTRICTED == true or (sSecretsEnabled and ShouldAurasBeSecret());
+
 	return;
 
 end
@@ -67,7 +74,42 @@ end
 --
 function VUHDO_isAuraModeContainers()
 
-	return VUHDO_AURA_MODE_CONTAINERS == true;
+	return sIsAuraModeContainers;
+
+end
+
+
+
+--
+function VUHDO_rebuildAuraModeEventFlags()
+
+	if not sIsAuraModeContainers then
+		sNeedsUnitAuraEvent = true;
+
+		return;
+	end
+
+	if VUHDO_CONFIG and VUHDO_CONFIG["SMARTCAST_CLEANSE"] then
+		sNeedsUnitAuraEvent = true;
+
+		return;
+	end
+
+	if VUHDO_CONFIG and (VUHDO_CONFIG["SOUND_DEBUFF"] or "") ~= "" then
+		sNeedsUnitAuraEvent = true;
+
+		return;
+	end
+
+	if VUHDO_hasConfiguredAuraGroupSounds() then
+		sNeedsUnitAuraEvent = true;
+
+		return;
+	end
+
+	sNeedsUnitAuraEvent = false;
+
+	return;
 
 end
 
@@ -81,6 +123,10 @@ function VUHDO_initAuraModeSelection()
 	else
 		VUHDO_AURA_MODE_CONTAINERS = VUHDO_AURA_MODE_CAPABILITY == true;
 	end
+
+	sIsAuraModeContainers = VUHDO_AURA_MODE_CONTAINERS == true;
+
+	VUHDO_rebuildAuraModeEventFlags();
 
 	return;
 
@@ -127,23 +173,7 @@ end
 --
 function VUHDO_needsUnitAuraEvent()
 
-	if not VUHDO_isAuraModeContainers() then
-		return true;
-	end
-
-	if VUHDO_CONFIG and VUHDO_CONFIG["SMARTCAST_CLEANSE"] then
-		return true;
-	end
-
-	if VUHDO_CONFIG and (VUHDO_CONFIG["SOUND_DEBUFF"] or "") ~= "" then
-		return true;
-	end
-
-	if VUHDO_hasConfiguredAuraGroupSounds() then
-		return true;
-	end
-
-	return false;
+	return sNeedsUnitAuraEvent;
 
 end
 
@@ -156,15 +186,7 @@ function VUHDO_isAuraDataRestricted()
 		return true;
 	end
 
-	if VUHDO_AURA_DATA_RESTRICTED == true then
-		return true;
-	end
-
-	if sSecretsEnabled and ShouldAurasBeSecret() then
-		return true;
-	end
-
-	return false;
+	return sIsAuraDataRestricted;
 
 end
 
@@ -174,8 +196,6 @@ end
 function VUHDO_shouldDropRestrictedAuraEvent(aUpdateInfo)
 
 	if VUHDO_isAuraDataRestricted() then
-		VUHDO_checkAuraDataRestrictedState(false);
-
 		return true;
 	end
 
@@ -278,6 +298,8 @@ end
 --
 local function VUHDO_setAuraDataRestrictedState(anIsRestricted, anIsForceResync)
 
+	sIsAuraDataRestricted = anIsRestricted;
+
 	if anIsRestricted == VUHDO_AURA_DATA_RESTRICTED and not anIsForceResync then
 		return;
 	end
@@ -353,6 +375,8 @@ end
 
 --
 function VUHDO_initAuraMode()
+
+	VUHDO_rebuildSoundEnabledAuraGroups();
 
 	if VUHDO_isAuraModeContainers() then
 		VUHDO_clearNativeAuraSounds();

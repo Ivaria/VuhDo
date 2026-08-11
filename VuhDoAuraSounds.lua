@@ -3,6 +3,7 @@ local _;
 local pairs = pairs;
 local ipairs = ipairs;
 local twipe = table.wipe;
+local tinsert = table.insert;
 
 local GetTime = GetTime;
 local issecretvalue = issecretvalue;
@@ -32,6 +33,7 @@ local VUHDO_LibSharedMedia;
 local sNextSoundTime = { };
 local sNativeAuraSoundIds = { };
 local sNativeAuraSoundUnits = { };
+local sSoundEnabledAuraGroups = { };
 
 
 
@@ -108,6 +110,41 @@ function VUHDO_registerNativeAuraSoundForUnit(aUnit, aSpellId, aSoundKey)
 
 	if tSoundId then
 		sNativeAuraSoundIds[tSoundId] = true;
+	end
+
+	return;
+
+end
+
+
+
+--
+local tAllGroups;
+local tGroup;
+local tSound;
+local tGroupType;
+function VUHDO_rebuildSoundEnabledAuraGroups()
+
+	twipe(sSoundEnabledAuraGroups);
+
+	tAllGroups = VUHDO_getAllAuraGroups();
+
+	if not tAllGroups then
+		return;
+	end
+
+	for tGroupId, tGroup in pairs(tAllGroups) do
+		if VUHDO_getAuraGroup(tGroupId) then
+			tSound = tGroup["sound"];
+
+			if (tSound or "") ~= "" then
+				tGroupType = tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
+
+				if tGroupType == VUHDO_AURA_GROUP_TYPE_FILTER or tGroupType == VUHDO_AURA_GROUP_TYPE_LIST then
+					tinsert(sSoundEnabledAuraGroups, tGroupId);
+				end
+			end
+		end
 	end
 
 	return;
@@ -266,7 +303,8 @@ end
 
 
 --
-local tAllGroups;
+local tGroupId;
+local tGroup;
 local tGroupType;
 local tSound;
 function VUHDO_checkAuraGroupSounds(aUnit, anAuraData)
@@ -279,14 +317,11 @@ function VUHDO_checkAuraGroupSounds(aUnit, anAuraData)
 		return;
 	end
 
-	tAllGroups = VUHDO_getAllAuraGroups();
+	for tCnt = 1, #sSoundEnabledAuraGroups do
+		tGroupId = sSoundEnabledAuraGroups[tCnt];
+		tGroup = VUHDO_getAuraGroup(tGroupId);
 
-	if not tAllGroups then
-		return;
-	end
-
-	for tGroupId, tGroup in pairs(tAllGroups) do
-		if VUHDO_getAuraGroup(tGroupId) then
+		if tGroup then
 			tSound = tGroup["sound"];
 
 			if (tSound or "") ~= "" then

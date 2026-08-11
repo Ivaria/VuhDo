@@ -9,7 +9,6 @@ local ipairs = ipairs;
 local strfind = string.find;
 
 local UnitCanAttack = UnitCanAttack;
-local UnitIsUnit = UnitIsUnit;
 local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local issecretvalue = issecretvalue;
 local GetAuraDispelTypeColor = C_UnitAuras and C_UnitAuras.GetAuraDispelTypeColor;
@@ -61,6 +60,7 @@ local sUnitAuraCanColorBar = { };
 local sUnitAuraColorType = { };
 local sUnitAuraCustomColor = { };
 local sCanColorBarGroups = { };
+local sAnyGlowGroups = false;
 local sUnitAuraBarWinner = { };
 local sUnitAuraTextWinner = { };
 local sUnitAuraGlowWinner = { };
@@ -71,6 +71,7 @@ local sGlowWinnerSet;
 local sAuraColorWinnerPool;
 local sCanColorBarGroupPool;
 local sAuraGroupActiveColorPool;
+local sAuraGlowWinnerPool;
 
 local sFilterResultCache = { };
 
@@ -90,7 +91,11 @@ local sGlowColorBuffer = { 0.95, 0.95, 0.32, 1 };
 --
 local function VUHDO_createAuraColorWinnerDelegate()
 
-	return { ["colorType"] = nil, ["customColor"] = nil, ["dispelAuraId"] = nil };
+	return {
+		["colorType"] = nil,
+		["customColor"] = nil,
+		["dispelAuraId"] = nil,
+	};
 
 end
 
@@ -102,6 +107,46 @@ local function VUHDO_cleanupAuraColorWinnerDelegate(aWinner)
 	aWinner["colorType"] = nil;
 	aWinner["customColor"] = nil;
 	aWinner["dispelAuraId"] = nil;
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_createAuraGlowWinnerDelegate()
+
+	return {
+		["groupId"] = nil,
+		["style"] = nil,
+		["colorType"] = nil,
+		["color"] = nil,
+		["dispelAuraId"] = nil,
+		["glowR"] = nil,
+		["glowG"] = nil,
+		["glowB"] = nil,
+		["glowO"] = nil,
+		["glowDispelGeneration"] = nil,
+	};
+
+end
+
+
+
+--
+local function VUHDO_cleanupAuraGlowWinnerDelegate(aWinner)
+
+	aWinner["groupId"] = nil;
+	aWinner["style"] = nil;
+	aWinner["colorType"] = nil;
+	aWinner["color"] = nil;
+	aWinner["dispelAuraId"] = nil;
+	aWinner["glowR"] = nil;
+	aWinner["glowG"] = nil;
+	aWinner["glowB"] = nil;
+	aWinner["glowO"] = nil;
+	aWinner["glowDispelGeneration"] = nil;
 
 	return;
 
@@ -220,6 +265,7 @@ function VUHDO_auraColorsInitLocalOverrides()
 	sAuraColorWinnerPool = VUHDO_createTablePool("AuraColorWinner", 100, VUHDO_createAuraColorWinnerDelegate, VUHDO_cleanupAuraColorWinnerDelegate);
 	sCanColorBarGroupPool = VUHDO_createTablePool("CanColorBarGroup", 50, VUHDO_createCanColorBarGroupDelegate, VUHDO_cleanupCanColorBarGroupDelegate);
 	sAuraGroupActiveColorPool = VUHDO_createTablePool("AuraGroupBouquetColor", 120, VUHDO_createAuraGroupBouquetColorDelegate, VUHDO_cleanupAuraGroupBouquetColorDelegate);
+	sAuraGlowWinnerPool = VUHDO_createTablePool("AuraGlowWinner", 100, VUHDO_createAuraGlowWinnerDelegate, VUHDO_cleanupAuraGlowWinnerDelegate);
 
 	return;
 
@@ -249,6 +295,9 @@ do
 
 		VUHDO_rebuildActiveAuraCaches();
 
+		VUHDO_rebuildAuraModeEventFlags();
+		VUHDO_rebuildSoundEnabledAuraGroups();
+
 		VUHDO_collectBouquetAuraGroupIds();
 
 		for tIdx = 1, #sCanColorBarGroups do
@@ -256,6 +305,8 @@ do
 		end
 
 		twipe(sCanColorBarGroups);
+
+		sAnyGlowGroups = false;
 
 		for tGroupId, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"] or sEmpty) do
 			tEffectiveColorType = tGroup["colorType"] or ((tGroup["canColorBar"] or tGroup["canColorText"]) and VUHDO_AURA_GROUP_COLOR_DISPEL or VUHDO_AURA_GROUP_COLOR_OFF);
@@ -287,6 +338,8 @@ do
 						tColorBarGroup["canGlowBar"] = true;
 						tColorBarGroup["glowBarColor"] = tGroup["glowBarColor"];
 						tColorBarGroup["glowBarStyle"] = tGroup["glowBarStyle"];
+
+						sAnyGlowGroups = true;
 					else
 						tColorBarGroup["canGlowBar"] = false;
 						tColorBarGroup["glowBarColor"] = nil;
@@ -321,6 +374,8 @@ do
 						tColorBarGroup["canGlowBar"] = true;
 						tColorBarGroup["glowBarColor"] = tGroup["glowBarColor"];
 						tColorBarGroup["glowBarStyle"] = tGroup["glowBarStyle"];
+
+						sAnyGlowGroups = true;
 					else
 						tColorBarGroup["canGlowBar"] = false;
 						tColorBarGroup["glowBarColor"] = nil;
@@ -399,6 +454,8 @@ do
 
 							tColorBarGroup["glowBarColor"] = tGroup["glowBarColor"];
 							tColorBarGroup["glowBarStyle"] = tGroup["glowBarStyle"];
+
+							sAnyGlowGroups = true;
 						else
 							tColorBarGroup["canGlowBar"] = false;
 
@@ -435,6 +492,8 @@ do
 
 							tColorBarGroup["glowBarColor"] = tGroup["glowBarColor"];
 							tColorBarGroup["glowBarStyle"] = tGroup["glowBarStyle"];
+
+							sAnyGlowGroups = true;
 						else
 							tColorBarGroup["canGlowBar"] = false;
 
@@ -569,16 +628,44 @@ do
 
 	--
 	local tGlowWinner;
+	local tDispelCurve;
+	local tDispelColorMixin;
 	local function VUHDO_setGlowWinnerIfNeeded(aUnit, aCanColorGroup, aDispelAuraInstanceId)
 
 		if not sGlowWinnerSet and aCanColorGroup["canGlowBar"] then
-			sUnitAuraGlowWinner[aUnit] = {
-				["groupId"] = aCanColorGroup["groupId"],
-				["style"] = aCanColorGroup["glowBarStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE,
-				["colorType"] = aCanColorGroup["colorType"],
-				["color"] = aCanColorGroup["glowBarColor"],
-				["dispelAuraId"] = aDispelAuraInstanceId,
-			};
+			tGlowWinner = sUnitAuraGlowWinner[aUnit];
+
+			if not tGlowWinner then
+				tGlowWinner = sAuraGlowWinnerPool:get();
+				sUnitAuraGlowWinner[aUnit] = tGlowWinner;
+			end
+
+			tGlowWinner["groupId"] = aCanColorGroup["groupId"];
+			tGlowWinner["style"] = aCanColorGroup["glowBarStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
+			tGlowWinner["colorType"] = aCanColorGroup["colorType"];
+			tGlowWinner["color"] = aCanColorGroup["glowBarColor"];
+			tGlowWinner["dispelAuraId"] = aDispelAuraInstanceId;
+			tGlowWinner["glowR"] = nil;
+			tGlowWinner["glowG"] = nil;
+			tGlowWinner["glowB"] = nil;
+			tGlowWinner["glowO"] = nil;
+			tGlowWinner["glowDispelGeneration"] = nil;
+
+			if aDispelAuraInstanceId and (aCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_DISPEL or aCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL) then
+				tDispelCurve = VUHDO_getDispelCurveForUnit(aUnit, true);
+
+				if tDispelCurve then
+					tDispelColorMixin = GetAuraDispelTypeColor(aUnit, aDispelAuraInstanceId, tDispelCurve);
+
+					if tDispelColorMixin then
+						tGlowWinner["glowR"] = tDispelColorMixin.r;
+						tGlowWinner["glowG"] = tDispelColorMixin.g;
+						tGlowWinner["glowB"] = tDispelColorMixin.b;
+						tGlowWinner["glowO"] = tDispelColorMixin.a or 1;
+						tGlowWinner["glowDispelGeneration"] = VUHDO_DISPEL_COLOR_GENERATION;
+					end
+				end
+			end
 
 			sGlowWinnerSet = true;
 		end
@@ -1275,15 +1362,19 @@ do
 			sUnitAuraTextWinner[aUnit] = nil;
 		end
 
+		if sUnitAuraGlowWinner[aUnit] then
+			sAuraGlowWinnerPool:release(sUnitAuraGlowWinner[aUnit]);
+			sUnitAuraGlowWinner[aUnit] = nil;
+		end
+
 		sUnitDispellableAuraId[aUnit] = nil;
 		sUnitAuraCanColorBar[aUnit] = nil;
 		sUnitAuraColorType[aUnit] = nil;
 		sUnitAuraCustomColor[aUnit] = nil;
-		sUnitAuraGlowWinner[aUnit] = nil;
 
 		tBarWinnerSet = false;
 		tTextWinnerSet = false;
-		sGlowWinnerSet = false;
+		sGlowWinnerSet = not sAnyGlowGroups;
 
 		VUHDO_resetUnitAuraGroupActiveSubtable(aUnit);
 
@@ -1427,6 +1518,15 @@ do
 		end
 
 		if (tGlowWinner["colorType"] == VUHDO_AURA_GROUP_COLOR_DISPEL or tGlowWinner["colorType"] == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL) and tGlowWinner["dispelAuraId"] then
+			if tGlowWinner["glowDispelGeneration"] == VUHDO_DISPEL_COLOR_GENERATION and tGlowWinner["glowR"] then
+				sGlowColorBuffer[1] = tGlowWinner["glowR"];
+				sGlowColorBuffer[2] = tGlowWinner["glowG"];
+				sGlowColorBuffer[3] = tGlowWinner["glowB"];
+				sGlowColorBuffer[4] = tGlowWinner["glowO"] or 1;
+
+				return true, sGlowColorBuffer, tGlowWinner["style"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
+			end
+
 			tDispelCurve = VUHDO_getDispelCurveForUnit(aUnit, true);
 
 			if tDispelCurve then
@@ -1590,6 +1690,10 @@ do
 				sAuraColorWinnerPool:release(sUnitAuraTextWinner[aUnit]);
 			end
 
+			if sUnitAuraGlowWinner[aUnit] then
+				sAuraGlowWinnerPool:release(sUnitAuraGlowWinner[aUnit]);
+			end
+
 			tSubMapForAuraGroup = sUnitAuraGroupActive[aUnit];
 
 			if tSubMapForAuraGroup then
@@ -1623,6 +1727,12 @@ do
 			for tUnit, _ in pairs(sUnitAuraTextWinner) do
 				if not sUnitAuraBarWinner[tUnit] and sUnitAuraTextWinner[tUnit] then
 					sAuraColorWinnerPool:release(sUnitAuraTextWinner[tUnit]);
+				end
+			end
+
+			for tUnit, _ in pairs(sUnitAuraGlowWinner) do
+				if sUnitAuraGlowWinner[tUnit] then
+					sAuraGlowWinnerPool:release(sUnitAuraGlowWinner[tUnit]);
 				end
 			end
 
