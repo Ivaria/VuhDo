@@ -3177,14 +3177,9 @@ function VUHDO_refreshAuraContainer(aContainer)
 		return;
 	end
 
-	if InCombatLockdown() then
-		aContainer:UpdateAllAuras();
+	aContainer:UpdateAllAuras();
 
-		aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
-	else
-		aContainer:Hide();
-		aContainer:Show();
-	end
+	aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
 
 	return;
 
@@ -3351,8 +3346,13 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 			tAssistOnlyDirty = VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted);
 
-			tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or tContainerData["lastSyncedRestricted"] ~= tIsAuraDataRestricted
-				or not tContainer:IsEnabled() or not tContainer:IsShown();
+			if VUHDO_isAuraModeContainers() then
+				tContainerData["lastSyncedRestricted"] = tIsAuraDataRestricted;
+
+				tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or not tContainer:IsEnabled() or not tContainer:IsShown();
+			else
+				tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or tContainerData["lastSyncedRestricted"] ~= tIsAuraDataRestricted or not tContainer:IsEnabled() or not tContainer:IsShown();
+			end
 
 			if tNeedsSync then
 				VUHDO_bindAuraContainerUnit(tContainer, tContainerData, aUnit, aButton);

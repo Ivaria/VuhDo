@@ -254,7 +254,7 @@ local function VUHDO_threatAboveValidator(anInfo, aSomeCustom)
 		return (anInfo["threat"] or 0) >= 2, nil, -1, -1, -1;
 	end
 
-	return anInfo["threatPerc"] > aSomeCustom["custom"][1], nil, -1, -1, -1;
+	return (anInfo["threatPerc"] or 0) > aSomeCustom["custom"][1], nil, -1, -1, -1;
 
 end
 
@@ -844,7 +844,7 @@ end
 
 --
 local function VUHDO_statusThreatValidator(anInfo, _)
-	return true, nil, anInfo["threatPerc"], -1, 100;
+	return true, nil, anInfo["threatPerc"] or 0, -1, 100;
 end
 
 

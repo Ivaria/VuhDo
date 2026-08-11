@@ -186,7 +186,17 @@ function VUHDO_isAuraDataRestricted()
 		return true;
 	end
 
-	return sIsAuraDataRestricted;
+	if sIsAuraDataRestricted then
+		return true;
+	end
+
+	if sSecretsEnabled and ShouldAurasBeSecret() then
+		VUHDO_checkAuraDataRestrictedState(true);
+
+		return true;
+	end
+
+	return false;
 
 end
 
@@ -305,6 +315,14 @@ local function VUHDO_setAuraDataRestrictedState(anIsRestricted, anIsForceResync)
 	end
 
 	VUHDO_AURA_DATA_RESTRICTED = anIsRestricted;
+
+	if VUHDO_isAuraModeContainers() and not anIsForceResync then
+		if not anIsRestricted then
+			VUHDO_flushPendingOverlayAcquires();
+		end
+
+		return;
+	end
 
 	VUHDO_resyncAuraDisplayMode(anIsForceResync);
 
