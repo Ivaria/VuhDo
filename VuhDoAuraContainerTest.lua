@@ -348,7 +348,7 @@ do
 						if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
 							tEnabledAnchorCount = tEnabledAnchorCount + 1;
 
-							tFilterString = VUHDO_escapeAuraDiagFilterString(VUHDO_resolveAuraContainerFilter(tAnchorConfig));
+							tFilterString = VUHDO_escapeAuraDiagFilterString(VUHDO_resolveAuraContainerFilter(tAnchorConfig) or "none");
 							tLayoutCapacity = (tAnchorConfig["maxColumns"] or 5) * (tAnchorConfig["maxRows"] or 1);
 
 							VUHDO_xMsg("panel", tPanelNum, "anchor", tAnchorIndex,
@@ -502,6 +502,7 @@ do
 	local tGroup;
 	local tIsExpressible;
 	local tAuditAssigned;
+	local tPanelAnchors;
 	function VUHDO_auditAuraConfiguration()
 
 		VUHDO_Msg("|cffFFD100--- Aura Configuration Audit ---|r");
@@ -523,6 +524,20 @@ do
 							tAuditAssigned[tBouquetName] = tAuditAssigned[tBouquetName] or { };
 
 							tinsert(tAuditAssigned[tBouquetName], format("panel %d/%s", tPanelNum, tIndicatorKey));
+						end
+					end
+				end
+
+				tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
+
+				if tPanelAnchors then
+					for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
+						if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
+							tGroupId = tAnchorConfig["groupId"];
+
+							if not tGroupId or not VUHDO_getAuraGroup(tGroupId) then
+								VUHDO_MsgC(format("  panel %d anchor %s: group missing or disabled (%s)", tPanelNum, tAnchorIndex, tostring(tGroupId)), 1, 0.6, 0.2);
+							end
 						end
 					end
 				end

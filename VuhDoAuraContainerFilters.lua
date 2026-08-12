@@ -552,13 +552,13 @@ local tGroup;
 function VUHDO_resolveAuraContainerFilter(anAnchorConfig)
 
 	if not anAnchorConfig then
-		return "HELPFUL";
+		return nil;
 	end
 
 	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
 
 	if not tGroup then
-		return "HELPFUL";
+		return nil;
 	end
 
 	return VUHDO_buildAuraGroupNativeFilterString(tGroup);
@@ -1288,6 +1288,12 @@ local tFixedRadioValue;
 local tUseFixedSlots;
 function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConfig)
 
+	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+
+	if not tGroup then
+		return nil;
+	end
+
 	tPanelNum = VUHDO_BUTTON_CACHE[aButton];
 
 	if tPanelNum then
@@ -1310,8 +1316,6 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 			};
 		end
 	end
-
-	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
 
 	tFilterString = VUHDO_resolveAuraContainerFilter(anAnchorConfig);
 	tCandidateFilters = VUHDO_resolveGroupCandidateFilters(tGroup, anAnchorConfig);
@@ -1376,43 +1380,45 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 	tWrapDir = VUHDO_AURA_GROWTH_OFFSETS[anAnchorConfig["wrapDir"]] or VUHDO_AURA_GROWTH_OFFSETS["DOWN"];
 
 	if tType ~= VUHDO_AURA_GROUP_TYPE_LIST then
-		tGroupTemplate = {
-			["key"] = "aura",
-			["filterString"] = tFilterString,
-			["candidateFilters"] = tCandidateFilters,
-			["isHarmful"] = tGroup and tGroup["isHarmful"] == true,
-			["maxFrameCount"] = tMaxFrameCount,
-			["sortMethod"] = tSortMethod,
-			["sortDir"] = tSortDir,
-			["templateName"] = tTemplateName,
-			["layout"] = {
-				["elementWidth"] = tPixelWidth,
-				["elementHeight"] = tPixelHeight,
-				["elementSpacing"] = tSpacing,
-				["lineSpacing"] = tSpacing,
-			},
-			["buttonSetup"] = tAnchorButtonSetup,
-		};
-
-		if tIsFixedLayout then
-			tGroupTemplate["isFixedLayout"] = true;
-			tGroupTemplate["fixedRadioValue"] = tFixedRadioValue;
-			tGroupTemplate["fixedBarWidth"] = tHealthBarWidthPx;
-			tGroupTemplate["fixedBarHeight"] = tHealthBarHeightPx;
-			tGroupTemplate["fixedIconSize"] = tPixelWidth;
-			tGroupTemplate["fixedSpacing"] = tSpacing;
-			tGroupTemplate["fixedMaxColumns"] = tMaxCols;
-			tGroupTemplate["fixedGrowthDir"] = anAnchorConfig["growthDir"] or "RIGHT";
-			tGroupTemplate["fixedWrapDir"] = anAnchorConfig["wrapDir"] or "DOWN";
-			tGroupTemplate["fixedAnchorConfig"] = {
-				["growthDir"] = anAnchorConfig["growthDir"] or "RIGHT",
-				["wrapDir"] = anAnchorConfig["wrapDir"] or "DOWN",
-				["maxColumns"] = tMaxCols,
-				["spacing"] = tSpacing,
+		if tGroup["resolvedFilter"] or tGroup["filter"] then
+			tGroupTemplate = {
+				["key"] = "aura",
+				["filterString"] = tFilterString,
+				["candidateFilters"] = tCandidateFilters,
+				["isHarmful"] = tGroup["isHarmful"] == true,
+				["maxFrameCount"] = tMaxFrameCount,
+				["sortMethod"] = tSortMethod,
+				["sortDir"] = tSortDir,
+				["templateName"] = tTemplateName,
+				["layout"] = {
+					["elementWidth"] = tPixelWidth,
+					["elementHeight"] = tPixelHeight,
+					["elementSpacing"] = tSpacing,
+					["lineSpacing"] = tSpacing,
+				},
+				["buttonSetup"] = tAnchorButtonSetup,
 			};
-		end
 
-		tinsert(tGroups, tGroupTemplate);
+			if tIsFixedLayout then
+				tGroupTemplate["isFixedLayout"] = true;
+				tGroupTemplate["fixedRadioValue"] = tFixedRadioValue;
+				tGroupTemplate["fixedBarWidth"] = tHealthBarWidthPx;
+				tGroupTemplate["fixedBarHeight"] = tHealthBarHeightPx;
+				tGroupTemplate["fixedIconSize"] = tPixelWidth;
+				tGroupTemplate["fixedSpacing"] = tSpacing;
+				tGroupTemplate["fixedMaxColumns"] = tMaxCols;
+				tGroupTemplate["fixedGrowthDir"] = anAnchorConfig["growthDir"] or "RIGHT";
+				tGroupTemplate["fixedWrapDir"] = anAnchorConfig["wrapDir"] or "DOWN";
+				tGroupTemplate["fixedAnchorConfig"] = {
+					["growthDir"] = anAnchorConfig["growthDir"] or "RIGHT",
+					["wrapDir"] = anAnchorConfig["wrapDir"] or "DOWN",
+					["maxColumns"] = tMaxCols,
+					["spacing"] = tSpacing,
+				};
+			end
+
+			tinsert(tGroups, tGroupTemplate);
+		end
 	elseif tGroup then
 		if VUHDO_isListCollapseEligible(tGroup, tUseFixedSlots, tIsFixedLayout) then
 			tGroups = VUHDO_buildListAnchorEntryGroups(tGroup, anAnchorConfig, tPixelWidth, tPixelHeight, tSpacing, tMaxFrameCount, tTemplateName, tAnchorButtonSetup, tIsBar);
