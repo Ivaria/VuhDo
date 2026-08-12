@@ -26,6 +26,8 @@ local VUHDO_refreshAllUnitAuras;
 local VUHDO_redisplayAllUnitAuras;
 local VUHDO_calculateDerivedOrientation;
 local VUHDO_updateToggledUnitEvents;
+local VUHDO_buildAllIndicatorAlphaChains;
+local VUHDO_buildBooleanOverlaysForButton;
 
 local VUHDO_STD_BACKDROP = nil;
 local VUHDO_DESIGN_BACKDROP = nil;
@@ -116,6 +118,8 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_redisplayAllUnitAuras = _G["VUHDO_redisplayAllUnitAuras"];
 	VUHDO_calculateDerivedOrientation = _G["VUHDO_calculateDerivedOrientation"];
 	VUHDO_updateToggledUnitEvents = _G["VUHDO_updateToggledUnitEvents"];
+	VUHDO_buildAllIndicatorAlphaChains = _G["VUHDO_buildAllIndicatorAlphaChains"];
+	VUHDO_buildBooleanOverlaysForButton = _G["VUHDO_buildBooleanOverlaysForButton"];
 
 	VUHDO_panelRedrawCustomDebuffsInitLocalOverrides();
 	VUHDO_panelRedrawHeadersInitLocalOverrides();
@@ -2170,6 +2174,7 @@ do
 
 		if sSecretsEnabled then
 			VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
+			VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum);
 
 			-- FIXME: alpha chains need fixed for target and target-of-target frames (e.g. range opacity not working)
 			--VUHDO_buildAllIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum);

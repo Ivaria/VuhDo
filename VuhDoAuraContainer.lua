@@ -1084,7 +1084,9 @@ do
 					aAuraButton["VuhDoFillMask"] = tFillMask;
 
 					tFillTexture:AddMaskTexture(tFillMask);
-					tFillMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE");
+					tFillMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST");
+
+					VUHDO_PixelUtil.ApplySettings(tFillMask);
 
 					if anButtonSetup["shadowValueMode"] == "cover" then
 						tFillMask:SetAllPoints(anButtonSetup["targetBar"]);
@@ -1107,6 +1109,8 @@ do
 					tFillBackground:SetAllPoints(aAuraButton);
 
 					tFillBackground:SetTexture("Interface\\Buttons\\WHITE8X8");
+
+					VUHDO_PixelUtil.ApplySettings(tFillBackground);
 				elseif anButtonSetup["staticColor"] then
 					tFillBackground = aAuraButton["VuhDoFillBackground"];
 
@@ -1760,6 +1764,10 @@ do
 			tChainBaselineMask = tChainBaselineFrame and tChainBaselineFrame["ChainBaselineMask"];
 
 			if tChainBaselineFrame and tChainBaselineTexture and tChainBaselineMask then
+				tChainBaselineMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST");
+
+				VUHDO_PixelUtil.ApplySettings(tChainBaselineMask);
+
 				tChainBaselineFrame:SetParent(tChainTargetBar);
 				tChainBaselineFrame:SetFrameLevel(aContainer:GetFrameLevel());
 

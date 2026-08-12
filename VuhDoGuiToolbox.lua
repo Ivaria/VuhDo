@@ -1307,14 +1307,30 @@ end
 
 --
 local tSourceTexture;
+local tSourceFile;
 function VUHDO_copyStatusBarFillTexture(aDestTexture, aSourceBar)
 
+	if "StatusBar" ~= aSourceBar:GetObjectType() then
+		return;
+	end
+
 	tSourceTexture = aSourceBar:GetStatusBarTexture();
-	aDestTexture:SetTexture(tSourceTexture:GetTexture());
+
+	if not tSourceTexture then
+		return;
+	end
+
+	tSourceFile = tSourceTexture:GetTexture();
+
+	if not tSourceFile then
+		return;
+	end
+
+	aDestTexture:SetTexture(tSourceFile);
 
 	VUHDO_PixelUtil.ApplySettings(aDestTexture);
 
-	return;
+	return true;
 
 end
 

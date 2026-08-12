@@ -38,6 +38,8 @@ local VUHDO_INDICATOR_FRAME_GETTERS = {
 	["CLUSTER_BORDER"] = "VUHDO_getClusterBorderFrame",
 };
 
+local VUHDO_PixelUtil;
+
 local VUHDO_getHealthBar;
 local VUHDO_getBarText;
 local VUHDO_getBarTextSolo;
@@ -45,6 +47,8 @@ local VUHDO_getLifeText;
 local VUHDO_decompressIfCompressed;
 local VUHDO_getBouquetGlobalOpacityNames;
 local VUHDO_isAuraDataRestricted;
+local VUHDO_copyStatusBarFillTexture;
+local VUHDO_getBouquetLayerTemplate;
 
 local VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS or { };
 
@@ -131,6 +135,8 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_BOUQUET_LAYER_TYPE_DISPEL = _G["VUHDO_BOUQUET_LAYER_TYPE_DISPEL"];
 	VUHDO_BOUQUET_LAYER_TYPE_AURA = _G["VUHDO_BOUQUET_LAYER_TYPE_AURA"];
 
+	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
+
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
 	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
@@ -138,6 +144,8 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
 	VUHDO_getBouquetGlobalOpacityNames = _G["VUHDO_getBouquetGlobalOpacityNames"];
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
+	VUHDO_copyStatusBarFillTexture = _G["VUHDO_copyStatusBarFillTexture"];
+	VUHDO_getBouquetLayerTemplate = _G["VUHDO_getBouquetLayerTemplate"];
 
 	sAlphaChainStepEntryPool = VUHDO_createTablePool("AlphaChainStepEntry", 100);
 	sAlphaChainPool = VUHDO_createTablePool("AlphaChain", 50, VUHDO_createAlphaChainDelegate, VUHDO_cleanupAlphaChainDelegate);
@@ -152,19 +160,62 @@ end
 local tOverlay;
 local tOverlayText;
 local tBarText;
-function VUHDO_getOrCreateBooleanOverlay(aButton, aValidatorName, aHealthBar)
+local tTargetOverlays;
+local tAnchorRegion;
+local tTexture;
+local function VUHDO_applyBooleanOverlayFillTexture(aTexture, aTarget, aTargetType)
 
-	if sBooleanOverlayLayers[aButton][aValidatorName] then
-		return sBooleanOverlayLayers[aButton][aValidatorName];
+	if aTargetType == VUHDO_TARGET_TYPE_BAR then
+		if not VUHDO_copyStatusBarFillTexture(aTexture, aTarget) then
+			aTexture:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMP", "CLAMP", "NEAREST");
+
+			VUHDO_PixelUtil.ApplySettings(aTexture);
+		end
+	else
+		aTexture:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMP", "CLAMP", "NEAREST");
+
+		VUHDO_PixelUtil.ApplySettings(aTexture);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_getOrCreateBooleanOverlay(aButton, aTarget, aValidatorName, aTargetType)
+
+	tTargetOverlays = sBooleanOverlayLayers[aButton][aTarget];
+
+	if not tTargetOverlays then
+		tTargetOverlays = { };
+
+		sBooleanOverlayLayers[aButton][aTarget] = tTargetOverlays;
+	end
+
+	if tTargetOverlays[aValidatorName] then
+		return tTargetOverlays[aValidatorName];
 	end
 
 	tOverlay = aButton:CreateTexture(nil, "OVERLAY");
 
-	tOverlay:SetAllPoints(aHealthBar);
-	tOverlay:SetTexture("Interface\\Buttons\\WHITE8X8");
+	if aTargetType == VUHDO_TARGET_TYPE_BAR then
+		tAnchorRegion = aTarget:GetStatusBarTexture() or aTarget;
+	else
+		tAnchorRegion = aTarget;
+	end
+
+	tOverlay:SetAllPoints(tAnchorRegion);
 	tOverlay:SetAlpha(0);
 
-	tBarText = VUHDO_getBarText(aHealthBar);
+	VUHDO_applyBooleanOverlayFillTexture(tOverlay, aTarget, aTargetType);
+
+	if aTargetType == VUHDO_TARGET_TYPE_BAR then
+		tBarText = VUHDO_getBarText(aTarget);
+	else
+		tBarText = nil;
+	end
 
 	if tBarText then
 		tOverlayText = aButton:CreateFontString(nil, "OVERLAY");
@@ -176,19 +227,18 @@ function VUHDO_getOrCreateBooleanOverlay(aButton, aValidatorName, aHealthBar)
 		tOverlayText = nil;
 	end
 
-	sBooleanOverlayLayers[aButton][aValidatorName] = {
+	tTargetOverlays[aValidatorName] = {
 		["texture"] = tOverlay,
 		["fontString"] = tOverlayText,
 	};
 
-	return sBooleanOverlayLayers[aButton][aValidatorName];
+	return tTargetOverlays[aValidatorName];
 
 end
 
 
 
 --
-local tTexture;
 local tFontString;
 function VUHDO_applyBooleanOverlay(aOverlay, aSecretBool, aConfig, aTrueColor, aFalseColor)
 
@@ -219,11 +269,15 @@ end
 --
 function VUHDO_clearBooleanOverlays(aButton)
 
-	for _, tOverlay in pairs(sBooleanOverlayLayers[aButton]) do
-		tOverlay["texture"]:SetAlpha(0);
+	-- FIXME: hook into VUHDO_registerAllBouquets with VUHDO_rebuildAllAlphaChains and VUHDO_buildBooleanOverlaysForButton
 
-		if tOverlay["fontString"] then
-			tOverlay["fontString"]:SetAlpha(0);
+	for _, tTargetOverlaysClear in pairs(sBooleanOverlayLayers[aButton]) do
+		for _, tOverlay in pairs(tTargetOverlaysClear) do
+			tOverlay["texture"]:SetAlpha(0);
+
+			if tOverlay["fontString"] then
+				tOverlay["fontString"]:SetAlpha(0);
+			end
 		end
 	end
 
@@ -469,6 +523,82 @@ end
 
 
 --
+local tLayerTemplate;
+local tValidatorEntry;
+local tBuildResultSlot;
+local tBuildBarIndex;
+local function VUHDO_buildBooleanOverlaysForTarget(aButton, aTarget, aTargetType, aLayerTemplate)
+
+	for tIdx = 1, #aLayerTemplate["booleanResults"] do
+		tBuildResultSlot = aLayerTemplate["booleanResults"][tIdx];
+
+		if tBuildResultSlot["color"] and
+		   (tBuildResultSlot["color"]["useBackground"] or tBuildResultSlot["color"]["useText"]) then
+			tValidatorEntry = aLayerTemplate["booleanValidators"][tIdx];
+
+			tOverlay = VUHDO_getOrCreateBooleanOverlay(aButton, aTarget,
+				tValidatorEntry["item"]["name"], aTargetType);
+
+			if tOverlay then
+				VUHDO_applyBooleanOverlayFillTexture(tOverlay["texture"], aTarget, aTargetType);
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
+
+	if not sSecretsEnabled then
+		return;
+	end
+
+	tIndicatorConfig = VUHDO_INDICATOR_CONFIG[aPanelNum];
+
+	if not tIndicatorConfig then
+		return;
+	end
+
+	for tIndicatorName, _ in pairs(VUHDO_INDICATOR_BAR_MAP) do
+		tBouquetName = tIndicatorConfig["BOUQUETS"][tIndicatorName];
+		tLayerTemplate = tBouquetName and tBouquetName ~= "" and VUHDO_getBouquetLayerTemplate(tBouquetName);
+
+		if tLayerTemplate and tLayerTemplate["hasBools"] then
+			tBuildBarIndex = VUHDO_INDICATOR_BAR_MAP[tIndicatorName];
+			tIndicatorBar = VUHDO_getHealthBar(aButton, tBuildBarIndex);
+
+			if tIndicatorBar then
+				VUHDO_buildBooleanOverlaysForTarget(aButton, tIndicatorBar, VUHDO_TARGET_TYPE_BAR, tLayerTemplate);
+			end
+		end
+	end
+
+	for tIndicatorName, _ in pairs(VUHDO_INDICATOR_FRAME_GETTERS) do
+		tBouquetName = tIndicatorConfig["BOUQUETS"][tIndicatorName];
+		tLayerTemplate = tBouquetName and tBouquetName ~= "" and VUHDO_getBouquetLayerTemplate(tBouquetName);
+
+		if tLayerTemplate and tLayerTemplate["hasBools"] then
+			tFrameGetter = VUHDO_INDICATOR_FRAME_GETTERS[tIndicatorName];
+			tIndicatorBar = _G[tFrameGetter](aButton);
+
+			if tIndicatorBar then
+				VUHDO_buildBooleanOverlaysForTarget(aButton, tIndicatorBar, VUHDO_TARGET_TYPE_BORDER, tLayerTemplate);
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tChain;
 local tStep;
 local tSecretBool;
@@ -595,6 +725,8 @@ end
 --
 function VUHDO_rebuildAllAlphaChains()
 
+	-- FIXME: hook into VUHDO_registerAllBouquets with VUHDO_clearBooleanOverlays and VUHDO_buildBooleanOverlaysForButton
+
 	for tButton, tIndicatorChains in pairs(sGlobalAlphaChains) do
 		for tIndicatorName, tChain in pairs(tIndicatorChains) do
 			if tChain["steps"] then
@@ -621,7 +753,7 @@ end
 --
 local tResultSlot;
 local tOverlay;
-local function VUHDO_applyBooleanLayers(aButton, aTarget, aLayerTemplate)
+local function VUHDO_applyBooleanLayers(aButton, aTarget, aTargetType, aLayerTemplate)
 
 	if not aLayerTemplate["hasBools"] then
 		return;
@@ -632,8 +764,8 @@ local function VUHDO_applyBooleanLayers(aButton, aTarget, aLayerTemplate)
 
 		if tResultSlot["color"] and
 		   (tResultSlot["color"]["useBackground"] or tResultSlot["color"]["useText"]) then
-			tOverlay = VUHDO_getOrCreateBooleanOverlay(aButton,
-				aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTarget);
+			tOverlay = VUHDO_getOrCreateBooleanOverlay(aButton, aTarget,
+				aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTargetType);
 
 			if tOverlay and tResultSlot["trueColorMixin"] and tResultSlot["falseColorMixin"] and tResultSlot["secretBool"] ~= nil then
 				VUHDO_applyBooleanOverlay(tOverlay, tResultSlot["secretBool"],
@@ -981,7 +1113,7 @@ function VUHDO_applyAllLayersToTexture(aButton, aTexture, aLayerTemplate)
 	end
 
 	VUHDO_applySortedValidatorsToTarget(aButton, aTexture, VUHDO_TARGET_TYPE_TEXTURE, aLayerTemplate);
-	VUHDO_applyBooleanLayers(aButton, aTexture, aLayerTemplate);
+	VUHDO_applyBooleanLayers(aButton, aTexture, VUHDO_TARGET_TYPE_TEXTURE, aLayerTemplate);
 	VUHDO_applySpriteCellToTexture(aTexture, aLayerTemplate);
 
 	return;
@@ -998,7 +1130,7 @@ function VUHDO_applyAllLayersToBorder(aButton, aBorder, aLayerTemplate)
 	end
 
 	VUHDO_applySortedValidatorsToTarget(aButton, aBorder, VUHDO_TARGET_TYPE_BORDER, aLayerTemplate);
-	VUHDO_applyBooleanLayers(aButton, aBorder, aLayerTemplate);
+	VUHDO_applyBooleanLayers(aButton, aBorder, VUHDO_TARGET_TYPE_BORDER, aLayerTemplate);
 
 	return;
 
@@ -1068,7 +1200,7 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 		tValidatorEntry = aLayerTemplate["booleanValidators"][tIdx];
 
 		if tGateIdx > 0 and tValidatorEntry and tValidatorEntry["index"] and tValidatorEntry["index"] > tGateIdx then
-			tOverlay = VUHDO_getOrCreateBooleanOverlay(aButton, tValidatorEntry["item"]["name"], aTargetBar);
+			tOverlay = VUHDO_getOrCreateBooleanOverlay(aButton, aTargetBar, tValidatorEntry["item"]["name"], VUHDO_TARGET_TYPE_BAR);
 
 			if tOverlay then
 				tOverlay["texture"]:SetAlpha(0);
@@ -1101,7 +1233,7 @@ function VUHDO_applyAllLayersToBar(aButton, aBar, aLayerTemplate, anIndicatorKey
 	end
 
 	VUHDO_applySortedValidatorsToTarget(aButton, aBar, VUHDO_TARGET_TYPE_BAR, aLayerTemplate);
-	VUHDO_applyBooleanLayers(aButton, aBar, aLayerTemplate);
+	VUHDO_applyBooleanLayers(aButton, aBar, VUHDO_TARGET_TYPE_BAR, aLayerTemplate);
 
 	if anIndicatorKey then
 		VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, aLayerTemplate, aBar);

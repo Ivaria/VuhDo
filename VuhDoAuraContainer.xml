@@ -10,8 +10,8 @@
 				<Frame parentKey="ChainBaselineFrame" inherits="DisableUntrustedLayoutScriptsTemplate" hidden="true">
 					<Layers>
 						<Layer level="ARTWORK">
-							<Texture parentKey="ChainBaselineTexture" file="Interface\Buttons\WHITE8X8" setAllPoints="true" />
-							<MaskTexture parentKey="ChainBaselineMask" file="Interface\Buttons\WHITE8X8" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+							<Texture parentKey="ChainBaselineTexture" file="Interface\Buttons\WHITE8X8" setAllPoints="true" texelSnappingBias="0.0" snapToPixelGrid="false" />
+							<MaskTexture parentKey="ChainBaselineMask" file="Interface\Buttons\WHITE8X8" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE" texelSnappingBias="0.0" snapToPixelGrid="false">
 								<MaskedTextures>
 									<MaskedTexture childKey="ChainBaselineTexture" />
 								</MaskedTextures>
