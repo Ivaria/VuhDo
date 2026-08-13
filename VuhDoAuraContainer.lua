@@ -146,7 +146,6 @@ local VUHDO_resolveAuraTriState;
 local VUHDO_isAuraDataRestricted;
 local VUHDO_isAuraModeContainers;
 local VUHDO_resolveGroupTimerSettings;
-local VUHDO_resolveFixedAuraSlotPlacement;
 local VUHDO_startAuraButtonGlow;
 local VUHDO_getDispelTypeColorMap;
 local VUHDO_getDispelTypeColorMapOpaque;
@@ -357,7 +356,6 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_resolveGroupTimerSettings = _G["VUHDO_resolveGroupTimerSettings"];
-	VUHDO_resolveFixedAuraSlotPlacement = _G["VUHDO_resolveFixedAuraSlotPlacement"];
 	VUHDO_startAuraButtonGlow = _G["VUHDO_startAuraButtonGlow"];
 	VUHDO_getDispelTypeColorMap = _G["VUHDO_getDispelTypeColorMap"];
 	VUHDO_getDispelTypeColorMapOpaque = _G["VUHDO_getDispelTypeColorMapOpaque"];
@@ -1400,66 +1398,12 @@ end
 
 do
 	--
-	local tGroupTemplate;
-	local tFrameIndex;
-	local tParentButton;
-	local tFixedAnchorConfig;
-	local tFixedAnchor;
-	local tFixedRelPoint;
-	local tFixedX;
-	local tFixedY;
 	local tSlotTemplate;
 	local tSlotButtonSetup;
 	local tSlotContainerLevel;
 	local tSlotFrameLevelOffset;
 	local tSlotAnchor;
 	local tSlotRelPoint;
-	function VUHDO_buildAuraFixedGroupButtonInitializer(aTemplateRef, aContainer)
-
-		return function(aAuraButton)
-
-			tGroupTemplate = aTemplateRef["template"];
-			tButtonSetup = tGroupTemplate["buttonSetup"];
-
-			VUHDO_applyAuraButtonSetup(tButtonSetup, aAuraButton);
-
-			if "class" == tButtonSetup["barColorMode"] and aAuraButton["DurationBar"] then
-				VUHDO_registerContainerClassColorBar(aContainer, aAuraButton["DurationBar"]);
-			end
-
-			tFrameIndex = (aTemplateRef["nextFixedFrameIndex"] or 0) + 1;
-			aTemplateRef["nextFixedFrameIndex"] = tFrameIndex;
-
-			tParentButton = aContainer:GetParent();
-
-			tFixedAnchorConfig = tGroupTemplate["fixedAnchorConfig"];
-
-			tFixedAnchor, tFixedRelPoint, tFixedX, tFixedY = VUHDO_resolveFixedAuraSlotPlacement(
-				tGroupTemplate["fixedRadioValue"],
-				tFrameIndex,
-				tGroupTemplate["fixedBarWidth"],
-				tGroupTemplate["fixedBarHeight"],
-				tFixedAnchorConfig,
-				tParentButton,
-				tGroupTemplate["fixedIconSize"]
-			);
-
-			if tFixedAnchor then
-				aAuraButton:ClearAllPoints();
-
-				VUHDO_PixelUtil.SetPoint(aAuraButton, tFixedAnchor, aContainer, tFixedRelPoint, tFixedX or 0, tFixedY or 0);
-				VUHDO_PixelUtil.SetSize(aAuraButton, tGroupTemplate["layout"] and tGroupTemplate["layout"]["elementWidth"] or 20, tGroupTemplate["layout"] and tGroupTemplate["layout"]["elementHeight"] or 20);
-			end
-
-			return;
-
-		end;
-
-	end
-
-
-
-	--
 	function VUHDO_buildAuraSlotButtonInitializer(aTemplateRef, aContainer, anAnchorPoint)
 
 		return function(aAuraButton)
@@ -1677,12 +1621,8 @@ do
 			["templateNames"] = { aGroup["templateName"] },
 			["candidateFilters"] = aGroup["candidateFilters"],
 			["layout"] = aGroup["layout"],
-			["initializeFrame"] = aGroup["isFixedLayout"] and VUHDO_buildAuraFixedGroupButtonInitializer(tTemplateRef, aContainer) or VUHDO_buildAuraButtonInitializer(tTemplateRef, aContainer),
+			["initializeFrame"] = VUHDO_buildAuraButtonInitializer(tTemplateRef, aContainer),
 		};
-
-		if aGroup["isFixedLayout"] then
-			tTemplateRef["nextFixedFrameIndex"] = 0;
-		end
 
 		tGroupKey = aGroup["key"] or "aura";
 
@@ -1819,7 +1759,7 @@ do
 	local tParent;
 	local tContainer;
 	local tContainerLayout;
-	local tRowWidth;
+	local tMaxLineSize;
 	local tSlotTemplateRefs;
 	local tGroupTemplateRefs;
 	local tContainerData;
@@ -1836,14 +1776,22 @@ do
 		if tContainerLayout and not tContainerLayout["isFixedLayout"] then
 			tContainer:SetFlowLayoutAnchorPoint(tContainerLayout["anchorPoint"] or "TOPLEFT");
 
+			tContainer:SetFlowLayoutAxis(tContainerLayout["layoutAxis"] or AnchorUtil.FlowLayoutAxis.Horizontal);
+
 			tContainer:SetFlowLayoutGrowthDirection(tContainerLayout["horizontalDir"] or AnchorUtil.FlowDirection.Right, tContainerLayout["verticalDir"] or AnchorUtil.FlowDirection.Down);
 
 			tContainer:SetFlowLayoutPadding(tContainerLayout["paddingLeft"] or 0, tContainerLayout["paddingRight"] or 0, tContainerLayout["paddingTop"] or 0, tContainerLayout["paddingBottom"] or 0);
 
-			if tContainerLayout["elementWidth"] then
-				tRowWidth = (tContainerLayout["maxColumns"] or 1) * (tContainerLayout["elementWidth"] + (tContainerLayout["spacing"] or 0));
+			if (tContainerLayout["maxColumns"] or 1) <= 1 then
+				tContainer:SetFlowLayoutMaximumLineSize(nil);
+			elseif AnchorUtil.FlowLayoutAxis.Vertical == tContainerLayout["layoutAxis"] and tContainerLayout["elementHeight"] then
+				tMaxLineSize = (tContainerLayout["maxColumns"] or 1) * (tContainerLayout["elementHeight"] + (tContainerLayout["spacing"] or 0));
 
-				tContainer:SetFlowLayoutMaximumLineSize(tRowWidth);
+				tContainer:SetFlowLayoutMaximumLineSize(tMaxLineSize);
+			elseif tContainerLayout["elementWidth"] then
+				tMaxLineSize = (tContainerLayout["maxColumns"] or 1) * (tContainerLayout["elementWidth"] + (tContainerLayout["spacing"] or 0));
+
+				tContainer:SetFlowLayoutMaximumLineSize(tMaxLineSize);
 			end
 		end
 
@@ -2175,9 +2123,13 @@ do
 			tinsert(aScratch, tContainerLayout["useFixedSlots"] and "1" or "0");
 			tinsert(aScratch, tContainerLayout["anchorPoint"] or "");
 			tinsert(aScratch, format("%d", tContainerLayout["elementWidth"] or 0));
+			tinsert(aScratch, format("%d", tContainerLayout["elementHeight"] or 0));
 			tinsert(aScratch, format("%d", tContainerLayout["maxColumns"] or 0));
 			tinsert(aScratch, format("%d", tContainerLayout["maxRows"] or 0));
 			tinsert(aScratch, format("%d", tContainerLayout["spacing"] or 0));
+			tinsert(aScratch, format("%d", tContainerLayout["layoutAxis"] or 0));
+			tinsert(aScratch, format("%d", tContainerLayout["horizontalDir"] or 0));
+			tinsert(aScratch, format("%d", tContainerLayout["verticalDir"] or 0));
 		end
 
 		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do

@@ -300,7 +300,7 @@ do
 	local tPanelAnchors;
 	local tEnabledAnchorCount;
 	local tFilterString;
-	local tLayoutCapacity;
+	local tResolvedLayout;
 	local tButtons;
 	local tButtonName;
 	local tButtonAnchors;
@@ -349,13 +349,16 @@ do
 							tEnabledAnchorCount = tEnabledAnchorCount + 1;
 
 							tFilterString = VUHDO_escapeAuraDiagFilterString(VUHDO_resolveAuraContainerFilter(tAnchorConfig) or "none");
-							tLayoutCapacity = (tAnchorConfig["maxColumns"] or 5) * (tAnchorConfig["maxRows"] or 1);
+							tResolvedLayout, _ = VUHDO_resolveAnchorLayout(tAnchorConfig);
 
 							VUHDO_xMsg("panel", tPanelNum, "anchor", tAnchorIndex,
 								"groupId", tAnchorConfig["groupId"],
 								"filter", tFilterString,
 								"maxDisplay", tAnchorConfig["maxDisplay"] or 5,
-								"layoutCap", tLayoutCapacity);
+								"isFixedLayout", tResolvedLayout and tResolvedLayout["isFixedLayout"] and "yes" or "no",
+								"layoutAxis", tResolvedLayout and tResolvedLayout["layoutAxis"] or "n/a",
+								"horizontalDir", tResolvedLayout and tResolvedLayout["horizontalDir"] or "n/a",
+								"verticalDir", tResolvedLayout and tResolvedLayout["verticalDir"] or "n/a");
 						end
 					end
 

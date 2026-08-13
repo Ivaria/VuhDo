@@ -10,7 +10,6 @@ local strfind = string.find;
 local twipe = table.wipe;
 local tinsert = table.insert;
 local floor = math.floor;
-local min = math.min;
 
 local GetSpellIDForSpellIdentifier = C_Spell.GetSpellIDForSpellIdentifier;
 
@@ -108,6 +107,63 @@ local sFlowVertical = {
 	["UP"] = AnchorUtil.FlowDirection.Up,
 	["DOWN"] = AnchorUtil.FlowDirection.Down,
 };
+
+local sGrowthAxis = {
+	["LEFT"] = AnchorUtil.FlowLayoutAxis.Horizontal,
+	["RIGHT"] = AnchorUtil.FlowLayoutAxis.Horizontal,
+	["UP"] = AnchorUtil.FlowLayoutAxis.Vertical,
+	["DOWN"] = AnchorUtil.FlowLayoutAxis.Vertical,
+};
+
+
+
+--
+local tLayoutAxis;
+local tHorizontalDir;
+local tVerticalDir;
+local tGrowthAxis;
+local tWrapAxis;
+local function VUHDO_resolveAnchorFlowDirections(aGrowthDir, aWrapDir, aMaxColumns)
+
+	if (aMaxColumns or 5) <= 1 then
+		tWrapAxis = sGrowthAxis[aWrapDir] or AnchorUtil.FlowLayoutAxis.Horizontal;
+
+		if AnchorUtil.FlowLayoutAxis.Vertical == tWrapAxis then
+			tLayoutAxis = AnchorUtil.FlowLayoutAxis.Vertical;
+			tVerticalDir = sFlowVertical[aWrapDir] or AnchorUtil.FlowDirection.Down;
+			tHorizontalDir = AnchorUtil.FlowDirection.Right;
+		else
+			tLayoutAxis = AnchorUtil.FlowLayoutAxis.Horizontal;
+			tHorizontalDir = sFlowHorizontal[aWrapDir] or AnchorUtil.FlowDirection.Right;
+			tVerticalDir = AnchorUtil.FlowDirection.Down;
+		end
+
+		return tLayoutAxis, tHorizontalDir, tVerticalDir;
+	end
+
+	tGrowthAxis = sGrowthAxis[aGrowthDir] or AnchorUtil.FlowLayoutAxis.Horizontal;
+
+	if AnchorUtil.FlowLayoutAxis.Horizontal == tGrowthAxis then
+		tLayoutAxis = AnchorUtil.FlowLayoutAxis.Horizontal;
+		tHorizontalDir = sFlowHorizontal[aGrowthDir] or AnchorUtil.FlowDirection.Right;
+		tVerticalDir = sFlowVertical[aWrapDir] or AnchorUtil.FlowDirection.Down;
+
+		if AnchorUtil.FlowLayoutAxis.Horizontal == sGrowthAxis[aWrapDir] then
+			tVerticalDir = AnchorUtil.FlowDirection.Down;
+		end
+	else
+		tLayoutAxis = AnchorUtil.FlowLayoutAxis.Vertical;
+		tVerticalDir = sFlowVertical[aGrowthDir] or AnchorUtil.FlowDirection.Down;
+		tHorizontalDir = sFlowHorizontal[aWrapDir] or AnchorUtil.FlowDirection.Right;
+
+		if AnchorUtil.FlowLayoutAxis.Vertical == sGrowthAxis[aWrapDir] then
+			tHorizontalDir = AnchorUtil.FlowDirection.Right;
+		end
+	end
+
+	return tLayoutAxis, tHorizontalDir, tVerticalDir;
+
+end
 
 
 
@@ -676,6 +732,8 @@ do
 	local tWrapDir;
 	local tSpacing;
 	local tMaxCols;
+	local tMaxRows;
+	local tAnchorCapacity;
 	local tSize;
 	local tCol;
 	local tRow;
@@ -691,9 +749,19 @@ do
 	function VUHDO_resolveFixedAuraSlotPlacement(aRadioValue, aSlotIndex, aBarWidth, aBarHeight, anAnchorConfig, aButton, anIconSize)
 
 		tNumBasePositions = 9;
+
 		tPositionTable = (30 == aRadioValue) and VUHDO_AURA_FIXED_STRAIGHT_POSITIONS or VUHDO_AURA_FIXED_DIAGONAL_POSITIONS;
 		tBaseAnchor = ((aSlotIndex - 1) % tNumBasePositions) + 1;
 		tLayerIndex = floor((aSlotIndex - 1) / tNumBasePositions);
+
+		tMaxCols = anAnchorConfig["maxColumns"] or 5;
+		tMaxRows = anAnchorConfig["maxRows"] or 1;
+		tAnchorCapacity = tMaxCols * tMaxRows;
+
+		if tLayerIndex >= tAnchorCapacity then
+			return nil;
+		end
+
 		tSlotPos = tPositionTable[tBaseAnchor];
 
 		if not tSlotPos then
@@ -961,6 +1029,8 @@ do
 	local tSlotButtonSetup;
 	local tSlotCandidateFilters;
 	local tBouquetSlotTemplate;
+	local tLayoutAxis;
+	local tSpacerSize;
 	function VUHDO_buildListAnchorEntryGroups(aGroup, anAnchorConfig, aPixelWidth, aPixelHeight, aSpacing, aMaxFrameCount, aTemplateName, aAnchorButtonSetup, anIsBar)
 
 		tGroups = { };
@@ -970,6 +1040,8 @@ do
 			return tGroups;
 		end
 
+		tLayoutAxis, _, _ = VUHDO_resolveAnchorFlowDirections(anAnchorConfig["growthDir"] or "RIGHT", anAnchorConfig["wrapDir"] or "DOWN", anAnchorConfig["maxColumns"] or 5);
+
 		tExcludeIds = VUHDO_resolveGroupExcludeSpellIDs(aGroup);
 
 		for tEntryIndex, tEntry in ipairs(aGroup["entries"] or sEmpty) do
@@ -978,7 +1050,13 @@ do
 			end
 
 			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
-				tPendingSpacer = tPendingSpacer + aPixelWidth + aSpacing;
+				if AnchorUtil.FlowLayoutAxis.Vertical == tLayoutAxis then
+					tSpacerSize = aPixelHeight + aSpacing;
+				else
+					tSpacerSize = aPixelWidth + aSpacing;
+				end
+
+				tPendingSpacer = tPendingSpacer + tSpacerSize;
 			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
 				tSlotButtonSetup, tSlotCandidateFilters = VUHDO_buildListEntrySlotButtonSetup(aGroup, tEntry, aAnchorButtonSetup, anIsBar, tExcludeIds);
 
@@ -1066,6 +1144,7 @@ do
 	local tFixedSlotRelPoint;
 	local tCol;
 	local tRow;
+	local tIsSlotDropped;
 	function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelHeight, aSpacing, aMaxCols, aMaxFrameCount, aTemplateName, aAnchorButtonSetup, anIsBar, aGrowthDir, aWrapDir, anIsFixedLayout, aFixedRadioValue, aBarWidth, aBarHeight, aButton)
 
 		tSlots = { };
@@ -1081,12 +1160,13 @@ do
 				break;
 			end
 
+			tIsSlotDropped = false;
+
 			if anIsFixedLayout then
 				tFixedSlotAnchor, tFixedSlotRelPoint, tSlotX, tSlotY = VUHDO_resolveFixedAuraSlotPlacement(aFixedRadioValue, tEntryIndex, aBarWidth, aBarHeight, anAnchorConfig, aButton, aPixelWidth);
 
 				if not tFixedSlotAnchor then
-					tSlotX = 0;
-					tSlotY = 0;
+					tIsSlotDropped = true;
 				end
 			else
 				tCol = (tEntryIndex - 1) % aMaxCols;
@@ -1095,85 +1175,59 @@ do
 				tSlotY = tCol * (aPixelHeight + aSpacing) * aGrowthDir[2] + tRow * (aPixelHeight + aSpacing) * aWrapDir[2];
 			end
 
-			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
-				tSlotButtonSetup, tSlotCandidateFilters = VUHDO_buildListEntrySlotButtonSetup(aGroup, tEntry, aAnchorButtonSetup, anIsBar, tExcludeIds);
+			if not tIsSlotDropped then
+				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+					tSlotButtonSetup, tSlotCandidateFilters = VUHDO_buildListEntrySlotButtonSetup(aGroup, tEntry, aAnchorButtonSetup, anIsBar, tExcludeIds);
 
-				if tSlotButtonSetup then
-					tSlotTemplate = {
-						["key"] = "slot" .. tEntryIndex,
-						["filterString"] = VUHDO_resolveListEntrySlotFilter(aGroup, tEntry),
-						["candidateFilters"] = tSlotCandidateFilters,
-						["isHarmful"] = aGroup["isHarmful"] == true,
-						["templateName"] = aTemplateName,
-						["buttonSetup"] = tSlotButtonSetup,
-						["x"] = tSlotX,
-						["y"] = tSlotY,
-						["width"] = aPixelWidth,
-						["height"] = aPixelHeight,
-					};
+					if tSlotButtonSetup then
+						tSlotTemplate = {
+							["key"] = "slot" .. tEntryIndex,
+							["filterString"] = VUHDO_resolveListEntrySlotFilter(aGroup, tEntry),
+							["candidateFilters"] = tSlotCandidateFilters,
+							["isHarmful"] = aGroup["isHarmful"] == true,
+							["templateName"] = aTemplateName,
+							["buttonSetup"] = tSlotButtonSetup,
+							["x"] = tSlotX,
+							["y"] = tSlotY,
+							["width"] = aPixelWidth,
+							["height"] = aPixelHeight,
+						};
+
+						if anIsFixedLayout and tFixedSlotAnchor then
+							tSlotTemplate["anchor"] = tFixedSlotAnchor;
+							tSlotTemplate["relPoint"] = tFixedSlotRelPoint;
+						end
+
+						VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
+
+						tinsert(tSlots, tSlotTemplate);
+					end
+				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_MIXED then
+					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup);
 
 					if anIsFixedLayout and tFixedSlotAnchor then
-						tSlotTemplate["anchor"] = tFixedSlotAnchor;
-						tSlotTemplate["relPoint"] = tFixedSlotRelPoint;
+						for tMixedSlotCnt = 1, #tMixedSlotTemplates do
+							tMixedSlotTemplates[tMixedSlotCnt]["anchor"] = tFixedSlotAnchor;
+							tMixedSlotTemplates[tMixedSlotCnt]["relPoint"] = tFixedSlotRelPoint;
+						end
 					end
 
-					VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
-
-					tinsert(tSlots, tSlotTemplate);
-				end
-			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_MIXED then
-				tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup);
-
-				if anIsFixedLayout and tFixedSlotAnchor then
 					for tMixedSlotCnt = 1, #tMixedSlotTemplates do
-						tMixedSlotTemplates[tMixedSlotCnt]["anchor"] = tFixedSlotAnchor;
-						tMixedSlotTemplates[tMixedSlotCnt]["relPoint"] = tFixedSlotRelPoint;
+						VUHDO_applyListSlotLayoutFlags(tMixedSlotTemplates[tMixedSlotCnt], tEntryIndex);
+
+						tinsert(tSlots, tMixedSlotTemplates[tMixedSlotCnt]);
 					end
-				end
-
-				for tMixedSlotCnt = 1, #tMixedSlotTemplates do
-					VUHDO_applyListSlotLayoutFlags(tMixedSlotTemplates[tMixedSlotCnt], tEntryIndex);
-
-					tinsert(tSlots, tMixedSlotTemplates[tMixedSlotCnt]);
-				end
-			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_NON_AURA then
-				tSlotTemplate = {
-					["key"] = "slot" .. tEntryIndex,
-					["isStaticBouquetSlot"] = true,
-					["bouquetName"] = tEntry["value"],
-					["entryIndex"] = tEntryIndex,
-					["x"] = tSlotX,
-					["y"] = tSlotY,
-					["width"] = aPixelWidth,
-					["height"] = aPixelHeight,
-					["buttonSetup"] = aAnchorButtonSetup,
-				};
-
-				if anIsFixedLayout and tFixedSlotAnchor then
-					tSlotTemplate["anchor"] = tFixedSlotAnchor;
-					tSlotTemplate["relPoint"] = tFixedSlotRelPoint;
-				end
-
-				VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
-
-				tinsert(tSlots, tSlotTemplate);
-			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER then
-				tBouquetSlotTemplate = VUHDO_buildListEntryContainerGroupTemplate(tEntry["value"]);
-
-				if tBouquetSlotTemplate then
-					VUHDO_applyBouquetSlotButtonSetup(tBouquetSlotTemplate, anAnchorConfig, aPixelWidth, aPixelHeight, aAnchorButtonSetup, anIsBar);
-
+				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_NON_AURA then
 					tSlotTemplate = {
 						["key"] = "slot" .. tEntryIndex,
-						["filterString"] = tBouquetSlotTemplate["filterString"],
-						["candidateFilters"] = tBouquetSlotTemplate["candidateFilters"],
-						["isHarmful"] = tBouquetSlotTemplate["isHarmful"] == true,
-						["templateName"] = aTemplateName,
-						["buttonSetup"] = tBouquetSlotTemplate["buttonSetup"],
+						["isStaticBouquetSlot"] = true,
+						["bouquetName"] = tEntry["value"],
+						["entryIndex"] = tEntryIndex,
 						["x"] = tSlotX,
 						["y"] = tSlotY,
 						["width"] = aPixelWidth,
 						["height"] = aPixelHeight,
+						["buttonSetup"] = aAnchorButtonSetup,
 					};
 
 					if anIsFixedLayout and tFixedSlotAnchor then
@@ -1184,6 +1238,34 @@ do
 					VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
 
 					tinsert(tSlots, tSlotTemplate);
+				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER then
+					tBouquetSlotTemplate = VUHDO_buildListEntryContainerGroupTemplate(tEntry["value"]);
+
+					if tBouquetSlotTemplate then
+						VUHDO_applyBouquetSlotButtonSetup(tBouquetSlotTemplate, anAnchorConfig, aPixelWidth, aPixelHeight, aAnchorButtonSetup, anIsBar);
+
+						tSlotTemplate = {
+							["key"] = "slot" .. tEntryIndex,
+							["filterString"] = tBouquetSlotTemplate["filterString"],
+							["candidateFilters"] = tBouquetSlotTemplate["candidateFilters"],
+							["isHarmful"] = tBouquetSlotTemplate["isHarmful"] == true,
+							["templateName"] = aTemplateName,
+							["buttonSetup"] = tBouquetSlotTemplate["buttonSetup"],
+							["x"] = tSlotX,
+							["y"] = tSlotY,
+							["width"] = aPixelWidth,
+							["height"] = aPixelHeight,
+						};
+
+						if anIsFixedLayout and tFixedSlotAnchor then
+							tSlotTemplate["anchor"] = tFixedSlotAnchor;
+							tSlotTemplate["relPoint"] = tFixedSlotRelPoint;
+						end
+
+						VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
+
+						tinsert(tSlots, tSlotTemplate);
+					end
 				end
 			end
 		end
@@ -1329,6 +1411,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 
 	tContainerLayout = tContainerLayout or { };
 	tContainerLayout["elementWidth"] = tPixelWidth;
+	tContainerLayout["elementHeight"] = tPixelHeight;
 
 	tIsFixedLayout = tContainerLayout["isFixedLayout"];
 	tFixedRadioValue = tContainerLayout["fixedRadioValue"];
@@ -1336,17 +1419,18 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 
 	tContainerLayout["useFixedSlots"] = tUseFixedSlots;
 
-	if tIsFixedLayout then
-		tMaxFrameCount = anAnchorConfig["maxDisplay"] or 5;
-	else
-		tMaxFrameCount = min(anAnchorConfig["maxDisplay"] or 5, (tContainerLayout["maxColumns"] or 5) * (tContainerLayout["maxRows"] or 1));
-	end
+	tMaxFrameCount = anAnchorConfig["maxDisplay"] or 5;
 
 	tHealthBarWidthPx = tPanelNum and VUHDO_getHealthBarWidth(tPanelNum) or 80;
 	tHealthBarHeightPx = tPanelNum and VUHDO_getHealthBarHeight(tPanelNum) or 40;
 
 	tOffsetX = (anAnchorConfig["offsetX"] or 0) * tHealthBarWidthPx * 0.01;
 	tOffsetY = -(anAnchorConfig["offsetY"] or 0) * tHealthBarHeightPx * 0.01;
+
+	if tIsFixedLayout then
+		tOffsetX = 0;
+		tOffsetY = 0;
+	end
 
 	tAnchorPoint = tContainerLayout["anchorPoint"] or "TOPLEFT";
 	tRelativePoint = tContainerLayout["relativePoint"] or tAnchorPoint;
@@ -1398,24 +1482,6 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 				},
 				["buttonSetup"] = tAnchorButtonSetup,
 			};
-
-			if tIsFixedLayout then
-				tGroupTemplate["isFixedLayout"] = true;
-				tGroupTemplate["fixedRadioValue"] = tFixedRadioValue;
-				tGroupTemplate["fixedBarWidth"] = tHealthBarWidthPx;
-				tGroupTemplate["fixedBarHeight"] = tHealthBarHeightPx;
-				tGroupTemplate["fixedIconSize"] = tPixelWidth;
-				tGroupTemplate["fixedSpacing"] = tSpacing;
-				tGroupTemplate["fixedMaxColumns"] = tMaxCols;
-				tGroupTemplate["fixedGrowthDir"] = anAnchorConfig["growthDir"] or "RIGHT";
-				tGroupTemplate["fixedWrapDir"] = anAnchorConfig["wrapDir"] or "DOWN";
-				tGroupTemplate["fixedAnchorConfig"] = {
-					["growthDir"] = anAnchorConfig["growthDir"] or "RIGHT",
-					["wrapDir"] = anAnchorConfig["wrapDir"] or "DOWN",
-					["maxColumns"] = tMaxCols,
-					["spacing"] = tSpacing,
-				};
-			end
 
 			tinsert(tGroups, tGroupTemplate);
 		end
@@ -1559,6 +1625,22 @@ end
 
 
 --
+local tFixedAnchorGroup;
+local function VUHDO_isFixedAnchorLayoutSupported(anAnchorConfig)
+
+	tFixedAnchorGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+
+	if not tFixedAnchorGroup then
+		return false;
+	end
+
+	return VUHDO_AURA_GROUP_TYPE_LIST == tFixedAnchorGroup["type"];
+
+end
+
+
+
+--
 local tContainerLayout;
 local tGroupLayout;
 local tGrowthDir;
@@ -1566,6 +1648,7 @@ local tWrapDir;
 local tRadioValue;
 local tPos;
 local tPosition;
+local tMaxCols;
 function VUHDO_resolveAnchorLayout(anAnchorConfig)
 
 	if not anAnchorConfig then
@@ -1579,6 +1662,9 @@ function VUHDO_resolveAnchorLayout(anAnchorConfig)
 
 		tGrowthDir = anAnchorConfig["growthDir"] or "RIGHT";
 		tWrapDir = anAnchorConfig["wrapDir"] or "DOWN";
+		tMaxCols = anAnchorConfig["maxColumns"] or 5;
+
+		tLayoutAxis, tHorizontalDir, tVerticalDir = VUHDO_resolveAnchorFlowDirections(tGrowthDir, tWrapDir, tMaxCols);
 
 		if tPos then
 			tContainerLayout = {
@@ -1587,9 +1673,10 @@ function VUHDO_resolveAnchorLayout(anAnchorConfig)
 				["relFrame"] = tPos["relFrame"],
 				["staticOffsetX"] = tPos["xOffset"] or 0,
 				["staticOffsetY"] = tPos["yOffset"] or 0,
-				["horizontalDir"] = sFlowHorizontal[tGrowthDir] or AnchorUtil.FlowDirection.Right,
-				["verticalDir"] = sFlowVertical[tWrapDir] or AnchorUtil.FlowDirection.Down,
-				["maxColumns"] = anAnchorConfig["maxColumns"] or 5,
+				["layoutAxis"] = tLayoutAxis,
+				["horizontalDir"] = tHorizontalDir,
+				["verticalDir"] = tVerticalDir,
+				["maxColumns"] = tMaxCols,
 				["maxRows"] = anAnchorConfig["maxRows"] or 1,
 				["spacing"] = anAnchorConfig["spacing"] or 2,
 			};
@@ -1600,25 +1687,30 @@ function VUHDO_resolveAnchorLayout(anAnchorConfig)
 				["relFrame"] = "Button",
 				["staticOffsetX"] = 0,
 				["staticOffsetY"] = 0,
-				["horizontalDir"] = sFlowHorizontal[tGrowthDir] or AnchorUtil.FlowDirection.Right,
-				["verticalDir"] = sFlowVertical[tWrapDir] or AnchorUtil.FlowDirection.Down,
-				["maxColumns"] = anAnchorConfig["maxColumns"] or 5,
+				["layoutAxis"] = tLayoutAxis,
+				["horizontalDir"] = tHorizontalDir,
+				["verticalDir"] = tVerticalDir,
+				["maxColumns"] = tMaxCols,
 				["maxRows"] = anAnchorConfig["maxRows"] or 1,
 				["spacing"] = anAnchorConfig["spacing"] or 2,
 			};
 		end
-	elseif tRadioValue and (30 == tRadioValue or 31 == tRadioValue) then
+	elseif tRadioValue and (30 == tRadioValue or 31 == tRadioValue) and VUHDO_isFixedAnchorLayoutSupported(anAnchorConfig) then
 		tContainerLayout = {
 			["isFixedLayout"] = true,
 			["fixedRadioValue"] = tRadioValue,
 			["relFrame"] = "HealthBar",
 			["maxColumns"] = anAnchorConfig["maxColumns"] or 5,
+			["maxRows"] = anAnchorConfig["maxRows"] or 1,
 			["spacing"] = anAnchorConfig["spacing"] or 2,
 		};
 	else
 		tGrowthDir = anAnchorConfig["growthDir"] or "LEFT";
 		tWrapDir = anAnchorConfig["wrapDir"] or "DOWN";
 		tPosition = anAnchorConfig["position"] or "TOPRIGHT";
+		tMaxCols = anAnchorConfig["maxColumns"] or 5;
+
+		tLayoutAxis, tHorizontalDir, tVerticalDir = VUHDO_resolveAnchorFlowDirections(tGrowthDir, tWrapDir, tMaxCols);
 
 		tContainerLayout = {
 			["anchorPoint"] = tPosition,
@@ -1626,9 +1718,10 @@ function VUHDO_resolveAnchorLayout(anAnchorConfig)
 			["relFrame"] = "Button",
 			["staticOffsetX"] = 0,
 			["staticOffsetY"] = 0,
-			["horizontalDir"] = sFlowHorizontal[tGrowthDir] or sFlowHorizontal[tWrapDir] or AnchorUtil.FlowDirection.Left,
-			["verticalDir"] = sFlowVertical[tWrapDir] or sFlowVertical[tGrowthDir] or AnchorUtil.FlowDirection.Down,
-			["maxColumns"] = anAnchorConfig["maxColumns"] or 5,
+			["layoutAxis"] = tLayoutAxis,
+			["horizontalDir"] = tHorizontalDir,
+			["verticalDir"] = tVerticalDir,
+			["maxColumns"] = tMaxCols,
 			["maxRows"] = anAnchorConfig["maxRows"] or 1,
 			["spacing"] = anAnchorConfig["spacing"] or 2,
 		};
