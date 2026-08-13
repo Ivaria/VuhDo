@@ -54,7 +54,7 @@
 			</Layers>
 			<Frames>
 
-				<Cooldown parentKey="DurationCooldown" inherits="CooldownFrameTemplate" setAllPoints="true" />
+				<Cooldown parentKey="DurationCooldown" inherits="CooldownFrameTemplate" setAllPoints="true" reverse="true" hideCountdownNumbers="true" drawSwipe="true" drawEdge="true" drawBling="false" />
 
 			</Frames>
 		</AuraButton>
@@ -105,7 +105,7 @@
 					</Layers>
 				</Frame>
 
-				<Cooldown parentKey="DurationCooldown" inherits="CooldownFrameTemplate" hidden="true" />
+				<Cooldown parentKey="DurationCooldown" inherits="CooldownFrameTemplate" hidden="true" reverse="true" hideCountdownNumbers="true" drawSwipe="true" drawEdge="true" drawBling="false" />
 
 			</Frames>
 		</AuraButton>
