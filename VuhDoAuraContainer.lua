@@ -2407,6 +2407,73 @@ do
 
 
 	--
+	local function VUHDO_restoreAuraContainerGlowState(aContainer, aContainerData, aContainerTemplate)
+
+		if not aContainer or not aContainerData or not aContainerTemplate then
+			return;
+		end
+
+		tGroupKeys = aContainerData["groupKeys"];
+
+		if tGroupKeys then
+			for tRestoreGroupCnt = 1, #(aContainerTemplate["groups"] or sEmpty) do
+				tGroup = aContainerTemplate["groups"][tRestoreGroupCnt];
+				tRecordedKey = tGroupKeys[tRestoreGroupCnt];
+
+				if tGroup and tRecordedKey and tGroup["buttonSetup"] then
+					tReleaseGroupFrameCount = aContainer:GetAuraGroupFrameCount(tRecordedKey);
+
+					for tRestoreGroupFrameCnt = 1, tReleaseGroupFrameCount do
+						tReleaseAuraFrame = aContainer:GetAuraGroupFrame(tRecordedKey, tRestoreGroupFrameCnt);
+
+						if tReleaseAuraFrame and tReleaseAuraFrame:CanBeAccessedInContext() then
+							if tGroup["buttonSetup"]["auraGroupBarGlow"] then
+								VUHDO_applyAuraGroupBarGlowFromAuraButton(tReleaseAuraFrame, tGroup["buttonSetup"]);
+							end
+
+							if tGroup["buttonSetup"]["glowIcon"] then
+								VUHDO_startAuraButtonGlow(tReleaseAuraFrame, tGroup["buttonSetup"]);
+							end
+						end
+					end
+				end
+			end
+		end
+
+		tSlotKeys = aContainerData["slotKeys"];
+		tReleaseSlotFrames = aContainerData["slotFrames"];
+		tEngineSlotCnt = 0;
+
+		for tRestoreSlotCnt = 1, #(aContainerTemplate["slots"] or sEmpty) do
+			tSlot = aContainerTemplate["slots"][tRestoreSlotCnt];
+
+			if tSlot and not tSlot["isStaticBouquetSlot"] then
+				tEngineSlotCnt = tEngineSlotCnt + 1;
+				tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
+
+				if tRecordedKey then
+					tReleaseAuraFrame = tReleaseSlotFrames and tReleaseSlotFrames[tRecordedKey];
+
+					if tReleaseAuraFrame and tSlot["buttonSetup"] and tReleaseAuraFrame:CanBeAccessedInContext() then
+						if tSlot["buttonSetup"]["auraGroupBarGlow"] then
+							VUHDO_applyAuraGroupBarGlowFromAuraButton(tReleaseAuraFrame, tSlot["buttonSetup"]);
+						end
+
+						if tSlot["buttonSetup"]["glowIcon"] then
+							VUHDO_startAuraButtonGlow(tReleaseAuraFrame, tSlot["buttonSetup"]);
+						end
+					end
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tWipeContainer;
 	function VUHDO_wipeAuraContainerPool()
 
@@ -2531,6 +2598,8 @@ do
 				tContainerData["fromPool"] = true;
 
 				VUHDO_restorePooledAuraContainer(tContainer, tContainerData, aContainerTemplate);
+
+				VUHDO_restoreAuraContainerGlowState(tContainer, tContainerData, aContainerTemplate);
 
 				if aContainerTemplate["isFillChain"] then
 					VUHDO_setupOverlayFillChain(tContainer, aContainerTemplate, tContainerData);

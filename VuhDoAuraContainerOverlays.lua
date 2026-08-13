@@ -2254,6 +2254,8 @@ do
 	local tBarGlowEntry;
 	local tBarGlowContainerTemplate;
 	local tBarGlowPlannedCount;
+	local tBarGlowCanBuild;
+	local tBarGlowHasListSpell;
 	local function VUHDO_buildAuraGroupBarGlowOverlaysForButton(aButton, aPanelNum)
 
 		tBarGlowPlannedCount = 0;
@@ -2271,57 +2273,78 @@ do
 
 				tBarGlowResolved = VUHDO_getAuraGroupResolvedFilters(tBarGlowGroupData);
 
-				if tBarGlowGroupData and tBarGlowResolved and tBarGlowResolved["expressible"] then
-					tBarGlowColorType = tBarGlowGroup["colorType"] or VUHDO_AURA_GROUP_COLOR_DISPEL;
+				if tBarGlowGroupData and tBarGlowResolved then
+					tBarGlowCanBuild = tBarGlowResolved["expressible"];
 
-					tBarGlowCandidateFilters = VUHDO_copyOverlayCandidateFilters(tBarGlowResolved["candidateFilters"], nil);
+					if not tBarGlowCanBuild then
+						tBarGlowHasListSpell = false;
+						tBarGlowColorType = tBarGlowGroup["colorType"] or VUHDO_AURA_GROUP_COLOR_DISPEL;
 
-					tBarGlowFilterSpecs = VUHDO_buildAuraGroupBarGlowFilterEntries(tBarGlowGroupId, tBarGlowColorType, tBarGlowResolved["filterString"], tBarGlowCandidateFilters);
+						if (tBarGlowGroupData["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) == VUHDO_AURA_GROUP_TYPE_LIST and tBarGlowColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM and tBarGlowGroupData["entries"] then
+							for _, tEntry in ipairs(tBarGlowGroupData["entries"]) do
+								if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and tEntry["value"] then
+									tBarGlowHasListSpell = true;
 
-					for tBarGlowFilterIdx = 1, #tBarGlowFilterSpecs do
-						tBarGlowFilterSpec = tBarGlowFilterSpecs[tBarGlowFilterIdx];
-
-						tBarGlowEntry = {
-							["filterString"] = tBarGlowFilterSpec["filterString"],
-							["candidateFilters"] = tBarGlowFilterSpec["candidateFilters"],
-							["friendlyOnly"] = tBarGlowFilterSpec["friendlyOnly"],
-							["hostileOnly"] = tBarGlowFilterSpec["hostileOnly"],
-							["shape"] = "glow",
-							["glowIcon"] = false,
-							["glowStyle"] = tBarGlowGroup["glowBarStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE,
-							["glowColorType"] = tBarGlowColorType,
-							["auraGroupBarGlow"] = true,
-							["glowGroupId"] = tBarGlowGroupId,
-							["unitButton"] = aButton,
-							["hideIcon"] = true,
-							["entryKey"] = "glow:" .. tBarGlowGroupId .. tBarGlowFilterSpec["entryKeySuffix"],
-							["frameLevelOffset"] = 8 + (#tBarGlowCanColorBarGroups - tGroupCnt),
-						};
-
-						if tBarGlowEntry["glowColorType"] == VUHDO_AURA_GROUP_COLOR_CUSTOM then
-							tBarGlowColor = tBarGlowGroup["glowBarColor"];
-
-							if not tBarGlowColor or not tBarGlowColor["R"] then
-								tBarGlowDefaultColor = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"] and VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"];
-								tBarGlowColor = tBarGlowDefaultColor;
+									break;
+								end
 							end
-
-							tBarGlowEntry["glowColor"] = tBarGlowColor;
 						end
 
-						tBarGlowEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aButton, 1, "AURA_GROUP_BAR_GLOW");
+						tBarGlowCanBuild = tBarGlowHasListSpell;
+					end
 
-						tBarGlowContainerTemplate = VUHDO_buildOverlayContainerTemplate(aButton, aButton, tBarGlowEntry, "glow_" .. tBarGlowGroupId .. tBarGlowFilterSpec["entryKeySuffix"]);
+					if tBarGlowCanBuild then
+						tBarGlowColorType = tBarGlowGroup["colorType"] or VUHDO_AURA_GROUP_COLOR_DISPEL;
 
-						tBarGlowContainerTemplate["anchor"] = {
-							["mode"] = "cover",
-							["target"] = tBarGlowContainerTemplate["overlayHostFrame"] or aButton,
-							["frameLevelOffset"] = tBarGlowEntry["frameLevelOffset"],
-						};
+						tBarGlowCandidateFilters = VUHDO_copyOverlayCandidateFilters(tBarGlowResolved["candidateFilters"], nil);
 
-						VUHDO_enqueueOverlayContainerBuild(aButton, "AURA_GROUP_BAR_GLOW", tBarGlowEntry["entryKey"], tBarGlowContainerTemplate, tBarGlowEntry);
+						tBarGlowFilterSpecs = VUHDO_buildAuraGroupBarGlowFilterEntries(tBarGlowGroupId, tBarGlowColorType, tBarGlowResolved["filterString"], tBarGlowCandidateFilters);
 
-						tBarGlowPlannedCount = tBarGlowPlannedCount + 1;
+						for tBarGlowFilterIdx = 1, #tBarGlowFilterSpecs do
+							tBarGlowFilterSpec = tBarGlowFilterSpecs[tBarGlowFilterIdx];
+
+							tBarGlowEntry = {
+								["filterString"] = tBarGlowFilterSpec["filterString"],
+								["candidateFilters"] = tBarGlowFilterSpec["candidateFilters"],
+								["friendlyOnly"] = tBarGlowFilterSpec["friendlyOnly"],
+								["hostileOnly"] = tBarGlowFilterSpec["hostileOnly"],
+								["shape"] = "glow",
+								["glowIcon"] = false,
+								["glowStyle"] = tBarGlowGroup["glowBarStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE,
+								["glowColorType"] = tBarGlowColorType,
+								["auraGroupBarGlow"] = true,
+								["glowGroupId"] = tBarGlowGroupId,
+								["unitButton"] = aButton,
+								["hideIcon"] = true,
+								["entryKey"] = "glow:" .. tBarGlowGroupId .. tBarGlowFilterSpec["entryKeySuffix"],
+								["frameLevelOffset"] = 8 + (#tBarGlowCanColorBarGroups - tGroupCnt),
+							};
+
+							if tBarGlowEntry["glowColorType"] == VUHDO_AURA_GROUP_COLOR_CUSTOM then
+								tBarGlowColor = tBarGlowGroup["glowBarColor"];
+
+								if not tBarGlowColor or not tBarGlowColor["R"] then
+									tBarGlowDefaultColor = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"] and VUHDO_PANEL_SETUP["BAR_COLORS"]["DEBUFF_BAR_GLOW"];
+									tBarGlowColor = tBarGlowDefaultColor;
+								end
+
+								tBarGlowEntry["glowColor"] = tBarGlowColor;
+							end
+
+							tBarGlowEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aButton, 1, "AURA_GROUP_BAR_GLOW");
+
+							tBarGlowContainerTemplate = VUHDO_buildOverlayContainerTemplate(aButton, aButton, tBarGlowEntry, "glow_" .. tBarGlowGroupId .. tBarGlowFilterSpec["entryKeySuffix"]);
+
+							tBarGlowContainerTemplate["anchor"] = {
+								["mode"] = "cover",
+								["target"] = tBarGlowContainerTemplate["overlayHostFrame"] or aButton,
+								["frameLevelOffset"] = tBarGlowEntry["frameLevelOffset"],
+							};
+
+							VUHDO_enqueueOverlayContainerBuild(aButton, "AURA_GROUP_BAR_GLOW", tBarGlowEntry["entryKey"], tBarGlowContainerTemplate, tBarGlowEntry);
+
+							tBarGlowPlannedCount = tBarGlowPlannedCount + 1;
+						end
 					end
 				end
 			end
@@ -2343,7 +2366,6 @@ do
 	local tContainerTemplate;
 	local tDispelOverlayEntry;
 	local tOverlayPrototypes;
-	local tOverlayEntry;
 	local tChainGroupMeta;
 	local tBuildBouquetOverlays;
 	function VUHDO_buildOverlaysForButton(aButton, aButtonName, aPanelNum, aUnit)
