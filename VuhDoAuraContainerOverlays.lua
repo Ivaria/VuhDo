@@ -2521,6 +2521,32 @@ do
 	local tGateActive;
 	local tEnabledChanged;
 	local tUnitRebound;
+	--
+	function VUHDO_resetOverlaysForUnit(aUnit)
+
+		if not aUnit then
+			return;
+		end
+
+		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+			tButtonName = tButton:GetName();
+
+			for _, tIndicatorEntry in pairs(tButtonName and VUHDO_OVERLAY_CONTAINERS[tButtonName] or sEmpty) do
+				for _, tContainerData in pairs(tIndicatorEntry) do
+					tContainerData["lastSyncedUnit"] = nil;
+					tContainerData["lastSyncedEnabled"] = nil;
+					tContainerData["lastSyncedGroupEnabled"] = nil;
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	function VUHDO_syncOverlaysForUnit(aUnit)
 
 		if not aUnit then

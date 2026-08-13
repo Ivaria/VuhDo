@@ -97,6 +97,8 @@ local VUHDO_checkAuraDataRestrictedState;
 local VUHDO_syncAuraContainersForUnit;
 local VUHDO_syncAuraContainersForAllRaidUnits;
 local VUHDO_syncOverlaysForUnit;
+local VUHDO_resetAuraContainersForUnit;
+local VUHDO_resetOverlaysForUnit;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -597,6 +599,8 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
 	VUHDO_syncAuraContainersForAllRaidUnits = _G["VUHDO_syncAuraContainersForAllRaidUnits"];
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
+	VUHDO_resetAuraContainersForUnit = _G["VUHDO_resetAuraContainersForUnit"];
+	VUHDO_resetOverlaysForUnit = _G["VUHDO_resetOverlaysForUnit"];
 
 	VUHDO_initTaskSystem();
 
@@ -1193,6 +1197,9 @@ do
 				VUHDO_updateToggledUnitEvents();
 
 				for tCnt = 1, 8 do
+					VUHDO_resetAuraContainersForUnit("boss" .. tCnt);
+					VUHDO_resetOverlaysForUnit("boss" .. tCnt);
+
 					VUHDO_syncAuraContainersForUnit("boss" .. tCnt);
 				end
 			end
@@ -1252,6 +1259,9 @@ do
 
 				VUHDO_updateBouquetsForEvent("player", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
 				VUHDO_updateBouquetsForEvent("focus", 23); -- VUHDO_UPDATE_PLAYER_FOCUS
+
+				VUHDO_resetAuraContainersForUnit("focus");
+				VUHDO_resetOverlaysForUnit("focus");
 
 				VUHDO_syncAuraContainersForUnit("focus");
 				VUHDO_syncOverlaysForUnit("focus");
@@ -1317,6 +1327,9 @@ do
 				if VUHDO_needsRoleInspect("target") then
 					VUHDO_requestTargetFocusInspect("target");
 				end
+
+				VUHDO_resetAuraContainersForUnit("target");
+				VUHDO_resetOverlaysForUnit("target");
 
 				VUHDO_syncAuraContainersForUnit("target");
 				VUHDO_syncOverlaysForUnit("target");

@@ -19,7 +19,7 @@ local CreateNumericRuleFormatter = C_StringUtil and C_StringUtil.CreateNumericRu
 local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
 local CreateColor = CreateColor;
 
-local VUHDO_ON_UPDATE_MODE_RUN_ONCE = Enum.OnUpdateMode.RunWhenVisibleOnce;
+local VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE = Enum.OnUpdateMode.RunWhenVisible;
 
 VUHDO_AURA_CONTAINERS = VUHDO_AURA_CONTAINERS or { };
 local VUHDO_AURA_CONTAINERS = VUHDO_AURA_CONTAINERS;
@@ -3101,7 +3101,7 @@ do
 		tUnitInfo = VUHDO_RAID[aUnit];
 
 		if not tUnitInfo then
-			return true;
+			return false;
 		end
 
 		if not tUnitInfo["connected"] then
@@ -3288,7 +3288,7 @@ function VUHDO_refreshAuraContainer(aContainer)
 	if InCombatLockdown() then
 		aContainer:UpdateAllAuras();
 
-		aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
+		aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
 	else
 		aContainer:Hide();
 		aContainer:Show();
@@ -3522,6 +3522,23 @@ function VUHDO_syncAuraContainersForAllRaidUnits()
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_syncAuraContainersForUnit(tUnit);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_resetAuraContainersForUnit(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+		VUHDO_clearAuraContainersForButton(tButton);
 	end
 
 	return;
