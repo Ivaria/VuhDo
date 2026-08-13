@@ -152,7 +152,7 @@ function VUHDO_updateUnitAggro(aUnit, aMode)
 		tUnitInfo["threatPerc"] = 0;
 		tUnitInfo["hasSecretThreat"] = false;
 
-		if UnitIsEnemy(aUnit, tUnitTarget) then
+		if tUnitTarget and UnitIsEnemy(aUnit, tUnitTarget) then
 			if VUHDO_INTERNAL_TOGGLES[14] then
 				_, _, tThreatPerc = UnitDetailedThreatSituation(aUnit, tUnitTarget);
 

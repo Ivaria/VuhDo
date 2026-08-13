@@ -637,13 +637,18 @@ end
 
 
 --
+local tPhaseReason;
 function VUHDO_unitPhaseReason(aUnit) 
 
 	if not aUnit then
 		return nil;
 	end
 
-	local tPhaseReason = UnitPhaseReason(aUnit);
+	tPhaseReason = UnitPhaseReason(aUnit);
+
+	if sSecretsEnabled and issecretvalue(tPhaseReason) then
+		return nil;
+	end
 
 	-- FIXME: workaround for Blizzard API bug: https://github.com/Stanzilla/WoWUIBugs/issues/49
 	if (tPhaseReason == Enum.PhaseReason.WarMode or tPhaseReason == Enum.PhaseReason.ChromieTime or tPhaseReason == Enum.PhaseReason.TimerunningHwt) and UnitIsVisible(aUnit) then
