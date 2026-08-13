@@ -154,6 +154,7 @@ local VUHDO_getDispelColorGeneration;
 local VUHDO_applyAuraGroupBarGlowFromAuraButton;
 local VUHDO_getManaAdjustedYOffset;
 local VUHDO_releaseAuraButtonGlowState;
+local VUHDO_unitPhaseReason;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -364,6 +365,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_applyAuraGroupBarGlowFromAuraButton = _G["VUHDO_applyAuraGroupBarGlowFromAuraButton"];
 	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
 	VUHDO_releaseAuraButtonGlowState = _G["VUHDO_releaseAuraButtonGlowState"];
+	VUHDO_unitPhaseReason = _G["VUHDO_unitPhaseReason"];
 
 	sAuraOpaqueBorderOptions["backingCurveFn"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"];
 	sAuraOpaqueBorderOptions["fillCurveFn"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"];
@@ -1666,6 +1668,7 @@ do
 		end
 
 		tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(aGroup);
+		tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(aGroup);
 
 		tOptions = {
 			["maxFrameCount"] = aGroup["maxFrameCount"] or 5,
@@ -1713,6 +1716,7 @@ do
 		end
 
 		tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(aSlot);
+		tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(aSlot);
 
 		tSlotOptions = {
 			["templateNames"] = { aSlot["templateName"] },
@@ -2371,6 +2375,7 @@ do
 					if tTemplateRef then
 						tTemplateRef["template"] = tSlot;
 						tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tSlot);
+						tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tSlot);
 					end
 				end
 			end
@@ -2392,6 +2397,7 @@ do
 				if tTemplateRef then
 					tTemplateRef["template"] = tGroup;
 					tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tGroup);
+					tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tGroup);
 				end
 			end
 		end
@@ -3037,6 +3043,73 @@ end
 
 do
 	--
+	local tFilterString;
+	function VUHDO_isCompoundFilterStringTemplate(aTemplate)
+
+		if not aTemplate then
+			return false;
+		end
+
+		tFilterString = aTemplate["filterString"];
+
+		if not tFilterString then
+			return false;
+		end
+
+		if tFilterString == "HELPFUL" or tFilterString == "HARMFUL" then
+			return false;
+		end
+
+		return true;
+
+	end
+end
+
+
+
+do
+	--
+	local tUnitInfo;
+	local tVisible;
+	function VUHDO_isUnitAuraFilterRestricted(aUnit)
+
+		if not aUnit then
+			return true;
+		end
+
+		tUnitInfo = VUHDO_RAID[aUnit];
+
+		if not tUnitInfo then
+			return true;
+		end
+
+		if not tUnitInfo["connected"] then
+			return true;
+		end
+
+		if VUHDO_unitPhaseReason(aUnit) then
+			return true;
+		end
+
+		tVisible = tUnitInfo["visible"];
+
+		if issecretvalue(tVisible) then
+			return false;
+		end
+
+		if not tVisible then
+			return true;
+		end
+
+		return false;
+
+	end
+end
+
+
+
+do
+	--
 	local tCanAssist;
 	function VUHDO_isUnitAssistRestricted(aUnit)
 
@@ -3070,13 +3143,17 @@ do
 	local tEngineSlotCnt;
 	local tSlot;
 	local tRecordedKey;
-	function VUHDO_applyAuraContainerAssistOnly(aContainer, aContainerData, anIsAssistRestricted)
+	local tSyncKey;
+	local tShouldSuppress;
+	function VUHDO_applyAuraContainerAssistOnly(aContainer, aContainerData, anIsAssistRestricted, anIsAuraFilterRestricted, anIsDisconnected)
 
 		if not aContainer or not aContainerData then
 			return false;
 		end
 
-		if aContainerData["lastSyncedAssistOnly"] == anIsAssistRestricted then
+		tSyncKey = (anIsAssistRestricted and "1" or "0") .. (anIsAuraFilterRestricted and "1" or "0") .. (anIsDisconnected and "1" or "0");
+
+		if aContainerData["lastSyncedAssistOnly"] == tSyncKey then
 			return false;
 		end
 
@@ -3092,12 +3169,14 @@ do
 		if tGroupKeys and tGroupTemplateRefs then
 			for tGroupCnt = 1, #tGroupKeys do
 				tTemplateRef = tGroupTemplateRefs[tGroupCnt];
+				tGroupKey = tGroupKeys[tGroupCnt];
 
-				if tTemplateRef and tTemplateRef["isAssistOnly"] then
-					tGroupKey = tGroupKeys[tGroupCnt];
+				if tTemplateRef then
 					tGroup = tTemplateRef["template"];
 
-					if anIsAssistRestricted then
+					tShouldSuppress = anIsDisconnected or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and anIsAuraFilterRestricted);
+
+					if tShouldSuppress then
 						aContainer:SetAuraGroupMaxFrameCount(tGroupKey, 0);
 					else
 						aContainer:SetAuraGroupMaxFrameCount(tGroupKey, tGroup["maxFrameCount"] or 5);
@@ -3117,23 +3196,23 @@ do
 			if tSlot and not tSlot["isStaticBouquetSlot"] then
 				tEngineSlotCnt = tEngineSlotCnt + 1;
 				tTemplateRef = tSlotTemplateRefs and tSlotTemplateRefs[tEngineSlotCnt];
+				tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
 
-				if tTemplateRef and tTemplateRef["isAssistOnly"] then
-					tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
+				if tTemplateRef and tRecordedKey then
 					tSlot = tTemplateRef["template"];
 
-					if tRecordedKey then
-						if anIsAssistRestricted then
-							aContainer:SetAuraSlotFilterString(tRecordedKey, "");
-						else
-							aContainer:SetAuraSlotFilterString(tRecordedKey, tSlot["filterString"] or "HELPFUL");
-						end
+					tShouldSuppress = anIsDisconnected or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and anIsAuraFilterRestricted);
+
+					if tShouldSuppress then
+						aContainer:SetAuraSlotFilterString(tRecordedKey, "");
+					else
+						aContainer:SetAuraSlotFilterString(tRecordedKey, tSlot["filterString"] or "HELPFUL");
 					end
 				end
 			end
 		end
 
-		aContainerData["lastSyncedAssistOnly"] = anIsAssistRestricted;
+		aContainerData["lastSyncedAssistOnly"] = tSyncKey;
 
 		return true;
 
@@ -3321,6 +3400,9 @@ local tNeedsSync;
 local tIsAuraDataRestricted;
 local tCanAttack;
 local tIsAssistRestricted;
+local tIsAuraFilterRestricted;
+local tIsDisconnected;
+local tUnitInfo;
 local tSlotFiltersDirty;
 local tAssistOnlyDirty;
 function VUHDO_syncAuraContainersForButton(aButton, aUnit)
@@ -3336,8 +3418,14 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 	end
 
 	tIsAuraDataRestricted = VUHDO_isAuraDataRestricted();
+
 	tCanAttack = UnitCanAttack("player", aUnit);
+
 	tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
+	tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
+
+	tUnitInfo = VUHDO_RAID[aUnit];
+	tIsDisconnected = tUnitInfo and not tUnitInfo["connected"];
 
 	if not UnitExists(aUnit) then
 		for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
@@ -3357,7 +3445,7 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 		if tContainer then
 			tSlotFiltersDirty = VUHDO_applyAuraContainerSlotFilters(tContainer, tContainerData, tCanAttack);
 
-			tAssistOnlyDirty = VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted);
+			tAssistOnlyDirty = VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted, tIsAuraFilterRestricted, tIsDisconnected);
 
 			if VUHDO_isAuraModeContainers() then
 				tContainerData["lastSyncedRestricted"] = tIsAuraDataRestricted;
@@ -3396,6 +3484,23 @@ function VUHDO_syncAuraContainersForUnit(aUnit)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		VUHDO_syncAuraContainersForButton(tButton, aUnit);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_syncAuraContainersForAllRaidUnits()
+
+	if not VUHDO_RAID then
+		return;
+	end
+
+	for tUnit, _ in pairs(VUHDO_RAID) do
+		VUHDO_syncAuraContainersForUnit(tUnit);
 	end
 
 	return;

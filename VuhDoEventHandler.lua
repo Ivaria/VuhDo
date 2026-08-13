@@ -95,6 +95,7 @@ local VUHDO_flushPendingOverlayRebuild;
 local VUHDO_flushPendingOverlayAcquires;
 local VUHDO_checkAuraDataRestrictedState;
 local VUHDO_syncAuraContainersForUnit;
+local VUHDO_syncAuraContainersForAllRaidUnits;
 local VUHDO_syncOverlaysForUnit;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
@@ -594,6 +595,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_flushPendingOverlayAcquires = _G["VUHDO_flushPendingOverlayAcquires"];
 	VUHDO_checkAuraDataRestrictedState = _G["VUHDO_checkAuraDataRestrictedState"];
 	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
+	VUHDO_syncAuraContainersForAllRaidUnits = _G["VUHDO_syncAuraContainersForAllRaidUnits"];
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
 
 	VUHDO_initTaskSystem();
@@ -1183,6 +1185,10 @@ do
 				end
 			end
 
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_syncAuraContainersForAllRaidUnits();
+			end
+
 			if "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then
 				VUHDO_updateToggledUnitEvents();
 
@@ -1260,6 +1266,10 @@ do
 		elseif "PLAYER_ENTERING_WORLD" == anEvent then
 			VUHDO_init();
 			VUHDO_initAddonMessages();
+
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_syncAuraContainersForAllRaidUnits();
+			end
 
 			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
 				VUHDO_clearAllSpellTraces();

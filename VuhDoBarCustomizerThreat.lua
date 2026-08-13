@@ -8,6 +8,7 @@ local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
 local VUHDO_applyAllLayersToTexture;
 local VUHDO_getIsDirectionArrow;
+local VUHDO_syncAuraContainersForUnit;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sThreatInterpolation = { };
@@ -21,6 +22,7 @@ function VUHDO_barCustomizerThreatInitLocalOverrides()
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
 	VUHDO_applyAllLayersToTexture = _G["VUHDO_applyAllLayersToTexture"];
 	VUHDO_getIsDirectionArrow = _G["VUHDO_getIsDirectionArrow"];
+	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
 
 	for tCnt = 1, 10 do -- VUHDO_MAX_PANELS
 		sThreatInterpolation[tCnt] = VUHDO_INDICATOR_CONFIG[tCnt]["CUSTOM"]["THREAT_BAR"]["smooth"]
@@ -293,6 +295,7 @@ local tUnitInfo;
 local tIsCharmed;
 local tUnitCharmed;
 local tUnitCanAttack;
+local tWasVisible;
 function VUHDO_updateUnitVisibilityCharmRange(aUnit)
 
 	if not VUHDO_RAID then
@@ -305,7 +308,13 @@ function VUHDO_updateUnitVisibilityCharmRange(aUnit)
 		return;
 	end
 
+	tWasVisible = tUnitInfo["visible"];
+
 	tUnitInfo["visible"] = UnitIsVisible(aUnit);
+
+	if tWasVisible ~= tUnitInfo["visible"] then
+		VUHDO_syncAuraContainersForUnit(aUnit);
+	end
 
 	if not tUnitInfo["isEventRange"] then
 		tUnitInfo["baseRange"] = "player" == aUnit or "pet" == aUnit or UnitInRange(aUnit);
