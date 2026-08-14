@@ -163,6 +163,7 @@ do
 					"liveBarWidth", tLiveBarWidth,
 					"liveBarHeight", tLiveBarHeight,
 					"dispelFill", tGroupButtonSetup and tGroupButtonSetup["dispelFill"],
+					"dispelIcon", tGroupButtonSetup and tGroupButtonSetup["dispelIcon"],
 					"dispelBright", tGroupButtonSetup and tGroupButtonSetup["dispelBright"],
 					"dispelOpacity", tGroupButtonSetup and tGroupButtonSetup["dispelOpacity"],
 					"shadowValueMode", tGroupButtonSetup and tGroupButtonSetup["shadowValueMode"]);
@@ -177,7 +178,7 @@ do
 						"a", VUHDO_formatAuraDiagColorComponent(tStaticColor["O"]));
 				end
 
-				if tGroupButtonSetup and tGroupButtonSetup["dispelFill"] then
+				if tGroupButtonSetup and (tGroupButtonSetup["dispelFill"] or tGroupButtonSetup["dispelIcon"]) then
 					tDispelBright = tGroupButtonSetup["dispelBright"];
 					tDispelOpacity = tGroupButtonSetup["dispelOpacity"];
 

@@ -724,9 +724,19 @@ end
 
 do
 	--
+	local tAggroTexture;
 	function VUHDO_initAggroTexture(aButton, aHealthBar)
 
-		VUHDO_PixelUtil.Hide(VUHDO_getAggroTexture(aHealthBar));
+		tAggroTexture = VUHDO_getAggroTexture(aHealthBar);
+
+		VUHDO_PixelUtil.ClearAllPoints(tAggroTexture);
+
+		VUHDO_PixelUtil.SetPoint(tAggroTexture, "TOPLEFT", aButton, "TOPLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tAggroTexture, "TOPRIGHT", aButton, "TOPRIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tAggroTexture, "BOTTOMLEFT", aButton, "BOTTOMLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tAggroTexture, "BOTTOMRIGHT", aButton, "BOTTOMRIGHT", 0, 0);
+
+		VUHDO_PixelUtil.Hide(tAggroTexture);
 
 		return;
 

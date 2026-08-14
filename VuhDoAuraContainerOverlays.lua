@@ -13,6 +13,7 @@ VUHDO_OVERLAYS_REBUILD_PENDING = false;
 local VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS;
 local VUHDO_INDICATOR_OVERLAY_TARGETS = VUHDO_INDICATOR_OVERLAY_TARGETS;
 local VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE = "VuhDoAuraButtonOverlayTemplate";
+local VUHDO_AURA_BUTTON_ICON_TEMPLATE = "VuhDoAuraButtonIconTemplate";
 
 local VUHDO_PANEL_SETUP;
 local VUHDO_BOUQUETS;
@@ -269,7 +270,7 @@ do
 	local tOcclusionO;
 	local tThreatHeight;
 	local tBarButtonSetup;
-	local function VUHDO_getOverlayBarButtonSetup(aPanelNum, anIndicatorKey, aTargetFrame, aButton)
+	function VUHDO_getOverlayBarButtonSetup(aPanelNum, anIndicatorKey, aTargetFrame, aButton)
 
 		tCustomSetup = VUHDO_INDICATOR_CONFIG[aPanelNum] and VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"][anIndicatorKey];
 		tBarTexture = (tCustomSetup and tCustomSetup["TEXTURE"])
@@ -314,7 +315,7 @@ do
 	--
 	local tBorderCustomSetup;
 	local tBorderButtonSetup;
-	local function VUHDO_getOverlayBorderButtonSetup(aPanelNum, anIndicatorKey)
+	function VUHDO_getOverlayBorderButtonSetup(aPanelNum, anIndicatorKey)
 
 		tBorderCustomSetup = VUHDO_INDICATOR_CONFIG[aPanelNum] and VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"][anIndicatorKey];
 
@@ -349,190 +350,191 @@ do
 		return;
 
 	end
+end
 
 
 
-	do
-		--
-		local tModeItemSpecial;
-		local function VUHDO_getBouquetItemValueType(aItem)
+do
+	--
+	local tModeItemSpecial;
+	local function VUHDO_getBouquetItemValueType(aItem)
 
-			tModeItemSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[aItem["name"]];
+		tModeItemSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[aItem["name"]];
 
-			if not tModeItemSpecial then
-				return VUHDO_BOUQUET_VALUE_TYPE_AURA;
-			end
-
-			return tModeItemSpecial["valueType"] or VUHDO_BOUQUET_VALUE_TYPE_NONE;
-
+		if not tModeItemSpecial then
+			return VUHDO_BOUQUET_VALUE_TYPE_AURA;
 		end
 
-
-
-		--
-		local tModeItem;
-		local tModeItemValueType;
-		local tValueItem;
-		local tValueSpecial;
-		local tHasHigherStatusItem;
-		local tHasCoverContributor;
-		local tGateValidators;
-		local tGateIdx;
-		function VUHDO_resolveOverlayShadowValueMode(aBouquet, aItemIdx, anOverlayTarget)
-
-			tModeItem = aBouquet[aItemIdx];
-			tModeItemValueType = VUHDO_getBouquetItemValueType(tModeItem);
-
-			if anOverlayTarget and anOverlayTarget["barValue"] == "binary" then
-
-				if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_NONE then
-					return "mirror";
-				end
-
-				return "cover";
-			end
-
-			if anOverlayTarget and anOverlayTarget["barValue"] == "bouquet" then
-
-				if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_NONE then
-					return "mirror";
-				end
-
-				if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_AURA then
-					tHasHigherStatusItem = false;
-					tHasCoverContributor = false;
-					tGateValidators = nil;
-					tGateIdx = 0;
-
-					for tScan = 1, aItemIdx - 1 do
-						tValueItem = aBouquet[tScan];
-						tValueSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tValueItem["name"]];
-
-						if tValueSpecial and tValueSpecial["valueType"] == VUHDO_BOUQUET_VALUE_TYPE_STATUS then
-							if tValueSpecial["isSecretInactive"] then
-							elseif tValueSpecial["isActiveOnly"] then
-								tHasHigherStatusItem = true;
-								tHasCoverContributor = true;
-							elseif tValueSpecial["gateValidator"] then
-								tHasHigherStatusItem = true;
-
-								if not tGateValidators then
-									tGateValidators = { };
-								end
-
-								tGateIdx = tGateIdx + 1;
-								tGateValidators[tGateIdx] = tValueSpecial["gateValidator"];
-							else
-								return "mirror";
-							end
-						end
-					end
-
-					if not tHasHigherStatusItem then
-						return "duration";
-					end
-
-					if tGateValidators then
-						if tHasCoverContributor then
-							return "cover", tGateValidators;
-						end
-
-						return "duration", tGateValidators;
-					end
-
-					if tHasCoverContributor then
-						return "cover";
-					end
-
-					return "mirror";
-				end
-
-				return "cover";
-			end
-
-			return "cover";
-
-		end
-
-
-
-		--
-		local tFallbackEntry;
-		local function VUHDO_shallowCopyOverlayEntry(anEntry)
-
-			tFallbackEntry = { };
-
-			for tCopyKey, tCopyValue in pairs(anEntry) do
-				tFallbackEntry[tCopyKey] = tCopyValue;
-			end
-
-			return tFallbackEntry;
-
-		end
-
-
-
-		--
-		local tFallbackEntry;
-		local tActiveEntry;
-		function VUHDO_appendOverlayEntryWithVariants(aDest, anEntry, aFallbackMode, aGateValidators)
-
-			if not aGateValidators then
-				if aFallbackMode then
-					anEntry["shadowValueMode"] = aFallbackMode;
-				end
-
-				aDest[#aDest + 1] = anEntry;
-
-				return;
-			end
-
-			tFallbackEntry = VUHDO_shallowCopyOverlayEntry(anEntry);
-
-			tFallbackEntry["shadowValueMode"] = aFallbackMode;
-			tFallbackEntry["valueGates"] = aGateValidators;
-			tFallbackEntry["entryKey"] = anEntry["entryKey"] .. ":gatefallback";
-
-			tActiveEntry = VUHDO_shallowCopyOverlayEntry(anEntry);
-
-			tActiveEntry["shadowValueMode"] = "mirror";
-			tActiveEntry["valueGates"] = aGateValidators;
-			tActiveEntry["isValueGateActiveVariant"] = true;
-			tActiveEntry["entryKey"] = anEntry["entryKey"] .. ":gateactive";
-
-			aDest[#aDest + 1] = tFallbackEntry;
-			aDest[#aDest + 1] = tActiveEntry;
-
-			return;
-
-		end
-
-
-
-		--
-		local tGateDelegate;
-		function VUHDO_isAnyOverlayValueGateActive(aGates, anInfo)
-
-			if not aGates or not anInfo then
-				return false;
-			end
-
-			for tCnt = 1, #aGates do
-				tGateDelegate = aGates[tCnt];
-
-				if tGateDelegate(anInfo) then
-					return true;
-				end
-			end
-
-			return false;
-
-		end
+		return tModeItemSpecial["valueType"] or VUHDO_BOUQUET_VALUE_TYPE_NONE;
 
 	end
 
 
 
+	--
+	local tModeItem;
+	local tModeItemValueType;
+	local tValueItem;
+	local tValueSpecial;
+	local tHasHigherStatusItem;
+	local tHasCoverContributor;
+	local tGateValidators;
+	local tGateIdx;
+	function VUHDO_resolveOverlayShadowValueMode(aBouquet, aItemIdx, anOverlayTarget)
+
+		tModeItem = aBouquet[aItemIdx];
+		tModeItemValueType = VUHDO_getBouquetItemValueType(tModeItem);
+
+		if anOverlayTarget and anOverlayTarget["barValue"] == "binary" then
+
+			if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_NONE then
+				return "mirror";
+			end
+
+			return "cover";
+		end
+
+		if anOverlayTarget and anOverlayTarget["barValue"] == "bouquet" then
+
+			if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_NONE then
+				return "mirror";
+			end
+
+			if tModeItemValueType == VUHDO_BOUQUET_VALUE_TYPE_AURA then
+				tHasHigherStatusItem = false;
+				tHasCoverContributor = false;
+				tGateValidators = nil;
+				tGateIdx = 0;
+
+				for tScan = 1, aItemIdx - 1 do
+					tValueItem = aBouquet[tScan];
+					tValueSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tValueItem["name"]];
+
+					if tValueSpecial and tValueSpecial["valueType"] == VUHDO_BOUQUET_VALUE_TYPE_STATUS then
+						if tValueSpecial["isSecretInactive"] then
+						elseif tValueSpecial["isActiveOnly"] then
+							tHasHigherStatusItem = true;
+							tHasCoverContributor = true;
+						elseif tValueSpecial["gateValidator"] then
+							tHasHigherStatusItem = true;
+
+							if not tGateValidators then
+								tGateValidators = { };
+							end
+
+							tGateIdx = tGateIdx + 1;
+							tGateValidators[tGateIdx] = tValueSpecial["gateValidator"];
+						else
+							return "mirror";
+						end
+					end
+				end
+
+				if not tHasHigherStatusItem then
+					return "duration";
+				end
+
+				if tGateValidators then
+					if tHasCoverContributor then
+						return "cover", tGateValidators;
+					end
+
+					return "duration", tGateValidators;
+				end
+
+				if tHasCoverContributor then
+					return "cover";
+				end
+
+				return "mirror";
+			end
+
+			return "cover";
+		end
+
+		return "cover";
+
+	end
+
+
+
+	--
+	local tFallbackEntry;
+	local function VUHDO_shallowCopyOverlayEntry(anEntry)
+
+		tFallbackEntry = { };
+
+		for tCopyKey, tCopyValue in pairs(anEntry) do
+			tFallbackEntry[tCopyKey] = tCopyValue;
+		end
+
+		return tFallbackEntry;
+
+	end
+
+
+
+	--
+	local tFallbackEntry;
+	local tActiveEntry;
+	function VUHDO_appendOverlayEntryWithVariants(aDest, anEntry, aFallbackMode, aGateValidators)
+
+		if not aGateValidators then
+			if aFallbackMode then
+				anEntry["shadowValueMode"] = aFallbackMode;
+			end
+
+			aDest[#aDest + 1] = anEntry;
+
+			return;
+		end
+
+		tFallbackEntry = VUHDO_shallowCopyOverlayEntry(anEntry);
+
+		tFallbackEntry["shadowValueMode"] = aFallbackMode;
+		tFallbackEntry["valueGates"] = aGateValidators;
+		tFallbackEntry["entryKey"] = anEntry["entryKey"] .. ":gatefallback";
+
+		tActiveEntry = VUHDO_shallowCopyOverlayEntry(anEntry);
+
+		tActiveEntry["shadowValueMode"] = "mirror";
+		tActiveEntry["valueGates"] = aGateValidators;
+		tActiveEntry["isValueGateActiveVariant"] = true;
+		tActiveEntry["entryKey"] = anEntry["entryKey"] .. ":gateactive";
+
+		aDest[#aDest + 1] = tFallbackEntry;
+		aDest[#aDest + 1] = tActiveEntry;
+
+		return;
+
+	end
+
+
+
+	--
+	local tGateDelegate;
+	function VUHDO_isAnyOverlayValueGateActive(aGates, anInfo)
+
+		if not aGates or not anInfo then
+			return false;
+		end
+
+		for tCnt = 1, #aGates do
+			tGateDelegate = aGates[tCnt];
+
+			if tGateDelegate(anInfo) then
+				return true;
+			end
+		end
+
+		return false;
+
+	end
+end
+
+
+
+do
 	--
 	local tBaseOpacityItem;
 	local tBaseOpacityColor;
@@ -699,6 +701,30 @@ do
 
 
 	--
+	local function VUHDO_applyOverlayDotIconFields(anOverlayEntry, anItem, anIconColor)
+
+		if anItem["icon"] and anItem["icon"] ~= 1 then
+			anOverlayEntry["staticIcon"] = VUHDO_CUSTOM_ICONS[anItem["icon"]][2];
+
+			if anIconColor then
+				anOverlayEntry["staticColor"] = anIconColor;
+			end
+		else
+			anOverlayEntry["staticColor"] = nil;
+			anOverlayEntry["templateName"] = VUHDO_AURA_BUTTON_ICON_TEMPLATE;
+
+			if anIconColor then
+				anOverlayEntry["iconColor"] = anIconColor;
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tHostileDispelEntry;
 	function VUHDO_buildHostileDispelEntry(aDispelTypeNames, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, anSetEntryKey, anIsGlowFilterSpec)
 
@@ -733,6 +759,10 @@ do
 			tHostileDispelEntry["dispelFill"] = true;
 		elseif aOverlayTarget["shape"] == "border" then
 			tHostileDispelEntry["dispelBorder"] = true;
+		elseif aOverlayTarget["shape"] == "dot" then
+			tHostileDispelEntry["dispelIcon"] = true;
+
+			VUHDO_applyOverlayDotIconFields(tHostileDispelEntry, aItem, nil);
 		end
 
 		tHostileDispelEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
@@ -956,12 +986,62 @@ do
 					["shadowValueMode"] = aShadowValueMode,
 					["staticColor"] = VUHDO_applyOverlayStaticColorBright(tItemColor, aItem, aBaseProduct),
 				};
+			elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
+				tOverlayEntry = {
+					["filterString"] = tFilterString,
+					["candidateFilters"] = tCandidateFilters,
+					["shape"] = aOverlayTarget["shape"],
+					["bouquetIdx"] = aBouquetIdx,
+					["groupKey"] = aGroupKey,
+					["shadowValueMode"] = aShadowValueMode,
+					["dispelIcon"] = true,
+					["friendlyOnly"] = true,
+				};
+
+				if tFilterString and not strfind(tFilterString, "|RAID", 1, true) then
+					tOverlayEntry["filterString"] = tFilterString .. "|RAID";
+				end
+
+				tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
+				tOverlayEntry["dispelOpacity"] = VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct);
+
+				VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
+
+				sOverlayScratch["groupOverlayEntries"][#sOverlayScratch["groupOverlayEntries"] + 1] = tOverlayEntry;
+
+				tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeDispelTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+
+				if tHostileEntry then
+					sOverlayScratch["groupOverlayEntries"][#sOverlayScratch["groupOverlayEntries"] + 1] = tHostileEntry;
+				end
+			elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
+				tOverlayEntry = {
+					["filterString"] = tFilterString,
+					["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, VUHDO_getAllDispelTypeNames()),
+					["shape"] = aOverlayTarget["shape"],
+					["bouquetIdx"] = aBouquetIdx,
+					["groupKey"] = aGroupKey,
+					["shadowValueMode"] = aShadowValueMode,
+					["dispelIcon"] = true,
+					["friendlyOnly"] = true,
+				};
+
+				tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
+				tOverlayEntry["dispelOpacity"] = VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct);
+
+				VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
+
+				sOverlayScratch["groupOverlayEntries"][#sOverlayScratch["groupOverlayEntries"] + 1] = tOverlayEntry;
+
+				tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+
+				if tHostileEntry then
+					sOverlayScratch["groupOverlayEntries"][#sOverlayScratch["groupOverlayEntries"] + 1] = tHostileEntry;
+				end
 			end
 
-			if tOverlayEntry then
-				if aItem["icon"] and aItem["icon"] ~= 1 then
-					tOverlayEntry["staticIcon"] = VUHDO_CUSTOM_ICONS[aItem["icon"]][2];
-				end
+			if tOverlayEntry and not tOverlayEntry["dispelIcon"] then
+				VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, tOverlayEntry["staticColor"]);
 
 				sOverlayScratch["groupOverlayEntries"][#sOverlayScratch["groupOverlayEntries"] + 1] = tOverlayEntry;
 			end
@@ -1061,6 +1141,10 @@ do
 				tOverlayEntry["dispelFill"] = true;
 			elseif aOverlayTarget["shape"] == "border" then
 				tOverlayEntry["dispelBorder"] = true;
+			elseif aOverlayTarget["shape"] == "dot" then
+				tOverlayEntry["dispelIcon"] = true;
+
+				VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
 			end
 
 			tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
@@ -1090,6 +1174,10 @@ do
 				tOverlayEntry["dispelFill"] = true;
 			elseif aOverlayTarget["shape"] == "border" then
 				tOverlayEntry["dispelBorder"] = true;
+			elseif aOverlayTarget["shape"] == "dot" then
+				tOverlayEntry["dispelIcon"] = true;
+
+				VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
 			end
 
 			tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
@@ -1523,8 +1611,10 @@ do
 								tOverlayEntry["dispelFill"] = true;
 
 								VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, tOverlayTarget);
-							else
+							elseif tOverlayTarget["shape"] == "border" then
 								tOverlayEntry["dispelBorder"] = true;
+							elseif tOverlayTarget["shape"] == "dot" then
+								VUHDO_applyOverlayDotIconFields(tOverlayEntry, tItem, VUHDO_applyOverlayStaticColorBright(tItem["color"], tItem, tBaseOpacityProduct));
 							end
 
 							tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(tItem);
@@ -1555,9 +1645,7 @@ do
 					if tOverlayTarget["shape"] == "bar" then
 						VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, tOverlayTarget);
 					elseif tOverlayTarget["shape"] == "dot" then
-						if tItem["icon"] and tItem["icon"] ~= 1 then
-							tOverlayEntry["staticIcon"] = VUHDO_CUSTOM_ICONS[tItem["icon"]][2];
-						end
+						VUHDO_applyOverlayDotIconFields(tOverlayEntry, tItem, tOverlayEntry["staticColor"]);
 					elseif tOverlayTarget["shape"] == "border" then
 						tOverlayEntry["border"] = true;
 					end
@@ -1684,17 +1772,37 @@ do
 		return VUHDO_stampOverlayEntriesFromPrototypes(tOverlayEntries, aPanelNum, anIndicatorKey, aButton, aTargetFrame);
 
 	end
+end
+
+
+
+do
+	--
+	local function VUHDO_resolveOverlayLevelFrame(aTargetFrame)
+
+		if aTargetFrame:IsObjectType("Frame") then
+			return aTargetFrame;
+		end
+
+		return aTargetFrame:GetParent();
+
+	end
 
 
 
 	--
+	local tLevelFrame;
 	local function VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry)
+
+		tLevelFrame = VUHDO_resolveOverlayLevelFrame(aTargetFrame);
 
 		return {
 			["staticColor"] = anOverlayEntry["staticColor"],
+			["iconColor"] = anOverlayEntry["iconColor"],
 			["dispelBorder"] = anOverlayEntry["dispelBorder"],
 			["shadowBar"] = anOverlayEntry["shadowBar"],
 			["dispelFill"] = anOverlayEntry["dispelFill"],
+			["dispelIcon"] = anOverlayEntry["dispelIcon"],
 			["dispelBright"] = anOverlayEntry["dispelBright"],
 			["dispelOpacity"] = anOverlayEntry["dispelOpacity"],
 			["shadowValueMode"] = anOverlayEntry["shadowValueMode"],
@@ -1709,7 +1817,7 @@ do
 			["staticIcon"] = anOverlayEntry["staticIcon"],
 			["iconTexCoords"] = anOverlayEntry["iconTexCoords"],
 			["targetBar"] = aTargetFrame,
-			["targetFrame"] = aTargetFrame,
+			["targetFrameLevel"] = tLevelFrame:GetFrameLevel(),
 			["hideIcon"] = not anOverlayEntry["dispelOverlayChrome"] and (anOverlayEntry["hideIcon"] or anOverlayEntry["glowIcon"] or anOverlayEntry["shape"] == "bar" or anOverlayEntry["shape"] == "glow"),
 			["disableMouse"] = true,
 			["glowIcon"] = anOverlayEntry["glowIcon"],
@@ -1731,11 +1839,14 @@ do
 	local tResolveContainerParent;
 	local tResolveOverlayHostFrame;
 	local tResolveFrameLevelOffset;
+	local tResolveLevelFrame;
 	local function VUHDO_resolveOverlayContainerAnchorFields(aButton, aTargetFrame, aFrameLevelOffsetAddend)
+
+		tResolveLevelFrame = VUHDO_resolveOverlayLevelFrame(aTargetFrame);
 
 		tResolveOverlayHostFrame = VUHDO_getOrCreateOverlayHostFrame(aButton, aTargetFrame);
 		tResolveContainerParent = (tResolveOverlayHostFrame and tResolveOverlayHostFrame:GetName() and tResolveOverlayHostFrame) or (((aTargetFrame and aTargetFrame:GetName()) and aTargetFrame) or aButton);
-		tResolveFrameLevelOffset = (aTargetFrame["addLevel"] or 0) + (aFrameLevelOffsetAddend or 1);
+		tResolveFrameLevelOffset = (tResolveLevelFrame["addLevel"] or 0) + (aFrameLevelOffsetAddend or 1);
 
 		return tResolveContainerParent, tResolveOverlayHostFrame, tResolveFrameLevelOffset;
 
