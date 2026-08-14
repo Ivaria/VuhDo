@@ -82,6 +82,9 @@ local sPlayerPurgeDispelTypeNames = { };
 local sAllDispelBarColorTypeNames = { };
 local sPlayerDispelBarColorTypeNames = { };
 local sPlayerPurgeBarColorTypeNames = { };
+local sAllDispelGlowTypeNames = { };
+local sPlayerDispelGlowTypeNames = { };
+local sPlayerPurgeGlowTypeNames = { };
 local sGroupResolvedFilterCache = { };
 
 local sAuraBarFallbackColor = {
@@ -547,7 +550,7 @@ function VUHDO_rebuildDispelTypeNameMaps()
 		end
 	end
 
-	VUHDO_rebuildBarColorDispelTypeNameMaps();
+	VUHDO_rebuildDerivedDispelTypeNameMaps();
 
 	return;
 
@@ -557,17 +560,26 @@ end
 
 --
 local tBackgroundDispelTypeNames;
-function VUHDO_rebuildBarColorDispelTypeNameMaps()
+local tGlowDispelTypeNames;
+function VUHDO_rebuildDerivedDispelTypeNameMaps()
 
 	twipe(sAllDispelBarColorTypeNames);
 	twipe(sPlayerDispelBarColorTypeNames);
 	twipe(sPlayerPurgeBarColorTypeNames);
+	twipe(sAllDispelGlowTypeNames);
+	twipe(sPlayerDispelGlowTypeNames);
+	twipe(sPlayerPurgeGlowTypeNames);
 
 	tBackgroundDispelTypeNames = VUHDO_getBackgroundDispelTypeNames();
+	tGlowDispelTypeNames = VUHDO_getGlowDispelTypeNames();
 
 	for tDispelName, _ in pairs(sAllDispelTypeNames) do
 		if tBackgroundDispelTypeNames[tDispelName] then
 			sAllDispelBarColorTypeNames[tDispelName] = true;
+		end
+
+		if tGlowDispelTypeNames[tDispelName] then
+			sAllDispelGlowTypeNames[tDispelName] = true;
 		end
 	end
 
@@ -575,11 +587,19 @@ function VUHDO_rebuildBarColorDispelTypeNameMaps()
 		if tBackgroundDispelTypeNames[tDispelName] then
 			sPlayerDispelBarColorTypeNames[tDispelName] = true;
 		end
+
+		if tGlowDispelTypeNames[tDispelName] then
+			sPlayerDispelGlowTypeNames[tDispelName] = true;
+		end
 	end
 
 	for tDispelName, _ in pairs(sPlayerPurgeDispelTypeNames) do
 		if tBackgroundDispelTypeNames[tDispelName] then
 			sPlayerPurgeBarColorTypeNames[tDispelName] = true;
+		end
+
+		if tGlowDispelTypeNames[tDispelName] then
+			sPlayerPurgeGlowTypeNames[tDispelName] = true;
 		end
 	end
 
@@ -638,6 +658,33 @@ end
 function VUHDO_getPlayerPurgeBarColorTypeNames()
 
 	return sPlayerPurgeBarColorTypeNames;
+
+end
+
+
+
+--
+function VUHDO_getAllDispelGlowTypeNames()
+
+	return sAllDispelGlowTypeNames;
+
+end
+
+
+
+--
+function VUHDO_getPlayerDispelGlowTypeNames()
+
+	return sPlayerDispelGlowTypeNames;
+
+end
+
+
+
+--
+function VUHDO_getPlayerPurgeGlowTypeNames()
+
+	return sPlayerPurgeGlowTypeNames;
 
 end
 

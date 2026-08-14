@@ -546,6 +546,19 @@ end
 
 
 --
+local function VUHDO_makeFullColorWithGlow(...)
+
+	local tColor = VUHDO_makeFullColor(...);
+
+	tColor["useGlow"] = true;
+
+	return tColor;
+
+end
+
+
+
+--
 local function VUHDO_makeHotColor(...)
 	
 	local tColor = VUHDO_makeFullColor(...);
@@ -2966,7 +2979,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 
 	["BAR_COLORS"] = {
 
-		["VERSION"] = 2,
+		["VERSION"] = 3,
 
 		["TARGET"] = {
 			["TR"] = 1,	["TG"] = 1,	["TB"] = 1,	["TO"] = 1,
@@ -3031,13 +3044,13 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["TARGET_ENEMY"] = VUHDO_makeFullColor(1, 0, 0, 1,   1, 0, 0, 1),
 
 		["DEBUFF" .. VUHDO_DEBUFF_TYPE_NONE] = VUHDO_makeFullColor(0, 0, 0, 0,   0, 0, 0, 0),
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_POISON] = VUHDO_makeFullColor(0, 0.592, 0.8, 1,   0, 1, 0.686, 1),
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_DISEASE] = VUHDO_makeFullColor(0.8, 0.4, 0.4, 1,   1, 0, 0, 1),
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_CURSE] = VUHDO_makeFullColor(0.7, 0, 0.7, 1,   1, 0, 1, 1),
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_MAGIC] = VUHDO_makeFullColor(0.4, 0.4, 0.8, 1,   0.329, 0.957, 1, 1),
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM] = VUHDO_makeFullColor(0.6, 0.3, 0, 1,   0.8, 0.5, 0, 1),
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_BLEED] = VUHDO_makeFullColor(1, 0.2, 0, 1,   1, 0.2, 0.4, 1),
-		["DEBUFF" .. VUHDO_DEBUFF_TYPE_ENRAGE] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_POISON] = VUHDO_makeFullColorWithGlow(0, 0.592, 0.8, 1,   0, 1, 0.686, 1),
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_DISEASE] = VUHDO_makeFullColorWithGlow(0.8, 0.4, 0.4, 1,   1, 0, 0, 1),
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_CURSE] = VUHDO_makeFullColorWithGlow(0.7, 0, 0.7, 1,   1, 0, 1, 1),
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_MAGIC] = VUHDO_makeFullColorWithGlow(0.4, 0.4, 0.8, 1,   0.329, 0.957, 1, 1),
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_CUSTOM] = VUHDO_makeFullColorWithGlow(0.6, 0.3, 0, 1,   0.8, 0.5, 0, 1),
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_BLEED] = VUHDO_makeFullColorWithGlow(1, 0.2, 0, 1,   1, 0.2, 0.4, 1),
+		["DEBUFF" .. VUHDO_DEBUFF_TYPE_ENRAGE] = VUHDO_makeFullColorWithGlow(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["DEBUFF_BAR_GLOW"] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["DEBUFF_ICON_GLOW"] = VUHDO_makeFullColor(0.95, 0.95, 0.32, 1,   1, 1, 0, 1),
 		["showDispelOverlay"] = false,
@@ -4551,6 +4564,18 @@ function VUHDO_loadDefaultPanelSetup()
 		end
 
 		tBarColors["VERSION"] = 2;
+	end
+
+	if tBarColors and (tBarColors["VERSION"] or 0) < 3 then
+		for tDebuffCnt = 1, 9 do
+			tDebuffColor = tBarColors["DEBUFF" .. tDebuffCnt];
+
+			if tDebuffColor and tDebuffColor["useGlow"] == nil then
+				tDebuffColor["useGlow"] = true;
+			end
+		end
+
+		tBarColors["VERSION"] = 3;
 	end
 
 	if VUHDO_PANEL_SETUP["HOTS"] and not VUHDO_PANEL_SETUP["HOTS"]["VERSION"] then

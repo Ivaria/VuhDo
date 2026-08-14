@@ -128,13 +128,32 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="153" y="-7" />
+									<AbsDimension x="157" y="-7" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Layers>
 							<Layer>
 								<FontString name="$parentLabel" text="VUHDO_I18N_BORDER" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Frame name="$parentGlowLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="50" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="198" y="-7" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_GLOW" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
 								</FontString>
 							</Layer>
 						</Layers>
@@ -147,7 +166,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="275" y="-7" />
+									<AbsDimension x="335" y="-7" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -166,7 +185,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="330" y="-7" />
+									<AbsDimension x="394" y="-7" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -178,11 +197,30 @@
 						</Layers>
 					</Frame>
 
+					<Frame name="$parentGlowRightLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="50" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="436" y="-7" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_GLOW" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
 					<CheckButton name="$parentMagicBorderCheckBox" inherits="VuhDoCheckBoxTemplate">
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="330" y="-29" />
+									<AbsDimension x="394" y="-29" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -215,7 +253,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="298" y="-29" />
+									<AbsDimension x="358" y="-29" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -230,7 +268,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="153" y="-105" />
+									<AbsDimension x="157" y="-105" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -278,7 +316,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="153" y="-67" />
+									<AbsDimension x="157" y="-67" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -326,7 +364,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="153" y="-143" />
+									<AbsDimension x="157" y="-143" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -374,7 +412,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="330" y="-67" />
+									<AbsDimension x="394" y="-67" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -407,7 +445,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="298" y="-67" />
+									<AbsDimension x="358" y="-67" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -422,7 +460,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="153" y="-29" />
+									<AbsDimension x="157" y="-29" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -437,7 +475,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="330" y="-105" />
+									<AbsDimension x="394" y="-105" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -470,7 +508,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="298" y="-105" />
+									<AbsDimension x="358" y="-105" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -510,6 +548,111 @@
 						<Scripts>
 							<OnLoad>
 								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF1.useBackground");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentPoisonGlowCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="193" y="-29" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF1.useGlow");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentDiseaseGlowCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="193" y="-67" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF2.useGlow");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentCurseGlowCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="193" y="-105" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF4.useGlow");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentCustomGlowCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="193" y="-143" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF6.useGlow");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentMagicGlowCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="430" y="-29" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF3.useGlow");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentBleedGlowCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="430" y="-67" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF8.useGlow");
+							</OnLoad>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="$parentEnrageGlowCheckBox" inherits="VuhDoCheckBoxTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="430" y="-105" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_lnfSetModel(self, "VUHDO_PANEL_SETUP.BAR_COLORS.DEBUFF9.useGlow");
 							</OnLoad>
 						</Scripts>
 					</CheckButton>
@@ -575,7 +718,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="190" y="-29" />
+									<AbsDimension x="250" y="-29" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -630,7 +773,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="190" y="-181" />
+									<AbsDimension x="126" y="-181" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -647,7 +790,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="190" y="-67" />
+									<AbsDimension x="250" y="-67" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -666,7 +809,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="190" y="-105" />
+									<AbsDimension x="250" y="-105" />
 								</Offset>
 							</Anchor>
 						</Anchors>

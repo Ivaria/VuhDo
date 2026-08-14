@@ -145,6 +145,7 @@ local sDispelNameColorKeyMap = {
 };
 
 local sBackgroundDispelTypeNames = { };
+local sGlowDispelTypeNames = { };
 
 local sDispelTypeCurvePointKeys = {
 	{ 0, "DEBUFF0" },
@@ -709,6 +710,15 @@ do
 
 
 	--
+	function VUHDO_getGlowDispelTypeNames()
+
+		return sGlowDispelTypeNames;
+
+	end
+
+
+
+	--
 	function VUHDO_getDispelTypeBackgroundFillColorMap(aBright, aOpacity)
 
 		return VUHDO_getOrBuildDispelBrightOpacityVariant(sDispelTypeBackgroundFillColorMap, sDispelTypeBackgroundFillBrightCache, aBright, aOpacity, VUHDO_buildDispelTypeColorMapVariant);
@@ -1197,6 +1207,7 @@ do
 		twipe(sDispelTypeColorMap);
 		twipe(sDispelTypeColorMapOpaque);
 		twipe(sBackgroundDispelTypeNames);
+		twipe(sGlowDispelTypeNames);
 		twipe(sDispelTypeBackgroundFillColorMap);
 		twipe(sDispelTypeBackgroundBackingColorMap);
 		twipe(sDispelTypeColorMapOpaqueBrightCache);
@@ -1215,6 +1226,10 @@ do
 		for tDispelName, tColorKey in pairs(sDispelNameColorKeyMap) do
 			if tColors and tColors[tColorKey] and tColors[tColorKey]["useBackground"] then
 				sBackgroundDispelTypeNames[tDispelName] = true;
+			end
+
+			if tColors and tColors[tColorKey] and tColors[tColorKey]["useGlow"] then
+				sGlowDispelTypeNames[tDispelName] = true;
 			end
 
 			sDispelTypeColorMap[tDispelName] = VUHDO_safeColorFromTable(tColors and tColors[tColorKey], tDefaultColor);
@@ -1239,7 +1254,7 @@ do
 			sDispelTypeBorderCurve:SetType(Enum.LuaCurveType.Step);
 			VUHDO_populateDispelTypeBorderCurve(sDispelTypeBorderCurve);
 
-			VUHDO_rebuildBarColorDispelTypeNameMaps();
+			VUHDO_rebuildDerivedDispelTypeNameMaps();
 
 			return;
 		end
@@ -1263,7 +1278,7 @@ do
 		sDispelTypeBorderCurve:SetType(Enum.LuaCurveType.Step);
 		VUHDO_populateDispelTypeBorderCurve(sDispelTypeBorderCurve);
 
-		VUHDO_rebuildBarColorDispelTypeNameMaps();
+		VUHDO_rebuildDerivedDispelTypeNameMaps();
 
 		return;
 

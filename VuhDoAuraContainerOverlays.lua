@@ -56,6 +56,9 @@ local VUHDO_getBackgroundDispelTypeNames;
 local VUHDO_getAllDispelBarColorTypeNames;
 local VUHDO_getPlayerDispelBarColorTypeNames;
 local VUHDO_getPlayerPurgeBarColorTypeNames;
+local VUHDO_getAllDispelGlowTypeNames;
+local VUHDO_getPlayerDispelGlowTypeNames;
+local VUHDO_getPlayerPurgeGlowTypeNames;
 local VUHDO_copyOverlayCandidateFilters;
 local VUHDO_resolveAuraContainerSpellId;
 local VUHDO_getStatusbarOrientationNumber;
@@ -172,6 +175,9 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_getAllDispelBarColorTypeNames = _G["VUHDO_getAllDispelBarColorTypeNames"];
 	VUHDO_getPlayerDispelBarColorTypeNames = _G["VUHDO_getPlayerDispelBarColorTypeNames"];
 	VUHDO_getPlayerPurgeBarColorTypeNames = _G["VUHDO_getPlayerPurgeBarColorTypeNames"];
+	VUHDO_getAllDispelGlowTypeNames = _G["VUHDO_getAllDispelGlowTypeNames"];
+	VUHDO_getPlayerDispelGlowTypeNames = _G["VUHDO_getPlayerDispelGlowTypeNames"];
+	VUHDO_getPlayerPurgeGlowTypeNames = _G["VUHDO_getPlayerPurgeGlowTypeNames"];
 	VUHDO_copyOverlayCandidateFilters = _G["VUHDO_copyOverlayCandidateFilters"];
 	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
 	VUHDO_getStatusbarOrientationNumber = _G["VUHDO_getStatusbarOrientationNumber"];
@@ -2348,6 +2354,7 @@ do
 	local tBarGlowFilterEntry;
 	local tBarGlowFilterString;
 	local tBarGlowHostileEntry;
+	local tDispelTypeNames;
 	local function VUHDO_buildAuraGroupBarGlowFilterEntries(aGroupId, aColorType, aFilterString, aCandidateFilters)
 
 		twipe(sOverlayScratch["barGlowFilterEntries"]);
@@ -2367,31 +2374,39 @@ do
 				tBarGlowFilterString = tBarGlowFilterString .. "|RAID";
 			end
 
-			tBarGlowFilterEntry = {
-				["filterString"] = tBarGlowFilterString,
-				["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, VUHDO_getPlayerDispelTypeNames()),
-				["friendlyOnly"] = true,
-				["entryKeySuffix"] = ":friendly",
-			};
+			tDispelTypeNames = VUHDO_getPlayerDispelGlowTypeNames();
 
-			sOverlayScratch["barGlowFilterEntries"][1] = tBarGlowFilterEntry;
+			if next(tDispelTypeNames) ~= nil then
+				tBarGlowFilterEntry = {
+					["filterString"] = tBarGlowFilterString,
+					["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, tDispelTypeNames),
+					["friendlyOnly"] = true,
+					["entryKeySuffix"] = ":friendly",
+				};
 
-			tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeDispelTypeNames(), nil, nil, aGroupId, nil, nil, nil, false, true);
+				sOverlayScratch["barGlowFilterEntries"][#sOverlayScratch["barGlowFilterEntries"] + 1] = tBarGlowFilterEntry;
+			end
+
+			tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeGlowTypeNames(), nil, nil, aGroupId, nil, nil, nil, false, true);
 
 			if tBarGlowHostileEntry then
 				sOverlayScratch["barGlowFilterEntries"][#sOverlayScratch["barGlowFilterEntries"] + 1] = tBarGlowHostileEntry;
 			end
 		elseif aColorType == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
-			tBarGlowFilterEntry = {
-				["filterString"] = aFilterString,
-				["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, VUHDO_getAllDispelTypeNames()),
-				["friendlyOnly"] = true,
-				["entryKeySuffix"] = ":friendly",
-			};
+			tDispelTypeNames = VUHDO_getAllDispelGlowTypeNames();
 
-			sOverlayScratch["barGlowFilterEntries"][1] = tBarGlowFilterEntry;
+			if next(tDispelTypeNames) ~= nil then
+				tBarGlowFilterEntry = {
+					["filterString"] = aFilterString,
+					["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, tDispelTypeNames),
+					["friendlyOnly"] = true,
+					["entryKeySuffix"] = ":friendly",
+				};
 
-			tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelTypeNames(), nil, nil, aGroupId, nil, nil, nil, false, true);
+				sOverlayScratch["barGlowFilterEntries"][#sOverlayScratch["barGlowFilterEntries"] + 1] = tBarGlowFilterEntry;
+			end
+
+			tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelGlowTypeNames(), nil, nil, aGroupId, nil, nil, nil, false, true);
 
 			if tBarGlowHostileEntry then
 				sOverlayScratch["barGlowFilterEntries"][#sOverlayScratch["barGlowFilterEntries"] + 1] = tBarGlowHostileEntry;
