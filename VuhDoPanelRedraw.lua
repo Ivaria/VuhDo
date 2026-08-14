@@ -2089,6 +2089,7 @@ do
 	local tIsInverted;
 	local tOrientation;
 	local tClickPar;
+	local tIsAlphaChainRebuilt;
 	function VUHDO_initHealButton(aButton, aPanelNum)
 
 		tClickPar = VUHDO_CONFIG["ON_MOUSE_UP"] and "AnyUp" or "AnyDown";
@@ -2185,13 +2186,14 @@ do
 		end
 
 		if sSecretsEnabled then
-			VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
-			VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum);
+			tIsAlphaChainRebuilt = VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
+			tIsAlphaChainRebuilt = VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum) or tIsAlphaChainRebuilt;
+			tIsAlphaChainRebuilt = VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum) or tIsAlphaChainRebuilt;
+			tIsAlphaChainRebuilt = VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTotButton(aButton), aPanelNum) or tIsAlphaChainRebuilt;
 
-			VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum);
-			VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTotButton(aButton), aPanelNum);
-
-			VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());
+			if tIsAlphaChainRebuilt then
+				VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());
+			end
 		end
 
 		aButton["initRevision"] = sPanelInitRevision[aPanelNum] or 0;

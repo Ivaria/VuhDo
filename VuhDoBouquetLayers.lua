@@ -1,18 +1,21 @@
 local _;
 
 local pairs = pairs;
-local ipairs = ipairs;
 local tinsert = table.insert;
 local twipe = table.wipe;
+local format = string.format;
 
 local CreateFrame = CreateFrame;
+local InCombatLockdown = InCombatLockdown;
 
 local VUHDO_META_NEW_ARRAY = VUHDO_META_NEW_ARRAY;
 local VUHDO_BOUQUET_BUFFS_SPECIAL;
 local VUHDO_BOUQUETS;
 local VUHDO_INDICATOR_CONFIG;
+local VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH;
 local VUHDO_SECRET_TYPE_NONE;
 local VUHDO_SECRET_TYPE_BOOLEAN;
+local VUHDO_MAX_ALPHA_CHAIN_STEPS;
 
 local VUHDO_BOUQUET_LAYER_TYPE_NONSECRET;
 local VUHDO_BOUQUET_LAYER_TYPE_CURVE;
@@ -63,7 +66,10 @@ setmetatable(sGlobalAlphaChains, VUHDO_META_NEW_ARRAY);
 local sAlphaChainPool;
 local sAlphaChainStepEntryPool;
 
-local sWrapperNameCounter = 0;
+local sAlphaChainConfigVersion = 0;
+
+local sAlphaChainWrappers = { };
+setmetatable(sAlphaChainWrappers, VUHDO_META_NEW_ARRAY);
 
 local VUHDO_TARGET_TYPE_BAR = 1;
 local VUHDO_TARGET_TYPE_TEXTURE = 2;
@@ -127,8 +133,10 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_BOUQUET_BUFFS_SPECIAL = _G["VUHDO_BOUQUET_BUFFS_SPECIAL"];
 	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
 	VUHDO_INDICATOR_CONFIG = _G["VUHDO_INDICATOR_CONFIG"];
+	VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH = _G["VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH"];
 	VUHDO_SECRET_TYPE_NONE = _G["VUHDO_SECRET_TYPE_NONE"];
 	VUHDO_SECRET_TYPE_BOOLEAN = _G["VUHDO_SECRET_TYPE_BOOLEAN"];
+	VUHDO_MAX_ALPHA_CHAIN_STEPS = _G["VUHDO_MAX_ALPHA_CHAIN_STEPS"];
 
 	VUHDO_BOUQUET_LAYER_TYPE_NONSECRET = _G["VUHDO_BOUQUET_LAYER_TYPE_NONSECRET"];
 	VUHDO_BOUQUET_LAYER_TYPE_CURVE = _G["VUHDO_BOUQUET_LAYER_TYPE_CURVE"];
@@ -303,20 +311,88 @@ end
 
 
 --
+function VUHDO_incrementAlphaChainConfigVersion()
+
+	sAlphaChainConfigVersion = sAlphaChainConfigVersion + 1;
+
+	return;
+
+end
+
+
+
+--
+local tWrapperData;
+local tParentFrame;
+local tButtonName;
+local tWrapper;
+local function VUHDO_initAlphaChainWrapperNest(aButton, anIndicatorName, anIndicatorBar, anOriginalParent)
+
+	tWrapperData = sAlphaChainWrappers[aButton] and sAlphaChainWrappers[aButton][anIndicatorName];
+
+	if tWrapperData then
+		return tWrapperData;
+	end
+
+	if not sAlphaChainWrappers[aButton] then
+		sAlphaChainWrappers[aButton] = { };
+	end
+
+	tWrapperData = {
+		["wrappers"] = { },
+		["originalParent"] = anOriginalParent,
+		["tail"] = nil,
+	};
+
+	tParentFrame = anOriginalParent;
+	tButtonName = aButton:GetName() or "VdBtn";
+
+	for tCnt = 1, VUHDO_MAX_ALPHA_CHAIN_STEPS do
+		tWrapper = CreateFrame("Frame", format("%s%sAlpWr%d", tButtonName, anIndicatorName, tCnt), tParentFrame);
+
+		VUHDO_PixelUtil.SetPoint(tWrapper, "TOPLEFT", tParentFrame, "TOPLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(tWrapper, "BOTTOMRIGHT", tParentFrame, "BOTTOMRIGHT", 0, 0);
+
+		tWrapper["isAlphaChainWrapper"] = true;
+		VUHDO_PixelUtil.SetFrameLevel(tWrapper, tParentFrame:GetFrameLevel());
+
+		tWrapper:SetAlpha(1);
+		tWrapper:Show();
+
+		tWrapperData["wrappers"][tCnt] = tWrapper;
+		tParentFrame = tWrapper;
+	end
+
+	tWrapperData["tail"] = tWrapperData["wrappers"][VUHDO_MAX_ALPHA_CHAIN_STEPS];
+
+	anIndicatorBar:SetParent(tWrapperData["tail"]);
+	anIndicatorBar["vuhdo_parent"] = anOriginalParent;
+
+	sAlphaChainWrappers[aButton][anIndicatorName] = tWrapperData;
+
+	return tWrapperData;
+
+end
+
+
+
+--
 local tItem;
 local tSpecial;
-local tWrapper;
 local tChain;
-local tParent;
 local tSecretType;
 local tIndicatorBar;
 local tOriginalParent;
 local tBarIndex;
 local tFrameGetter;
-local tIndicatorAddLevel;
 local tEntry;
 local tHealthBouquetName;
 local tHealthGlobalOpacityNames;
+local tStepCnt;
+local tBooleanStepByName = { };
+local tItemTrueAlpha;
+local tItemFalseAlpha;
+local tExistingEntry;
 function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBouquet, aPanelNum)
 
 	if not aBouquet or not sSecretsEnabled then
@@ -339,31 +415,13 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 		return;
 	end
 
-	tIndicatorAddLevel = tIndicatorBar["addLevel"] or 0;
+	tOriginalParent = tIndicatorBar["vuhdo_parent"] or tIndicatorBar:GetParent();
+
+	tWrapperData = VUHDO_initAlphaChainWrapperNest(aButton, anIndicatorName, tIndicatorBar, tOriginalParent);
 
 	if sGlobalAlphaChains[aButton] and sGlobalAlphaChains[aButton][anIndicatorName] then
-		tChain = sGlobalAlphaChains[aButton][anIndicatorName];
-
-		tOriginalParent = tChain["originalParent"];
-
-		if tOriginalParent then
-			tIndicatorBar:SetParent(tOriginalParent);
-
-			tIndicatorBar["vuhdo_parent"] = nil;
-		end
-
-		for _, tStep in ipairs(tChain["steps"] or { }) do
-			if tStep["frame"] then
-				tStep["frame"]:Hide();
-				tStep["frame"]:ClearAllPoints();
-				tStep["frame"]:SetParent(nil);
-			end
-		end
-
-		sAlphaChainPool:release(tChain);
+		sAlphaChainPool:release(sGlobalAlphaChains[aButton][anIndicatorName]);
 		sGlobalAlphaChains[aButton][anIndicatorName] = nil;
-	else
-		tOriginalParent = tIndicatorBar:GetParent();
 	end
 
 	if not sGlobalAlphaChains[aButton] then
@@ -374,6 +432,7 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 
 	tChain["originalParent"] = tOriginalParent;
 	tChain["barIndex"] = tBarIndex;
+	tChain["tail"] = tWrapperData["tail"];
 
 	sGlobalAlphaChains[aButton][anIndicatorName] = tChain;
 
@@ -387,6 +446,10 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 		end
 	end
 
+	tStepCnt = 0;
+
+	twipe(tBooleanStepByName);
+
 	for tCnt = 1, #aBouquet do
 		tItem = aBouquet[tCnt];
 		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
@@ -396,28 +459,33 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 				tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
 				if tSecretType == VUHDO_SECRET_TYPE_BOOLEAN then
-					sWrapperNameCounter = sWrapperNameCounter + 1;
+					tItemTrueAlpha = tSpecial["isInverted"] and 1 or (tItem["color"]["O"] or 1);
+					tItemFalseAlpha = tSpecial["isInverted"] and (tItem["color"]["O"] or 1) or 1;
 
-					tWrapper = CreateFrame("Frame", tOriginalParent:GetName() .. "AlpWr" .. sWrapperNameCounter, tOriginalParent);
+					tExistingEntry = tBooleanStepByName[tItem["name"]];
 
-					tWrapper:SetAllPoints(tOriginalParent);
+					if tExistingEntry then
+						tExistingEntry["trueAlpha"] = tExistingEntry["trueAlpha"] * tItemTrueAlpha;
+						tExistingEntry["falseAlpha"] = tExistingEntry["falseAlpha"] * tItemFalseAlpha;
+					elseif tStepCnt < VUHDO_MAX_ALPHA_CHAIN_STEPS then
+						tStepCnt = tStepCnt + 1;
 
-					tWrapper["addLevel"] = tIndicatorAddLevel;
-					tWrapper:SetFrameLevel(tOriginalParent:GetFrameLevel());
+						tWrapper = tWrapperData["wrappers"][tStepCnt];
 
-					tWrapper:SetAlpha(1);
-					tWrapper:Show();
+						tEntry = sAlphaChainStepEntryPool:get();
 
-					tEntry = sAlphaChainStepEntryPool:get();
+						tEntry["frame"] = tWrapper;
+						tEntry["wrapperIndex"] = tStepCnt;
+						tEntry["item"] = tItem;
+						tEntry["special"] = tSpecial;
+						tEntry["index"] = tCnt;
+						tEntry["trueAlpha"] = tItemTrueAlpha;
+						tEntry["falseAlpha"] = tItemFalseAlpha;
 
-					tEntry["frame"] = tWrapper;
-					tEntry["item"] = tItem;
-					tEntry["special"] = tSpecial;
-					tEntry["index"] = tCnt;
-					tEntry["trueAlpha"] = tSpecial["isInverted"] and 1 or (tItem["color"]["O"] or 1);
-					tEntry["falseAlpha"] = tSpecial["isInverted"] and (tItem["color"]["O"] or 1) or 1;
+						tBooleanStepByName[tItem["name"]] = tEntry;
 
-					tinsert(tChain["steps"], tEntry);
+						tinsert(tChain["steps"], tEntry);
+					end
 				else
 					tEntry = sAlphaChainStepEntryPool:get();
 
@@ -449,27 +517,12 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 
 	if #tChain["steps"] > 0 then
 		tChain["head"] = tChain["steps"][1]["frame"];
-
-		tParent = tOriginalParent;
-
-		for tIdx = 1, #tChain["steps"] do
-			tWrapper = tChain["steps"][tIdx]["frame"];
-
-			tWrapper:SetParent(tParent);
-			tWrapper:ClearAllPoints();
-			tWrapper:SetAllPoints(tParent);
-			tWrapper:SetFrameLevel(tParent:GetFrameLevel());
-
-			tParent = tWrapper;
-		end
-
-		tChain["tail"] = tChain["steps"][#tChain["steps"]]["frame"];
-
-		tIndicatorBar:SetParent(tChain["tail"]);
-
-		tIndicatorBar["vuhdo_parent"] = tOriginalParent;
 	else
-		tChain["tail"] = tOriginalParent;
+		tChain["head"] = tOriginalParent;
+	end
+
+	for tCnt = tStepCnt + 1, VUHDO_MAX_ALPHA_CHAIN_STEPS do
+		tWrapperData["wrappers"][tCnt]:SetAlpha(1);
 	end
 
 	return;
@@ -498,13 +551,21 @@ local tIndicatorConfig;
 function VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum)
 
 	if not sSecretsEnabled then
-		return;
+		return false;
+	end
+
+	if InCombatLockdown() then
+		return false;
+	end
+
+	if aButton["alphaChainConfigVersion"] == sAlphaChainConfigVersion and aButton["alphaChainPanelNum"] == aPanelNum then
+		return false;
 	end
 
 	tIndicatorConfig = VUHDO_INDICATOR_CONFIG[aPanelNum];
 
 	if not tIndicatorConfig then
-		return;
+		return false;
 	end
 
 	for tIndicatorName, _ in pairs(VUHDO_INDICATOR_BAR_MAP) do
@@ -531,7 +592,10 @@ function VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum)
 		end
 	end
 
-	return;
+	aButton["alphaChainConfigVersion"] = sAlphaChainConfigVersion;
+	aButton["alphaChainPanelNum"] = aPanelNum;
+
+	return true;
 
 end
 
@@ -541,13 +605,21 @@ end
 function VUHDO_buildTargetIndicatorAlphaChains(aButton, aPanelNum)
 
 	if not sSecretsEnabled then
-		return;
+		return false;
+	end
+
+	if InCombatLockdown() then
+		return false;
+	end
+
+	if aButton["alphaChainConfigVersion"] == sAlphaChainConfigVersion and aButton["alphaChainPanelNum"] == aPanelNum then
+		return false;
 	end
 
 	tBouquet = VUHDO_BOUQUETS["STORED"][VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH];
 
 	if not tBouquet then
-		return;
+		return false;
 	end
 
 	tBouquet = VUHDO_decompressIfCompressed(tBouquet);
@@ -556,7 +628,10 @@ function VUHDO_buildTargetIndicatorAlphaChains(aButton, aPanelNum)
 	VUHDO_buildGlobalAlphaChainsForIndicator(aButton, "HEALTH_BAR", tBouquet, aPanelNum);
 	VUHDO_buildGlobalAlphaChainsForIndicator(aButton, "MANA_BAR", tBouquet, aPanelNum);
 
-	return;
+	aButton["alphaChainConfigVersion"] = sAlphaChainConfigVersion;
+	aButton["alphaChainPanelNum"] = aPanelNum;
+
+	return true;
 
 end
 
@@ -589,13 +664,21 @@ end
 function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 
 	if not sSecretsEnabled then
-		return;
+		return false;
+	end
+
+	if InCombatLockdown() then
+		return false;
+	end
+
+	if aButton["booleanOverlayConfigVersion"] == sAlphaChainConfigVersion and aButton["booleanOverlayPanelNum"] == aPanelNum then
+		return false;
 	end
 
 	tIndicatorConfig = VUHDO_INDICATOR_CONFIG[aPanelNum];
 
 	if not tIndicatorConfig then
-		return;
+		return false;
 	end
 
 	for tIndicatorName, _ in pairs(VUHDO_INDICATOR_BAR_MAP) do
@@ -626,7 +709,10 @@ function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 		end
 	end
 
-	return;
+	aButton["booleanOverlayConfigVersion"] = sAlphaChainConfigVersion;
+	aButton["booleanOverlayPanelNum"] = aPanelNum;
+
+	return true;
 
 end
 
@@ -763,15 +849,6 @@ function VUHDO_rebuildAllAlphaChains()
 
 	for tButton, tIndicatorChains in pairs(sGlobalAlphaChains) do
 		for tIndicatorName, tChain in pairs(tIndicatorChains) do
-			if tChain["steps"] then
-				for _, tStep in ipairs(tChain["steps"]) do
-					if tStep["frame"] then
-						tStep["frame"]:Hide();
-						tStep["frame"]:SetParent(nil);
-					end
-				end
-			end
-
 			sAlphaChainPool:release(tChain);
 		end
 	end

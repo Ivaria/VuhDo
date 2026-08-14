@@ -37,6 +37,7 @@ local VUHDO_releaseAllOverlays;
 local VUHDO_invalidateAuraContainerTemplateCache;
 local VUHDO_renderNonAuraListSlots;
 local VUHDO_deferSyncOverlaysForUnit;
+local VUHDO_incrementAlphaChainConfigVersion;
 
 local VUHDO_BOUQUETS = { };
 local VUHDO_RAID = { };
@@ -230,6 +231,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_invalidateAuraContainerTemplateCache = _G["VUHDO_invalidateAuraContainerTemplateCache"];
 	VUHDO_renderNonAuraListSlots = _G["VUHDO_renderNonAuraListSlots"];
 	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
+	VUHDO_incrementAlphaChainConfigVersion = _G["VUHDO_incrementAlphaChainConfigVersion"];
 
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
@@ -4453,6 +4455,8 @@ do
 		VUHDO_invalidateBouquetRestrictedModeCache();
 		VUHDO_invalidateAuraContainerTemplateCache();
 		VUHDO_releaseAllOverlays();
+
+		VUHDO_incrementAlphaChainConfigVersion();
 
 		for tUnit, _ in pairs(VUHDO_RAID or { }) do
 			VUHDO_clearUnitBouquetActiveCache(tUnit);

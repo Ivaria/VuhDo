@@ -1348,7 +1348,7 @@ function VUHDO_fixFrameLevels(anIsForceUpdateChildren, aFrame, aBaseLevel, ...)
 	while tChild do -- Layer components seem to have no name, important for HoT icons.
 		if tChild.IsForbidden and not tChild:IsForbidden() then
 			if tChild.GetName and tChild:GetName() then
-				tOurLevel = aBaseLevel + 1 + (tChild["addLevel"] or 0);
+				tOurLevel = tChild["isAlphaChainWrapper"] and aBaseLevel or (aBaseLevel + 1 + (tChild["addLevel"] or 0));
 
 				if not tChild["vfl"] then
 					if not VUHDO_isConfigPanelShowing() then
