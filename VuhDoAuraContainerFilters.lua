@@ -79,6 +79,9 @@ local sEmpty = { };
 local sAllDispelTypeNames = { };
 local sPlayerDispelTypeNames = { };
 local sPlayerPurgeDispelTypeNames = { };
+local sAllDispelBarColorTypeNames = { };
+local sPlayerDispelBarColorTypeNames = { };
+local sPlayerPurgeBarColorTypeNames = { };
 local sGroupResolvedFilterCache = { };
 
 local sAuraBarFallbackColor = {
@@ -544,6 +547,42 @@ function VUHDO_rebuildDispelTypeNameMaps()
 		end
 	end
 
+	VUHDO_rebuildBarColorDispelTypeNameMaps();
+
+	return;
+
+end
+
+
+
+--
+local tBackgroundDispelTypeNames;
+function VUHDO_rebuildBarColorDispelTypeNameMaps()
+
+	twipe(sAllDispelBarColorTypeNames);
+	twipe(sPlayerDispelBarColorTypeNames);
+	twipe(sPlayerPurgeBarColorTypeNames);
+
+	tBackgroundDispelTypeNames = VUHDO_getBackgroundDispelTypeNames();
+
+	for tDispelName, _ in pairs(sAllDispelTypeNames) do
+		if tBackgroundDispelTypeNames[tDispelName] then
+			sAllDispelBarColorTypeNames[tDispelName] = true;
+		end
+	end
+
+	for tDispelName, _ in pairs(sPlayerDispelTypeNames) do
+		if tBackgroundDispelTypeNames[tDispelName] then
+			sPlayerDispelBarColorTypeNames[tDispelName] = true;
+		end
+	end
+
+	for tDispelName, _ in pairs(sPlayerPurgeDispelTypeNames) do
+		if tBackgroundDispelTypeNames[tDispelName] then
+			sPlayerPurgeBarColorTypeNames[tDispelName] = true;
+		end
+	end
+
 	return;
 
 end
@@ -572,6 +611,33 @@ end
 function VUHDO_getPlayerDispelTypeNames()
 
 	return sPlayerDispelTypeNames;
+
+end
+
+
+
+--
+function VUHDO_getAllDispelBarColorTypeNames()
+
+	return sAllDispelBarColorTypeNames;
+
+end
+
+
+
+--
+function VUHDO_getPlayerDispelBarColorTypeNames()
+
+	return sPlayerDispelBarColorTypeNames;
+
+end
+
+
+
+--
+function VUHDO_getPlayerPurgeBarColorTypeNames()
+
+	return sPlayerPurgeBarColorTypeNames;
 
 end
 

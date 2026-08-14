@@ -144,6 +144,8 @@ local sDispelNameColorKeyMap = {
 	["Enrage"] = "DEBUFF9",
 };
 
+local sBackgroundDispelTypeNames = { };
+
 local sDispelTypeCurvePointKeys = {
 	{ 0, "DEBUFF0" },
 	{ 1, "DEBUFF3" },
@@ -698,6 +700,15 @@ do
 
 
 	--
+	function VUHDO_getBackgroundDispelTypeNames()
+
+		return sBackgroundDispelTypeNames;
+
+	end
+
+
+
+	--
 	function VUHDO_getDispelTypeBackgroundFillColorMap(aBright, aOpacity)
 
 		return VUHDO_getOrBuildDispelBrightOpacityVariant(sDispelTypeBackgroundFillColorMap, sDispelTypeBackgroundFillBrightCache, aBright, aOpacity, VUHDO_buildDispelTypeColorMapVariant);
@@ -1185,6 +1196,7 @@ do
 
 		twipe(sDispelTypeColorMap);
 		twipe(sDispelTypeColorMapOpaque);
+		twipe(sBackgroundDispelTypeNames);
 		twipe(sDispelTypeBackgroundFillColorMap);
 		twipe(sDispelTypeBackgroundBackingColorMap);
 		twipe(sDispelTypeColorMapOpaqueBrightCache);
@@ -1201,6 +1213,10 @@ do
 		tTransparent = CreateColor(0, 0, 0, 0);
 
 		for tDispelName, tColorKey in pairs(sDispelNameColorKeyMap) do
+			if tColors and tColors[tColorKey] and tColors[tColorKey]["useBackground"] then
+				sBackgroundDispelTypeNames[tDispelName] = true;
+			end
+
 			sDispelTypeColorMap[tDispelName] = VUHDO_safeColorFromTable(tColors and tColors[tColorKey], tDefaultColor);
 			sDispelTypeColorMapOpaque[tDispelName] = VUHDO_safeOpaqueDispelColorFromTable(tColors and tColors[tColorKey], tTransparent);
 			sDispelTypeBackgroundFillColorMap[tDispelName] = VUHDO_safeBackgroundDispelColorFromTable(tColors and tColors[tColorKey], tDefaultColor, 1, 1);
@@ -1223,6 +1239,8 @@ do
 			sDispelTypeBorderCurve:SetType(Enum.LuaCurveType.Step);
 			VUHDO_populateDispelTypeBorderCurve(sDispelTypeBorderCurve);
 
+			VUHDO_rebuildBarColorDispelTypeNameMaps();
+
 			return;
 		end
 
@@ -1244,6 +1262,8 @@ do
 		sDispelTypeBorderCurve = CreateColorCurve();
 		sDispelTypeBorderCurve:SetType(Enum.LuaCurveType.Step);
 		VUHDO_populateDispelTypeBorderCurve(sDispelTypeBorderCurve);
+
+		VUHDO_rebuildBarColorDispelTypeNameMaps();
 
 		return;
 
@@ -3787,13 +3807,13 @@ do
 		["DEBUFF_CHARMED"] = true,
 	};
 
-	-- Single dispel type specials expressible as Blizzard candidateFilters includeDispelTypes.
-	-- Bleed/Enrage have no dispelName in the 12.1 aura container schema and stay CAT B2.
 	local sDispelSpecialToDispelName = {
 		["DEBUFF_MAGIC"] = "Magic",
 		["DEBUFF_CURSE"] = "Curse",
 		["DEBUFF_DISEASE"] = "Disease",
 		["DEBUFF_POISON"] = "Poison",
+		["DEBUFF_BLEED"] = "Bleed",
+		["DEBUFF_ENRAGE"] = "Enrage",
 	};
 
 	local sRestrictedModeClassCache = { };

@@ -2966,7 +2966,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 
 	["BAR_COLORS"] = {
 
-		["VERSION"] = 1,
+		["VERSION"] = 2,
 
 		["TARGET"] = {
 			["TR"] = 1,	["TG"] = 1,	["TB"] = 1,	["TO"] = 1,
@@ -4334,6 +4334,7 @@ local tAktPanel;
 local tPrivateAura;
 local tBarColors;
 local tHealthLossColor;
+local tDebuffColor;
 function VUHDO_loadDefaultPanelSetup()
 
 	if not VUHDO_PANEL_SETUP then
@@ -4538,6 +4539,18 @@ function VUHDO_loadDefaultPanelSetup()
 		end
 
 		tBarColors["VERSION"] = 1;
+	end
+
+	if tBarColors and (tBarColors["VERSION"] or 0) < 2 then
+		for tDebuffCnt = 1, 9 do
+			tDebuffColor = tBarColors["DEBUFF" .. tDebuffCnt];
+
+			if tDebuffColor and tDebuffColor["useBackground"] == nil then
+				tDebuffColor["useBackground"] = true;
+			end
+		end
+
+		tBarColors["VERSION"] = 2;
 	end
 
 	if VUHDO_PANEL_SETUP["HOTS"] and not VUHDO_PANEL_SETUP["HOTS"]["VERSION"] then
