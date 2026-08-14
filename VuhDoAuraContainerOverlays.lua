@@ -62,7 +62,7 @@ local VUHDO_stopUnitButtonAuraGroupGlow;
 local VUHDO_acquireAuraContainer;
 local VUHDO_releaseAuraContainer;
 local VUHDO_refreshAuraContainer;
-local VUHDO_getOrCreateOverlayHostFrame;
+local VUHDO_getOverlayHostFrame;
 local VUHDO_deferAcquireOverlayContainer;
 local VUHDO_deferSyncOverlaysForUnit;
 local VUHDO_applyStoredChainBaselineColor;
@@ -173,7 +173,7 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_acquireAuraContainer = _G["VUHDO_acquireAuraContainer"];
 	VUHDO_releaseAuraContainer = _G["VUHDO_releaseAuraContainer"];
 	VUHDO_refreshAuraContainer = _G["VUHDO_refreshAuraContainer"];
-	VUHDO_getOrCreateOverlayHostFrame = _G["VUHDO_getOrCreateOverlayHostFrame"];
+	VUHDO_getOverlayHostFrame = _G["VUHDO_getOverlayHostFrame"];
 	VUHDO_deferAcquireOverlayContainer = _G["VUHDO_deferAcquireOverlayContainer"];
 	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
 	VUHDO_applyStoredChainBaselineColor = _G["VUHDO_applyStoredChainBaselineColor"];
@@ -1844,7 +1844,7 @@ do
 
 		tResolveLevelFrame = VUHDO_resolveOverlayLevelFrame(aTargetFrame);
 
-		tResolveOverlayHostFrame = VUHDO_getOrCreateOverlayHostFrame(aButton, aTargetFrame);
+		tResolveOverlayHostFrame = VUHDO_getOverlayHostFrame(aTargetFrame);
 		tResolveContainerParent = (tResolveOverlayHostFrame and tResolveOverlayHostFrame:GetName() and tResolveOverlayHostFrame) or (((aTargetFrame and aTargetFrame:GetName()) and aTargetFrame) or aButton);
 		tResolveFrameLevelOffset = (tResolveLevelFrame["addLevel"] or 0) + (aFrameLevelOffsetAddend or 1);
 

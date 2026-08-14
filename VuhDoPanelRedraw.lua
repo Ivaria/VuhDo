@@ -28,6 +28,7 @@ local VUHDO_calculateDerivedOrientation;
 local VUHDO_updateToggledUnitEvents;
 local VUHDO_buildAllIndicatorAlphaChains;
 local VUHDO_buildBooleanOverlaysForButton;
+local VUHDO_buildTargetIndicatorAlphaChains;
 
 local VUHDO_STD_BACKDROP = nil;
 local VUHDO_DESIGN_BACKDROP = nil;
@@ -120,6 +121,7 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_updateToggledUnitEvents = _G["VUHDO_updateToggledUnitEvents"];
 	VUHDO_buildAllIndicatorAlphaChains = _G["VUHDO_buildAllIndicatorAlphaChains"];
 	VUHDO_buildBooleanOverlaysForButton = _G["VUHDO_buildBooleanOverlaysForButton"];
+	VUHDO_buildTargetIndicatorAlphaChains = _G["VUHDO_buildTargetIndicatorAlphaChains"];
 
 	VUHDO_panelRedrawCustomDebuffsInitLocalOverrides();
 	VUHDO_panelRedrawHeadersInitLocalOverrides();
@@ -2186,9 +2188,8 @@ do
 			VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
 			VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum);
 
-			-- FIXME: alpha chains need fixed for target and target-of-target frames (e.g. range opacity not working)
-			--VUHDO_buildAllIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum);
-			--VUHDO_buildAllIndicatorAlphaChains(VUHDO_getTotButton(aButton), aPanelNum);
+			VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum);
+			VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTotButton(aButton), aPanelNum);
 
 			VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());
 		end

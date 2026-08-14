@@ -1901,10 +1901,9 @@ do
 	local tOverlayHostTargetBarName;
 	local tOverlayHostFrameName;
 	local tOverlayHostFrame;
-	local tOverlayHostAddLevelFrame;
-	function VUHDO_getOrCreateOverlayHostFrame(aButton, aTargetBar)
+	function VUHDO_getOverlayHostFrame(aTargetBar)
 
-		if not aButton or not aTargetBar then
+		if not aTargetBar then
 			return nil;
 		end
 
@@ -1920,19 +1919,11 @@ do
 		if not tOverlayHostFrame then
 			tOverlayHostFrame = _G[tOverlayHostFrameName];
 
-			if not tOverlayHostFrame then
-				tOverlayHostFrame = CreateFrame("Frame", tOverlayHostFrameName, aButton);
-
-				tOverlayHostAddLevelFrame = aTargetBar:IsObjectType("Frame") and aTargetBar or aTargetBar:GetParent();
-
-				tOverlayHostFrame["addLevel"] = tOverlayHostAddLevelFrame and tOverlayHostAddLevelFrame["addLevel"];
+			if tOverlayHostFrame then
+				aTargetBar["VuhDoOverlayHostFrame"] = tOverlayHostFrame;
+			elseif not aTargetBar:IsObjectType("Frame") then
+				tOverlayHostFrame = aTargetBar:GetParent();
 			end
-
-			aTargetBar["VuhDoOverlayHostFrame"] = tOverlayHostFrame;
-		end
-
-		if not InCombatLockdown() then
-			VUHDO_pixelSnapCoverFrame(tOverlayHostFrame, aTargetBar);
 		end
 
 		return tOverlayHostFrame;
