@@ -154,6 +154,7 @@ local VUHDO_applyAuraGroupBarGlowFromAuraButton;
 local VUHDO_getManaAdjustedYOffset;
 local VUHDO_releaseAuraButtonGlowState;
 local VUHDO_unitPhaseReason;
+local VUHDO_isSpecialUnit;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -393,6 +394,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
 	VUHDO_releaseAuraButtonGlowState = _G["VUHDO_releaseAuraButtonGlowState"];
 	VUHDO_unitPhaseReason = _G["VUHDO_unitPhaseReason"];
+	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
 
 	sAuraOpaqueBorderOptions["backingCurveFn"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"];
 	sAuraOpaqueBorderOptions["fillCurveFn"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"];
@@ -3097,7 +3099,7 @@ do
 
 		tCandidateFilters = aTemplate["candidateFilters"];
 
-		if not tCandidateFilters or (not tCandidateFilters["includeSpellIDs"] and not tCandidateFilters["excludeSpellIDs"]) then
+		if not tCandidateFilters or not tCandidateFilters["includeSpellIDs"] then
 			return false;
 		end
 
@@ -3154,6 +3156,10 @@ do
 			return true;
 		end
 
+		if VUHDO_isSpecialUnit(aUnit) then
+			return false;
+		end
+
 		if VUHDO_unitPhaseReason(aUnit) then
 			return true;
 		end
@@ -3186,7 +3192,11 @@ do
 
 		tCanAssist = UnitCanAssist("player", aUnit);
 
-		if issecretvalue(tCanAssist) or not tCanAssist then
+		if issecretvalue(tCanAssist) then
+			return false;
+		end
+
+		if not tCanAssist then
 			return true;
 		end
 

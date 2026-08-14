@@ -10,6 +10,10 @@ local tconcat = table.concat;
 local InCombatLockdown = InCombatLockdown;
 local issecretvalue = issecretvalue;
 local CreateFrame = CreateFrame;
+local UnitExists = UnitExists;
+local UnitCanAssist = UnitCanAssist;
+local UnitCanAttack = UnitCanAttack;
+local gsub = string.gsub;
 
 local sSmokeTestContainer;
 
@@ -285,6 +289,23 @@ end
 
 do
 	--
+	local function VUHDO_formatAuraDiagValue(aValue)
+
+		if aValue == nil then
+			return "nil";
+		end
+
+		if issecretvalue(aValue) then
+			return "secret";
+		end
+
+		return aValue;
+
+	end
+
+
+
+	--
 	local function VUHDO_escapeAuraDiagFilterString(aFilterString)
 
 		if not aFilterString then
@@ -318,6 +339,19 @@ do
 	local tCandidateFilters;
 	local tOverlayContainers;
 	local tHasStaticColor;
+	local tUnitInfo;
+	local tIsAssistRestricted;
+	local tIsAuraFilterRestricted;
+	local tIsDisconnected;
+	local tPhaseReason;
+	local tGroupTemplateRefs;
+	local tSlotTemplateRefs;
+	local tGroupKeys;
+	local tSlotKeys;
+	local tTemplateRef;
+	local tShouldSuppress;
+	local tEngineSlotCnt;
+	local tRecordedKey;
 	function VUHDO_dumpAuraDiagnostics(aUnit)
 
 		aUnit = aUnit or "player";
@@ -337,6 +371,23 @@ do
 		VUHDO_xMsg("pendingContainerBuilds:", VUHDO_getPendingContainerBuildCount());
 
 		VUHDO_xMsg("pendingOverlayBuilds:", VUHDO_getPendingOverlayBuildCount());
+
+		tUnitInfo = VUHDO_RAID[aUnit];
+		tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
+		tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
+		tIsDisconnected = tUnitInfo and not tUnitInfo["connected"];
+		tPhaseReason = VUHDO_unitPhaseReason(aUnit);
+
+		VUHDO_xMsg("gates:",
+			"exists", UnitExists(aUnit),
+			"canAssist", VUHDO_formatAuraDiagValue(UnitCanAssist("player", aUnit)),
+			"canAttack", VUHDO_formatAuraDiagValue(UnitCanAttack("player", aUnit)),
+			"assistRestricted", tIsAssistRestricted,
+			"filterRestricted", tIsAuraFilterRestricted,
+			"disconnected", tIsDisconnected and true or false,
+			"connected", tUnitInfo and tUnitInfo["connected"],
+			"visible", tUnitInfo and VUHDO_formatAuraDiagValue(tUnitInfo["visible"]),
+			"phaseReason", tPhaseReason or "nil");
 
 		for tPanelNum = 1, VUHDO_MAX_PANELS do
 			if VUHDO_isPanelVisible(tPanelNum) then
@@ -404,9 +455,28 @@ do
 								"shown", tIsShown, "enabled", tIsEnabled,
 								"unit", tContainerUnit, "size", tWidth, tHeight,
 								"lastSyncedUnit", tContainerData["lastSyncedUnit"],
-								"lastSyncedRestricted", tContainerData["lastSyncedRestricted"]);
+								"lastSyncedRestricted", tContainerData["lastSyncedRestricted"],
+								"lastSyncedAssistOnly", tContainerData["lastSyncedAssistOnly"]);
 
-							if tGroups then
+							tGroupTemplateRefs = tContainerData["groupTemplateRefs"];
+							tGroupKeys = tContainerData["groupKeys"];
+
+							if tGroupTemplateRefs then
+								for tGroupCnt = 1, #tGroupTemplateRefs do
+									tTemplateRef = tGroupTemplateRefs[tGroupCnt];
+
+									if tTemplateRef then
+										tShouldSuppress = tIsDisconnected or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and tIsAuraFilterRestricted);
+
+										VUHDO_xMsg("  group", tGroupCnt,
+											"key", tGroupKeys and tGroupKeys[tGroupCnt],
+											"filter", VUHDO_escapeAuraDiagFilterString(tTemplateRef["template"] and tTemplateRef["template"]["filterString"]),
+											"isAssistOnly", tTemplateRef["isAssistOnly"],
+											"isCompoundFilterString", tTemplateRef["isCompoundFilterString"],
+											"suppress", tShouldSuppress);
+									end
+								end
+							elseif tGroups then
 								for tGroupIndex, tGroup in ipairs(tGroups) do
 									VUHDO_xMsg("  group", tGroupIndex,
 										"filter", VUHDO_escapeAuraDiagFilterString(tGroup["filterString"]),
@@ -414,7 +484,31 @@ do
 								end
 							end
 
-							if tSlots then
+							tSlotTemplateRefs = tContainerData["slotTemplateRefs"];
+							tSlotKeys = tContainerData["slotKeys"];
+
+							if tSlotTemplateRefs and tSlots then
+								tEngineSlotCnt = 0;
+
+								for tSlotIndex, tSlot in ipairs(tSlots) do
+									if tSlot and not tSlot["isStaticBouquetSlot"] then
+										tEngineSlotCnt = tEngineSlotCnt + 1;
+										tTemplateRef = tSlotTemplateRefs[tEngineSlotCnt];
+										tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
+
+										if tTemplateRef and tRecordedKey then
+											tShouldSuppress = tIsDisconnected or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and tIsAuraFilterRestricted);
+
+											VUHDO_xMsg("  slot", tEngineSlotCnt,
+												"key", tRecordedKey,
+												"filter", VUHDO_escapeAuraDiagFilterString(tTemplateRef["template"] and tTemplateRef["template"]["filterString"]),
+												"isAssistOnly", tTemplateRef["isAssistOnly"],
+												"isCompoundFilterString", tTemplateRef["isCompoundFilterString"],
+												"suppress", tShouldSuppress);
+										end
+									end
+								end
+							elseif tSlots then
 								for tSlotIndex, tSlot in ipairs(tSlots) do
 									tCandidateFilters = tSlot["candidateFilters"];
 
@@ -881,6 +975,161 @@ do
 		sSmokeTestContainer = tContainer;
 
 		VUHDO_xMsg("Aura smoke test created on", tButton:GetName(), "for", aUnit);
+
+		return;
+
+	end
+
+end
+
+
+
+do
+	--
+	local tPassCnt;
+	local tFailCnt;
+	local tSavedUnits;
+	local tSavedRaidEntries;
+	local tTemplate;
+	local tMockInfo;
+	local tUnit;
+	local function VUHDO_assertAuraGateTest(aLabel, anExpected, anActual)
+
+		if anExpected == anActual then
+			tPassCnt = tPassCnt + 1;
+		else
+			tFailCnt = tFailCnt + 1;
+
+			VUHDO_xMsg("FAIL", aLabel, "expected", anExpected, "got", anActual);
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_saveAuraGateRaidEntry(aUnit)
+
+		tSavedRaidEntries[aUnit] = VUHDO_RAID[aUnit];
+		tinsert(tSavedUnits, aUnit);
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_restoreAuraGateRaidEntries()
+
+		for tCnt = 1, #tSavedUnits do
+			tUnit = tSavedUnits[tCnt];
+
+			VUHDO_RAID[tUnit] = tSavedRaidEntries[tUnit];
+		end
+
+		tSavedUnits = { };
+		tSavedRaidEntries = { };
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_testAuraContainerGates()
+
+		tPassCnt = 0;
+		tFailCnt = 0;
+		tSavedUnits = { };
+		tSavedRaidEntries = { };
+
+		tTemplate = {
+			["isHarmful"] = false,
+			["candidateFilters"] = {
+				["excludeSpellIDs"] = {
+					[57724] = true,
+				},
+			},
+		};
+
+		VUHDO_assertAuraGateTest("excludeOnlyNotAssistOnly", false, VUHDO_isAssistOnlyTemplate(tTemplate));
+
+		tTemplate = {
+			["isHarmful"] = false,
+			["candidateFilters"] = {
+				["includeSpellIDs"] = {
+					[774] = true,
+				},
+			},
+		};
+
+		VUHDO_assertAuraGateTest("includeSpellIDsAssistOnly", true, VUHDO_isAssistOnlyTemplate(tTemplate));
+
+		tTemplate = {
+			["filterString"] = "HELPFUL",
+		};
+
+		VUHDO_assertAuraGateTest("bareHelpfulNotAssistOnly", false, VUHDO_isAssistOnlyTemplate(tTemplate));
+
+		tTemplate = {
+			["isHarmful"] = true,
+			["candidateFilters"] = {
+				["excludeSpellIDs"] = {
+					[1] = true,
+				},
+			},
+		};
+
+		VUHDO_assertAuraGateTest("harmfulNotAssistOnly", false, VUHDO_isAssistOnlyTemplate(tTemplate));
+
+		tTemplate = {
+			["filterString"] = "HELPFUL|PLAYER|RAID_IN_COMBAT",
+		};
+
+		VUHDO_assertAuraGateTest("compoundFilterString", true, VUHDO_isCompoundFilterStringTemplate(tTemplate));
+
+		tTemplate = {
+			["filterString"] = "HELPFUL",
+		};
+
+		VUHDO_assertAuraGateTest("bareFilterStringNotCompound", false, VUHDO_isCompoundFilterStringTemplate(tTemplate));
+
+		tMockInfo = {
+			["connected"] = true,
+			["visible"] = false,
+		};
+
+		VUHDO_saveAuraGateRaidEntry("boss1");
+		VUHDO_RAID["boss1"] = tMockInfo;
+		VUHDO_assertAuraGateTest("boss1ExemptFromVisibility", false, VUHDO_isUnitAuraFilterRestricted("boss1"));
+
+		VUHDO_saveAuraGateRaidEntry("target");
+		VUHDO_RAID["target"] = tMockInfo;
+		VUHDO_assertAuraGateTest("targetExemptFromVisibility", false, VUHDO_isUnitAuraFilterRestricted("target"));
+
+		VUHDO_saveAuraGateRaidEntry("focus");
+		VUHDO_RAID["focus"] = tMockInfo;
+		VUHDO_assertAuraGateTest("focusExemptFromVisibility", false, VUHDO_isUnitAuraFilterRestricted("focus"));
+
+		VUHDO_saveAuraGateRaidEntry("raid7");
+		VUHDO_RAID["raid7"] = tMockInfo;
+		VUHDO_assertAuraGateTest("raid7RestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("raid7"));
+
+		tMockInfo = {
+			["connected"] = false,
+			["visible"] = false,
+		};
+
+		VUHDO_RAID["boss1"] = tMockInfo;
+		VUHDO_assertAuraGateTest("boss1StillRestrictedWhenDisconnected", true, VUHDO_isUnitAuraFilterRestricted("boss1"));
+
+		VUHDO_restoreAuraGateRaidEntries();
+
+		VUHDO_xMsg("Aura gate tests:", tPassCnt, "passed,", tFailCnt, "failed");
 
 		return;
 

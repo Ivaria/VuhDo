@@ -1820,6 +1820,8 @@ do
 				VUHDO_dumpAuraContainerLevels(tParsedTexts[3] or "player");
 			elseif strfind(tSubCommand, "dump") then
 				VUHDO_dumpAuraDiagnostics(tParsedTexts[3] or "player");
+			elseif strfind(tSubCommand, "gate") then
+				VUHDO_testAuraContainerGates();
 			elseif strfind(tSubCommand, "test") then
 				VUHDO_createAuraContainerSmokeTest(tParsedTexts[3] or "player");
 			elseif strfind(tSubCommand, "res") then
