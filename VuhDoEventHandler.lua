@@ -707,6 +707,7 @@ VUHDO_TIMERS = {
 	["REFRESH_CUDE_TOOLTIP"] = 1,
 	["UPDATE_AOE"] = 3,
 	["BUFF_WATCH"] = 1,
+	["REFRESH_AURA_CONTAINERS"] = 0,
 };
 local VUHDO_TIMERS = VUHDO_TIMERS;
 
@@ -1283,6 +1284,13 @@ do
 
 			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
 				VUHDO_clearAllSpellTraces();
+			end
+
+		elseif "CINEMATIC_STOP" == anEvent or "STOP_MOVIE" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_syncAuraContainersForAllRaidUnits();
+
+				VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = 0.5;
 			end
 
 		elseif "UPDATE_SHAPESHIFT_FORM" == anEvent then
@@ -2419,6 +2427,10 @@ do
 			VUHDO_initAllEventBouquets();
 		end
 
+		if VUHDO_checkTimer("REFRESH_AURA_CONTAINERS") then
+			VUHDO_syncAuraContainersForAllRaidUnits();
+		end
+
 		-- Refresh Tooltip
 		if VUHDO_checkResetTimer("REFRESH_TOOLTIP", 2.3) and VuhDoTooltip:IsShown() then
 			VUHDO_updateTooltip();
@@ -2868,6 +2880,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"UNIT_SPELLCAST_SUCCEEDED", "UNIT_SPELLCAST_EMPOWER_STOP",
 	"NAME_PLATE_UNIT_REMOVED",
 	"UI_SCALE_CHANGED", "DISPLAY_SIZE_CHANGED",
+	"CINEMATIC_STOP", "STOP_MOVIE",
 };
 
 

@@ -48,6 +48,7 @@ local sAllUnitEventNames = {
 	"UNIT_CONNECTION",
 	"UNIT_NAME_UPDATE",
 	"UNIT_FACTION",
+	"UNIT_FLAGS",
 	"INCOMING_RESURRECT_CHANGED",
 	"INCOMING_SUMMON_CHANGED",
 	"UNIT_PHASE",
@@ -342,6 +343,17 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 
 		if VUHDO_RAID[anArg1] then
 			VUHDO_updateBouquetsForEvent(anArg1, 34);
+
+			VUHDO_syncAuraContainersForUnit(anArg1);
+		end
+
+	elseif "UNIT_FLAGS" == anEvent then
+		if not VUHDO_RAID then
+			return;
+		end
+
+		if VUHDO_RAID[anArg1] ~= nil then
+			VUHDO_syncAuraContainersForUnit(anArg1);
 		end
 
 	elseif "INCOMING_RESURRECT_CHANGED" == anEvent then
@@ -500,6 +512,7 @@ local function VUHDO_applyCoreUnitRegistrations(aFrame, aUnit)
 	aFrame:RegisterUnitEvent("UNIT_CONNECTION", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_NAME_UPDATE", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_FACTION", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_FLAGS", aUnit);
 	aFrame:RegisterUnitEvent("INCOMING_RESURRECT_CHANGED", aUnit);
 	aFrame:RegisterUnitEvent("INCOMING_SUMMON_CHANGED", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_PHASE", aUnit);

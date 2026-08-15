@@ -14,6 +14,7 @@ local InCombatLockdown = InCombatLockdown;
 local UnitExists = UnitExists;
 local UnitCanAttack = UnitCanAttack;
 local UnitCanAssist = UnitCanAssist;
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local issecretvalue = issecretvalue;
 local CreateNumericRuleFormatter = C_StringUtil and C_StringUtil.CreateNumericRuleFormatter;
 local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
@@ -3131,6 +3132,7 @@ do
 	--
 	local tUnitInfo;
 	local tVisible;
+	local tIsDeadOrGhost;
 	function VUHDO_isUnitAuraFilterRestricted(aUnit)
 
 		if not aUnit then
@@ -3149,6 +3151,16 @@ do
 
 		if VUHDO_isSpecialUnit(aUnit) then
 			return false;
+		end
+
+		tIsDeadOrGhost = UnitIsDeadOrGhost(aUnit);
+
+		if issecretvalue(tIsDeadOrGhost) then
+			return false;
+		end
+
+		if tIsDeadOrGhost then
+			return true;
 		end
 
 		if VUHDO_unitPhaseReason(aUnit) then
@@ -3316,6 +3328,7 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 		aContainerData["lastSyncedGroupEnabled"] = nil;
 		aContainerData["lastSlotSuppress"] = nil;
 		aContainerData["lastSyncedAssistOnly"] = nil;
+		aContainerData["lastAuraFilterDenied"] = nil;
 		aContainerData["mixedPriorityCutoffs"] = nil;
 	end
 
@@ -3473,6 +3486,9 @@ local tIsDisconnected;
 local tUnitInfo;
 local tSlotFiltersDirty;
 local tAssistOnlyDirty;
+local tIsRestricted;
+local tIsPreviouslyRestricted;
+local tIsRestrictionRegained;
 function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 	if not aButton or not aUnit then
@@ -3491,6 +3507,7 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 	tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
 	tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
+	tIsRestricted = tIsAssistRestricted or tIsAuraFilterRestricted;
 
 	tUnitInfo = VUHDO_RAID[aUnit];
 	tIsDisconnected = tUnitInfo and not tUnitInfo["connected"];
@@ -3523,10 +3540,15 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 				tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or tContainerData["lastSyncedRestricted"] ~= tIsAuraDataRestricted or not tContainer:IsEnabled() or not tContainer:IsShown();
 			end
 
+			tIsPreviouslyRestricted = tContainerData["lastAuraFilterDenied"] == true;
+			tIsRestrictionRegained = tIsPreviouslyRestricted and not tIsRestricted;
+
+			tContainerData["lastAuraFilterDenied"] = tIsRestricted;
+
 			if tNeedsSync then
 				VUHDO_bindAuraContainerUnit(tContainer, tContainerData, aUnit, aButton);
 			else
-				if tSlotFiltersDirty or tAssistOnlyDirty then
+				if tSlotFiltersDirty or tAssistOnlyDirty or tIsRestrictionRegained then
 					VUHDO_refreshAuraContainer(tContainer);
 				end
 
