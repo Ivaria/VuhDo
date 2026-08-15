@@ -3497,8 +3497,7 @@ do
 			VUHDO_evaluateBouquetNonSecret(tUnit, tInfo, tBouquet, tAnzInfos);
 		end
 
-		tHasSecretResults = (tLayerTemplate and (tLayerTemplate["hasCurves"] or tLayerTemplate["hasBools"] or tLayerTemplate["hasDispels"] or tLayerTemplate["hasSecretValues"]))
-			or issecretvalue(txState["icon"]) or issecretvalue(txState["timer"]) or issecretvalue(txState["counter"]) or issecretvalue(txState["duration"]);
+		tHasSecretResults = issecretvalue(txState["icon"]) or issecretvalue(txState["timer"]) or issecretvalue(txState["counter"]) or issecretvalue(txState["duration"]);
 
 		if txState["active"] then
 			if not txState["isColorInit"] then

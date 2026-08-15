@@ -80,6 +80,7 @@ local sOverlayConfigGeneration = 0;
 local sOverlayEntryPrototypeCache = { };
 local sOverlayFilterFlagsCache = { };
 local sPendingOverlayBuilds = { };
+local sStagingOverlayContainers = { };
 local sHasAnyOverlays = false;
 
 local sOverlayScratch = {
@@ -2125,6 +2126,8 @@ do
 		end
 
 		if InCombatLockdown() then
+			VUHDO_deferAcquireOverlayContainer(aButton, anIndicatorKey, anEntryKey);
+
 			return;
 		end
 
@@ -2146,12 +2149,12 @@ do
 		tContainerData = VUHDO_acquireAuraContainer(aButton, tContainerTemplate);
 
 		if tContainerData then
-			if not VUHDO_OVERLAY_CONTAINERS[tButtonName] then
-				VUHDO_OVERLAY_CONTAINERS[tButtonName] = { };
+			if not sStagingOverlayContainers[tButtonName] then
+				sStagingOverlayContainers[tButtonName] = { };
 			end
 
-			if not VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey] then
-				VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey] = { };
+			if not sStagingOverlayContainers[tButtonName][anIndicatorKey] then
+				sStagingOverlayContainers[tButtonName][anIndicatorKey] = { };
 			end
 
 			if tChainGroupMeta then
@@ -2191,7 +2194,7 @@ do
 				end
 			end
 
-			VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey][anEntryKey] = tContainerData;
+			sStagingOverlayContainers[tButtonName][anIndicatorKey][anEntryKey] = tContainerData;
 
 			if tContainerData["chainBaselineTexture"] then
 				VUHDO_applyStoredChainBaselineColor(tButtonName, tContainerData);
@@ -2202,6 +2205,8 @@ do
 
 		if tPendingBuild["pendingCount"] <= 0 then
 			sPendingOverlayBuilds[aButton] = nil;
+
+			VUHDO_finalizeOverlayStaging(aButton);
 
 			sOverlayConfigKeys[tButtonName] = sOverlayConfigGeneration;
 
@@ -2236,6 +2241,73 @@ do
 
 	--
 	local tButtonName;
+	local tOldOverlays;
+	local tIndicatorEntry;
+	local tContainerData;
+	function VUHDO_releaseStagingOverlaysForButton(aButton)
+
+		if not aButton then
+			return;
+		end
+
+		tButtonName = aButton:GetName();
+
+		if not tButtonName or not sStagingOverlayContainers[tButtonName] then
+			return;
+		end
+
+		for _, tIndicatorEntry in pairs(sStagingOverlayContainers[tButtonName]) do
+			for _, tContainerData in pairs(tIndicatorEntry) do
+				VUHDO_releaseAuraContainer(aButton, tContainerData);
+			end
+		end
+
+		sStagingOverlayContainers[tButtonName] = nil;
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_finalizeOverlayStaging(aButton)
+
+		if not aButton then
+			return;
+		end
+
+		tButtonName = aButton:GetName();
+
+		if not tButtonName then
+			return;
+		end
+
+		tOldOverlays = VUHDO_OVERLAY_CONTAINERS[tButtonName];
+
+		if sStagingOverlayContainers[tButtonName] then
+			VUHDO_OVERLAY_CONTAINERS[tButtonName] = sStagingOverlayContainers[tButtonName];
+			sStagingOverlayContainers[tButtonName] = nil;
+		else
+			VUHDO_OVERLAY_CONTAINERS[tButtonName] = nil;
+		end
+
+		if tOldOverlays then
+			for _, tIndicatorEntry in pairs(tOldOverlays) do
+				for _, tContainerData in pairs(tIndicatorEntry) do
+					VUHDO_releaseAuraContainer(aButton, tContainerData);
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tButtonName;
 	function VUHDO_releaseOverlaysForButton(aButton)
 
 		if not aButton then
@@ -2251,6 +2323,8 @@ do
 		tButtonName = aButton:GetName();
 
 		sPendingOverlayBuilds[aButton] = nil;
+
+		VUHDO_releaseStagingOverlaysForButton(aButton);
 
 		if not tButtonName or not VUHDO_OVERLAY_CONTAINERS[tButtonName] then
 			if tButtonName then
@@ -2294,6 +2368,7 @@ do
 		end
 
 		twipe(VUHDO_OVERLAY_CONTAINERS);
+		twipe(sStagingOverlayContainers);
 		twipe(sOverlayConfigKeys);
 		twipe(sPendingOverlayBuilds);
 		twipe(sOverlaySublevelAllocators);
@@ -2570,9 +2645,9 @@ do
 			return;
 		end
 
-		VUHDO_releaseOverlaysForButton(aButton);
+		VUHDO_releaseStagingOverlaysForButton(aButton);
+		sStagingOverlayContainers[aButtonName] = { };
 
-		VUHDO_OVERLAY_CONTAINERS[aButtonName] = { };
 		tPlannedCount = 0;
 
 		tBuildBouquetOverlays = VUHDO_isAuraModeContainers() or VUHDO_isAuraDataRestricted() or sHasAnyOverlays or VUHDO_isBarColorsDispelOverlayConfigured();
@@ -2644,6 +2719,11 @@ do
 		end
 
 		if tPlannedCount == 0 then
+			sPendingOverlayBuilds[aButton] = nil;
+
+			VUHDO_releaseStagingOverlaysForButton(aButton);
+			VUHDO_releaseOverlaysForButton(aButton);
+
 			sOverlayConfigKeys[aButtonName] = sOverlayConfigGeneration;
 		else
 			sHasAnyOverlays = true;

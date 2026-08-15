@@ -1693,9 +1693,15 @@ function VUHDO_updateHealthBarsFor(aUnit, anUpdateMode)
 	elseif 5 == anUpdateMode then -- VUHDO_UPDATE_RANGE
 		VUHDO_determineIncHeal(aUnit);
 
+		tInfo = VUHDO_RAID[aUnit];
+
 		for _, tButton in pairs(tAllButtons) do
 			VUHDO_customizeText(tButton, 2, false); -- for d/c tag -- VUHDO_UPDATE_HEALTH
 			VUHDO_customizeDebuffIconsRange(tButton);
+
+			if sSecretsEnabled then
+				VUHDO_updateAllIndicatorAlphaChains(tButton, tInfo);
+			end
 		end
 
 		VUHDO_updateIncHeal(aUnit);

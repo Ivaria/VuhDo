@@ -99,6 +99,7 @@ local VUHDO_syncAuraContainersForAllRaidUnits;
 local VUHDO_syncOverlaysForUnit;
 local VUHDO_resetAuraContainersForUnit;
 local VUHDO_resetOverlaysForUnit;
+local VUHDO_resetAuraFilterResultCachePerFrame;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -601,6 +602,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
 	VUHDO_resetAuraContainersForUnit = _G["VUHDO_resetAuraContainersForUnit"];
 	VUHDO_resetOverlaysForUnit = _G["VUHDO_resetOverlaysForUnit"];
+	VUHDO_resetAuraFilterResultCachePerFrame = _G["VUHDO_resetAuraFilterResultCachePerFrame"];
 
 	VUHDO_initTaskSystem();
 
@@ -2167,7 +2169,7 @@ local function VUHDO_doReloadRoster(anIsQuick)
 			end
 		end
 
-		VUHDO_initDebuffs(); -- Verzgerung nach Taltentwechsel-Spell?
+		VUHDO_initDebuffsIfNeeded(); -- Verzgerung nach Taltentwechsel-Spell?
 	end
 
 	return;
@@ -2275,6 +2277,19 @@ do
 
 		-- Own frame flash routines to avoid taints
 		VUHDO_UIFrameFlash_OnUpdate(aTimeDelta);
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_handleSegment1B(aTimeDelta)
+
+		VUHDO_resetAuraFilterResultCachePerFrame();
+
+		VUHDO_processDeferredTaskQueue(aTimeDelta);
 
 		return;
 
@@ -2659,7 +2674,7 @@ do
 	--
 	local tSegmentCallbacks = {
 		["segment1A"] = function(aTimeDelta) VUHDO_handleSegment1A(aTimeDelta); end,
-		["segment1B"] = function() VUHDO_processDeferredTaskQueue(); end,
+		["segment1B"] = function(aTimeDelta) VUHDO_handleSegment1B(aTimeDelta); end,
 		["segment2A"] = function(aTimeDelta) VUHDO_handleSegment2A(aTimeDelta); end,
 		["segment2B"] = function(aTimeDelta) VUHDO_handleSegment2B(aTimeDelta); end,
 		["segment2C"] = function(aTimeDelta) VUHDO_handleSegment2C(aTimeDelta); end,
@@ -2708,7 +2723,7 @@ do
 		end
 
 		-- Segment 1B - Process deferred tasks
-		_, tSegment1BDuration = VUHDO_profileSegment("segment1B", tSegmentCallbacks["segment1B"]);
+		_, tSegment1BDuration = VUHDO_profileSegment("segment1B", tSegmentCallbacks["segment1B"], aTimeDelta);
 
 		if VUHDO_HANDLER_PROFILING_ENABLED then
 			tSegment1Total = tSegment1Total + tSegment1BDuration;

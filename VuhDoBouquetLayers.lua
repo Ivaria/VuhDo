@@ -809,6 +809,26 @@ end
 
 
 --
+local tIndicatorChains;
+function VUHDO_updateAllIndicatorAlphaChains(aButton, anInfo)
+
+	if not anInfo then
+		return;
+	end
+
+	tIndicatorChains = sGlobalAlphaChains[aButton];
+
+	for tIndicatorName, _ in pairs(tIndicatorChains) do
+		VUHDO_updateIndicatorAlphaChain(aButton, tIndicatorName, anInfo);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tValidatorResult;
 function VUHDO_evaluateValidatorActive(aSpecial, anInfo, aItem)
 

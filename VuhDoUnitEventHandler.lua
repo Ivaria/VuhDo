@@ -135,6 +135,7 @@ end
 --
 local tUnitInfo;
 local tPowerBouquetMode;
+local tInferenceChanged;
 function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5)
 
 	if "UNIT_AURA" == anEvent then
@@ -145,17 +146,17 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 		tUnitInfo = VUHDO_RAID[anArg1];
 
 		if tUnitInfo then
+			tInferenceChanged = false;
+
+			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] then
+				tInferenceChanged = VUHDO_onUnitAuraInference(anArg1, anArg2);
+			end
+
 			VUHDO_onUnitAura(anArg1, anArg2);
 			VUHDO_updateBouquetsForEvent(anArg1, 4);
 
-			if VUHDO_VARIABLES_LOADED and VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_AURA_INFERENCE] then
-				if VUHDO_onUnitAuraInference(anArg1, anArg2) then
-					VUHDO_determineAura(anArg1);
-
-					VUHDO_updateBouquetsForEvent(anArg1, 4);
-
-					VUHDO_updateInferredAuraDisplaysForUnit(anArg1);
-				end
+			if tInferenceChanged then
+				VUHDO_updateInferredAuraDisplaysForUnit(anArg1);
 			end
 		end
 

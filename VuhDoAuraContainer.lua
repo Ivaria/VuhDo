@@ -2515,15 +2515,23 @@ do
 
 	--
 	local tWipeContainer;
+	local tWipeContainerData;
 	function VUHDO_wipeAuraContainerPool()
 
 		for _, tPool in pairs(sAuraContainerPool) do
-			for tPoolCnt = 1, #tPool do
-				tWipeContainer = tPool[tPoolCnt] and tPool[tPoolCnt]["container"];
+			for tPoolCnt = #tPool, 1, -1 do
+				tWipeContainerData = tPool[tPoolCnt];
 
-				if tWipeContainer then
+				if tWipeContainerData and tWipeContainerData["container"] then
+					tWipeContainer = tWipeContainerData["container"];
+
 					sContainerClassColorBars[tWipeContainer] = nil;
 					sPendingClassColors[tWipeContainer] = nil;
+
+					tWipeContainer:Hide();
+					tWipeContainer:SetParent(nil);
+
+					tWipeContainerData["container"] = nil;
 				end
 			end
 		end
@@ -2590,6 +2598,11 @@ do
 
 				if tUsesDispelTextures then
 					if not tContainerData["dispelColorGen"] or tContainerData["dispelColorGen"] ~= tDispelColorGen then
+						if tContainerData["container"] then
+							tContainerData["container"]:Hide();
+							tContainerData["container"]:SetParent(nil);
+						end
+
 						tContainerData = nil;
 					else
 						break;
@@ -2629,7 +2642,9 @@ do
 				tContainerData["lastSyncedUnit"] = nil;
 				tContainerData["lastSyncedRestricted"] = nil;
 				tContainerData["lastSyncedEnabled"] = nil;
-				tContainerData["lastSyncedAssistOnly"] = nil;
+				tContainerData["lastSyncedAssistRestricted"] = nil;
+				tContainerData["lastSyncedAuraFilterRestricted"] = nil;
+				tContainerData["lastSyncedDisconnected"] = nil;
 				tContainerData["lastSlotSuppress"] = nil;
 				tContainerData["mixedPriorityCutoffs"] = nil;
 				tContainerData["friendlyOnly"] = nil;
@@ -2761,6 +2776,10 @@ do
 
 			if tUsesDispelTextures then
 				if not aContainerData["dispelColorGen"] or aContainerData["dispelColorGen"] ~= VUHDO_getDispelColorGeneration() then
+					aContainerData["container"] = nil;
+
+					tContainer:Hide();
+
 					return;
 				end
 			end
@@ -3223,7 +3242,6 @@ do
 	local tEngineSlotCnt;
 	local tSlot;
 	local tRecordedKey;
-	local tSyncKey;
 	local tShouldSuppress;
 	function VUHDO_applyAuraContainerAssistOnly(aContainer, aContainerData, anIsAssistRestricted, anIsAuraFilterRestricted, anIsDisconnected)
 
@@ -3231,9 +3249,9 @@ do
 			return false;
 		end
 
-		tSyncKey = (anIsAssistRestricted and "1" or "0") .. (anIsAuraFilterRestricted and "1" or "0") .. (anIsDisconnected and "1" or "0");
-
-		if aContainerData["lastSyncedAssistOnly"] == tSyncKey then
+		if aContainerData["lastSyncedAssistRestricted"] == anIsAssistRestricted
+			and aContainerData["lastSyncedAuraFilterRestricted"] == anIsAuraFilterRestricted
+			and aContainerData["lastSyncedDisconnected"] == anIsDisconnected then
 			return false;
 		end
 
@@ -3292,7 +3310,9 @@ do
 			end
 		end
 
-		aContainerData["lastSyncedAssistOnly"] = tSyncKey;
+		aContainerData["lastSyncedAssistRestricted"] = anIsAssistRestricted;
+		aContainerData["lastSyncedAuraFilterRestricted"] = anIsAuraFilterRestricted;
+		aContainerData["lastSyncedDisconnected"] = anIsDisconnected;
 
 		return true;
 
@@ -3327,7 +3347,9 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 		aContainerData["lastSyncedEnabled"] = nil;
 		aContainerData["lastSyncedGroupEnabled"] = nil;
 		aContainerData["lastSlotSuppress"] = nil;
-		aContainerData["lastSyncedAssistOnly"] = nil;
+		aContainerData["lastSyncedAssistRestricted"] = nil;
+		aContainerData["lastSyncedAuraFilterRestricted"] = nil;
+		aContainerData["lastSyncedDisconnected"] = nil;
 		aContainerData["lastAuraFilterDenied"] = nil;
 		aContainerData["mixedPriorityCutoffs"] = nil;
 	end
@@ -3345,14 +3367,9 @@ function VUHDO_refreshAuraContainer(aContainer)
 		return;
 	end
 
-	if InCombatLockdown() then
-		aContainer:UpdateAllAuras();
+	aContainer:UpdateAllAuras();
 
-		aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
-	else
-		aContainer:Hide();
-		aContainer:Show();
-	end
+	aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
 
 	return;
 
@@ -3680,13 +3697,13 @@ function VUHDO_processPendingAuraContainerBuilds()
 		return;
 	end
 
-	sHasPendingBuilds = false;
+	if not InCombatLockdown() then
+		for tButton, tPanelNum in pairs(sPendingContainerBuilds) do
+			VUHDO_deferInitAuraContainersForButton(tButton, tPanelNum);
+		end
 
-	for tButton, tPanelNum in pairs(sPendingContainerBuilds) do
-		VUHDO_deferInitAuraContainersForButton(tButton, tPanelNum);
+		twipe(sPendingContainerBuilds);
 	end
-
-	twipe(sPendingContainerBuilds);
 
 	for tButton, tButtonSetup in pairs(sPendingButtonLayouts) do
 		VUHDO_layoutBarAuraButtonFrames(tButtonSetup, tButton);
@@ -3699,6 +3716,10 @@ function VUHDO_processPendingAuraContainerBuilds()
 	end
 
 	twipe(sPendingClassColors);
+
+	if not next(sPendingContainerBuilds) then
+		sHasPendingBuilds = false;
+	end
 
 	return;
 

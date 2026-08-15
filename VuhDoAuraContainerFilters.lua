@@ -1497,18 +1497,24 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 		if tCachedEntry then
 			tCachedTemplate = tCachedEntry["template"];
 
-			return {
-				["parent"] = aButton,
-				["anchor"] = tCachedTemplate["anchor"],
-				["containerLayout"] = tCachedTemplate["containerLayout"],
-				["groups"] = tCachedTemplate["groups"],
-				["slots"] = tCachedTemplate["slots"],
-				["poolKeyBase"] = tCachedTemplate["poolKeyBase"],
-				["staticSlots"] = tCachedTemplate["staticSlots"],
-				["usesDispelTextures"] = tCachedTemplate["usesDispelTextures"],
-				["panelNum"] = tPanelNum,
-				["anchorIndex"] = anAnchorIndex,
-			};
+			if not tCachedEntry["instanceTemplate"] then
+				tCachedEntry["instanceTemplate"] = {
+					["parent"] = aButton,
+					["anchor"] = tCachedTemplate["anchor"],
+					["containerLayout"] = tCachedTemplate["containerLayout"],
+					["groups"] = tCachedTemplate["groups"],
+					["slots"] = tCachedTemplate["slots"],
+					["poolKeyBase"] = tCachedTemplate["poolKeyBase"],
+					["staticSlots"] = tCachedTemplate["staticSlots"],
+					["usesDispelTextures"] = tCachedTemplate["usesDispelTextures"],
+					["panelNum"] = tPanelNum,
+					["anchorIndex"] = anAnchorIndex,
+				};
+			end
+
+			tCachedEntry["instanceTemplate"]["parent"] = aButton;
+
+			return tCachedEntry["instanceTemplate"];
 		end
 	end
 
@@ -1643,6 +1649,18 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 
 		VUHDO_AURA_CONTAINER_TEMPLATE_CACHE[tPanelNum][anAnchorIndex] = {
 			["template"] = tCachedTemplate,
+			["instanceTemplate"] = {
+				["parent"] = aButton,
+				["anchor"] = tCachedTemplate["anchor"],
+				["containerLayout"] = tContainerLayout,
+				["groups"] = tGroups,
+				["slots"] = tSlots,
+				["poolKeyBase"] = tCachedTemplate["poolKeyBase"],
+				["staticSlots"] = tCachedTemplate["staticSlots"],
+				["usesDispelTextures"] = tCachedTemplate["usesDispelTextures"],
+				["panelNum"] = tPanelNum,
+				["anchorIndex"] = anAnchorIndex,
+			},
 		};
 	end
 

@@ -88,6 +88,28 @@ local sButtonInitTimeouts = { };
 local sButtonPositionTimeouts = { };
 local sPanelRedrawTimeout = 0;
 
+
+
+--
+local tReleaseSemaphoreName;
+local function VUHDO_releaseStoredSemaphore(aSemaphore)
+
+	if not aSemaphore then
+		return;
+	end
+
+	tReleaseSemaphoreName = aSemaphore["name"];
+
+	if tReleaseSemaphoreName then
+		VUHDO_releaseSemaphore(tReleaseSemaphoreName);
+	end
+
+	return;
+
+end
+
+
+
 local sGrowthOffsets = {
 	["LEFT"] = { -1, 0 },
 	["RIGHT"] = { 1, 0 },
@@ -2419,6 +2441,9 @@ do
 		tNumButtons = VUHDO_getNumButtonsPanel(aPanelNum);
 
 		tCycleId = VUHDO_generateCycleId(aCycleId, true);
+
+		VUHDO_releaseStoredSemaphore(sButtonInitSemaphores[aPanelNum]);
+
 		sButtonInitSemaphores[aPanelNum] = VUHDO_createSemaphore("InitAllHealButtons_" .. aPanelNum .. "_" .. tCycleId, 0, tNumButtons, sButtonInitTimeouts[aPanelNum]);
 
 		if not sButtonInitSemaphores[aPanelNum] then
@@ -2465,6 +2490,9 @@ do
 		end
 
 		tCycleId = VUHDO_generateCycleId(aCycleId, true);
+
+		VUHDO_releaseStoredSemaphore(sButtonPositionSemaphores[aPanelNum]);
+
 		sButtonPositionSemaphores[aPanelNum] = VUHDO_createSemaphore("PositionAllHealButtons_" .. aPanelNum .. "_" .. tCycleId, 0, tTotalButtons, sButtonPositionTimeouts[aPanelNum]);
 
 		if not sButtonPositionSemaphores[aPanelNum] then
@@ -2527,6 +2555,9 @@ do
 		end
 
 		tCycleId = VUHDO_generateCycleId();
+
+		VUHDO_releaseStoredSemaphore(sButtonInitSemaphores[aPanelNum]);
+
 		sButtonInitSemaphores[aPanelNum] = VUHDO_createSemaphore("RefreshInitButtons_" .. aPanelNum .. "_" .. tCycleId, 0, aMaxCount, sButtonInitTimeouts[aPanelNum]);
 
 		return sButtonInitSemaphores[aPanelNum];
@@ -2561,6 +2592,8 @@ do
 		tSemaphores = { sButtonInitSemaphores[aPanelNum] };
 
 		if VUHDO_waitForSemaphores(tSemaphores, aTaskType, aPriority, ...) then
+			VUHDO_releaseStoredSemaphore(sButtonInitSemaphores[aPanelNum]);
+
 			sButtonInitSemaphores[aPanelNum] = nil;
 
 			return true;
@@ -2800,6 +2833,8 @@ do
 			sRedrawPanelSemaphores[aPanelNum]:decrement();
 
 			if sRedrawPanelSemaphores[aPanelNum]["count"] == 0 then
+				VUHDO_releaseStoredSemaphore(sRedrawPanelSemaphores[aPanelNum]);
+
 				sRedrawPanelSemaphores[aPanelNum] = nil;
 
 				if sWaitingIndividualRedraws[aPanelNum] and #sWaitingIndividualRedraws[aPanelNum] > 0 then
@@ -3205,6 +3240,8 @@ do
 			return;
 		end
 
+		VUHDO_releaseStoredSemaphore(sRedrawAllPanelsSemaphore);
+
 		sRedrawAllPanelsSemaphore = VUHDO_createSemaphore("RedrawAllPanels_" .. tCycleId, 0, 10, sPanelRedrawTimeout);
 
 		if not sRedrawAllPanelsSemaphore then
@@ -3223,10 +3260,14 @@ do
 			end
 
 			if sButtonInitSemaphores[tPanelNum] then
+				VUHDO_releaseStoredSemaphore(sButtonInitSemaphores[tPanelNum]);
+
 				sButtonInitSemaphores[tPanelNum] = nil;
 			end
 
 			if sButtonPositionSemaphores[tPanelNum] then
+				VUHDO_releaseStoredSemaphore(sButtonPositionSemaphores[tPanelNum]);
+
 				sButtonPositionSemaphores[tPanelNum] = nil;
 			end
 		end
@@ -3250,6 +3291,7 @@ do
 		tPanel = VUHDO_getOrCreateActionPanel(aPanelNum);
 
 		VUHDO_initLocalVars(aPanelNum);
+
 		VUHDO_deferInitAllHealButtons(tPanel, aPanelNum, aCycleId);
 
 		if VUHDO_isConfigPanelShowing() then
@@ -3308,10 +3350,14 @@ do
 
 		VUHDO_updateToggledUnitEvents();
 
+		VUHDO_releaseStoredSemaphore(sRedrawAllPanelsSemaphore);
+
 		sRedrawAllPanelsSemaphore = nil;
 
 		for tPanelNum = 1, 10 do
 			if sRedrawPanelSemaphores[tPanelNum] then
+				VUHDO_releaseStoredSemaphore(sRedrawPanelSemaphores[tPanelNum]);
+
 				sRedrawPanelSemaphores[tPanelNum] = nil;
 			end
 		end

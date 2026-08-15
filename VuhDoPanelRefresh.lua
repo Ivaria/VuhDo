@@ -48,6 +48,8 @@ local sShowPanels;
 local sDurationAnchor = { };
 local sDeferredRefreshCount = 0;
 local sStaleButtonIndices = { };
+local sScratchUnitButtons = { };
+local sScratchUnitButtonsPanel = { };
 
 
 
@@ -315,12 +317,37 @@ end
 
 
 --
+local function VUHDO_commitScratchUnitButtons()
+
+	twipe(VUHDO_UNIT_BUTTONS);
+	twipe(VUHDO_UNIT_BUTTONS_PANEL);
+
+	for tUnit, tButtons in pairs(sScratchUnitButtons) do
+		VUHDO_UNIT_BUTTONS[tUnit] = tButtons;
+	end
+
+	for tUnit, tPanelMap in pairs(sScratchUnitButtonsPanel) do
+		VUHDO_UNIT_BUTTONS_PANEL[tUnit] = tPanelMap;
+	end
+
+	twipe(sScratchUnitButtons);
+	twipe(sScratchUnitButtonsPanel);
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_deferRefreshUiNoMembers()
 
 	VUHDO_resetNameTextCache();
 
-	twipe(VUHDO_UNIT_BUTTONS);
-	twipe(VUHDO_UNIT_BUTTONS_PANEL);
+	twipe(sScratchUnitButtons);
+	twipe(sScratchUnitButtonsPanel);
+
+	VUHDO_setUnitButtonBuildScratch(sScratchUnitButtons, sScratchUnitButtonsPanel);
 
 	sDeferredRefreshCount = sDeferredRefreshCount + 1;
 
@@ -406,6 +433,17 @@ end
 --
 function VUHDO_deferRefreshUiCompleteDelegate()
 
+	if sDeferredRefreshCount > 0 then
+		sDeferredRefreshCount = sDeferredRefreshCount - 1;
+	end
+
+	if sDeferredRefreshCount <= 0 then
+		sDeferredRefreshCount = 0;
+
+		VUHDO_commitScratchUnitButtons();
+		VUHDO_clearUnitButtonBuildScratch();
+	end
+
 	VUHDO_updateAllRaidBars();
 	VUHDO_updatePanelVisibility();
 	VUHDO_PixelUtil.Hide(VuhDoGcdStatusBar);
@@ -419,10 +457,6 @@ function VUHDO_deferRefreshUiCompleteDelegate()
 	end
 
 	VUHDO_initAllEventBouquets();
-
-	if sDeferredRefreshCount > 0 then
-		sDeferredRefreshCount = sDeferredRefreshCount - 1;
-	end
 
 	return;
 

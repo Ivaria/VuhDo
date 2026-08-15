@@ -892,6 +892,21 @@ end
 
 
 --
+function VUHDO_releaseSemaphore(aSemaphoreName)
+
+	if not aSemaphoreName then
+		return;
+	end
+
+	VUHDO_REGISTERED_SEMAPHORES[aSemaphoreName] = nil;
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_getSemaphore(aSemaphoreName)
 
 	return VUHDO_REGISTERED_SEMAPHORES[aSemaphoreName];
