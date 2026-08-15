@@ -262,25 +262,23 @@ end
 
 
 --
+local tConfig;
 local tFontString;
-function VUHDO_applyBooleanOverlay(aOverlay, aSecretBool, aConfig, aTrueColor, aFalseColor)
+function VUHDO_applyBooleanOverlay(aOverlay, aResultSlot)
 
 	tTexture = aOverlay["texture"];
 	tFontString = aOverlay["fontString"];
+	tConfig = aResultSlot["color"];
 
-	if aConfig["useBackground"] then
-		tTexture:SetVertexColorFromBoolean(aSecretBool, aTrueColor, aFalseColor);
+	if tConfig["useBackground"] then
+		tTexture:SetVertexColorFromBoolean(aResultSlot["secretBool"], aResultSlot["trueColorMixin"], aResultSlot["falseColorMixin"]);
 	end
 
-	if aConfig["useOpacity"] then
-		tTexture:SetAlphaFromBoolean(aSecretBool, aConfig["O"] or 1, 0);
-	else
-		tTexture:SetAlphaFromBoolean(aSecretBool, 1, 0);
-	end
+	tTexture:SetAlphaFromBoolean(aResultSlot["secretBool"], aResultSlot["trueAlpha"], aResultSlot["falseAlpha"]);
 
-	if aConfig["useText"] and tFontString then
-		tFontString:SetVertexColorFromBoolean(aSecretBool, aTrueColor, aFalseColor);
-		tFontString:SetAlphaFromBoolean(aSecretBool, aConfig["TO"] or 1, 0);
+	if tConfig["useText"] and tFontString then
+		tFontString:SetVertexColorFromBoolean(aResultSlot["secretBool"], aResultSlot["trueColorMixin"], aResultSlot["falseColorMixin"]);
+		tFontString:SetAlphaFromBoolean(aResultSlot["secretBool"], aResultSlot["trueTextAlpha"], aResultSlot["falseTextAlpha"]);
 	end
 
 	return;
@@ -291,8 +289,6 @@ end
 
 --
 function VUHDO_clearBooleanOverlays(aButton)
-
-	-- FIXME: hook into VUHDO_registerAllBouquets with VUHDO_rebuildAllAlphaChains and VUHDO_buildBooleanOverlaysForButton
 
 	for _, tTargetOverlaysClear in pairs(sBooleanOverlayLayers[aButton]) do
 		for _, tOverlay in pairs(tTargetOverlaysClear) do
@@ -675,6 +671,8 @@ function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 		return false;
 	end
 
+	VUHDO_clearBooleanOverlays(aButton);
+
 	tIndicatorConfig = VUHDO_INDICATOR_CONFIG[aPanelNum];
 
 	if not tIndicatorConfig then
@@ -845,8 +843,6 @@ end
 --
 function VUHDO_rebuildAllAlphaChains()
 
-	-- FIXME: hook into VUHDO_registerAllBouquets with VUHDO_clearBooleanOverlays and VUHDO_buildBooleanOverlaysForButton
-
 	for tButton, tIndicatorChains in pairs(sGlobalAlphaChains) do
 		for tIndicatorName, tChain in pairs(tIndicatorChains) do
 			sAlphaChainPool:release(tChain);
@@ -878,8 +874,17 @@ local function VUHDO_applyBooleanLayers(aButton, aTarget, aTargetType, aLayerTem
 			tOverlay = VUHDO_getBooleanOverlay(aButton, aTarget, aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTargetType);
 
 			if tOverlay and tResultSlot["trueColorMixin"] and tResultSlot["falseColorMixin"] and tResultSlot["secretBool"] ~= nil then
-				VUHDO_applyBooleanOverlay(tOverlay, tResultSlot["secretBool"],
-					tResultSlot["color"], tResultSlot["trueColorMixin"], tResultSlot["falseColorMixin"]);
+				VUHDO_applyBooleanOverlay(tOverlay, tResultSlot);
+			end
+		else
+			tOverlay = VUHDO_getBooleanOverlay(aButton, aTarget, aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTargetType);
+
+			if tOverlay then
+				tOverlay["texture"]:SetAlpha(0);
+
+				if tOverlay["fontString"] then
+					tOverlay["fontString"]:SetAlpha(0);
+				end
 			end
 		end
 	end

@@ -1753,6 +1753,10 @@ do
 							["trueColorMixin"] = sTransparentColor,
 							["falseColorMixin"] = tTrueColor,
 							["color"] = tItem["color"],
+							["trueAlpha"] = 0,
+							["falseAlpha"] = tItem["color"]["useOpacity"] and (tItem["color"]["O"] or 1) or 1,
+							["trueTextAlpha"] = 0,
+							["falseTextAlpha"] = tItem["color"]["TO"] or 1,
 						};
 					else
 						tTemplate["booleanResults"][tBoolIdx] = {
@@ -1760,6 +1764,10 @@ do
 							["trueColorMixin"] = tTrueColor,
 							["falseColorMixin"] = sTransparentColor,
 							["color"] = tItem["color"],
+							["trueAlpha"] = tItem["color"]["useOpacity"] and (tItem["color"]["O"] or 1) or 1,
+							["falseAlpha"] = 0,
+							["trueTextAlpha"] = tItem["color"]["TO"] or 1,
+							["falseTextAlpha"] = 0,
 						};
 					end
 
