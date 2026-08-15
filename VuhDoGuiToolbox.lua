@@ -1346,23 +1346,21 @@ function VUHDO_fixFrameLevels(anIsForceUpdateChildren, aFrame, aBaseLevel, ...)
 	VUHDO_PixelUtil.SetFrameLevel(aFrame, aBaseLevel);
 
 	while tChild do -- Layer components seem to have no name, important for HoT icons.
-		if tChild.IsForbidden and not tChild:IsForbidden() then
-			if tChild.GetName and tChild:GetName() then
-				tOurLevel = tChild["isAlphaChainWrapper"] and aBaseLevel or (aBaseLevel + 1 + (tChild["addLevel"] or 0));
+		if tChild:CanBeAccessedInContext() and not tChild:IsForbidden() and tChild:GetName() then
+			tOurLevel = tChild["isAlphaChainWrapper"] and aBaseLevel or (aBaseLevel + 1 + (tChild["addLevel"] or 0));
 
-				if not tChild["vfl"] then
-					if not VUHDO_isConfigPanelShowing() then
-						VUHDO_PixelUtil.SetFrameStrata(tChild, aFrame:GetFrameStrata());
-					end
-
-					VUHDO_PixelUtil.SetFrameLevel(tChild, tOurLevel);
-
-					tChild["vfl"] = true;
-
-					VUHDO_fixFrameLevels(anIsForceUpdateChildren, tChild, tOurLevel, tChild:GetChildren());
-				elseif(anIsForceUpdateChildren) then
-					VUHDO_fixFrameLevels(true, tChild, tOurLevel, tChild:GetChildren());
+			if not tChild["vfl"] then
+				if not VUHDO_isConfigPanelShowing() then
+					VUHDO_PixelUtil.SetFrameStrata(tChild, aFrame:GetFrameStrata());
 				end
+
+				VUHDO_PixelUtil.SetFrameLevel(tChild, tOurLevel);
+
+				tChild["vfl"] = true;
+
+				VUHDO_fixFrameLevels(anIsForceUpdateChildren, tChild, tOurLevel, tChild:GetChildren());
+			elseif(anIsForceUpdateChildren) then
+				VUHDO_fixFrameLevels(true, tChild, tOurLevel, tChild:GetChildren());
 			end
 		end
 

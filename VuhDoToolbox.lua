@@ -309,7 +309,7 @@ function VUHDO_getMouseFocus()
 
 	tMouseFoci = GetMouseFoci();
 
-	if tMouseFoci and tMouseFoci[1] then
+	if tMouseFoci and tMouseFoci[1] and tMouseFoci[1]:CanBeAccessedInContext() and not tMouseFoci[1]:IsForbidden() then
 		return tMouseFoci[1];
 	end
 
