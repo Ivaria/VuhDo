@@ -1,5 +1,6 @@
 local _;
 
+local UnitInRange = UnitInRange;
 local issecretvalue = issecretvalue;
 
 local VUHDO_IMMEDIATE = Enum.StatusBarInterpolation.Immediate;
@@ -9,6 +10,7 @@ local VUHDO_applyAllLayersToBar;
 local VUHDO_applyAllLayersToTexture;
 local VUHDO_getIsDirectionArrow;
 local VUHDO_syncAuraContainersForUnit;
+local VUHDO_isUnitRangeCheckable;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sThreatInterpolation = { };
@@ -23,6 +25,7 @@ function VUHDO_barCustomizerThreatInitLocalOverrides()
 	VUHDO_applyAllLayersToTexture = _G["VUHDO_applyAllLayersToTexture"];
 	VUHDO_getIsDirectionArrow = _G["VUHDO_getIsDirectionArrow"];
 	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
+	VUHDO_isUnitRangeCheckable = _G["VUHDO_isUnitRangeCheckable"];
 
 	for tCnt = 1, 10 do -- VUHDO_MAX_PANELS
 		sThreatInterpolation[tCnt] = VUHDO_INDICATOR_CONFIG[tCnt]["CUSTOM"]["THREAT_BAR"]["smooth"]
@@ -242,6 +245,14 @@ function VUHDO_onUnitInRangeUpdate(aUnit, anIsInRange)
 		return;
 	end
 
+	if not VUHDO_isUnitRangeCheckable(aUnit) then
+		tUnitInfo["isEventRange"] = false;
+
+		VUHDO_updateUnitRange(aUnit);
+
+		return;
+	end
+
 	tUnitInfo["baseRange"] = anIsInRange;
 	tUnitInfo["isEventRange"] = true;
 
@@ -317,7 +328,11 @@ function VUHDO_updateUnitVisibilityCharmRange(aUnit)
 	end
 
 	if not tUnitInfo["isEventRange"] then
-		tUnitInfo["baseRange"] = "player" == aUnit or "pet" == aUnit or UnitInRange(aUnit);
+		if "player" == aUnit or "pet" == aUnit or not VUHDO_isUnitRangeCheckable(aUnit) then
+			tUnitInfo["baseRange"] = true;
+		else
+			tUnitInfo["baseRange"] = UnitInRange(aUnit);
+		end
 
 		VUHDO_updateUnitRange(aUnit);
 	end

@@ -92,6 +92,7 @@ local VUHDO_OWNER_2_PET;
 local VUHDO_getUnitIds;
 local VUHDO_getUnitNo;
 local VUHDO_isInRange;
+local VUHDO_isUnitRangeCheckable;
 local VUHDO_determineAura;
 local VUHDO_getUnitGroup;
 local VUHDO_tableUniqueAdd;
@@ -135,6 +136,7 @@ local UnitInRaid = UnitInRaid;
 local UnitHasVehicleUI = UnitHasVehicleUI;
 local UnitTargetsVehicleInRaidUI = UnitTargetsVehicleInRaidUI;
 local UnitCanAttack = UnitCanAttack;
+local UnitInRange = UnitInRange;
 local GetNumGroupMembers = GetNumGroupMembers;
 local UnitName = UnitName;
 local UnitPower = UnitPower;
@@ -174,6 +176,7 @@ function VUHDO_vuhdoInitLocalOverrides()
 	VUHDO_getUnitIds = _G["VUHDO_getUnitIds"];
 	VUHDO_getUnitNo = _G["VUHDO_getUnitNo"];
 	VUHDO_isInRange = _G["VUHDO_isInRange"];
+	VUHDO_isUnitRangeCheckable = _G["VUHDO_isUnitRangeCheckable"];
 	VUHDO_determineAura = _G["VUHDO_determineAura"];
 	VUHDO_getUnitGroup = _G["VUHDO_getUnitGroup"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
@@ -532,7 +535,7 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["visible"] = UnitIsVisible(aUnit); -- Reihenfolge beachten
 			tInfo["zone"], tInfo["map"] = VUHDO_getUnitZoneName(aUnit); -- ^^
 
-			if VUHDO_RAID["player"] then
+			if "player" == aUnit or "pet" == aUnit or not VUHDO_isUnitRangeCheckable(aUnit) then
 				tInfo["baseRange"] = true;
 			else
 				tInfo["baseRange"] = UnitInRange(aUnit);
