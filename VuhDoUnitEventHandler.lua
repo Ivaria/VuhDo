@@ -38,6 +38,7 @@ local VUHDO_CONFIG;
 local VUHDO_PANEL_SETUP;
 local VUHDO_INTERNAL_TOGGLES;
 local VUHDO_VARIABLES_LOADED;
+local VUHDO_TIMERS;
 
 local sUnitEventFrames = { };
 
@@ -54,6 +55,7 @@ local sAllUnitEventNames = {
 	"UNIT_PHASE",
 	"PLAYER_FLAGS_CHANGED",
 	"UNIT_PET",
+	"UNIT_ENTERING_VEHICLE",
 	"UNIT_ENTERED_VEHICLE",
 	"UNIT_EXITED_VEHICLE",
 	"UNIT_EXITING_VEHICLE",
@@ -91,6 +93,7 @@ function VUHDO_unitEventHandlerInitLocalOverrides()
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_INTERNAL_TOGGLES = _G["VUHDO_INTERNAL_TOGGLES"];
 	VUHDO_VARIABLES_LOADED = _G["VUHDO_VARIABLES_LOADED"];
+	VUHDO_TIMERS = _G["VUHDO_TIMERS"];
 
 	VUHDO_isBossUnit = _G["VUHDO_isBossUnit"];
 	VUHDO_isAltPowerActive = _G["VUHDO_isAltPowerActive"];
@@ -286,14 +289,17 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 			end
 		end
 
-	elseif "UNIT_ENTERED_VEHICLE" == anEvent or "UNIT_EXITED_VEHICLE" == anEvent or "UNIT_EXITING_VEHICLE" == anEvent then
+	elseif "UNIT_ENTERING_VEHICLE" == anEvent or "UNIT_ENTERED_VEHICLE" == anEvent
+		or "UNIT_EXITING_VEHICLE" == anEvent or "UNIT_EXITED_VEHICLE" == anEvent then
 		VUHDO_REMOVE_HOTS = false;
 
 		VUHDO_normalRaidReload();
 
 		if VUHDO_RAID and VUHDO_RAID[anArg1] ~= nil then
-			VUHDO_syncAuraContainersForUnit(anArg1);
+			VUHDO_syncAuraContainersForUnit(anArg1, VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL);
 		end
+
+		VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = 0.5;
 
 	elseif "PLAYER_FLAGS_CHANGED" == anEvent then
 		if not VUHDO_RAID then
@@ -519,6 +525,7 @@ local function VUHDO_applyCoreUnitRegistrations(aFrame, aUnit)
 	aFrame:RegisterUnitEvent("UNIT_PHASE", aUnit);
 	aFrame:RegisterUnitEvent("PLAYER_FLAGS_CHANGED", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_PET", aUnit);
+	aFrame:RegisterUnitEvent("UNIT_ENTERING_VEHICLE", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", aUnit);
 	aFrame:RegisterUnitEvent("UNIT_EXITING_VEHICLE", aUnit);

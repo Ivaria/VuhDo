@@ -14,6 +14,7 @@ local InCombatLockdown = InCombatLockdown;
 local UnitExists = UnitExists;
 local UnitCanAttack = UnitCanAttack;
 local UnitCanAssist = UnitCanAssist;
+local UnitUsingVehicle = UnitUsingVehicle;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local issecretvalue = issecretvalue;
 local CreateNumericRuleFormatter = C_StringUtil and C_StringUtil.CreateNumericRuleFormatter;
@@ -3280,9 +3281,16 @@ end
 do
 	--
 	local tCanAssist;
+	local tIsUsingVehicle;
 	function VUHDO_isUnitAssistRestricted(aUnit)
 
 		if not aUnit then
+			return true;
+		end
+
+		tIsUsingVehicle = UnitUsingVehicle(aUnit);
+
+		if not issecretvalue(tIsUsingVehicle) and tIsUsingVehicle then
 			return true;
 		end
 
