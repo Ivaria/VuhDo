@@ -99,6 +99,7 @@ local sPlayerArray = { };
 local sBouquetLayerTemplates = { };
 local sBouquetCurves = { };
 local sBouquetColors = { };
+local sBouquetTextColors = { };
 local sCurveCache = { };
 local sBrightnessCurveCache = { };
 local sTextBrightnessCurveCache = { };
@@ -542,6 +543,22 @@ end
 
 
 --
+local tBouquetTextColors;
+function VUHDO_getBouquetBoolTextColor(aBouquetName, aValidatorName)
+
+	tBouquetTextColors = sBouquetTextColors[aBouquetName];
+
+	if tBouquetTextColors then
+		return tBouquetTextColors[aValidatorName];
+	end
+
+	return nil;
+
+end
+
+
+
+--
 local tCacheKey;
 function VUHDO_getHealthCurve(aBouquetName, aClassId)
 
@@ -705,6 +722,7 @@ function VUHDO_clearCurveCache()
 	twipe(sCurveCache);
 	twipe(sBouquetCurves);
 	twipe(sBouquetColors);
+	twipe(sBouquetTextColors);
 	twipe(sTextBrightnessCurveCache);
 
 	return;
@@ -796,11 +814,9 @@ do
 
 		if tBaseColor then
 			if 2 == tRadio then
-				tBaseColorMixin = CreateColor(
-					tBaseColor["R"] * tHealthBright, tBaseColor["G"] * tHealthBright, tBaseColor["B"] * tHealthBright, tBaseColor["O"] or 1);
+				tBaseColorMixin = CreateColor(tBaseColor["R"] * tHealthBright, tBaseColor["G"] * tHealthBright, tBaseColor["B"] * tHealthBright, tBaseColor["O"] or 1);
 			else
-				tBaseColorMixin = CreateColor(
-					tBaseColor["R"], tBaseColor["G"], tBaseColor["B"], tBaseColor["O"] or 1);
+				tBaseColorMixin = CreateColor(tBaseColor["R"], tBaseColor["G"], tBaseColor["B"], tBaseColor["O"] or 1);
 			end
 		end
 
@@ -1003,16 +1019,14 @@ do
 			if tItem["name"] == "MANA_BELOW" then
 				tThreshold = tItem["custom"][1];
 
-				tWarningColor = CreateColor(
-					tItem["color"]["R"], tItem["color"]["G"], tItem["color"]["B"], 1);
+				tWarningColor = CreateColor(tItem["color"]["R"], tItem["color"]["G"], tItem["color"]["B"], 1);
 
 				tPowerCurve:AddPoint(0.00, tWarningColor);
 				tPowerCurve:AddPoint(tThreshold / 100 - 0.005, tWarningColor);
 			end
 		end
 
-		tPowerBaseColorMixin = CreateColor(
-			tPowerBaseColor["R"], tPowerBaseColor["G"], tPowerBaseColor["B"], 1);
+		tPowerBaseColorMixin = CreateColor(tPowerBaseColor["R"], tPowerBaseColor["G"], tPowerBaseColor["B"], 1);
 
 		if tThreshold then
 			tPowerCurve:AddPoint(tThreshold / 100, tPowerBaseColorMixin);
@@ -1334,6 +1348,7 @@ do
 
 		sBouquetCurves[aBouquetName] = { };
 		sBouquetColors[aBouquetName] = { };
+		sBouquetTextColors[aBouquetName] = { };
 
 		tHasHealthValidator = false;
 		tHasPowerValidator = false;
@@ -1345,9 +1360,11 @@ do
 
 			if tSpecial then
 				if tSpecial["secretType"] == VUHDO_SECRET_TYPE_BOOLEAN then
-					sBouquetColors[aBouquetName][tName] = CreateColor(
-						tItem["color"]["R"], tItem["color"]["G"],
-						tItem["color"]["B"], tItem["color"]["O"] or 1);
+					sBouquetColors[aBouquetName][tName] = CreateColor(tItem["color"]["R"], tItem["color"]["G"], tItem["color"]["B"], 1);
+
+					if tItem["color"]["useText"] then
+						sBouquetTextColors[aBouquetName][tName] = CreateColor(tItem["color"]["TR"], tItem["color"]["TG"], tItem["color"]["TB"], 1);
+					end
 				elseif tSpecial["secretType"] == VUHDO_SECRET_TYPE_HEALTH_PERCENT then
 					tHasHealthValidator = true;
 				elseif tSpecial["secretType"] == VUHDO_SECRET_TYPE_POWER_PERCENT then
@@ -1418,6 +1435,7 @@ do
 	local tBuildGradMax;
 	local tBuildGradMin;
 	local tBuildGradFactor;
+	local tTrueTextColor;
 	function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 
 		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
@@ -1474,7 +1492,7 @@ do
 			tItem = tBouquet[tCnt];
 			tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
 
-			if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] and not tItem["color"]["useBackground"] then
+			if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] then
 				if not tTemplate["globalOpacityNames"] then
 					tTemplate["globalOpacityNames"] = { };
 				end
@@ -1670,6 +1688,7 @@ do
 					};
 
 					tTrueColor = VUHDO_getBouquetBoolColor(aBouquetName, tItem["name"]);
+					tTrueTextColor = VUHDO_getBouquetBoolTextColor(aBouquetName, tItem["name"]);
 
 					if tSpecial and tSpecial["isInverted"] then
 						tTemplate["booleanResults"][tBoolIdx] = {
@@ -1678,9 +1697,8 @@ do
 							["falseColorMixin"] = tTrueColor,
 							["color"] = tItem["color"],
 							["trueAlpha"] = 0,
-							["falseAlpha"] = tItem["color"]["useOpacity"] and (tItem["color"]["O"] or 1) or 1,
-							["trueTextAlpha"] = 0,
-							["falseTextAlpha"] = tItem["color"]["TO"] or 1,
+							["falseAlpha"] = tItem["color"]["useOpacity"] and 1 or (tItem["color"]["O"] or 1),
+							["activeTextColorMixin"] = tTrueTextColor,
 						};
 					else
 						tTemplate["booleanResults"][tBoolIdx] = {
@@ -1688,10 +1706,9 @@ do
 							["trueColorMixin"] = tTrueColor,
 							["falseColorMixin"] = sTransparentColor,
 							["color"] = tItem["color"],
-							["trueAlpha"] = tItem["color"]["useOpacity"] and (tItem["color"]["O"] or 1) or 1,
+							["trueAlpha"] = tItem["color"]["useOpacity"] and 1 or (tItem["color"]["O"] or 1),
 							["falseAlpha"] = 0,
-							["trueTextAlpha"] = tItem["color"]["TO"] or 1,
-							["falseTextAlpha"] = 0,
+							["activeTextColorMixin"] = tTrueTextColor,
 						};
 					end
 

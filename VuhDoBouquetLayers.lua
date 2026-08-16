@@ -47,6 +47,7 @@ local VUHDO_getHealthBar;
 local VUHDO_getBarText;
 local VUHDO_getBarTextSolo;
 local VUHDO_getLifeText;
+local VUHDO_restoreLifeTextAlpha;
 local VUHDO_decompressIfCompressed;
 local VUHDO_getBouquetGlobalOpacityNames;
 local VUHDO_isAuraDataRestricted;
@@ -64,6 +65,8 @@ local sGlobalAlphaChains = { };
 setmetatable(sGlobalAlphaChains, VUHDO_META_NEW_ARRAY);
 
 local sAlphaChainPool;
+local sIdentityTextColor = CreateColor(1, 1, 1, 1);
+
 local sAlphaChainStepEntryPool;
 
 local sAlphaChainConfigVersion = 0;
@@ -149,6 +152,7 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
 	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
 	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
+	VUHDO_restoreLifeTextAlpha = _G["VUHDO_restoreLifeTextAlpha"];
 	VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
 	VUHDO_getBouquetGlobalOpacityNames = _G["VUHDO_getBouquetGlobalOpacityNames"];
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
@@ -166,8 +170,6 @@ end
 
 --
 local tOverlay;
-local tOverlayText;
-local tBarText;
 local tTargetOverlays;
 local tAnchorRegion;
 local tTexture;
@@ -219,28 +221,29 @@ local function VUHDO_createBooleanOverlay(aButton, aTarget, aValidatorName, aTar
 
 	VUHDO_applyBooleanOverlayFillTexture(tOverlay, aTarget, aTargetType);
 
-	if aTargetType == VUHDO_TARGET_TYPE_BAR then
-		tBarText = VUHDO_getBarText(aTarget);
-	else
-		tBarText = nil;
-	end
-
-	if tBarText then
-		tOverlayText = aTarget:CreateFontString(nil, "OVERLAY");
-
-		tOverlayText:SetAllPoints(tBarText);
-		tOverlayText:SetFontObject(tBarText:GetFontObject());
-		tOverlayText:SetAlpha(0);
-	else
-		tOverlayText = nil;
-	end
-
 	tTargetOverlays[aValidatorName] = {
 		["texture"] = tOverlay,
-		["fontString"] = tOverlayText,
+		["isCleared"] = true,
 	};
 
 	return tTargetOverlays[aValidatorName];
+
+end
+
+
+
+--
+local function VUHDO_clearBooleanOverlay(aOverlay)
+
+	if aOverlay["isCleared"] then
+		return;
+	end
+
+	aOverlay["texture"]:SetAlpha(0);
+
+	aOverlay["isCleared"] = true;
+
+	return;
 
 end
 
@@ -263,22 +266,18 @@ end
 
 --
 local tConfig;
-local tFontString;
 function VUHDO_applyBooleanOverlay(aOverlay, aResultSlot)
 
 	tTexture = aOverlay["texture"];
-	tFontString = aOverlay["fontString"];
 	tConfig = aResultSlot["color"];
 
 	if tConfig["useBackground"] then
 		tTexture:SetVertexColorFromBoolean(aResultSlot["secretBool"], aResultSlot["trueColorMixin"], aResultSlot["falseColorMixin"]);
-	end
+		tTexture:SetAlphaFromBoolean(aResultSlot["secretBool"], aResultSlot["trueAlpha"], aResultSlot["falseAlpha"]);
 
-	tTexture:SetAlphaFromBoolean(aResultSlot["secretBool"], aResultSlot["trueAlpha"], aResultSlot["falseAlpha"]);
-
-	if tConfig["useText"] and tFontString then
-		tFontString:SetVertexColorFromBoolean(aResultSlot["secretBool"], aResultSlot["trueColorMixin"], aResultSlot["falseColorMixin"]);
-		tFontString:SetAlphaFromBoolean(aResultSlot["secretBool"], aResultSlot["trueTextAlpha"], aResultSlot["falseTextAlpha"]);
+		aOverlay["isCleared"] = nil;
+	else
+		VUHDO_clearBooleanOverlay(aOverlay);
 	end
 
 	return;
@@ -292,11 +291,7 @@ function VUHDO_clearBooleanOverlays(aButton)
 
 	for _, tTargetOverlaysClear in pairs(sBooleanOverlayLayers[aButton]) do
 		for _, tOverlay in pairs(tTargetOverlaysClear) do
-			tOverlay["texture"]:SetAlpha(0);
-
-			if tOverlay["fontString"] then
-				tOverlay["fontString"]:SetAlpha(0);
-			end
+			VUHDO_clearBooleanOverlay(tOverlay);
 		end
 	end
 
@@ -450,7 +445,7 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 		tItem = aBouquet[tCnt];
 		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
 
-		if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] and not tItem["color"]["useBackground"] then
+		if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] then
 			if not tHealthGlobalOpacityNames or not tHealthGlobalOpacityNames[tItem["name"]] then
 				tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
@@ -501,13 +496,17 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
 
 		if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useBackground"] then
-			tEntry = sAlphaChainStepEntryPool:get();
+			tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
-			tEntry["item"] = tItem;
-			tEntry["special"] = tSpecial;
-			tEntry["index"] = tCnt;
+			if tSecretType == VUHDO_SECRET_TYPE_NONE then
+				tEntry = sAlphaChainStepEntryPool:get();
 
-			tinsert(tChain["overrideValidators"], tEntry);
+				tEntry["item"] = tItem;
+				tEntry["special"] = tSpecial;
+				tEntry["index"] = tCnt;
+
+				tinsert(tChain["overrideValidators"], tEntry);
+			end
 		end
 	end
 
@@ -892,23 +891,13 @@ local function VUHDO_applyBooleanLayers(aButton, aTarget, aTargetType, aLayerTem
 
 	for tIdx = 1, #aLayerTemplate["booleanResults"] do
 		tResultSlot = aLayerTemplate["booleanResults"][tIdx];
+		tOverlay = VUHDO_getBooleanOverlay(aButton, aTarget, aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTargetType);
 
-		if tResultSlot["color"] and
-		   (tResultSlot["color"]["useBackground"] or tResultSlot["color"]["useText"]) then
-			tOverlay = VUHDO_getBooleanOverlay(aButton, aTarget, aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTargetType);
-
-			if tOverlay and tResultSlot["trueColorMixin"] and tResultSlot["falseColorMixin"] and tResultSlot["secretBool"] ~= nil then
+		if tOverlay then
+			if tResultSlot["color"] and tResultSlot["color"]["useBackground"] and tResultSlot["trueColorMixin"] and tResultSlot["falseColorMixin"] and tResultSlot["secretBool"] ~= nil then
 				VUHDO_applyBooleanOverlay(tOverlay, tResultSlot);
-			end
-		else
-			tOverlay = VUHDO_getBooleanOverlay(aButton, aTarget, aLayerTemplate["booleanValidators"][tIdx]["item"]["name"], aTargetType);
-
-			if tOverlay then
-				tOverlay["texture"]:SetAlpha(0);
-
-				if tOverlay["fontString"] then
-					tOverlay["fontString"]:SetAlpha(0);
-				end
+			else
+				VUHDO_clearBooleanOverlay(tOverlay);
 			end
 		end
 	end
@@ -991,7 +980,14 @@ end
 local tBarText;
 local tBarTextSolo;
 local tLifeText;
+local tInactiveMixin;
 local function VUHDO_applyTextColorToBar(aBar, aR, aG, aB)
+
+	if not aBar["booleanTextInactiveMixin"] then
+		aBar["booleanTextInactiveMixin"] = CreateColor(1, 1, 1, 1);
+	end
+
+	aBar["booleanTextInactiveMixin"]:SetRGBA(aR or 1, aG or 1, aB or 1, 1);
 
 	tBarText = VUHDO_getBarText(aBar);
 
@@ -1010,6 +1006,91 @@ local function VUHDO_applyTextColorToBar(aBar, aR, aG, aB)
 	if tLifeText then
 		tLifeText:SetTextColor(aR or 1, aG or 1, aB or 1);
 	end
+
+	return;
+
+end
+
+
+
+--
+local tValidatorEntry;
+local tWinningTextIdx;
+local tWinningTextIndex;
+local tSpecial;
+local tTrueTextMixin;
+local tFalseTextMixin;
+local function VUHDO_applyBooleanTextToBar(aBar, aSecretBool, aTrueTextMixin, aFalseTextMixin)
+
+	tBarText = VUHDO_getBarText(aBar);
+
+	if tBarText then
+		tBarText:SetTextColor(1, 1, 1);
+		tBarText:SetVertexColorFromBoolean(aSecretBool, aTrueTextMixin, aFalseTextMixin);
+	end
+
+	tBarTextSolo = VUHDO_getBarTextSolo(aBar);
+
+	if tBarTextSolo then
+		tBarTextSolo:SetTextColor(1, 1, 1);
+		tBarTextSolo:SetVertexColorFromBoolean(aSecretBool, aTrueTextMixin, aFalseTextMixin);
+	end
+
+	tLifeText = VUHDO_getLifeText(aBar);
+
+	if tLifeText then
+		tLifeText:SetTextColor(1, 1, 1);
+		tLifeText:SetVertexColorFromBoolean(aSecretBool, aTrueTextMixin, aFalseTextMixin);
+	end
+
+	VUHDO_restoreLifeTextAlpha(aBar);
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_applyBooleanTextLayers(aBar, aLayerTemplate)
+
+	if not aLayerTemplate["hasBools"] then
+		return;
+	end
+
+	tWinningTextIdx = nil;
+	tWinningTextIndex = nil;
+
+	for tIdx = 1, #aLayerTemplate["booleanResults"] do
+		tResultSlot = aLayerTemplate["booleanResults"][tIdx];
+		tValidatorEntry = aLayerTemplate["booleanValidators"][tIdx];
+
+		if tResultSlot["color"] and tResultSlot["color"]["useText"] and tResultSlot["activeTextColorMixin"] and tResultSlot["secretBool"] ~= nil then
+			if not tWinningTextIndex or tValidatorEntry["index"] < tWinningTextIndex then
+				tWinningTextIdx = tIdx;
+				tWinningTextIndex = tValidatorEntry["index"];
+			end
+		end
+	end
+
+	if not tWinningTextIdx then
+		return;
+	end
+
+	tResultSlot = aLayerTemplate["booleanResults"][tWinningTextIdx];
+	tValidatorEntry = aLayerTemplate["booleanValidators"][tWinningTextIdx];
+	tSpecial = tValidatorEntry["special"];
+	tInactiveMixin = aBar["booleanTextInactiveMixin"] or sIdentityTextColor;
+
+	if tSpecial and tSpecial["isInverted"] then
+		tTrueTextMixin = tInactiveMixin;
+		tFalseTextMixin = tResultSlot["activeTextColorMixin"];
+	else
+		tTrueTextMixin = tResultSlot["activeTextColorMixin"];
+		tFalseTextMixin = tInactiveMixin;
+	end
+
+	VUHDO_applyBooleanTextToBar(aBar, tResultSlot["secretBool"], tTrueTextMixin, tFalseTextMixin);
 
 	return;
 
@@ -1342,11 +1423,7 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 			tOverlay = VUHDO_getBooleanOverlay(aButton, aTargetBar, tValidatorEntry["item"]["name"], VUHDO_TARGET_TYPE_BAR);
 
 			if tOverlay then
-				tOverlay["texture"]:SetAlpha(0);
-
-				if tOverlay["fontString"] then
-					tOverlay["fontString"]:SetAlpha(0);
-				end
+				VUHDO_clearBooleanOverlay(tOverlay);
 			end
 		end
 	end
@@ -1373,6 +1450,7 @@ function VUHDO_applyAllLayersToBar(aButton, aBar, aLayerTemplate, anIndicatorKey
 
 	VUHDO_applySortedValidatorsToTarget(aButton, aBar, VUHDO_TARGET_TYPE_BAR, aLayerTemplate);
 	VUHDO_applyBooleanLayers(aButton, aBar, VUHDO_TARGET_TYPE_BAR, aLayerTemplate);
+	VUHDO_applyBooleanTextLayers(aBar, aLayerTemplate);
 
 	if anIndicatorKey then
 		VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, aLayerTemplate, aBar);
