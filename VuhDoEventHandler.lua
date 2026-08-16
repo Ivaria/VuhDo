@@ -91,6 +91,7 @@ local VUHDO_unregisterUnitForEvents;
 local VUHDO_isDeferredRefreshActive;
 local VUHDO_isDeferredRedrawActive;
 local VUHDO_processPendingAuraContainerBuilds;
+local VUHDO_processPendingNativeAuraSounds;
 local VUHDO_flushPendingOverlayRebuild;
 local VUHDO_flushPendingOverlayAcquires;
 local VUHDO_checkAuraDataRestrictedState;
@@ -594,6 +595,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_isDeferredRefreshActive = _G["VUHDO_isDeferredRefreshActive"];
 	VUHDO_isDeferredRedrawActive = _G["VUHDO_isDeferredRedrawActive"];
 	VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
+	VUHDO_processPendingNativeAuraSounds = _G["VUHDO_processPendingNativeAuraSounds"];
 	VUHDO_flushPendingOverlayRebuild = _G["VUHDO_flushPendingOverlayRebuild"];
 	VUHDO_flushPendingOverlayAcquires = _G["VUHDO_flushPendingOverlayAcquires"];
 	VUHDO_checkAuraDataRestrictedState = _G["VUHDO_checkAuraDataRestrictedState"];
@@ -1146,6 +1148,8 @@ do
 				VUHDO_updateAuraDataRestrictedState(false);
 
 				VUHDO_processPendingAuraContainerBuilds();
+
+				VUHDO_processPendingNativeAuraSounds();
 
 				VUHDO_flushPendingOverlayRebuild();
 

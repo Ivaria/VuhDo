@@ -263,6 +263,7 @@ local VUHDO_TASK_PRIORITY_QUEUE = { };
 local VUHDO_TASK_QUEUE_MAP = { };
 
 local VUHDO_processPendingAuraContainerBuilds;
+local VUHDO_processPendingNativeAuraSounds;
 
 
 
@@ -1833,6 +1834,8 @@ do
 
 		VUHDO_processPendingAuraContainerBuilds();
 
+		VUHDO_processPendingNativeAuraSounds();
+
 		return;
 
 	end
@@ -2433,6 +2436,7 @@ function VUHDO_initTaskSystem()
 		VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] = VUHDO_DEFERRED_TASK_CONFIG["INITIAL_TASKS_PER_FRAME"];
 
 		VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
+		VUHDO_processPendingNativeAuraSounds = _G["VUHDO_processPendingNativeAuraSounds"];
 
 		VUHDO_DEFERRED_TASK_STATE["isInit"] = true;
 	end
