@@ -77,7 +77,12 @@ end
 --
 local tBar;
 local tPanelNum;
-function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
+local tInterpolation;
+function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate, anIsAliveTime, anEventType)
+
+	if -1 == anEventType then -- VUHDO_UPDATE_BOUQUET_RESET
+		return;
+	end
 
 	aMaxValue = aMaxValue or 1;
 	aCurrValue = aCurrValue or 0;
@@ -88,12 +93,15 @@ function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 		if VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["THREAT_BAR"] == aBouquetName then
 			tBar = VUHDO_getHealthBar(tButton, 7);
 
+			tInterpolation = (tBar["forceImmediate"] or 1 == anEventType) and VUHDO_IMMEDIATE or sThreatInterpolation[tPanelNum];
+			tBar["forceImmediate"] = nil;
+
 			tBar:SetMinMaxValues(0, aMaxValue);
 
 			if tBar["isInverted"] then
-				tBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue), VUHDO_FORCE_IMMEDIATE_INTERPOLATION and VUHDO_IMMEDIATE or sThreatInterpolation[tPanelNum]);
+				tBar:SetValue(sSecretsEnabled and aCurrValue2 or (aMaxValue - aCurrValue), tInterpolation);
 			else
-				tBar:SetValue(aCurrValue, VUHDO_FORCE_IMMEDIATE_INTERPOLATION and VUHDO_IMMEDIATE or sThreatInterpolation[tPanelNum]);
+				tBar:SetValue(aCurrValue, tInterpolation);
 			end
 
 			if anIsActive then
@@ -109,6 +117,8 @@ function VUHDO_threatBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, a
 			end
 		end
 	end
+
+	return;
 
 end
 

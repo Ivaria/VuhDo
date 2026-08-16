@@ -1158,15 +1158,15 @@ do
 	function VUHDO_enqueueDeferredTask(aType, aPriority, ...)
 
 		if not aType then
-			return;
+			return false;
 		end
 
 		if not sDeferredTaskDelegates then
-			return;
+			return false;
 		end
 
 		if not VUHDO_DEFERRED_TASK_POOL then
-			return;
+			return false;
 		end
 
 		tCurrentPriority = aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL;
@@ -1226,12 +1226,16 @@ do
 				if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
 					tMetrics["totalTasksDeduped"] = tMetrics["totalTasksDeduped"] + 1;
 				end
+
+				return false;
 			else
 				VUHDO_heapInsert(VUHDO_TASK_PRIORITY_QUEUE, tNewTask, VUHDO_TASK_QUEUE_MAP);
+
+				return true;
 			end
 		end
 
-		return;
+		return false;
 
 	end
 
@@ -1838,9 +1842,7 @@ do
 	--
 	function VUHDO_deferTask(aType, aPriority, ...)
 
-		VUHDO_enqueueDeferredTask(aType, aPriority, ...);
-
-		return;
+		return VUHDO_enqueueDeferredTask(aType, aPriority, ...);
 
 	end
 

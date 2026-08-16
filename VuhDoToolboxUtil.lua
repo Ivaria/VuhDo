@@ -818,11 +818,13 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 	local tMetrics;
 	local tTask;
 	local tTimedOutCount;
+	local tTimedOutTasks;
 	function tSemaphore:checkTimeouts()
 
 		tCurrentTime = GetTime() * 1000;
 		tIsProfile = VUHDO_SEMAPHORE_PROFILING_ENABLED;
 		tTimedOutCount = 0;
+		tTimedOutTasks = { };
 
 		if tIsProfile then
 			tMetrics = self["metrics"];
@@ -839,12 +841,20 @@ function VUHDO_createSemaphore(aSemaphoreName, aInitialCount, aMaxCount, aTimeou
 					tMetrics["timeouts"] = tMetrics["timeouts"] + 1;
 				end
 
+				tinsert(tTimedOutTasks, tTask);
+
 				table.remove(self["waitingTasks"], tIndex);
 			end
 		end
 
 		if tTimedOutCount > 0 then
 			self:validateAndRecoverState(tTimedOutCount);
+
+			for tTimedOutCnt = 1, #tTimedOutTasks do
+				tTask = tTimedOutTasks[tTimedOutCnt];
+
+				VUHDO_deferTask(tTask["type"], tTask["priority"], unpack(tTask["args"]));
+			end
 		end
 
 		return;

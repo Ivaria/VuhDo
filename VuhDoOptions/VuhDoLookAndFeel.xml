@@ -3095,7 +3095,6 @@
 	</Layers>
 	<Scripts>
 		<OnLoad>
-			self.statusTexture = self:GetStatusBarTexture();
 			self:SetStatusBarTexture("Interface\\AddOns\\VuhDoOptions\\Images\\blue_lt_square_16_16");
 			self:SetStatusBarColor(1, 1, 1, 1);
 			self["SetProgress"] = function(self, aValue, aMaxValue)

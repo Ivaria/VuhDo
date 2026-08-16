@@ -1417,6 +1417,8 @@ end
 local tTargetButton;
 local tFocusButton;
 local tUnit;
+local tUnitWatchType;
+local tIsWatched;
 function VUHDO_setupAllButtonsUnitWatch(anIsEnabled)
 
 	if InCombatLockdown() then
@@ -1440,11 +1442,21 @@ function VUHDO_setupAllButtonsUnitWatch(anIsEnabled)
 			end
 		end
 
-		for tButton, _ in pairs(VUHDO_BUTTON_CACHE) do
-			if tButton:IsShown() then
-				-- FIXME: tUnit serves no purpose here?
-				tUnit = tButton:GetAttribute("unit");
+		for tButton, tPanelNum in pairs(VUHDO_BUTTON_CACHE) do
+			tUnit = tButton:GetAttribute("unit");
+			tUnitWatchType = tButton["unitWatchType"];
 
+			if not tUnit then
+				tIsWatched = false;
+			elseif VUHDO_UNIT_WATCH_TYPE_TARGET == tUnitWatchType then
+				tIsWatched = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["showTarget"] and true or false;
+			elseif VUHDO_UNIT_WATCH_TYPE_TOT == tUnitWatchType then
+				tIsWatched = VUHDO_PANEL_SETUP[tPanelNum]["SCALING"]["showTot"] and true or false;
+			else
+				tIsWatched = true;
+			end
+
+			if tIsWatched then
 				RegisterUnitWatch(tButton);
 			else
 				UnregisterUnitWatch(tButton);
@@ -1452,9 +1464,6 @@ function VUHDO_setupAllButtonsUnitWatch(anIsEnabled)
 		end
 	else
 		for tButton, _ in pairs(VUHDO_BUTTON_CACHE) do
-			-- FIXME: tUnit serves no purpose here?
-			tUnit = tButton:GetAttribute("unit");
-
 			UnregisterUnitWatch(tButton);
 		end
 	end

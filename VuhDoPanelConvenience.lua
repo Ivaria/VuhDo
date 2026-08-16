@@ -917,6 +917,10 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	VUHDO_BUTTON_CACHE[tTargetButton] = aPanelNum;
 	VUHDO_BUTTON_CACHE[tTotButton] = aPanelNum;
 
+	tButton["unitWatchType"] = VUHDO_UNIT_WATCH_TYPE_HEAL;
+	tTargetButton["unitWatchType"] = VUHDO_UNIT_WATCH_TYPE_TARGET;
+	tTotButton["unitWatchType"] = VUHDO_UNIT_WATCH_TYPE_TOT;
+
 	tButton:SetAttribute("vuhdo_button_marker", true);
 	tTargetButton:SetAttribute("vuhdo_button_marker", true);
 	tTotButton:SetAttribute("vuhdo_button_marker", true);

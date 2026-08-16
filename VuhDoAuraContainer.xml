@@ -35,6 +35,10 @@
 					<Texture parentKey="IconColorOverlay" file="Interface\Buttons\WHITE8X8" setAllPoints="true" alphaMode="MOD" hidden="true" />
 				</Layer>
 				<Layer level="OVERLAY">
+					<Texture parentKey="BorderEdgeTop" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
+					<Texture parentKey="BorderEdgeBottom" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
+					<Texture parentKey="BorderEdgeLeft" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
+					<Texture parentKey="BorderEdgeRight" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
 					<FontString parentKey="SymbolText" inherits="NumberFontNormalSmall">
 						<Anchors>
 							<Anchor point="CENTER" />
@@ -69,6 +73,12 @@
 				</Layer>
 				<Layer level="ARTWORK">
 					<Texture parentKey="IconColorOverlay" file="Interface\Buttons\WHITE8X8" setAllPoints="true" alphaMode="MOD" hidden="true" />
+				</Layer>
+				<Layer level="OVERLAY">
+					<Texture parentKey="BorderEdgeTop" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
+					<Texture parentKey="BorderEdgeBottom" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
+					<Texture parentKey="BorderEdgeLeft" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
+					<Texture parentKey="BorderEdgeRight" file="Interface\AddOns\VuhDo\Images\white_square_16_16" hidden="true" />
 				</Layer>
 			</Layers>
 			<Frames>

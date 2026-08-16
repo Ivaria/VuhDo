@@ -91,14 +91,6 @@ local VUHDO_CUSTOM_BOUQUETS = {
 
 VUHDO_DISPEL_COLOR_GENERATION = 0;
 
-local sAuraIconDispelBorderOptionsBind = {
-	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
-	["showWhenHarmful"] = true,
-	["showWhenHelpful"] = true,
-};
-
-local sAuraIconDispelBorderInset = 2;
-
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sEmpty = { };
 
@@ -571,77 +563,9 @@ end
 
 
 --
-local tBorderTexture;
-local tIconTexture;
-local tInsetParent;
-local tBorderOptions;
-function VUHDO_bindAuraButtonDispelBorder(aAuraButton)
+function VUHDO_getDispelTypeBorderCurve()
 
-	if not aAuraButton or not aAuraButton["BorderTexture"] then
-		return;
-	end
-
-	tBorderOptions = sAuraIconDispelBorderOptionsBind;
-	tBorderOptions["showWhenHarmful"] = true;
-	tBorderOptions["showWhenHelpful"] = true;
-
-	tBorderTexture = aAuraButton["BorderTexture"];
-	tInsetParent = aAuraButton["IconFrame"] or aAuraButton;
-
-	tBorderTexture:ClearAllPoints();
-	tBorderTexture:SetAllPoints(tInsetParent);
-	tBorderTexture:SetColorTexture(1, 1, 1, 1);
-	tBorderTexture:SetVertexColor(1, 1, 1, 1);
-	tBorderTexture:Show();
-
-	tBorderOptions["customDispelColorMap"] = nil;
-	tBorderOptions["customDispelColorCurve"] = sDispelTypeBorderCurve;
-
-	aAuraButton:ClearDispelTypeTextures();
-
-	aAuraButton:AddDispelTypeTexture(tBorderTexture, tBorderOptions);
-
-	tIconTexture = aAuraButton["IconTexture"];
-
-	if tIconTexture then
-		tIconTexture:ClearAllPoints();
-		_G["VUHDO_PixelUtil"].SetPoint(tIconTexture, "TOPLEFT", tInsetParent, "TOPLEFT", sAuraIconDispelBorderInset, -sAuraIconDispelBorderInset);
-		_G["VUHDO_PixelUtil"].SetPoint(tIconTexture, "BOTTOMRIGHT", tInsetParent, "BOTTOMRIGHT", -sAuraIconDispelBorderInset, sAuraIconDispelBorderInset);
-		tIconTexture:SetTexCoord(0.08, 0.92, 0.08, 0.92);
-	end
-
-	return;
-
-end
-
-
-
---
-function VUHDO_unbindAuraButtonDispelBorder(aAuraButton)
-
-	if not aAuraButton then
-		return;
-	end
-
-	aAuraButton:ClearDispelTypeTextures();
-	aAuraButton:ClearDispelTypeText();
-
-	tBorderTexture = aAuraButton["BorderTexture"];
-
-	if tBorderTexture then
-		tBorderTexture:Hide();
-	end
-
-	tIconTexture = aAuraButton["IconTexture"];
-	tInsetParent = aAuraButton["IconFrame"] or aAuraButton;
-
-	if tIconTexture then
-		tIconTexture:ClearAllPoints();
-		tIconTexture:SetAllPoints(tInsetParent);
-		tIconTexture:SetTexCoord(0, 1, 0, 1);
-	end
-
-	return;
+	return sDispelTypeBorderCurve;
 
 end
 
@@ -3597,7 +3521,7 @@ do
 		VUHDO_activateAurasFromBouquet(aBouquetName);
 
 		for tUnit, _ in pairs(VUHDO_RAID) do
-			aFunction(tUnit, false, nil, 0, 0, 0, nil, nil, aBouquetName);
+			aFunction(tUnit, false, nil, 0, 0, 0, nil, nil, aBouquetName, nil, nil, nil, nil, nil, nil, nil, nil, nil, VUHDO_UPDATE_BOUQUET_RESET);
 		end
 
 		if VUHDO_hasCyclic(aBouquetName) then
@@ -4749,7 +4673,7 @@ do
 
 		for _, tDelegate in pairs(VUHDO_REGISTERED_BOUQUETS[aBouquetName]) do
 			tDelegate(aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime);
+				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime, anEventType);
 		end
 
 		VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = tIsActive;
@@ -4771,11 +4695,11 @@ do
 
 		if tIsActive then
 			aDelegate(aButton, aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime);
+				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime, 1);
 			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = true;
 		elseif VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] then
 			aDelegate(aButton, aUnit, tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, aBouquetName,
-				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime);
+				tImpact, tTimer2, tClipL, tClipR, tClipT, tClipB, tMaxColor, tLayerTemplate, tIsAliveTime, 1);
 			VUHDO_ACTIVE_BOUQUETS[aUnit][aBouquetName] = false;
 		end
 

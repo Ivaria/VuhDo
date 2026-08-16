@@ -293,6 +293,8 @@ function VUHDO_refreshUiNoMembers()
 
 	VUHDO_initAllEventBouquets();
 
+	VUHDO_setupAllButtonsUnitWatch(VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers());
+
 	return;
 
 end
@@ -349,7 +351,9 @@ function VUHDO_deferRefreshUiNoMembers()
 
 	VUHDO_setUnitButtonBuildScratch(sScratchUnitButtons, sScratchUnitButtonsPanel);
 
-	sDeferredRefreshCount = sDeferredRefreshCount + 1;
+	if sDeferredRefreshCount <= 0 then
+		sDeferredRefreshCount = 1;
+	end
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 		VUHDO_deferTask(VUHDO_DEFER_REFRESH_PANEL, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tPanelNum);
@@ -457,6 +461,8 @@ function VUHDO_deferRefreshUiCompleteDelegate()
 	end
 
 	VUHDO_initAllEventBouquets();
+
+	VUHDO_setupAllButtonsUnitWatch(VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers());
 
 	return;
 

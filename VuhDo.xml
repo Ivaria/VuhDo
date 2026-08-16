@@ -84,7 +84,6 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self.statusTexture = self:GetStatusBarTexture();
 			</OnLoad>
 		</Scripts>
 	</StatusBar>

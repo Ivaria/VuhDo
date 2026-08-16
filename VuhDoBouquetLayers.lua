@@ -818,6 +818,10 @@ function VUHDO_updateAllIndicatorAlphaChains(aButton, anInfo)
 
 	tIndicatorChains = sGlobalAlphaChains[aButton];
 
+	if not tIndicatorChains then
+		return;
+	end
+
 	for tIndicatorName, _ in pairs(tIndicatorChains) do
 		VUHDO_updateIndicatorAlphaChain(aButton, tIndicatorName, anInfo);
 	end

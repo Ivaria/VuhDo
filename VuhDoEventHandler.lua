@@ -1034,6 +1034,7 @@ end
 
 
 --
+local tSpellbookChanged;
 local function VUHDO_processSpellbookRefresh()
 
 	sSpellbookRefreshScheduled = false;
@@ -1042,12 +1043,16 @@ local function VUHDO_processSpellbookRefresh()
 		return;
 	end
 
-	VUHDO_initFromSpellbook();
-	VUHDO_registerAllBouquets(false);
+	tSpellbookChanged = VUHDO_initFromSpellbook();
+
 	VUHDO_initBuffs();
 	VUHDO_initDebuffs();
 
-	VUHDO_timeReloadUI(1);
+	if tSpellbookChanged then
+		VUHDO_registerAllBouquets(false);
+
+		VUHDO_timeReloadUI(1);
+	end
 
 	VUHDO_rebuildKeyboardMacros();
 
@@ -2780,13 +2785,15 @@ do
 
 		-- Segment 2D: Combat checks
 
+		if not VUHDO_isConfigDemoUsers() then
+			VUHDO_profileSegment("segment2D", tSegmentCallbacks["segment2D"], aTimeDelta);
+		end
+
 		if VUHDO_CONFIG_SHOW_RAID then
 			VUHDO_finalizeOnUpdateMetrics(tStartTimes[1], tStartTimes[2], tSegment1Total);
 
 			return;
 		end
-
-		VUHDO_profileSegment("segment2D", tSegmentCallbacks["segment2D"], aTimeDelta);
 
 		-- Segment 2E: Slow tasks
 

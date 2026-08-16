@@ -155,7 +155,6 @@
 			<StatusBar name="$parentAuBar" inherits="VuhDoStatusBar" enableMouse="false">
 				<Scripts>
 					<OnLoad>
-						self.statusTexture = self:GetStatusBarTexture();
 						self.addLevel = 10;
 					</OnLoad>
 				</Scripts>
@@ -180,7 +179,6 @@
 	<StatusBar name="VuhDoHotBarTemplate" setAllPoints="true" hidden="false" inherits="VuhDoStatusBar" virtual="true">
 		<Scripts>
 			<OnLoad>
-				self.statusTexture = self:GetStatusBarTexture();
 				self.addLevel = 6;
 			</OnLoad>
 		</Scripts>
@@ -237,7 +235,6 @@
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										self.statusTexture = self:GetStatusBarTexture();
 										self.addLevel = 1;
 									</OnLoad>
 								</Scripts>
@@ -417,7 +414,6 @@
 								</Frames>
 								<Scripts>
 									<OnLoad>
-										self.statusTexture = self:GetStatusBarTexture();
 										self.addLevel = 1;
 									</OnLoad>
 								</Scripts>
@@ -449,7 +445,6 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self.addLevel = 2;
 							</OnLoad>
 						</Scripts>
@@ -469,7 +464,6 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self.addLevel = 2;
 							</OnLoad>
 						</Scripts>
@@ -505,7 +499,6 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self.addLevel = 4;
 							</OnLoad>
 						</Scripts>
@@ -525,7 +518,6 @@
 						</Frames>
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self.addLevel = 5;
 							</OnLoad>
 						</Scripts>
@@ -636,7 +628,6 @@
 					<StatusBar name="$parentFlBar" setAllPoints="true" inherits="VuhDoStatusBar">
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self.addLevel = 13;
 							</OnLoad>
 						</Scripts>
@@ -692,7 +683,6 @@
 							<StatusBar name="$parentIcBar" inherits="VuhDoStatusBar">
 								<Scripts>
 									<OnLoad>
-										self.statusTexture = self:GetStatusBarTexture();
 									</OnLoad>
 								</Scripts>
 							</StatusBar>
@@ -700,7 +690,6 @@
 							<StatusBar name="$parentShBar" inherits="VuhDoStatusBar">
 								<Scripts>
 									<OnLoad>
-										self.statusTexture = self:GetStatusBarTexture();
 									</OnLoad>
 								</Scripts>
 							</StatusBar>
@@ -711,7 +700,6 @@
 					<StatusBar name="$parentOvsOffsBar" alpha="0" inherits="VuhDoStatusBar">
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self:SetMinMaxValues(0, 1);
 								self:SetValue(0);
 								self.addLevel = 1;
@@ -729,7 +717,6 @@
 							<StatusBar name="$parentOvsBar" hidden="true" inherits="VuhDoStatusBar">
 								<Scripts>
 									<OnLoad>
-										self.statusTexture = self:GetStatusBarTexture();
 										self:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\overshield_bar");
 										self:GetStatusBarTexture():SetTexCoord(0, 1, 0, 1);
 										self:GetStatusBarTexture():SetTexture("Interface\\AddOns\\VuhDo\\Images\\overshield_bar", "REPEAT", "REPEAT");
@@ -749,7 +736,6 @@
 					<StatusBar name="$parentHeAbBar" hidden="true" inherits="VuhDoStatusBar">
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\healabsorb_bar");
 								self:GetStatusBarTexture():SetTexCoord(0, 1, 0, 1);
 								self:GetStatusBarTexture():SetTexture("Interface\\AddOns\\VuhDo\\Images\\healabsorb_bar", "REPEAT", "REPEAT");
@@ -766,7 +752,6 @@
 					<StatusBar name="$parentHlLossBar" hidden="true" inherits="VuhDoStatusBar">
 						<Scripts>
 							<OnLoad>
-								self.statusTexture = self:GetStatusBarTexture();
 								self:SetStatusBarTexture("Interface\\AddOns\\VuhDo\\Images\\healthloss_bar");
 								self:GetStatusBarTexture():SetTexCoord(0, 1, 0, 1);
 								self:GetStatusBarTexture():SetTexture("Interface\\AddOns\\VuhDo\\Images\\healthloss_bar", "REPEAT", "REPEAT");

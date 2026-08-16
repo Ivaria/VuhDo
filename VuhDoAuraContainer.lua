@@ -150,6 +150,7 @@ local VUHDO_resolveGroupTimerSettings;
 local VUHDO_startAuraButtonGlow;
 local VUHDO_getDispelTypeColorMap;
 local VUHDO_getDispelTypeColorMapOpaque;
+local VUHDO_getDispelTypeBorderCurve;
 local VUHDO_getDispelColorGeneration;
 local VUHDO_applyAuraGroupBarGlowFromAuraButton;
 local VUHDO_getManaAdjustedYOffset;
@@ -158,6 +159,12 @@ local VUHDO_unitPhaseReason;
 local VUHDO_isSpecialUnit;
 
 local sAuraBorderOptions = {
+	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
+	["showWhenHarmful"] = true,
+	["showWhenHelpful"] = true,
+};
+
+local sAuraIconDispelBorderOptionsBind = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
 	["showWhenHarmful"] = true,
 	["showWhenHelpful"] = true,
@@ -390,6 +397,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_startAuraButtonGlow = _G["VUHDO_startAuraButtonGlow"];
 	VUHDO_getDispelTypeColorMap = _G["VUHDO_getDispelTypeColorMap"];
 	VUHDO_getDispelTypeColorMapOpaque = _G["VUHDO_getDispelTypeColorMapOpaque"];
+	VUHDO_getDispelTypeBorderCurve = _G["VUHDO_getDispelTypeBorderCurve"];
 	VUHDO_getDispelColorGeneration = _G["VUHDO_getDispelColorGeneration"];
 	VUHDO_applyAuraGroupBarGlowFromAuraButton = _G["VUHDO_applyAuraGroupBarGlowFromAuraButton"];
 	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
@@ -549,7 +557,7 @@ do
 		end
 
 		if anButtonSetup["dispelBorder"] then
-			VUHDO_bindAuraButtonDispelBorder(aAuraButton);
+			VUHDO_bindAuraButtonDispelBorder(aAuraButton, anButtonSetup);
 		elseif not anButtonSetup["dispelOverlayChrome"] then
 			VUHDO_unbindAuraButtonDispelBorder(aAuraButton);
 		end
@@ -768,7 +776,8 @@ end
 
 do
 	--
-	local function VUHDO_anchorAuraButtonBorderEdges(aAuraButton, anButtonSetup)
+	local tAnchorFrame;
+	local function VUHDO_anchorAuraButtonBorderEdges(aAuraButton, anButtonSetup, anAnchorFrame)
 
 		sBorderEdgeTop = aAuraButton["BorderEdgeTop"];
 		sBorderEdgeBottom = aAuraButton["BorderEdgeBottom"];
@@ -779,30 +788,32 @@ do
 			return false;
 		end
 
+		tAnchorFrame = anAnchorFrame or aAuraButton;
+
 		sBorderWidth = (anButtonSetup and anButtonSetup["borderWidth"]) or 1;
 		sBorderFile = (anButtonSetup and anButtonSetup["borderFile"]) or "Interface\\AddOns\\VuhDo\\Images\\white_square_16_16";
 
 		sBorderEdgeTop:ClearAllPoints();
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeTop, "TOPLEFT", aAuraButton, "TOPLEFT", 0, 0);
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeTop, "TOPRIGHT", aAuraButton, "TOPRIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeTop, "TOPLEFT", tAnchorFrame, "TOPLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeTop, "TOPRIGHT", tAnchorFrame, "TOPRIGHT", 0, 0);
 		sBorderEdgeTop:SetTexture(sBorderFile);
 		VUHDO_PixelUtil.SetHeight(sBorderEdgeTop, sBorderWidth, 1);
 
 		sBorderEdgeBottom:ClearAllPoints();
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeBottom, "BOTTOMLEFT", aAuraButton, "BOTTOMLEFT", 0, 0);
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeBottom, "BOTTOMRIGHT", aAuraButton, "BOTTOMRIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeBottom, "BOTTOMLEFT", tAnchorFrame, "BOTTOMLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeBottom, "BOTTOMRIGHT", tAnchorFrame, "BOTTOMRIGHT", 0, 0);
 		sBorderEdgeBottom:SetTexture(sBorderFile);
 		VUHDO_PixelUtil.SetHeight(sBorderEdgeBottom, sBorderWidth, 1);
 
 		sBorderEdgeLeft:ClearAllPoints();
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeLeft, "TOPLEFT", aAuraButton, "TOPLEFT", 0, 0);
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeLeft, "BOTTOMLEFT", aAuraButton, "BOTTOMLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeLeft, "TOPLEFT", tAnchorFrame, "TOPLEFT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeLeft, "BOTTOMLEFT", tAnchorFrame, "BOTTOMLEFT", 0, 0);
 		sBorderEdgeLeft:SetTexture(sBorderFile);
 		VUHDO_PixelUtil.SetWidth(sBorderEdgeLeft, sBorderWidth, 1);
 
 		sBorderEdgeRight:ClearAllPoints();
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeRight, "TOPRIGHT", aAuraButton, "TOPRIGHT", 0, 0);
-		VUHDO_PixelUtil.SetPoint(sBorderEdgeRight, "BOTTOMRIGHT", aAuraButton, "BOTTOMRIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeRight, "TOPRIGHT", tAnchorFrame, "TOPRIGHT", 0, 0);
+		VUHDO_PixelUtil.SetPoint(sBorderEdgeRight, "BOTTOMRIGHT", tAnchorFrame, "BOTTOMRIGHT", 0, 0);
 		sBorderEdgeRight:SetTexture(sBorderFile);
 		VUHDO_PixelUtil.SetWidth(sBorderEdgeRight, sBorderWidth, 1);
 
@@ -944,6 +955,68 @@ do
 
 		if sBorderEdgeRight then
 			sBorderEdgeRight:Hide();
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tIconTexture;
+	local tInsetParent;
+	function VUHDO_bindAuraButtonDispelBorder(aAuraButton, anButtonSetup)
+
+		if not aAuraButton then
+			return;
+		end
+
+		sBorderTexture = aAuraButton["BorderTexture"];
+
+		if sBorderTexture then
+			sBorderTexture:Hide();
+		end
+
+		if not VUHDO_anchorAuraButtonBorderEdges(aAuraButton, anButtonSetup, aAuraButton["IconFrame"]) then
+			return;
+		end
+
+		sAuraIconDispelBorderOptionsBind["customDispelColorMap"] = nil;
+		sAuraIconDispelBorderOptionsBind["customDispelColorCurve"] = VUHDO_getDispelTypeBorderCurve();
+
+		aAuraButton:ClearDispelTypeTextures();
+
+		aAuraButton:AddDispelTypeTexture(sBorderEdgeTop, sAuraIconDispelBorderOptionsBind);
+		aAuraButton:AddDispelTypeTexture(sBorderEdgeBottom, sAuraIconDispelBorderOptionsBind);
+		aAuraButton:AddDispelTypeTexture(sBorderEdgeLeft, sAuraIconDispelBorderOptionsBind);
+		aAuraButton:AddDispelTypeTexture(sBorderEdgeRight, sAuraIconDispelBorderOptionsBind);
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_unbindAuraButtonDispelBorder(aAuraButton)
+
+		if not aAuraButton then
+			return;
+		end
+
+		aAuraButton:ClearDispelTypeTextures();
+		aAuraButton:ClearDispelTypeText();
+
+		VUHDO_hideAuraButtonBorder(aAuraButton);
+
+		tIconTexture = aAuraButton["IconTexture"];
+		tInsetParent = aAuraButton["IconFrame"] or aAuraButton;
+
+		if tIconTexture then
+			tIconTexture:ClearAllPoints();
+			tIconTexture:SetAllPoints(tInsetParent);
+			tIconTexture:SetTexCoord(0, 1, 0, 1);
 		end
 
 		return;
@@ -1209,7 +1282,7 @@ do
 				VUHDO_applyAuraButtonDispelIcon(aAuraButton, anButtonSetup);
 			elseif anButtonSetup["dispelBorder"] then
 				if aAuraButton["IconTexture"] then
-					VUHDO_bindAuraButtonDispelBorder(aAuraButton);
+					VUHDO_bindAuraButtonDispelBorder(aAuraButton, anButtonSetup);
 				else
 					if not anButtonSetup["dispelFill"] and not anButtonSetup["auraGroupBarGlow"] then
 						aAuraButton:ClearDispelTypeTextures();
@@ -2958,6 +3031,7 @@ function VUHDO_buildAnchorButtonSetup(anAnchorConfig, aPixelWidth, aPixelHeight,
 	tButtonSetup = {
 		["dispelBorder"] = tDispelBorder,
 		["auraSymbol"] = tDispelBorder,
+		["borderWidth"] = tDispelBorder and 2 or nil,
 		["durationText"] = VUHDO_resolveAuraTriState(anAnchorConfig["showTimer"], "showTimer"),
 		["durationCooldown"] = VUHDO_resolveAuraTriState(anAnchorConfig["showClock"], "showClock"),
 		["durationBar"] = false,
