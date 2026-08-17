@@ -175,9 +175,18 @@ end
 --
 local tOverlay;
 local tTargetOverlays;
-local tAnchorRegion;
+local tFillAnchorRegion;
 local tTexture;
 local function VUHDO_applyBooleanOverlayFillTexture(aTexture, aTarget, aTargetType)
+
+	if aTargetType == VUHDO_TARGET_TYPE_BAR then
+		tFillAnchorRegion = aTarget:GetStatusBarTexture() or aTarget;
+	else
+		tFillAnchorRegion = aTarget;
+	end
+
+	aTexture:ClearAllPoints();
+	aTexture:SetAllPoints(tFillAnchorRegion);
 
 	if aTargetType == VUHDO_TARGET_TYPE_BAR then
 		if not VUHDO_copyStatusBarFillTexture(aTexture, aTarget) then
@@ -214,13 +223,6 @@ local function VUHDO_createBooleanOverlay(aButton, aTarget, aValidatorName, aTar
 
 	tOverlay = aTarget:CreateTexture(nil, "OVERLAY");
 
-	if aTargetType == VUHDO_TARGET_TYPE_BAR then
-		tAnchorRegion = aTarget:GetStatusBarTexture() or aTarget;
-	else
-		tAnchorRegion = aTarget;
-	end
-
-	tOverlay:SetAllPoints(tAnchorRegion);
 	tOverlay:SetAlpha(0);
 
 	VUHDO_applyBooleanOverlayFillTexture(tOverlay, aTarget, aTargetType);
@@ -728,10 +730,6 @@ function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 		return false;
 	end
 
-	if aButton["booleanOverlayConfigVersion"] == sAlphaChainConfigVersion and aButton["booleanOverlayPanelNum"] == aPanelNum then
-		return false;
-	end
-
 	VUHDO_clearBooleanOverlays(aButton);
 
 	tIndicatorConfig = VUHDO_INDICATOR_CONFIG[aPanelNum];
@@ -767,9 +765,6 @@ function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 			end
 		end
 	end
-
-	aButton["booleanOverlayConfigVersion"] = sAlphaChainConfigVersion;
-	aButton["booleanOverlayPanelNum"] = aPanelNum;
 
 	return true;
 

@@ -1308,6 +1308,7 @@ end
 --
 local tSourceTexture;
 local tSourceFile;
+local tSourceAtlas;
 function VUHDO_copyStatusBarFillTexture(aDestTexture, aSourceBar)
 
 	if "StatusBar" ~= aSourceBar:GetObjectType() then
@@ -1320,13 +1321,21 @@ function VUHDO_copyStatusBarFillTexture(aDestTexture, aSourceBar)
 		return;
 	end
 
-	tSourceFile = tSourceTexture:GetTexture();
+	tSourceAtlas = tSourceTexture:GetAtlas();
 
-	if not tSourceFile then
-		return;
+	if tSourceAtlas then
+		aDestTexture:SetAtlas(tSourceAtlas);
+	else
+		tSourceFile = tSourceTexture:GetTexture();
+
+		if not tSourceFile then
+			return;
+		end
+
+		aDestTexture:SetTexture(tSourceFile, "CLAMP", "CLAMP", "NEAREST");
 	end
 
-	aDestTexture:SetTexture(tSourceFile);
+	aDestTexture:SetTexCoord(tSourceTexture:GetTexCoord());
 
 	VUHDO_PixelUtil.ApplySettings(aDestTexture);
 

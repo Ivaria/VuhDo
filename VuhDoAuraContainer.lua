@@ -235,6 +235,7 @@ local sAuraTimerFormattersByThreshold = { };
 local sAuraTimerColorCurveFull;
 local sAuraTimerColorCurvesByThreshold = { };
 local sChainBaselineColors = { };
+local sChainBaselineFrames = { };
 local sAuraContainerPool = { };
 local sPoolKeyScratch = { };
 
@@ -602,7 +603,7 @@ do
 		tOverlayBarTextureFile = VUHDO_LibSharedMedia:Fetch('statusbar', aBarTextureName);
 
 		if tOverlayBarTextureFile then
-			aFillTexture:SetTexture(tOverlayBarTextureFile);
+			aFillTexture:SetTexture(tOverlayBarTextureFile, "CLAMP", "CLAMP", "NEAREST");
 
 			VUHDO_PixelUtil.ApplySettings(aFillTexture);
 		end
@@ -1806,6 +1807,8 @@ do
 	local tChainTargetTexture;
 	local tChainButtonName;
 	local tChainStoredBaselineColor;
+	local tPreviousBaselineFrame;
+	local tPreviousBaselineMask;
 	function VUHDO_setupOverlayFillChain(aContainer, aContainerTemplate, aContainerData)
 
 		if not aContainer or not aContainerTemplate or not aContainerTemplate["isFillChain"] then
@@ -1824,6 +1827,20 @@ do
 			tChainBaselineMask = tChainBaselineFrame and tChainBaselineFrame["ChainBaselineMask"];
 
 			if tChainBaselineFrame and tChainBaselineTexture and tChainBaselineMask then
+				tPreviousBaselineFrame = sChainBaselineFrames[tChainTargetBar];
+
+				if tPreviousBaselineFrame and tPreviousBaselineFrame ~= tChainBaselineFrame then
+					tPreviousBaselineMask = tPreviousBaselineFrame["ChainBaselineMask"];
+
+					if tPreviousBaselineMask then
+						tPreviousBaselineMask:ClearAllPoints();
+					end
+
+					tPreviousBaselineFrame:ClearAllPoints();
+					tPreviousBaselineFrame:Hide();
+					tPreviousBaselineFrame:SetParent(nil);
+				end
+
 				tChainBaselineMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST");
 
 				VUHDO_PixelUtil.ApplySettings(tChainBaselineMask);
@@ -1852,6 +1869,8 @@ do
 
 				aContainerData["chainBaselineFrame"] = tChainBaselineFrame;
 				aContainerData["chainBaselineTexture"] = tChainBaselineTexture;
+
+				sChainBaselineFrames[tChainTargetBar] = tChainBaselineFrame;
 
 				tChainButtonName = tChainTargetBar:GetParent() and tChainTargetBar:GetParent():GetName();
 
@@ -2588,6 +2607,84 @@ do
 
 
 	--
+	local tRestoreTargetBar;
+	local tRestoreButtonName;
+	local tRestoreStoredColor;
+	local tRestoreOpacity;
+	local tRestoreChainBaselineFrame;
+	local tRestoreChainBaselineMask;
+	local tRestoreTargetBarTexture;
+	local tRestoreContainer;
+	local function VUHDO_restoreOverlayFillChainBackground(aContainerData)
+
+		if not aContainerData then
+			return;
+		end
+
+		tRestoreChainBaselineFrame = aContainerData["chainBaselineFrame"];
+
+		if tRestoreChainBaselineFrame then
+			tRestoreChainBaselineMask = tRestoreChainBaselineFrame["ChainBaselineMask"];
+
+			if tRestoreChainBaselineMask then
+				tRestoreChainBaselineMask:ClearAllPoints();
+			end
+
+			tRestoreChainBaselineFrame:ClearAllPoints();
+			tRestoreChainBaselineFrame:Hide();
+
+			tRestoreContainer = aContainerData["container"];
+
+			if tRestoreContainer then
+				tRestoreChainBaselineFrame:SetParent(tRestoreContainer);
+			else
+				tRestoreChainBaselineFrame:SetParent(nil);
+			end
+
+			tRestoreTargetBar = aContainerData["overlayTargetBar"];
+
+			if tRestoreTargetBar and sChainBaselineFrames[tRestoreTargetBar] == tRestoreChainBaselineFrame then
+				sChainBaselineFrames[tRestoreTargetBar] = nil;
+			end
+		end
+
+		if aContainerData["backgroundFillHidden"] then
+			tRestoreTargetBar = aContainerData["overlayTargetBar"];
+
+			if tRestoreTargetBar then
+				tRestoreTargetBarTexture = tRestoreTargetBar:GetStatusBarTexture();
+				tRestoreButtonName = tRestoreTargetBar:GetParent() and tRestoreTargetBar:GetParent():GetName();
+				tRestoreStoredColor = tRestoreButtonName and sChainBaselineColors[tRestoreButtonName];
+
+				if tRestoreStoredColor then
+					tRestoreOpacity = tRestoreStoredColor["O"];
+
+					if tRestoreOpacity == nil then
+						tRestoreOpacity = 1;
+					end
+
+					tRestoreTargetBar:SetStatusBarColor(tRestoreStoredColor["R"] or 0, tRestoreStoredColor["G"] or 0, tRestoreStoredColor["B"] or 0, tRestoreOpacity);
+				else
+					tRestoreTargetBar:SetStatusBarColor(0, 0, 0, 0);
+				end
+
+				if tRestoreTargetBarTexture then
+					tRestoreTargetBarTexture:SetAlpha(1);
+				end
+			end
+		end
+
+		aContainerData["backgroundFillHidden"] = nil;
+		aContainerData["chainBaselineFrame"] = nil;
+		aContainerData["chainBaselineTexture"] = nil;
+
+		return;
+
+	end
+
+
+
+	--
 	local tWipeContainer;
 	local tWipeContainerData;
 	function VUHDO_wipeAuraContainerPool()
@@ -2598,6 +2695,8 @@ do
 
 				if tWipeContainerData and tWipeContainerData["container"] then
 					tWipeContainer = tWipeContainerData["container"];
+
+					VUHDO_restoreOverlayFillChainBackground(tWipeContainerData);
 
 					sContainerClassColorBars[tWipeContainer] = nil;
 					sPendingClassColors[tWipeContainer] = nil;
@@ -2755,59 +2854,6 @@ do
 		end
 
 		return tContainerData;
-
-	end
-
-
-
-	--
-	local tRestoreTargetBar;
-	local tRestoreButtonName;
-	local tRestoreStoredColor;
-	local tRestoreOpacity;
-	local tChainBaselineFrame;
-	local tRestoreTargetBarTexture;
-	local function VUHDO_restoreOverlayFillChainBackground(aContainerData)
-
-		if not aContainerData or not aContainerData["backgroundFillHidden"] then
-			return;
-		end
-
-		tRestoreTargetBar = aContainerData["overlayTargetBar"];
-
-		if tRestoreTargetBar then
-			tRestoreTargetBarTexture = tRestoreTargetBar:GetStatusBarTexture();
-			tRestoreButtonName = tRestoreTargetBar:GetParent() and tRestoreTargetBar:GetParent():GetName();
-			tRestoreStoredColor = tRestoreButtonName and sChainBaselineColors[tRestoreButtonName];
-
-			if tRestoreStoredColor then
-				tRestoreOpacity = tRestoreStoredColor["O"];
-
-				if tRestoreOpacity == nil then
-					tRestoreOpacity = 1;
-				end
-
-				tRestoreTargetBar:SetStatusBarColor(tRestoreStoredColor["R"] or 0, tRestoreStoredColor["G"] or 0, tRestoreStoredColor["B"] or 0, tRestoreOpacity);
-			else
-				tRestoreTargetBar:SetStatusBarColor(0, 0, 0, 0);
-			end
-
-			if tRestoreTargetBarTexture then
-				tRestoreTargetBarTexture:SetAlpha(1);
-			end
-		end
-
-		tChainBaselineFrame = aContainerData["chainBaselineFrame"];
-
-		if tChainBaselineFrame then
-			tChainBaselineFrame:Hide();
-		end
-
-		aContainerData["backgroundFillHidden"] = nil;
-		aContainerData["chainBaselineFrame"] = nil;
-		aContainerData["chainBaselineTexture"] = nil;
-
-		return;
 
 	end
 
