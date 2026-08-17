@@ -366,6 +366,34 @@ end
 
 
 
+--
+function VUHDO_invalidateUnitVisuals(aUnit)
+
+	if not aUnit then
+		return;
+	end
+
+	if sSecretsEnabled then
+		VUHDO_hideAurasForUnit(aUnit);
+	else
+		VUHDO_removeHots(aUnit);
+		VUHDO_removeAllDebuffIcons(aUnit);
+	end
+
+	VUHDO_clearUnitAuraCache(aUnit);
+
+	if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+		VUHDO_cleanupSpellTraceForUnit(aUnit);
+	end
+
+	VUHDO_initEventBouquetsFor(aUnit);
+
+	return;
+
+end
+
+
+
 -- Sets a Member info into raid array
 local tUnitId;
 local tIsPet;
@@ -397,20 +425,7 @@ function VUHDO_setHealth(aUnit, aMode)
 		tIsDead = UnitIsDeadOrGhost(aUnit) and not UnitIsFeignDeath(aUnit);
 
 		if tIsDead then
-			if sSecretsEnabled then
-				VUHDO_hideAurasForUnit(aUnit);
-			else
-				VUHDO_removeHots(aUnit);
-				VUHDO_removeAllDebuffIcons(aUnit);
-			end
-
-			VUHDO_clearUnitAuraCache(aUnit);
-
-			if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
-				VUHDO_cleanupSpellTraceForUnit(aUnit);
-			end
-
-			VUHDO_initEventBouquetsFor(aUnit);
+			VUHDO_invalidateUnitVisuals(aUnit);
 		end
 
 		if 1 == aMode then -- VUHDO_UPDATE_ALL
@@ -462,6 +477,7 @@ function VUHDO_setHealth(aUnit, aMode)
 
 			tInfo["number"] = VUHDO_getUnitNo(aUnit);
 			tInfo["unit"] = aUnit;
+			tInfo["guid"] = UnitGUID(aUnit);
 			tInfo["class"] = tClassName;
 			tInfo["range"] = VUHDO_isInRange(aUnit);
 
@@ -1157,6 +1173,11 @@ function VUHDO_refreshRaidMembers()
 			if not tInfo or (tGuid and not (sSecretsEnabled and issecretvalue(tGuid)) and VUHDO_RAID_GUIDS[tGuid] ~= tPlayer) then
 				VUHDO_setHealth(tPlayer, 1); -- VUHDO_UPDATE_ALL
 			else
+				if tGuid and not (sSecretsEnabled and issecretvalue(tGuid)) and tInfo["guid"] and tInfo["guid"] ~= tGuid then
+					VUHDO_invalidateUnitVisuals(tPlayer);
+					VUHDO_syncAuraContainersForUnit(tPlayer);
+				end
+
 				tInfo["group"] = VUHDO_getUnitGroup(tPlayer, false);
 
 				tInfo["isVehicle"] = UnitHasVehicleUI(tPlayer);

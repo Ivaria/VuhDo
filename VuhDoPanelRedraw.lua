@@ -29,6 +29,7 @@ local VUHDO_updateToggledUnitEvents;
 local VUHDO_buildAllIndicatorAlphaChains;
 local VUHDO_buildBooleanOverlaysForButton;
 local VUHDO_buildTargetIndicatorAlphaChains;
+local VUHDO_resetButtonVisuals;
 
 local VUHDO_STD_BACKDROP = nil;
 local VUHDO_DESIGN_BACKDROP = nil;
@@ -144,6 +145,7 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_buildAllIndicatorAlphaChains = _G["VUHDO_buildAllIndicatorAlphaChains"];
 	VUHDO_buildBooleanOverlaysForButton = _G["VUHDO_buildBooleanOverlaysForButton"];
 	VUHDO_buildTargetIndicatorAlphaChains = _G["VUHDO_buildTargetIndicatorAlphaChains"];
+	VUHDO_resetButtonVisuals = _G["VUHDO_resetButtonVisuals"];
 
 	VUHDO_panelRedrawCustomDebuffsInitLocalOverrides();
 	VUHDO_panelRedrawHeadersInitLocalOverrides();
@@ -2755,6 +2757,10 @@ do
 
 		VUHDO_positionHealButton(tHealButton, aPanelNum);
 
+		if aUnit and (tHealButton["raidid"] ~= aUnit or tHealButton:GetAttribute("unit") ~= aUnit) then
+			VUHDO_resetButtonVisuals(tHealButton);
+		end
+
 		if aUnit then
 			VUHDO_setupAllHealButtonAttributes(tHealButton, aUnit, false, 70 == aModelId, false, false); -- VUHDO_ID_VEHICLES
 		end
@@ -2777,7 +2783,7 @@ do
 			VUHDO_PixelUtil.SetPoint(tHealButton, "TOPLEFT", tPanel:GetName(), "TOPLEFT", tXPos, -tYPos);
 		end
 
-		if tHealButton:GetAttribute("unit") then
+		if tHealButton["raidid"] then
 			VUHDO_addUnitButton(tHealButton, aPanelNum);
 		end
 

@@ -1824,17 +1824,21 @@ end
 
 
 --
+local tPanelButtons;
+local tButton;
 VUHDO_REMOVE_HOTS = true;
 function VUHDO_updateAllRaidBars()
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 		if VUHDO_isPanelVisible(tPanelNum) then
-			for _, tButton in pairs(VUHDO_getPanelButtons(tPanelNum)) do
-				if not tButton:GetAttribute("unit") then
-					break;
-				end
+			tPanelButtons = VUHDO_getPanelButtons(tPanelNum);
 
-				VUHDO_customizeHealButton(tButton);
+			for tBtnIdx = 1, #tPanelButtons do
+				tButton = tPanelButtons[tBtnIdx];
+
+				if tButton["raidid"] then
+					VUHDO_customizeHealButton(tButton);
+				end
 			end
 		end
 	end

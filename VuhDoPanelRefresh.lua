@@ -44,6 +44,7 @@ local VUHDO_enqueueRefreshButtonInit;
 local VUHDO_waitRefreshButtonInits;
 local VUHDO_resetAlphaChainWrappers;
 local VUHDO_clearBooleanOverlays;
+local VUHDO_resetButtonVisuals;
 
 local sRefreshUiNoMembers;
 local sShowPanels;
@@ -94,6 +95,7 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_waitRefreshButtonInits = _G["VUHDO_waitRefreshButtonInits"];
 	VUHDO_resetAlphaChainWrappers = _G["VUHDO_resetAlphaChainWrappers"];
 	VUHDO_clearBooleanOverlays = _G["VUHDO_clearBooleanOverlays"];
+	VUHDO_resetButtonVisuals = _G["VUHDO_resetButtonVisuals"];
 
 	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
 		sRefreshUiNoMembers = _G["VUHDO_deferRefreshUiNoMembers"];
@@ -152,7 +154,8 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			tButton = VUHDO_getOrCreateHealButton(tButtonIdx, aPanelNum);
 			tButtonIdx = tButtonIdx + 1;
 
-			if tButton["raidid"] ~= tUnit then
+			if tButton["raidid"] ~= tUnit or tButton:GetAttribute("unit") ~= tUnit then
+				VUHDO_resetButtonVisuals(tButton);
 				VUHDO_resetAlphaChainWrappers(tButton);
 				VUHDO_clearBooleanOverlays(tButton);
 
@@ -431,6 +434,12 @@ end
 
 --
 function VUHDO_deferRefreshPanelCompleteDelegate(aPanelNum)
+
+	if InCombatLockdown() then
+		VUHDO_deferTask(VUHDO_DEFER_REFRESH_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum);
+
+		return;
+	end
 
 	if not VUHDO_waitRefreshButtonInits(aPanelNum, VUHDO_DEFER_REFRESH_PANEL_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum) then
 		return;

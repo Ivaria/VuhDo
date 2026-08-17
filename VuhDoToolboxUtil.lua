@@ -1222,14 +1222,16 @@ end
 function VUHDO_safeSetAttribute(aFrame, aAttribute, aValue)
 
 	if not aFrame then
-		return;
+		return false;
 	end
 
 	if not InCombatLockdown() or (aFrame.IsProtected and not aFrame:IsProtected()) then
 		aFrame:SetAttribute(aAttribute, aValue);
+
+		return true;
 	end
 
-	return;
+	return false;
 
 end
 

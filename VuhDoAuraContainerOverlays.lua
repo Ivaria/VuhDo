@@ -7,6 +7,7 @@ local strfind = string.find;
 local twipe = table.wipe;
 
 local UnitCanAttack = UnitCanAttack;
+local issecretvalue = issecretvalue;
 
 VUHDO_OVERLAYS_REBUILD_PENDING = false;
 
@@ -2781,6 +2782,7 @@ do
 	local tGateActive;
 	local tEnabledChanged;
 	local tUnitRebound;
+	local tOccupantGuid;
 	--
 	function VUHDO_resetOverlaysForUnit(aUnit)
 
@@ -2794,6 +2796,7 @@ do
 			for _, tIndicatorEntry in pairs(tButtonName and VUHDO_OVERLAY_CONTAINERS[tButtonName] or sEmpty) do
 				for _, tContainerData in pairs(tIndicatorEntry) do
 					tContainerData["lastSyncedUnit"] = nil;
+					tContainerData["lastSyncedGuid"] = nil;
 					tContainerData["lastSyncedEnabled"] = nil;
 					tContainerData["lastSyncedGroupEnabled"] = nil;
 				end
@@ -2914,12 +2917,22 @@ do
 							end
 
 							if tWantEnabled then
+								tOccupantGuid = tGateInfo and tGateInfo["guid"];
 								tUnitRebound = tContainerData["lastSyncedUnit"] ~= aUnit;
+
+								if not tUnitRebound then
+									if not tOccupantGuid or issecretvalue(tOccupantGuid) then
+										tUnitRebound = true;
+									elseif tContainerData["lastSyncedGuid"] ~= tOccupantGuid then
+										tUnitRebound = true;
+									end
+								end
 
 								if tUnitRebound then
 									tContainer:SetUnit(aUnit);
 
 									tContainerData["lastSyncedUnit"] = aUnit;
+									tContainerData["lastSyncedGuid"] = tOccupantGuid;
 								end
 
 								if tUnitRebound or tEnabledChanged then

@@ -1147,6 +1147,22 @@ do
 				VUHDO_updateBouquetsForEvent("target", 13); -- VUHDO_UPDATE_MANA
 				VUHDO_updateBouquetsForEvent("focus",  13); -- VUHDO_UPDATE_MANA
 
+				if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
+					VUHDO_RELOAD_AFTER_BATTLE = false;
+
+					if VUHDO_TIMERS["RELOAD_RAID"] <= 0 then
+						VUHDO_quickRaidReload();
+
+						if VUHDO_IS_RELOAD_BUFFS then
+							VUHDO_reloadBuffPanel();
+
+							VUHDO_IS_RELOAD_BUFFS = false;
+						end
+					end
+
+					VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = 0.5;
+				end
+
 				VUHDO_updateAuraDataRestrictedState(false);
 
 				VUHDO_processPendingAuraContainerBuilds();
@@ -1190,6 +1206,11 @@ do
 			VUHDO_processCombatUnsafeTasksBeforeLockdown();
 
 			VUHDO_setIsOutOfCombat(false);
+
+		elseif "ENCOUNTER_END" == anEvent or "ZONE_CHANGED_NEW_AREA" == anEvent then
+			if VUHDO_VARIABLES_LOADED then
+				VUHDO_processPendingAuraContainerBuilds();
+			end
 
 		elseif "RAID_TARGET_UPDATE" == anEvent then
 			VUHDO_TIMERS["CUSTOMIZE"] = 0.1;
@@ -2154,6 +2175,8 @@ local function VUHDO_doReloadRoster(anIsQuick)
 
 	if not VUHDO_isConfigPanelShowing() then
 		if VUHDO_IS_RELOADING or VUHDO_isDeferredRefreshActive() or VUHDO_isDeferredRedrawActive() then
+			VUHDO_RELOAD_AFTER_BATTLE = true;
+
 			VUHDO_quickRaidReload();
 		else
 			VUHDO_rebuildTargets();
@@ -2904,6 +2927,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	--"UPDATE_MACROS",
 	"PET_BATTLE_CLOSE", "PET_BATTLE_OPENING_START",
 	"PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED",
+	"ENCOUNTER_END", "ZONE_CHANGED_NEW_AREA",
 	"PLAYER_SPECIALIZATION_CHANGED", "ACTIVE_TALENT_GROUP_CHANGED",
 	"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_DELAYED", "UNIT_SPELLCAST_CHANNEL_START", "UNIT_SPELLCAST_CHANNEL_UPDATE",
 	"UNIT_SPELLCAST_STOP", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_FAILED_QUIET", "UNIT_SPELLCAST_CHANNEL_STOP",

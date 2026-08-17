@@ -638,7 +638,11 @@ function VUHDO_addUnitButton(aHealButton, aPanelNum)
 	tUnitButtons = sScratchUnitButtons or VUHDO_UNIT_BUTTONS;
 	tUnitButtonsPanel = sScratchUnitButtonsPanel or VUHDO_UNIT_BUTTONS_PANEL;
 
-	tUnit = aHealButton:GetAttribute("unit");
+	tUnit = aHealButton["raidid"];
+
+	if not tUnit then
+		return;
+	end
 
 	if not tUnitButtons[tUnit] then
 		tUnitButtons[tUnit] = { };

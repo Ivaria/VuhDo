@@ -646,18 +646,20 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 	end
 
 	if aUnit and not anIsIcButton then
-		VUHDO_safeSetAttribute(aButton, "unit", aUnit);
-		aButton["raidid"] = aUnit;
+		if VUHDO_safeSetAttribute(aButton, "unit", aUnit) then
+			aButton["raidid"] = aUnit;
 
-		VUHDO_syncAuraContainersForButton(aButton, aUnit);
+			VUHDO_syncAuraContainersForButton(aButton, aUnit);
 
-		if not anIsTgButton then
-			for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
-				tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+			if not anIsTgButton then
+				for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+					tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
 
-				if tDebuffFrame then
-					VUHDO_safeSetAttribute(tDebuffFrame, "unit", aUnit);
-					tDebuffFrame["raidid"] = aUnit;
+					if tDebuffFrame then
+						if VUHDO_safeSetAttribute(tDebuffFrame, "unit", aUnit) then
+							tDebuffFrame["raidid"] = aUnit;
+						end
+					end
 				end
 			end
 		end

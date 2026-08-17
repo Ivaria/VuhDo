@@ -200,6 +200,7 @@ VUHDO_SUPPRESS_CANDIDATE_FILTERS = sSuppressCandidateFilters;
 local sPendingContainerBuilds = { };
 local sPendingButtonLayouts = { };
 local sPendingClassColors = { };
+local sPendingRetryScratch = { };
 local sHasPendingBuilds = false;
 local sContainerClassColorBars = { };
 
@@ -406,6 +407,9 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_releaseAuraButtonGlowState = _G["VUHDO_releaseAuraButtonGlowState"];
 	VUHDO_unitPhaseReason = _G["VUHDO_unitPhaseReason"];
 	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
+	VUHDO_precomputeStaticBouquetSlotsForButton = _G["VUHDO_precomputeStaticBouquetSlotsForButton"];
+	VUHDO_updateStaticBouquetSlotsForButton = _G["VUHDO_updateStaticBouquetSlotsForButton"];
+	VUHDO_hideStaticBouquetSlotsForButton = _G["VUHDO_hideStaticBouquetSlotsForButton"];
 
 	sAuraOpaqueBorderOptions["backingCurveFn"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"];
 	sAuraOpaqueBorderOptions["fillCurveFn"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"];
@@ -473,7 +477,7 @@ do
 	function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton)
 
 		if not anButtonSetup["durationBar"] or not aAuraButton["IconFrame"] then
-			return;
+			return true;
 		end
 
 		if not aAuraButton:CanBeAccessedInContext() then
@@ -481,7 +485,7 @@ do
 
 			sHasPendingBuilds = true;
 
-			return;
+			return false;
 		end
 
 		tIconSize = anButtonSetup["iconTextSize"];
@@ -517,7 +521,7 @@ do
 				tIconColorOverlay:SetAllPoints(aAuraButton);
 			end
 
-			return;
+			return true;
 		end
 
 		tIconFrame:ClearAllPoints();
@@ -564,7 +568,7 @@ do
 			VUHDO_unbindAuraButtonDispelBorder(aAuraButton);
 		end
 
-		return;
+		return true;
 
 	end
 end
@@ -1463,13 +1467,13 @@ do
 		tClassColorBars = sContainerClassColorBars[aContainer];
 
 		if not tClassColorBars or not aUnit or not VUHDO_RAID[aUnit] then
-			return;
+			return true;
 		end
 
 		tClassColor = VUHDO_getClassColor(VUHDO_RAID[aUnit]);
 
 		if not tClassColor then
-			return;
+			return true;
 		end
 
 		for tCnt = 1, #tClassColorBars do
@@ -1481,10 +1485,12 @@ do
 				sPendingClassColors[aContainer] = aUnit;
 
 				sHasPendingBuilds = true;
+
+				return false;
 			end
 		end
 
-		return;
+		return true;
 
 	end
 
@@ -2494,6 +2500,34 @@ do
 
 
 	--
+	local tClassColorBars;
+	local function VUHDO_reregisterContainerClassColorBar(aContainer, aDurationBar)
+
+		if not aContainer or not aDurationBar then
+			return;
+		end
+
+		if not sContainerClassColorBars[aContainer] then
+			sContainerClassColorBars[aContainer] = { };
+		end
+
+		tClassColorBars = sContainerClassColorBars[aContainer];
+
+		for tCnt = 1, #tClassColorBars do
+			if tClassColorBars[tCnt] == aDurationBar then
+				return;
+			end
+		end
+
+		tinsert(tClassColorBars, aDurationBar);
+
+		return;
+
+	end
+
+
+
+	--
 	local tReleaseGroupKeys;
 	local tReleaseGroupKey;
 	local tReleaseGroupFrameCount;
@@ -2567,6 +2601,10 @@ do
 							if tGroup["buttonSetup"]["glowIcon"] then
 								VUHDO_startAuraButtonGlow(tReleaseAuraFrame, tGroup["buttonSetup"]);
 							end
+
+							if "class" == tGroup["buttonSetup"]["barColorMode"] and tReleaseAuraFrame["DurationBar"] then
+								VUHDO_reregisterContainerClassColorBar(aContainer, tReleaseAuraFrame["DurationBar"]);
+							end
 						end
 					end
 				end
@@ -2594,6 +2632,10 @@ do
 
 						if tSlot["buttonSetup"]["glowIcon"] then
 							VUHDO_startAuraButtonGlow(tReleaseAuraFrame, tSlot["buttonSetup"]);
+						end
+
+						if "class" == tSlot["buttonSetup"]["barColorMode"] and tReleaseAuraFrame["DurationBar"] then
+							VUHDO_reregisterContainerClassColorBar(aContainer, tReleaseAuraFrame["DurationBar"]);
 						end
 					end
 				end
@@ -2790,10 +2832,6 @@ do
 
 				tContainer:SetParent(tContainerParent);
 
-				if sContainerClassColorBars[tContainer] then
-					twipe(sContainerClassColorBars[tContainer]);
-				end
-
 				sPendingClassColors[tContainer] = nil;
 
 				VUHDO_applyAuraContainerAnchor(tContainer, aContainerTemplate["anchor"], tContainerParent);
@@ -2813,6 +2851,7 @@ do
 				tContainerData["panelNum"] = aContainerTemplate["panelNum"];
 				tContainerData["anchorIndex"] = aContainerTemplate["anchorIndex"];
 				tContainerData["lastSyncedUnit"] = nil;
+				tContainerData["lastSyncedGuid"] = nil;
 				tContainerData["lastSyncedRestricted"] = nil;
 				tContainerData["lastSyncedEnabled"] = nil;
 				tContainerData["lastSyncedAssistRestricted"] = nil;
@@ -3247,6 +3286,12 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 		end
 	end
 
+	for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
+		if tContainerData and tContainerData["staticSlots"] and next(tContainerData["staticSlots"]) then
+			VUHDO_precomputeStaticBouquetSlotsForButton(aButton, tContainerData);
+		end
+	end
+
 	tUnit = aButton["raidid"] or aButton:GetAttribute("unit");
 
 	if tUnit then
@@ -3494,10 +3539,52 @@ end
 
 --
 local tButton;
+local tContainerTemplate;
+local tGroupKeys;
+local tGroupKey;
+local tSlotKeys;
+local tEngineSlotCnt;
+local tSlot;
+local tRecordedKey;
 function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 
 	if not aContainer then
 		return;
+	end
+
+	if aContainerData then
+		tContainerTemplate = aContainerData["containerTemplate"];
+
+		if tContainerTemplate then
+			tGroupKeys = aContainerData["groupKeys"];
+
+			if tGroupKeys then
+				for tGroupCnt = 1, #tGroupKeys do
+					tGroupKey = tGroupKeys[tGroupCnt];
+
+					if tGroupKey then
+						aContainer:SetAuraGroupMaxFrameCount(tGroupKey, 0);
+						aContainer:SetAuraGroupFilterString(tGroupKey, "");
+					end
+				end
+			end
+
+			tSlotKeys = aContainerData["slotKeys"];
+			tEngineSlotCnt = 0;
+
+			for tSlotCnt = 1, #(tContainerTemplate["slots"] or sEmpty) do
+				tSlot = tContainerTemplate["slots"][tSlotCnt];
+
+				if tSlot and not tSlot["isStaticBouquetSlot"] then
+					tEngineSlotCnt = tEngineSlotCnt + 1;
+					tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
+
+					if tRecordedKey then
+						aContainer:SetAuraSlotFilterString(tRecordedKey, "");
+					end
+				end
+			end
+		end
 	end
 
 	if aContainerData and aContainerData["staticSlots"] and next(aContainerData["staticSlots"]) then
@@ -3514,6 +3601,7 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 
 	if aContainerData then
 		aContainerData["lastSyncedUnit"] = nil;
+		aContainerData["lastSyncedGuid"] = nil;
 		aContainerData["lastSyncedRestricted"] = nil;
 		aContainerData["lastSyncedEnabled"] = nil;
 		aContainerData["lastSyncedGroupEnabled"] = nil;
@@ -3551,6 +3639,7 @@ end
 --
 local tIsAuraDataRestricted;
 local tCanAttack;
+local tOccupantGuid;
 function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 
 	if not aContainer or not aContainerData or not aUnit then
@@ -3573,8 +3662,6 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 
 	VUHDO_applyContainerClassColorBars(aContainer, aUnit);
 
-	aContainerData["lastSyncedUnit"] = aUnit;
-
 	if aContainerData["staticSlots"] and next(aContainerData["staticSlots"]) then
 		if not aButton then
 			aButton = aContainer:GetParent();
@@ -3587,6 +3674,11 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 	end
 
 	VUHDO_refreshAuraContainer(aContainer);
+
+	tOccupantGuid = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["guid"];
+
+	aContainerData["lastSyncedUnit"] = aUnit;
+	aContainerData["lastSyncedGuid"] = tOccupantGuid;
 
 	return;
 
@@ -3677,6 +3769,7 @@ local tAssistOnlyDirty;
 local tIsRestricted;
 local tIsPreviouslyRestricted;
 local tIsRestrictionRegained;
+local tOccupantGuid;
 function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 	if not aButton or not aUnit then
@@ -3726,6 +3819,16 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 				tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or not tContainer:IsEnabled() or not tContainer:IsShown();
 			else
 				tNeedsSync = tContainerData["lastSyncedUnit"] ~= aUnit or tContainerData["lastSyncedRestricted"] ~= tIsAuraDataRestricted or not tContainer:IsEnabled() or not tContainer:IsShown();
+			end
+
+			if not tNeedsSync then
+				tOccupantGuid = tUnitInfo and tUnitInfo["guid"];
+
+				if not tOccupantGuid or issecretvalue(tOccupantGuid) then
+					tNeedsSync = true;
+				elseif tContainerData["lastSyncedGuid"] ~= tOccupantGuid then
+					tNeedsSync = true;
+				end
 			end
 
 			tIsPreviouslyRestricted = tContainerData["lastAuraFilterDenied"] == true;
@@ -3876,19 +3979,37 @@ function VUHDO_processPendingAuraContainerBuilds()
 		twipe(sPendingContainerBuilds);
 	end
 
+	twipe(sPendingRetryScratch);
+
 	for tButton, tButtonSetup in pairs(sPendingButtonLayouts) do
-		VUHDO_layoutBarAuraButtonFrames(tButtonSetup, tButton);
+		if not VUHDO_layoutBarAuraButtonFrames(tButtonSetup, tButton) then
+			sPendingRetryScratch[tButton] = tButtonSetup;
+		end
 	end
 
 	twipe(sPendingButtonLayouts);
 
+	for tRetryButton, tRetryButtonSetup in pairs(sPendingRetryScratch) do
+		sPendingButtonLayouts[tRetryButton] = tRetryButtonSetup;
+	end
+
+	twipe(sPendingRetryScratch);
+
 	for tContainer, tUnit in pairs(sPendingClassColors) do
-		VUHDO_applyContainerClassColorBars(tContainer, tUnit);
+		if not VUHDO_applyContainerClassColorBars(tContainer, tUnit) then
+			sPendingRetryScratch[tContainer] = tUnit;
+		end
 	end
 
 	twipe(sPendingClassColors);
 
-	if not next(sPendingContainerBuilds) then
+	for tRetryContainer, tRetryUnit in pairs(sPendingRetryScratch) do
+		sPendingClassColors[tRetryContainer] = tRetryUnit;
+	end
+
+	twipe(sPendingRetryScratch);
+
+	if not next(sPendingContainerBuilds) and not next(sPendingButtonLayouts) and not next(sPendingClassColors) then
 		sHasPendingBuilds = false;
 	end
 
