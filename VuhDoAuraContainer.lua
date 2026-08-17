@@ -2944,6 +2944,49 @@ end
 
 
 --
+local tHideFillButtonName;
+local tHideFillIndicatorEntry;
+local tHideFillContainerData;
+local tHideFillTargetBar;
+local tHideFillTargetTexture;
+function VUHDO_hideOverlayFillChainBackground(aButton)
+
+	if not aButton then
+		return;
+	end
+
+	tHideFillButtonName = aButton:GetName();
+
+	if not tHideFillButtonName then
+		return;
+	end
+
+	tHideFillIndicatorEntry = VUHDO_OVERLAY_CONTAINERS[tHideFillButtonName] and VUHDO_OVERLAY_CONTAINERS[tHideFillButtonName]["BACKGROUND_BAR"];
+	tHideFillContainerData = tHideFillIndicatorEntry and tHideFillIndicatorEntry["fillChain"];
+
+	if not tHideFillContainerData or not tHideFillContainerData["backgroundFillHidden"] then
+		return;
+	end
+
+	tHideFillTargetBar = tHideFillContainerData["overlayTargetBar"];
+
+	if not tHideFillTargetBar then
+		return;
+	end
+
+	tHideFillTargetTexture = tHideFillTargetBar:GetStatusBarTexture();
+
+	if tHideFillTargetTexture then
+		tHideFillTargetTexture:SetAlpha(0);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tBaselineStoredColor;
 local tBaselineTexture;
 local tBaselineOpacity;

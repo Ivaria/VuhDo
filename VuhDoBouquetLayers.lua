@@ -53,6 +53,7 @@ local VUHDO_getBouquetGlobalOpacityNames;
 local VUHDO_isAuraDataRestricted;
 local VUHDO_copyStatusBarFillTexture;
 local VUHDO_getBouquetLayerTemplate;
+local VUHDO_invalidatePanelButtonInits;
 
 local VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS or { };
 
@@ -73,6 +74,8 @@ local sAlphaChainConfigVersion = 0;
 
 local sAlphaChainWrappers = { };
 setmetatable(sAlphaChainWrappers, VUHDO_META_NEW_ARRAY);
+
+local sPendingAlphaChainRebuild = false;
 
 local VUHDO_TARGET_TYPE_BAR = 1;
 local VUHDO_TARGET_TYPE_TEXTURE = 2;
@@ -158,6 +161,7 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
 	VUHDO_copyStatusBarFillTexture = _G["VUHDO_copyStatusBarFillTexture"];
 	VUHDO_getBouquetLayerTemplate = _G["VUHDO_getBouquetLayerTemplate"];
+	VUHDO_invalidatePanelButtonInits = _G["VUHDO_invalidatePanelButtonInits"];
 
 	sAlphaChainStepEntryPool = VUHDO_createTablePool("AlphaChainStepEntry", 100);
 	sAlphaChainPool = VUHDO_createTablePool("AlphaChain", 50, VUHDO_createAlphaChainDelegate, VUHDO_cleanupAlphaChainDelegate);
@@ -302,6 +306,58 @@ end
 
 
 --
+function VUHDO_resetAlphaChainWrappers(aButton)
+
+	for _, tResetWrapperData in pairs(sAlphaChainWrappers[aButton]) do
+		for tCnt = 1, VUHDO_MAX_ALPHA_CHAIN_STEPS do
+			tResetWrapperData["wrappers"][tCnt]:SetAlpha(1);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+local tIndicatorResetWrapperData;
+function VUHDO_resetAlphaChainWrappersForIndicator(aButton, anIndicatorName)
+
+	tIndicatorResetWrapperData = sAlphaChainWrappers[aButton] and sAlphaChainWrappers[aButton][anIndicatorName];
+
+	if not tIndicatorResetWrapperData then
+		return;
+	end
+
+	for tCnt = 1, VUHDO_MAX_ALPHA_CHAIN_STEPS do
+		tIndicatorResetWrapperData["wrappers"][tCnt]:SetAlpha(1);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_flushPendingAlphaChainRebuild()
+
+	if not sPendingAlphaChainRebuild then
+		return;
+	end
+
+	sPendingAlphaChainRebuild = false;
+
+	VUHDO_invalidatePanelButtonInits();
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_incrementAlphaChainConfigVersion()
 
 	sAlphaChainConfigVersion = sAlphaChainConfigVersion + 1;
@@ -410,6 +466,10 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 
 	tWrapperData = VUHDO_initAlphaChainWrapperNest(aButton, anIndicatorName, tIndicatorBar, tOriginalParent);
 
+	for tCnt = 1, VUHDO_MAX_ALPHA_CHAIN_STEPS do
+		tWrapperData["wrappers"][tCnt]:SetAlpha(1);
+	end
+
 	if sGlobalAlphaChains[aButton] and sGlobalAlphaChains[aButton][anIndicatorName] then
 		sAlphaChainPool:release(sGlobalAlphaChains[aButton][anIndicatorName]);
 		sGlobalAlphaChains[aButton][anIndicatorName] = nil;
@@ -445,7 +505,7 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 		tItem = aBouquet[tCnt];
 		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
 
-		if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] then
+		if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] and not tItem["color"]["useBackground"] then
 			if not tHealthGlobalOpacityNames or not tHealthGlobalOpacityNames[tItem["name"]] then
 				tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
@@ -516,10 +576,6 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 		tChain["head"] = tOriginalParent;
 	end
 
-	for tCnt = tStepCnt + 1, VUHDO_MAX_ALPHA_CHAIN_STEPS do
-		tWrapperData["wrappers"][tCnt]:SetAlpha(1);
-	end
-
 	return;
 
 end
@@ -550,6 +606,8 @@ function VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum)
 	end
 
 	if InCombatLockdown() then
+		sPendingAlphaChainRebuild = true;
+
 		return false;
 	end
 
@@ -604,6 +662,8 @@ function VUHDO_buildTargetIndicatorAlphaChains(aButton, aPanelNum)
 	end
 
 	if InCombatLockdown() then
+		sPendingAlphaChainRebuild = true;
+
 		return false;
 	end
 
@@ -663,6 +723,8 @@ function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 	end
 
 	if InCombatLockdown() then
+		sPendingAlphaChainRebuild = true;
+
 		return false;
 	end
 
@@ -721,10 +783,13 @@ local tStep;
 local tSecretBool;
 local tNonSecretAlpha;
 local tIsActive;
+local tIsBoolTrue;
 local tIndicatorBar;
 local tFrameGetter;
 local tMinOverrideIndex;
 local tOverride;
+local tStepItemColor;
+local tIsOpacityOnlyStep;
 function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 
 	if not anInfo then
@@ -732,12 +797,16 @@ function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 	end
 
 	if not sGlobalAlphaChains[aButton] then
+		VUHDO_resetAlphaChainWrappersForIndicator(aButton, anIndicatorName);
+
 		return;
 	end
 
 	tChain = sGlobalAlphaChains[aButton][anIndicatorName];
 
 	if not tChain then
+		VUHDO_resetAlphaChainWrappersForIndicator(aButton, anIndicatorName);
+
 		return;
 	end
 
@@ -788,7 +857,10 @@ function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 	for tIdx = 1, #tChain["steps"] do
 		tStep = tChain["steps"][tIdx];
 
-		if tMinOverrideIndex and tStep["index"] > tMinOverrideIndex then
+		tStepItemColor = tStep["item"] and tStep["item"]["color"];
+		tIsOpacityOnlyStep = tStepItemColor and tStepItemColor["useOpacity"] and not tStepItemColor["useBackground"];
+
+		if tMinOverrideIndex and tStep["index"] > tMinOverrideIndex and not tIsOpacityOnlyStep then
 			tStep["frame"]:SetAlpha(1);
 		else
 			tIsActive, _, _, _, _, _, _, _, _, _, _, tSecretBool = tStep["special"]["validator"](anInfo, tStep["item"]);
@@ -796,7 +868,13 @@ function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 			if tSecretBool ~= nil then
 				tStep["frame"]:SetAlphaFromBoolean(tSecretBool, tStep["trueAlpha"], tStep["falseAlpha"]);
 			else
-				tStep["frame"]:SetAlpha(tIsActive and tStep["falseAlpha"] or tStep["trueAlpha"]);
+				if tStep["special"]["isInverted"] then
+					tIsBoolTrue = not tIsActive;
+				else
+					tIsBoolTrue = tIsActive;
+				end
+
+				tStep["frame"]:SetAlpha(tIsBoolTrue and tStep["trueAlpha"] or tStep["falseAlpha"]);
 			end
 		end
 	end
@@ -812,12 +890,16 @@ local tIndicatorChains;
 function VUHDO_updateAllIndicatorAlphaChains(aButton, anInfo)
 
 	if not anInfo then
+		VUHDO_resetAlphaChainWrappers(aButton);
+
 		return;
 	end
 
 	tIndicatorChains = sGlobalAlphaChains[aButton];
 
 	if not tIndicatorChains then
+		VUHDO_resetAlphaChainWrappers(aButton);
+
 		return;
 	end
 
@@ -867,6 +949,8 @@ end
 function VUHDO_rebuildAllAlphaChains()
 
 	for tButton, tIndicatorChains in pairs(sGlobalAlphaChains) do
+		VUHDO_resetAlphaChainWrappers(tButton);
+
 		for tIndicatorName, tChain in pairs(tIndicatorChains) do
 			sAlphaChainPool:release(tChain);
 		end
@@ -958,8 +1042,10 @@ local function VUHDO_applyRawColorToTarget(aTarget, aTargetType, aR, aG, aB, aA,
 
 	if aLayerTemplate["useOpacity"] and aA then
 		tEffectiveAlpha = aA;
-	else
+	elseif aLayerTemplate["useOpacity"] then
 		tEffectiveAlpha = sCurrentOpacity;
+	else
+		tEffectiveAlpha = 1;
 	end
 
 	if aTargetType == VUHDO_TARGET_TYPE_BAR then
@@ -977,11 +1063,51 @@ end
 
 
 --
+local tResetBarText;
+local tResetBarTextSolo;
+local tResetLifeText;
+function VUHDO_resetBarTextVertexColor(aBar)
+
+	if not aBar["booleanTextStamped"] then
+		return;
+	end
+
+	tResetBarText = VUHDO_getBarText(aBar);
+
+	if tResetBarText then
+		tResetBarText:SetVertexColor(1, 1, 1, 1);
+	end
+
+	tResetBarTextSolo = VUHDO_getBarTextSolo(aBar);
+
+	if tResetBarTextSolo then
+		tResetBarTextSolo:SetVertexColor(1, 1, 1, 1);
+	end
+
+	tResetLifeText = VUHDO_getLifeText(aBar);
+
+	if tResetLifeText then
+		tResetLifeText:SetVertexColor(1, 1, 1, 1);
+	end
+
+	aBar["booleanTextStamped"] = nil;
+
+	VUHDO_restoreLifeTextAlpha(aBar);
+
+	return;
+
+end
+
+
+
+--
 local tBarText;
 local tBarTextSolo;
 local tLifeText;
 local tInactiveMixin;
 local function VUHDO_applyTextColorToBar(aBar, aR, aG, aB)
+
+	VUHDO_resetBarTextVertexColor(aBar);
 
 	if not aBar["booleanTextInactiveMixin"] then
 		aBar["booleanTextInactiveMixin"] = CreateColor(1, 1, 1, 1);
@@ -1043,6 +1169,8 @@ local function VUHDO_applyBooleanTextToBar(aBar, aSecretBool, aTrueTextMixin, aF
 		tLifeText:SetVertexColorFromBoolean(aSecretBool, aTrueTextMixin, aFalseTextMixin);
 	end
 
+	aBar["booleanTextStamped"] = true;
+
 	VUHDO_restoreLifeTextAlpha(aBar);
 
 	return;
@@ -1055,6 +1183,8 @@ end
 local function VUHDO_applyBooleanTextLayers(aBar, aLayerTemplate)
 
 	if not aLayerTemplate["hasBools"] then
+		VUHDO_resetBarTextVertexColor(aBar);
+
 		return;
 	end
 
@@ -1074,6 +1204,8 @@ local function VUHDO_applyBooleanTextLayers(aBar, aLayerTemplate)
 	end
 
 	if not tWinningTextIdx then
+		VUHDO_resetBarTextVertexColor(aBar);
+
 		return;
 	end
 

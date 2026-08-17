@@ -2126,7 +2126,6 @@ do
 	local tIsInverted;
 	local tOrientation;
 	local tClickPar;
-	local tIsAlphaChainRebuilt;
 	local tStatusTexture;
 	function VUHDO_initHealButton(aButton, aPanelNum)
 
@@ -2233,14 +2232,12 @@ do
 		end
 
 		if sSecretsEnabled then
-			tIsAlphaChainRebuilt = VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
-			tIsAlphaChainRebuilt = VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum) or tIsAlphaChainRebuilt;
-			tIsAlphaChainRebuilt = VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum) or tIsAlphaChainRebuilt;
-			tIsAlphaChainRebuilt = VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTotButton(aButton), aPanelNum) or tIsAlphaChainRebuilt;
+			VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum);
+			VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum);
+			VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTargetButton(aButton), aPanelNum);
+			VUHDO_buildTargetIndicatorAlphaChains(VUHDO_getTotButton(aButton), aPanelNum);
 
-			if tIsAlphaChainRebuilt then
-				VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());
-			end
+			VUHDO_fixFrameLevels(true, aButton, aButton:GetFrameLevel(), aButton:GetChildren());
 		end
 
 		aButton["initRevision"] = sPanelInitRevision[aPanelNum] or 0;

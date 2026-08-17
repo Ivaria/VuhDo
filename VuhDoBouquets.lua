@@ -1492,7 +1492,7 @@ do
 			tItem = tBouquet[tCnt];
 			tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
 
-			if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] then
+			if tSpecial and tSpecial["isGlobal"] and tItem["color"] and tItem["color"]["useOpacity"] and not tItem["color"]["useBackground"] then
 				if not tTemplate["globalOpacityNames"] then
 					tTemplate["globalOpacityNames"] = { };
 				end
@@ -1697,7 +1697,7 @@ do
 							["falseColorMixin"] = tTrueColor,
 							["color"] = tItem["color"],
 							["trueAlpha"] = 0,
-							["falseAlpha"] = tItem["color"]["useOpacity"] and 1 or (tItem["color"]["O"] or 1),
+							["falseAlpha"] = tItem["color"]["useOpacity"] and (tItem["color"]["O"] or 1) or 1,
 							["activeTextColorMixin"] = tTrueTextColor,
 						};
 					else
@@ -1706,7 +1706,7 @@ do
 							["trueColorMixin"] = tTrueColor,
 							["falseColorMixin"] = sTransparentColor,
 							["color"] = tItem["color"],
-							["trueAlpha"] = tItem["color"]["useOpacity"] and 1 or (tItem["color"]["O"] or 1),
+							["trueAlpha"] = tItem["color"]["useOpacity"] and (tItem["color"]["O"] or 1) or 1,
 							["falseAlpha"] = 0,
 							["activeTextColorMixin"] = tTrueTextColor,
 						};

@@ -94,6 +94,7 @@ local VUHDO_processPendingAuraContainerBuilds;
 local VUHDO_processPendingNativeAuraSounds;
 local VUHDO_flushPendingOverlayRebuild;
 local VUHDO_flushPendingOverlayAcquires;
+local VUHDO_flushPendingAlphaChainRebuild;
 local VUHDO_checkAuraDataRestrictedState;
 local VUHDO_syncAuraContainersForUnit;
 local VUHDO_syncAuraContainersForAllRaidUnits;
@@ -598,6 +599,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_processPendingNativeAuraSounds = _G["VUHDO_processPendingNativeAuraSounds"];
 	VUHDO_flushPendingOverlayRebuild = _G["VUHDO_flushPendingOverlayRebuild"];
 	VUHDO_flushPendingOverlayAcquires = _G["VUHDO_flushPendingOverlayAcquires"];
+	VUHDO_flushPendingAlphaChainRebuild = _G["VUHDO_flushPendingAlphaChainRebuild"];
 	VUHDO_checkAuraDataRestrictedState = _G["VUHDO_checkAuraDataRestrictedState"];
 	VUHDO_syncAuraContainersForUnit = _G["VUHDO_syncAuraContainersForUnit"];
 	VUHDO_syncAuraContainersForAllRaidUnits = _G["VUHDO_syncAuraContainersForAllRaidUnits"];
@@ -1154,6 +1156,8 @@ do
 				VUHDO_flushPendingOverlayRebuild();
 
 				VUHDO_flushPendingOverlayAcquires();
+
+				VUHDO_flushPendingAlphaChainRebuild();
 			end
 
 			if VUHDO_OPTIONS_SHOW_AFTER_BATTLE and VuhDoNewOptionsTabbedFrame and not VuhDoNewOptionsTabbedFrame:IsShown() then

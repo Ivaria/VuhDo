@@ -56,6 +56,8 @@ local VUHDO_stopUnitButtonAuraGroupGlow;
 local VUHDO_refreshPrivateAuras;
 local VUHDO_getRealParent;
 local VUHDO_setOverlayChainBaselineColor;
+local VUHDO_hideOverlayFillChainBackground;
+local VUHDO_resetBarTextVertexColor;
 
 local VUHDO_PANEL_SETUP;
 local VUHDO_BUTTON_CACHE;
@@ -149,6 +151,8 @@ function VUHDO_customHealthInitBurstCache()
 	VUHDO_refreshPrivateAuras = _G["VUHDO_refreshPrivateAuras"];
 	VUHDO_getRealParent = _G["VUHDO_getRealParent"];
 	VUHDO_setOverlayChainBaselineColor = _G["VUHDO_setOverlayChainBaselineColor"];
+	VUHDO_hideOverlayFillChainBackground = _G["VUHDO_hideOverlayFillChainBackground"];
+	VUHDO_resetBarTextVertexColor = _G["VUHDO_resetBarTextVertexColor"];
 
 	return;
 
@@ -1254,6 +1258,8 @@ do
 				elseif aColor then
 					VUHDO_setStatusBarVuhDoColor(tHealthBar, aColor, aMaxColor);
 
+					VUHDO_resetBarTextVertexColor(tHealthBar);
+
 					if aColor["useText"] then
 						VUHDO_getBarText(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
 						VUHDO_getBarTextSolo(tHealthBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
@@ -1403,6 +1409,8 @@ do
 
 					VUHDO_setOverlayChainBaselineColor(tButton, sTransparentColor);
 				end
+
+				VUHDO_hideOverlayFillChainBackground(tButton);
 
 				if sSecretsEnabled then
 					VUHDO_updateIndicatorAlphaChain(tButton, "BACKGROUND_BAR", VUHDO_RAID[aUnit]);

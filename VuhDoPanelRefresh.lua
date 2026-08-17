@@ -42,6 +42,8 @@ local VUHDO_getPanelButtonInitRev;
 local VUHDO_startRefreshButtonInits;
 local VUHDO_enqueueRefreshButtonInit;
 local VUHDO_waitRefreshButtonInits;
+local VUHDO_resetAlphaChainWrappers;
+local VUHDO_clearBooleanOverlays;
 
 local sRefreshUiNoMembers;
 local sShowPanels;
@@ -90,6 +92,8 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_startRefreshButtonInits = _G["VUHDO_startRefreshButtonInits"];
 	VUHDO_enqueueRefreshButtonInit = _G["VUHDO_enqueueRefreshButtonInit"];
 	VUHDO_waitRefreshButtonInits = _G["VUHDO_waitRefreshButtonInits"];
+	VUHDO_resetAlphaChainWrappers = _G["VUHDO_resetAlphaChainWrappers"];
+	VUHDO_clearBooleanOverlays = _G["VUHDO_clearBooleanOverlays"];
 
 	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
 		sRefreshUiNoMembers = _G["VUHDO_deferRefreshUiNoMembers"];
@@ -149,6 +153,9 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 			tButtonIdx = tButtonIdx + 1;
 
 			if tButton["raidid"] ~= tUnit then
+				VUHDO_resetAlphaChainWrappers(tButton);
+				VUHDO_clearBooleanOverlays(tButton);
+
 				VUHDO_setupAllHealButtonAttributes(tButton, tUnit, false, 70 == tModelId, false, false); -- VUHDO_ID_VEHICLES
 
 				if VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP[aPanelNum] and VUHDO_PANEL_SETUP[aPanelNum]["SCALING"]["showTarget"] then
@@ -201,6 +208,9 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 		VUHDO_clearUnitAuraFrames(tButton);
 
 		VUHDO_clearAuraContainersForButton(tButton);
+
+		VUHDO_resetAlphaChainWrappers(tButton);
+		VUHDO_clearBooleanOverlays(tButton);
 
 		VUHDO_PixelUtil.Hide(tButton);
 		tButtonIdx = tButtonIdx + 1;

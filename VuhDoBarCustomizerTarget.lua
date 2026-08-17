@@ -57,6 +57,7 @@ local VUHDO_applyAllLayersToBar;
 local VUHDO_getBarText;
 local VUHDO_getBarTextSolo;
 local VUHDO_getLifeText;
+local VUHDO_resetBarTextVertexColor;
 
 
 
@@ -86,6 +87,7 @@ function VUHDO_customTargetInitLocalOverrides()
 	VUHDO_getBarText = _G["VUHDO_getBarText"];
 	VUHDO_getBarTextSolo = _G["VUHDO_getBarTextSolo"];
 	VUHDO_getLifeText = _G["VUHDO_getLifeText"];
+	VUHDO_resetBarTextVertexColor = _G["VUHDO_resetBarTextVertexColor"];
 
 end
 
@@ -252,6 +254,8 @@ local function VUHDO_targetHealthBouquetCallback(aButton, aUnit, anIsActive, anI
 			VUHDO_applyAllLayersToBar(aButton, tBar, aLayerTemplate);
 		elseif aColor then
 			VUHDO_setStatusBarVuhDoColor(tBar, aColor);
+
+			VUHDO_resetBarTextVertexColor(tBar);
 
 			VUHDO_getBarText(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
 			VUHDO_getBarTextSolo(tBar):SetTextColor(aColor["TR"], aColor["TG"], aColor["TB"]);
