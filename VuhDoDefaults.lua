@@ -15,6 +15,7 @@ VUHDO_AURA_IGNORE_LIST_DEFAULTS = {
 	[264689] = true, -- Fatigued (Primal Fury)
 	[26013] = true, -- Deserter (LFG penalty)
 	[71041] = true, -- Dungeon Deserter
+	[1313593] = true, -- Deserter (Midnight)
 	[95809] = true, -- Insanity (Drums variant)
 	[160455] = true, -- Fatigued (Drums of Fury)
 	[390435] = true, -- Exhaustion (alternate)
