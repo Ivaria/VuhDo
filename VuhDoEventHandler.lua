@@ -1544,6 +1544,8 @@ do
 	local tHelpText;
 	local tCurrentValue;
 	local tCount;
+	local tDumpIndicator;
+	local tDumpVerbose;
 	function VUHDO_slashCmd(aCommand)
 
 		tParsedTexts = VUHDO_textParse(aCommand);
@@ -1863,7 +1865,39 @@ do
 			elseif strfind(tSubCommand, "level") then
 				VUHDO_dumpAuraContainerLevels(tParsedTexts[3] or "player");
 			elseif strfind(tSubCommand, "dump") then
-				VUHDO_dumpAuraDiagnostics(tParsedTexts[3] or "player");
+				tUnit = "player";
+				tDumpIndicator = nil;
+				tDumpVerbose = false;
+
+				for tDumpIdx = 3, #tParsedTexts do
+					tArgument = tParsedTexts[tDumpIdx];
+
+					if tArgument == "-v" then
+						tDumpVerbose = true;
+					elseif UnitExists(tArgument) or tArgument == "player" or tArgument == "target" or strfind(tArgument, "^raid") or strfind(tArgument, "^party") then
+						tUnit = tArgument;
+					elseif tArgument and tArgument ~= "" then
+						tDumpIndicator = strupper(tArgument);
+					end
+				end
+
+				VUHDO_dumpAuraDiagnostics(tUnit, tDumpIndicator, tDumpVerbose);
+			elseif strfind(tSubCommand, "nopool") then
+				tArgument = strlower(tParsedTexts[3] or "");
+
+				if tArgument == "on" then
+					VUHDO_setAuraContainerPoolDisabled(true);
+
+					VUHDO_Msg("Aura container pooling disabled.");
+				elseif tArgument == "off" then
+					VUHDO_setAuraContainerPoolDisabled(false);
+
+					VUHDO_Msg("Aura container pooling enabled.");
+				else
+					VUHDO_Msg(format("Aura container pooling is %s.", VUHDO_isAuraContainerPoolDisabled() and "disabled" or "enabled"));
+				end
+			elseif strfind(tSubCommand, "rebuild") then
+				VUHDO_rebuildAuraOverlays();
 			elseif strfind(tSubCommand, "gate") then
 				VUHDO_testAuraContainerGates();
 			elseif strfind(tSubCommand, "test") then

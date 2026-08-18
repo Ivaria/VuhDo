@@ -237,7 +237,9 @@ local sAuraTimerColorCurveFull;
 local sAuraTimerColorCurvesByThreshold = { };
 local sChainBaselineColors = { };
 local sChainBaselineFrames = { };
+local sChainBackgroundFillOwners = { };
 local sAuraContainerPool = { };
+local sAuraPoolDisabled = false;
 local sPoolKeyScratch = { };
 
 local sBorderTexture;
@@ -1201,12 +1203,12 @@ do
 						tFillMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST");
 
 						VUHDO_PixelUtil.ApplySettings(tFillMask);
+					end
 
-						if anButtonSetup["shadowValueMode"] == "cover" then
-							tFillMask:SetAllPoints(anButtonSetup["targetBar"]);
-						else
-							tFillMask:SetAllPoints(anButtonSetup["targetBar"]:GetStatusBarTexture());
-						end
+					if anButtonSetup["shadowValueMode"] == "cover" then
+						tFillMask:SetAllPoints(anButtonSetup["targetBar"]);
+					else
+						tFillMask:SetAllPoints(anButtonSetup["targetBar"]:GetStatusBarTexture());
 					end
 
 					if anButtonSetup["dispelFill"] then
@@ -1317,6 +1319,7 @@ do
 			if tFillTexture then
 				tFillTexture:SetVertexColor(1, 1, 1, 1);
 				tFillTexture:SetAlpha(0.2);
+				tFillTexture:Show();
 			end
 
 			VUHDO_applyDispelOverlayGradientTexture(aAuraButton, anButtonSetup, sAuraBorderOptions);
@@ -1810,11 +1813,10 @@ do
 	local tChainBaselineFrame;
 	local tChainBaselineMask;
 	local tChainBaselineTexture;
-	local tChainTargetTexture;
 	local tChainButtonName;
-	local tChainStoredBaselineColor;
 	local tPreviousBaselineFrame;
 	local tPreviousBaselineMask;
+	local tPreviousBackgroundFillOwner;
 	local tChainBaselineTopInset;
 	function VUHDO_setupOverlayFillChain(aContainer, aContainerTemplate, aContainerData)
 
@@ -1859,7 +1861,6 @@ do
 				tChainBaselineFrame:ClearAllPoints();
 				tChainBaselineFrame:SetAllPoints(tChainTargetBar);
 
-				tChainBaselineFrame:Show();
 				tChainBaselineTexture:Show();
 
 				tChainBaselineMask:ClearAllPoints();
@@ -1870,27 +1871,25 @@ do
 				VUHDO_PixelUtil.SetPoint(tChainBaselineMask, "TOPLEFT", aContainer, "BOTTOMLEFT", 0, tChainBaselineTopInset);
 				VUHDO_PixelUtil.SetPoint(tChainBaselineMask, "BOTTOMRIGHT", tChainTargetBar, "BOTTOMRIGHT", 0, 0);
 
-				tChainTargetTexture = tChainTargetBar:GetStatusBarTexture();
+				tPreviousBackgroundFillOwner = sChainBackgroundFillOwners[tChainTargetBar];
 
-				if tChainTargetTexture then
-					tChainTargetTexture:SetAlpha(0);
-
-					aContainerData["backgroundFillHidden"] = true;
+				if tPreviousBackgroundFillOwner and tPreviousBackgroundFillOwner ~= aContainerData then
+					tPreviousBackgroundFillOwner["ownsBackgroundFill"] = nil;
+					tPreviousBackgroundFillOwner["backgroundFillHidden"] = nil;
 				end
+
+				aContainerData["ownsBackgroundFill"] = true;
 
 				aContainerData["chainBaselineFrame"] = tChainBaselineFrame;
 				aContainerData["chainBaselineTexture"] = tChainBaselineTexture;
 
 				sChainBaselineFrames[tChainTargetBar] = tChainBaselineFrame;
+				sChainBackgroundFillOwners[tChainTargetBar] = aContainerData;
 
 				tChainButtonName = tChainTargetBar:GetParent() and tChainTargetBar:GetParent():GetName();
 
 				if tChainButtonName then
-					tChainStoredBaselineColor = sChainBaselineColors[tChainButtonName];
-
-					if not tChainStoredBaselineColor and not tChainBaselineTexture:IsForbidden() then
-						tChainBaselineTexture:SetColorTexture(0, 0, 0, 0);
-					end
+					VUHDO_applyStoredChainBaselineColor(tChainButtonName, aContainerData);
 				end
 			end
 		end
@@ -2380,6 +2379,10 @@ do
 	--
 	local function VUHDO_getAuraContainerPoolKey(aContainerTemplate)
 
+		if sAuraPoolDisabled then
+			return nil;
+		end
+
 		if not aContainerTemplate then
 			return nil;
 		end
@@ -2451,6 +2454,8 @@ do
 			return;
 		end
 
+		VUHDO_restoreAuraContainerGroups(aContainer, aContainerData);
+
 		tSlotKeys = aContainerData["slotKeys"];
 		tSlotTemplateRefs = aContainerData["slotTemplateRefs"];
 		tEngineSlotCnt = 0;
@@ -2485,6 +2490,7 @@ do
 			tRecordedKey = tGroupKeys and tGroupKeys[tGroupCnt];
 
 			if tGroup and tRecordedKey then
+				aContainer:SetAuraGroupMaxFrameCount(tRecordedKey, tGroup["maxFrameCount"] or 5);
 				aContainer:SetAuraGroupFilterString(tRecordedKey, tGroup["filterString"] or "HELPFUL");
 				aContainer:SetAuraGroupCandidateFilters(tRecordedKey, tGroup["candidateFilters"]);
 
@@ -2660,8 +2666,8 @@ do
 	local tRestoreOpacity;
 	local tRestoreChainBaselineFrame;
 	local tRestoreChainBaselineMask;
-	local tRestoreTargetBarTexture;
 	local tRestoreContainer;
+	local tRestoreBackgroundFillOwner;
 	local function VUHDO_restoreOverlayFillChainBackground(aContainerData)
 
 		if not aContainerData then
@@ -2695,32 +2701,34 @@ do
 			end
 		end
 
-		if aContainerData["backgroundFillHidden"] then
+		if aContainerData["ownsBackgroundFill"] then
 			tRestoreTargetBar = aContainerData["overlayTargetBar"];
 
 			if tRestoreTargetBar then
-				tRestoreTargetBarTexture = tRestoreTargetBar:GetStatusBarTexture();
-				tRestoreButtonName = tRestoreTargetBar:GetParent() and tRestoreTargetBar:GetParent():GetName();
-				tRestoreStoredColor = tRestoreButtonName and sChainBaselineColors[tRestoreButtonName];
+				tRestoreBackgroundFillOwner = sChainBackgroundFillOwners[tRestoreTargetBar];
 
-				if tRestoreStoredColor then
-					tRestoreOpacity = tRestoreStoredColor["O"];
+				if tRestoreBackgroundFillOwner == aContainerData then
+					sChainBackgroundFillOwners[tRestoreTargetBar] = nil;
 
-					if tRestoreOpacity == nil then
-						tRestoreOpacity = 1;
+					tRestoreButtonName = tRestoreTargetBar:GetParent() and tRestoreTargetBar:GetParent():GetName();
+					tRestoreStoredColor = tRestoreButtonName and sChainBaselineColors[tRestoreButtonName];
+
+					if tRestoreStoredColor then
+						tRestoreOpacity = tRestoreStoredColor["O"];
+
+						if tRestoreOpacity == nil then
+							tRestoreOpacity = 1;
+						end
+
+						tRestoreTargetBar:SetStatusBarColor(tRestoreStoredColor["R"] or 0, tRestoreStoredColor["G"] or 0, tRestoreStoredColor["B"] or 0, tRestoreOpacity);
 					end
 
-					tRestoreTargetBar:SetStatusBarColor(tRestoreStoredColor["R"] or 0, tRestoreStoredColor["G"] or 0, tRestoreStoredColor["B"] or 0, tRestoreOpacity);
-				else
-					tRestoreTargetBar:SetStatusBarColor(0, 0, 0, 0);
-				end
-
-				if tRestoreTargetBarTexture then
-					tRestoreTargetBarTexture:SetAlpha(1);
+					VUHDO_showOverlayFillChainBackgroundForData(aContainerData);
 				end
 			end
 		end
 
+		aContainerData["ownsBackgroundFill"] = nil;
 		aContainerData["backgroundFillHidden"] = nil;
 		aContainerData["chainBaselineFrame"] = nil;
 		aContainerData["chainBaselineTexture"] = nil;
@@ -2773,6 +2781,7 @@ do
 	local tContainerParent;
 	local tUsesDispelTextures;
 	local tDispelColorGen;
+	local tRefreshSlotTemplateRefs;
 	function VUHDO_acquireAuraContainer(aButton, aContainerTemplate)
 
 		if not aButton or not aContainerTemplate then
@@ -2840,6 +2849,18 @@ do
 				sPendingClassColors[tContainer] = nil;
 
 				VUHDO_applyAuraContainerAnchor(tContainer, aContainerTemplate["anchor"], tContainerParent);
+
+				tRefreshSlotTemplateRefs = tContainerData["slotTemplateRefs"];
+
+				if tRefreshSlotTemplateRefs then
+					for tRefreshSlotTemplateRefCnt = 1, #tRefreshSlotTemplateRefs do
+						tTemplateRef = tRefreshSlotTemplateRefs[tRefreshSlotTemplateRefCnt];
+
+						if tTemplateRef then
+							tTemplateRef["containerLevel"] = tContainer:GetFrameLevel();
+						end
+					end
+				end
 
 				if aContainerTemplate["isOverlay"] then
 					tContainer:EnableMouse(false);
@@ -2953,11 +2974,35 @@ do
 			end
 
 			tinsert(sAuraContainerPool[tPoolKey], aContainerData);
+		else
+			aContainerData["container"] = nil;
+
+			tContainer:Hide();
 		end
 
 		return;
 
 	end
+
+end
+
+
+
+--
+function VUHDO_setAuraContainerPoolDisabled(anIsDisabled)
+
+	sAuraPoolDisabled = anIsDisabled and true or false;
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_isAuraContainerPoolDisabled()
+
+	return sAuraPoolDisabled;
 
 end
 
@@ -2982,6 +3027,8 @@ local tBaselineStoredColor;
 local tBaselineIndicatorEntry;
 local tBaselineContainerData;
 local tBaselineTexture;
+local tBaselineOpacity;
+local tBaselineColorChanged;
 function VUHDO_setOverlayChainBaselineColor(aButton, aColor)
 
 	if not aButton or not aColor then
@@ -2996,27 +3043,27 @@ function VUHDO_setOverlayChainBaselineColor(aButton, aColor)
 
 	tBaselineStoredColor = sChainBaselineColors[tBaselineButtonName];
 
-	if tBaselineStoredColor
-		and tBaselineStoredColor["R"] == (aColor["R"] or 0)
-		and tBaselineStoredColor["G"] == (aColor["G"] or 0)
-		and tBaselineStoredColor["B"] == (aColor["B"] or 0)
-		and tBaselineStoredColor["O"] == (aColor["O"] == nil and 1 or aColor["O"]) then
-		return;
-	end
+	tBaselineColorChanged = not tBaselineStoredColor
+		or tBaselineStoredColor["R"] ~= (aColor["R"] or 0)
+		or tBaselineStoredColor["G"] ~= (aColor["G"] or 0)
+		or tBaselineStoredColor["B"] ~= (aColor["B"] or 0)
+		or tBaselineStoredColor["O"] ~= (aColor["O"] == nil and 1 or aColor["O"]);
 
-	if not tBaselineStoredColor then
-		tBaselineStoredColor = { };
+	if tBaselineColorChanged then
+		if not tBaselineStoredColor then
+			tBaselineStoredColor = { };
 
-		sChainBaselineColors[tBaselineButtonName] = tBaselineStoredColor;
-	end
+			sChainBaselineColors[tBaselineButtonName] = tBaselineStoredColor;
+		end
 
-	tBaselineStoredColor["R"] = aColor["R"] or 0;
-	tBaselineStoredColor["G"] = aColor["G"] or 0;
-	tBaselineStoredColor["B"] = aColor["B"] or 0;
-	tBaselineStoredColor["O"] = aColor["O"];
+		tBaselineStoredColor["R"] = aColor["R"] or 0;
+		tBaselineStoredColor["G"] = aColor["G"] or 0;
+		tBaselineStoredColor["B"] = aColor["B"] or 0;
+		tBaselineStoredColor["O"] = aColor["O"];
 
-	if tBaselineStoredColor["O"] == nil then
-		tBaselineStoredColor["O"] = 1;
+		if tBaselineStoredColor["O"] == nil then
+			tBaselineStoredColor["O"] = 1;
+		end
 	end
 
 	tBaselineIndicatorEntry = VUHDO_OVERLAY_CONTAINERS[tBaselineButtonName] and VUHDO_OVERLAY_CONTAINERS[tBaselineButtonName]["BACKGROUND_BAR"];
@@ -3024,8 +3071,95 @@ function VUHDO_setOverlayChainBaselineColor(aButton, aColor)
 	tBaselineTexture = tBaselineContainerData and tBaselineContainerData["chainBaselineTexture"];
 
 	if tBaselineTexture and not tBaselineTexture:IsForbidden() then
-		tBaselineTexture:SetColorTexture(tBaselineStoredColor["R"], tBaselineStoredColor["G"], tBaselineStoredColor["B"], tBaselineStoredColor["O"]);
+		tBaselineStoredColor = sChainBaselineColors[tBaselineButtonName];
+		tBaselineOpacity = tBaselineStoredColor and tBaselineStoredColor["O"];
+
+		if tBaselineOpacity == nil then
+			tBaselineOpacity = 1;
+		end
+
+		tBaselineTexture:SetColorTexture(tBaselineStoredColor["R"] or 0, tBaselineStoredColor["G"] or 0, tBaselineStoredColor["B"] or 0, tBaselineOpacity);
 	end
+
+	return;
+
+end
+
+
+
+--
+local tShowFillTargetBar;
+local tShowFillTargetTexture;
+local tShowChainBaselineFrame;
+function VUHDO_showOverlayFillChainBackgroundForData(aContainerData)
+
+	if not aContainerData or not aContainerData["ownsBackgroundFill"] then
+		return;
+	end
+
+	if not aContainerData["backgroundFillHidden"] then
+		return;
+	end
+
+	tShowFillTargetBar = aContainerData["overlayTargetBar"];
+
+	if not tShowFillTargetBar then
+		return;
+	end
+
+	tShowFillTargetTexture = tShowFillTargetBar:GetStatusBarTexture();
+
+	if tShowFillTargetTexture then
+		tShowFillTargetTexture:SetAlpha(1);
+	end
+
+	tShowChainBaselineFrame = aContainerData["chainBaselineFrame"];
+
+	if tShowChainBaselineFrame then
+		tShowChainBaselineFrame:Hide();
+	end
+
+	aContainerData["backgroundFillHidden"] = nil;
+
+	return;
+
+end
+
+
+
+--
+local tHideFillTargetBar;
+local tHideFillTargetTexture;
+local tHideChainBaselineFrame;
+function VUHDO_hideOverlayFillChainBackgroundForData(aContainerData)
+
+	if not aContainerData or not aContainerData["ownsBackgroundFill"] then
+		return;
+	end
+
+	if not aContainerData["lastSyncedEnabled"] then
+		return;
+	end
+
+	tHideFillTargetBar = aContainerData["overlayTargetBar"];
+
+	if not tHideFillTargetBar then
+		return;
+	end
+
+	tHideFillTargetTexture = tHideFillTargetBar:GetStatusBarTexture();
+
+	if tHideFillTargetTexture then
+		tHideFillTargetTexture:SetAlpha(0);
+	end
+
+	tHideChainBaselineFrame = aContainerData["chainBaselineFrame"];
+
+	if tHideChainBaselineFrame then
+		tHideChainBaselineFrame:Show();
+	end
+
+	aContainerData["backgroundFillHidden"] = true;
 
 	return;
 
@@ -3037,8 +3171,30 @@ end
 local tHideFillButtonName;
 local tHideFillIndicatorEntry;
 local tHideFillContainerData;
-local tHideFillTargetBar;
-local tHideFillTargetTexture;
+function VUHDO_showOverlayFillChainBackground(aButton)
+
+	if not aButton then
+		return;
+	end
+
+	tHideFillButtonName = aButton:GetName();
+
+	if not tHideFillButtonName then
+		return;
+	end
+
+	tHideFillIndicatorEntry = VUHDO_OVERLAY_CONTAINERS[tHideFillButtonName] and VUHDO_OVERLAY_CONTAINERS[tHideFillButtonName]["BACKGROUND_BAR"];
+	tHideFillContainerData = tHideFillIndicatorEntry and tHideFillIndicatorEntry["fillChain"];
+
+	VUHDO_showOverlayFillChainBackgroundForData(tHideFillContainerData);
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_hideOverlayFillChainBackground(aButton)
 
 	if not aButton then
@@ -3054,21 +3210,7 @@ function VUHDO_hideOverlayFillChainBackground(aButton)
 	tHideFillIndicatorEntry = VUHDO_OVERLAY_CONTAINERS[tHideFillButtonName] and VUHDO_OVERLAY_CONTAINERS[tHideFillButtonName]["BACKGROUND_BAR"];
 	tHideFillContainerData = tHideFillIndicatorEntry and tHideFillIndicatorEntry["fillChain"];
 
-	if not tHideFillContainerData or not tHideFillContainerData["backgroundFillHidden"] then
-		return;
-	end
-
-	tHideFillTargetBar = tHideFillContainerData["overlayTargetBar"];
-
-	if not tHideFillTargetBar then
-		return;
-	end
-
-	tHideFillTargetTexture = tHideFillTargetBar:GetStatusBarTexture();
-
-	if tHideFillTargetTexture then
-		tHideFillTargetTexture:SetAlpha(0);
-	end
+	VUHDO_hideOverlayFillChainBackgroundForData(tHideFillContainerData);
 
 	return;
 
@@ -3089,7 +3231,11 @@ function VUHDO_applyStoredChainBaselineColor(aButtonName, aContainerData)
 	tBaselineStoredColor = sChainBaselineColors[aButtonName];
 	tBaselineTexture = aContainerData["chainBaselineTexture"];
 
-	if tBaselineStoredColor and tBaselineTexture and not tBaselineTexture:IsForbidden() then
+	if not tBaselineTexture or tBaselineTexture:IsForbidden() then
+		return;
+	end
+
+	if tBaselineStoredColor then
 		tBaselineOpacity = tBaselineStoredColor["O"];
 
 		if tBaselineOpacity == nil then
@@ -3097,6 +3243,8 @@ function VUHDO_applyStoredChainBaselineColor(aButtonName, aContainerData)
 		end
 
 		tBaselineTexture:SetColorTexture(tBaselineStoredColor["R"] or 0, tBaselineStoredColor["G"] or 0, tBaselineStoredColor["B"] or 0, tBaselineOpacity);
+	else
+		tBaselineTexture:SetColorTexture(0, 0, 0, 0);
 	end
 
 	return;
@@ -3543,6 +3691,47 @@ end
 
 
 --
+local tRestoreGroupsTemplate;
+local tRestoreGroupsKeys;
+local tRestoreGroup;
+local tRestoreGroupKey;
+local tRestoreGroupCnt;
+function VUHDO_restoreAuraContainerGroups(aContainer, aContainerData)
+
+	if not aContainer or not aContainerData or not aContainerData["groupsSuppressed"] then
+		return;
+	end
+
+	tRestoreGroupsTemplate = aContainerData["containerTemplate"];
+
+	if not tRestoreGroupsTemplate then
+		return;
+	end
+
+	tRestoreGroupsKeys = aContainerData["groupKeys"];
+
+	for tRestoreGroupCnt = 1, #(tRestoreGroupsTemplate["groups"] or sEmpty) do
+		tRestoreGroup = tRestoreGroupsTemplate["groups"][tRestoreGroupCnt];
+		tRestoreGroupKey = tRestoreGroupsKeys and tRestoreGroupsKeys[tRestoreGroupCnt];
+
+		if tRestoreGroup and tRestoreGroupKey then
+			aContainer:SetAuraGroupMaxFrameCount(tRestoreGroupKey, tRestoreGroup["maxFrameCount"] or 5);
+			aContainer:SetAuraGroupFilterString(tRestoreGroupKey, tRestoreGroup["filterString"] or "HELPFUL");
+		end
+	end
+
+	aContainerData["groupsSuppressed"] = nil;
+	aContainerData["lastSyncedAssistRestricted"] = nil;
+	aContainerData["lastSyncedAuraFilterRestricted"] = nil;
+	aContainerData["lastSyncedDisconnected"] = nil;
+
+	return;
+
+end
+
+
+
+--
 local tButton;
 local tContainerTemplate;
 local tGroupKeys;
@@ -3572,6 +3761,8 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 						aContainer:SetAuraGroupFilterString(tGroupKey, "");
 					end
 				end
+
+				aContainerData["groupsSuppressed"] = true;
 			end
 
 			tSlotKeys = aContainerData["slotKeys"];
@@ -3650,6 +3841,8 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 	if not aContainer or not aContainerData or not aUnit then
 		return;
 	end
+
+	VUHDO_restoreAuraContainerGroups(aContainer, aContainerData);
 
 	aContainer:SetUnit(aUnit);
 

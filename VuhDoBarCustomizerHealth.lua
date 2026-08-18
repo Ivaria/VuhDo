@@ -57,6 +57,7 @@ local VUHDO_refreshPrivateAuras;
 local VUHDO_getRealParent;
 local VUHDO_setOverlayChainBaselineColor;
 local VUHDO_hideOverlayFillChainBackground;
+local VUHDO_showOverlayFillChainBackground;
 local VUHDO_resetBarTextVertexColor;
 
 local VUHDO_PANEL_SETUP;
@@ -152,6 +153,7 @@ function VUHDO_customHealthInitBurstCache()
 	VUHDO_getRealParent = _G["VUHDO_getRealParent"];
 	VUHDO_setOverlayChainBaselineColor = _G["VUHDO_setOverlayChainBaselineColor"];
 	VUHDO_hideOverlayFillChainBackground = _G["VUHDO_hideOverlayFillChainBackground"];
+	VUHDO_showOverlayFillChainBackground = _G["VUHDO_showOverlayFillChainBackground"];
 	VUHDO_resetBarTextVertexColor = _G["VUHDO_resetBarTextVertexColor"];
 
 	return;
@@ -1382,7 +1384,10 @@ do
 
 
 	--
-	local tBar, tQuota;
+	local tBar;
+	local tQuota;
+	local tShouldDelegateToFillChain;
+	local tColorOpacity;
 	function VUHDO_backgroundBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCounter, aMaxValue, aColor, aBuffName, aBouquetName, aLevel, aCurrValue2, aClipL, aClipR, aClipT, aClipB, aMaxColor, aLayerTemplate)
 
 		tQuota = (anIsActive or (aMaxValue or 0) > 1) and 1 or 0;
@@ -1410,7 +1415,14 @@ do
 					VUHDO_setOverlayChainBaselineColor(tButton, sTransparentColor);
 				end
 
-				VUHDO_hideOverlayFillChainBackground(tButton);
+				tColorOpacity = aColor and (aColor["O"] == nil and 1 or aColor["O"]) or 0;
+				tShouldDelegateToFillChain = anIsActive and (aLayerTemplate or (aColor and tColorOpacity > 0));
+
+				if tShouldDelegateToFillChain then
+					VUHDO_hideOverlayFillChainBackground(tButton);
+				else
+					VUHDO_showOverlayFillChainBackground(tButton);
+				end
 
 				if sSecretsEnabled then
 					VUHDO_updateIndicatorAlphaChain(tButton, "BACKGROUND_BAR", VUHDO_RAID[aUnit]);

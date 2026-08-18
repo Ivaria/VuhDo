@@ -54,6 +54,7 @@ local VUHDO_isAuraModeContainers;
 local VUHDO_syncAllOverlayUnits;
 local VUHDO_buildAuraGroupNativeFilterString;
 local VUHDO_auraSourceMatchesFilter;
+local VUHDO_invalidateOverlayBuildKeys;
 
 local sUnitDispellableAuraId = { };
 local sUnitAuraCanColorBar = { };
@@ -263,6 +264,7 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
 	VUHDO_buildAuraGroupNativeFilterString = _G["VUHDO_buildAuraGroupNativeFilterString"];
 	VUHDO_auraSourceMatchesFilter = _G["VUHDO_auraSourceMatchesFilter"];
+	VUHDO_invalidateOverlayBuildKeys = _G["VUHDO_invalidateOverlayBuildKeys"];
 
 	sAuraColorWinnerPool = VUHDO_createTablePool("AuraColorWinner", 100, VUHDO_createAuraColorWinnerDelegate, VUHDO_cleanupAuraColorWinnerDelegate);
 	sCanColorBarGroupPool = VUHDO_createTablePool("CanColorBarGroup", 50, VUHDO_createCanColorBarGroupDelegate, VUHDO_cleanupCanColorBarGroupDelegate);
@@ -597,6 +599,8 @@ do
 				VUHDO_updateDispellableAuraForUnit(tUnit);
 			end
 		end
+
+		VUHDO_invalidateOverlayBuildKeys();
 
 		if VUHDO_isAuraDataRestricted() or VUHDO_isAuraModeContainers() then
 			VUHDO_syncAllOverlayUnits(true);
