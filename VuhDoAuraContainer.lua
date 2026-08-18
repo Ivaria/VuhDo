@@ -1815,6 +1815,7 @@ do
 	local tChainStoredBaselineColor;
 	local tPreviousBaselineFrame;
 	local tPreviousBaselineMask;
+	local tChainBaselineTopInset;
 	function VUHDO_setupOverlayFillChain(aContainer, aContainerTemplate, aContainerData)
 
 		if not aContainer or not aContainerTemplate or not aContainerTemplate["isFillChain"] then
@@ -1847,6 +1848,7 @@ do
 					tPreviousBaselineFrame:SetParent(nil);
 				end
 
+				tChainBaselineMask:SetTexture(nil);
 				tChainBaselineMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST");
 
 				VUHDO_PixelUtil.ApplySettings(tChainBaselineMask);
@@ -1862,7 +1864,10 @@ do
 
 				tChainBaselineMask:ClearAllPoints();
 
-				VUHDO_PixelUtil.SetPoint(tChainBaselineMask, "TOPLEFT", aContainer, "BOTTOMLEFT", 0, 0);
+				-- FIXME: aura containers seem to keep a one pixel minimum height
+				tChainBaselineTopInset = VUHDO_PixelUtil.RoundToPixel(1, 1);
+
+				VUHDO_PixelUtil.SetPoint(tChainBaselineMask, "TOPLEFT", aContainer, "BOTTOMLEFT", 0, tChainBaselineTopInset);
 				VUHDO_PixelUtil.SetPoint(tChainBaselineMask, "BOTTOMRIGHT", tChainTargetBar, "BOTTOMRIGHT", 0, 0);
 
 				tChainTargetTexture = tChainTargetBar:GetStatusBarTexture();
