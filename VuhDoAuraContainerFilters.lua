@@ -11,7 +11,16 @@ local twipe = table.wipe;
 local tinsert = table.insert;
 local floor = math.floor;
 
+local GetSpellName = C_Spell.GetSpellName;
 local GetSpellIDForSpellIdentifier = C_Spell.GetSpellIDForSpellIdentifier;
+
+VUHDO_AURA_NAME_TO_SPELL_IDS = { };
+local VUHDO_AURA_NAME_TO_SPELL_IDS = VUHDO_AURA_NAME_TO_SPELL_IDS;
+
+VUHDO_AURA_CONTAINER_MAPPED_SPELL_IDS = {
+	-- [200025] = { 53563 }, -- Beacon of Virtue to Beacon of Light
+};
+local VUHDO_AURA_CONTAINER_MAPPED_SPELL_IDS = VUHDO_AURA_CONTAINER_MAPPED_SPELL_IDS;
 
 local VUHDO_AURA_NATIVE_FILTER_TOKENS = {
 	["HELPFUL"] = true,
@@ -41,6 +50,7 @@ local VUHDO_BOUQUET_RESTRICTED_NON_AURA;
 local VUHDO_BOUQUET_RESTRICTED_MIXED;
 local VUHDO_SPELL_DURATION_MODE_THRESHOLD;
 local VUHDO_SPELL_NAME_TO_ID;
+local VUHDO_DEFAULT_AURA_GROUPS;
 local VUHDO_AURA_RADIOVALUE_POSITIONS;
 local VUHDO_AURA_FIXED_STRAIGHT_POSITIONS;
 local VUHDO_AURA_FIXED_DIAGONAL_POSITIONS;
@@ -187,6 +197,7 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_BOUQUET_RESTRICTED_MIXED = _G["VUHDO_BOUQUET_RESTRICTED_MIXED"];
 	VUHDO_SPELL_DURATION_MODE_THRESHOLD = _G["VUHDO_SPELL_DURATION_MODE_THRESHOLD"];
 	VUHDO_SPELL_NAME_TO_ID = _G["VUHDO_SPELL_NAME_TO_ID"];
+	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
 	VUHDO_AURA_RADIOVALUE_POSITIONS = _G["VUHDO_AURA_RADIOVALUE_POSITIONS"];
 	VUHDO_AURA_FIXED_STRAIGHT_POSITIONS = _G["VUHDO_AURA_FIXED_STRAIGHT_POSITIONS"];
 	VUHDO_AURA_FIXED_DIAGONAL_POSITIONS = _G["VUHDO_AURA_FIXED_DIAGONAL_POSITIONS"];
@@ -221,6 +232,48 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_deepCopyTable = _G["VUHDO_deepCopyTable"];
 
 	VUHDO_rebuildDispelTypeNameMaps();
+	VUHDO_rebuildDefaultAuraNameSpellIds();
+
+	return;
+
+end
+
+
+
+--
+local tValue;
+local tSpellId;
+local tSpellName;
+local tNameIds;
+function VUHDO_rebuildDefaultAuraNameSpellIds()
+
+	twipe(VUHDO_AURA_NAME_TO_SPELL_IDS);
+
+	for _, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
+		if tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST and not tGroup["isHarmful"] then
+			for _, tEntry in ipairs(tGroup["entries"] or sEmpty) do
+				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+					tValue = tEntry["value"];
+
+					if type(tValue) == "number" then
+						tSpellId = tValue;
+						tSpellName = GetSpellName(tSpellId);
+
+						if tSpellName then
+							tNameIds = VUHDO_AURA_NAME_TO_SPELL_IDS[tSpellName];
+
+							if not tNameIds then
+								tNameIds = { };
+								VUHDO_AURA_NAME_TO_SPELL_IDS[tSpellName] = tNameIds;
+							end
+
+							tNameIds[tSpellId] = true;
+						end
+					end
+				end
+			end
+		end
+	end
 
 	return;
 
@@ -360,7 +413,6 @@ end
 
 --
 local tType;
-local tSpellId;
 local tBouquetClass;
 function VUHDO_isAuraGroupContainerExpressible(aGroup)
 
@@ -436,14 +488,14 @@ function VUHDO_getAuraGroupResolvedFilters(aGroup)
 
 		for _, tEntry in ipairs(aGroup["entries"] or sEmpty) do
 			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL and tEntry["value"] then
-				tNum = VUHDO_resolveAuraContainerSpellId(tEntry["value"]);
+				tSpellIds = tSpellIds or { };
 
-				if tNum then
-					tSpellIds = tSpellIds or { };
-
-					tSpellIds[tNum] = true;
-				end
+				VUHDO_addResolvedAuraContainerSpellIds(tSpellIds, tEntry["value"]);
 			end
+		end
+
+		if tSpellIds and not next(tSpellIds) then
+			tSpellIds = nil;
 		end
 
 		if tSpellIds then
@@ -788,6 +840,80 @@ end
 
 
 --
+local tNumVal;
+local tMappedIds;
+local tScratchIds;
+local tResolveSpellId;
+function VUHDO_addResolvedAuraContainerSpellIds(aDest, aValue)
+
+	if not aDest or aValue == nil then
+		return;
+	end
+
+	if type(aValue) == "number" then
+		aDest[aValue] = true;
+
+		return;
+	end
+
+	if type(aValue) ~= "string" then
+		return;
+	end
+
+	tNumVal = tonumber(aValue);
+
+	if tNumVal then
+		aDest[tNumVal] = true;
+
+		return;
+	end
+
+	tScratchIds = nil;
+	tNameIds = VUHDO_AURA_NAME_TO_SPELL_IDS[aValue];
+
+	if tNameIds then
+		for tSpellId, _ in pairs(tNameIds) do
+			aDest[tSpellId] = true;
+			tScratchIds = tScratchIds or { };
+			tScratchIds[tSpellId] = true;
+		end
+	else
+		tResolveSpellId = VUHDO_SPELL_NAME_TO_ID[aValue];
+
+		if tResolveSpellId then
+			aDest[tResolveSpellId] = true;
+			tScratchIds = tScratchIds or { };
+			tScratchIds[tResolveSpellId] = true;
+		else
+			tResolveSpellId = GetSpellIDForSpellIdentifier(aValue);
+
+			if tResolveSpellId then
+				aDest[tResolveSpellId] = true;
+				tScratchIds = tScratchIds or { };
+				tScratchIds[tResolveSpellId] = true;
+			end
+		end
+	end
+
+	if tScratchIds then
+		for tScratchSpellId, _ in pairs(tScratchIds) do
+			tMappedIds = VUHDO_AURA_CONTAINER_MAPPED_SPELL_IDS[tScratchSpellId];
+
+			if tMappedIds then
+				for tMappedCnt = 1, #tMappedIds do
+					aDest[tMappedIds[tMappedCnt]] = true;
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 local tResult;
 local tNum;
 function VUHDO_resolveGroupExcludeSpellIDs(aGroup)
@@ -801,11 +927,7 @@ function VUHDO_resolveGroupExcludeSpellIDs(aGroup)
 
 		-- FIXME: 12.1 only supports spell ID ignore list entries
 		for tKey, _ in pairs(VUHDO_AURA_IGNORE_LIST or sEmpty) do
-			tNum = VUHDO_resolveAuraContainerSpellId(tKey);
-
-			if tNum then
-				tResult[tNum] = true;
-			end
+			VUHDO_addResolvedAuraContainerSpellIds(tResult, tKey);
 		end
 
 		sGroupResolvedFilterCache["__globalIgnore__"] = tResult;
@@ -820,13 +942,9 @@ function VUHDO_resolveGroupExcludeSpellIDs(aGroup)
 	end
 
 	for tKey, _ in pairs(aGroup["ignoreList"] or sEmpty) do
-		tNum = VUHDO_resolveAuraContainerSpellId(tKey);
+		tResult = tResult or { };
 
-		if tNum then
-			tResult = tResult or { };
-
-			tResult[tNum] = true;
-		end
+		VUHDO_addResolvedAuraContainerSpellIds(tResult, tKey);
 	end
 
 	return tResult;
@@ -957,7 +1075,7 @@ do
 
 
 	--
-	local tSpellId;
+	local tIncludeSpellIds;
 	local tSlotCandidateFilters;
 	local tSlotButtonSetup;
 	local tSlotEntryDurationMode;
@@ -977,16 +1095,16 @@ do
 	local tColorCopy;
 	function VUHDO_buildListEntrySlotButtonSetup(aGroup, anEntry, aAnchorButtonSetup, anIsBar, anExcludeSpellIds)
 
-		tSpellId = VUHDO_resolveAuraContainerSpellId(anEntry["value"]);
+		tIncludeSpellIds = { };
 
-		if not tSpellId then
+		VUHDO_addResolvedAuraContainerSpellIds(tIncludeSpellIds, anEntry["value"]);
+
+		if not next(tIncludeSpellIds) then
 			return nil, nil;
 		end
 
 		tSlotCandidateFilters = {
-			["includeSpellIDs"] = {
-				[tSpellId] = true,
-			},
+			["includeSpellIDs"] = tIncludeSpellIds,
 		};
 
 		if anExcludeSpellIds then
@@ -1706,17 +1824,13 @@ function VUHDO_resolveGroupCandidateFilters(aGroup, anAnchorConfig)
 			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
 				tValue = tEntry["value"];
 
-				tNum = VUHDO_resolveAuraContainerSpellId(tValue);
+				tSpellIds = tSpellIds or { };
 
-				if tNum then
-					tSpellIds = tSpellIds or { };
-
-					tSpellIds[tNum] = true;
-				end
+				VUHDO_addResolvedAuraContainerSpellIds(tSpellIds, tValue);
 			end
 		end
 
-		if tSpellIds then
+		if tSpellIds and next(tSpellIds) then
 			tCandidate = tCandidate or { };
 
 			tCandidate["includeSpellIDs"] = tSpellIds;

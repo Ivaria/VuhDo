@@ -31,6 +31,7 @@ local VUHDO_isAuraDataRestricted;
 local VUHDO_isAuraModeContainers;
 local VUHDO_resolveGroupCandidateFilters;
 local VUHDO_resolveAuraContainerSpellId;
+local VUHDO_addResolvedAuraContainerSpellIds;
 local VUHDO_getAuraGroup;
 local VUHDO_isAuraGroupContainerExpressible;
 local VUHDO_releaseAllOverlays;
@@ -218,6 +219,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_resolveGroupCandidateFilters = _G["VUHDO_resolveGroupCandidateFilters"];
 	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
+	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_isAuraGroupContainerExpressible = _G["VUHDO_isAuraGroupContainerExpressible"];
 	VUHDO_releaseAllOverlays = _G["VUHDO_releaseAllOverlays"];
@@ -3974,7 +3976,7 @@ do
 
 					tEntries[tEntryCount] = {
 						["entryType"] = VUHDO_AURA_LIST_ENTRY_SPELL,
-						["value"] = tSpellId,
+						["value"] = tName,
 					};
 
 					if tItem["mine"] ~= false and tItem["others"] ~= true then
@@ -4071,6 +4073,7 @@ do
 	local tMixedItemStackLevel;
 	local tMixedPieceKey;
 	local tMixedSpellId;
+	local tMixedIncludeSpellIds;
 	local tMixedDispelName;
 	local tMixedFilterString;
 	local tMixedCandidateFilters;
@@ -4104,7 +4107,15 @@ do
 			tMixedDispelName = nil;
 
 			if not tSpecial then
-				tMixedSpellId = VUHDO_resolveAuraContainerSpellId(tName);
+				tMixedIncludeSpellIds = { };
+
+				VUHDO_addResolvedAuraContainerSpellIds(tMixedIncludeSpellIds, tName);
+
+				if next(tMixedIncludeSpellIds) then
+					tMixedSpellId = VUHDO_resolveAuraContainerSpellId(tName);
+				else
+					tMixedSpellId = nil;
+				end
 			elseif sDispelSpecialToDispelName[tName] then
 				tMixedDispelName = sDispelSpecialToDispelName[tName];
 			end
@@ -4119,9 +4130,7 @@ do
 				end
 
 				tMixedCandidateFilters = {
-					["includeSpellIDs"] = {
-						[tMixedSpellId] = true,
-					},
+					["includeSpellIDs"] = tMixedIncludeSpellIds,
 				};
 
 				tMixedButtonSetup = { };

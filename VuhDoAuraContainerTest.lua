@@ -6,6 +6,7 @@ local next = next;
 local format = string.format;
 local tinsert = table.insert;
 local tconcat = table.concat;
+local twipe = table.wipe;
 
 local InCombatLockdown = InCombatLockdown;
 local issecretvalue = issecretvalue;
@@ -1669,6 +1670,10 @@ do
 	local tTemplate;
 	local tMockInfo;
 	local tUnit;
+	local tResolvedSpellIds;
+	local tExpectedCnt;
+	local tActualCnt;
+	local tSpellName;
 	local function VUHDO_assertAuraGateTest(aLabel, anExpected, anActual)
 
 		if anExpected == anActual then
@@ -1678,6 +1683,67 @@ do
 
 			VUHDO_xMsg("FAIL", aLabel, "expected", anExpected, "got", anActual);
 		end
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_assertResolvedSpellIdSet(aLabel, aValue, aExpectedIds)
+
+		twipe(tResolvedSpellIds);
+		VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, aValue);
+
+		tExpectedCnt = #aExpectedIds;
+		tActualCnt = 0;
+
+		for tExpectedSpellId = 1, tExpectedCnt do
+			if not tResolvedSpellIds[aExpectedIds[tExpectedSpellId]] then
+				tFailCnt = tFailCnt + 1;
+
+				VUHDO_xMsg("FAIL", aLabel, "missing spell ID", aExpectedIds[tExpectedSpellId]);
+
+				return;
+			end
+		end
+
+		for tExpectedSpellId, _ in pairs(tResolvedSpellIds) do
+			tActualCnt = tActualCnt + 1;
+		end
+
+		if tActualCnt ~= tExpectedCnt then
+			tFailCnt = tFailCnt + 1;
+
+			VUHDO_xMsg("FAIL", aLabel, "expected", tExpectedCnt, "IDs got", tActualCnt);
+
+			return;
+		end
+
+		tPassCnt = tPassCnt + 1;
+
+		return;
+
+	end
+
+
+
+	--
+	local function VUHDO_assertResolvedSpellIdEmpty(aLabel, aValue)
+
+		twipe(tResolvedSpellIds);
+		VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, aValue);
+
+		if next(tResolvedSpellIds) then
+			tFailCnt = tFailCnt + 1;
+
+			VUHDO_xMsg("FAIL", aLabel, "expected no spell IDs");
+
+			return;
+		end
+
+		tPassCnt = tPassCnt + 1;
 
 		return;
 
@@ -1722,6 +1788,28 @@ do
 		tFailCnt = 0;
 		tSavedUnits = { };
 		tSavedRaidEntries = { };
+		tResolvedSpellIds = { };
+
+		tSpellName = C_Spell.GetSpellName(974);
+
+		if tSpellName then
+			VUHDO_assertResolvedSpellIdSet("earthShieldName", tSpellName, { 974, 383648 });
+		end
+
+		tSpellName = C_Spell.GetSpellName(119611);
+
+		if tSpellName then
+			VUHDO_assertResolvedSpellIdSet("renewingMistName", tSpellName, { 119611 });
+		end
+
+		tSpellName = C_Spell.GetSpellName(124682);
+
+		if tSpellName then
+			VUHDO_assertResolvedSpellIdSet("envelopingMistName", tSpellName, { 124682 });
+		end
+
+		VUHDO_assertResolvedSpellIdSet("numericEarthShieldExact", 974, { 974 });
+		VUHDO_assertResolvedSpellIdEmpty("unknownSpellName", "NotARealSpellNameForVuhDoTestXYZ");
 
 		tTemplate = {
 			["isHarmful"] = false,

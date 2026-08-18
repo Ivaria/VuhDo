@@ -27,7 +27,7 @@ local VUHDO_auraMatchesFilter;
 local VUHDO_auraSourceMatchesFilter;
 local VUHDO_isAuraIgnored;
 local VUHDO_playSoundFile;
-local VUHDO_resolveAuraContainerSpellId;
+local VUHDO_addResolvedAuraContainerSpellIds;
 local VUHDO_isAuraModeContainers;
 local VUHDO_LibSharedMedia;
 
@@ -58,7 +58,7 @@ function VUHDO_auraSoundsInitLocalOverrides()
 	VUHDO_auraSourceMatchesFilter = _G["VUHDO_auraSourceMatchesFilter"];
 	VUHDO_isAuraIgnored = _G["VUHDO_isAuraIgnored"];
 	VUHDO_playSoundFile = _G["VUHDO_playSoundFile"];
-	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
+	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_LibSharedMedia = _G["VUHDO_LibSharedMedia"];
 
@@ -98,6 +98,7 @@ local tSoundPath;
 local tSoundId;
 local tSettings;
 local tSpellId;
+local tResolvedSpellIds;
 function VUHDO_registerNativeAuraSoundForUnit(aUnit, aSpellId, aSoundKey)
 
 	if not aUnit or not aSpellId or not aSoundKey or aSoundKey == "" then
@@ -194,9 +195,11 @@ function VUHDO_syncNativeAuraSoundsForUnit(aUnit)
 
 	if tSettings then
 		for tSettingsKey, tDebuffSettings in pairs(tSettings) do
-			tSpellId = VUHDO_resolveAuraContainerSpellId(tSettingsKey);
+			tResolvedSpellIds = { };
 
-			if tSpellId and ((tDebuffSettings["SOUND"] or "") ~= "" or (tDefaultSound or "") ~= "") then
+			VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, tSettingsKey);
+
+			if next(tResolvedSpellIds) and ((tDebuffSettings["SOUND"] or "") ~= "" or (tDefaultSound or "") ~= "") then
 				tHasSoundsToRegister = true;
 
 				break;
@@ -218,12 +221,16 @@ function VUHDO_syncNativeAuraSoundsForUnit(aUnit)
 
 	if tSettings then
 		for tSettingsKey, tDebuffSettings in pairs(tSettings) do
-			tSpellId = VUHDO_resolveAuraContainerSpellId(tSettingsKey);
+			tResolvedSpellIds = { };
 
-			if tSpellId and tDebuffSettings["SOUND"] and tDebuffSettings["SOUND"] ~= "" then
-				VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDebuffSettings["SOUND"]);
-			elseif tSpellId and tDefaultSound and tDefaultSound ~= "" then
-				VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDefaultSound);
+			VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, tSettingsKey);
+
+			for tSpellId, _ in pairs(tResolvedSpellIds) do
+				if tDebuffSettings["SOUND"] and tDebuffSettings["SOUND"] ~= "" then
+					VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDebuffSettings["SOUND"]);
+				elseif tDefaultSound and tDefaultSound ~= "" then
+					VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDefaultSound);
+				end
 			end
 		end
 	end

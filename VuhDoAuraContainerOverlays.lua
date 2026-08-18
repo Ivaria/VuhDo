@@ -58,6 +58,7 @@ local VUHDO_getPlayerDispelGlowTypeNames;
 local VUHDO_getPlayerPurgeGlowTypeNames;
 local VUHDO_copyOverlayCandidateFilters;
 local VUHDO_resolveAuraContainerSpellId;
+local VUHDO_addResolvedAuraContainerSpellIds;
 local VUHDO_getStatusbarOrientationNumber;
 local VUHDO_decompressIfCompressed;
 local VUHDO_isAuraDataRestricted;
@@ -189,6 +190,7 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_getPlayerPurgeGlowTypeNames = _G["VUHDO_getPlayerPurgeGlowTypeNames"];
 	VUHDO_copyOverlayCandidateFilters = _G["VUHDO_copyOverlayCandidateFilters"];
 	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
+	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
 	VUHDO_getStatusbarOrientationNumber = _G["VUHDO_getStatusbarOrientationNumber"];
 	VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
@@ -1525,6 +1527,7 @@ do
 	local tCanColorBarGroups;
 	local tDispelName;
 	local tSpellId;
+	local tIncludeSpellIds;
 	local tColor;
 	local tBaseOpacityProduct;
 	local tPrototypeCacheKey;
@@ -1662,16 +1665,18 @@ do
 					end
 				end
 			else
-				tSpellId = VUHDO_resolveAuraContainerSpellId(tItem["name"]);
+				tIncludeSpellIds = { };
+
+				VUHDO_addResolvedAuraContainerSpellIds(tIncludeSpellIds, tItem["name"]);
 				tColor = tItem["color"];
 
-				if tSpellId and tColor and tColor["useBackground"] then
+				if next(tIncludeSpellIds) and tColor and tColor["useBackground"] then
+					tSpellId = VUHDO_resolveAuraContainerSpellId(tItem["name"]);
+
 					tOverlayEntry = {
 						["filterString"] = VUHDO_getOverlaySpellFilterString(tItem),
 						["candidateFilters"] = {
-							["includeSpellIDs"] = {
-								[tSpellId] = true,
-							},
+							["includeSpellIDs"] = tIncludeSpellIds,
 						},
 						["staticColor"] = VUHDO_applyOverlayStaticColorBright(tColor, tItem, tBaseOpacityProduct),
 						["shape"] = tOverlayTarget["shape"],
