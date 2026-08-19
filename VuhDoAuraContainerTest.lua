@@ -21,6 +21,9 @@ local sSmokeTestContainer;
 local sAuraDiagVerbose = false;
 local sAuraDiagIndicator = nil;
 local sAuraDiagUnit = nil;
+local sAuraDiagAssistRestricted = false;
+local sAuraDiagAuraFilterRestricted = false;
+local sAuraDiagDisconnected = false;
 
 local sAuraDiagNilAllowlist = {
 	["ownsBackgroundFill"] = true,
@@ -501,6 +504,9 @@ do
 	local tChainBaselineRgba;
 	local tStoredBaselineRgba;
 	local tGroupDiagTemplate;
+	local tAssistOnly;
+	local tCompound;
+	local tShouldSuppress;
 	function VUHDO_dumpFillChainDiagnostics(aContainerData, aContainerTemplate)
 
 		tContainer = aContainerData["container"];
@@ -593,14 +599,19 @@ do
 					["candidateFilters"] = tGroupCandidateFilters,
 				};
 
+				tAssistOnly = tChainGroupMetaEntry and tChainGroupMetaEntry["isAssistOnly"] or VUHDO_isAssistOnlyTemplate(tGroupDiagTemplate);
+				tCompound = tChainGroupMetaEntry and tChainGroupMetaEntry["isCompoundFilterString"] or VUHDO_isCompoundFilterStringTemplate(tGroupDiagTemplate);
+				tShouldSuppress = sAuraDiagDisconnected or (tAssistOnly and sAuraDiagAssistRestricted) or (tCompound and sAuraDiagAuraFilterRestricted);
+
 				VUHDO_auraDiagLine("chainGroup",
 					"g", tGroupIndex,
 					"key", tGroupKey,
 					"groupKey", tMetaGroupKey ~= tGroupKey and tMetaGroupKey or nil,
 					"filter", VUHDO_escapeAuraDiagFilterString(tGroupFilterString),
 					"candidates", tCandidateSummary,
-					"assistOnly", VUHDO_isAssistOnlyTemplate(tGroupDiagTemplate),
-					"compound", VUHDO_isCompoundFilterStringTemplate(tGroupDiagTemplate),
+					"assistOnly", tAssistOnly,
+					"compound", tCompound,
+					"suppress", tShouldSuppress and 1 or 0,
 					"enabled", tLastSyncedGroupEnabled and tLastSyncedGroupEnabled[tGroupKey],
 					"elem", tElemSize,
 					"live", tLiveSize ~= tElemSize and tLiveSize or nil,
@@ -662,6 +673,7 @@ do
 	local tGroupKey;
 	local tGroupFrameCount;
 	local tAuraFrame;
+	local tShouldSuppress;
 	function VUHDO_dumpAuraOverlayDiagnostics(aButtonName)
 
 		tOverlayContainers = VUHDO_OVERLAY_CONTAINERS[aButtonName];
@@ -745,6 +757,8 @@ do
 
 						tWarnField = #tWarnParts > 0 and tconcat(tWarnParts, ",") or nil;
 
+						tShouldSuppress = sAuraDiagDisconnected or (tContainerData["isAssistOnly"] and sAuraDiagAssistRestricted) or (tContainerData["isCompoundFilterString"] and sAuraDiagAuraFilterRestricted);
+
 						VUHDO_auraDiagLine("overlay",
 							"button", aButtonName,
 							"indicator", tIndicatorKey,
@@ -759,6 +773,9 @@ do
 							"warn", tWarnField,
 							"friendlyOnly", tContainerData["friendlyOnly"],
 							"hostileOnly", tContainerData["hostileOnly"],
+							"assistOnly", tContainerData["isAssistOnly"],
+							"compound", tContainerData["isCompoundFilterString"],
+							"suppress", tShouldSuppress and 1 or 0,
 							"lastSyncedEnabled", tContainerData["lastSyncedEnabled"],
 							"ownsBackgroundFill", tContainerData["ownsBackgroundFill"],
 							"backgroundFillHidden", tContainerData["backgroundFillHidden"],
@@ -1054,6 +1071,10 @@ do
 		tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
 		tIsDisconnected = tUnitInfo and not tUnitInfo["connected"];
 		tPhaseReason = VUHDO_unitPhaseReason(aUnit);
+
+		sAuraDiagAssistRestricted = tIsAssistRestricted;
+		sAuraDiagAuraFilterRestricted = tIsAuraFilterRestricted;
+		sAuraDiagDisconnected = tIsDisconnected and true or false;
 
 		VUHDO_auraDiagLine("gates",
 			"exists", UnitExists(aUnit),
@@ -1882,6 +1903,14 @@ do
 		VUHDO_saveAuraGateRaidEntry("raid7");
 		VUHDO_RAID["raid7"] = tMockInfo;
 		VUHDO_assertAuraGateTest("raid7RestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("raid7"));
+
+		VUHDO_saveAuraGateRaidEntry("raid8");
+		VUHDO_RAID["raid8"] = nil;
+		VUHDO_assertAuraGateTest("raid8RestrictedWhenNoRaidEntry", true, VUHDO_isUnitAuraFilterRestricted("raid8"));
+
+		VUHDO_saveAuraGateRaidEntry("focus");
+		VUHDO_RAID["focus"] = nil;
+		VUHDO_assertAuraGateTest("focusExemptWhenNoRaidEntry", false, VUHDO_isUnitAuraFilterRestricted("focus"));
 
 		tMockInfo = {
 			["connected"] = false,

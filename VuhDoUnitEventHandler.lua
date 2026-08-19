@@ -32,6 +32,7 @@ local VUHDO_needsUnitAuraEvent;
 local VUHDO_syncNativeAuraSoundsForUnit;
 local VUHDO_isAuraModeContainers;
 local VUHDO_syncAuraContainersForUnit;
+local VUHDO_syncOverlaysForUnit;
 
 local VUHDO_RAID;
 local VUHDO_CONFIG;
@@ -120,6 +121,7 @@ function VUHDO_unitEventHandlerInitLocalOverrides()
 	VUHDO_syncNativeAuraSoundsForUnit = _G["VUHDO_syncNativeAuraSoundsForUnit"];
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_syncAuraContainersForUnit = _G["VUHDO_deferSyncAuraContainersForUnit"];
+	VUHDO_syncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
 
 	VUHDO_updateHealth = _G["VUHDO_deferUpdateHealth"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
@@ -297,6 +299,7 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 
 		if VUHDO_RAID and VUHDO_RAID[anArg1] ~= nil then
 			VUHDO_syncAuraContainersForUnit(anArg1, VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL);
+			VUHDO_syncOverlaysForUnit(anArg1, VUHDO_DEFERRED_TASK_PRIORITY_CRITICAL);
 		end
 
 		VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = 0.5;
@@ -330,6 +333,7 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 			VUHDO_updateHealth(anArg1, VUHDO_UPDATE_DC);
 
 			VUHDO_syncAuraContainersForUnit(anArg1);
+			VUHDO_syncOverlaysForUnit(anArg1);
 		end
 
 	elseif "UNIT_NAME_UPDATE" == anEvent then
@@ -352,6 +356,7 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 			VUHDO_updateBouquetsForEvent(anArg1, 34);
 
 			VUHDO_syncAuraContainersForUnit(anArg1);
+			VUHDO_syncOverlaysForUnit(anArg1);
 		end
 
 	elseif "UNIT_FLAGS" == anEvent then
@@ -361,6 +366,7 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 
 		if VUHDO_RAID[anArg1] ~= nil then
 			VUHDO_syncAuraContainersForUnit(anArg1);
+			VUHDO_syncOverlaysForUnit(anArg1);
 		end
 
 	elseif "INCOMING_RESURRECT_CHANGED" == anEvent then
@@ -390,6 +396,7 @@ function VUHDO_dispatchUnitEvent(anEvent, anArg1, anArg2, anArg3, anArg4, anArg5
 			VUHDO_updateBouquetsForEvent(anArg1, 39);
 
 			VUHDO_syncAuraContainersForUnit(anArg1);
+			VUHDO_syncOverlaysForUnit(anArg1);
 		end
 
 	end

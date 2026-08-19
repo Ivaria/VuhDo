@@ -73,6 +73,10 @@ local VUHDO_deferSyncOverlaysForUnit;
 local VUHDO_applyStoredChainBaselineColor;
 local VUHDO_showOverlayFillChainBackgroundForData;
 local VUHDO_hideOverlayFillChainBackgroundForData;
+local VUHDO_isAssistOnlyTemplate;
+local VUHDO_isCompoundFilterStringTemplate;
+local VUHDO_isUnitAssistRestricted;
+local VUHDO_isUnitAuraFilterRestricted;
 
 local sEmpty = { };
 local sOverlayConfigKeys = { };
@@ -205,9 +209,35 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_applyStoredChainBaselineColor = _G["VUHDO_applyStoredChainBaselineColor"];
 	VUHDO_showOverlayFillChainBackgroundForData = _G["VUHDO_showOverlayFillChainBackgroundForData"];
 	VUHDO_hideOverlayFillChainBackgroundForData = _G["VUHDO_hideOverlayFillChainBackgroundForData"];
+	VUHDO_isAssistOnlyTemplate = _G["VUHDO_isAssistOnlyTemplate"];
+	VUHDO_isCompoundFilterStringTemplate = _G["VUHDO_isCompoundFilterStringTemplate"];
+	VUHDO_isUnitAssistRestricted = _G["VUHDO_isUnitAssistRestricted"];
+	VUHDO_isUnitAuraFilterRestricted = _G["VUHDO_isUnitAuraFilterRestricted"];
 
 	return;
 
+end
+
+
+
+do
+	--
+	local tFilterString;
+	function VUHDO_applyOverlayGateFlags(anEntry)
+
+		if not anEntry then
+			return;
+		end
+
+		tFilterString = anEntry["filterString"];
+
+		anEntry["isHarmful"] = tFilterString and strfind(tFilterString, "HARMFUL", 1, true) ~= nil or false;
+		anEntry["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(anEntry);
+		anEntry["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(anEntry);
+
+		return;
+
+	end
 end
 
 
@@ -2006,6 +2036,8 @@ do
 				["staticColor"] = tChainFillEntry["staticColor"],
 				["bouquetIdx"] = tChainFillEntry["bouquetIdx"],
 			};
+
+			VUHDO_applyOverlayGateFlags(tChainGroupMeta[#tChainGroupMeta]);
 		end
 
 		tContainerParent, tOverlayHostFrame, tFrameLevelOffset = VUHDO_resolveOverlayContainerAnchorFields(aButton, aTargetFrame, 1);
@@ -2167,8 +2199,12 @@ do
 					end
 				end
 			elseif tOverlayEntry then
+				VUHDO_applyOverlayGateFlags(tOverlayEntry);
+
 				tContainerData["friendlyOnly"] = tOverlayEntry["friendlyOnly"] or nil;
 				tContainerData["hostileOnly"] = tOverlayEntry["hostileOnly"] or nil;
+				tContainerData["isAssistOnly"] = tOverlayEntry["isAssistOnly"] or nil;
+				tContainerData["isCompoundFilterString"] = tOverlayEntry["isCompoundFilterString"] or nil;
 				tContainerData["alwaysEnabled"] = tOverlayEntry["alwaysEnabled"] or nil;
 				tContainerData["valueGates"] = tOverlayEntry["valueGates"] or nil;
 				tContainerData["isValueGateActiveVariant"] = tOverlayEntry["isValueGateActiveVariant"] or nil;
@@ -2892,8 +2928,13 @@ do
 	local tGateInfo;
 	local tGateActive;
 	local tEnabledChanged;
+	local tGroupEnabledChanged;
 	local tUnitRebound;
 	local tOccupantGuid;
+	local tIsAssistRestricted;
+	local tIsAuraFilterRestricted;
+	local tIsDisconnected;
+	local tShouldSuppress;
 	function VUHDO_resetOverlaysForUnit(aUnit)
 
 		if not aUnit then
@@ -2936,6 +2977,9 @@ do
 
 		tCanAttack = UnitCanAttack("player", aUnit);
 		tGateInfo = VUHDO_RAID and VUHDO_RAID[aUnit];
+		tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
+		tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
+		tIsDisconnected = tGateInfo and not tGateInfo["connected"];
 
 		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 			tButtonName = tButton:GetName();
@@ -2955,6 +2999,7 @@ do
 
 						if tContainer then
 							tChainGroupMeta = tContainerData["chainGroupMeta"];
+							tGroupEnabledChanged = false;
 
 							if tChainGroupMeta then
 								tWantEnabled = false;
@@ -2977,6 +3022,12 @@ do
 										tGroupWant = false;
 									end
 
+									tShouldSuppress = tIsDisconnected or (tChainGroupMetaEntry["isAssistOnly"] and tIsAssistRestricted) or (tChainGroupMetaEntry["isCompoundFilterString"] and tIsAuraFilterRestricted);
+
+									if tGroupWant and tShouldSuppress then
+										tGroupWant = false;
+									end
+
 									if tGroupWant then
 										tWantEnabled = true;
 									end
@@ -2991,6 +3042,7 @@ do
 										end
 
 										tLastSyncedGroupEnabled[tGroupKey] = tGroupWant;
+										tGroupEnabledChanged = true;
 									end
 								end
 							else
@@ -3004,6 +3056,12 @@ do
 									if tContainerData["hostileOnly"] and not tCanAttack then
 										tWantEnabled = false;
 									end
+								end
+
+								tShouldSuppress = tIsDisconnected or (tContainerData["isAssistOnly"] and tIsAssistRestricted) or (tContainerData["isCompoundFilterString"] and tIsAuraFilterRestricted);
+
+								if tWantEnabled and tShouldSuppress then
+									tWantEnabled = false;
 								end
 							end
 
@@ -3057,7 +3115,7 @@ do
 									tContainerData["lastSyncedGuid"] = tOccupantGuid;
 								end
 
-								if tUnitRebound or tEnabledChanged then
+								if tUnitRebound or tEnabledChanged or tGroupEnabledChanged then
 									VUHDO_refreshAuraContainer(tContainer);
 								end
 							end

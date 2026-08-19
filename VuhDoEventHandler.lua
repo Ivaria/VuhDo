@@ -101,6 +101,7 @@ local VUHDO_syncAuraContainersForAllRaidUnits;
 local VUHDO_syncOverlaysForUnit;
 local VUHDO_resetAuraContainersForUnit;
 local VUHDO_resetOverlaysForUnit;
+local VUHDO_syncAllOverlayUnits;
 local VUHDO_resetAuraFilterResultCachePerFrame;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
@@ -606,6 +607,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
 	VUHDO_resetAuraContainersForUnit = _G["VUHDO_resetAuraContainersForUnit"];
 	VUHDO_resetOverlaysForUnit = _G["VUHDO_resetOverlaysForUnit"];
+	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
 	VUHDO_resetAuraFilterResultCachePerFrame = _G["VUHDO_resetAuraFilterResultCachePerFrame"];
 
 	VUHDO_initTaskSystem();
@@ -1228,6 +1230,10 @@ do
 
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_syncAuraContainersForAllRaidUnits();
+
+				if VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] < 0.9 then
+					VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = 0.9;
+				end
 			end
 
 			if "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then
@@ -2514,6 +2520,8 @@ do
 
 		if VUHDO_checkTimer("REFRESH_AURA_CONTAINERS") then
 			VUHDO_syncAuraContainersForAllRaidUnits();
+
+			VUHDO_syncAllOverlayUnits(false);
 		end
 
 		-- Refresh Tooltip

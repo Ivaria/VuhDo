@@ -3523,7 +3523,11 @@ do
 		tUnitInfo = VUHDO_RAID[aUnit];
 
 		if not tUnitInfo then
-			return false;
+			if VUHDO_isSpecialUnit(aUnit) then
+				return false;
+			end
+
+			return true;
 		end
 
 		if not tUnitInfo["connected"] then
@@ -3842,8 +3846,6 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 		return;
 	end
 
-	VUHDO_restoreAuraContainerGroups(aContainer, aContainerData);
-
 	aContainer:SetUnit(aUnit);
 
 	tIsAuraDataRestricted = VUHDO_isAuraDataRestricted();
@@ -4007,6 +4009,8 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 		tContainer = tContainerData and tContainerData["container"];
 
 		if tContainer then
+			VUHDO_restoreAuraContainerGroups(tContainer, tContainerData);
+
 			tSlotFiltersDirty = VUHDO_applyAuraContainerSlotFilters(tContainer, tContainerData, tCanAttack);
 
 			tAssistOnlyDirty = VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted, tIsAuraFilterRestricted, tIsDisconnected);
