@@ -494,7 +494,6 @@ do
 	local tOverlayHostFrame;
 	local tOverlayHostWidth;
 	local tOverlayHostHeight;
-	local tGroupTemplate;
 	local tGroupFilterString;
 	local tGroupCandidateFilters;
 	local tCandidateSummary;
@@ -665,6 +664,13 @@ end
 
 do
 	--
+	local tOverlayContainers;
+	local tSlotHostData;
+	local tSlotHostContainer;
+	local tSlotFrame;
+	local tFillTexture;
+	local tFillLayer;
+	local tFillSublevel;
 	local tContainer;
 	local tContainerWidth;
 	local tContainerHeight;
@@ -674,13 +680,74 @@ do
 	local tGroupFrameCount;
 	local tAuraFrame;
 	local tShouldSuppress;
+	local tBarColors;
+	local sEmpty = { };
 	function VUHDO_dumpAuraOverlayDiagnostics(aButtonName)
+
+		tSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS and VUHDO_OVERLAY_SLOT_HOSTS[aButtonName];
+		tSlotHostContainer = tSlotHostData and tSlotHostData["container"];
+
+		if tSlotHostContainer then
+			VUHDO_auraDiagLine("overlaySlotHost",
+				"button", aButtonName,
+				"slotCount", tSlotHostData["slotOrder"] and #tSlotHostData["slotOrder"] or 0,
+				"shown", tSlotHostContainer:IsShown(),
+				"enabled", tSlotHostContainer:IsEnabled(),
+				"unit", tSlotHostContainer:GetUnit(),
+				"frameLevel", tSlotHostContainer:GetFrameLevel());
+
+			for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"] or sEmpty) do
+				if VUHDO_auraDiagMatchesIndicator(tSlotRecord["indicatorKey"]) then
+					tSlotFrame = tSlotRecord["slotFrame"];
+					tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tSlotRecord, sAuraDiagDisconnected, sAuraDiagAssistRestricted, sAuraDiagAuraFilterRestricted);
+
+					tFillLayer = nil;
+					tFillSublevel = nil;
+
+					if tSlotFrame and tSlotFrame["FillTexture"] then
+						tFillTexture = tSlotFrame["FillTexture"];
+						tFillLayer, tFillSublevel = tFillTexture:GetDrawLayer();
+					end
+
+					VUHDO_auraDiagLine("overlaySlot",
+						"button", aButtonName,
+						"indicator", tSlotRecord["indicatorKey"],
+						"entry", tSlotRecord["entryKey"],
+						"slotKey", tSlotKey,
+						"shown", tSlotFrame and tSlotFrame:IsShown(),
+						"filter", VUHDO_escapeAuraDiagFilterString(tSlotRecord["filterString"]),
+						"candidates", VUHDO_auraDiagFormatCandidateSummary(tSlotRecord["candidateFilters"], nil),
+						"friendlyOnly", tSlotRecord["friendlyOnly"],
+						"hostileOnly", tSlotRecord["hostileOnly"],
+						"assistOnly", tSlotRecord["isAssistOnly"],
+						"compound", tSlotRecord["isCompoundFilterString"],
+						"suppress", tShouldSuppress and 1 or 0,
+						"lastSyncedEnabled", tSlotHostData["lastSyncedSlotEnabled"] and tSlotHostData["lastSyncedSlotEnabled"][tSlotKey],
+						"fillLayer", tFillLayer and format("%s/%s", tostring(tFillLayer), tostring(tFillSublevel)),
+						"frameLevel", tSlotFrame and tSlotFrame:GetFrameLevel(),
+						"auraGroupBarGlow", tSlotRecord["auraGroupBarGlow"] and 1 or 0);
+
+					if tSlotRecord["indicatorKey"] == "DISPEL_OVERLAY" then
+						tBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+
+						VUHDO_auraDiagLine("dispelOverlay",
+							"showDispelOverlay", tBarColors and tBarColors["showDispelOverlay"],
+							"dispelIndicatorType", tBarColors and tBarColors["dispelIndicatorType"],
+							"filter", VUHDO_escapeAuraDiagFilterString(tSlotRecord["filterString"]));
+					end
+				end
+			end
+		end
 
 		tOverlayContainers = VUHDO_OVERLAY_CONTAINERS[aButtonName];
 
-		if not tOverlayContainers then
+		if not tOverlayContainers and not tSlotHostContainer then
 			VUHDO_auraDiagLine("overlays", "button", aButtonName, "count", 0);
 
+			return;
+		end
+
+		if not tOverlayContainers then
 			return;
 		end
 
@@ -757,7 +824,7 @@ do
 
 						tWarnField = #tWarnParts > 0 and tconcat(tWarnParts, ",") or nil;
 
-						tShouldSuppress = sAuraDiagDisconnected or sAuraDiagAuraFilterRestricted or (tContainerData["isAssistOnly"] and sAuraDiagAssistRestricted);
+						tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tContainerData, sAuraDiagDisconnected, sAuraDiagAssistRestricted, sAuraDiagAuraFilterRestricted);
 
 						VUHDO_auraDiagLine("overlay",
 							"button", aButtonName,
@@ -912,7 +979,6 @@ do
 	local tSignature;
 	local tFilterString;
 	local tResolvedLayout;
-	local tPanelNum;
 	function VUHDO_dumpAuraPanelAnchors()
 
 		tPanelAnchorSignatureMap = { };
@@ -1035,8 +1101,6 @@ do
 	local tIndicatorBouquetName;
 	local tPrototypeGeneration;
 	local tPrototypeCount;
-	local tButton;
-	local tSlot;
 	function VUHDO_dumpAuraDiagnostics(aUnit, anIndicatorKey, anIsVerbose)
 
 		aUnit = aUnit or "player";
@@ -1056,7 +1120,9 @@ do
 			"overlayConfigGeneration", VUHDO_getOverlayConfigGeneration(),
 			"containerBuilds", VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0,
 			"containerReleases", VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0,
-			"containerPoolHits", VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] or 0);
+			"containerPoolHits", VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] or 0,
+			"slotHostBuilds", VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] or 0,
+			"overlaySlotBuilds", VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] or 0);
 
 		tOverlayZeroPlanCount, tOverlayZeroPlanLastReason = VUHDO_getOverlayZeroPlanDiagnostics();
 
@@ -1214,7 +1280,7 @@ do
 									tTemplateRef = tGroupTemplateRefs[tGroupCnt];
 
 									if tTemplateRef then
-										tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted);
+										tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tTemplateRef, tIsDisconnected, tIsAssistRestricted, tIsAuraFilterRestricted);
 
 										VUHDO_auraDiagLine("containerGroup",
 											"i", tGroupCnt,
@@ -1249,7 +1315,7 @@ do
 										tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
 
 										if tTemplateRef and tRecordedKey then
-											tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted);
+											tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tTemplateRef, tIsDisconnected, tIsAssistRestricted, tIsAuraFilterRestricted);
 
 											VUHDO_auraDiagLine("containerSlot",
 												"i", tEngineSlotCnt,

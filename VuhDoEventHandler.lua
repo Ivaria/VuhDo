@@ -3536,6 +3536,7 @@ function VUHDO_showProfilingMetrics()
 		VUHDO_printDeferredTaskMetrics(false);
 		VUHDO_printPoolMetrics();
 		VUHDO_printSemaphoreMetrics();
+		VUHDO_printAuraContainerMetrics();
 	end);
 
 	return;

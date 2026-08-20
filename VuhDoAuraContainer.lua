@@ -30,6 +30,9 @@ local VUHDO_AURA_CONTAINERS = VUHDO_AURA_CONTAINERS;
 VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS or { };
 local VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS;
 
+VUHDO_OVERLAY_SLOT_HOSTS = VUHDO_OVERLAY_SLOT_HOSTS or { };
+local VUHDO_OVERLAY_SLOT_HOSTS = VUHDO_OVERLAY_SLOT_HOSTS;
+
 local VUHDO_AURA_CONTAINER_TEMPLATE = "VuhDoAuraContainerTemplate";
 local VUHDO_FILL_CHAIN_CONTAINER_TEMPLATE = "VuhDoFillChainAuraContainerTemplate";
 VUHDO_AURA_BUTTON_ICON_TEMPLATE = "VuhDoAuraButtonIconTemplate";
@@ -1529,6 +1532,7 @@ do
 	local tSlotFrameLevelOffset;
 	local tSlotAnchor;
 	local tSlotRelPoint;
+	local tSlotAnchorFrame;
 	function VUHDO_buildAuraSlotButtonInitializer(aTemplateRef, aContainer, anAnchorPoint)
 
 		return function(aAuraButton)
@@ -1542,15 +1546,25 @@ do
 				VUHDO_registerContainerClassColorBar(aContainer, aAuraButton["DurationBar"]);
 			end
 
+			tSlotAnchorFrame = tSlotTemplate["anchorFrame"] or aContainer;
 			tSlotAnchor = tSlotTemplate["anchor"] or anAnchorPoint;
 			tSlotRelPoint = tSlotTemplate["relPoint"] or tSlotAnchor;
 
 			aAuraButton:ClearAllPoints();
 
-			VUHDO_PixelUtil.SetPoint(aAuraButton, tSlotAnchor, aContainer, tSlotRelPoint, tSlotTemplate["x"] or 0, tSlotTemplate["y"] or 0);
-			VUHDO_PixelUtil.SetSize(aAuraButton, tSlotTemplate["width"] or 20, tSlotTemplate["height"] or 20);
+			if tSlotTemplate["anchorMode"] == "cover" then
+				VUHDO_pixelSnapCoverFrame(aAuraButton, tSlotAnchorFrame);
+			else
+				VUHDO_PixelUtil.SetPoint(aAuraButton, tSlotAnchor, tSlotAnchorFrame, tSlotRelPoint, tSlotTemplate["x"] or 0, tSlotTemplate["y"] or 0);
+				VUHDO_PixelUtil.SetSize(aAuraButton, tSlotTemplate["width"] or 20, tSlotTemplate["height"] or 20);
+			end
 
-			tSlotContainerLevel = aTemplateRef["containerLevel"];
+			tSlotContainerLevel = aContainer:GetFrameLevel();
+
+			if not tSlotContainerLevel or tSlotContainerLevel <= 0 then
+				tSlotContainerLevel = aTemplateRef["containerLevel"];
+			end
+
 			tSlotFrameLevelOffset = tSlotButtonSetup["frameLevelOffset"];
 
 			if tSlotFrameLevelOffset and tSlotContainerLevel then
@@ -1995,6 +2009,15 @@ do
 		end
 
 		return tContainerData;
+
+	end
+
+
+
+	--
+	function VUHDO_addOverlaySlotToHost(aContainer, aSlot, anAnchorPoint, aSlotKeys, aSlotFrames, aSlotRefs)
+
+		return VUHDO_addAuraContainerSlot(aContainer, aSlot, anAnchorPoint, aSlotKeys, aSlotFrames, aSlotRefs);
 
 	end
 
@@ -2990,6 +3013,152 @@ do
 		return;
 
 	end
+
+end
+
+
+
+do
+	--
+	local tHostData;
+	local tContainer;
+	local tSlotHostFrameName;
+	function VUHDO_getOrCreateOverlaySlotHost(aButton, aButtonName)
+
+		if not aButton or not aButtonName then
+			return nil;
+		end
+
+		tHostData = VUHDO_OVERLAY_SLOT_HOSTS[aButtonName];
+
+		if tHostData and tHostData["container"] then
+			return tHostData;
+		end
+
+		if InCombatLockdown() then
+			return nil;
+		end
+
+		tSlotHostFrameName = aButtonName .. "OlSlotHost";
+		tContainer = aButton["VuhDoOverlaySlotHost"];
+
+		if not tContainer then
+			tContainer = _G[tSlotHostFrameName];
+		end
+
+		if not tContainer then
+			tContainer = CreateFrame("AuraContainer", tSlotHostFrameName, aButton, VUHDO_AURA_CONTAINER_TEMPLATE);
+
+			VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] = (VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] or 0) + 1;
+		end
+
+		tContainer:ClearAllPoints();
+		tContainer:SetAllPoints(aButton);
+		tContainer:SetMouseClickEnabled(false);
+		tContainer:EnableMouse(false);
+		tContainer:SetMouseMotionEnabled(false);
+		tContainer:SetEnabled(false);
+		tContainer:SetShown(false);
+
+		aButton["VuhDoOverlaySlotHost"] = tContainer;
+
+		tHostData = {
+			["container"] = tContainer,
+			["slotRecords"] = { },
+			["slotOrder"] = { },
+			["lastSyncedSlotEnabled"] = { },
+			["lastSyncedUnit"] = nil,
+			["lastSyncedGuid"] = nil,
+		};
+
+		VUHDO_OVERLAY_SLOT_HOSTS[aButtonName] = tHostData;
+
+		return tHostData;
+
+	end
+
+
+
+	--
+	local tSlotKey;
+	local tContainer;
+	function VUHDO_suppressOverlaySlotHostSlot(aHostData, aSlotKey)
+
+		if not aHostData or not aSlotKey then
+			return;
+		end
+
+		tContainer = aHostData["container"];
+
+		if not tContainer or not aHostData["slotRecords"][aSlotKey] then
+			return;
+		end
+
+		tContainer:SetAuraSlotFilterString(aSlotKey, "HELPFUL");
+		tContainer:SetAuraSlotCandidateFilters(aSlotKey, VUHDO_SUPPRESS_CANDIDATE_FILTERS);
+
+		aHostData["slotRecords"][aSlotKey]["appliedFilterString"] = "HELPFUL";
+		aHostData["lastSyncedSlotEnabled"][aSlotKey] = false;
+
+		return;
+
+	end
+
+
+
+	--
+	local tHostData;
+	local tContainer;
+	local tSlotKey;
+	function VUHDO_disableOverlaySlotHost(aButtonName)
+
+		tHostData = VUHDO_OVERLAY_SLOT_HOSTS[aButtonName];
+
+		if not tHostData or not tHostData["container"] then
+			return;
+		end
+
+		tContainer = tHostData["container"];
+
+		for tSlotKey, _ in pairs(tHostData["slotRecords"]) do
+			VUHDO_suppressOverlaySlotHostSlot(tHostData, tSlotKey);
+		end
+
+		tContainer:SetUnit("none");
+
+		if not tContainer:IsEnabled() then
+			tContainer:SetEnabled(true);
+		end
+
+		tContainer:UpdateAllAuras();
+
+		tContainer:SetEnabled(false);
+		tContainer:SetShown(false);
+
+		tHostData["lastSyncedUnit"] = nil;
+		tHostData["lastSyncedGuid"] = nil;
+
+		return;
+
+	end
+
+end
+
+
+
+--
+function VUHDO_printAuraContainerMetrics()
+
+	VUHDO_Msg(format("|cffFFD100--- Aura Container Metrics ---|r"));
+	VUHDO_Msg(format("  containers: builds=%d releases=%d poolHits=%d",
+		VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0,
+		VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0,
+		VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] or 0));
+	VUHDO_Msg(format("  overlay slots: slotHostBuilds=%d overlaySlotBuilds=%d",
+		VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] or 0,
+		VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] or 0));
+
+	return;
 
 end
 
