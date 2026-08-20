@@ -17,6 +17,9 @@ local GetSpellIDForSpellIdentifier = C_Spell.GetSpellIDForSpellIdentifier;
 VUHDO_AURA_NAME_TO_SPELL_IDS = { };
 local VUHDO_AURA_NAME_TO_SPELL_IDS = VUHDO_AURA_NAME_TO_SPELL_IDS;
 
+VUHDO_AURA_NAME_PREFERRED_SPELL_ID = { };
+local VUHDO_AURA_NAME_PREFERRED_SPELL_ID = VUHDO_AURA_NAME_PREFERRED_SPELL_ID;
+
 VUHDO_AURA_CONTAINER_MAPPED_SPELL_IDS = {
 	-- [200025] = { 53563 }, -- Beacon of Virtue to Beacon of Light
 };
@@ -248,6 +251,7 @@ local tNameIds;
 function VUHDO_rebuildDefaultAuraNameSpellIds()
 
 	twipe(VUHDO_AURA_NAME_TO_SPELL_IDS);
+	twipe(VUHDO_AURA_NAME_PREFERRED_SPELL_ID);
 
 	for _, tGroup in pairs(VUHDO_DEFAULT_AURA_GROUPS or sEmpty) do
 		if tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST and not tGroup["isHarmful"] then
@@ -268,6 +272,8 @@ function VUHDO_rebuildDefaultAuraNameSpellIds()
 							end
 
 							tNameIds[tSpellId] = true;
+
+							VUHDO_AURA_NAME_PREFERRED_SPELL_ID[tSpellName] = VUHDO_AURA_NAME_PREFERRED_SPELL_ID[tSpellName] or tSpellId;
 						end
 					end
 				end
@@ -834,6 +840,34 @@ function VUHDO_resolveAuraContainerSpellId(aValue)
 	tResolvedSpellId = tonumber(aValue) or VUHDO_SPELL_NAME_TO_ID[aValue] or GetSpellIDForSpellIdentifier(aValue);
 
 	return tResolvedSpellId;
+
+end
+
+
+
+--
+local tPreferredNumVal;
+function VUHDO_resolveAuraContainerPreferredSpellId(aValue)
+
+	if type(aValue) == "number" then
+		return aValue;
+	end
+
+	if type(aValue) ~= "string" then
+		return nil;
+	end
+
+	tPreferredNumVal = tonumber(aValue);
+
+	if tPreferredNumVal then
+		return tPreferredNumVal;
+	end
+
+	if VUHDO_AURA_NAME_PREFERRED_SPELL_ID[aValue] then
+		return VUHDO_AURA_NAME_PREFERRED_SPELL_ID[aValue];
+	end
+
+	return VUHDO_resolveAuraContainerSpellId(aValue);
 
 end
 

@@ -1714,6 +1714,7 @@ end
 --
 local tRowName;
 local tIcon;
+local tSpellId;
 local tValueLabel;
 local tTypeLabel;
 local tTypeLabelFrame;
@@ -1736,6 +1737,10 @@ local function VUHDO_initAuraGroupEntryItem(aParent, anItemPanel, anIndex, anEnt
 	if tIcon then
 		if anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_EMPTY then
 			tIcon:SetTexture(nil);
+		elseif anEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+			tSpellId = VUHDO_resolveAuraContainerPreferredSpellId(anEntry["value"]);
+
+			tIcon:SetTexture(VUHDO_getGlobalIcon(tostring(tSpellId or anEntry["value"])));
 		else
 			tIcon:SetTexture(VUHDO_getGlobalIcon(tostring(anEntry["value"])));
 		end
@@ -2565,6 +2570,7 @@ local tPreviewPanel;
 local tIconTexture;
 local tTimerText;
 local tSpellValue;
+local tSpellId;
 local tR;
 local tG;
 local tB;
@@ -2634,7 +2640,9 @@ function VUHDO_updateSpellEntryIconPreview(aFrame)
 		return;
 	end
 
-	tIconTexture:SetTexture(VUHDO_getGlobalIcon(tostring(tSpellValue)));
+	tSpellId = VUHDO_resolveAuraContainerPreferredSpellId(tSpellValue);
+
+	tIconTexture:SetTexture(VUHDO_getGlobalIcon(tostring(tSpellId or tSpellValue)));
 
 	if VUHDO_SPELL_ENTRY_COLOR_ICON and VUHDO_SPELL_ENTRY_SETTINGS["COLOR_ICON_COLOR"] then
 		tR = VUHDO_SPELL_ENTRY_SETTINGS["COLOR_ICON_COLOR"]["R"] or 1;
