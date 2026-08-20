@@ -879,12 +879,20 @@ do
 		tBackgroundBarTexture = tBackgroundBar:GetStatusBarTexture();
 		tBackgroundBarTextureAlpha = tBackgroundBarTexture and tBackgroundBarTexture:GetAlpha();
 
+		if tBackgroundBarAlpha ~= nil and not issecretvalue(tBackgroundBarAlpha) and tBackgroundBarAlpha == 1 then
+			tBackgroundBarAlpha = nil;
+		end
+
+		if tBackgroundBarEffectiveAlpha ~= nil and not issecretvalue(tBackgroundBarEffectiveAlpha) and tBackgroundBarEffectiveAlpha == 1 then
+			tBackgroundBarEffectiveAlpha = nil;
+		end
+
 		VUHDO_auraDiagLine("backgroundBar", "button", aButtonName,
 			"shown", tBackgroundBarShown,
 			"rgba", VUHDO_auraDiagCompactRgba(tBackgroundBarR, tBackgroundBarG, tBackgroundBarB, tBackgroundBarA),
 			"value", tBackgroundBarValue,
-			"alpha", tBackgroundBarAlpha ~= 1 and tBackgroundBarAlpha or nil,
-			"effAlpha", tBackgroundBarEffectiveAlpha ~= 1 and tBackgroundBarEffectiveAlpha or nil,
+			"alpha", tBackgroundBarAlpha,
+			"effAlpha", tBackgroundBarEffectiveAlpha,
 			"texAlpha", tBackgroundBarTextureAlpha);
 
 		return;
