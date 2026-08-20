@@ -4108,7 +4108,7 @@ function VUHDO_syncAuraContainersForAllRaidUnits()
 	end
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_syncAuraContainersForUnit(tUnit);
+		VUHDO_deferSyncAuraContainersForUnit(tUnit);
 	end
 
 	return;

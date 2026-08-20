@@ -9,9 +9,12 @@ local GetTime = GetTime;
 local InCombatLockdown = InCombatLockdown;
 local issecretvalue = issecretvalue;
 
-local AddAuraSound = (C_UnitAuras and C_UnitAuras.AddAuraSound) or function() return nil; end;
-local RemoveAuraSound = (C_UnitAuras and C_UnitAuras.RemoveAuraSound) or function() end;
-local UnitAuraSoundTriggerAdded = Enum.UnitAuraSoundTrigger and Enum.UnitAuraSoundTrigger.Added;
+local AddAuraSound = C_UnitAuras and C_UnitAuras.AddAuraSound;
+local RemoveAuraSound = C_UnitAuras and C_UnitAuras.RemoveAuraSound;
+local IsAddOnRestrictionActive = C_RestrictedActions and C_RestrictedActions.IsAddOnRestrictionActive;
+local AddOnRestrictionType = Enum and Enum.AddOnRestrictionType;
+local UnitAuraSoundTrigger = Enum and Enum.UnitAuraSoundTrigger;
+local UnitAuraSoundTriggerAdded = UnitAuraSoundTrigger and UnitAuraSoundTrigger["Added"];
 
 local VUHDO_CONFIG;
 local VUHDO_RAID;
@@ -37,6 +40,7 @@ local sNativeAuraSoundUnits = { };
 local sPendingNativeAuraSoundUnits = { };
 local sPendingNativeAuraSoundClear = false;
 local sSoundEnabledAuraGroups = { };
+local sHasNativeAuraSoundsToRegister = nil;
 
 
 
@@ -69,9 +73,73 @@ end
 
 
 --
+function VUHDO_isNativeAuraSoundRestricted()
+
+	if IsAddOnRestrictionActive then
+		if IsAddOnRestrictionActive(AddOnRestrictionType and AddOnRestrictionType["Encounter"] or 1) then
+			return true;
+		end
+
+		if IsAddOnRestrictionActive(AddOnRestrictionType and AddOnRestrictionType["Combat"] or 0)
+			and IsAddOnRestrictionActive(AddOnRestrictionType and AddOnRestrictionType["ChallengeMode"] or 2) then
+			return true;
+		end
+	end
+
+	return false;
+
+end
+
+
+
+--
+local tSettings;
+local tDefaultSound;
+local tResolvedSpellIds;
+function VUHDO_computeHasNativeAuraSoundsToRegister()
+
+	if not VUHDO_CONFIG or not VUHDO_CONFIG["CUSTOM_DEBUFF"] then
+		return false;
+	end
+
+	tDefaultSound = VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"];
+	tSettings = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"];
+
+	if not tSettings then
+		return false;
+	end
+
+	for tSettingsKey, tDebuffSettings in pairs(tSettings) do
+		tResolvedSpellIds = { };
+
+		VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, tSettingsKey);
+
+		if next(tResolvedSpellIds) and ((tDebuffSettings["SOUND"] or "") ~= "" or (tDefaultSound or "") ~= "") then
+			return true;
+		end
+	end
+
+	return false;
+
+end
+
+
+
+--
+function VUHDO_invalidateNativeAuraSoundScanCache()
+
+	sHasNativeAuraSoundsToRegister = nil;
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_clearNativeAuraSounds()
 
-	if InCombatLockdown() then
+	if InCombatLockdown() or VUHDO_isNativeAuraSoundRestricted() then
 		sPendingNativeAuraSoundClear = true;
 
 		return;
@@ -102,11 +170,17 @@ local tResolvedSpellIds;
 function VUHDO_registerNativeAuraSoundForUnit(aUnit, aSpellId, aSoundKey)
 
 	if not aUnit or not aSpellId or not aSoundKey or aSoundKey == "" then
-		return;
+		return false;
 	end
 
-	if InCombatLockdown() then
-		return;
+	if InCombatLockdown() or VUHDO_isNativeAuraSoundRestricted() then
+		sPendingNativeAuraSoundUnits[aUnit] = true;
+
+		return false;
+	end
+
+	if not UnitAuraSoundTriggerAdded then
+		return false;
 	end
 
 	if VUHDO_LibSharedMedia then
@@ -116,7 +190,7 @@ function VUHDO_registerNativeAuraSoundForUnit(aUnit, aSpellId, aSoundKey)
 	end
 
 	if not tSoundPath or tSoundPath == "" then
-		return;
+		return false;
 	end
 
 	tSoundId = AddAuraSound(UnitAuraSoundTriggerAdded, {
@@ -127,9 +201,11 @@ function VUHDO_registerNativeAuraSoundForUnit(aUnit, aSpellId, aSoundKey)
 
 	if tSoundId then
 		sNativeAuraSoundIds[tSoundId] = true;
+
+		return true;
 	end
 
-	return;
+	return false;
 
 end
 
@@ -172,7 +248,12 @@ end
 
 --
 local tDefaultSound;
-local tHasSoundsToRegister;
+local tSettings;
+local tSettingsKey;
+local tDebuffSettings;
+local tResolvedSpellIds;
+local tSpellId;
+local tRegistrationFailed;
 function VUHDO_syncNativeAuraSoundsForUnit(aUnit)
 
 	if not VUHDO_isAuraModeContainers() or not aUnit then
@@ -189,35 +270,25 @@ function VUHDO_syncNativeAuraSoundsForUnit(aUnit)
 		return;
 	end
 
-	tDefaultSound = VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"];
-	tSettings = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"];
-	tHasSoundsToRegister = false;
-
-	if tSettings then
-		for tSettingsKey, tDebuffSettings in pairs(tSettings) do
-			tResolvedSpellIds = { };
-
-			VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, tSettingsKey);
-
-			if next(tResolvedSpellIds) and ((tDebuffSettings["SOUND"] or "") ~= "" or (tDefaultSound or "") ~= "") then
-				tHasSoundsToRegister = true;
-
-				break;
-			end
-		end
+	if sHasNativeAuraSoundsToRegister == nil then
+		sHasNativeAuraSoundsToRegister = VUHDO_computeHasNativeAuraSoundsToRegister();
 	end
 
-	if not tHasSoundsToRegister then
+	if not sHasNativeAuraSoundsToRegister then
 		sNativeAuraSoundUnits[aUnit] = true;
 
 		return;
 	end
 
-	if InCombatLockdown() then
+	if InCombatLockdown() or VUHDO_isNativeAuraSoundRestricted() then
 		sPendingNativeAuraSoundUnits[aUnit] = true;
 
 		return;
 	end
+
+	tDefaultSound = VUHDO_CONFIG["CUSTOM_DEBUFF"]["SOUND"];
+	tSettings = VUHDO_CONFIG["CUSTOM_DEBUFF"]["STORED_SETTINGS"];
+	tRegistrationFailed = false;
 
 	if tSettings then
 		for tSettingsKey, tDebuffSettings in pairs(tSettings) do
@@ -227,12 +298,22 @@ function VUHDO_syncNativeAuraSoundsForUnit(aUnit)
 
 			for tSpellId, _ in pairs(tResolvedSpellIds) do
 				if tDebuffSettings["SOUND"] and tDebuffSettings["SOUND"] ~= "" then
-					VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDebuffSettings["SOUND"]);
+					if not VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDebuffSettings["SOUND"]) then
+						tRegistrationFailed = true;
+					end
 				elseif tDefaultSound and tDefaultSound ~= "" then
-					VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDefaultSound);
+					if not VUHDO_registerNativeAuraSoundForUnit(aUnit, tSpellId, tDefaultSound) then
+						tRegistrationFailed = true;
+					end
 				end
 			end
 		end
+	end
+
+	if tRegistrationFailed then
+		sPendingNativeAuraSoundUnits[aUnit] = true;
+
+		return;
 	end
 
 	sNativeAuraSoundUnits[aUnit] = true;
@@ -246,7 +327,7 @@ end
 --
 function VUHDO_processPendingNativeAuraSounds()
 
-	if InCombatLockdown() then
+	if InCombatLockdown() or VUHDO_isNativeAuraSoundRestricted() then
 		return;
 	end
 

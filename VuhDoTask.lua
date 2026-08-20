@@ -137,18 +137,11 @@ local sNextTaskEnqueueOrder = 0;
 local sCombatHeldTasks = { };
 local sCombatHeldTaskMap = { };
 
-local sSmoothedFrameIntervalUs = 16667;
-local sLastQueueDepth = 0;
-
 local VUHDO_DEFERRED_TASK_PROFILING_ENABLED = false;
 
 local VUHDO_DEFERRED_TASK_CONFIG = {
-	["TARGET_EXEC_TIME_US"] = 5000,
-	["MAX_EXEC_TIME_US"] = 18000,
-	["MIN_FRAME_BUDGET_US"] = 2000,
-	["MAX_FRAME_BUDGET_US"] = 18000,
-	["FRAME_BUDGET_SHARE"] = 0.22,
-	["QUEUE_DEPTH_ESCALATION"] = 1.25,
+	["TARGET_EXEC_TIME_US"] = 50000,
+	["MAX_EXEC_TIME_US"] = 75000,
 	["MIN_TASKS_PER_FRAME"] = 1,
 	["INITIAL_TASKS_PER_FRAME"] = 250,
 	["MAX_TASKS_PER_FRAME"] = 500,
@@ -476,7 +469,7 @@ end
 --
 function VUHDO_deferUpdateManaBars(aUnit, aMode, aPriority)
 
-	VUHDO_deferTask(VUHDO_DEFER_UPDATE_MANA_BARS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aUnit, aMode);
+	VUHDO_deferTask(VUHDO_DEFER_UPDATE_MANA_BARS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aUnit, aMode);
 
 	return;
 
@@ -1243,31 +1236,14 @@ do
 
 
 	--
-	local tFrameDeltaUs;
-	local tFrameBudgetUs;
-	local tQueueDepth;
+	local tTaskState;
+	local tTaskConfig;
 	function VUHDO_updateFrameBudget(aTimeDelta)
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
 
-		if aTimeDelta and aTimeDelta > 0 then
-			tFrameDeltaUs = aTimeDelta * 1000000;
-
-			sSmoothedFrameIntervalUs = sSmoothedFrameIntervalUs * 0.9 + tFrameDeltaUs * 0.1;
-		end
-
-		tFrameBudgetUs = floor(sSmoothedFrameIntervalUs * tTaskConfig["FRAME_BUDGET_SHARE"]);
-		tFrameBudgetUs = max(tTaskConfig["MIN_FRAME_BUDGET_US"], min(tFrameBudgetUs, tTaskConfig["MAX_FRAME_BUDGET_US"]));
-
-		tQueueDepth = #VUHDO_TASK_PRIORITY_QUEUE + #sCombatHeldTasks;
-
-		if tQueueDepth > sLastQueueDepth and sLastQueueDepth > 0 then
-			tFrameBudgetUs = min(floor(tFrameBudgetUs * tTaskConfig["QUEUE_DEPTH_ESCALATION"]), tTaskConfig["MAX_FRAME_BUDGET_US"]);
-		end
-
-		sLastQueueDepth = tQueueDepth;
-		tTaskState["currentFrameBudgetUs"] = tFrameBudgetUs;
+		tTaskState["currentFrameBudgetUs"] = tTaskConfig["MAX_EXEC_TIME_US"];
 
 		return;
 
@@ -1338,36 +1314,12 @@ do
 	local tCount;
 	local tDefaultCost;
 	local tMaxReasonableCost;
-	local tFrameBudgetUs;
-	local tAvgCost;
-	local tDerivedMaxTasks;
 	function VUHDO_adjustDynamicDeferTasks()
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
 		tTaskConfig = VUHDO_DEFERRED_TASK_CONFIG;
 
-		tFrameBudgetUs = tTaskState["currentFrameBudgetUs"] or tTaskConfig["MIN_FRAME_BUDGET_US"];
-
-		tSum = 0;
-		tCount = 0;
-
-		if tTaskState["avgCostUsByType"] then
-			for _, tCost in pairs(tTaskState["avgCostUsByType"]) do
-				tSum = tSum + tCost;
-
-				tCount = tCount + 1;
-			end
-		end
-
-		if tCount > 0 then
-			tAvgCost = tSum / tCount;
-		else
-			tAvgCost = tTaskConfig["TARGET_EXEC_TIME_US"] / max(1, tTaskConfig["INITIAL_TASKS_PER_FRAME"]);
-		end
-
-		tDerivedMaxTasks = floor(tFrameBudgetUs / max(1, tAvgCost));
-		tMaxTasksPerFrame = floor(max(tTaskConfig["MIN_TASKS_PER_FRAME"], min(tDerivedMaxTasks, tTaskConfig["MAX_TASKS_PER_FRAME"])));
-		tTaskState["maxTasksPerFrame"] = tMaxTasksPerFrame;
+		tMaxTasksPerFrame = tTaskState["maxTasksPerFrame"];
 
 		if VUHDO_DEFERRED_TASK_PROFILING_ENABLED and VUHDO_DEFERRED_TASK_TYPES then
 			for _, tTaskType in pairs(VUHDO_DEFERRED_TASK_TYPES) do
@@ -1452,6 +1404,8 @@ do
 				end
 			end
 		end
+
+		tTaskState["maxTasksPerFrame"] = floor(max(tTaskConfig["MIN_TASKS_PER_FRAME"], min(tMaxTasksPerFrame, tTaskConfig["MAX_TASKS_PER_FRAME"])));
 
 		return;
 
@@ -1618,10 +1572,10 @@ do
 	local tAccuracy;
 	local tIsInCombatLockdown;
 	local tHeldTaskKey;
-	local tChunkBudgetUs;
-	local tNowUs;
-	local tRemainingUs;
-	local tPredictedCost;
+	local tBelowHighProcessed;
+	local tHeldForRequeue;
+	local tStarvationTask;
+	local tRequeueCnt;
 	function VUHDO_executeDeferredTaskChunk()
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
@@ -1647,17 +1601,15 @@ do
 		end
 
 		tTasksCompleted = 0;
-		tChunkBudgetUs = tTaskState["currentFrameBudgetUs"] or tTaskConfig["MAX_EXEC_TIME_US"];
-		tHardStopTime = (debugprofilestop() * 1000) + tChunkBudgetUs + 100;
+		tBelowHighProcessed = false;
+		tHardStopTime = (debugprofilestop() * 1000) + tTaskConfig["MAX_EXEC_TIME_US"] + 100;
 
 		for tTaskCount = 1, tTaskState["maxTasksPerFrame"] do
 			if #VUHDO_TASK_PRIORITY_QUEUE == 0 then
 				break;
 			end
 
-			tNowUs = debugprofilestop() * 1000;
-
-			if tNowUs > tHardStopTime and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
+			if (debugprofilestop() * 1000) > tHardStopTime and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
 				VUHDO_incrementDeferredTaskHardStops();
 
 				break;
@@ -1677,15 +1629,6 @@ do
 				sCombatHeldTaskMap[tHeldTaskKey] = tTask;
 				tinsert(sCombatHeldTasks, tTask);
 			else
-				tPredictedCost = VUHDO_getTaskCostEstimate(tTaskType);
-				tRemainingUs = tHardStopTime - tNowUs;
-
-				if tPredictedCost > tRemainingUs and tTasksCompleted >= tTaskConfig["MIN_TASKS_PER_FRAME"] then
-					VUHDO_incrementDeferredTaskHardStops();
-
-					break;
-				end
-
 				tShouldProcessTask = (tTasksCompleted < tTaskConfig["MIN_TASKS_PER_FRAME"]) or
 					(tTasksCompleted < tTaskState["maxTasksPerFrame"]);
 
@@ -1693,6 +1636,10 @@ do
 					tTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
 
 					if tTask["delegate"] and tTaskType then
+						if tTask["priority"] < VUHDO_DEFERRED_TASK_PRIORITY_HIGH then
+							tBelowHighProcessed = true;
+						end
+
 						_, _, tTaskDurationUs = VUHDO_executeSingleTask(tTask);
 
 						if VUHDO_DEFERRED_TASK_PROFILING_ENABLED then
@@ -1759,6 +1706,33 @@ do
 						tTask = nil;
 					end
 				end
+			end
+		end
+
+		if not tBelowHighProcessed and #VUHDO_TASK_PRIORITY_QUEUE > 0 and not InCombatLockdown() then
+			tHeldForRequeue = { };
+			tStarvationTask = nil;
+
+			while #VUHDO_TASK_PRIORITY_QUEUE > 0 and not tStarvationTask do
+				tTask = VUHDO_heapExtractTop(VUHDO_TASK_PRIORITY_QUEUE, VUHDO_TASK_QUEUE_MAP);
+
+				if tTask["priority"] < VUHDO_DEFERRED_TASK_PRIORITY_HIGH then
+					tStarvationTask = tTask;
+				else
+					tinsert(tHeldForRequeue, tTask);
+				end
+			end
+
+			for tRequeueCnt = 1, #tHeldForRequeue do
+				VUHDO_heapInsert(VUHDO_TASK_PRIORITY_QUEUE, tHeldForRequeue[tRequeueCnt], VUHDO_TASK_QUEUE_MAP);
+			end
+
+			if tStarvationTask and tStarvationTask["delegate"] and tStarvationTask["type"] then
+				_, _, tTaskDurationUs = VUHDO_executeSingleTask(tStarvationTask);
+
+				tTasksCompleted = tTasksCompleted + 1;
+
+				VUHDO_DEFERRED_TASK_POOL:release(tStarvationTask);
 			end
 		end
 
@@ -1832,9 +1806,9 @@ do
 			tTaskState["lastAdjustTime"] = GetTime();
 		end
 
-		VUHDO_processPendingAuraContainerBuilds();
+		xpcall(VUHDO_processPendingAuraContainerBuilds, VUHDO_deferredTaskErrorHandler);
 
-		VUHDO_processPendingNativeAuraSounds();
+		xpcall(VUHDO_processPendingNativeAuraSounds, VUHDO_deferredTaskErrorHandler);
 
 		return;
 
