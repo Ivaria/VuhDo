@@ -410,7 +410,9 @@ function VUHDO_updateAllRange()
 	end
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
-		VUHDO_updateUnitRange(tUnit);
+		if not VUHDO_RAID[tUnit]["isEventRange"] then
+			VUHDO_updateUnitRange(tUnit);
+		end
 	end
 
 	return;

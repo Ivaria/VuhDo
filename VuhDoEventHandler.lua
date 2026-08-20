@@ -647,6 +647,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	sAggroRefreshSecs = VUHDO_CONFIG["THREAT"]["AGGRO_REFRESH_MS"] * 0.001;
 	sRangeRefreshSecs = VUHDO_CONFIG["RANGE_CHECK_DELAY"] * 0.001;
 	sRangeFallbackSecs = VUHDO_CONFIG["RANGE_FALLBACK_DELAY"] * 0.001;
+
 	sClusterRefreshSecs = VUHDO_CONFIG["CLUSTER"]["REFRESH"] * 0.001;
 	sAoeRefreshSecs = VUHDO_CONFIG["AOE_ADVISOR"]["refresh"] * 0.001;
 	sBuffsRefreshSecs = VUHDO_BUFF_SETTINGS["CONFIG"]["REFRESH_SECS"];
@@ -1861,6 +1862,28 @@ do
 				VUHDO_setAnimationGroupEnabled(false);
 			else
 				VUHDO_animHelp();
+			end
+
+		elseif tCommandWord == "range" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+			tUnit = tParsedTexts[3];
+
+			if tSubCommand == "" or strfind(tSubCommand, "help") or strfind(tSubCommand, "%?") then
+				VUHDO_rangeHelp();
+			else
+				if not tUnit or tUnit == "" then
+					tUnit = tSubCommand;
+				end
+
+				if not tUnit or tUnit == "" then
+					_, tUnit = VUHDO_getCurrentMouseOver();
+				end
+
+				if not tUnit or tUnit == "" then
+					tUnit = "mouseover";
+				end
+
+				VUHDO_dumpRangeDiagnostics(tUnit);
 			end
 
 		elseif tCommandWord == "aura" then
