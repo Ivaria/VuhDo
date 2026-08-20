@@ -476,13 +476,13 @@ do
 	local tDurationCooldown;
 	local tLayoutSpec;
 	local tDurationBarWidth;
-	function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton)
+	function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton, anIsInitializerContext)
 
 		if not anButtonSetup["durationBar"] or not aAuraButton["IconFrame"] then
 			return true;
 		end
 
-		if not aAuraButton:CanBeAccessedInContext() then
+		if not anIsInitializerContext and not aAuraButton:CanBeAccessedInContext() then
 			sPendingButtonLayouts[aAuraButton] = anButtonSetup;
 
 			sHasPendingBuilds = true;
@@ -1377,7 +1377,7 @@ do
 				tTextOverlayFrame:SetFrameLevel(aAuraButton["DurationBar"]:GetFrameLevel() + 1);
 			end
 
-			VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton);
+			VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton, true);
 		end
 
 		if not tBarNoIconTexts and anButtonSetup["durationText"] and aAuraButton["TimerText"] then
