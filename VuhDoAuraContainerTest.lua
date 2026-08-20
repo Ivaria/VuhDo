@@ -757,7 +757,7 @@ do
 
 						tWarnField = #tWarnParts > 0 and tconcat(tWarnParts, ",") or nil;
 
-						tShouldSuppress = sAuraDiagDisconnected or (tContainerData["isAssistOnly"] and sAuraDiagAssistRestricted) or (tContainerData["isCompoundFilterString"] and sAuraDiagAuraFilterRestricted);
+						tShouldSuppress = sAuraDiagDisconnected or sAuraDiagAuraFilterRestricted or (tContainerData["isAssistOnly"] and sAuraDiagAssistRestricted);
 
 						VUHDO_auraDiagLine("overlay",
 							"button", aButtonName,
@@ -1201,7 +1201,9 @@ do
 								"size", VUHDO_auraDiagCompactSize(tWidth, tHeight),
 								"lastSyncedUnit", tContainerData["lastSyncedUnit"],
 								"lastSyncedRestricted", tContainerData["lastSyncedRestricted"],
-								"lastSyncedAssistOnly", tContainerData["lastSyncedAssistOnly"],
+								"lastSyncedAssistRestricted", tContainerData["lastSyncedAssistRestricted"],
+								"lastSyncedAuraFilterRestricted", tContainerData["lastSyncedAuraFilterRestricted"],
+								"lastSyncedDisconnected", tContainerData["lastSyncedDisconnected"],
 								"suppressed", tContainerData["groupsSuppressed"] and 1 or 0);
 
 							tGroupTemplateRefs = tContainerData["groupTemplateRefs"];
@@ -1212,7 +1214,7 @@ do
 									tTemplateRef = tGroupTemplateRefs[tGroupCnt];
 
 									if tTemplateRef then
-										tShouldSuppress = tIsDisconnected or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and tIsAuraFilterRestricted);
+										tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted);
 
 										VUHDO_auraDiagLine("containerGroup",
 											"i", tGroupCnt,
@@ -1247,7 +1249,7 @@ do
 										tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
 
 										if tTemplateRef and tRecordedKey then
-											tShouldSuppress = tIsDisconnected or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and tIsAuraFilterRestricted);
+											tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and tIsAssistRestricted);
 
 											VUHDO_auraDiagLine("containerSlot",
 												"i", tEngineSlotCnt,
@@ -1898,15 +1900,15 @@ do
 
 		VUHDO_saveAuraGateRaidEntry("boss1");
 		VUHDO_RAID["boss1"] = tMockInfo;
-		VUHDO_assertAuraGateTest("boss1ExemptFromVisibility", false, VUHDO_isUnitAuraFilterRestricted("boss1"));
+		VUHDO_assertAuraGateTest("boss1RestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("boss1"));
 
 		VUHDO_saveAuraGateRaidEntry("target");
 		VUHDO_RAID["target"] = tMockInfo;
-		VUHDO_assertAuraGateTest("targetExemptFromVisibility", false, VUHDO_isUnitAuraFilterRestricted("target"));
+		VUHDO_assertAuraGateTest("targetRestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("target"));
 
 		VUHDO_saveAuraGateRaidEntry("focus");
 		VUHDO_RAID["focus"] = tMockInfo;
-		VUHDO_assertAuraGateTest("focusExemptFromVisibility", false, VUHDO_isUnitAuraFilterRestricted("focus"));
+		VUHDO_assertAuraGateTest("focusRestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("focus"));
 
 		VUHDO_saveAuraGateRaidEntry("raid7");
 		VUHDO_RAID["raid7"] = tMockInfo;
@@ -1918,7 +1920,7 @@ do
 
 		VUHDO_saveAuraGateRaidEntry("focus");
 		VUHDO_RAID["focus"] = nil;
-		VUHDO_assertAuraGateTest("focusExemptWhenNoRaidEntry", false, VUHDO_isUnitAuraFilterRestricted("focus"));
+		VUHDO_assertAuraGateTest("focusFollowsLiveVisibilityWhenNoRaidEntry", not UnitIsVisible("focus"), VUHDO_isUnitAuraFilterRestricted("focus"));
 
 		tMockInfo = {
 			["connected"] = false,

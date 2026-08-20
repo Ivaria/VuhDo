@@ -16,6 +16,7 @@ local UnitCanAttack = UnitCanAttack;
 local UnitCanAssist = UnitCanAssist;
 local UnitUsingVehicle = UnitUsingVehicle;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
+local UnitIsVisible = UnitIsVisible;
 local issecretvalue = issecretvalue;
 local CreateNumericRuleFormatter = C_StringUtil and C_StringUtil.CreateNumericRuleFormatter;
 local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
@@ -3528,20 +3529,12 @@ do
 
 		tUnitInfo = VUHDO_RAID[aUnit];
 
-		if not tUnitInfo then
-			if VUHDO_isSpecialUnit(aUnit) then
-				return false;
-			end
-
+		if not tUnitInfo and not VUHDO_isSpecialUnit(aUnit) then
 			return true;
 		end
 
-		if not tUnitInfo["connected"] then
+		if tUnitInfo and not tUnitInfo["connected"] then
 			return true;
-		end
-
-		if VUHDO_isSpecialUnit(aUnit) then
-			return false;
 		end
 
 		tIsDeadOrGhost = UnitIsDeadOrGhost(aUnit);
@@ -3554,11 +3547,15 @@ do
 			return true;
 		end
 
-		if VUHDO_unitPhaseReason(aUnit) then
+		if not VUHDO_isSpecialUnit(aUnit) and VUHDO_unitPhaseReason(aUnit) then
 			return true;
 		end
 
-		tVisible = tUnitInfo["visible"];
+		if tUnitInfo then
+			tVisible = tUnitInfo["visible"];
+		else
+			tVisible = UnitIsVisible(aUnit);
+		end
 
 		if issecretvalue(tVisible) then
 			return false;
@@ -3651,7 +3648,7 @@ do
 				if tTemplateRef then
 					tGroup = tTemplateRef["template"];
 
-					tShouldSuppress = anIsDisconnected or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and anIsAuraFilterRestricted);
+					tShouldSuppress = anIsDisconnected or anIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted);
 
 					if tShouldSuppress then
 						aContainer:SetAuraGroupMaxFrameCount(tGroupKey, 0);
@@ -3678,7 +3675,7 @@ do
 				if tTemplateRef and tRecordedKey then
 					tSlot = tTemplateRef["template"];
 
-					tShouldSuppress = anIsDisconnected or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted) or (tTemplateRef["isCompoundFilterString"] and anIsAuraFilterRestricted);
+					tShouldSuppress = anIsDisconnected or anIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted);
 
 					if tShouldSuppress then
 						aContainer:SetAuraSlotFilterString(tRecordedKey, "");

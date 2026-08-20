@@ -3022,7 +3022,7 @@ do
 										tGroupWant = false;
 									end
 
-									tShouldSuppress = tIsDisconnected or (tChainGroupMetaEntry["isAssistOnly"] and tIsAssistRestricted) or (tChainGroupMetaEntry["isCompoundFilterString"] and tIsAuraFilterRestricted);
+									tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tChainGroupMetaEntry["isAssistOnly"] and tIsAssistRestricted);
 
 									if tGroupWant and tShouldSuppress then
 										tGroupWant = false;
@@ -3058,7 +3058,7 @@ do
 									end
 								end
 
-								tShouldSuppress = tIsDisconnected or (tContainerData["isAssistOnly"] and tIsAssistRestricted) or (tContainerData["isCompoundFilterString"] and tIsAuraFilterRestricted);
+								tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tContainerData["isAssistOnly"] and tIsAssistRestricted);
 
 								if tWantEnabled and tShouldSuppress then
 									tWantEnabled = false;
