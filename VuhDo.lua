@@ -601,9 +601,17 @@ function VUHDO_setHealth(aUnit, aMode)
 
 				if sSecretsEnabled then
 					tInfo["hasSecretHealth"] = issecretvalue(tInfo["health"]);
-					tInfo["hasSecretHealthMax"] = issecretvalue(tInfo["healthmax"]);
+
+					if not tInfo["hasSecretHealthMax"] and (not tInfo["healthmax"] or tInfo["healthmax"] <= 0) then
+						VUHDO_setUnitInfoHealthMax(tInfo, UnitHealthMax(aUnit));
+					end
 				else
 					tInfo["hasSecretHealth"] = false;
+
+					if not tInfo["healthmax"] or tInfo["healthmax"] <= 0 then
+						VUHDO_setUnitInfoHealthMax(tInfo, UnitHealthMax(aUnit));
+					end
+
 					tInfo["hasSecretHealthMax"] = false;
 				end
 

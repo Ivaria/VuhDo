@@ -1004,11 +1004,14 @@ local VUHDO_isInSameZone = VUHDO_isInSameZone;
 --
 function VUHDO_setUnitInfoHealthMax(anInfo, aHealthMax)
 
-	anInfo["healthmax"] = aHealthMax;
-
-	if sSecretsEnabled then
-		anInfo["hasSecretHealthMax"] = issecretvalue(aHealthMax);
+	if sSecretsEnabled and issecretvalue(aHealthMax) then
+		anInfo["healthmax"] = aHealthMax;
+		anInfo["hasSecretHealthMax"] = true;
+	elseif type(aHealthMax) == "number" and aHealthMax > 0 then
+		anInfo["healthmax"] = aHealthMax;
+		anInfo["hasSecretHealthMax"] = false;
 	else
+		anInfo["healthmax"] = 0;
 		anInfo["hasSecretHealthMax"] = false;
 	end
 
