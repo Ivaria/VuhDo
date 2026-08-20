@@ -22,6 +22,7 @@ local VUHDO_hideAuraSlot;
 local VUHDO_copyColorTo;
 local VUHDO_evaluateBouquetItemForStaticSlot;
 local VUHDO_applyAuraContainerSlotFilters;
+local VUHDO_isUnitAuraFilterRestricted;
 local VUHDO_getManaAdjustedYOffset;
 local VUHDO_acquireAuraIconFrame;
 local VUHDO_acquireAuraBarFrame;
@@ -53,6 +54,7 @@ function VUHDO_auraContainerStaticInitLocalOverrides()
 	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
 	VUHDO_evaluateBouquetItemForStaticSlot = _G["VUHDO_evaluateBouquetItemForStaticSlot"];
 	VUHDO_applyAuraContainerSlotFilters = _G["VUHDO_applyAuraContainerSlotFilters"];
+	VUHDO_isUnitAuraFilterRestricted = _G["VUHDO_isUnitAuraFilterRestricted"];
 	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
 	VUHDO_acquireAuraIconFrame = _G["VUHDO_acquireAuraIconFrame"];
 	VUHDO_acquireAuraBarFrame = _G["VUHDO_acquireAuraBarFrame"];
@@ -503,7 +505,7 @@ do
 				tCanAttack = aCanAttack;
 			end
 
-			VUHDO_applyAuraContainerSlotFilters(tContainer, aContainerData, tCanAttack);
+			VUHDO_applyAuraContainerSlotFilters(tContainer, aContainerData, tCanAttack, VUHDO_isUnitAuraFilterRestricted(aUnit));
 		end
 
 		return;

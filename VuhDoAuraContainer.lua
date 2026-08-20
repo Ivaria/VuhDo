@@ -3918,7 +3918,7 @@ local tShouldSuppress;
 local tLastSlotSuppress;
 local tSlotKey;
 local tIsDirty;
-function VUHDO_applyAuraContainerSlotFilters(aContainer, aContainerData, anIsHostile)
+function VUHDO_applyAuraContainerSlotFilters(aContainer, aContainerData, anIsHostile, anIsUnitRestricted)
 
 	if not aContainer or not aContainerData then
 		return false;
@@ -3936,7 +3936,7 @@ function VUHDO_applyAuraContainerSlotFilters(aContainer, aContainerData, anIsHos
 
 	for _, tSlot in ipairs(tContainerTemplate["slots"] or sEmpty) do
 		if not tSlot["isStaticBouquetSlot"] and tSlot["key"] then
-			tShouldSuppress = false;
+			tShouldSuppress = anIsUnitRestricted and true or false;
 
 			if tSlot["friendlyOnly"] and anIsHostile then
 				tShouldSuppress = true;
@@ -4033,7 +4033,7 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 		if tContainer then
 			VUHDO_restoreAuraContainerGroups(tContainer, tContainerData);
 
-			tSlotFiltersDirty = VUHDO_applyAuraContainerSlotFilters(tContainer, tContainerData, tCanAttack);
+			tSlotFiltersDirty = VUHDO_applyAuraContainerSlotFilters(tContainer, tContainerData, tCanAttack, tIsAuraFilterRestricted);
 
 			tAssistOnlyDirty = VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted, tIsAuraFilterRestricted, tIsDisconnected);
 

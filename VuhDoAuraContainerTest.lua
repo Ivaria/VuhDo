@@ -1258,7 +1258,8 @@ do
 												"candidates", VUHDO_auraDiagFormatCandidateSummary(tTemplateRef["template"] and tTemplateRef["template"]["candidateFilters"], nil),
 												"assistOnly", tTemplateRef["isAssistOnly"],
 												"compound", tTemplateRef["isCompoundFilterString"],
-												"suppress", tShouldSuppress);
+												"suppress", tShouldSuppress,
+												"candSuppress", tContainerData["lastSlotSuppress"] and tContainerData["lastSlotSuppress"][tRecordedKey]);
 										end
 									end
 								end
