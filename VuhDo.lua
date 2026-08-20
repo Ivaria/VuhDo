@@ -1063,6 +1063,28 @@ function VUHDO_reloadRaidMembers()
 
 		tMaxMembers = ("raid" == tUnit) and GetNumGroupMembers() or ("party" == tUnit) and 4 or 0;
 
+		for tDepartedUnit, _ in pairs(VUHDO_RAID) do
+			if not UnitExists(tDepartedUnit) then
+				if sSecretsEnabled then
+					VUHDO_hideAurasForUnit(tDepartedUnit);
+				else
+					VUHDO_removeHots(tDepartedUnit);
+					VUHDO_removeAllDebuffIcons(tDepartedUnit);
+					VUHDO_resetDebuffsFor(tDepartedUnit);
+				end
+
+				VUHDO_clearUnitAuraCache(tDepartedUnit);
+
+				if VUHDO_INTERNAL_TOGGLES and VUHDO_INTERNAL_TOGGLES[37] and VUHDO_CONFIG and VUHDO_CONFIG["SHOW_SPELL_TRACE"] then
+					VUHDO_cleanupSpellTraceForUnit(tDepartedUnit);
+				end
+
+				VUHDO_unregisterUnitForEvents(tDepartedUnit);
+
+				VUHDO_initEventBouquetsFor(tDepartedUnit);
+			end
+		end
+
 		twipe(VUHDO_RAID);
 		twipe(VUHDO_RAID_NAMES);
 

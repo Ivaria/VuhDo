@@ -1981,6 +1981,7 @@ do
 			["staticSlots"] = aContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate),
 			["panelNum"] = aContainerTemplate["panelNum"],
 			["anchorIndex"] = aContainerTemplate["anchorIndex"],
+			["ownerButton"] = aContainerTemplate["ownerButton"],
 			["fromPool"] = false,
 		};
 
@@ -2808,6 +2809,7 @@ do
 		end
 
 		aContainerTemplate["parent"] = tContainerParent;
+		aContainerTemplate["ownerButton"] = aButton;
 
 		tPoolKey = VUHDO_getAuraContainerPoolKey(aContainerTemplate);
 		tUsesDispelTextures = aContainerTemplate["usesDispelTextures"];
@@ -2876,6 +2878,7 @@ do
 				tContainerData["staticSlots"] = aContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate);
 				tContainerData["panelNum"] = aContainerTemplate["panelNum"];
 				tContainerData["anchorIndex"] = aContainerTemplate["anchorIndex"];
+				tContainerData["ownerButton"] = aButton;
 				tContainerData["lastSyncedUnit"] = nil;
 				tContainerData["lastSyncedGuid"] = nil;
 				tContainerData["lastSyncedRestricted"] = nil;
@@ -2889,6 +2892,8 @@ do
 				tContainerData["hostileOnly"] = nil;
 				tContainerData["alwaysEnabled"] = nil;
 				tContainerData["fromPool"] = true;
+
+				VUHDO_clearAuraContainerUnit(tContainer, tContainerData);
 
 				VUHDO_restorePooledAuraContainer(tContainer, tContainerData, aContainerTemplate);
 
@@ -2916,6 +2921,7 @@ do
 		if tContainerData then
 			tContainerData["fromPool"] = false;
 			tContainerData["poolKey"] = tPoolKey;
+			tContainerData["ownerButton"] = aButton;
 		end
 
 		return tContainerData;
@@ -3788,7 +3794,11 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 	end
 
 	if aContainerData and aContainerData["staticSlots"] and next(aContainerData["staticSlots"]) then
-		tButton = aContainer:GetParent();
+		tButton = aContainerData["ownerButton"];
+
+		if not tButton then
+			tButton = aContainer:GetParent();
+		end
 
 		if tButton then
 			VUHDO_hideStaticBouquetSlotsForButton(tButton, aContainerData);
@@ -3796,6 +3806,13 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 	end
 
 	aContainer:SetUnit("none");
+
+	if not aContainer:IsEnabled() then
+		aContainer:SetEnabled(true);
+	end
+
+	aContainer:UpdateAllAuras();
+
 	aContainer:SetEnabled(false);
 	aContainer:SetShown(false);
 
@@ -3840,10 +3857,15 @@ end
 local tIsAuraDataRestricted;
 local tCanAttack;
 local tOccupantGuid;
+local tButton;
 function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 
 	if not aContainer or not aContainerData or not aUnit then
 		return;
+	end
+
+	if aButton then
+		aContainerData["ownerButton"] = aButton;
 	end
 
 	aContainer:SetUnit(aUnit);
@@ -3863,13 +3885,16 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 	VUHDO_applyContainerClassColorBars(aContainer, aUnit);
 
 	if aContainerData["staticSlots"] and next(aContainerData["staticSlots"]) then
-		if not aButton then
-			aButton = aContainer:GetParent();
+		tButton = aButton or aContainerData["ownerButton"];
+
+		if not tButton then
+			tButton = aContainer:GetParent();
 		end
 
-		if aButton then
+		if tButton then
 			tCanAttack = UnitCanAttack("player", aUnit);
-			VUHDO_updateStaticBouquetSlotsForButton(aButton, aUnit, aContainerData, tCanAttack);
+
+			VUHDO_updateStaticBouquetSlotsForButton(tButton, aUnit, aContainerData, tCanAttack);
 		end
 	end
 
