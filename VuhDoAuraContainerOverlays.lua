@@ -3255,7 +3255,12 @@ do
 				if tSlotHostData then
 					tSlotHostData["lastSyncedUnit"] = nil;
 					tSlotHostData["lastSyncedGuid"] = nil;
-					tSlotHostData["lastSyncedSlotEnabled"] = nil;
+
+					if not tSlotHostData["lastSyncedSlotEnabled"] then
+						tSlotHostData["lastSyncedSlotEnabled"] = { };
+					else
+						twipe(tSlotHostData["lastSyncedSlotEnabled"]);
+					end
 				end
 			end
 

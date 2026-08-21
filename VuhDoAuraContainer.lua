@@ -3078,7 +3078,6 @@ do
 
 
 	--
-	local tSlotKey;
 	local tContainer;
 	function VUHDO_suppressOverlaySlotHostSlot(aHostData, aSlotKey)
 
@@ -3096,6 +3095,11 @@ do
 		tContainer:SetAuraSlotCandidateFilters(aSlotKey, VUHDO_SUPPRESS_CANDIDATE_FILTERS);
 
 		aHostData["slotRecords"][aSlotKey]["appliedFilterString"] = "HELPFUL";
+
+		if not aHostData["lastSyncedSlotEnabled"] then
+			aHostData["lastSyncedSlotEnabled"] = { };
+		end
+
 		aHostData["lastSyncedSlotEnabled"][aSlotKey] = false;
 
 		return;
@@ -3107,7 +3111,6 @@ do
 	--
 	local tHostData;
 	local tContainer;
-	local tSlotKey;
 	function VUHDO_disableOverlaySlotHost(aButtonName)
 
 		tHostData = VUHDO_OVERLAY_SLOT_HOSTS[aButtonName];
