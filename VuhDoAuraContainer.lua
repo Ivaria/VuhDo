@@ -204,7 +204,7 @@ VUHDO_SUPPRESS_CANDIDATE_FILTERS = sSuppressCandidateFilters;
 local sPendingContainerBuilds = { };
 local sPendingButtonLayouts = { };
 local sPendingClassColors = { };
-local sPendingRetryScratch = { };
+local sPendingRetry = { };
 local sHasPendingBuilds = false;
 local sContainerClassColorBars = { };
 
@@ -244,7 +244,7 @@ local sChainBaselineFrames = { };
 local sChainBackgroundFillOwners = { };
 local sAuraContainerPool = { };
 local sAuraPoolDisabled = false;
-local sPoolKeyScratch = { };
+local sPoolKeyParts = { };
 
 local sBorderTexture;
 local sBorderEdgeTop;
@@ -1996,7 +1996,6 @@ do
 			["staticSlots"] = aContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate),
 			["panelNum"] = aContainerTemplate["panelNum"],
 			["anchorIndex"] = aContainerTemplate["anchorIndex"],
-			["ownerButton"] = aContainerTemplate["ownerButton"],
 			["fromPool"] = false,
 		};
 
@@ -2107,16 +2106,16 @@ end
 --
 do
 	--
-	local function VUHDO_appendPoolKeyColorComponent(aScratch, aComponent, aPrefix)
+	local function VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, aComponent, aPrefix)
 
 		if aComponent == nil then
 			return;
 		end
 
 		if issecretvalue(aComponent) then
-			tinsert(aScratch, aPrefix and (aPrefix .. "?") or "?");
+			tinsert(aPoolKeyParts, aPrefix and (aPrefix .. "?") or "?");
 		else
-			tinsert(aScratch, format(aPrefix and (aPrefix .. "%.3f") or "%.3f", aComponent));
+			tinsert(aPoolKeyParts, format(aPrefix and (aPrefix .. "%.3f") or "%.3f", aComponent));
 		end
 
 		return;
@@ -2134,72 +2133,72 @@ do
 	local tSublevelSlots;
 	local tSublevelSlot;
 	local tDurationBarOptions;
-	local function VUHDO_appendAuraContainerPoolKeyExtras(aScratch, aButtonSetup)
+	local function VUHDO_appendAuraContainerPoolKeyExtras(aPoolKeyParts, aButtonSetup)
 
-		tinsert(aScratch, aButtonSetup["shadowValueMode"] or "");
-		tinsert(aScratch, aButtonSetup["hideIcon"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["staticIcon"] or "");
+		tinsert(aPoolKeyParts, aButtonSetup["shadowValueMode"] or "");
+		tinsert(aPoolKeyParts, aButtonSetup["hideIcon"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["staticIcon"] or "");
 
 		tStaticColor = aButtonSetup["staticColor"];
 
 		if tStaticColor then
-			VUHDO_appendPoolKeyColorComponent(aScratch, tStaticColor["R"], "c");
-			VUHDO_appendPoolKeyColorComponent(aScratch, tStaticColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tStaticColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tStaticColor["O"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["R"], "c");
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["G"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["B"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["O"], nil);
 		end
 
 		tIconColor = aButtonSetup["iconColor"];
 
 		if tIconColor then
-			VUHDO_appendPoolKeyColorComponent(aScratch, tIconColor["R"], "i");
-			VUHDO_appendPoolKeyColorComponent(aScratch, tIconColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tIconColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tIconColor["O"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["R"], "i");
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["G"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["B"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["O"], nil);
 		end
 
 		tBarColor = aButtonSetup["barColor"];
 
 		if tBarColor then
-			VUHDO_appendPoolKeyColorComponent(aScratch, tBarColor["R"], "bc");
-			VUHDO_appendPoolKeyColorComponent(aScratch, tBarColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tBarColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tBarColor["O"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["R"], "bc");
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["G"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["B"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["O"], nil);
 		end
 
 		if aButtonSetup["dispelBright"] then
-			tinsert(aScratch, format("b%.3f", aButtonSetup["dispelBright"]));
+			tinsert(aPoolKeyParts, format("b%.3f", aButtonSetup["dispelBright"]));
 		end
 
 		if aButtonSetup["dispelOpacity"] then
-			tinsert(aScratch, format("o%.3f", aButtonSetup["dispelOpacity"]));
+			tinsert(aPoolKeyParts, format("o%.3f", aButtonSetup["dispelOpacity"]));
 		end
 
 		tIconTexCoords = aButtonSetup["iconTexCoords"];
 
 		if tIconTexCoords then
 			for tTexCoordCnt = 1, #tIconTexCoords do
-				VUHDO_appendPoolKeyColorComponent(aScratch, tIconTexCoords[tTexCoordCnt], nil);
+				VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconTexCoords[tTexCoordCnt], nil);
 			end
 		end
 
 		tGlowColor = aButtonSetup["glowColor"];
 
 		if tGlowColor then
-			VUHDO_appendPoolKeyColorComponent(aScratch, tGlowColor["R"], "g");
-			VUHDO_appendPoolKeyColorComponent(aScratch, tGlowColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tGlowColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aScratch, tGlowColor["O"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["R"], "g");
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["G"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["B"], nil);
+			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["O"], nil);
 		end
 
 		if aButtonSetup["glowIcon"] then
-			tinsert(aScratch, "gs" .. (aButtonSetup["glowStyle"] or ""));
+			tinsert(aPoolKeyParts, "gs" .. (aButtonSetup["glowStyle"] or ""));
 		end
 
 		if aButtonSetup["shadowBar"] and aButtonSetup["barTexture"] then
-			tinsert(aScratch, aButtonSetup["barTexture"]);
-			tinsert(aScratch, format("%d", aButtonSetup["barOrientation"] or 0));
-			tinsert(aScratch, aButtonSetup["barInverted"] and "1" or "0");
+			tinsert(aPoolKeyParts, aButtonSetup["barTexture"]);
+			tinsert(aPoolKeyParts, format("%d", aButtonSetup["barOrientation"] or 0));
+			tinsert(aPoolKeyParts, aButtonSetup["barInverted"] and "1" or "0");
 		end
 
 		tSublevelSlots = aButtonSetup["sublevelSlots"];
@@ -2209,36 +2208,36 @@ do
 				tSublevelSlot = tSublevelSlots[tSublevelCnt];
 
 				if tSublevelSlot then
-					tinsert(aScratch, tSublevelSlot["layer"] or "");
-					tinsert(aScratch, format("%d", tSublevelSlot["sublevel"] or 0));
+					tinsert(aPoolKeyParts, tSublevelSlot["layer"] or "");
+					tinsert(aPoolKeyParts, format("%d", tSublevelSlot["sublevel"] or 0));
 				end
 			end
 		end
 
-		tinsert(aScratch, aButtonSetup["durationText"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["durationCooldown"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["applicationCount"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["mouseMotion"] and "1" or "0");
-		tinsert(aScratch, format("%d", aButtonSetup["durationMode"] or 0));
-		tinsert(aScratch, format("%d", aButtonSetup["timerThreshold"] or 0));
+		tinsert(aPoolKeyParts, aButtonSetup["durationText"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["durationCooldown"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["applicationCount"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["mouseMotion"] and "1" or "0");
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["durationMode"] or 0));
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["timerThreshold"] or 0));
 
-		tinsert(aScratch, format("%d", aButtonSetup["iconType"] or 0));
-		tinsert(aScratch, aButtonSetup["barVertical"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["barTurnAxis"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["durationBar"] and "1" or "0");
-		tinsert(aScratch, format("%d", aButtonSetup["durationBarOrientation"] or 0));
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["iconType"] or 0));
+		tinsert(aPoolKeyParts, aButtonSetup["barVertical"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["barTurnAxis"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["durationBar"] and "1" or "0");
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["durationBarOrientation"] or 0));
 
 		tDurationBarOptions = aButtonSetup["durationBarOptions"];
 
 		if tDurationBarOptions then
-			tinsert(aScratch, format("%d", tDurationBarOptions["direction"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tDurationBarOptions["direction"] or 0));
 		else
-			tinsert(aScratch, "0");
+			tinsert(aPoolKeyParts, "0");
 		end
 
-		tinsert(aScratch, format("%d", aButtonSetup["barSegmentWidth"] or 0));
-		tinsert(aScratch, format("%d", aButtonSetup["barSegmentHeight"] or 0));
-		tinsert(aScratch, format("%d", aButtonSetup["iconTextSize"] or 0));
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["barSegmentWidth"] or 0));
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["barSegmentHeight"] or 0));
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["iconTextSize"] or 0));
 
 		return;
 
@@ -2246,20 +2245,20 @@ do
 
 
 
-	local function VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aScratch, aButtonSetup)
+	local function VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aPoolKeyParts, aButtonSetup)
 
-		tinsert(aScratch, aButtonSetup["shadowBar"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["dispelFill"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["dispelBorder"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["dispelIcon"] and "1" or "0");
-		tinsert(aScratch, format("%d", aButtonSetup["targetFrameLevel"] or 0));
-		tinsert(aScratch, aButtonSetup["border"] and "1" or "0");
-		tinsert(aScratch, format("%d", aButtonSetup["borderWidth"] or 0));
-		tinsert(aScratch, aButtonSetup["borderFile"] or "");
-		tinsert(aScratch, aButtonSetup["glowIcon"] and "1" or "0");
-		tinsert(aScratch, aButtonSetup["dispelOverlayChrome"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["shadowBar"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["dispelFill"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["dispelBorder"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["dispelIcon"] and "1" or "0");
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["targetFrameLevel"] or 0));
+		tinsert(aPoolKeyParts, aButtonSetup["border"] and "1" or "0");
+		tinsert(aPoolKeyParts, format("%d", aButtonSetup["borderWidth"] or 0));
+		tinsert(aPoolKeyParts, aButtonSetup["borderFile"] or "");
+		tinsert(aPoolKeyParts, aButtonSetup["glowIcon"] and "1" or "0");
+		tinsert(aPoolKeyParts, aButtonSetup["dispelOverlayChrome"] and "1" or "0");
 
-		VUHDO_appendAuraContainerPoolKeyExtras(aScratch, aButtonSetup);
+		VUHDO_appendAuraContainerPoolKeyExtras(aPoolKeyParts, aButtonSetup);
 
 	end
 
@@ -2270,105 +2269,105 @@ do
 	local tParentName;
 	local tButtonSetup;
 	local tPoolKeyBase;
-	local function VUHDO_appendAuraContainerPoolKeyToScratch(aScratch, aContainerTemplate)
+	local function VUHDO_appendAuraContainerPoolKeyParts(aPoolKeyParts, aContainerTemplate)
 
-		tinsert(aScratch, aContainerTemplate["isOverlay"] and "1" or "0");
-		tinsert(aScratch, aContainerTemplate["isFillChain"] and "1" or "0");
-		tinsert(aScratch, aContainerTemplate["chainHasBaseline"] and "1" or "0");
+		tinsert(aPoolKeyParts, aContainerTemplate["isOverlay"] and "1" or "0");
+		tinsert(aPoolKeyParts, aContainerTemplate["isFillChain"] and "1" or "0");
+		tinsert(aPoolKeyParts, aContainerTemplate["chainHasBaseline"] and "1" or "0");
 
 		if aContainerTemplate["anchor"] then
-			tinsert(aScratch, aContainerTemplate["anchor"]["mode"] or "");
-			tinsert(aScratch, format("%d", aContainerTemplate["anchor"]["frameLevelOffset"] or 0));
-			tinsert(aScratch, format("%d", aContainerTemplate["anchor"]["offsetX"] or 0));
-			tinsert(aScratch, format("%d", aContainerTemplate["anchor"]["offsetY"] or 0));
+			tinsert(aPoolKeyParts, aContainerTemplate["anchor"]["mode"] or "");
+			tinsert(aPoolKeyParts, format("%d", aContainerTemplate["anchor"]["frameLevelOffset"] or 0));
+			tinsert(aPoolKeyParts, format("%d", aContainerTemplate["anchor"]["offsetX"] or 0));
+			tinsert(aPoolKeyParts, format("%d", aContainerTemplate["anchor"]["offsetY"] or 0));
 		end
 
 		tContainerLayout = aContainerTemplate["containerLayout"];
 
 		if tContainerLayout then
-			tinsert(aScratch, tContainerLayout["isFixedLayout"] and "1" or "0");
-			tinsert(aScratch, format("%d", tContainerLayout["fixedRadioValue"] or 0));
-			tinsert(aScratch, tContainerLayout["useFixedSlots"] and "1" or "0");
-			tinsert(aScratch, tContainerLayout["anchorPoint"] or "");
-			tinsert(aScratch, format("%d", tContainerLayout["elementWidth"] or 0));
-			tinsert(aScratch, format("%d", tContainerLayout["elementHeight"] or 0));
-			tinsert(aScratch, format("%d", tContainerLayout["maxColumns"] or 0));
-			tinsert(aScratch, format("%d", tContainerLayout["maxRows"] or 0));
-			tinsert(aScratch, format("%d", tContainerLayout["spacing"] or 0));
-			tinsert(aScratch, format("%d", tContainerLayout["layoutAxis"] or 0));
-			tinsert(aScratch, format("%d", tContainerLayout["horizontalDir"] or 0));
-			tinsert(aScratch, format("%d", tContainerLayout["verticalDir"] or 0));
+			tinsert(aPoolKeyParts, tContainerLayout["isFixedLayout"] and "1" or "0");
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["fixedRadioValue"] or 0));
+			tinsert(aPoolKeyParts, tContainerLayout["useFixedSlots"] and "1" or "0");
+			tinsert(aPoolKeyParts, tContainerLayout["anchorPoint"] or "");
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["elementWidth"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["elementHeight"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["maxColumns"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["maxRows"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["spacing"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["layoutAxis"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["horizontalDir"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tContainerLayout["verticalDir"] or 0));
 		end
 
 		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
-			tinsert(aScratch, "s");
-			tinsert(aScratch, tSlot["key"] or "");
+			tinsert(aPoolKeyParts, "s");
+			tinsert(aPoolKeyParts, tSlot["key"] or "");
 
 			if tSlot["isStaticBouquetSlot"] then
-				tinsert(aScratch, "static");
-				tinsert(aScratch, tSlot["bouquetName"] or "");
-				tinsert(aScratch, format("%d", tSlot["entryIndex"] or 0));
-				tinsert(aScratch, format("%d", tSlot["itemIndex"] or 0));
-				tinsert(aScratch, format("%d", tSlot["frameLevelOffset"] or 0));
-				tinsert(aScratch, tSlot["isMixedBouquetItem"] and "1" or "0");
-				tinsert(aScratch, format("%d", tSlot["x"] or 0));
-				tinsert(aScratch, format("%d", tSlot["y"] or 0));
+				tinsert(aPoolKeyParts, "static");
+				tinsert(aPoolKeyParts, tSlot["bouquetName"] or "");
+				tinsert(aPoolKeyParts, format("%d", tSlot["entryIndex"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tSlot["itemIndex"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tSlot["frameLevelOffset"] or 0));
+				tinsert(aPoolKeyParts, tSlot["isMixedBouquetItem"] and "1" or "0");
+				tinsert(aPoolKeyParts, format("%d", tSlot["x"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tSlot["y"] or 0));
 
 				tButtonSetup = tSlot["buttonSetup"];
 
 				if tButtonSetup then
-					tinsert(aScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+					tinsert(aPoolKeyParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
 				end
 			else
-				tinsert(aScratch, tSlot["templateName"] or "");
-				tinsert(aScratch, tSlot["filterString"] or "");
+				tinsert(aPoolKeyParts, tSlot["templateName"] or "");
+				tinsert(aPoolKeyParts, tSlot["filterString"] or "");
 			end
 
-			tinsert(aScratch, format("%d", tSlot["width"] or 0));
-			tinsert(aScratch, format("%d", tSlot["height"] or 0));
-			tinsert(aScratch, tSlot["anchor"] or "");
-			tinsert(aScratch, tSlot["relPoint"] or "");
-			tinsert(aScratch, format("%d", tSlot["x"] or 0));
-			tinsert(aScratch, format("%d", tSlot["y"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tSlot["width"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tSlot["height"] or 0));
+			tinsert(aPoolKeyParts, tSlot["anchor"] or "");
+			tinsert(aPoolKeyParts, tSlot["relPoint"] or "");
+			tinsert(aPoolKeyParts, format("%d", tSlot["x"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tSlot["y"] or 0));
 
 			tButtonSetup = tSlot["buttonSetup"];
 
 			if tButtonSetup and not tSlot["isStaticBouquetSlot"] then
-				tinsert(aScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
 
-				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aScratch, tButtonSetup);
+				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aPoolKeyParts, tButtonSetup);
 			end
 		end
 
 		for _, tGroup in ipairs(aContainerTemplate["groups"] or sEmpty) do
-			tinsert(aScratch, "g");
-			tinsert(aScratch, tGroup["key"] or "");
-			tinsert(aScratch, tGroup["templateName"] or "");
-			tinsert(aScratch, tGroup["filterString"] or "");
-			tinsert(aScratch, format("%d", tGroup["maxFrameCount"] or 0));
-			tinsert(aScratch, format("%d", tGroup["sortMethod"] or 0));
-			tinsert(aScratch, format("%d", tGroup["sortDir"] or 0));
+			tinsert(aPoolKeyParts, "g");
+			tinsert(aPoolKeyParts, tGroup["key"] or "");
+			tinsert(aPoolKeyParts, tGroup["templateName"] or "");
+			tinsert(aPoolKeyParts, tGroup["filterString"] or "");
+			tinsert(aPoolKeyParts, format("%d", tGroup["maxFrameCount"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tGroup["sortMethod"] or 0));
+			tinsert(aPoolKeyParts, format("%d", tGroup["sortDir"] or 0));
 
 			if tGroup["layout"] then
-				tinsert(aScratch, format("%d", tGroup["layout"]["elementWidth"] or 0));
-				tinsert(aScratch, format("%d", tGroup["layout"]["elementHeight"] or 0));
-				tinsert(aScratch, tGroup["layout"]["forceNewLine"] and "1" or "0");
-				tinsert(aScratch, format("%d", tGroup["layout"]["layoutIndex"] or 0));
-				tinsert(aScratch, format("%d", tGroup["layout"]["groupSpacing"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["elementWidth"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["elementHeight"] or 0));
+				tinsert(aPoolKeyParts, tGroup["layout"]["forceNewLine"] and "1" or "0");
+				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["layoutIndex"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["groupSpacing"] or 0));
 			end
 
 			tButtonSetup = tGroup["buttonSetup"];
 
 			if tButtonSetup then
-				tinsert(aScratch, format("%d", tButtonSetup["frameLevelOffset"] or 0));
-				tinsert(aScratch, tGroup["isFixedLayout"] and "1" or "0");
-				tinsert(aScratch, format("%d", tGroup["fixedRadioValue"] or 0));
-				tinsert(aScratch, format("%d", tGroup["fixedBarWidth"] or 0));
-				tinsert(aScratch, format("%d", tGroup["fixedBarHeight"] or 0));
-				tinsert(aScratch, format("%d", tGroup["fixedIconSize"] or 0));
-				tinsert(aScratch, tButtonSetup["auraSymbol"] and "1" or "0");
+				tinsert(aPoolKeyParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+				tinsert(aPoolKeyParts, tGroup["isFixedLayout"] and "1" or "0");
+				tinsert(aPoolKeyParts, format("%d", tGroup["fixedRadioValue"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tGroup["fixedBarWidth"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tGroup["fixedBarHeight"] or 0));
+				tinsert(aPoolKeyParts, format("%d", tGroup["fixedIconSize"] or 0));
+				tinsert(aPoolKeyParts, tButtonSetup["auraSymbol"] and "1" or "0");
 
-				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aScratch, tButtonSetup);
+				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aPoolKeyParts, tButtonSetup);
 			end
 		end
 
@@ -2389,11 +2388,11 @@ do
 			return aContainerTemplate["poolKeyBase"];
 		end
 
-		twipe(sPoolKeyScratch);
+		twipe(sPoolKeyParts);
 
-		VUHDO_appendAuraContainerPoolKeyToScratch(sPoolKeyScratch, aContainerTemplate);
+		VUHDO_appendAuraContainerPoolKeyParts(sPoolKeyParts, aContainerTemplate);
 
-		aContainerTemplate["poolKeyBase"] = tconcat(sPoolKeyScratch, "|");
+		aContainerTemplate["poolKeyBase"] = tconcat(sPoolKeyParts, "|");
 
 		return aContainerTemplate["poolKeyBase"];
 
@@ -2833,7 +2832,6 @@ do
 		end
 
 		aContainerTemplate["parent"] = tContainerParent;
-		aContainerTemplate["ownerButton"] = aButton;
 
 		tPoolKey = VUHDO_getAuraContainerPoolKey(aContainerTemplate);
 		tUsesDispelTextures = aContainerTemplate["usesDispelTextures"];
@@ -4372,35 +4370,35 @@ function VUHDO_processPendingAuraContainerBuilds()
 		twipe(sPendingContainerBuilds);
 	end
 
-	twipe(sPendingRetryScratch);
+	twipe(sPendingRetry);
 
 	for tButton, tButtonSetup in pairs(sPendingButtonLayouts) do
 		if not VUHDO_layoutBarAuraButtonFrames(tButtonSetup, tButton) then
-			sPendingRetryScratch[tButton] = tButtonSetup;
+			sPendingRetry[tButton] = tButtonSetup;
 		end
 	end
 
 	twipe(sPendingButtonLayouts);
 
-	for tRetryButton, tRetryButtonSetup in pairs(sPendingRetryScratch) do
+	for tRetryButton, tRetryButtonSetup in pairs(sPendingRetry) do
 		sPendingButtonLayouts[tRetryButton] = tRetryButtonSetup;
 	end
 
-	twipe(sPendingRetryScratch);
+	twipe(sPendingRetry);
 
 	for tContainer, tUnit in pairs(sPendingClassColors) do
 		if not VUHDO_applyContainerClassColorBars(tContainer, tUnit) then
-			sPendingRetryScratch[tContainer] = tUnit;
+			sPendingRetry[tContainer] = tUnit;
 		end
 	end
 
 	twipe(sPendingClassColors);
 
-	for tRetryContainer, tRetryUnit in pairs(sPendingRetryScratch) do
+	for tRetryContainer, tRetryUnit in pairs(sPendingRetry) do
 		sPendingClassColors[tRetryContainer] = tRetryUnit;
 	end
 
-	twipe(sPendingRetryScratch);
+	twipe(sPendingRetry);
 
 	if not next(sPendingContainerBuilds) and not next(sPendingButtonLayouts) and not next(sPendingClassColors) then
 		sHasPendingBuilds = false;

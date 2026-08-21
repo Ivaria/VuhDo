@@ -51,8 +51,8 @@ local sShowPanels;
 local sDurationAnchor = { };
 local sDeferredRefreshCount = 0;
 local sStaleButtonIndices = { };
-local sScratchUnitButtons = { };
-local sScratchUnitButtonsPanel = { };
+local sRefreshUnitButtons = { };
+local sRefreshUnitButtonsPanel = { };
 
 
 
@@ -211,6 +211,7 @@ local function VUHDO_refreshPositionAllHealButtons(aPanel, aPanelNum)
 		VUHDO_clearUnitAuraFrames(tButton);
 
 		VUHDO_clearAuraContainersForButton(tButton);
+		VUHDO_releaseOverlaysForButton(tButton);
 
 		VUHDO_resetAlphaChainWrappers(tButton);
 		VUHDO_clearBooleanOverlays(tButton);
@@ -332,21 +333,21 @@ end
 
 
 --
-local function VUHDO_commitScratchUnitButtons()
+local function VUHDO_commitRefreshUnitButtons()
 
 	twipe(VUHDO_UNIT_BUTTONS);
 	twipe(VUHDO_UNIT_BUTTONS_PANEL);
 
-	for tUnit, tButtons in pairs(sScratchUnitButtons) do
+	for tUnit, tButtons in pairs(sRefreshUnitButtons) do
 		VUHDO_UNIT_BUTTONS[tUnit] = tButtons;
 	end
 
-	for tUnit, tPanelMap in pairs(sScratchUnitButtonsPanel) do
+	for tUnit, tPanelMap in pairs(sRefreshUnitButtonsPanel) do
 		VUHDO_UNIT_BUTTONS_PANEL[tUnit] = tPanelMap;
 	end
 
-	twipe(sScratchUnitButtons);
-	twipe(sScratchUnitButtonsPanel);
+	twipe(sRefreshUnitButtons);
+	twipe(sRefreshUnitButtonsPanel);
 
 	return;
 
@@ -359,10 +360,10 @@ function VUHDO_deferRefreshUiNoMembers()
 
 	VUHDO_resetNameTextCache();
 
-	twipe(sScratchUnitButtons);
-	twipe(sScratchUnitButtonsPanel);
+	twipe(sRefreshUnitButtons);
+	twipe(sRefreshUnitButtonsPanel);
 
-	VUHDO_setUnitButtonBuildScratch(sScratchUnitButtons, sScratchUnitButtonsPanel);
+	VUHDO_setRefreshUnitButtons(sRefreshUnitButtons, sRefreshUnitButtonsPanel);
 
 	if sDeferredRefreshCount <= 0 then
 		sDeferredRefreshCount = 1;
@@ -463,8 +464,8 @@ function VUHDO_deferRefreshUiCompleteDelegate()
 	if sDeferredRefreshCount <= 0 then
 		sDeferredRefreshCount = 0;
 
-		VUHDO_commitScratchUnitButtons();
-		VUHDO_clearUnitButtonBuildScratch();
+		VUHDO_commitRefreshUnitButtons();
+		VUHDO_clearRefreshUnitButtons();
 	end
 
 	VUHDO_updateAllRaidBars();

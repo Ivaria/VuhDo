@@ -876,7 +876,7 @@ end
 --
 local tNumVal;
 local tMappedIds;
-local tScratchIds;
+local tResolvedSpellIds;
 local tResolveSpellId;
 function VUHDO_addResolvedAuraContainerSpellIds(aDest, aValue)
 
@@ -902,36 +902,36 @@ function VUHDO_addResolvedAuraContainerSpellIds(aDest, aValue)
 		return;
 	end
 
-	tScratchIds = nil;
+	tResolvedSpellIds = nil;
 	tNameIds = VUHDO_AURA_NAME_TO_SPELL_IDS[aValue];
 
 	if tNameIds then
 		for tSpellId, _ in pairs(tNameIds) do
 			aDest[tSpellId] = true;
-			tScratchIds = tScratchIds or { };
-			tScratchIds[tSpellId] = true;
+			tResolvedSpellIds = tResolvedSpellIds or { };
+			tResolvedSpellIds[tSpellId] = true;
 		end
 	else
 		tResolveSpellId = VUHDO_SPELL_NAME_TO_ID[aValue];
 
 		if tResolveSpellId then
 			aDest[tResolveSpellId] = true;
-			tScratchIds = tScratchIds or { };
-			tScratchIds[tResolveSpellId] = true;
+			tResolvedSpellIds = tResolvedSpellIds or { };
+			tResolvedSpellIds[tResolveSpellId] = true;
 		else
 			tResolveSpellId = GetSpellIDForSpellIdentifier(aValue);
 
 			if tResolveSpellId then
 				aDest[tResolveSpellId] = true;
-				tScratchIds = tScratchIds or { };
-				tScratchIds[tResolveSpellId] = true;
+				tResolvedSpellIds = tResolvedSpellIds or { };
+				tResolvedSpellIds[tResolveSpellId] = true;
 			end
 		end
 	end
 
-	if tScratchIds then
-		for tScratchSpellId, _ in pairs(tScratchIds) do
-			tMappedIds = VUHDO_AURA_CONTAINER_MAPPED_SPELL_IDS[tScratchSpellId];
+	if tResolvedSpellIds then
+		for tResolvedSpellId, _ in pairs(tResolvedSpellIds) do
+			tMappedIds = VUHDO_AURA_CONTAINER_MAPPED_SPELL_IDS[tResolvedSpellId];
 
 			if tMappedIds then
 				for tMappedCnt = 1, #tMappedIds do
