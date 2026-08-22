@@ -5,6 +5,7 @@ local ipairs = ipairs;
 local next = next;
 local strfind = string.find;
 local twipe = table.wipe;
+local min = math.min;
 
 local UnitCanAttack = UnitCanAttack;
 local InCombatLockdown = InCombatLockdown;
@@ -735,7 +736,17 @@ do
 
 
 	--
-	local function VUHDO_applyOverlayDotIconFields(anOverlayEntry, anItem, anIconColor)
+	local function VUHDO_applyOverlayDotIconFields(anOverlayEntry, anItem, anIconColor, anOverlayTarget)
+
+		if anOverlayTarget and anOverlayTarget["staticIcon"] then
+			anOverlayEntry["staticIcon"] = anOverlayTarget["staticIcon"];
+
+			if anIconColor then
+				anOverlayEntry["staticColor"] = anIconColor;
+			end
+
+			return;
+		end
 
 		if anItem["icon"] and anItem["icon"] ~= 1 then
 			anOverlayEntry["staticIcon"] = VUHDO_CUSTOM_ICONS[anItem["icon"]][2];
@@ -796,7 +807,7 @@ do
 		elseif aOverlayTarget["shape"] == "dot" then
 			tHostileDispelEntry["dispelIcon"] = true;
 
-			VUHDO_applyOverlayDotIconFields(tHostileDispelEntry, aItem, nil);
+			VUHDO_applyOverlayDotIconFields(tHostileDispelEntry, aItem, nil, aOverlayTarget);
 		end
 
 		tHostileDispelEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
@@ -1059,7 +1070,7 @@ do
 					tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
 					tOverlayEntry["dispelOpacity"] = VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct);
 
-					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
+					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil, aOverlayTarget);
 
 					sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 				end
@@ -1087,7 +1098,7 @@ do
 					tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
 					tOverlayEntry["dispelOpacity"] = VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct);
 
-					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
+					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil, aOverlayTarget);
 
 					sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 				end
@@ -1100,7 +1111,7 @@ do
 			end
 
 			if tOverlayEntry and not tOverlayEntry["dispelIcon"] then
-				VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, tOverlayEntry["staticColor"]);
+				VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, tOverlayEntry["staticColor"], aOverlayTarget);
 
 				sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 			end
@@ -1207,7 +1218,7 @@ do
 				elseif aOverlayTarget["shape"] == "dot" then
 					tOverlayEntry["dispelIcon"] = true;
 
-					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
+					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil, aOverlayTarget);
 				end
 
 				tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
@@ -1244,7 +1255,7 @@ do
 				elseif aOverlayTarget["shape"] == "dot" then
 					tOverlayEntry["dispelIcon"] = true;
 
-					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil);
+					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, nil, aOverlayTarget);
 				end
 
 				tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
@@ -1364,7 +1375,7 @@ do
 
 		tGetter = _G[tOverlayTarget["getter"]];
 
-		if tOverlayTarget["ofBar"] then
+		if tOverlayTarget["isBarRelative"] then
 			return tGetter(VUHDO_getHealthBar(aButton, tOverlayTarget["barIndex"]));
 		elseif tOverlayTarget["barIndex"] then
 			return tGetter(aButton, tOverlayTarget["barIndex"]);
@@ -1692,7 +1703,7 @@ do
 							elseif tOverlayTarget["shape"] == "border" then
 								tOverlayEntry["dispelBorder"] = true;
 							elseif tOverlayTarget["shape"] == "dot" then
-								VUHDO_applyOverlayDotIconFields(tOverlayEntry, tItem, VUHDO_applyOverlayStaticColorBright(tItem["color"], tItem, tBaseOpacityProduct));
+								VUHDO_applyOverlayDotIconFields(tOverlayEntry, tItem, VUHDO_applyOverlayStaticColorBright(tItem["color"], tItem, tBaseOpacityProduct), tOverlayTarget);
 							end
 
 							tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(tItem);
@@ -1725,7 +1736,7 @@ do
 					if tOverlayTarget["shape"] == "bar" then
 						VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, tOverlayTarget);
 					elseif tOverlayTarget["shape"] == "dot" then
-						VUHDO_applyOverlayDotIconFields(tOverlayEntry, tItem, tOverlayEntry["staticColor"]);
+						VUHDO_applyOverlayDotIconFields(tOverlayEntry, tItem, tOverlayEntry["staticColor"], tOverlayTarget);
 					elseif tOverlayTarget["shape"] == "border" then
 						tOverlayEntry["border"] = true;
 					end
@@ -1883,9 +1894,22 @@ do
 
 	--
 	local tLevelFrame;
+	local tTargetWidth;
+	local tTargetHeight;
+	local tSquareSize;
 	local function VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry)
 
 		tLevelFrame = VUHDO_resolveOverlayLevelFrame(aTargetFrame);
+
+		tTargetWidth = aTargetFrame:GetWidth();
+		tTargetHeight = anOverlayEntry["height"] or aTargetFrame:GetHeight();
+
+		if (anOverlayEntry["templateName"] or VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE) == VUHDO_AURA_BUTTON_ICON_TEMPLATE then
+			tSquareSize = min(tTargetWidth, tTargetHeight);
+
+			tTargetWidth = tSquareSize;
+			tTargetHeight = tSquareSize;
+		end
 
 		return {
 			["staticColor"] = anOverlayEntry["staticColor"],
@@ -1918,8 +1942,8 @@ do
 			["auraGroupBarGlow"] = anOverlayEntry["auraGroupBarGlow"],
 			["unitButton"] = anOverlayEntry["unitButton"],
 			["dispelOverlayChrome"] = anOverlayEntry["dispelOverlayChrome"],
-			["width"] = aTargetFrame:GetWidth(),
-			["height"] = anOverlayEntry["height"] or aTargetFrame:GetHeight(),
+			["width"] = tTargetWidth,
+			["height"] = tTargetHeight,
 		};
 
 	end
@@ -3179,6 +3203,51 @@ end
 
 
 
+--
+local tThreatMarkFlashTexture;
+function VUHDO_stopOverlayThreatMarkFlashForSlotRecord(aSlotRecord)
+
+	if not aSlotRecord or aSlotRecord["indicatorKey"] ~= "THREAT_MARK" then
+		return;
+	end
+
+	tThreatMarkFlashTexture = aSlotRecord["slotFrame"] and aSlotRecord["slotFrame"]["FillTexture"];
+
+	if tThreatMarkFlashTexture then
+		VUHDO_UIFrameFlashStop(tThreatMarkFlashTexture);
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_syncOverlayThreatMarkFlashForSlotRecord(aSlotRecord, aWantEnabled)
+
+	if not aSlotRecord or aSlotRecord["indicatorKey"] ~= "THREAT_MARK" then
+		return;
+	end
+
+	tThreatMarkFlashTexture = aSlotRecord["slotFrame"] and aSlotRecord["slotFrame"]["FillTexture"];
+
+	if not tThreatMarkFlashTexture then
+		return;
+	end
+
+	if aWantEnabled then
+		VUHDO_UIFrameFlash(tThreatMarkFlashTexture, 0.2, 0.5, 3.2, true, 0, 0);
+	else
+		VUHDO_UIFrameFlashStop(tThreatMarkFlashTexture);
+	end
+
+	return;
+
+end
+
+
+
 do
 	--
 	function VUHDO_syncAuraGroupBarGlowOverlay(aButton, aContainerData, aWantEnabled)
@@ -3362,6 +3431,8 @@ do
 
 							tLastSyncedSlotEnabled[tSlotKey] = tSlotWant;
 							tSlotEnabledChanged = true;
+
+							VUHDO_syncOverlayThreatMarkFlashForSlotRecord(tSlotRecord, tSlotWant);
 						end
 
 						if tSlotWant then

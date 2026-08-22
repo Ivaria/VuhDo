@@ -47,12 +47,6 @@ function VUHDO_threatIndicatorsBouquetCallback(aUnit, anIsActive, anIcon, aTimer
 			tTexture = VUHDO_getAggroTexture(VUHDO_getHealthBar(tButton, 1));
 
 			if anIsActive then
-				tTexture:ClearAllPoints();
-				VUHDO_PixelUtil.SetPoint(tTexture, "TOPLEFT", tButton, "TOPLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tTexture, "TOPRIGHT", tButton, "TOPRIGHT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tTexture, "BOTTOMLEFT", tButton, "BOTTOMLEFT", 0, 0);
-				VUHDO_PixelUtil.SetPoint(tTexture, "BOTTOMRIGHT", tButton, "BOTTOMRIGHT", 0, 0);
-
 				if aLayerTemplate then
 					VUHDO_applyAllLayersToTexture(tButton, tTexture, aLayerTemplate);
 				elseif aColor then

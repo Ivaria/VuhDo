@@ -651,7 +651,9 @@ end
 
 --
 function VUHDO_getAggroTexture(aHealthBar)
-	return _G[aHealthBar:GetName() .. "Aggro"];
+
+	return _G[aHealthBar:GetName() .. "AggroOlHostTex"];
+
 end
 
 

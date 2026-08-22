@@ -123,7 +123,8 @@ VUHDO_INDICATOR_OVERLAY_TARGETS = {
 		["shape"] = "dot",
 		["getter"] = "VUHDO_getAggroTexture",
 		["barIndex"] = 1,
-		["ofBar"] = true,
+		["isBarRelative"] = true,
+		["staticIcon"] = "Interface\\AddOns\\VuhDo\\Images\\aggro",
 	},
 };
 
@@ -162,6 +163,7 @@ local VUHDO_getManaAdjustedYOffset;
 local VUHDO_releaseAuraButtonGlowState;
 local VUHDO_unitPhaseReason;
 local VUHDO_isSpecialUnit;
+local VUHDO_stopOverlayThreatMarkFlashForSlotRecord;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -413,6 +415,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_releaseAuraButtonGlowState = _G["VUHDO_releaseAuraButtonGlowState"];
 	VUHDO_unitPhaseReason = _G["VUHDO_unitPhaseReason"];
 	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
+	VUHDO_stopOverlayThreatMarkFlashForSlotRecord = _G["VUHDO_stopOverlayThreatMarkFlashForSlotRecord"];
 	VUHDO_precomputeStaticBouquetSlotsForButton = _G["VUHDO_precomputeStaticBouquetSlotsForButton"];
 	VUHDO_updateStaticBouquetSlotsForButton = _G["VUHDO_updateStaticBouquetSlotsForButton"];
 	VUHDO_hideStaticBouquetSlotsForButton = _G["VUHDO_hideStaticBouquetSlotsForButton"];
@@ -1119,6 +1122,8 @@ do
 				tMainTexture:Show();
 
 				tMainTexture:SetVertexColor(1, 1, 1, 1);
+
+				VUHDO_applyAuraButtonSublevelSlot(tMainTexture, anButtonSetup, 1, "ARTWORK", 1);
 			end
 		elseif aAuraButton["IconTexture"] then
 			aAuraButton:SetIcon(aAuraButton["IconTexture"]);
@@ -3095,6 +3100,8 @@ do
 		tContainer:SetAuraSlotCandidateFilters(aSlotKey, VUHDO_SUPPRESS_CANDIDATE_FILTERS);
 
 		aHostData["slotRecords"][aSlotKey]["appliedFilterString"] = "HELPFUL";
+
+		VUHDO_stopOverlayThreatMarkFlashForSlotRecord(aHostData["slotRecords"][aSlotKey]);
 
 		if not aHostData["lastSyncedSlotEnabled"] then
 			aHostData["lastSyncedSlotEnabled"] = { };
