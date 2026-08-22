@@ -3069,6 +3069,7 @@ do
 			["container"] = tContainer,
 			["slotRecords"] = { },
 			["slotOrder"] = { },
+			["plannedSlots"] = { },
 			["lastSyncedSlotEnabled"] = { },
 			["lastSyncedUnit"] = nil,
 			["lastSyncedGuid"] = nil,
@@ -3096,10 +3097,9 @@ do
 			return;
 		end
 
-		tContainer:SetAuraSlotFilterString(aSlotKey, "HELPFUL");
-		tContainer:SetAuraSlotCandidateFilters(aSlotKey, VUHDO_SUPPRESS_CANDIDATE_FILTERS);
+		tContainer:SetAuraSlotFilterString(aSlotKey, "");
 
-		aHostData["slotRecords"][aSlotKey]["appliedFilterString"] = "HELPFUL";
+		aHostData["slotRecords"][aSlotKey]["appliedFilterString"] = "";
 
 		VUHDO_stopOverlayThreatMarkFlashForSlotRecord(aHostData["slotRecords"][aSlotKey]);
 
@@ -3145,6 +3145,10 @@ do
 
 		tHostData["lastSyncedUnit"] = nil;
 		tHostData["lastSyncedGuid"] = nil;
+
+		if tHostData["plannedSlots"] then
+			twipe(tHostData["plannedSlots"]);
+		end
 
 		return;
 
