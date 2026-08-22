@@ -3140,6 +3140,8 @@ do
 
 		tContainer:UpdateAllAuras();
 
+		tContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
+
 		tContainer:SetEnabled(false);
 		tContainer:SetShown(false);
 
@@ -3149,6 +3151,35 @@ do
 		if tHostData["plannedSlots"] then
 			twipe(tHostData["plannedSlots"]);
 		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tContainer;
+	function VUHDO_clearOverlaySlotHostUnit(aHostData)
+
+		if not aHostData or not aHostData["container"] then
+			return;
+		end
+
+		tContainer = aHostData["container"];
+
+		tContainer:SetUnit("none");
+
+		if not tContainer:IsEnabled() then
+			tContainer:SetEnabled(true);
+		end
+
+		tContainer:UpdateAllAuras();
+
+		tContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
+
+		aHostData["lastSyncedUnit"] = nil;
+		aHostData["lastSyncedGuid"] = nil;
 
 		return;
 

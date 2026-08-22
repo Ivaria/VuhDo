@@ -25,6 +25,7 @@ local VUHDO_RAID;
 local VUHDO_CONFIG;
 local VUHDO_INDICATOR_CONFIG;
 local VUHDO_BUTTON_CACHE;
+local VUHDO_UNIT_BUTTONS;
 local VUHDO_BOUQUET_BUFFS_SPECIAL;
 local VUHDO_SECRET_TYPE_DISPEL;
 local VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP;
@@ -70,6 +71,7 @@ local VUHDO_stopUnitButtonAuraGroupGlow;
 local VUHDO_acquireAuraContainer;
 local VUHDO_releaseAuraContainer;
 local VUHDO_refreshAuraContainer;
+local VUHDO_clearOverlaySlotHostUnit;
 local VUHDO_getOverlayHostFrame;
 local VUHDO_deferAcquireOverlayContainer;
 local VUHDO_deferSyncOverlaysForUnit;
@@ -82,6 +84,7 @@ local VUHDO_isUnitAssistRestricted;
 local VUHDO_isUnitAuraFilterRestricted;
 
 local sEmpty = { };
+local sInvalidateRemappedButtonNameToUnit = { };
 local sOverlayConfigKeys = { };
 local sOverlayConfigGeneration = 0;
 local sOverlayEntryPrototypeCache = { };
@@ -165,6 +168,7 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_INDICATOR_CONFIG = _G["VUHDO_INDICATOR_CONFIG"];
 	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
+	VUHDO_UNIT_BUTTONS = _G["VUHDO_UNIT_BUTTONS"];
 	VUHDO_BOUQUET_BUFFS_SPECIAL = _G["VUHDO_BOUQUET_BUFFS_SPECIAL"];
 	VUHDO_SECRET_TYPE_DISPEL = _G["VUHDO_SECRET_TYPE_DISPEL"];
 	VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP = _G["VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP"];
@@ -184,6 +188,17 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY = _G["VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY"];
 
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
+
+	VUHDO_auraContainerOverlaysInitFunctionOverrides();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
@@ -210,6 +225,7 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_acquireAuraContainer = _G["VUHDO_acquireAuraContainer"];
 	VUHDO_releaseAuraContainer = _G["VUHDO_releaseAuraContainer"];
 	VUHDO_refreshAuraContainer = _G["VUHDO_refreshAuraContainer"];
+	VUHDO_clearOverlaySlotHostUnit = _G["VUHDO_clearOverlaySlotHostUnit"];
 	VUHDO_getOverlayHostFrame = _G["VUHDO_getOverlayHostFrame"];
 	VUHDO_deferAcquireOverlayContainer = _G["VUHDO_deferAcquireOverlayContainer"];
 	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
@@ -2130,6 +2146,10 @@ do
 			if tFilterChanged then
 				tContainer:SetAuraSlotFilterString(tSlotKey, aSlotSpec["filterString"]);
 				tExistingRecord["appliedFilterString"] = aSlotSpec["filterString"] or "HELPFUL";
+
+				if aHostData["lastSyncedSlotEnabled"] then
+					aHostData["lastSyncedSlotEnabled"][tSlotKey] = nil;
+				end
 			end
 
 			if tCandidateChanged then
@@ -2184,6 +2204,9 @@ do
 	local tPlannedSpecs;
 	local tSlotKey;
 	local tDeferredAdd;
+	local tSuppressedAny;
+	local tContainer;
+	local tWasHostShown;
 	function VUHDO_reconcileOverlaySlotsForButton(aButton, aButtonName)
 
 		tPlannedOrder = sOverlayBuild["plannedSlotOrder"];
@@ -2231,11 +2254,15 @@ do
 			sOverlayBuild["plannedSlotSet"][tPlannedOrder[tOrderCnt]] = true;
 		end
 
+		tSuppressedAny = false;
+
 		for tOrderCnt = 1, #tHostData["slotOrder"] do
 			tSlotKey = tHostData["slotOrder"][tOrderCnt];
 
 			if not sOverlayBuild["plannedSlotSet"][tSlotKey] then
 				VUHDO_suppressOverlaySlotHostSlot(tHostData, tSlotKey);
+
+				tSuppressedAny = true;
 			end
 		end
 
@@ -2267,8 +2294,14 @@ do
 
 		tContainer = tHostData["container"];
 
+		tWasHostShown = tContainer:IsShown();
+
 		tContainer:SetEnabled(true);
 		tContainer:SetShown(true);
+
+		if tSuppressedAny or not tWasHostShown then
+			VUHDO_refreshAuraContainer(tContainer);
+		end
 
 		return;
 
@@ -3313,6 +3346,61 @@ do
 	local tSlotEnabledChanged;
 	local tLastSyncedSlotEnabled;
 	local tHostNeedsUnit;
+	local tCurrentUnit;
+	local tLastSyncedUnit;
+	function VUHDO_invalidateRemappedOverlayUnitBindings()
+
+		twipe(sInvalidateRemappedButtonNameToUnit);
+
+		for tInvalidateUnit, tButtons in pairs(VUHDO_UNIT_BUTTONS or sEmpty) do
+			for _, tButton in pairs(tButtons) do
+				tButtonName = tButton:GetName();
+
+				if tButtonName then
+					sInvalidateRemappedButtonNameToUnit[tButtonName] = tInvalidateUnit;
+				end
+			end
+		end
+
+		for tButtonName, tSlotHostData in pairs(VUHDO_OVERLAY_SLOT_HOSTS) do
+			tCurrentUnit = sInvalidateRemappedButtonNameToUnit[tButtonName];
+			tLastSyncedUnit = tSlotHostData["lastSyncedUnit"];
+
+			if tLastSyncedUnit and tLastSyncedUnit ~= tCurrentUnit then
+				VUHDO_clearOverlaySlotHostUnit(tSlotHostData);
+			end
+		end
+
+		for tButtonName, tIndicatorEntries in pairs(VUHDO_OVERLAY_CONTAINERS) do
+			tCurrentUnit = sInvalidateRemappedButtonNameToUnit[tButtonName];
+
+			for _, tIndicatorEntry in pairs(tIndicatorEntries) do
+				for _, tContainerData in pairs(tIndicatorEntry) do
+					tLastSyncedUnit = tContainerData["lastSyncedUnit"];
+
+					if tLastSyncedUnit and tLastSyncedUnit ~= tCurrentUnit then
+						tContainer = tContainerData["container"];
+
+						if tContainer then
+							tContainer:SetUnit("none");
+						end
+
+						tContainerData["lastSyncedUnit"] = nil;
+						tContainerData["lastSyncedGuid"] = nil;
+						tContainerData["lastSyncedEnabled"] = nil;
+						tContainerData["lastSyncedGroupEnabled"] = nil;
+					end
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	function VUHDO_resetOverlaysForUnit(aUnit)
 
 		if not aUnit then
@@ -3479,11 +3567,8 @@ do
 						if tUnitRebound or tSlotEnabledChanged then
 							VUHDO_refreshAuraContainer(tContainer);
 						end
-					elseif tSlotHostData["lastSyncedUnit"] then
-						tContainer:SetUnit("none");
-
-						tSlotHostData["lastSyncedUnit"] = nil;
-						tSlotHostData["lastSyncedGuid"] = nil;
+					elseif tSlotHostData["lastSyncedUnit"] or tSlotEnabledChanged then
+						VUHDO_clearOverlaySlotHostUnit(tSlotHostData);
 					end
 				end
 

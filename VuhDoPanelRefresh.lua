@@ -36,7 +36,6 @@ local VUHDO_positionTableHeaders;
 local VUHDO_refreshAllUnitAuras;
 local VUHDO_isSpecialUnit;
 local VUHDO_getPrivateAuraIcon;
-local VUHDO_getUnitButtons;
 local VUHDO_deferTask;
 local VUHDO_getPanelButtonInitRev;
 local VUHDO_startRefreshButtonInits;
@@ -45,6 +44,7 @@ local VUHDO_waitRefreshButtonInits;
 local VUHDO_resetAlphaChainWrappers;
 local VUHDO_clearBooleanOverlays;
 local VUHDO_resetButtonVisuals;
+local VUHDO_invalidateRemappedOverlayUnitBindings;
 
 local sRefreshUiNoMembers;
 local sShowPanels;
@@ -87,7 +87,6 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_refreshAllUnitAuras = _G["VUHDO_refreshAllUnitAuras"];
 	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
 	VUHDO_getPrivateAuraIcon = _G["VUHDO_getPrivateAuraIcon"];
-	VUHDO_getUnitButtons = _G["VUHDO_getUnitButtons"];
 	VUHDO_deferTask = _G["VUHDO_deferTask"];
 	VUHDO_getPanelButtonInitRev = _G["VUHDO_getPanelButtonInitRev"];
 	VUHDO_startRefreshButtonInits = _G["VUHDO_startRefreshButtonInits"];
@@ -96,6 +95,7 @@ function VUHDO_panelRefreshInitLocalOverrides()
 	VUHDO_resetAlphaChainWrappers = _G["VUHDO_resetAlphaChainWrappers"];
 	VUHDO_clearBooleanOverlays = _G["VUHDO_clearBooleanOverlays"];
 	VUHDO_resetButtonVisuals = _G["VUHDO_resetButtonVisuals"];
+	VUHDO_invalidateRemappedOverlayUnitBindings = _G["VUHDO_invalidateRemappedOverlayUnitBindings"];
 
 	if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
 		sRefreshUiNoMembers = _G["VUHDO_deferRefreshUiNoMembers"];
@@ -295,6 +295,8 @@ function VUHDO_refreshUiNoMembers()
 	twipe(VUHDO_UNIT_BUTTONS);
 	twipe(VUHDO_UNIT_BUTTONS_PANEL);
 
+	VUHDO_invalidateRemappedOverlayUnitBindings();
+
 	VUHDO_refreshAllPanels();
 
 	VUHDO_updateAllCustomDebuffs(true);
@@ -348,6 +350,8 @@ local function VUHDO_commitRefreshUnitButtons()
 
 	twipe(sRefreshUnitButtons);
 	twipe(sRefreshUnitButtonsPanel);
+
+	VUHDO_invalidateRemappedOverlayUnitBindings();
 
 	return;
 
