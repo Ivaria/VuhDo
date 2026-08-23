@@ -1580,6 +1580,51 @@ end
 local sFlashFrames = { };
 local sIsFlashFrame = { };
 
+
+
+--
+local function VUHDO_isFlashRegionWritable(aRegion)
+
+	return aRegion:CanBeAccessedInContext() and not aRegion:IsForbidden();
+
+end
+
+
+
+--
+function VUHDO_startThreatMarkTextureFlash(aTexture)
+
+	if not aTexture then
+		return;
+	end
+
+	VUHDO_UIFrameFlash(aTexture, 0.2, 0.5, 3.2, true, 0, 0);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_stopThreatMarkTextureFlash(aTexture)
+
+	if not aTexture then
+		return;
+	end
+
+	VUHDO_UIFrameFlashStop(aTexture);
+
+	if VUHDO_isFlashRegionWritable(aTexture) then
+		aTexture:SetAlpha(1);
+	end
+
+	return;
+
+end
+
+
+
 --
 function VUHDO_UIFrameFlash(aFrame, aFadeInTime, aFadeOutTime, aFlashDuration, anIsShowWhenDone, aFlashInHoldTime, aFlashOutHoldTime)
 
@@ -1609,27 +1654,32 @@ function VUHDO_UIFrameFlash_OnUpdate(aTimeDelta)
 
 	while sFlashFrames[tIndex] do
 	  tFrame = sFlashFrames[tIndex];
-	  tFrame.flashTimer = tFrame.flashTimer + aTimeDelta;
 
-	  if tFrame.flashTimer > tFrame.flashDuration and tFrame.flashDuration ~= -1 then
+	  if not VUHDO_isFlashRegionWritable(tFrame) then
 	    VUHDO_UIFrameFlashStop(tFrame);
 	  else
-	    tFlashTime = tFrame.flashTimer;
+	    tFrame.flashTimer = tFrame.flashTimer + aTimeDelta;
 
-	    tFlashTime = tFlashTime
-	    	% (tFrame.fadeInTime + tFrame.fadeOutTime + (tFrame.flashInHoldTime or 0) + (tFrame.flashOutHoldTime or 0));
-
-	    if tFlashTime < tFrame.fadeInTime then
-	    	tAlpha = tFlashTime / tFrame.fadeInTime;
-	    elseif tFlashTime < tFrame.fadeInTime + (tFrame.flashInHoldTime or 0) then
-	    	tAlpha = 1;
-	    elseif tFlashTime < tFrame.fadeInTime + (tFrame.flashInHoldTime or 0) + tFrame.fadeOutTime then
-	    	tAlpha = 1 - ((tFlashTime - tFrame.fadeInTime - (tFrame.flashInHoldTime or 0)) / tFrame.fadeOutTime);
+	    if tFrame.flashTimer > tFrame.flashDuration and tFrame.flashDuration ~= -1 then
+	      VUHDO_UIFrameFlashStop(tFrame);
 	    else
-	    	tAlpha = 0;
-	    end
+	      tFlashTime = tFrame.flashTimer;
 
-	    tFrame:SetAlpha(tAlpha);
+	      tFlashTime = tFlashTime
+	      	% (tFrame.fadeInTime + tFrame.fadeOutTime + (tFrame.flashInHoldTime or 0) + (tFrame.flashOutHoldTime or 0));
+
+	      if tFlashTime < tFrame.fadeInTime then
+	      	tAlpha = tFlashTime / tFrame.fadeInTime;
+	      elseif tFlashTime < tFrame.fadeInTime + (tFrame.flashInHoldTime or 0) then
+	      	tAlpha = 1;
+	      elseif tFlashTime < tFrame.fadeInTime + (tFrame.flashInHoldTime or 0) + tFrame.fadeOutTime then
+	      	tAlpha = 1 - ((tFlashTime - tFrame.fadeInTime - (tFrame.flashInHoldTime or 0)) / tFrame.fadeOutTime);
+	      else
+	      	tAlpha = 0;
+	      end
+
+	      tFrame:SetAlpha(tAlpha);
+	    end
 	  end
 
 	  tIndex = tIndex - 1;
@@ -1642,7 +1692,11 @@ end
 function VUHDO_UIFrameFlashStop(aFrame)
 	if sIsFlashFrame[aFrame] then
 		tDeleteItem(sFlashFrames, aFrame);
-		aFrame:SetAlpha(aFrame.showWhenDone and 1 or 0);
+
+		if VUHDO_isFlashRegionWritable(aFrame) then
+			aFrame:SetAlpha(aFrame.showWhenDone and 1 or 0);
+		end
+
 		aFrame.flashTimer = nil;
 		sIsFlashFrame[aFrame] = nil;
 	end

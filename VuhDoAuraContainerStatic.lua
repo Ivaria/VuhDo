@@ -21,7 +21,8 @@ local VUHDO_displayAuraInSlot;
 local VUHDO_hideAuraSlot;
 local VUHDO_copyColorTo;
 local VUHDO_evaluateBouquetItemForStaticSlot;
-local VUHDO_applyAuraContainerSlotFilters;
+local VUHDO_applyAuraContainerVisibility;
+local VUHDO_rewriteAuraContainerGateState;
 local VUHDO_isUnitAuraFilterRestricted;
 local VUHDO_getManaAdjustedYOffset;
 local VUHDO_acquireAuraIconFrame;
@@ -53,7 +54,8 @@ function VUHDO_auraContainerStaticInitLocalOverrides()
 	VUHDO_hideAuraSlot = _G["VUHDO_hideAuraSlot"];
 	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
 	VUHDO_evaluateBouquetItemForStaticSlot = _G["VUHDO_evaluateBouquetItemForStaticSlot"];
-	VUHDO_applyAuraContainerSlotFilters = _G["VUHDO_applyAuraContainerSlotFilters"];
+	VUHDO_applyAuraContainerVisibility = _G["VUHDO_applyAuraContainerVisibility"];
+	VUHDO_rewriteAuraContainerGateState = _G["VUHDO_rewriteAuraContainerGateState"];
 	VUHDO_isUnitAuraFilterRestricted = _G["VUHDO_isUnitAuraFilterRestricted"];
 	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
 	VUHDO_acquireAuraIconFrame = _G["VUHDO_acquireAuraIconFrame"];
@@ -374,6 +376,7 @@ do
 	local tPriorityCutoff;
 	local tContainer;
 	local tCanAttack;
+	local tIsAuraFilterRestricted;
 	local tEvalCacheEntry;
 	local tSlotEntryIndex;
 	function VUHDO_updateStaticBouquetSlotsForButton(aButton, aUnit, aContainerData, aCanAttack, anIsSlotFiltersApplied)
@@ -405,6 +408,7 @@ do
 		tIsBar = tAnchorConfig["style"] == "bars";
 		tListSlots = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum][tAnchorIndex];
 		tButtonName = aButton:GetName();
+		tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
 
 		tMixedPriorityCutoffs = aContainerData["mixedPriorityCutoffs"];
 
@@ -419,7 +423,7 @@ do
 
 		tInfo = VUHDO_RAID[aUnit];
 
-		if tInfo and tInfo["connected"] and not tInfo["dead"] then
+		if not tIsAuraFilterRestricted and tInfo and tInfo["connected"] and not tInfo["dead"] then
 			for tSlotEntryIndex, tStaticSlot in pairs(tStaticSlots) do
 				if tStaticSlot["isMixedBouquetItem"] then
 					tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tBuffName, tClipL, tClipR, tClipT, tClipB, tSecretBool
@@ -462,7 +466,9 @@ do
 		for tSlotEntryIndex, tStaticSlot in pairs(tStaticSlots) do
 			tSlotIndex = tStaticSlot["slotIndex"] or tSlotEntryIndex;
 
-			if tStaticSlot["isMixedBouquetItem"] then
+			if tIsAuraFilterRestricted or not tInfo or not tInfo["connected"] or tInfo["dead"] then
+				VUHDO_hideAuraSlot(aButton, tAnchorIndex, tSlotIndex, tIsBar);
+			elseif tStaticSlot["isMixedBouquetItem"] then
 				tEntryIndex = tStaticSlot["entryIndex"];
 				tItemIndex = tStaticSlot["itemIndex"];
 				tPriorityCutoff = tEntryIndex and tMixedPriorityCutoffs[tEntryIndex];
@@ -499,13 +505,8 @@ do
 		tContainer = aContainerData["container"];
 
 		if tContainer and not anIsSlotFiltersApplied then
-			if aCanAttack == nil then
-				tCanAttack = UnitCanAttack("player", aUnit);
-			else
-				tCanAttack = aCanAttack;
-			end
-
-			VUHDO_applyAuraContainerSlotFilters(tContainer, aContainerData, tCanAttack, VUHDO_isUnitAuraFilterRestricted(aUnit));
+			VUHDO_rewriteAuraContainerGateState(aUnit);
+			VUHDO_applyAuraContainerVisibility(tContainer, aContainerData);
 		end
 
 		return;

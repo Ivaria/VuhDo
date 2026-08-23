@@ -3099,6 +3099,7 @@ do
 		VUHDO_initAllBurstCaches(); -- Wichtig f�r INTERNAL_TOGGLES=>Clusters
 		VUHDO_reloadRaidMembers();
 		VUHDO_resetNameTextCache();
+		VUHDO_initDebuffs(); -- Talente scheinen recht sp�t zur Verf�gung zu stehen...
 
 		if VUHDO_CONFIG["USE_DEFERRED_REDRAW"] and VUHDO_IN_COMBAT_RELOG then
 			VUHDO_refreshRaidMembers();
@@ -3118,7 +3119,6 @@ do
 		VUHDO_IS_RELOADING = false;
 
 		VUHDO_reloadBuffPanel();
-		VUHDO_initDebuffs(); -- Talente scheinen recht sp�t zur Verf�gung zu stehen...
 
 		return;
 

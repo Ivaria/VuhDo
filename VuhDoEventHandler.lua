@@ -56,6 +56,8 @@ local VUHDO_HANDLER_EVENT_SNAPSHOTS = {
 	-- },
 };
 
+local sBossUnitIds = { "boss1", "boss2", "boss3", "boss4", "boss5", "boss6", "boss7", "boss8" };
+local sLastBossUnitGuids = { };
 
 local VUHDO_parseAddonMessage;
 local VUHDO_spellcastSent;
@@ -1053,7 +1055,7 @@ local function VUHDO_processSpellbookRefresh()
 	tSpellbookChanged = VUHDO_initFromSpellbook();
 
 	VUHDO_initBuffs();
-	VUHDO_initDebuffs();
+	VUHDO_initDebuffsIfNeeded();
 
 	if tSpellbookChanged then
 		VUHDO_registerAllBouquets(false);
@@ -1100,6 +1102,8 @@ do
 	local tEmptyRaid = { };
 	local tSpecNumber;
 	local tBestProfileName;
+	local tBossUnit;
+	local tBossGuid;
 	function VUHDO_OnEvent(anInstance, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
@@ -1218,9 +1222,7 @@ do
 		elseif "RAID_TARGET_UPDATE" == anEvent then
 			VUHDO_TIMERS["CUSTOMIZE"] = 0.1;
 
-		-- INSTANCE_ENCOUNTER_ENGAGE_UNIT fires when a boss unit is added to the UI
-		-- this is essentially the equivalent of GROUP_ROSTER_UPDATE for bosses/NPCs
-		elseif "GROUP_ROSTER_UPDATE" == anEvent or "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent or "UPDATE_ACTIVE_BATTLEFIELD" == anEvent then
+		elseif "GROUP_ROSTER_UPDATE" == anEvent or "UPDATE_ACTIVE_BATTLEFIELD" == anEvent then
 			if VUHDO_FIRST_RELOAD_UI then
 				VUHDO_normalRaidReload(true);
 
@@ -1229,22 +1231,24 @@ do
 				end
 			end
 
+		elseif "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
-				VUHDO_syncAuraContainersForAllRaidUnits();
-
-				if VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] < 0.9 then
-					VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = 0.9;
-				end
-			end
-
-			if "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then
 				VUHDO_updateToggledUnitEvents();
 
-				for tCnt = 1, 8 do
-					VUHDO_resetAuraContainersForUnit("boss" .. tCnt);
-					VUHDO_resetOverlaysForUnit("boss" .. tCnt);
+				for tBossCnt = 1, 8 do
+					tBossUnit = sBossUnitIds[tBossCnt];
+					tBossGuid = UnitExists(tBossUnit) and UnitGUID(tBossUnit) or nil;
 
-					VUHDO_syncAuraContainersForUnit("boss" .. tCnt);
+					if sLastBossUnitGuids[tBossCnt] ~= tBossGuid then
+						sLastBossUnitGuids[tBossCnt] = tBossGuid;
+
+						VUHDO_resetAuraContainersForUnit(tBossUnit);
+						VUHDO_resetOverlaysForUnit(tBossUnit);
+
+						if tBossGuid then
+							VUHDO_syncAuraContainersForUnit(tBossUnit);
+						end
+					end
 				end
 			end
 
@@ -1474,7 +1478,7 @@ do
 
 				if ((VUHDO_RAID or tEmptyRaid)[anArg1] ~= nil) then
 					VUHDO_resetTalentScan(anArg1);
-					VUHDO_initDebuffs(); -- Talentabhngige Debuff-Fhigkeiten neu initialisieren.
+					VUHDO_initDebuffsIfNeeded(); -- Talentabhngige Debuff-Fhigkeiten neu initialisieren.
 					VUHDO_timeReloadUI(1);
 				end
 			end
@@ -1891,8 +1895,6 @@ do
 
 			if strfind(tSubCommand, "mig") then
 				VUHDO_resetAndRemigrateAuras();
-			elseif strfind(tSubCommand, "level") then
-				VUHDO_dumpAuraContainerLevels(tParsedTexts[3] or "player");
 			elseif strfind(tSubCommand, "dump") then
 				tUnit = "player";
 				tDumpIndicator = nil;
@@ -1911,27 +1913,9 @@ do
 				end
 
 				VUHDO_dumpAuraDiagnostics(tUnit, tDumpIndicator, tDumpVerbose);
-			elseif strfind(tSubCommand, "nopool") then
-				tArgument = strlower(tParsedTexts[3] or "");
-
-				if tArgument == "on" then
-					VUHDO_setAuraContainerPoolDisabled(true);
-
-					VUHDO_Msg("Aura container pooling disabled.");
-				elseif tArgument == "off" then
-					VUHDO_setAuraContainerPoolDisabled(false);
-
-					VUHDO_Msg("Aura container pooling enabled.");
-				else
-					VUHDO_Msg(format("Aura container pooling is %s.", VUHDO_isAuraContainerPoolDisabled() and "disabled" or "enabled"));
-				end
 			elseif strfind(tSubCommand, "rebuild") then
 				VUHDO_rebuildAuraOverlays();
-			elseif strfind(tSubCommand, "gate") then
-				VUHDO_testAuraContainerGates();
-			elseif strfind(tSubCommand, "test") then
-				VUHDO_createAuraContainerSmokeTest(tParsedTexts[3] or "player");
-			elseif strfind(tSubCommand, "res") then
+			elseif strfind(tSubCommand, "restrict") then
 				tArgument = strlower(tParsedTexts[3] or "");
 
 				if tArgument == "on" then
@@ -1954,8 +1938,6 @@ do
 					VUHDO_Msg("Aura data restricted: " .. (VUHDO_isAuraDataRestricted() and "yes" or "no"));
 					VUHDO_Msg("Force aura mode: " .. (VUHDO_FORCE_AURA_MODE == nil and "auto" or tostring(VUHDO_FORCE_AURA_MODE)));
 				end
-			elseif strfind(tSubCommand, "aud") then
-				VUHDO_auditAuraConfiguration();
 			else
 				VUHDO_auraHelp();
 			end
@@ -2258,6 +2240,8 @@ local function VUHDO_doReloadRoster(anIsQuick)
 			else
 				VUHDO_refreshUI();
 
+				VUHDO_TIMERS["RELOAD_RAID"] = 0;
+
 				if VUHDO_IS_RELOAD_BUFFS and not anIsQuick then
 					VUHDO_reloadBuffPanel();
 
@@ -2460,7 +2444,6 @@ do
 			if VUHDO_IS_RELOADING or InCombatLockdown() or tIsDeferredActive then
 				VUHDO_TIMERS["REGISTER_BOUQUETS"] = 0.3;
 			else
-				VUHDO_wipeAuraContainerPool();
 				VUHDO_registerAllBouquets(false);
 				VUHDO_initAllEventBouquets();
 			end

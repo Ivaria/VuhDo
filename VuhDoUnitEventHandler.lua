@@ -43,6 +43,8 @@ local VUHDO_TIMERS;
 
 local sUnitEventFrames = { };
 
+local sLastUnitEventToggleFingerprint;
+
 local sAllUnitEventNames = {
 	"UNIT_AURA",
 	"UNIT_HEALTH",
@@ -661,6 +663,26 @@ function VUHDO_unregisterAllUnitEventFrames()
 end
 
 
+--
+local tUnitEventToggleFingerprint;
+local function VUHDO_getUnitEventToggleFingerprint()
+
+	tUnitEventToggleFingerprint = (VUHDO_needsUnitAuraEvent() and "A" or "a")
+		.. (VUHDO_getThreatEventsInterest() and "T" or "t")
+		.. (VUHDO_getPowerEventsInterest() and "P" or "p")
+		.. (VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_UNIT_TARGET) and "U" or "u")
+		.. (VUHDO_isAnyoneInterestedIn(VUHDO_UPDATE_ALT_POWER) and "L" or "l")
+		.. (VUHDO_CONFIG["SHOW_INCOMING"] and "I" or "i")
+		.. (VUHDO_CONFIG["SHOW_OWN_INCOMING"] and "O" or "o")
+		.. (VUHDO_getShieldInterest() and "S" or "s")
+		.. (VUHDO_getHealAbsorbInterest() and "H" or "h")
+		.. (VUHDO_getHealthLossInterest() and "M" or "m");
+
+	return tUnitEventToggleFingerprint;
+
+end
+
+
 
 --
 function VUHDO_refreshAllUnitEventRegistrations()
@@ -668,6 +690,14 @@ function VUHDO_refreshAllUnitEventRegistrations()
 	if not VUHDO_RAID then
 		return;
 	end
+
+	tUnitEventToggleFingerprint = VUHDO_getUnitEventToggleFingerprint();
+
+	if tUnitEventToggleFingerprint == sLastUnitEventToggleFingerprint then
+		return;
+	end
+
+	sLastUnitEventToggleFingerprint = tUnitEventToggleFingerprint;
 
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		VUHDO_registerUnitForEvents(tUnit);

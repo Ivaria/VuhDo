@@ -10,13 +10,10 @@ local twipe = table.wipe;
 
 local InCombatLockdown = InCombatLockdown;
 local issecretvalue = issecretvalue;
-local CreateFrame = CreateFrame;
 local UnitExists = UnitExists;
 local UnitCanAssist = UnitCanAssist;
 local UnitCanAttack = UnitCanAttack;
 local gsub = string.gsub;
-
-local sSmokeTestContainer;
 
 local sAuraDiagVerbose = false;
 local sAuraDiagIndicator = nil;
@@ -283,6 +280,169 @@ function VUHDO_auraDiagMatchesIndicator(aIndicatorKey)
 
 	return string.upper(aIndicatorKey) == string.upper(sAuraDiagIndicator);
 
+end
+
+
+
+do
+	--
+	local tMixedPriorityCutoffs;
+	local tSlotTemplateRefs;
+	local tSlotKeys;
+	local tEngineSlotCnt;
+	local tTemplateRef;
+	local tRecordedKey;
+	local tSlotTemplate;
+	local tShouldSuppress;
+	local tCanAttack;
+	local tSlotShouldShow;
+	local tMixedEntryIndex;
+	local tMixedItemIndex;
+	local tPriorityCutoff;
+	local tPrioritySuppress;
+	local tCandidateFilters;
+	local tTemplateKey;
+	local tSlotFrames;
+	local tSlotFrame;
+	local tHasFrame;
+	local tAppliedCandidateSuppress;
+	local tStaticSlots;
+	local tStaticSlot;
+	local tStaticSlotIndex;
+	local tStaticEntryIndex;
+	local tStaticItemIndex;
+	local tStaticFrame;
+	local tStaticAlpha;
+	local tStaticShown;
+	local tListSlots;
+	local tListSlotData;
+	local tPanelNum;
+	function VUHDO_dumpAuraContainerSlotDiagnostics(aButtonName, anAnchorIndex, aContainerData, aSlots, aUnit)
+
+		tMixedPriorityCutoffs = aContainerData["mixedPriorityCutoffs"];
+
+		if tMixedPriorityCutoffs and next(tMixedPriorityCutoffs) then
+			for tCutoffEntryIndex, tCutoffItemIndex in pairs(tMixedPriorityCutoffs) do
+				VUHDO_auraDiagLine("mixedPriorityCutoff",
+					"button", aButtonName,
+					"anchor", anAnchorIndex,
+					"entry", tCutoffEntryIndex,
+					"item", tCutoffItemIndex);
+			end
+		end
+
+		tSlotTemplateRefs = aContainerData["slotTemplateRefs"];
+		tSlotKeys = aContainerData["slotKeys"];
+		tSlotFrames = aContainerData["slotFrames"];
+
+		if tSlotTemplateRefs and aSlots then
+			tEngineSlotCnt = 0;
+
+			for tSlotIndex, tSlot in ipairs(aSlots) do
+				if tSlot and not tSlot["isStaticBouquetSlot"] then
+					tEngineSlotCnt = tEngineSlotCnt + 1;
+					tTemplateRef = tSlotTemplateRefs[tEngineSlotCnt];
+					tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
+
+					if tTemplateRef and tRecordedKey then
+						tSlotTemplate = tTemplateRef["template"];
+						tTemplateKey = tSlotTemplate and tSlotTemplate["key"];
+						tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tTemplateRef);
+						tCanAttack = VUHDO_AURA_CONTAINER_GATE_STATE["canAttack"];
+						tSlotShouldShow = not tShouldSuppress;
+
+						if tSlotTemplate and tSlotTemplate["friendlyOnly"] and tCanAttack then
+							tSlotShouldShow = false;
+						end
+
+						tMixedEntryIndex = tSlotTemplate and tSlotTemplate["mixedEntryIndex"];
+						tMixedItemIndex = tSlotTemplate and tSlotTemplate["mixedItemIndex"];
+						tPriorityCutoff = tMixedPriorityCutoffs and tMixedEntryIndex and tMixedPriorityCutoffs[tMixedEntryIndex];
+						tPrioritySuppress = tMixedItemIndex and tPriorityCutoff and tMixedItemIndex > tPriorityCutoff;
+
+						if tPrioritySuppress then
+							tSlotShouldShow = false;
+						end
+
+						tSlotFrame = tSlotFrames and tRecordedKey and tSlotFrames[tRecordedKey];
+						tHasFrame = tSlotFrame ~= nil;
+						tAppliedCandidateSuppress = aContainerData["appliedSlotCandidateSuppress"] and aContainerData["appliedSlotCandidateSuppress"][tRecordedKey];
+
+						VUHDO_auraDiagLine("containerSlot",
+							"i", tEngineSlotCnt,
+							"engineKey", tRecordedKey,
+							"templateKey", tTemplateKey,
+							"drift", (tTemplateKey and tTemplateKey ~= tRecordedKey) and 1 or 0,
+							"hasFrame", tHasFrame and 1 or 0,
+							"filter", VUHDO_escapeAuraDiagFilterString(tSlotTemplate and tSlotTemplate["filterString"]),
+							"candidates", VUHDO_auraDiagFormatCandidateSummary(tSlotTemplate and tSlotTemplate["candidateFilters"], nil),
+							"assistOnly", tTemplateRef["isAssistOnly"],
+							"compound", tTemplateRef["isCompoundFilterString"],
+							"suppress", tShouldSuppress,
+							"slotSuppress", aContainerData["lastSlotSuppress"] and aContainerData["lastSlotSuppress"][tRecordedKey],
+							"appliedCandidateSuppress", tAppliedCandidateSuppress and 1 or 0,
+							"mixedEntry", tMixedEntryIndex,
+							"mixedItem", tMixedItemIndex,
+							"priorityCutoff", tPriorityCutoff,
+							"prioritySuppress", tPrioritySuppress and 1 or 0,
+							"effectiveSuppress", tSlotShouldShow and 0 or 1);
+					end
+				end
+			end
+		elseif aSlots then
+			for tSlotIndex, tSlot in ipairs(aSlots) do
+				tCandidateFilters = tSlot["candidateFilters"];
+
+				VUHDO_auraDiagLine("containerSlot",
+					"i", tSlotIndex,
+					"filter", VUHDO_escapeAuraDiagFilterString(tSlot["filterString"]),
+					"candidates", VUHDO_auraDiagFormatCandidateSummary(tCandidateFilters, nil));
+			end
+		end
+
+		tStaticSlots = aContainerData["staticSlots"];
+		tPanelNum = aContainerData["panelNum"];
+
+		if tStaticSlots and next(tStaticSlots) and tPanelNum and aUnit then
+			tListSlots = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit]
+				and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum]
+				and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][tPanelNum][anAnchorIndex];
+
+			for tStaticSlotKey, tStaticSlot in pairs(tStaticSlots) do
+				tStaticSlotIndex = tStaticSlot["slotIndex"];
+				tStaticEntryIndex = tStaticSlot["entryIndex"];
+				tStaticItemIndex = tStaticSlot["itemIndex"];
+				tListSlotData = tListSlots and tStaticEntryIndex and tListSlots[tStaticEntryIndex];
+				tStaticFrame = tStaticSlotIndex
+					and VUHDO_AURA_FRAMES[aButtonName]
+					and VUHDO_AURA_FRAMES[aButtonName][anAnchorIndex]
+					and VUHDO_AURA_FRAMES[aButtonName][anAnchorIndex][tStaticSlotIndex];
+				tStaticShown = nil;
+				tStaticAlpha = nil;
+
+				if tStaticFrame then
+					tStaticShown = tStaticFrame:IsShown();
+					tStaticAlpha = tStaticFrame:GetAlpha();
+				end
+
+				VUHDO_auraDiagLine("staticSlot",
+					"button", aButtonName,
+					"anchor", anAnchorIndex,
+					"key", tStaticSlotKey,
+					"slotIndex", tStaticSlotIndex,
+					"entryIndex", tStaticEntryIndex,
+					"itemIndex", tStaticItemIndex,
+					"bouquet", tStaticSlot["bouquetName"],
+					"mixed", tStaticSlot["isMixedBouquetItem"] and 1 or 0,
+					"listActive", tListSlotData and tListSlotData["isActive"] and 1 or 0,
+					"shown", tStaticShown,
+					"alpha", tStaticAlpha);
+			end
+		end
+
+		return;
+
+	end
 end
 
 
@@ -600,7 +760,11 @@ do
 
 				tAssistOnly = tChainGroupMetaEntry and tChainGroupMetaEntry["isAssistOnly"] or VUHDO_isAssistOnlyTemplate(tGroupDiagTemplate);
 				tCompound = tChainGroupMetaEntry and tChainGroupMetaEntry["isCompoundFilterString"] or VUHDO_isCompoundFilterStringTemplate(tGroupDiagTemplate);
-				tShouldSuppress = sAuraDiagDisconnected or (tAssistOnly and sAuraDiagAssistRestricted) or (tCompound and sAuraDiagAuraFilterRestricted);
+				tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tGroupDiagTemplate, {
+					["isDisconnected"] = sAuraDiagDisconnected,
+					["isAssistRestricted"] = sAuraDiagAssistRestricted,
+					["isAuraFilterRestricted"] = sAuraDiagAuraFilterRestricted,
+				});
 
 				VUHDO_auraDiagLine("chainGroup",
 					"g", tGroupIndex,
@@ -694,12 +858,17 @@ do
 				"shown", tSlotHostContainer:IsShown(),
 				"enabled", tSlotHostContainer:IsEnabled(),
 				"unit", tSlotHostContainer:GetUnit(),
-				"frameLevel", tSlotHostContainer:GetFrameLevel());
+				"frameLevel", tSlotHostContainer:GetFrameLevel(),
+				"hostGated", tSlotHostData["lastHostGated"] and 1 or 0);
 
 			for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"] or sEmpty) do
 				if VUHDO_auraDiagMatchesIndicator(tSlotRecord["indicatorKey"]) then
 					tSlotFrame = tSlotRecord["slotFrame"];
-					tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tSlotRecord, sAuraDiagDisconnected, sAuraDiagAssistRestricted, sAuraDiagAuraFilterRestricted);
+					tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tSlotRecord, {
+						["isDisconnected"] = sAuraDiagDisconnected,
+						["isAssistRestricted"] = sAuraDiagAssistRestricted,
+						["isAuraFilterRestricted"] = sAuraDiagAuraFilterRestricted,
+					});
 
 					tFillLayer = nil;
 					tFillSublevel = nil;
@@ -722,6 +891,7 @@ do
 						"assistOnly", tSlotRecord["isAssistOnly"],
 						"compound", tSlotRecord["isCompoundFilterString"],
 						"suppress", tShouldSuppress and 1 or 0,
+						"appliedSuppress", tSlotRecord["appliedSuppress"] and 1 or 0,
 						"lastSyncedEnabled", tSlotHostData["lastSyncedSlotEnabled"] and tSlotHostData["lastSyncedSlotEnabled"][tSlotKey],
 						"fillLayer", tFillLayer and format("%s/%s", tostring(tFillLayer), tostring(tFillSublevel)),
 						"frameLevel", tSlotFrame and tSlotFrame:GetFrameLevel(),
@@ -824,7 +994,11 @@ do
 
 						tWarnField = #tWarnParts > 0 and tconcat(tWarnParts, ",") or nil;
 
-						tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tContainerData, sAuraDiagDisconnected, sAuraDiagAssistRestricted, sAuraDiagAuraFilterRestricted);
+						tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tContainerData, {
+							["isDisconnected"] = sAuraDiagDisconnected,
+							["isAssistRestricted"] = sAuraDiagAssistRestricted,
+							["isAuraFilterRestricted"] = sAuraDiagAuraFilterRestricted,
+						});
 
 						VUHDO_auraDiagLine("overlay",
 							"button", aButtonName,
@@ -841,7 +1015,6 @@ do
 							"friendlyOnly", tContainerData["friendlyOnly"],
 							"hostileOnly", tContainerData["hostileOnly"],
 							"assistOnly", tContainerData["isAssistOnly"],
-							"compound", tContainerData["isCompoundFilterString"],
 							"suppress", tShouldSuppress and 1 or 0,
 							"lastSyncedEnabled", tContainerData["lastSyncedEnabled"],
 							"ownsBackgroundFill", tContainerData["ownsBackgroundFill"],
@@ -853,7 +1026,8 @@ do
 							"shadowValueMode", tSlot and tSlot["shadowValueMode"],
 							"sublevelLayer", tSlot and tSlot["sublevelSlots"] and tSlot["sublevelSlots"][1] and tSlot["sublevelSlots"][1]["layer"],
 							"sublevel", tSlot and tSlot["sublevelSlots"] and tSlot["sublevelSlots"][1] and tSlot["sublevelSlots"][1]["sublevel"],
-							"fromPool", tContainerData["fromPool"],
+							"buildSignature", tContainerData["buildSignature"],
+							"filterSignature", tContainerData["filterSignature"],
 							"frameLevel", tContainer:GetFrameLevel(),
 							"suppressed", tContainerData["groupsSuppressed"] and 1 or 0);
 
@@ -1086,13 +1260,8 @@ do
 	local tSlots;
 	local tGroupTemplateRefs;
 	local tGroupKeys;
-	local tSlotTemplateRefs;
-	local tSlotKeys;
 	local tTemplateRef;
 	local tShouldSuppress;
-	local tEngineSlotCnt;
-	local tRecordedKey;
-	local tCandidateFilters;
 	local tPanelNum;
 	local tBackgroundBouquetName;
 	local tBouquetActiveEntry;
@@ -1120,7 +1289,6 @@ do
 			"overlayConfigGeneration", VUHDO_getOverlayConfigGeneration(),
 			"containerBuilds", VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0,
 			"containerReleases", VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0,
-			"containerPoolHits", VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] or 0,
 			"slotHostBuilds", VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] or 0,
 			"overlaySlotBuilds", VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] or 0);
 
@@ -1140,10 +1308,12 @@ do
 			"auraDataRestricted", tIsAuraDataRestricted,
 			"showDispelOverlay", tIsBarColorsDispelOverlayConfigured);
 
+		VUHDO_rewriteAuraContainerGateState(aUnit);
+
 		tUnitInfo = VUHDO_RAID[aUnit];
-		tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
-		tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
-		tIsDisconnected = tUnitInfo and not tUnitInfo["connected"];
+		tIsAssistRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAssistRestricted"];
+		tIsAuraFilterRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAuraFilterRestricted"];
+		tIsDisconnected = VUHDO_AURA_CONTAINER_GATE_STATE["isDisconnected"];
 		tPhaseReason = VUHDO_unitPhaseReason(aUnit);
 
 		sAuraDiagAssistRestricted = tIsAssistRestricted;
@@ -1267,9 +1437,7 @@ do
 								"size", VUHDO_auraDiagCompactSize(tWidth, tHeight),
 								"lastSyncedUnit", tContainerData["lastSyncedUnit"],
 								"lastSyncedRestricted", tContainerData["lastSyncedRestricted"],
-								"lastSyncedAssistRestricted", tContainerData["lastSyncedAssistRestricted"],
-								"lastSyncedAuraFilterRestricted", tContainerData["lastSyncedAuraFilterRestricted"],
-								"lastSyncedDisconnected", tContainerData["lastSyncedDisconnected"],
+								"containerSuppressed", tContainerData["lastContainerSuppressed"] and 1 or 0,
 								"suppressed", tContainerData["groupsSuppressed"] and 1 or 0);
 
 							tGroupTemplateRefs = tContainerData["groupTemplateRefs"];
@@ -1280,7 +1448,7 @@ do
 									tTemplateRef = tGroupTemplateRefs[tGroupCnt];
 
 									if tTemplateRef then
-										tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tTemplateRef, tIsDisconnected, tIsAssistRestricted, tIsAuraFilterRestricted);
+										tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tTemplateRef);
 
 										VUHDO_auraDiagLine("containerGroup",
 											"i", tGroupCnt,
@@ -1302,43 +1470,7 @@ do
 								end
 							end
 
-							tSlotTemplateRefs = tContainerData["slotTemplateRefs"];
-							tSlotKeys = tContainerData["slotKeys"];
-
-							if tSlotTemplateRefs and tSlots then
-								tEngineSlotCnt = 0;
-
-								for tSlotIndex, tSlot in ipairs(tSlots) do
-									if tSlot and not tSlot["isStaticBouquetSlot"] then
-										tEngineSlotCnt = tEngineSlotCnt + 1;
-										tTemplateRef = tSlotTemplateRefs[tEngineSlotCnt];
-										tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
-
-										if tTemplateRef and tRecordedKey then
-											tShouldSuppress = VUHDO_isOverlaySlotSuppressed(tTemplateRef, tIsDisconnected, tIsAssistRestricted, tIsAuraFilterRestricted);
-
-											VUHDO_auraDiagLine("containerSlot",
-												"i", tEngineSlotCnt,
-												"key", tRecordedKey,
-												"filter", VUHDO_escapeAuraDiagFilterString(tTemplateRef["template"] and tTemplateRef["template"]["filterString"]),
-												"candidates", VUHDO_auraDiagFormatCandidateSummary(tTemplateRef["template"] and tTemplateRef["template"]["candidateFilters"], nil),
-												"assistOnly", tTemplateRef["isAssistOnly"],
-												"compound", tTemplateRef["isCompoundFilterString"],
-												"suppress", tShouldSuppress,
-												"candSuppress", tContainerData["lastSlotSuppress"] and tContainerData["lastSlotSuppress"][tRecordedKey]);
-										end
-									end
-								end
-							elseif tSlots then
-								for tSlotIndex, tSlot in ipairs(tSlots) do
-									tCandidateFilters = tSlot["candidateFilters"];
-
-									VUHDO_auraDiagLine("containerSlot",
-										"i", tSlotIndex,
-										"filter", VUHDO_escapeAuraDiagFilterString(tSlot["filterString"]),
-										"candidates", VUHDO_auraDiagFormatCandidateSummary(tCandidateFilters, nil));
-								end
-							end
+							VUHDO_dumpAuraContainerSlotDiagnostics(tButtonName, tAnchorIndex, tContainerData, tSlots, aUnit);
 						else
 							VUHDO_auraDiagLine("buttonContainer",
 								"button", tButtonName,
@@ -1362,646 +1494,3 @@ end
 
 
 
-do
-	--
-	local tClassName;
-	local tPanelIndicatorConfig;
-	local tBouquetClass;
-	local tBouquet;
-	local tItem;
-	local tSpecial;
-	local tHasExpressibleAuraItem;
-	local tHasUnsupportedAuraItem;
-	local tHasBlindSpotItem;
-	local tGroupId;
-	local tGroup;
-	local tIsExpressible;
-	local tAuditAssigned;
-	local tPanelAnchors;
-	function VUHDO_auditAuraConfiguration()
-
-		VUHDO_Msg("|cffFFD100--- Aura Configuration Audit ---|r");
-
-		VUHDO_Msg(format("Aura mode: %s (capability: %s, override: %s)",
-			VUHDO_isAuraModeContainers() and "on" or "off",
-			VUHDO_AURA_MODE_CAPABILITY and "yes" or "no",
-			VUHDO_FORCE_AURA_MODE == nil and "auto" or tostring(VUHDO_FORCE_AURA_MODE)));
-
-		tAuditAssigned = { };
-
-		for tPanelNum = 1, VUHDO_MAX_PANELS do
-			if VUHDO_isPanelVisible(tPanelNum) then
-				tPanelIndicatorConfig = VUHDO_INDICATOR_CONFIG and VUHDO_INDICATOR_CONFIG[tPanelNum];
-
-				if tPanelIndicatorConfig and tPanelIndicatorConfig["BOUQUETS"] then
-					for tIndicatorKey, tBouquetName in pairs(tPanelIndicatorConfig["BOUQUETS"]) do
-						if tBouquetName and tBouquetName ~= "" then
-							tAuditAssigned[tBouquetName] = tAuditAssigned[tBouquetName] or { };
-
-							tinsert(tAuditAssigned[tBouquetName], format("panel %d/%s", tPanelNum, tIndicatorKey));
-						end
-					end
-				end
-
-				tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
-
-				if tPanelAnchors then
-					for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
-						if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
-							tGroupId = tAnchorConfig["groupId"];
-
-							if not tGroupId or not VUHDO_getAuraGroup(tGroupId) then
-								VUHDO_MsgC(format("  panel %d anchor %s: group missing or disabled (%s)", tPanelNum, tAnchorIndex, tostring(tGroupId)), 1, 0.6, 0.2);
-							end
-						end
-					end
-				end
-			end
-		end
-
-		if VUHDO_BOUQUETS and VUHDO_BOUQUETS["STORED"] then
-			for tBouquetName, _ in pairs(VUHDO_BOUQUETS["STORED"]) do
-				tBouquetClass = VUHDO_classifyBouquetRestrictedMode(tBouquetName);
-
-				if tBouquetClass == VUHDO_BOUQUET_RESTRICTED_NON_AURA then
-					tClassName = "NON_AURA";
-				elseif tBouquetClass == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER then
-					tClassName = "CONTAINER";
-				elseif tBouquetClass == VUHDO_BOUQUET_RESTRICTED_MIXED then
-					tClassName = "MIXED";
-				else
-					tClassName = "UNSUPPORTED";
-				end
-
-				tHasExpressibleAuraItem = false;
-				tHasUnsupportedAuraItem = false;
-				tHasBlindSpotItem = false;
-
-				tBouquet = VUHDO_BOUQUETS["STORED"][tBouquetName];
-				tBouquet = VUHDO_decompressIfCompressed(tBouquet);
-
-				if type(tBouquet) == "table" then
-					for tCnt = 1, #tBouquet do
-						tItem = tBouquet[tCnt];
-						tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
-
-						if tSpecial then
-							if tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP then
-								tGroupId = tItem["custom"] and tItem["custom"]["auraGroupId"];
-								tGroup = VUHDO_getAuraGroup(tGroupId);
-
-								if tGroup and VUHDO_isAuraGroupContainerExpressible(tGroup) then
-									tHasExpressibleAuraItem = true;
-								else
-									tHasUnsupportedAuraItem = true;
-								end
-							elseif tItem["name"] == "STACKS" or tItem["name"] == "STACKS_COLOR" or tItem["name"] == "ACTIVE_AURAS_COUNTER" then
-								tHasBlindSpotItem = true;
-							elseif tBouquetClass == VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED then
-								tHasUnsupportedAuraItem = true;
-							elseif tBouquetClass == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER then
-								tHasExpressibleAuraItem = true;
-							end
-						elseif not VUHDO_strempty(tItem["name"]) and tBouquetClass == VUHDO_BOUQUET_RESTRICTED_MIXED then
-							if not VUHDO_resolveAuraContainerSpellId(tItem["name"]) then
-								tHasUnsupportedAuraItem = true;
-							end
-						end
-					end
-				end
-
-				if tBouquetClass == VUHDO_BOUQUET_RESTRICTED_UNSUPPORTED or tHasBlindSpotItem
-					or (tHasExpressibleAuraItem and tHasUnsupportedAuraItem and tBouquetClass ~= VUHDO_BOUQUET_RESTRICTED_MIXED)
-					or (tBouquetClass == VUHDO_BOUQUET_RESTRICTED_MIXED and tHasUnsupportedAuraItem) then
-					VUHDO_MsgC(format("  bouquet %s: %s", tBouquetName, tClassName), 1, 0.6, 0.2);
-
-					if tAuditAssigned[tBouquetName] then
-						VUHDO_Msg("    assigned: " .. tconcat(tAuditAssigned[tBouquetName], ", "));
-					end
-
-					if tHasBlindSpotItem then
-						VUHDO_Msg("    blind-spot: STACKS / STACKS_COLOR / ACTIVE_AURAS_COUNTER");
-					end
-
-					if tHasExpressibleAuraItem and tHasUnsupportedAuraItem and tBouquetClass ~= VUHDO_BOUQUET_RESTRICTED_MIXED then
-						VUHDO_Msg("    mixed bouquet: some items silently drop in container mode");
-					end
-
-					if tBouquetClass == VUHDO_BOUQUET_RESTRICTED_MIXED and tHasUnsupportedAuraItem then
-						VUHDO_Msg("    mixed bouquet: unresolvable aura spell items drop in container mode");
-					end
-				end
-			end
-		end
-
-		if VUHDO_CONFIG and VUHDO_CONFIG["AURA_GROUPS"] then
-			for tGroupId, tGroup in pairs(VUHDO_CONFIG["AURA_GROUPS"]) do
-				tIsExpressible = VUHDO_isAuraGroupContainerExpressible(tGroup);
-
-				if not tIsExpressible then
-					VUHDO_MsgC(format("  aura group %s: inexpressible", tGroupId), 1, 0.6, 0.2);
-				end
-			end
-		end
-
-		VUHDO_Msg("|cffFFD100--- End Aura Audit ---|r");
-
-		return;
-
-	end
-end
-
-
-
-do
-	--
-	local tButtons;
-	local tButtonName;
-	local tButtonContainers;
-	local tContainer;
-	local tContainerTemplate;
-	local tSlots;
-	local tSlotKey;
-	local tSlotFrame;
-	local tStaticSlots;
-	local tStaticSlotIndex;
-	local tStaticFrame;
-	local tFrameLevel;
-	local tAlpha;
-	local tIsShown;
-	local tMixedPriorityCutoffs;
-	local tLastSlotSuppress;
-	local tShouldSuppress;
-	local tPriorityCutoff;
-	local tEntryIndex;
-	local tItemIndex;
-	function VUHDO_dumpAuraContainerLevels(aUnit)
-
-		aUnit = aUnit or "player";
-
-		VUHDO_xMsg("--- Aura Container Level Dump ---");
-		VUHDO_xMsg("unit:", aUnit);
-
-		tButtons = VUHDO_getUnitButtonsSafe(aUnit);
-
-		if not tButtons or not next(tButtons) then
-			VUHDO_xMsg("no buttons for unit:", aUnit);
-			VUHDO_xMsg("--- End Level Dump ---");
-
-			return;
-		end
-
-		for _, tButton in pairs(tButtons) do
-			tButtonName = tButton:GetName();
-
-			if tButtonName then
-				VUHDO_xMsg("button", tButtonName,
-					"level", tButton:GetFrameLevel(),
-					"strata", tButton:GetFrameStrata());
-
-				tButtonContainers = VUHDO_AURA_CONTAINERS[tButtonName];
-
-				if not tButtonContainers then
-					VUHDO_xMsg("  containers: none");
-				else
-					for tAnchorIndex, tContainerData in pairs(tButtonContainers) do
-						tContainer = tContainerData and tContainerData["container"];
-
-						if tContainer then
-							VUHDO_xMsg("  anchor", tAnchorIndex,
-								"containerLevel", tContainer:GetFrameLevel(),
-								"strata", tContainer:GetFrameStrata(),
-								"shown", tContainer:IsShown(),
-								"enabled", tContainer:IsEnabled());
-
-							tMixedPriorityCutoffs = tContainerData["mixedPriorityCutoffs"];
-
-							if tMixedPriorityCutoffs and next(tMixedPriorityCutoffs) then
-								for tCutoffEntryIndex, tCutoffItemIndex in pairs(tMixedPriorityCutoffs) do
-									VUHDO_xMsg("    mixedPriorityCutoff", "entry", tCutoffEntryIndex, "item", tCutoffItemIndex);
-								end
-							else
-								VUHDO_xMsg("    mixedPriorityCutoffs: none");
-							end
-
-							tLastSlotSuppress = tContainerData["lastSlotSuppress"];
-
-							tContainerTemplate = tContainerData["containerTemplate"];
-							tSlots = tContainerTemplate and tContainerTemplate["slots"];
-
-							if tSlots then
-								for tSlotIndex, tSlot in ipairs(tSlots) do
-									tShouldSuppress = nil;
-									tSlotKey = tSlot["key"];
-
-									if tSlotKey and tLastSlotSuppress then
-										tShouldSuppress = tLastSlotSuppress[tSlotKey];
-									end
-
-									VUHDO_xMsg("    templateSlot", tSlotIndex,
-										"key", tSlotKey,
-										"isStatic", tSlot["isStaticBouquetSlot"] or false,
-										"mixedEntry", tSlot["mixedEntryIndex"],
-										"mixedItem", tSlot["mixedItemIndex"],
-										"frameLevelOffset", tSlot["frameLevelOffset"] or (tSlot["buttonSetup"] and tSlot["buttonSetup"]["frameLevelOffset"]),
-										"suppressed", tShouldSuppress);
-
-									if not tSlot["isStaticBouquetSlot"] then
-										tSlotKey = tSlot["key"];
-										tSlotFrame = tContainerData["slotFrames"] and tContainerData["slotFrames"][tSlotKey];
-
-										if tSlotFrame then
-											if tContainerData["lastSyncedRestricted"] then
-												VUHDO_xMsg("      engineFrame restricted");
-											else
-												tFrameLevel = tSlotFrame:GetFrameLevel();
-												tIsShown = tSlotFrame:IsShown();
-												tAlpha = tSlotFrame:GetAlpha();
-
-												VUHDO_xMsg("      engineFrame",
-													"level", tFrameLevel,
-													"shown", tIsShown,
-													"alpha", tAlpha);
-											end
-										else
-											VUHDO_xMsg("      engineFrame: nil");
-										end
-									end
-								end
-							end
-
-							tStaticSlots = tContainerData["staticSlots"];
-
-							if tStaticSlots and next(tStaticSlots) then
-								for tStaticSlotKey, tStaticSlot in pairs(tStaticSlots) do
-									tStaticSlotIndex = tStaticSlot["slotIndex"];
-
-									tStaticFrame = VUHDO_AURA_FRAMES[tButtonName]
-										and VUHDO_AURA_FRAMES[tButtonName][tAnchorIndex]
-										and VUHDO_AURA_FRAMES[tButtonName][tAnchorIndex][tStaticSlotIndex];
-
-									if tStaticFrame then
-										tFrameLevel = tStaticFrame:GetFrameLevel();
-										tIsShown = tStaticFrame:IsShown();
-										tAlpha = tStaticFrame:GetAlpha();
-
-										tEntryIndex = tStaticSlot["entryIndex"];
-										tItemIndex = tStaticSlot["itemIndex"];
-										tPriorityCutoff = tEntryIndex and tMixedPriorityCutoffs and tMixedPriorityCutoffs[tEntryIndex];
-
-										VUHDO_xMsg("    staticSlot", tStaticSlotKey,
-											"slotIndex", tStaticSlotIndex,
-											"entryIndex", tEntryIndex,
-											"itemIndex", tItemIndex,
-											"priorityCutoff", tPriorityCutoff,
-											"frameLevelOffset", tStaticSlot["frameLevelOffset"],
-											"level", tFrameLevel,
-											"shown", tIsShown,
-											"alpha", tAlpha,
-											"geometryKey", tStaticFrame["staticSlotGeometryKey"]);
-									else
-										VUHDO_xMsg("    staticSlot", tStaticSlotKey, "frame: nil");
-									end
-								end
-							end
-						else
-							VUHDO_xMsg("  anchor", tAnchorIndex, "container: nil");
-						end
-					end
-				end
-			end
-		end
-
-		VUHDO_xMsg("--- End Level Dump ---");
-
-		return;
-
-	end
-end
-
-
-
-do
-	--
-	local tButton;
-	local tContainer;
-	local tButtons;
-	function VUHDO_createAuraContainerSmokeTest(aUnit)
-
-		aUnit = aUnit or "player";
-
-		if InCombatLockdown() then
-			VUHDO_xMsg("Aura smoke test blocked: combat lockdown.");
-
-			return;
-		end
-
-		tButtons = VUHDO_getUnitButtonsSafe(aUnit);
-
-		if not tButtons or not next(tButtons) then
-			VUHDO_xMsg("Aura smoke test: no button for unit", aUnit);
-
-			return;
-		end
-
-		for _, tCandidateButton in pairs(tButtons) do
-			tButton = tCandidateButton;
-
-			break;
-		end
-
-		if sSmokeTestContainer then
-			sSmokeTestContainer:SetEnabled(false);
-			sSmokeTestContainer:SetShown(false);
-
-			sSmokeTestContainer:Hide();
-
-			sSmokeTestContainer = nil;
-		end
-
-		tContainer = CreateFrame("AuraContainer", "VuhDoAuraSmokeTest", tButton, "VuhDoAuraContainerTemplate");
-
-		tContainer:ClearAllPoints();
-
-		VUHDO_PixelUtil.SetPoint(tContainer, "TOPRIGHT", tButton, "TOPRIGHT", -2, -2);
-		tContainer:SetFrameLevel(tButton:GetFrameLevel() + 20);
-
-		tContainer:SetFlowLayoutAnchorPoint("TOPRIGHT");
-		tContainer:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection.Left, AnchorUtil.FlowDirection.Down);
-		tContainer:SetFlowLayoutPadding(0, 0, 0, 0);
-
-		tContainer:AddAuraGroup("test", "HELPFUL", {
-			["maxFrameCount"] = 5,
-			["sortMethod"] = AuraContainerSortMethod.Default,
-			["sortDirection"] = AuraContainerSortDirection.Normal,
-			["templateNames"] = { VUHDO_AURA_BUTTON_ICON_TEMPLATE },
-			["layout"] = {
-				["elementWidth"] = 20,
-				["elementHeight"] = 20,
-				["elementSpacing"] = 2,
-				["lineSpacing"] = 2,
-			},
-		});
-
-		tContainer:SetUnit(aUnit);
-		tContainer:SetEnabled(true);
-		tContainer:SetShown(true);
-		tContainer:Show();
-
-		sSmokeTestContainer = tContainer;
-
-		VUHDO_xMsg("Aura smoke test created on", tButton:GetName(), "for", aUnit);
-
-		return;
-
-	end
-end
-
-
-
-do
-	--
-	local tPassCnt;
-	local tFailCnt;
-	local tSavedUnits;
-	local tSavedRaidEntries;
-	local tTemplate;
-	local tMockInfo;
-	local tUnit;
-	local tResolvedSpellIds;
-	local tExpectedCnt;
-	local tActualCnt;
-	local tSpellName;
-	local function VUHDO_assertAuraGateTest(aLabel, anExpected, anActual)
-
-		if anExpected == anActual then
-			tPassCnt = tPassCnt + 1;
-		else
-			tFailCnt = tFailCnt + 1;
-
-			VUHDO_xMsg("FAIL", aLabel, "expected", anExpected, "got", anActual);
-		end
-
-		return;
-
-	end
-
-
-
-	--
-	local function VUHDO_assertResolvedSpellIdSet(aLabel, aValue, aExpectedIds)
-
-		twipe(tResolvedSpellIds);
-		VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, aValue);
-
-		tExpectedCnt = #aExpectedIds;
-		tActualCnt = 0;
-
-		for tExpectedSpellId = 1, tExpectedCnt do
-			if not tResolvedSpellIds[aExpectedIds[tExpectedSpellId]] then
-				tFailCnt = tFailCnt + 1;
-
-				VUHDO_xMsg("FAIL", aLabel, "missing spell ID", aExpectedIds[tExpectedSpellId]);
-
-				return;
-			end
-		end
-
-		for tExpectedSpellId, _ in pairs(tResolvedSpellIds) do
-			tActualCnt = tActualCnt + 1;
-		end
-
-		if tActualCnt ~= tExpectedCnt then
-			tFailCnt = tFailCnt + 1;
-
-			VUHDO_xMsg("FAIL", aLabel, "expected", tExpectedCnt, "IDs got", tActualCnt);
-
-			return;
-		end
-
-		tPassCnt = tPassCnt + 1;
-
-		return;
-
-	end
-
-
-
-	--
-	local function VUHDO_assertResolvedSpellIdEmpty(aLabel, aValue)
-
-		twipe(tResolvedSpellIds);
-		VUHDO_addResolvedAuraContainerSpellIds(tResolvedSpellIds, aValue);
-
-		if next(tResolvedSpellIds) then
-			tFailCnt = tFailCnt + 1;
-
-			VUHDO_xMsg("FAIL", aLabel, "expected no spell IDs");
-
-			return;
-		end
-
-		tPassCnt = tPassCnt + 1;
-
-		return;
-
-	end
-
-
-
-	--
-	local function VUHDO_saveAuraGateRaidEntry(aUnit)
-
-		tSavedRaidEntries[aUnit] = VUHDO_RAID[aUnit];
-		tinsert(tSavedUnits, aUnit);
-
-		return;
-
-	end
-
-
-
-	--
-	local function VUHDO_restoreAuraGateRaidEntries()
-
-		for tCnt = 1, #tSavedUnits do
-			tUnit = tSavedUnits[tCnt];
-
-			VUHDO_RAID[tUnit] = tSavedRaidEntries[tUnit];
-		end
-
-		tSavedUnits = { };
-		tSavedRaidEntries = { };
-
-		return;
-
-	end
-
-
-
-	--
-	function VUHDO_testAuraContainerGates()
-
-		tPassCnt = 0;
-		tFailCnt = 0;
-		tSavedUnits = { };
-		tSavedRaidEntries = { };
-		tResolvedSpellIds = { };
-
-		tSpellName = C_Spell.GetSpellName(974);
-
-		if tSpellName then
-			VUHDO_assertResolvedSpellIdSet("earthShieldName", tSpellName, { 974, 383648 });
-		end
-
-		tSpellName = C_Spell.GetSpellName(119611);
-
-		if tSpellName then
-			VUHDO_assertResolvedSpellIdSet("renewingMistName", tSpellName, { 119611 });
-		end
-
-		tSpellName = C_Spell.GetSpellName(124682);
-
-		if tSpellName then
-			VUHDO_assertResolvedSpellIdSet("envelopingMistName", tSpellName, { 124682 });
-		end
-
-		VUHDO_assertResolvedSpellIdSet("numericEarthShieldExact", 974, { 974 });
-		VUHDO_assertResolvedSpellIdEmpty("unknownSpellName", "NotARealSpellNameForVuhDoTestXYZ");
-
-		tTemplate = {
-			["isHarmful"] = false,
-			["candidateFilters"] = {
-				["excludeSpellIDs"] = {
-					[57724] = true,
-				},
-			},
-		};
-
-		VUHDO_assertAuraGateTest("excludeOnlyNotAssistOnly", false, VUHDO_isAssistOnlyTemplate(tTemplate));
-
-		tTemplate = {
-			["isHarmful"] = false,
-			["candidateFilters"] = {
-				["includeSpellIDs"] = {
-					[774] = true,
-				},
-			},
-		};
-
-		VUHDO_assertAuraGateTest("includeSpellIDsAssistOnly", true, VUHDO_isAssistOnlyTemplate(tTemplate));
-
-		tTemplate = {
-			["filterString"] = "HELPFUL",
-		};
-
-		VUHDO_assertAuraGateTest("bareHelpfulNotAssistOnly", false, VUHDO_isAssistOnlyTemplate(tTemplate));
-
-		tTemplate = {
-			["isHarmful"] = true,
-			["candidateFilters"] = {
-				["excludeSpellIDs"] = {
-					[1] = true,
-				},
-			},
-		};
-
-		VUHDO_assertAuraGateTest("harmfulNotAssistOnly", false, VUHDO_isAssistOnlyTemplate(tTemplate));
-
-		tTemplate = {
-			["filterString"] = "HELPFUL|PLAYER|RAID_IN_COMBAT",
-		};
-
-		VUHDO_assertAuraGateTest("compoundFilterString", true, VUHDO_isCompoundFilterStringTemplate(tTemplate));
-
-		tTemplate = {
-			["filterString"] = "HELPFUL",
-		};
-
-		VUHDO_assertAuraGateTest("bareFilterStringNotCompound", false, VUHDO_isCompoundFilterStringTemplate(tTemplate));
-
-		tMockInfo = {
-			["connected"] = true,
-			["visible"] = false,
-		};
-
-		VUHDO_saveAuraGateRaidEntry("boss1");
-		VUHDO_RAID["boss1"] = tMockInfo;
-		VUHDO_assertAuraGateTest("boss1RestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("boss1"));
-
-		VUHDO_saveAuraGateRaidEntry("target");
-		VUHDO_RAID["target"] = tMockInfo;
-		VUHDO_assertAuraGateTest("targetRestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("target"));
-
-		VUHDO_saveAuraGateRaidEntry("focus");
-		VUHDO_RAID["focus"] = tMockInfo;
-		VUHDO_assertAuraGateTest("focusRestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("focus"));
-
-		VUHDO_saveAuraGateRaidEntry("raid7");
-		VUHDO_RAID["raid7"] = tMockInfo;
-		VUHDO_assertAuraGateTest("raid7RestrictedByVisibility", true, VUHDO_isUnitAuraFilterRestricted("raid7"));
-
-		VUHDO_saveAuraGateRaidEntry("raid8");
-		VUHDO_RAID["raid8"] = nil;
-		VUHDO_assertAuraGateTest("raid8RestrictedWhenNoRaidEntry", true, VUHDO_isUnitAuraFilterRestricted("raid8"));
-
-		VUHDO_saveAuraGateRaidEntry("focus");
-		VUHDO_RAID["focus"] = nil;
-		VUHDO_assertAuraGateTest("focusFollowsLiveVisibilityWhenNoRaidEntry", not UnitIsVisible("focus"), VUHDO_isUnitAuraFilterRestricted("focus"));
-
-		tMockInfo = {
-			["connected"] = false,
-			["visible"] = false,
-		};
-
-		VUHDO_RAID["boss1"] = tMockInfo;
-		VUHDO_assertAuraGateTest("boss1StillRestrictedWhenDisconnected", true, VUHDO_isUnitAuraFilterRestricted("boss1"));
-
-		VUHDO_restoreAuraGateRaidEntries();
-
-		VUHDO_xMsg("Aura gate tests:", tPassCnt, "passed,", tFailCnt, "failed");
-
-		return;
-
-	end
-end

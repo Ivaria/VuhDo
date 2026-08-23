@@ -40,7 +40,6 @@ local VUHDO_AURA_GROUP_TYPE_LIST;
 local VUHDO_AURA_LIST_ENTRY_SPELL;
 local VUHDO_CUSTOM_ICONS;
 local VUHDO_AURA_GROUP_TYPE_FILTER;
-local VUHDO_SUPPRESS_CANDIDATE_FILTERS;
 local VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY;
 local VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY;
 
@@ -68,10 +67,13 @@ local VUHDO_decompressIfCompressed;
 local VUHDO_isAuraDataRestricted;
 local VUHDO_isAuraModeContainers;
 local VUHDO_stopUnitButtonAuraGroupGlow;
+local VUHDO_releaseAuraButtonGlowState;
 local VUHDO_acquireAuraContainer;
-local VUHDO_releaseAuraContainer;
+local VUHDO_retireAuraContainer;
 local VUHDO_refreshAuraContainer;
 local VUHDO_clearOverlaySlotHostUnit;
+local VUHDO_clearAuraContainerBinding;
+local VUHDO_getAuraContainerBuildSignature;
 local VUHDO_getOverlayHostFrame;
 local VUHDO_deferAcquireOverlayContainer;
 local VUHDO_deferSyncOverlaysForUnit;
@@ -80,8 +82,8 @@ local VUHDO_showOverlayFillChainBackgroundForData;
 local VUHDO_hideOverlayFillChainBackgroundForData;
 local VUHDO_isAssistOnlyTemplate;
 local VUHDO_isCompoundFilterStringTemplate;
-local VUHDO_isUnitAssistRestricted;
-local VUHDO_isUnitAuraFilterRestricted;
+local VUHDO_rewriteAuraContainerGateState;
+local VUHDO_isAuraDisplaySuppressed;
 
 local sEmpty = { };
 local sInvalidateRemappedButtonNameToUnit = { };
@@ -93,7 +95,7 @@ local sOverlayZeroPlanLastReason = nil;
 local sOverlayFilterFlagsCache = { };
 local sPendingOverlayBuilds = { };
 local sPendingOverlaySlotPlans = { };
-local sStagingOverlayContainers = { };
+local sOverlayContainerPlans = { };
 local sHasAnyOverlays = false;
 
 local sOverlayBuild = {
@@ -109,6 +111,9 @@ local sOverlayBuild = {
 	["plannedSlotSpecs"] = { },
 	["plannedSlotOrder"] = { },
 	["plannedSlotSet"] = { },
+	["plannedContainerSpecs"] = { },
+	["plannedContainerOrder"] = { },
+	["plannedContainerSet"] = { },
 };
 
 local sDispelNameHostile = {
@@ -183,7 +188,6 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_AURA_LIST_ENTRY_SPELL = _G["VUHDO_AURA_LIST_ENTRY_SPELL"];
 	VUHDO_CUSTOM_ICONS = _G["VUHDO_CUSTOM_ICONS"];
 	VUHDO_AURA_GROUP_TYPE_FILTER = _G["VUHDO_AURA_GROUP_TYPE_FILTER"];
-	VUHDO_SUPPRESS_CANDIDATE_FILTERS = _G["VUHDO_SUPPRESS_CANDIDATE_FILTERS"];
 	VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY = _G["VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY"];
 	VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY = _G["VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY"];
 
@@ -222,10 +226,13 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_stopUnitButtonAuraGroupGlow = _G["VUHDO_stopUnitButtonAuraGroupGlow"];
+	VUHDO_releaseAuraButtonGlowState = _G["VUHDO_releaseAuraButtonGlowState"];
 	VUHDO_acquireAuraContainer = _G["VUHDO_acquireAuraContainer"];
-	VUHDO_releaseAuraContainer = _G["VUHDO_releaseAuraContainer"];
+	VUHDO_retireAuraContainer = _G["VUHDO_retireAuraContainer"];
 	VUHDO_refreshAuraContainer = _G["VUHDO_refreshAuraContainer"];
 	VUHDO_clearOverlaySlotHostUnit = _G["VUHDO_clearOverlaySlotHostUnit"];
+	VUHDO_clearAuraContainerBinding = _G["VUHDO_clearAuraContainerBinding"];
+	VUHDO_getAuraContainerBuildSignature = _G["VUHDO_getAuraContainerBuildSignature"];
 	VUHDO_getOverlayHostFrame = _G["VUHDO_getOverlayHostFrame"];
 	VUHDO_deferAcquireOverlayContainer = _G["VUHDO_deferAcquireOverlayContainer"];
 	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
@@ -234,8 +241,8 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 	VUHDO_hideOverlayFillChainBackgroundForData = _G["VUHDO_hideOverlayFillChainBackgroundForData"];
 	VUHDO_isAssistOnlyTemplate = _G["VUHDO_isAssistOnlyTemplate"];
 	VUHDO_isCompoundFilterStringTemplate = _G["VUHDO_isCompoundFilterStringTemplate"];
-	VUHDO_isUnitAssistRestricted = _G["VUHDO_isUnitAssistRestricted"];
-	VUHDO_isUnitAuraFilterRestricted = _G["VUHDO_isUnitAuraFilterRestricted"];
+	VUHDO_rewriteAuraContainerGateState = _G["VUHDO_rewriteAuraContainerGateState"];
+	VUHDO_isAuraDisplaySuppressed = _G["VUHDO_isAuraDisplaySuppressed"];
 
 	return;
 
@@ -2146,14 +2153,20 @@ do
 			if tFilterChanged then
 				tContainer:SetAuraSlotFilterString(tSlotKey, aSlotSpec["filterString"]);
 				tExistingRecord["appliedFilterString"] = aSlotSpec["filterString"] or "HELPFUL";
-
-				if aHostData["lastSyncedSlotEnabled"] then
-					aHostData["lastSyncedSlotEnabled"][tSlotKey] = nil;
-				end
 			end
 
 			if tCandidateChanged then
-				tContainer:SetAuraSlotCandidateFilters(tSlotKey, aSlotSpec["candidateFilters"]);
+				if tExistingRecord["appliedSuppress"] then
+					tContainer:SetAuraSlotFilterString(tSlotKey, "");
+				else
+					tContainer:SetAuraSlotCandidateFilters(tSlotKey, aSlotSpec["candidateFilters"]);
+				end
+			end
+
+			if tFilterChanged or tCandidateChanged then
+				if aHostData["lastSyncedSlotEnabled"] then
+					aHostData["lastSyncedSlotEnabled"][tSlotKey] = nil;
+				end
 			end
 
 			return true;
@@ -2186,6 +2199,7 @@ do
 		VUHDO_copyOverlaySlotRecordFromSpec(tSlotRecord, aSlotSpec);
 		tSlotRecord["slotFrame"] = tAuraFrame;
 		tSlotRecord["appliedFilterString"] = aSlotSpec["filterString"] or "HELPFUL";
+		tSlotRecord["appliedSuppress"] = false;
 
 		aHostData["slotRecords"][tSlotKey] = tSlotRecord;
 
@@ -2460,9 +2474,150 @@ do
 			return;
 		end
 
+
 		VUHDO_OVERLAYS_REBUILD_PENDING = true;
 
 		sOverlayConfigGeneration = sOverlayConfigGeneration + 1;
+
+		return;
+
+	end
+
+
+
+	--
+	local tStampChainGroupMetaEntry;
+	local function VUHDO_stampOverlayContainerMetadata(aButtonName, aContainerData, aChainGroupMeta, anIndicatorKey)
+
+		if not aContainerData then
+			return;
+		end
+
+		if aChainGroupMeta then
+			aContainerData["chainGroupMeta"] = aChainGroupMeta;
+			aContainerData["alwaysEnabled"] = nil;
+
+			for tStampChainGroupIdx = 1, #aChainGroupMeta do
+				tStampChainGroupMetaEntry = aChainGroupMeta[tStampChainGroupIdx];
+
+				if tStampChainGroupMetaEntry["alwaysEnabled"] then
+					aContainerData["alwaysEnabled"] = true;
+				end
+
+				if aContainerData["groupKeys"] and aContainerData["groupKeys"][tStampChainGroupIdx] then
+					tStampChainGroupMetaEntry["groupKey"] = aContainerData["groupKeys"][tStampChainGroupIdx];
+				end
+			end
+		end
+
+		if aContainerData["chainBaselineTexture"] then
+			VUHDO_applyStoredChainBaselineColor(aButtonName, aContainerData);
+		end
+
+		if anIndicatorKey and anIndicatorKey ~= "DISPEL_OVERLAY" then
+			sHasAnyOverlays = true;
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	local tReconcilePlannedOrder;
+	local tReconcilePlannedSpecs;
+	local tReconcilePlannedKey;
+	local tReconcilePlannedSpec;
+	local tReconcileIndicatorKey;
+	local tReconcileEntryKey;
+	local tReconcileExistingOverlays;
+	local tReconcileRetireIndicatorKey;
+	local tReconcileRetireIndicatorEntry;
+	local tReconcileRetireEntryKey;
+	local tReconcileRetireContainerData;
+	local tReconcileExistingContainer;
+	function VUHDO_reconcileOverlayContainersForButton(aButton, aButtonName)
+
+		tReconcilePlannedOrder = sOverlayBuild["plannedContainerOrder"];
+		tReconcilePlannedSpecs = sOverlayBuild["plannedContainerSpecs"];
+
+		if not sOverlayContainerPlans[aButtonName] then
+			sOverlayContainerPlans[aButtonName] = { ["plannedEntries"] = { } };
+		end
+
+		twipe(sOverlayContainerPlans[aButtonName]["plannedEntries"]);
+
+		if #tReconcilePlannedOrder == 0 then
+			tReconcileExistingOverlays = VUHDO_OVERLAY_CONTAINERS[aButtonName];
+
+			if tReconcileExistingOverlays then
+				for tReconcileRetireIndicatorKey, tReconcileRetireIndicatorEntry in pairs(tReconcileExistingOverlays) do
+					for _, tReconcileRetireContainerData in pairs(tReconcileRetireIndicatorEntry) do
+						VUHDO_retireAuraContainer(aButton, tReconcileRetireContainerData);
+					end
+				end
+
+				VUHDO_OVERLAY_CONTAINERS[aButtonName] = nil;
+			end
+
+			return;
+		end
+
+		if not VUHDO_OVERLAY_CONTAINERS[aButtonName] then
+			VUHDO_OVERLAY_CONTAINERS[aButtonName] = { };
+		end
+
+		tReconcileExistingOverlays = VUHDO_OVERLAY_CONTAINERS[aButtonName];
+
+		twipe(sOverlayBuild["plannedContainerSet"]);
+
+		for tReconcileOrderCnt = 1, #tReconcilePlannedOrder do
+			tReconcilePlannedKey = tReconcilePlannedOrder[tReconcileOrderCnt];
+			sOverlayBuild["plannedContainerSet"][tReconcilePlannedKey] = true;
+			sOverlayContainerPlans[aButtonName]["plannedEntries"][tReconcilePlannedKey] = true;
+		end
+
+		for tReconcileRetireIndicatorKey, tReconcileRetireIndicatorEntry in pairs(tReconcileExistingOverlays) do
+			for tReconcileRetireEntryKey, tReconcileRetireContainerData in pairs(tReconcileRetireIndicatorEntry) do
+				tReconcilePlannedKey = tReconcileRetireIndicatorKey .. ":" .. tReconcileRetireEntryKey;
+
+				if not sOverlayBuild["plannedContainerSet"][tReconcilePlannedKey] then
+					VUHDO_retireAuraContainer(aButton, tReconcileRetireContainerData);
+					tReconcileRetireIndicatorEntry[tReconcileRetireEntryKey] = nil;
+				else
+					tReconcilePlannedSpec = tReconcilePlannedSpecs[tReconcilePlannedKey];
+
+					if tReconcilePlannedSpec and tReconcileRetireContainerData["buildSignature"] ~= tReconcilePlannedSpec["buildSignature"] then
+						VUHDO_retireAuraContainer(aButton, tReconcileRetireContainerData);
+						tReconcileRetireIndicatorEntry[tReconcileRetireEntryKey] = nil;
+					end
+				end
+			end
+
+			if not next(tReconcileRetireIndicatorEntry) then
+				tReconcileExistingOverlays[tReconcileRetireIndicatorKey] = nil;
+			end
+		end
+
+		for tReconcileOrderCnt = 1, #tReconcilePlannedOrder do
+			tReconcilePlannedKey = tReconcilePlannedOrder[tReconcileOrderCnt];
+			tReconcilePlannedSpec = tReconcilePlannedSpecs[tReconcilePlannedKey];
+
+			if tReconcilePlannedSpec then
+				tReconcileIndicatorKey = tReconcilePlannedSpec["indicatorKey"];
+				tReconcileEntryKey = tReconcilePlannedSpec["entryKey"];
+				tReconcileExistingContainer = tReconcileExistingOverlays[tReconcileIndicatorKey]
+					and tReconcileExistingOverlays[tReconcileIndicatorKey][tReconcileEntryKey];
+
+				if tReconcileExistingContainer then
+					VUHDO_stampOverlayContainerMetadata(aButtonName, tReconcileExistingContainer, tReconcilePlannedSpec["chainGroupMeta"], tReconcileIndicatorKey);
+				else
+					VUHDO_enqueueOverlayContainerBuild(aButton, tReconcileIndicatorKey, tReconcileEntryKey,
+						tReconcilePlannedSpec["containerTemplate"], nil, tReconcilePlannedSpec["chainGroupMeta"]);
+				end
+			end
+		end
 
 		return;
 
@@ -2476,11 +2631,9 @@ do
 	local tPendingKey;
 	local tPendingEntry;
 	local tContainerTemplate;
-	local tOverlayEntry;
 	local tContainerData;
 	local tUnit;
 	local tChainGroupMeta;
-	local tChainGroupMetaEntry;
 	function VUHDO_acquireOverlayContainerForEntry(aButton, anIndicatorKey, anEntryKey)
 
 		if not aButton or not anIndicatorKey or not anEntryKey then
@@ -2524,78 +2677,26 @@ do
 		end
 
 		tContainerTemplate = tPendingEntry["containerTemplate"];
-		tOverlayEntry = tPendingEntry["overlayEntry"];
 		tChainGroupMeta = tPendingEntry["chainGroupMeta"];
 
 		tContainerData = VUHDO_acquireAuraContainer(aButton, tContainerTemplate);
 
 		if tContainerData then
-			if not sStagingOverlayContainers[tButtonName] then
-				sStagingOverlayContainers[tButtonName] = { };
+			if not VUHDO_OVERLAY_CONTAINERS[tButtonName] then
+				VUHDO_OVERLAY_CONTAINERS[tButtonName] = { };
 			end
 
-			if not sStagingOverlayContainers[tButtonName][anIndicatorKey] then
-				sStagingOverlayContainers[tButtonName][anIndicatorKey] = { };
+			if not VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey] then
+				VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey] = { };
 			end
 
-			if tChainGroupMeta then
-				tContainerData["chainGroupMeta"] = tChainGroupMeta;
-				tContainerData["alwaysEnabled"] = nil;
+			VUHDO_stampOverlayContainerMetadata(tButtonName, tContainerData, tChainGroupMeta, anIndicatorKey);
 
-				for tChainGroupIdx = 1, #tChainGroupMeta do
-					tChainGroupMetaEntry = tChainGroupMeta[tChainGroupIdx];
-
-					if tChainGroupMetaEntry["alwaysEnabled"] then
-						tContainerData["alwaysEnabled"] = true;
-					end
-
-					if tContainerData["groupKeys"] and tContainerData["groupKeys"][tChainGroupIdx] then
-						tChainGroupMetaEntry["groupKey"] = tContainerData["groupKeys"][tChainGroupIdx];
-					end
-				end
-			elseif tOverlayEntry then
-				VUHDO_applyOverlayGateFlags(tOverlayEntry);
-
-				tContainerData["friendlyOnly"] = tOverlayEntry["friendlyOnly"] or nil;
-				tContainerData["hostileOnly"] = tOverlayEntry["hostileOnly"] or nil;
-				tContainerData["isAssistOnly"] = tOverlayEntry["isAssistOnly"] or nil;
-				tContainerData["isCompoundFilterString"] = tOverlayEntry["isCompoundFilterString"] or nil;
-				tContainerData["alwaysEnabled"] = tOverlayEntry["alwaysEnabled"] or nil;
-				tContainerData["valueGates"] = tOverlayEntry["valueGates"] or nil;
-				tContainerData["isValueGateActiveVariant"] = tOverlayEntry["isValueGateActiveVariant"] or nil;
-
-				tContainerData["overlayFilterString"] = tOverlayEntry["filterString"];
-				tContainerData["overlayCandidateFilters"] = tOverlayEntry["candidateFilters"];
-				tContainerData["overlayStaticColor"] = tOverlayEntry["staticColor"];
-
-				if anIndicatorKey == "AURA_GROUP_BAR_GLOW" then
-					tContainerData["auraGroupBarGlow"] = true;
-					tContainerData["glowGroupId"] = tOverlayEntry["glowGroupId"];
-					tContainerData["glowStyle"] = tOverlayEntry["glowStyle"];
-					tContainerData["glowColorType"] = tOverlayEntry["glowColorType"];
-					tContainerData["glowColor"] = tOverlayEntry["glowColor"];
-					tContainerData["unitButton"] = aButton;
-					tContainerData["glowButtonSetup"] = tContainerTemplate["groups"] and tContainerTemplate["groups"][1] and tContainerTemplate["groups"][1]["buttonSetup"];
-				end
-			end
-
-			sStagingOverlayContainers[tButtonName][anIndicatorKey][anEntryKey] = tContainerData;
-
-			if tContainerData["chainBaselineTexture"] then
-				VUHDO_applyStoredChainBaselineColor(tButtonName, tContainerData);
-			end
-
-			if anIndicatorKey ~= "DISPEL_OVERLAY" then
-				sHasAnyOverlays = true;
-			end
+			VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey][anEntryKey] = tContainerData;
 		end
 
 		if tPendingBuild["pendingCount"] <= 0 then
 			sPendingOverlayBuilds[aButton] = nil;
-
-			VUHDO_finalizeOverlayStaging(aButton);
-
-			sOverlayConfigKeys[tButtonName] = sOverlayConfigGeneration;
 
 			tUnit = aButton["raidid"] or aButton:GetAttribute("unit");
 
@@ -2656,6 +2757,7 @@ do
 	--
 	function VUHDO_invalidateOverlayBuildKeys()
 
+
 		twipe(sOverlayConfigKeys);
 		twipe(sOverlayEntryPrototypeCache);
 
@@ -2700,76 +2802,12 @@ do
 
 	--
 	local tButtonName;
-	local tOldOverlays;
-	function VUHDO_releaseStagingOverlaysForButton(aButton)
-
-		if not aButton then
-			return;
-		end
-
-		tButtonName = aButton:GetName();
-
-		if not tButtonName or not sStagingOverlayContainers[tButtonName] then
-			return;
-		end
-
-		for _, tIndicatorEntry in pairs(sStagingOverlayContainers[tButtonName]) do
-			for _, tContainerData in pairs(tIndicatorEntry) do
-				VUHDO_releaseAuraContainer(aButton, tContainerData);
-			end
-		end
-
-		sStagingOverlayContainers[tButtonName] = nil;
-
-		return;
-
-	end
-
-
-
-	--
-	function VUHDO_finalizeOverlayStaging(aButton)
-
-		if not aButton then
-			return;
-		end
-
-		tButtonName = aButton:GetName();
-
-		if not tButtonName then
-			return;
-		end
-
-		tOldOverlays = VUHDO_OVERLAY_CONTAINERS[tButtonName];
-
-		if sStagingOverlayContainers[tButtonName] then
-			VUHDO_OVERLAY_CONTAINERS[tButtonName] = sStagingOverlayContainers[tButtonName];
-			sStagingOverlayContainers[tButtonName] = nil;
-		else
-			VUHDO_OVERLAY_CONTAINERS[tButtonName] = nil;
-		end
-
-		if tOldOverlays then
-			for _, tIndicatorEntry in pairs(tOldOverlays) do
-				for _, tContainerData in pairs(tIndicatorEntry) do
-					VUHDO_releaseAuraContainer(aButton, tContainerData);
-				end
-			end
-		end
-
-		return;
-
-	end
-
-
-
-	--
-	local tButtonName;
 	function VUHDO_releaseOverlaysForButton(aButton)
 
 		if not aButton then
 			return;
 		end
+
 
 		if InCombatLockdown() then
 			VUHDO_markOverlayRebuildPendingInCombat();
@@ -2781,8 +2819,6 @@ do
 
 		sPendingOverlayBuilds[aButton] = nil;
 
-		VUHDO_releaseStagingOverlaysForButton(aButton);
-
 		VUHDO_disableOverlaySlotHost(tButtonName);
 
 		sPendingOverlaySlotPlans[aButton] = nil;
@@ -2790,7 +2826,7 @@ do
 		if tButtonName and VUHDO_OVERLAY_CONTAINERS[tButtonName] then
 			for _, tIndicatorEntry in pairs(VUHDO_OVERLAY_CONTAINERS[tButtonName]) do
 				for _, tContainerData in pairs(tIndicatorEntry) do
-					VUHDO_releaseAuraContainer(aButton, tContainerData);
+					VUHDO_retireAuraContainer(aButton, tContainerData);
 				end
 			end
 
@@ -2816,16 +2852,17 @@ do
 			return;
 		end
 
+
 		for _, tIndicatorEntries in pairs(VUHDO_OVERLAY_CONTAINERS) do
 			for _, tIndicatorEntry in pairs(tIndicatorEntries) do
 				for _, tContainerData in pairs(tIndicatorEntry) do
-					VUHDO_releaseAuraContainer(nil, tContainerData);
+					VUHDO_retireAuraContainer(nil, tContainerData);
 				end
 			end
 		end
 
 		twipe(VUHDO_OVERLAY_CONTAINERS);
-		twipe(sStagingOverlayContainers);
+		twipe(sOverlayContainerPlans);
 		twipe(sOverlayConfigKeys);
 		twipe(sPendingOverlayBuilds);
 		twipe(sPendingOverlaySlotPlans);
@@ -3112,12 +3149,14 @@ do
 	local tDispelOverlayEntry;
 	local tOverlayPrototypes;
 	local tChainGroupMeta;
+	local tPlannedContainerKey;
 	local tBuildBouquetOverlays;
 	function VUHDO_buildOverlaysForButton(aButton, aButtonName, aPanelNum, aUnit)
 
 		if sOverlayConfigKeys[aButtonName] == sOverlayConfigGeneration then
 			return;
 		end
+
 
 		tPendingBuild = sPendingOverlayBuilds[aButton];
 
@@ -3137,15 +3176,14 @@ do
 
 		twipe(sOverlayBuild["plannedSlotSpecs"]);
 		twipe(sOverlayBuild["plannedSlotOrder"]);
+		twipe(sOverlayBuild["plannedContainerSpecs"]);
+		twipe(sOverlayBuild["plannedContainerOrder"]);
 
 		tBuildBouquetOverlays = VUHDO_isAuraModeContainers() or VUHDO_isAuraDataRestricted() or sHasAnyOverlays;
 
 		if not VUHDO_areOverlayPlanInputsUsable(aPanelNum, tBuildBouquetOverlays) then
 			return;
 		end
-
-		VUHDO_releaseStagingOverlaysForButton(aButton);
-		sStagingOverlayContainers[aButtonName] = { };
 
 		tPlannedCount = 0;
 		tPlannedBouquetCount = 0;
@@ -3175,7 +3213,15 @@ do
 						if #sOverlayBuild["fillEntries"] > 0 and (VUHDO_isAuraModeContainers() or VUHDO_isAuraDataRestricted()) then
 							tContainerTemplate, tChainGroupMeta = VUHDO_buildOverlayChainContainerTemplate(aButton, tTargetFrame, sOverlayBuild["fillEntries"], tIndicatorKey);
 
-							VUHDO_enqueueOverlayContainerBuild(aButton, tIndicatorKey, "fillChain", tContainerTemplate, nil, tChainGroupMeta);
+							tPlannedContainerKey = tIndicatorKey .. ":fillChain";
+							sOverlayBuild["plannedContainerSpecs"][tPlannedContainerKey] = {
+								["indicatorKey"] = tIndicatorKey,
+								["entryKey"] = "fillChain",
+								["buildSignature"] = VUHDO_getAuraContainerBuildSignature(tContainerTemplate),
+								["containerTemplate"] = tContainerTemplate,
+								["chainGroupMeta"] = tChainGroupMeta,
+							};
+							sOverlayBuild["plannedContainerOrder"][#sOverlayBuild["plannedContainerOrder"] + 1] = tPlannedContainerKey;
 
 							tPlannedCount = tPlannedCount + 1;
 							tPlannedBouquetCount = tPlannedBouquetCount + 1;
@@ -3220,15 +3266,17 @@ do
 
 		if tPlannedCount == 0 then
 			sPendingOverlayBuilds[aButton] = nil;
+			sPendingOverlaySlotPlans[aButton] = nil;
 
-			VUHDO_releaseStagingOverlaysForButton(aButton);
-			VUHDO_releaseOverlaysForButton(aButton);
+			VUHDO_disableOverlaySlotHost(aButtonName);
+			VUHDO_reconcileOverlayContainersForButton(aButton, aButtonName);
 
 			sOverlayConfigKeys[aButtonName] = sOverlayConfigGeneration;
 
 			sOverlayZeroPlanCount = sOverlayZeroPlanCount + 1;
 			sOverlayZeroPlanLastReason = "plannedZero";
 		else
+			VUHDO_reconcileOverlayContainersForButton(aButton, aButtonName);
 			VUHDO_reconcileOverlaySlotsForButton(aButton, aButtonName);
 
 			sOverlayConfigKeys[aButtonName] = sOverlayConfigGeneration;
@@ -3256,7 +3304,7 @@ function VUHDO_stopOverlayThreatMarkFlashForSlotRecord(aSlotRecord)
 	tThreatMarkFlashTexture = aSlotRecord["slotFrame"] and aSlotRecord["slotFrame"]["FillTexture"];
 
 	if tThreatMarkFlashTexture then
-		VUHDO_UIFrameFlashStop(tThreatMarkFlashTexture);
+		VUHDO_stopThreatMarkTextureFlash(tThreatMarkFlashTexture);
 	end
 
 	return;
@@ -3279,10 +3327,76 @@ function VUHDO_syncOverlayThreatMarkFlashForSlotRecord(aSlotRecord, anIsEnabled)
 	end
 
 	if anIsEnabled then
-		VUHDO_UIFrameFlash(tThreatMarkFlashTexture, 0.2, 0.5, 3.2, true, 0, 0);
+		VUHDO_startThreatMarkTextureFlash(tThreatMarkFlashTexture);
 	else
-		VUHDO_UIFrameFlashStop(tThreatMarkFlashTexture);
+		VUHDO_stopThreatMarkTextureFlash(tThreatMarkFlashTexture);
 	end
+
+	return;
+
+end
+
+
+
+--
+local tGateContainer;
+local tGateSlotFrame;
+local sOnUpdateModeRunOnce = Enum.OnUpdateMode.RunOnce;
+function VUHDO_gateOverlaySlotHost(aHostData, aButton)
+
+	if not aHostData or not aHostData["container"] then
+		return;
+	end
+
+	if aHostData["lastHostGated"] then
+		return;
+	end
+
+	tGateContainer = aHostData["container"];
+
+	for tGateSlotKey, tGateSlotRecord in pairs(aHostData["slotRecords"] or sEmpty) do
+		VUHDO_stopOverlayThreatMarkFlashForSlotRecord(tGateSlotRecord);
+
+		tGateSlotFrame = tGateSlotRecord["slotFrame"];
+
+		if tGateSlotFrame then
+			VUHDO_releaseAuraButtonGlowState(tGateSlotFrame);
+		end
+	end
+
+	if aButton then
+		if aButton[VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY] then
+			VUHDO_stopUnitButtonAuraGroupGlow(aButton, VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY);
+
+			aButton[VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY] = nil;
+		elseif aButton["hasAuraGroupBarGlow"] then
+			VUHDO_stopUnitButtonAuraGroupGlow(aButton, VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY);
+		end
+	end
+
+
+	if tGateContainer:IsEnabled() then
+		tGateContainer:SetEnabled(false);
+	end
+
+	if tGateContainer:IsShown() then
+		tGateContainer:SetShown(false);
+	end
+
+	if tGateContainer:GetUnit() ~= "none" then
+		tGateContainer:SetUnit("none");
+	end
+
+	tGateContainer:SetOnUpdateMode(sOnUpdateModeRunOnce);
+
+	aHostData["lastSyncedUnit"] = nil;
+	aHostData["lastSyncedGuid"] = nil;
+
+	if aHostData["lastSyncedSlotEnabled"] then
+		twipe(aHostData["lastSyncedSlotEnabled"]);
+	end
+
+	aHostData["lastHostGated"] = true;
 
 	return;
 
@@ -3337,7 +3451,6 @@ do
 	local tGroupEnabledChanged;
 	local tUnitRebound;
 	local tOccupantGuid;
-	local tIsAssistRestricted;
 	local tIsAuraFilterRestricted;
 	local tIsDisconnected;
 	local tShouldSuppress;
@@ -3346,8 +3459,11 @@ do
 	local tSlotEnabledChanged;
 	local tLastSyncedSlotEnabled;
 	local tHostNeedsUnit;
+	local tDeferHostEnable;
+	local tNeedsHostRefresh;
 	local tCurrentUnit;
 	local tLastSyncedUnit;
+	local tDesiredFilterString;
 	function VUHDO_invalidateRemappedOverlayUnitBindings()
 
 		twipe(sInvalidateRemappedButtonNameToUnit);
@@ -3379,16 +3495,7 @@ do
 					tLastSyncedUnit = tContainerData["lastSyncedUnit"];
 
 					if tLastSyncedUnit and tLastSyncedUnit ~= tCurrentUnit then
-						tContainer = tContainerData["container"];
-
-						if tContainer then
-							tContainer:SetUnit("none");
-						end
-
-						tContainerData["lastSyncedUnit"] = nil;
-						tContainerData["lastSyncedGuid"] = nil;
-						tContainerData["lastSyncedEnabled"] = nil;
-						tContainerData["lastSyncedGroupEnabled"] = nil;
+						VUHDO_clearAuraContainerBinding(tContainerData);
 					end
 				end
 			end
@@ -3411,11 +3518,6 @@ do
 			tButtonName = tButton:GetName();
 
 			if tButtonName then
-				for _, tSlotRecord in pairs((VUHDO_OVERLAY_SLOT_HOSTS[tButtonName] or sEmpty)["slotRecords"] or sEmpty) do
-					tSlotRecord["lastSyncedUnit"] = nil;
-					tSlotRecord["lastSyncedGuid"] = nil;
-				end
-
 				tSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS[tButtonName];
 
 				if tSlotHostData then
@@ -3461,11 +3563,13 @@ do
 			return;
 		end
 
-		tCanAttack = UnitCanAttack("player", aUnit);
+		VUHDO_rewriteAuraContainerGateState(aUnit);
+
 		tGateInfo = VUHDO_RAID and VUHDO_RAID[aUnit];
-		tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
-		tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
-		tIsDisconnected = tGateInfo and not tGateInfo["connected"];
+		tCanAttack = VUHDO_AURA_CONTAINER_GATE_STATE["canAttack"];
+		tIsAssistRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAssistRestricted"];
+		tIsAuraFilterRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAuraFilterRestricted"];
+		tIsDisconnected = VUHDO_AURA_CONTAINER_GATE_STATE["isDisconnected"];
 
 		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 			tButtonName = tButton:GetName();
@@ -3485,14 +3589,28 @@ do
 					tContainer = tSlotHostData["container"];
 					tSlotEnabledChanged = false;
 					tHostNeedsUnit = false;
+					tDeferHostEnable = false;
 
-					if not tSlotHostData["lastSyncedSlotEnabled"] then
-						tSlotHostData["lastSyncedSlotEnabled"] = { };
-					end
+					if tIsDisconnected then
+						VUHDO_gateOverlaySlotHost(tSlotHostData, tButton);
+					else
+						if tSlotHostData["lastHostGated"] then
+							tDeferHostEnable = true;
 
-					tLastSyncedSlotEnabled = tSlotHostData["lastSyncedSlotEnabled"];
+							tSlotHostData["lastHostGated"] = nil;
 
-					for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"]) do
+							if tSlotHostData["lastSyncedSlotEnabled"] then
+								twipe(tSlotHostData["lastSyncedSlotEnabled"]);
+							end
+						end
+
+						if not tSlotHostData["lastSyncedSlotEnabled"] then
+							tSlotHostData["lastSyncedSlotEnabled"] = { };
+						end
+
+						tLastSyncedSlotEnabled = tSlotHostData["lastSyncedSlotEnabled"];
+
+						for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"]) do
 						tSlotEnabled = tSlotHostData["plannedSlots"] and tSlotHostData["plannedSlots"][tSlotKey]
 							and (tSlotRecord["alwaysEnabled"] or tIsAuraDataRestricted or tIsAuraModeContainers);
 
@@ -3506,7 +3624,7 @@ do
 							end
 						end
 
-						tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tSlotRecord["isAssistOnly"] and tIsAssistRestricted);
+						tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tSlotRecord);
 
 						if tSlotEnabled and tShouldSuppress then
 							tSlotEnabled = false;
@@ -3520,16 +3638,30 @@ do
 							end
 						end
 
+						tSlotEnabled = tSlotEnabled and true or false;
+
 						if tLastSyncedSlotEnabled[tSlotKey] ~= tSlotEnabled then
-							if tSlotEnabled then
-								tContainer:SetAuraSlotFilterString(tSlotKey, tSlotRecord["filterString"] or "HELPFUL");
-								tContainer:SetAuraSlotCandidateFilters(tSlotKey, tSlotRecord["candidateFilters"]);
+							tDesiredFilterString = tSlotEnabled and (tSlotRecord["filterString"] or "HELPFUL") or "";
+
+							if tSlotRecord["appliedFilterString"] ~= tDesiredFilterString then
+								if tSlotEnabled then
+									tContainer:SetAuraSlotFilterString(tSlotKey, tSlotRecord["filterString"] or "HELPFUL");
+									tContainer:SetAuraSlotCandidateFilters(tSlotKey, tSlotRecord["candidateFilters"]);
+
+									tSlotRecord["appliedFilterString"] = tSlotRecord["filterString"] or "HELPFUL";
+									tSlotRecord["appliedSuppress"] = false;
+								else
+									tContainer:SetAuraSlotFilterString(tSlotKey, "");
+
+									tSlotRecord["appliedFilterString"] = "";
+									tSlotRecord["appliedSuppress"] = true;
+								end
+
+								tSlotEnabledChanged = true;
 							else
-								tContainer:SetAuraSlotFilterString(tSlotKey, "");
 							end
 
 							tLastSyncedSlotEnabled[tSlotKey] = tSlotEnabled;
-							tSlotEnabledChanged = true;
 
 							VUHDO_syncOverlayThreatMarkFlashForSlotRecord(tSlotRecord, tSlotEnabled);
 						end
@@ -3545,30 +3677,47 @@ do
 						end
 					end
 
-					if tHostNeedsUnit then
-						tOccupantGuid = tGateInfo and tGateInfo["guid"];
-						tUnitRebound = tSlotHostData["lastSyncedUnit"] ~= aUnit;
+						if tHostNeedsUnit then
+							tOccupantGuid = tGateInfo and tGateInfo["guid"];
+							tUnitRebound = tSlotHostData["lastSyncedUnit"] ~= aUnit;
 
-						if not tUnitRebound then
-							if not tOccupantGuid or issecretvalue(tOccupantGuid) then
-								tUnitRebound = true;
-							elseif tSlotHostData["lastSyncedGuid"] ~= tOccupantGuid then
-								tUnitRebound = true;
+							if not tUnitRebound then
+								if not tOccupantGuid or issecretvalue(tOccupantGuid) then
+									tUnitRebound = true;
+								elseif tSlotHostData["lastSyncedGuid"] ~= tOccupantGuid then
+									tUnitRebound = true;
+								end
 							end
+
+							if tUnitRebound then
+								if tContainer:GetUnit() ~= aUnit then
+									tContainer:SetUnit(aUnit);
+								end
+
+								tSlotHostData["lastSyncedUnit"] = aUnit;
+								tSlotHostData["lastSyncedGuid"] = tOccupantGuid;
+							end
+
+							if tDeferHostEnable then
+								tContainer:SetEnabled(true);
+								tContainer:SetShown(true);
+
+								tDeferHostEnable = false;
+								tNeedsHostRefresh = true;
+							else
+								tNeedsHostRefresh = false;
+							end
+
+							if tUnitRebound or tSlotEnabledChanged or tNeedsHostRefresh then
+								VUHDO_refreshAuraContainer(tContainer);
+							end
+						elseif tSlotHostData["lastSyncedUnit"] or tSlotEnabledChanged then
+							VUHDO_clearOverlaySlotHostUnit(tSlotHostData);
 						end
 
-						if tUnitRebound then
-							tContainer:SetUnit(aUnit);
-
-							tSlotHostData["lastSyncedUnit"] = aUnit;
-							tSlotHostData["lastSyncedGuid"] = tOccupantGuid;
+						if not tHostNeedsUnit and tDeferHostEnable then
+							tSlotHostData["lastHostGated"] = true;
 						end
-
-						if tUnitRebound or tSlotEnabledChanged then
-							VUHDO_refreshAuraContainer(tContainer);
-						end
-					elseif tSlotHostData["lastSyncedUnit"] or tSlotEnabledChanged then
-						VUHDO_clearOverlaySlotHostUnit(tSlotHostData);
 					end
 				end
 
@@ -3601,7 +3750,7 @@ do
 										tGroupEnabled = false;
 									end
 
-									tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tChainGroupMetaEntry["isAssistOnly"] and tIsAssistRestricted);
+									tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tChainGroupMetaEntry);
 
 									if tGroupEnabled and tShouldSuppress then
 										tGroupEnabled = false;
@@ -3615,9 +3764,11 @@ do
 
 									if tGroupKey and tLastSyncedGroupEnabled[tGroupKey] ~= tGroupEnabled then
 										if tGroupEnabled then
+											tContainer:SetAuraGroupMaxFrameCount(tGroupKey, 1);
+											tContainer:SetAuraGroupFilterString(tGroupKey, tChainGroupMetaEntry["filterString"] or "HELPFUL");
 											tContainer:SetAuraGroupCandidateFilters(tGroupKey, tChainGroupMetaEntry["candidateFilters"]);
 										else
-											tContainer:SetAuraGroupCandidateFilters(tGroupKey, VUHDO_SUPPRESS_CANDIDATE_FILTERS);
+											tContainer:SetAuraGroupMaxFrameCount(tGroupKey, 0);
 										end
 
 										tLastSyncedGroupEnabled[tGroupKey] = tGroupEnabled;
@@ -3637,7 +3788,7 @@ do
 									end
 								end
 
-								tShouldSuppress = tIsDisconnected or tIsAuraFilterRestricted or (tContainerData["isAssistOnly"] and tIsAssistRestricted);
+								tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tContainerData);
 
 								if tIsEnabled and tShouldSuppress then
 									tIsEnabled = false;
@@ -3649,6 +3800,28 @@ do
 
 								if tGateActive ~= (tContainerData["isValueGateActiveVariant"] or false) then
 									tIsEnabled = false;
+								end
+							end
+
+							tUnitRebound = false;
+
+							if tIsEnabled then
+								tOccupantGuid = tGateInfo and tGateInfo["guid"];
+								tUnitRebound = tContainerData["lastSyncedUnit"] ~= aUnit;
+
+								if not tUnitRebound then
+									if not tOccupantGuid or issecretvalue(tOccupantGuid) then
+										tUnitRebound = true;
+									elseif tContainerData["lastSyncedGuid"] ~= tOccupantGuid then
+										tUnitRebound = true;
+									end
+								end
+
+								if tUnitRebound then
+									tContainer:SetUnit(aUnit);
+
+									tContainerData["lastSyncedUnit"] = aUnit;
+									tContainerData["lastSyncedGuid"] = tOccupantGuid;
 								end
 							end
 
@@ -3676,24 +3849,6 @@ do
 							end
 
 							if tIsEnabled then
-								tOccupantGuid = tGateInfo and tGateInfo["guid"];
-								tUnitRebound = tContainerData["lastSyncedUnit"] ~= aUnit;
-
-								if not tUnitRebound then
-									if not tOccupantGuid or issecretvalue(tOccupantGuid) then
-										tUnitRebound = true;
-									elseif tContainerData["lastSyncedGuid"] ~= tOccupantGuid then
-										tUnitRebound = true;
-									end
-								end
-
-								if tUnitRebound then
-									tContainer:SetUnit(aUnit);
-
-									tContainerData["lastSyncedUnit"] = aUnit;
-									tContainerData["lastSyncedGuid"] = tOccupantGuid;
-								end
-
 								if tUnitRebound or tEnabledChanged or tGroupEnabledChanged then
 									VUHDO_refreshAuraContainer(tContainer);
 								end
@@ -3716,13 +3871,4 @@ do
 		return;
 
 	end
-end
-
-
-
---
-function VUHDO_isOverlaySlotSuppressed(aSlotRecord, anIsDisconnected, anIsAssistRestricted, anIsAuraFilterRestricted)
-
-	return anIsDisconnected or anIsAuraFilterRestricted or (aSlotRecord["isAssistOnly"] and anIsAssistRestricted);
-
 end

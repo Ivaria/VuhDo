@@ -3,7 +3,6 @@ local _;
 local pairs = pairs;
 local ipairs = ipairs;
 local tinsert = table.insert;
-local tremove = table.remove;
 local tconcat = table.concat;
 local tsort = table.sort;
 local twipe = table.wipe;
@@ -22,7 +21,7 @@ local CreateNumericRuleFormatter = C_StringUtil and C_StringUtil.CreateNumericRu
 local CreateColorCurve = C_CurveUtil and C_CurveUtil.CreateColorCurve;
 local CreateColor = CreateColor;
 
-local VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE = Enum.OnUpdateMode.RunWhenVisible;
+local VUHDO_ON_UPDATE_MODE_RUN_ONCE = Enum.OnUpdateMode.RunOnce;
 
 VUHDO_AURA_CONTAINERS = VUHDO_AURA_CONTAINERS or { };
 local VUHDO_AURA_CONTAINERS = VUHDO_AURA_CONTAINERS;
@@ -46,7 +45,6 @@ VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION = VUHDO_AURA_CONTAINER_TEMPLATE_C
 VUHDO_AURA_CONTAINER_METRICS = VUHDO_AURA_CONTAINER_METRICS or {
 	["builds"] = { },
 	["releases"] = { },
-	["poolHits"] = { },
 };
 local VUHDO_AURA_CONTAINER_METRICS = VUHDO_AURA_CONTAINER_METRICS;
 
@@ -157,13 +155,12 @@ local VUHDO_startAuraButtonGlow;
 local VUHDO_getDispelTypeColorMap;
 local VUHDO_getDispelTypeColorMapOpaque;
 local VUHDO_getDispelTypeBorderCurve;
-local VUHDO_getDispelColorGeneration;
 local VUHDO_applyAuraGroupBarGlowFromAuraButton;
 local VUHDO_getManaAdjustedYOffset;
-local VUHDO_releaseAuraButtonGlowState;
 local VUHDO_unitPhaseReason;
 local VUHDO_isSpecialUnit;
 local VUHDO_stopOverlayThreatMarkFlashForSlotRecord;
+local VUHDO_deferVolatilePassForButton;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -195,18 +192,19 @@ local sAuraOpaqueBorderOptions = {
 };
 
 local sAuraDurationBarOptions = { };
-
 local sEmpty = { };
 
-local sSuppressCandidateFilters = {
-	["maxDuration"] = 0,
+local sGateState = {
+	["canAttack"] = false,
+	["isAssistRestricted"] = false,
+	["isAuraFilterRestricted"] = false,
+	["isDisconnected"] = false,
 };
-VUHDO_SUPPRESS_CANDIDATE_FILTERS = sSuppressCandidateFilters;
+VUHDO_AURA_CONTAINER_GATE_STATE = sGateState;
 
 local sPendingContainerBuilds = { };
-local sPendingButtonLayouts = { };
 local sPendingClassColors = { };
-local sPendingRetry = { };
+local sPendingClassColorRetry = { };
 local sHasPendingBuilds = false;
 local sContainerClassColorBars = { };
 
@@ -244,9 +242,7 @@ local sAuraTimerColorCurvesByThreshold = { };
 local sChainBaselineColors = { };
 local sChainBaselineFrames = { };
 local sChainBackgroundFillOwners = { };
-local sAuraContainerPool = { };
-local sAuraPoolDisabled = false;
-local sPoolKeyParts = { };
+local sSignatureParts = { };
 
 local sBorderTexture;
 local sBorderEdgeTop;
@@ -409,16 +405,15 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_getDispelTypeColorMap = _G["VUHDO_getDispelTypeColorMap"];
 	VUHDO_getDispelTypeColorMapOpaque = _G["VUHDO_getDispelTypeColorMapOpaque"];
 	VUHDO_getDispelTypeBorderCurve = _G["VUHDO_getDispelTypeBorderCurve"];
-	VUHDO_getDispelColorGeneration = _G["VUHDO_getDispelColorGeneration"];
 	VUHDO_applyAuraGroupBarGlowFromAuraButton = _G["VUHDO_applyAuraGroupBarGlowFromAuraButton"];
 	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
-	VUHDO_releaseAuraButtonGlowState = _G["VUHDO_releaseAuraButtonGlowState"];
 	VUHDO_unitPhaseReason = _G["VUHDO_unitPhaseReason"];
 	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
 	VUHDO_stopOverlayThreatMarkFlashForSlotRecord = _G["VUHDO_stopOverlayThreatMarkFlashForSlotRecord"];
 	VUHDO_precomputeStaticBouquetSlotsForButton = _G["VUHDO_precomputeStaticBouquetSlotsForButton"];
 	VUHDO_updateStaticBouquetSlotsForButton = _G["VUHDO_updateStaticBouquetSlotsForButton"];
 	VUHDO_hideStaticBouquetSlotsForButton = _G["VUHDO_hideStaticBouquetSlotsForButton"];
+	VUHDO_deferVolatilePassForButton = _G["VUHDO_deferVolatilePassForButton"];
 
 	sAuraOpaqueBorderOptions["backingCurveFn"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"];
 	sAuraOpaqueBorderOptions["fillCurveFn"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"];
@@ -483,18 +478,10 @@ do
 	local tDurationCooldown;
 	local tLayoutSpec;
 	local tDurationBarWidth;
-	function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton, anIsInitializerContext)
+	function VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton)
 
 		if not anButtonSetup["durationBar"] or not aAuraButton["IconFrame"] then
 			return true;
-		end
-
-		if not anIsInitializerContext and not aAuraButton:CanBeAccessedInContext() then
-			sPendingButtonLayouts[aAuraButton] = anButtonSetup;
-
-			sHasPendingBuilds = true;
-
-			return false;
 		end
 
 		tIconSize = anButtonSetup["iconTextSize"];
@@ -1386,7 +1373,7 @@ do
 				tTextOverlayFrame:SetFrameLevel(aAuraButton["DurationBar"]:GetFrameLevel() + 1);
 			end
 
-			VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton, true);
+			VUHDO_layoutBarAuraButtonFrames(anButtonSetup, aAuraButton);
 		end
 
 		if not tBarNoIconTexts and anButtonSetup["durationText"] and aAuraButton["TimerText"] then
@@ -1590,6 +1577,7 @@ do
 	function VUHDO_pixelSnapCoverFrame(aFrame, aTargetFrame)
 
 		VUHDO_PixelUtil.ClearAllPoints(aFrame);
+
 		VUHDO_PixelUtil.SetPoint(aFrame, "TOPLEFT", aTargetFrame, "TOPLEFT", 0, 0);
 		VUHDO_PixelUtil.SetPoint(aFrame, "TOPRIGHT", aTargetFrame, "TOPRIGHT", 0, 0);
 		VUHDO_PixelUtil.SetPoint(aFrame, "BOTTOMLEFT", aTargetFrame, "BOTTOMLEFT", 0, 0);
@@ -1722,8 +1710,12 @@ do
 			return nil;
 		end
 
-		if not aContainerTemplate["poolKeyBase"] then
-			VUHDO_computeAuraContainerPoolKeyBase(aContainerTemplate);
+		if not aContainerTemplate["buildSignature"] then
+			VUHDO_getAuraContainerBuildSignature(aContainerTemplate);
+		end
+
+		if not aContainerTemplate["filterSignature"] then
+			VUHDO_getAuraContainerFilterSignature(aContainerTemplate);
 		end
 
 		if not aContainerTemplate["staticSlots"] then
@@ -1992,7 +1984,6 @@ do
 			["container"] = tContainer,
 			["containerTemplate"] = aContainerTemplate,
 			["overlayTargetBar"] = aContainerTemplate["overlayTargetBar"],
-			["overlayHostFrame"] = aContainerTemplate["overlayHostFrame"],
 			["slotKeys"] = tSlotKeys,
 			["slotFrames"] = tSlotFrames,
 			["groupKeys"] = tGroupKeys,
@@ -2001,12 +1992,7 @@ do
 			["staticSlots"] = aContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate),
 			["panelNum"] = aContainerTemplate["panelNum"],
 			["anchorIndex"] = aContainerTemplate["anchorIndex"],
-			["fromPool"] = false,
 		};
-
-		if VUHDO_containerTemplateUsesDispelTextures(aContainerTemplate) then
-			tContainerData["dispelColorGen"] = VUHDO_getDispelColorGeneration();
-		end
 
 		if aContainerTemplate["isFillChain"] then
 			VUHDO_setupOverlayFillChain(tContainer, aContainerTemplate, tContainerData);
@@ -2108,20 +2094,64 @@ end
 
 
 
---
 do
 	--
-	local function VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, aComponent, aPrefix)
+	local tCandidateKeys;
+	local tCandidateKey;
+	local tCandidateValue;
+	local tCandidateSpellIds;
+	local tCandidateDispelNames;
+	local tCandidateParts;
+	local function VUHDO_appendSignatureCandidateFilters(aSignatureParts, aCandidateFilters)
 
-		if aComponent == nil then
+		if not aCandidateFilters then
+			tinsert(aSignatureParts, "");
+
 			return;
 		end
 
-		if issecretvalue(aComponent) then
-			tinsert(aPoolKeyParts, aPrefix and (aPrefix .. "?") or "?");
-		else
-			tinsert(aPoolKeyParts, format(aPrefix and (aPrefix .. "%.3f") or "%.3f", aComponent));
+		tCandidateParts = { };
+
+		tCandidateKeys = { };
+
+		for tCandidateKey in pairs(aCandidateFilters) do
+			tinsert(tCandidateKeys, tCandidateKey);
 		end
+
+		tsort(tCandidateKeys);
+
+		for tCandidateCnt = 1, #tCandidateKeys do
+			tCandidateKey = tCandidateKeys[tCandidateCnt];
+			tCandidateValue = aCandidateFilters[tCandidateKey];
+
+			if "includeSpellIDs" == tCandidateKey or "excludeSpellIDs" == tCandidateKey then
+				tCandidateSpellIds = { };
+
+				for tSpellId in pairs(tCandidateValue or sEmpty) do
+					tinsert(tCandidateSpellIds, tSpellId);
+				end
+
+				tsort(tCandidateSpellIds);
+
+				tinsert(tCandidateParts, format("%s=%s", tCandidateKey, tconcat(tCandidateSpellIds, ",")));
+			elseif "includeDispelTypes" == tCandidateKey or "excludeDispelTypes" == tCandidateKey then
+				tCandidateDispelNames = { };
+
+				for tDispelName, tIsIncluded in pairs(tCandidateValue or sEmpty) do
+					if tIsIncluded then
+						tinsert(tCandidateDispelNames, tDispelName);
+					end
+				end
+
+				tsort(tCandidateDispelNames);
+
+				tinsert(tCandidateParts, format("%s=%s", tCandidateKey, tconcat(tCandidateDispelNames, ",")));
+			else
+				tinsert(tCandidateParts, format("%s=%s", tCandidateKey, tostring(tCandidateValue)));
+			end
+		end
+
+		tinsert(aSignatureParts, tconcat(tCandidateParts, ";"));
 
 		return;
 
@@ -2130,81 +2160,10 @@ do
 
 
 	--
-	local tStaticColor;
-	local tGlowColor;
-	local tIconColor;
-	local tBarColor;
-	local tIconTexCoords;
 	local tSublevelSlots;
 	local tSublevelSlot;
 	local tDurationBarOptions;
-	local function VUHDO_appendAuraContainerPoolKeyExtras(aPoolKeyParts, aButtonSetup)
-
-		tinsert(aPoolKeyParts, aButtonSetup["shadowValueMode"] or "");
-		tinsert(aPoolKeyParts, aButtonSetup["hideIcon"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["staticIcon"] or "");
-
-		tStaticColor = aButtonSetup["staticColor"];
-
-		if tStaticColor then
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["R"], "c");
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tStaticColor["O"], nil);
-		end
-
-		tIconColor = aButtonSetup["iconColor"];
-
-		if tIconColor then
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["R"], "i");
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconColor["O"], nil);
-		end
-
-		tBarColor = aButtonSetup["barColor"];
-
-		if tBarColor then
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["R"], "bc");
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tBarColor["O"], nil);
-		end
-
-		if aButtonSetup["dispelBright"] then
-			tinsert(aPoolKeyParts, format("b%.3f", aButtonSetup["dispelBright"]));
-		end
-
-		if aButtonSetup["dispelOpacity"] then
-			tinsert(aPoolKeyParts, format("o%.3f", aButtonSetup["dispelOpacity"]));
-		end
-
-		tIconTexCoords = aButtonSetup["iconTexCoords"];
-
-		if tIconTexCoords then
-			for tTexCoordCnt = 1, #tIconTexCoords do
-				VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tIconTexCoords[tTexCoordCnt], nil);
-			end
-		end
-
-		tGlowColor = aButtonSetup["glowColor"];
-
-		if tGlowColor then
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["R"], "g");
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["G"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["B"], nil);
-			VUHDO_appendPoolKeyColorComponent(aPoolKeyParts, tGlowColor["O"], nil);
-		end
-
-		if aButtonSetup["glowIcon"] then
-			tinsert(aPoolKeyParts, "gs" .. (aButtonSetup["glowStyle"] or ""));
-		end
-
-		if aButtonSetup["shadowBar"] and aButtonSetup["barTexture"] then
-			tinsert(aPoolKeyParts, aButtonSetup["barTexture"]);
-			tinsert(aPoolKeyParts, format("%d", aButtonSetup["barOrientation"] or 0));
-			tinsert(aPoolKeyParts, aButtonSetup["barInverted"] and "1" or "0");
-		end
+	local function VUHDO_appendAuraContainerBuildSignatureExtras(aSignatureParts, aButtonSetup)
 
 		tSublevelSlots = aButtonSetup["sublevelSlots"];
 
@@ -2213,36 +2172,25 @@ do
 				tSublevelSlot = tSublevelSlots[tSublevelCnt];
 
 				if tSublevelSlot then
-					tinsert(aPoolKeyParts, tSublevelSlot["layer"] or "");
-					tinsert(aPoolKeyParts, format("%d", tSublevelSlot["sublevel"] or 0));
+					tinsert(aSignatureParts, tSublevelSlot["layer"] or "");
+					tinsert(aSignatureParts, format("%d", tSublevelSlot["sublevel"] or 0));
 				end
 			end
 		end
 
-		tinsert(aPoolKeyParts, aButtonSetup["durationText"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["durationCooldown"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["applicationCount"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["mouseMotion"] and "1" or "0");
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["durationMode"] or 0));
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["timerThreshold"] or 0));
-
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["iconType"] or 0));
-		tinsert(aPoolKeyParts, aButtonSetup["barVertical"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["barTurnAxis"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["durationBar"] and "1" or "0");
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["durationBarOrientation"] or 0));
+		tinsert(aSignatureParts, format("%d", aButtonSetup["iconType"] or 0));
+		tinsert(aSignatureParts, aButtonSetup["barVertical"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["barTurnAxis"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["durationBar"] and "1" or "0");
+		tinsert(aSignatureParts, format("%d", aButtonSetup["durationBarOrientation"] or 0));
 
 		tDurationBarOptions = aButtonSetup["durationBarOptions"];
 
 		if tDurationBarOptions then
-			tinsert(aPoolKeyParts, format("%d", tDurationBarOptions["direction"] or 0));
+			tinsert(aSignatureParts, format("%d", tDurationBarOptions["direction"] or 0));
 		else
-			tinsert(aPoolKeyParts, "0");
+			tinsert(aSignatureParts, "0");
 		end
-
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["barSegmentWidth"] or 0));
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["barSegmentHeight"] or 0));
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["iconTextSize"] or 0));
 
 		return;
 
@@ -2250,20 +2198,20 @@ do
 
 
 
-	local function VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aPoolKeyParts, aButtonSetup)
+	local function VUHDO_appendAuraContainerBuildSignatureButtonSetupCore(aSignatureParts, aButtonSetup)
 
-		tinsert(aPoolKeyParts, aButtonSetup["shadowBar"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["dispelFill"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["dispelBorder"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["dispelIcon"] and "1" or "0");
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["targetFrameLevel"] or 0));
-		tinsert(aPoolKeyParts, aButtonSetup["border"] and "1" or "0");
-		tinsert(aPoolKeyParts, format("%d", aButtonSetup["borderWidth"] or 0));
-		tinsert(aPoolKeyParts, aButtonSetup["borderFile"] or "");
-		tinsert(aPoolKeyParts, aButtonSetup["glowIcon"] and "1" or "0");
-		tinsert(aPoolKeyParts, aButtonSetup["dispelOverlayChrome"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["shadowBar"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["dispelFill"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["dispelBorder"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["dispelIcon"] and "1" or "0");
+		tinsert(aSignatureParts, format("%d", aButtonSetup["targetFrameLevel"] or 0));
+		tinsert(aSignatureParts, aButtonSetup["border"] and "1" or "0");
+		tinsert(aSignatureParts, format("%d", aButtonSetup["borderWidth"] or 0));
+		tinsert(aSignatureParts, aButtonSetup["borderFile"] or "");
+		tinsert(aSignatureParts, aButtonSetup["glowIcon"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["dispelOverlayChrome"] and "1" or "0");
 
-		VUHDO_appendAuraContainerPoolKeyExtras(aPoolKeyParts, aButtonSetup);
+		VUHDO_appendAuraContainerBuildSignatureExtras(aSignatureParts, aButtonSetup);
 
 	end
 
@@ -2271,108 +2219,101 @@ do
 
 	--
 	local tContainerLayout;
-	local tParentName;
 	local tButtonSetup;
-	local tPoolKeyBase;
-	local function VUHDO_appendAuraContainerPoolKeyParts(aPoolKeyParts, aContainerTemplate)
+	local function VUHDO_appendAuraContainerBuildSignatureParts(aSignatureParts, aContainerTemplate)
 
-		tinsert(aPoolKeyParts, aContainerTemplate["isOverlay"] and "1" or "0");
-		tinsert(aPoolKeyParts, aContainerTemplate["isFillChain"] and "1" or "0");
-		tinsert(aPoolKeyParts, aContainerTemplate["chainHasBaseline"] and "1" or "0");
+		tinsert(aSignatureParts, aContainerTemplate["isOverlay"] and "1" or "0");
+		tinsert(aSignatureParts, aContainerTemplate["isFillChain"] and "1" or "0");
+		tinsert(aSignatureParts, aContainerTemplate["chainHasBaseline"] and "1" or "0");
 
 		if aContainerTemplate["anchor"] then
-			tinsert(aPoolKeyParts, aContainerTemplate["anchor"]["mode"] or "");
-			tinsert(aPoolKeyParts, format("%d", aContainerTemplate["anchor"]["frameLevelOffset"] or 0));
-			tinsert(aPoolKeyParts, format("%d", aContainerTemplate["anchor"]["offsetX"] or 0));
-			tinsert(aPoolKeyParts, format("%d", aContainerTemplate["anchor"]["offsetY"] or 0));
+			tinsert(aSignatureParts, aContainerTemplate["anchor"]["mode"] or "");
+			tinsert(aSignatureParts, format("%d", aContainerTemplate["anchor"]["frameLevelOffset"] or 0));
+			tinsert(aSignatureParts, format("%d", aContainerTemplate["anchor"]["offsetX"] or 0));
+			tinsert(aSignatureParts, format("%d", aContainerTemplate["anchor"]["offsetY"] or 0));
 		end
 
 		tContainerLayout = aContainerTemplate["containerLayout"];
 
 		if tContainerLayout then
-			tinsert(aPoolKeyParts, tContainerLayout["isFixedLayout"] and "1" or "0");
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["fixedRadioValue"] or 0));
-			tinsert(aPoolKeyParts, tContainerLayout["useFixedSlots"] and "1" or "0");
-			tinsert(aPoolKeyParts, tContainerLayout["anchorPoint"] or "");
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["elementWidth"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["elementHeight"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["maxColumns"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["maxRows"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["spacing"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["layoutAxis"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["horizontalDir"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tContainerLayout["verticalDir"] or 0));
+			tinsert(aSignatureParts, tContainerLayout["isFixedLayout"] and "1" or "0");
+			tinsert(aSignatureParts, format("%d", tContainerLayout["fixedRadioValue"] or 0));
+			tinsert(aSignatureParts, tContainerLayout["useFixedSlots"] and "1" or "0");
+			tinsert(aSignatureParts, tContainerLayout["anchorPoint"] or "");
+			tinsert(aSignatureParts, format("%d", tContainerLayout["elementWidth"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["elementHeight"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["maxColumns"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["maxRows"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["spacing"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["layoutAxis"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["horizontalDir"] or 0));
+			tinsert(aSignatureParts, format("%d", tContainerLayout["verticalDir"] or 0));
 		end
 
 		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
-			tinsert(aPoolKeyParts, "s");
-			tinsert(aPoolKeyParts, tSlot["key"] or "");
+			tinsert(aSignatureParts, "s");
+			tinsert(aSignatureParts, tSlot["key"] or "");
 
 			if tSlot["isStaticBouquetSlot"] then
-				tinsert(aPoolKeyParts, "static");
-				tinsert(aPoolKeyParts, tSlot["bouquetName"] or "");
-				tinsert(aPoolKeyParts, format("%d", tSlot["entryIndex"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tSlot["itemIndex"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tSlot["frameLevelOffset"] or 0));
-				tinsert(aPoolKeyParts, tSlot["isMixedBouquetItem"] and "1" or "0");
-				tinsert(aPoolKeyParts, format("%d", tSlot["x"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tSlot["y"] or 0));
+				tinsert(aSignatureParts, "static");
+				tinsert(aSignatureParts, tSlot["bouquetName"] or "");
+				tinsert(aSignatureParts, format("%d", tSlot["entryIndex"] or 0));
+				tinsert(aSignatureParts, format("%d", tSlot["itemIndex"] or 0));
+				tinsert(aSignatureParts, format("%d", tSlot["frameLevelOffset"] or 0));
+				tinsert(aSignatureParts, tSlot["isMixedBouquetItem"] and "1" or "0");
+				tinsert(aSignatureParts, format("%d", tSlot["x"] or 0));
+				tinsert(aSignatureParts, format("%d", tSlot["y"] or 0));
 
 				tButtonSetup = tSlot["buttonSetup"];
 
 				if tButtonSetup then
-					tinsert(aPoolKeyParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+					tinsert(aSignatureParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
 				end
 			else
-				tinsert(aPoolKeyParts, tSlot["templateName"] or "");
-				tinsert(aPoolKeyParts, tSlot["filterString"] or "");
+				tinsert(aSignatureParts, tSlot["templateName"] or "");
 			end
 
-			tinsert(aPoolKeyParts, format("%d", tSlot["width"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tSlot["height"] or 0));
-			tinsert(aPoolKeyParts, tSlot["anchor"] or "");
-			tinsert(aPoolKeyParts, tSlot["relPoint"] or "");
-			tinsert(aPoolKeyParts, format("%d", tSlot["x"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tSlot["y"] or 0));
+			tinsert(aSignatureParts, format("%d", tSlot["width"] or 0));
+			tinsert(aSignatureParts, format("%d", tSlot["height"] or 0));
+			tinsert(aSignatureParts, tSlot["anchor"] or "");
+			tinsert(aSignatureParts, tSlot["relPoint"] or "");
+			tinsert(aSignatureParts, format("%d", tSlot["x"] or 0));
+			tinsert(aSignatureParts, format("%d", tSlot["y"] or 0));
 
 			tButtonSetup = tSlot["buttonSetup"];
 
 			if tButtonSetup and not tSlot["isStaticBouquetSlot"] then
-				tinsert(aPoolKeyParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+				tinsert(aSignatureParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
 
-				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aPoolKeyParts, tButtonSetup);
+				VUHDO_appendAuraContainerBuildSignatureButtonSetupCore(aSignatureParts, tButtonSetup);
 			end
 		end
 
 		for _, tGroup in ipairs(aContainerTemplate["groups"] or sEmpty) do
-			tinsert(aPoolKeyParts, "g");
-			tinsert(aPoolKeyParts, tGroup["key"] or "");
-			tinsert(aPoolKeyParts, tGroup["templateName"] or "");
-			tinsert(aPoolKeyParts, tGroup["filterString"] or "");
-			tinsert(aPoolKeyParts, format("%d", tGroup["maxFrameCount"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tGroup["sortMethod"] or 0));
-			tinsert(aPoolKeyParts, format("%d", tGroup["sortDir"] or 0));
+			tinsert(aSignatureParts, "g");
+			tinsert(aSignatureParts, tGroup["key"] or "");
+			tinsert(aSignatureParts, tGroup["templateName"] or "");
 
 			if tGroup["layout"] then
-				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["elementWidth"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["elementHeight"] or 0));
-				tinsert(aPoolKeyParts, tGroup["layout"]["forceNewLine"] and "1" or "0");
-				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["layoutIndex"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tGroup["layout"]["groupSpacing"] or 0));
+				tinsert(aSignatureParts, format("%d", tGroup["layout"]["elementWidth"] or 0));
+				tinsert(aSignatureParts, format("%d", tGroup["layout"]["elementHeight"] or 0));
+				tinsert(aSignatureParts, tGroup["layout"]["forceNewLine"] and "1" or "0");
+				tinsert(aSignatureParts, format("%d", tGroup["layout"]["layoutIndex"] or 0));
+				tinsert(aSignatureParts, format("%d", tGroup["layout"]["groupSpacing"] or 0));
 			end
 
 			tButtonSetup = tGroup["buttonSetup"];
 
 			if tButtonSetup then
-				tinsert(aPoolKeyParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
-				tinsert(aPoolKeyParts, tGroup["isFixedLayout"] and "1" or "0");
-				tinsert(aPoolKeyParts, format("%d", tGroup["fixedRadioValue"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tGroup["fixedBarWidth"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tGroup["fixedBarHeight"] or 0));
-				tinsert(aPoolKeyParts, format("%d", tGroup["fixedIconSize"] or 0));
-				tinsert(aPoolKeyParts, tButtonSetup["auraSymbol"] and "1" or "0");
+				tinsert(aSignatureParts, format("%d", tButtonSetup["frameLevelOffset"] or 0));
+				tinsert(aSignatureParts, tGroup["isFixedLayout"] and "1" or "0");
+				tinsert(aSignatureParts, format("%d", tGroup["fixedRadioValue"] or 0));
+				tinsert(aSignatureParts, format("%d", tGroup["fixedBarWidth"] or 0));
+				tinsert(aSignatureParts, format("%d", tGroup["fixedBarHeight"] or 0));
+				tinsert(aSignatureParts, format("%d", tGroup["fixedIconSize"] or 0));
+				tinsert(aSignatureParts, tButtonSetup["auraSymbol"] and "1" or "0");
 
-				VUHDO_appendAuraContainerPoolKeyButtonSetupCore(aPoolKeyParts, tButtonSetup);
+				VUHDO_appendAuraContainerBuildSignatureButtonSetupCore(aSignatureParts, tButtonSetup);
 			end
 		end
 
@@ -2383,82 +2324,28 @@ do
 
 
 	--
-	function VUHDO_computeAuraContainerPoolKeyBase(aContainerTemplate)
+	local function VUHDO_appendAuraContainerFilterSignatureParts(aSignatureParts, aContainerTemplate)
 
-		if not aContainerTemplate then
-			return nil;
-		end
+		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
+			if not tSlot["isStaticBouquetSlot"] then
+				tinsert(aSignatureParts, "s");
+				tinsert(aSignatureParts, tSlot["key"] or "");
+				tinsert(aSignatureParts, tSlot["filterString"] or "");
 
-		if aContainerTemplate["poolKeyBase"] then
-			return aContainerTemplate["poolKeyBase"];
-		end
-
-		twipe(sPoolKeyParts);
-
-		VUHDO_appendAuraContainerPoolKeyParts(sPoolKeyParts, aContainerTemplate);
-
-		aContainerTemplate["poolKeyBase"] = tconcat(sPoolKeyParts, "|");
-
-		return aContainerTemplate["poolKeyBase"];
-
-	end
-
-
-
-	--
-	local function VUHDO_getAuraContainerPoolKey(aContainerTemplate)
-
-		if sAuraPoolDisabled then
-			return nil;
-		end
-
-		if not aContainerTemplate then
-			return nil;
-		end
-
-		tPoolKeyBase = aContainerTemplate["poolKeyBase"] or VUHDO_computeAuraContainerPoolKeyBase(aContainerTemplate);
-
-		if not tPoolKeyBase then
-			return nil;
-		end
-
-		if aContainerTemplate["isFillChain"] and aContainerTemplate["parent"] then
-			tParentName = aContainerTemplate["parent"]:GetName();
-
-			if tParentName and _G[tParentName] then
-				return tPoolKeyBase .. "|" .. tParentName;
+				VUHDO_appendSignatureCandidateFilters(aSignatureParts, tSlot["candidateFilters"]);
 			end
 		end
 
-		return tPoolKeyBase;
+		for _, tGroup in ipairs(aContainerTemplate["groups"] or sEmpty) do
+			tinsert(aSignatureParts, "g");
+			tinsert(aSignatureParts, tGroup["key"] or "");
+			tinsert(aSignatureParts, tGroup["filterString"] or "");
 
-	end
+			VUHDO_appendSignatureCandidateFilters(aSignatureParts, tGroup["candidateFilters"]);
 
-
-
-	--
-	local tSlotKeys;
-	local tGroupKeys;
-	local function VUHDO_suppressAuraContainer(aContainer, aContainerData)
-
-		if not aContainer or not aContainerData then
-			return;
-		end
-
-		tSlotKeys = aContainerData["slotKeys"];
-
-		if tSlotKeys then
-			for tSlotKeyCnt = 1, #tSlotKeys do
-				aContainer:SetAuraSlotCandidateFilters(tSlotKeys[tSlotKeyCnt], sSuppressCandidateFilters);
-			end
-		end
-
-		tGroupKeys = aContainerData["groupKeys"];
-
-		if tGroupKeys then
-			for tGroupKeyCnt = 1, #tGroupKeys do
-				aContainer:SetAuraGroupCandidateFilters(tGroupKeys[tGroupKeyCnt], sSuppressCandidateFilters);
-			end
+			tinsert(aSignatureParts, format("%d", tGroup["maxFrameCount"] or 0));
+			tinsert(aSignatureParts, format("%d", tGroup["sortMethod"] or 0));
+			tinsert(aSignatureParts, format("%d", tGroup["sortDir"] or 0));
 		end
 
 		return;
@@ -2468,16 +2355,62 @@ do
 
 
 	--
-	local tSlotKeys;
-	local tSlotTemplateRefs;
-	local tSlot;
-	local tRecordedKey;
-	local tTemplateRef;
-	local tGroupKeys;
-	local tGroupTemplateRefs;
-	local tGroup;
-	local tEngineSlotCnt;
-	local function VUHDO_restorePooledAuraContainer(aContainer, aContainerData, aContainerTemplate)
+	function VUHDO_getAuraContainerBuildSignature(aContainerTemplate)
+
+		if not aContainerTemplate then
+			return nil;
+		end
+
+		if aContainerTemplate["buildSignature"] then
+			return aContainerTemplate["buildSignature"];
+		end
+
+		twipe(sSignatureParts);
+
+		VUHDO_appendAuraContainerBuildSignatureParts(sSignatureParts, aContainerTemplate);
+
+		aContainerTemplate["buildSignature"] = tconcat(sSignatureParts, "|");
+
+		return aContainerTemplate["buildSignature"];
+
+	end
+
+
+
+	--
+	function VUHDO_getAuraContainerFilterSignature(aContainerTemplate)
+
+		if not aContainerTemplate then
+			return nil;
+		end
+
+		if aContainerTemplate["filterSignature"] then
+			return aContainerTemplate["filterSignature"];
+		end
+
+		twipe(sSignatureParts);
+
+		VUHDO_appendAuraContainerFilterSignatureParts(sSignatureParts, aContainerTemplate);
+
+		aContainerTemplate["filterSignature"] = tconcat(sSignatureParts, "|");
+
+		return aContainerTemplate["filterSignature"];
+
+	end
+
+
+
+	--
+	local tFilterSlotKeys;
+	local tFilterSlotTemplateRefs;
+	local tFilterSlot;
+	local tFilterRecordedKey;
+	local tFilterTemplateRef;
+	local tFilterGroupKeys;
+	local tFilterGroupTemplateRefs;
+	local tFilterGroup;
+	local tFilterEngineSlotCnt;
+	function VUHDO_applyAuraContainerFilterPass(aContainer, aContainerData, aContainerTemplate)
 
 		if not aContainer or not aContainerData or not aContainerTemplate then
 			return;
@@ -2485,53 +2418,58 @@ do
 
 		VUHDO_restoreAuraContainerGroups(aContainer, aContainerData);
 
-		tSlotKeys = aContainerData["slotKeys"];
-		tSlotTemplateRefs = aContainerData["slotTemplateRefs"];
-		tEngineSlotCnt = 0;
+		tFilterSlotKeys = aContainerData["slotKeys"];
+		tFilterSlotTemplateRefs = aContainerData["slotTemplateRefs"];
+		tFilterEngineSlotCnt = 0;
 
-		for tSlotCnt = 1, #(aContainerTemplate["slots"] or sEmpty) do
-			tSlot = aContainerTemplate["slots"][tSlotCnt];
+		for tFilterSlotCnt = 1, #(aContainerTemplate["slots"] or sEmpty) do
+			tFilterSlot = aContainerTemplate["slots"][tFilterSlotCnt];
 
-			if tSlot and not tSlot["isStaticBouquetSlot"] then
-				tEngineSlotCnt = tEngineSlotCnt + 1;
-				tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
+			if tFilterSlot and not tFilterSlot["isStaticBouquetSlot"] then
+				tFilterEngineSlotCnt = tFilterEngineSlotCnt + 1;
+				tFilterRecordedKey = tFilterSlotKeys and tFilterSlotKeys[tFilterEngineSlotCnt];
 
-				if tRecordedKey then
-					aContainer:SetAuraSlotFilterString(tRecordedKey, tSlot["filterString"] or "HELPFUL");
-					aContainer:SetAuraSlotCandidateFilters(tRecordedKey, tSlot["candidateFilters"]);
+				if tFilterRecordedKey then
+					aContainer:SetAuraSlotFilterString(tFilterRecordedKey, tFilterSlot["filterString"] or "HELPFUL");
+					aContainer:SetAuraSlotCandidateFilters(tFilterRecordedKey, tFilterSlot["candidateFilters"]);
 
-					tTemplateRef = tSlotTemplateRefs and tSlotTemplateRefs[tEngineSlotCnt];
+					tFilterTemplateRef = tFilterSlotTemplateRefs and tFilterSlotTemplateRefs[tFilterEngineSlotCnt];
 
-					if tTemplateRef then
-						tTemplateRef["template"] = tSlot;
-						tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tSlot);
-						tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tSlot);
+					if tFilterTemplateRef then
+						tFilterTemplateRef["template"] = tFilterSlot;
+						tFilterTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tFilterSlot);
+						tFilterTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tFilterSlot);
 					end
 				end
 			end
 		end
 
-		tGroupKeys = aContainerData["groupKeys"];
-		tGroupTemplateRefs = aContainerData["groupTemplateRefs"];
+		tFilterGroupKeys = aContainerData["groupKeys"];
+		tFilterGroupTemplateRefs = aContainerData["groupTemplateRefs"];
 
-		for tGroupCnt = 1, #(aContainerTemplate["groups"] or sEmpty) do
-			tGroup = aContainerTemplate["groups"][tGroupCnt];
-			tRecordedKey = tGroupKeys and tGroupKeys[tGroupCnt];
+		for tFilterGroupCnt = 1, #(aContainerTemplate["groups"] or sEmpty) do
+			tFilterGroup = aContainerTemplate["groups"][tFilterGroupCnt];
+			tFilterRecordedKey = tFilterGroupKeys and tFilterGroupKeys[tFilterGroupCnt];
 
-			if tGroup and tRecordedKey then
-				aContainer:SetAuraGroupMaxFrameCount(tRecordedKey, tGroup["maxFrameCount"] or 5);
-				aContainer:SetAuraGroupFilterString(tRecordedKey, tGroup["filterString"] or "HELPFUL");
-				aContainer:SetAuraGroupCandidateFilters(tRecordedKey, tGroup["candidateFilters"]);
+			if tFilterGroup and tFilterRecordedKey then
+				aContainer:SetAuraGroupMaxFrameCount(tFilterRecordedKey, tFilterGroup["maxFrameCount"] or 5);
+				aContainer:SetAuraGroupFilterString(tFilterRecordedKey, tFilterGroup["filterString"] or "HELPFUL");
+				aContainer:SetAuraGroupCandidateFilters(tFilterRecordedKey, tFilterGroup["candidateFilters"]);
 
-				tTemplateRef = tGroupTemplateRefs and tGroupTemplateRefs[tGroupCnt];
+				tFilterTemplateRef = tFilterGroupTemplateRefs and tFilterGroupTemplateRefs[tFilterGroupCnt];
 
-				if tTemplateRef then
-					tTemplateRef["template"] = tGroup;
-					tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tGroup);
-					tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tGroup);
+				if tFilterTemplateRef then
+					tFilterTemplateRef["template"] = tFilterGroup;
+					tFilterTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tFilterGroup);
+					tFilterTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tFilterGroup);
 				end
 			end
 		end
+
+		aContainerData["lastSlotSuppress"] = nil;
+		aContainerData["lastGroupSuppress"] = nil;
+		aContainerData["lastContainerSuppressed"] = nil;
+		aContainerData["appliedSlotCandidateSuppress"] = nil;
 
 		return;
 
@@ -2568,82 +2506,72 @@ do
 
 
 	--
-	local tReleaseGroupKeys;
-	local tReleaseGroupKey;
-	local tReleaseGroupFrameCount;
-	local tReleaseAuraFrame;
-	local tReleaseSlotFrames;
-	local function VUHDO_releaseAuraContainerGlowState(aContainer, aContainerData)
+	local tThreatMarkFlashTexture;
+	local function VUHDO_isThreatMarkSlotFlashing(aAuraFrame, aSlot)
 
-		if not aContainer or not aContainerData then
-			return;
+		if not aSlot or aSlot["indicatorKey"] ~= "THREAT_MARK" then
+			return false;
 		end
 
-		tReleaseGroupKeys = aContainerData["groupKeys"];
+		tThreatMarkFlashTexture = aAuraFrame and aAuraFrame["FillTexture"];
 
-		if tReleaseGroupKeys then
-			for tReleaseGroupKeyCnt = 1, #tReleaseGroupKeys do
-				tReleaseGroupKey = tReleaseGroupKeys[tReleaseGroupKeyCnt];
-
-				tReleaseGroupFrameCount = aContainer:GetAuraGroupFrameCount(tReleaseGroupKey);
-
-				for tReleaseGroupFrameIndex = 1, tReleaseGroupFrameCount do
-					tReleaseAuraFrame = aContainer:GetAuraGroupFrame(tReleaseGroupKey, tReleaseGroupFrameIndex);
-
-					if tReleaseAuraFrame then
-						VUHDO_releaseAuraButtonGlowState(tReleaseAuraFrame);
-					end
-				end
-			end
-		end
-
-		tReleaseSlotFrames = aContainerData["slotFrames"];
-
-		if tReleaseSlotFrames then
-			for _, tReleaseAuraFrame in pairs(tReleaseSlotFrames) do
-				if tReleaseAuraFrame then
-					VUHDO_releaseAuraButtonGlowState(tReleaseAuraFrame);
-				end
-			end
-		end
-
-		return;
+		return tThreatMarkFlashTexture and tThreatMarkFlashTexture.flashTimer ~= nil;
 
 	end
 
 
 
 	--
-	local function VUHDO_restoreAuraContainerGlowState(aContainer, aContainerData, aContainerTemplate)
+	local tVolatileContainerTemplate;
+	local tVolatileGroupKeys;
+	local tVolatileGroup;
+	local tVolatileRecordedKey;
+	local tVolatileGroupFrameCount;
+	local tVolatileAuraFrame;
+	local tVolatileSlotKeys;
+	local tVolatileSlotFrames;
+	local tVolatileSlot;
+	local tVolatileEngineSlotCnt;
+	local tVolatileButtonSetup;
+	function VUHDO_applyAuraContainerVolatilePass(aContainer, aContainerData)
 
-		if not aContainer or not aContainerData or not aContainerTemplate then
+		if not aContainer or not aContainerData then
 			return;
 		end
 
-		tGroupKeys = aContainerData["groupKeys"];
+		tVolatileContainerTemplate = aContainerData["containerTemplate"];
 
-		if tGroupKeys then
-			for tRestoreGroupCnt = 1, #(aContainerTemplate["groups"] or sEmpty) do
-				tGroup = aContainerTemplate["groups"][tRestoreGroupCnt];
-				tRecordedKey = tGroupKeys[tRestoreGroupCnt];
+		if not tVolatileContainerTemplate then
+			return;
+		end
 
-				if tGroup and tRecordedKey and tGroup["buttonSetup"] then
-					tReleaseGroupFrameCount = aContainer:GetAuraGroupFrameCount(tRecordedKey);
+		tVolatileGroupKeys = aContainerData["groupKeys"];
 
-					for tRestoreGroupFrameCnt = 1, tReleaseGroupFrameCount do
-						tReleaseAuraFrame = aContainer:GetAuraGroupFrame(tRecordedKey, tRestoreGroupFrameCnt);
+		if tVolatileGroupKeys then
+			for tVolatileGroupCnt = 1, #(tVolatileContainerTemplate["groups"] or sEmpty) do
+				tVolatileGroup = tVolatileContainerTemplate["groups"][tVolatileGroupCnt];
+				tVolatileRecordedKey = tVolatileGroupKeys[tVolatileGroupCnt];
 
-						if tReleaseAuraFrame and tReleaseAuraFrame:CanBeAccessedInContext() then
-							if tGroup["buttonSetup"]["auraGroupBarGlow"] then
-								VUHDO_applyAuraGroupBarGlowFromAuraButton(tReleaseAuraFrame, tGroup["buttonSetup"]);
+				if tVolatileGroup and tVolatileRecordedKey and tVolatileGroup["buttonSetup"] then
+					tVolatileButtonSetup = tVolatileGroup["buttonSetup"];
+					tVolatileGroupFrameCount = aContainer:GetAuraGroupFrameCount(tVolatileRecordedKey);
+
+					for tVolatileGroupFrameCnt = 1, tVolatileGroupFrameCount do
+						tVolatileAuraFrame = aContainer:GetAuraGroupFrame(tVolatileRecordedKey, tVolatileGroupFrameCnt);
+
+						if tVolatileAuraFrame and tVolatileAuraFrame:CanBeAccessedInContext() then
+							VUHDO_applyAuraButtonVolatileSetup(tVolatileButtonSetup, tVolatileAuraFrame);
+
+							if tVolatileButtonSetup["auraGroupBarGlow"] then
+								VUHDO_applyAuraGroupBarGlowFromAuraButton(tVolatileAuraFrame, tVolatileButtonSetup);
 							end
 
-							if tGroup["buttonSetup"]["glowIcon"] then
-								VUHDO_startAuraButtonGlow(tReleaseAuraFrame, tGroup["buttonSetup"]);
+							if tVolatileButtonSetup["glowIcon"] then
+								VUHDO_startAuraButtonGlow(tVolatileAuraFrame, tVolatileButtonSetup);
 							end
 
-							if "class" == tGroup["buttonSetup"]["barColorMode"] and tReleaseAuraFrame["DurationBar"] then
-								VUHDO_reregisterContainerClassColorBar(aContainer, tReleaseAuraFrame["DurationBar"]);
+							if "class" == tVolatileButtonSetup["barColorMode"] and tVolatileAuraFrame["DurationBar"] then
+								VUHDO_reregisterContainerClassColorBar(aContainer, tVolatileAuraFrame["DurationBar"]);
 							end
 						end
 					end
@@ -2651,31 +2579,37 @@ do
 			end
 		end
 
-		tSlotKeys = aContainerData["slotKeys"];
-		tReleaseSlotFrames = aContainerData["slotFrames"];
-		tEngineSlotCnt = 0;
+		tVolatileSlotKeys = aContainerData["slotKeys"];
+		tVolatileSlotFrames = aContainerData["slotFrames"];
+		tVolatileEngineSlotCnt = 0;
 
-		for tRestoreSlotCnt = 1, #(aContainerTemplate["slots"] or sEmpty) do
-			tSlot = aContainerTemplate["slots"][tRestoreSlotCnt];
+		for tVolatileSlotCnt = 1, #(tVolatileContainerTemplate["slots"] or sEmpty) do
+			tVolatileSlot = tVolatileContainerTemplate["slots"][tVolatileSlotCnt];
 
-			if tSlot and not tSlot["isStaticBouquetSlot"] then
-				tEngineSlotCnt = tEngineSlotCnt + 1;
-				tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
+			if tVolatileSlot and not tVolatileSlot["isStaticBouquetSlot"] then
+				tVolatileEngineSlotCnt = tVolatileEngineSlotCnt + 1;
+				tVolatileRecordedKey = tVolatileSlotKeys and tVolatileSlotKeys[tVolatileEngineSlotCnt];
 
-				if tRecordedKey then
-					tReleaseAuraFrame = tReleaseSlotFrames and tReleaseSlotFrames[tRecordedKey];
+				if tVolatileRecordedKey then
+					tVolatileAuraFrame = tVolatileSlotFrames and tVolatileSlotFrames[tVolatileRecordedKey];
 
-					if tReleaseAuraFrame and tSlot["buttonSetup"] and tReleaseAuraFrame:CanBeAccessedInContext() then
-						if tSlot["buttonSetup"]["auraGroupBarGlow"] then
-							VUHDO_applyAuraGroupBarGlowFromAuraButton(tReleaseAuraFrame, tSlot["buttonSetup"]);
-						end
+					if tVolatileAuraFrame and tVolatileSlot["buttonSetup"] and tVolatileAuraFrame:CanBeAccessedInContext() then
+						if not VUHDO_isThreatMarkSlotFlashing(tVolatileAuraFrame, tVolatileSlot) then
+							tVolatileButtonSetup = tVolatileSlot["buttonSetup"];
 
-						if tSlot["buttonSetup"]["glowIcon"] then
-							VUHDO_startAuraButtonGlow(tReleaseAuraFrame, tSlot["buttonSetup"]);
-						end
+							VUHDO_applyAuraButtonVolatileSetup(tVolatileButtonSetup, tVolatileAuraFrame);
 
-						if "class" == tSlot["buttonSetup"]["barColorMode"] and tReleaseAuraFrame["DurationBar"] then
-							VUHDO_reregisterContainerClassColorBar(aContainer, tReleaseAuraFrame["DurationBar"]);
+							if tVolatileButtonSetup["auraGroupBarGlow"] then
+								VUHDO_applyAuraGroupBarGlowFromAuraButton(tVolatileAuraFrame, tVolatileButtonSetup);
+							end
+
+							if tVolatileButtonSetup["glowIcon"] then
+								VUHDO_startAuraButtonGlow(tVolatileAuraFrame, tVolatileButtonSetup);
+							end
+
+							if "class" == tVolatileButtonSetup["barColorMode"] and tVolatileAuraFrame["DurationBar"] then
+								VUHDO_reregisterContainerClassColorBar(aContainer, tVolatileAuraFrame["DurationBar"]);
+							end
 						end
 					end
 				end
@@ -2769,48 +2703,9 @@ do
 
 
 	--
-	local tWipeContainer;
-	local tWipeContainerData;
-	function VUHDO_wipeAuraContainerPool()
-
-		for _, tPool in pairs(sAuraContainerPool) do
-			for tPoolCnt = #tPool, 1, -1 do
-				tWipeContainerData = tPool[tPoolCnt];
-
-				if tWipeContainerData and tWipeContainerData["container"] then
-					tWipeContainer = tWipeContainerData["container"];
-
-					VUHDO_restoreOverlayFillChainBackground(tWipeContainerData);
-
-					sContainerClassColorBars[tWipeContainer] = nil;
-					sPendingClassColors[tWipeContainer] = nil;
-
-					tWipeContainer:Hide();
-					tWipeContainer:SetParent(nil);
-
-					tWipeContainerData["container"] = nil;
-				end
-			end
-		end
-
-		twipe(sAuraContainerPool);
-
-		return;
-
-	end
-
-
-
-	--
-	local tPoolKey;
-	local tPool;
 	local tContainerData;
-	local tContainer;
 	local tOverlayTargetBar;
 	local tContainerParent;
-	local tUsesDispelTextures;
-	local tDispelColorGen;
-	local tRefreshSlotTemplateRefs;
 	function VUHDO_acquireAuraContainer(aButton, aContainerTemplate)
 
 		if not aButton or not aContainerTemplate then
@@ -2838,117 +2733,15 @@ do
 
 		aContainerTemplate["parent"] = tContainerParent;
 
-		tPoolKey = VUHDO_getAuraContainerPoolKey(aContainerTemplate);
-		tUsesDispelTextures = aContainerTemplate["usesDispelTextures"];
-
-		if tUsesDispelTextures == nil then
-			tUsesDispelTextures = VUHDO_containerTemplateUsesDispelTextures(aContainerTemplate);
-		end
-
-		tDispelColorGen = tUsesDispelTextures and VUHDO_getDispelColorGeneration() or nil;
-		tPool = tPoolKey and sAuraContainerPool[tPoolKey];
-
-		if tPool and #tPool > 0 then
-			tContainerData = nil;
-
-			while #tPool > 0 do
-				tContainerData = tremove(tPool);
-
-				if tUsesDispelTextures then
-					if not tContainerData["dispelColorGen"] or tContainerData["dispelColorGen"] ~= tDispelColorGen then
-						if tContainerData["container"] then
-							tContainerData["container"]:Hide();
-							tContainerData["container"]:SetParent(nil);
-						end
-
-						tContainerData = nil;
-					else
-						break;
-					end
-				else
-					break;
-				end
-			end
-
-			if tContainerData and tContainerData["container"] then
-				tContainer = tContainerData["container"];
-
-				tContainer:SetParent(tContainerParent);
-
-				sPendingClassColors[tContainer] = nil;
-
-				VUHDO_applyAuraContainerAnchor(tContainer, aContainerTemplate["anchor"], tContainerParent);
-
-				tRefreshSlotTemplateRefs = tContainerData["slotTemplateRefs"];
-
-				if tRefreshSlotTemplateRefs then
-					for tRefreshSlotTemplateRefCnt = 1, #tRefreshSlotTemplateRefs do
-						tTemplateRef = tRefreshSlotTemplateRefs[tRefreshSlotTemplateRefCnt];
-
-						if tTemplateRef then
-							tTemplateRef["containerLevel"] = tContainer:GetFrameLevel();
-						end
-					end
-				end
-
-				if aContainerTemplate["isOverlay"] then
-					tContainer:EnableMouse(false);
-					tContainer:SetMouseMotionEnabled(false);
-				end
-
-				tContainer:SetEnabled(false);
-				tContainer:SetShown(false);
-
-				tContainerData["containerTemplate"] = aContainerTemplate;
-				tContainerData["overlayTargetBar"] = aContainerTemplate["overlayTargetBar"];
-				tContainerData["overlayHostFrame"] = aContainerTemplate["overlayHostFrame"];
-				tContainerData["staticSlots"] = aContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(aContainerTemplate);
-				tContainerData["panelNum"] = aContainerTemplate["panelNum"];
-				tContainerData["anchorIndex"] = aContainerTemplate["anchorIndex"];
-				tContainerData["ownerButton"] = aButton;
-				tContainerData["lastSyncedUnit"] = nil;
-				tContainerData["lastSyncedGuid"] = nil;
-				tContainerData["lastSyncedRestricted"] = nil;
-				tContainerData["lastSyncedEnabled"] = nil;
-				tContainerData["lastSyncedAssistRestricted"] = nil;
-				tContainerData["lastSyncedAuraFilterRestricted"] = nil;
-				tContainerData["lastSyncedDisconnected"] = nil;
-				tContainerData["lastSlotSuppress"] = nil;
-				tContainerData["mixedPriorityCutoffs"] = nil;
-				tContainerData["friendlyOnly"] = nil;
-				tContainerData["hostileOnly"] = nil;
-				tContainerData["alwaysEnabled"] = nil;
-				tContainerData["fromPool"] = true;
-
-				VUHDO_clearAuraContainerUnit(tContainer, tContainerData);
-
-				VUHDO_restorePooledAuraContainer(tContainer, tContainerData, aContainerTemplate);
-
-				VUHDO_restoreAuraContainerGlowState(tContainer, tContainerData, aContainerTemplate);
-
-				if aContainerTemplate["isFillChain"] then
-					VUHDO_setupOverlayFillChain(tContainer, aContainerTemplate, tContainerData);
-				end
-
-				tContainerData["lastSyncedGroupEnabled"] = nil;
-				tContainerData["poolKey"] = tPoolKey;
-			end
-
-			if tContainerData and tContainerData["container"] then
-				VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] = (VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] or 0) + 1;
-
-				return tContainerData;
-			end
-		end
-
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] = (VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0) + 1;
+
 
 		tContainerData = VUHDO_buildManagedAuraContainer(aContainerTemplate);
 
 		if tContainerData then
-			tContainerData["fromPool"] = false;
-			tContainerData["poolKey"] = tPoolKey;
 			tContainerData["ownerButton"] = aButton;
+			tContainerData["buildSignature"] = VUHDO_getAuraContainerBuildSignature(aContainerTemplate);
+			tContainerData["filterSignature"] = VUHDO_getAuraContainerFilterSignature(aContainerTemplate);
 		end
 
 		return tContainerData;
@@ -2958,9 +2751,8 @@ do
 
 
 	--
-	local tPoolKey;
 	local tContainer;
-	function VUHDO_releaseAuraContainer(aButton, aContainerData)
+	function VUHDO_retireAuraContainer(aButton, aContainerData)
 
 		if not aContainerData or not aContainerData["container"] then
 			return;
@@ -2970,48 +2762,18 @@ do
 
 		VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] = (VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0) + 1;
 
+
 		tContainer = aContainerData["container"];
-
-		VUHDO_releaseAuraContainerGlowState(tContainer, aContainerData);
-
-		VUHDO_suppressAuraContainer(tContainer, aContainerData);
 
 		VUHDO_clearAuraContainerUnit(tContainer, aContainerData);
 
 		sContainerClassColorBars[tContainer] = nil;
 		sPendingClassColors[tContainer] = nil;
 
+		tContainer:Hide();
 		tContainer:SetParent(nil);
 
-		tPoolKey = aContainerData["poolKey"] or VUHDO_getAuraContainerPoolKey(aContainerData["containerTemplate"]);
-
-		if tPoolKey then
-			tUsesDispelTextures = aContainerData["containerTemplate"] and aContainerData["containerTemplate"]["usesDispelTextures"];
-
-			if tUsesDispelTextures == nil then
-				tUsesDispelTextures = VUHDO_containerTemplateUsesDispelTextures(aContainerData["containerTemplate"]);
-			end
-
-			if tUsesDispelTextures then
-				if not aContainerData["dispelColorGen"] or aContainerData["dispelColorGen"] ~= VUHDO_getDispelColorGeneration() then
-					aContainerData["container"] = nil;
-
-					tContainer:Hide();
-
-					return;
-				end
-			end
-
-			if not sAuraContainerPool[tPoolKey] then
-				sAuraContainerPool[tPoolKey] = { };
-			end
-
-			tinsert(sAuraContainerPool[tPoolKey], aContainerData);
-		else
-			aContainerData["container"] = nil;
-
-			tContainer:Hide();
-		end
+		aContainerData["container"] = nil;
 
 		return;
 
@@ -3085,6 +2847,7 @@ do
 
 	--
 	local tContainer;
+	local tSlotRecord;
 	function VUHDO_suppressOverlaySlotHostSlot(aHostData, aSlotKey)
 
 		if not aHostData or not aSlotKey then
@@ -3097,11 +2860,14 @@ do
 			return;
 		end
 
+		tSlotRecord = aHostData["slotRecords"][aSlotKey];
+
 		tContainer:SetAuraSlotFilterString(aSlotKey, "");
 
-		aHostData["slotRecords"][aSlotKey]["appliedFilterString"] = "";
+		tSlotRecord["appliedFilterString"] = "";
+		tSlotRecord["appliedSuppress"] = true;
 
-		VUHDO_stopOverlayThreatMarkFlashForSlotRecord(aHostData["slotRecords"][aSlotKey]);
+		VUHDO_stopOverlayThreatMarkFlashForSlotRecord(tSlotRecord);
 
 		if not aHostData["lastSyncedSlotEnabled"] then
 			aHostData["lastSyncedSlotEnabled"] = { };
@@ -3128,25 +2894,30 @@ do
 
 		tContainer = tHostData["container"];
 
-		for tSlotKey, _ in pairs(tHostData["slotRecords"]) do
-			VUHDO_suppressOverlaySlotHostSlot(tHostData, tSlotKey);
+		for tDisableSlotKey, tDisableSlotRecord in pairs(tHostData["slotRecords"]) do
+			VUHDO_stopOverlayThreatMarkFlashForSlotRecord(tDisableSlotRecord);
 		end
 
-		tContainer:SetUnit("none");
-
-		if not tContainer:IsEnabled() then
-			tContainer:SetEnabled(true);
+		if tContainer:IsEnabled() then
+			tContainer:SetEnabled(false);
 		end
 
-		tContainer:UpdateAllAuras();
+		if tContainer:IsShown() then
+			tContainer:SetShown(false);
+		end
 
-		tContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
+		if tContainer:GetUnit() ~= "none" then
+			tContainer:SetUnit("none");
+		end
 
-		tContainer:SetEnabled(false);
-		tContainer:SetShown(false);
+		tContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
 
 		tHostData["lastSyncedUnit"] = nil;
 		tHostData["lastSyncedGuid"] = nil;
+
+		if tHostData["lastSyncedSlotEnabled"] then
+			twipe(tHostData["lastSyncedSlotEnabled"]);
+		end
 
 		if tHostData["plannedSlots"] then
 			twipe(tHostData["plannedSlots"]);
@@ -3168,18 +2939,32 @@ do
 
 		tContainer = aHostData["container"];
 
-		tContainer:SetUnit("none");
-
-		if not tContainer:IsEnabled() then
-			tContainer:SetEnabled(true);
+		for tClearSlotKey, tClearSlotRecord in pairs(aHostData["slotRecords"] or sEmpty) do
+			VUHDO_stopOverlayThreatMarkFlashForSlotRecord(tClearSlotRecord);
 		end
 
-		tContainer:UpdateAllAuras();
+		if tContainer:IsEnabled() then
+			tContainer:SetEnabled(false);
+		end
 
-		tContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
+		if tContainer:IsShown() then
+			tContainer:SetShown(false);
+		end
+
+		if tContainer:GetUnit() ~= "none" then
+			tContainer:SetUnit("none");
+		end
+
+		tContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
 
 		aHostData["lastSyncedUnit"] = nil;
 		aHostData["lastSyncedGuid"] = nil;
+
+		if aHostData["lastSyncedSlotEnabled"] then
+			twipe(aHostData["lastSyncedSlotEnabled"]);
+		end
+
+		aHostData["lastHostGated"] = true;
 
 		return;
 
@@ -3193,35 +2978,14 @@ end
 function VUHDO_printAuraContainerMetrics()
 
 	VUHDO_Msg(format("|cffFFD100--- Aura Container Metrics ---|r"));
-	VUHDO_Msg(format("  containers: builds=%d releases=%d poolHits=%d",
+	VUHDO_Msg(format("  containers: builds=%d releases=%d",
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0,
-		VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0,
-		VUHDO_AURA_CONTAINER_METRICS["poolHits"]["container"] or 0));
+		VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0));
 	VUHDO_Msg(format("  overlay slots: slotHostBuilds=%d overlaySlotBuilds=%d",
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] or 0,
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] or 0));
 
 	return;
-
-end
-
-
-
---
-function VUHDO_setAuraContainerPoolDisabled(anIsDisabled)
-
-	sAuraPoolDisabled = anIsDisabled and true or false;
-
-	return;
-
-end
-
-
-
---
-function VUHDO_isAuraContainerPoolDisabled()
-
-	return sAuraPoolDisabled;
 
 end
 
@@ -3479,8 +3243,6 @@ function VUHDO_invalidateAuraContainerTemplateCache()
 
 	twipe(VUHDO_AURA_CONTAINER_TEMPLATE_CACHE);
 
-	VUHDO_wipeAuraContainerPool();
-
 	VUHDO_invalidateAuraGroupFilterCache();
 
 	VUHDO_incrementAuraAnchorConfigVersion();
@@ -3616,6 +3378,11 @@ local tButtonName;
 local tUnit;
 local tPanelAnchors;
 local tContainerData;
+local tSeenAnchors;
+local tBuildSignature;
+local tFilterSignature;
+local tFilterContainer;
+local tContainerTemplate;
 function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 
 	if not aButton or not aPanelNum then
@@ -3644,17 +3411,64 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 		return;
 	end
 
-	VUHDO_releaseAuraContainersForButton(aButton);
+	if not VUHDO_AURA_CONTAINERS[tButtonName] then
+		VUHDO_AURA_CONTAINERS[tButtonName] = { };
+	end
 
-	VUHDO_AURA_CONTAINERS[tButtonName] = { };
+	tSeenAnchors = { };
 
 	for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
 		if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
-			tContainerData = VUHDO_createAuraContainer(aButton, tAnchorIndex, tAnchorConfig);
+			tSeenAnchors[tAnchorIndex] = true;
 
-			if tContainerData then
-				VUHDO_AURA_CONTAINERS[tButtonName][tAnchorIndex] = tContainerData;
+			tContainerTemplate = VUHDO_buildAnchorContainerTemplate(aButton, tAnchorIndex, tAnchorConfig);
+
+			if tContainerTemplate then
+				tBuildSignature = VUHDO_getAuraContainerBuildSignature(tContainerTemplate);
+				tContainerData = VUHDO_AURA_CONTAINERS[tButtonName][tAnchorIndex];
+
+				if tContainerData and tContainerData["container"] and tContainerData["buildSignature"] == tBuildSignature and tContainerData["panelNum"] == aPanelNum then
+					tContainerData["containerTemplate"] = tContainerTemplate;
+					tContainerData["ownerButton"] = aButton;
+					tContainerData["panelNum"] = aPanelNum;
+					tContainerData["anchorIndex"] = tAnchorIndex;
+					tContainerData["staticSlots"] = tContainerTemplate["staticSlots"] or VUHDO_collectStaticSlotsFromTemplate(tContainerTemplate);
+					tContainerData["lastSlotSuppress"] = nil;
+					tContainerData["lastGroupSuppress"] = nil;
+					tContainerData["groupsSuppressed"] = nil;
+					tContainerData["lastContainerSuppressed"] = nil;
+					tContainerData["appliedSlotCandidateSuppress"] = nil;
+
+					tFilterSignature = VUHDO_getAuraContainerFilterSignature(tContainerTemplate);
+					tFilterContainer = tContainerData["container"];
+
+					if tFilterContainer and tContainerData["filterSignature"] ~= tFilterSignature then
+						VUHDO_applyAuraContainerFilterPass(tFilterContainer, tContainerData, tContainerTemplate);
+
+						tContainerData["filterSignature"] = tFilterSignature;
+					end
+
+					VUHDO_deferVolatilePassForButton(aButton);
+				else
+					if tContainerData then
+						VUHDO_retireAuraContainer(aButton, tContainerData);
+					end
+
+					tContainerData = VUHDO_acquireAuraContainer(aButton, tContainerTemplate);
+
+					if tContainerData then
+						VUHDO_AURA_CONTAINERS[tButtonName][tAnchorIndex] = tContainerData;
+					end
+				end
 			end
+		end
+	end
+
+	for tAnchorIndex, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
+		if not tSeenAnchors[tAnchorIndex] then
+			VUHDO_retireAuraContainer(aButton, tContainerData);
+
+			VUHDO_AURA_CONTAINERS[tButtonName][tAnchorIndex] = nil;
 		end
 	end
 
@@ -3668,6 +3482,35 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 
 	if tUnit then
 		VUHDO_syncAuraContainersForButton(aButton, tUnit);
+	end
+
+	return;
+
+end
+
+
+
+--
+local tVolatilePassButtonName;
+local tVolatilePassContainer;
+function VUHDO_applyVolatilePassForButton(aButton)
+
+	if not aButton then
+		return;
+	end
+
+	tVolatilePassButtonName = aButton:GetName();
+
+	if not tVolatilePassButtonName or not VUHDO_AURA_CONTAINERS[tVolatilePassButtonName] then
+		return;
+	end
+
+	for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tVolatilePassButtonName]) do
+		tVolatilePassContainer = tContainerData and tContainerData["container"];
+
+		if tVolatilePassContainer then
+			VUHDO_applyAuraContainerVolatilePass(tVolatilePassContainer, tContainerData);
+		end
 	end
 
 	return;
@@ -3819,6 +3662,36 @@ end
 
 do
 	--
+	local tUnitInfo;
+	function VUHDO_rewriteAuraContainerGateState(aUnit)
+
+		tUnitInfo = VUHDO_RAID[aUnit];
+
+		sGateState["canAttack"] = aUnit and UnitCanAttack("player", aUnit) or false;
+		sGateState["isAssistRestricted"] = VUHDO_isUnitAssistRestricted(aUnit);
+		sGateState["isAuraFilterRestricted"] = VUHDO_isUnitAuraFilterRestricted(aUnit);
+		sGateState["isDisconnected"] = tUnitInfo and tUnitInfo["connected"] == false;
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_isAuraDisplaySuppressed(aTemplateRef, aGateState)
+
+		aGateState = aGateState or sGateState;
+
+		return aGateState["isDisconnected"] or aGateState["isAuraFilterRestricted"] or (aTemplateRef["isAssistOnly"] and aGateState["isAssistRestricted"]);
+
+	end
+end
+
+
+
+do
+	--
 	local tContainerTemplate;
 	local tGroupKeys;
 	local tGroupTemplateRefs;
@@ -3830,16 +3703,23 @@ do
 	local tEngineSlotCnt;
 	local tSlot;
 	local tRecordedKey;
+	local tMixedPriorityCutoffs;
+	local tMixedEntryIndex;
+	local tMixedItemIndex;
+	local tPriorityCutoff;
+	local tGroupShouldShow;
+	local tSlotShouldShow;
 	local tShouldSuppress;
-	function VUHDO_applyAuraContainerAssistOnly(aContainer, aContainerData, anIsAssistRestricted, anIsAuraFilterRestricted, anIsDisconnected)
+	local tLastSlotSuppress;
+	local tLastGroupSuppress;
+	local tAppliedSlotCandidateSuppress;
+	local tContainerSuppressed;
+	local tIsDirty;
+	local tRecoverGroupKey;
+	local tNeedsRestoreEnable;
+	function VUHDO_applyAuraContainerVisibility(aContainer, aContainerData)
 
 		if not aContainer or not aContainerData then
-			return false;
-		end
-
-		if aContainerData["lastSyncedAssistRestricted"] == anIsAssistRestricted
-			and aContainerData["lastSyncedAuraFilterRestricted"] == anIsAuraFilterRestricted
-			and aContainerData["lastSyncedDisconnected"] == anIsDisconnected then
 			return false;
 		end
 
@@ -3847,6 +3727,57 @@ do
 
 		if not tContainerTemplate then
 			return false;
+		end
+
+		tMixedPriorityCutoffs = aContainerData["mixedPriorityCutoffs"];
+		tLastSlotSuppress = aContainerData["lastSlotSuppress"];
+		tLastGroupSuppress = aContainerData["lastGroupSuppress"];
+		tAppliedSlotCandidateSuppress = aContainerData["appliedSlotCandidateSuppress"];
+		tIsDirty = false;
+		tNeedsRestoreEnable = false;
+
+		tContainerSuppressed = sGateState["isDisconnected"] or sGateState["isAuraFilterRestricted"];
+
+		if tContainerSuppressed then
+			if not aContainerData["lastContainerSuppressed"] then
+				tIsDirty = true;
+			end
+
+			if aContainer:IsEnabled() then
+				aContainer:SetEnabled(false);
+				tIsDirty = true;
+			end
+
+			aContainerData["lastContainerSuppressed"] = true;
+
+			return tIsDirty;
+		end
+
+		if aContainerData["lastContainerSuppressed"] then
+			if not aContainer:IsEnabled() then
+				tNeedsRestoreEnable = true;
+			end
+
+			aContainerData["lastContainerSuppressed"] = nil;
+			tIsDirty = true;
+
+			if tGroupKeys and tGroupTemplateRefs and tLastGroupSuppress then
+				for tRecoverGroupCnt = 1, #tGroupKeys do
+					tRecoverGroupKey = tGroupKeys[tRecoverGroupCnt];
+
+					if tRecoverGroupKey and tLastGroupSuppress[tRecoverGroupKey] then
+						aContainer:SetAuraGroupMaxFrameCount(tRecoverGroupKey, 0);
+					end
+				end
+			end
+
+			if tLastSlotSuppress and tAppliedSlotCandidateSuppress then
+				for tRecoverSlotKey, tRecoverWasSuppressed in pairs(tLastSlotSuppress) do
+					if tRecoverWasSuppressed and tAppliedSlotCandidateSuppress[tRecoverSlotKey] then
+						aContainer:SetAuraSlotFilterString(tRecoverSlotKey, "");
+					end
+				end
+			end
 		end
 
 		tGroupKeys = aContainerData["groupKeys"];
@@ -3857,16 +3788,28 @@ do
 				tTemplateRef = tGroupTemplateRefs[tGroupCnt];
 				tGroupKey = tGroupKeys[tGroupCnt];
 
-				if tTemplateRef then
+				if tTemplateRef and tGroupKey then
 					tGroup = tTemplateRef["template"];
 
-					tShouldSuppress = anIsDisconnected or anIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted);
+					tGroupShouldShow = not VUHDO_isAuraDisplaySuppressed(tTemplateRef, sGateState);
 
-					if tShouldSuppress then
-						aContainer:SetAuraGroupMaxFrameCount(tGroupKey, 0);
-					else
-						aContainer:SetAuraGroupMaxFrameCount(tGroupKey, tGroup["maxFrameCount"] or 5);
-						aContainer:SetAuraGroupFilterString(tGroupKey, tGroup["filterString"] or "HELPFUL");
+					tShouldSuppress = not tGroupShouldShow;
+
+					if not tLastGroupSuppress or tLastGroupSuppress[tGroupKey] ~= tShouldSuppress then
+						if tGroupShouldShow then
+							aContainer:SetAuraGroupMaxFrameCount(tGroupKey, tGroup["maxFrameCount"] or 5);
+							aContainer:SetAuraGroupFilterString(tGroupKey, tGroup["filterString"] or "HELPFUL");
+						else
+							aContainer:SetAuraGroupMaxFrameCount(tGroupKey, 0);
+						end
+
+						if not tLastGroupSuppress then
+							tLastGroupSuppress = { };
+							aContainerData["lastGroupSuppress"] = tLastGroupSuppress;
+						end
+
+						tLastGroupSuppress[tGroupKey] = tShouldSuppress;
+						tIsDirty = true;
 					end
 				end
 			end
@@ -3885,24 +3828,57 @@ do
 				tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
 
 				if tTemplateRef and tRecordedKey then
-					tSlot = tTemplateRef["template"];
+					tSlotShouldShow = not VUHDO_isAuraDisplaySuppressed(tTemplateRef, sGateState);
 
-					tShouldSuppress = anIsDisconnected or anIsAuraFilterRestricted or (tTemplateRef["isAssistOnly"] and anIsAssistRestricted);
+					if tSlot["friendlyOnly"] and sGateState["canAttack"] then
+						tSlotShouldShow = false;
+					end
 
-					if tShouldSuppress then
-						aContainer:SetAuraSlotFilterString(tRecordedKey, "");
-					else
-						aContainer:SetAuraSlotFilterString(tRecordedKey, tSlot["filterString"] or "HELPFUL");
+					tMixedEntryIndex = tSlot["mixedEntryIndex"];
+					tMixedItemIndex = tSlot["mixedItemIndex"];
+					tPriorityCutoff = tMixedPriorityCutoffs and tMixedEntryIndex and tMixedPriorityCutoffs[tMixedEntryIndex];
+
+					if tMixedItemIndex and tPriorityCutoff and tMixedItemIndex > tPriorityCutoff then
+						tSlotShouldShow = false;
+					end
+
+					tShouldSuppress = not tSlotShouldShow;
+
+					if not tLastSlotSuppress or tLastSlotSuppress[tRecordedKey] ~= tShouldSuppress then
+						if tSlotShouldShow then
+							aContainer:SetAuraSlotFilterString(tRecordedKey, tSlot["filterString"] or "HELPFUL");
+							aContainer:SetAuraSlotCandidateFilters(tRecordedKey, tSlot["candidateFilters"]);
+						else
+							aContainer:SetAuraSlotFilterString(tRecordedKey, "");
+						end
+
+						if not tLastSlotSuppress then
+							tLastSlotSuppress = { };
+							aContainerData["lastSlotSuppress"] = tLastSlotSuppress;
+						end
+
+						if not tAppliedSlotCandidateSuppress then
+							tAppliedSlotCandidateSuppress = { };
+							aContainerData["appliedSlotCandidateSuppress"] = tAppliedSlotCandidateSuppress;
+						end
+
+						tLastSlotSuppress[tRecordedKey] = tShouldSuppress;
+						tAppliedSlotCandidateSuppress[tRecordedKey] = tShouldSuppress;
+
+						tIsDirty = true;
 					end
 				end
 			end
 		end
 
-		aContainerData["lastSyncedAssistRestricted"] = anIsAssistRestricted;
-		aContainerData["lastSyncedAuraFilterRestricted"] = anIsAuraFilterRestricted;
-		aContainerData["lastSyncedDisconnected"] = anIsDisconnected;
+		if tNeedsRestoreEnable then
 
-		return true;
+			aContainer:SetEnabled(true);
+
+			tIsDirty = true;
+		end
+
+		return tIsDirty;
 
 	end
 end
@@ -3914,7 +3890,6 @@ local tRestoreGroupsTemplate;
 local tRestoreGroupsKeys;
 local tRestoreGroup;
 local tRestoreGroupKey;
-local tRestoreGroupCnt;
 function VUHDO_restoreAuraContainerGroups(aContainer, aContainerData)
 
 	if not aContainer or not aContainerData or not aContainerData["groupsSuppressed"] then
@@ -3940,9 +3915,10 @@ function VUHDO_restoreAuraContainerGroups(aContainer, aContainerData)
 	end
 
 	aContainerData["groupsSuppressed"] = nil;
-	aContainerData["lastSyncedAssistRestricted"] = nil;
-	aContainerData["lastSyncedAuraFilterRestricted"] = nil;
-	aContainerData["lastSyncedDisconnected"] = nil;
+	aContainerData["lastGroupSuppress"] = nil;
+	aContainerData["lastSlotSuppress"] = nil;
+	aContainerData["lastContainerSuppressed"] = nil;
+	aContainerData["appliedSlotCandidateSuppress"] = nil;
 
 	return;
 
@@ -3952,54 +3928,10 @@ end
 
 --
 local tButton;
-local tContainerTemplate;
-local tGroupKeys;
-local tGroupKey;
-local tSlotKeys;
-local tEngineSlotCnt;
-local tSlot;
-local tRecordedKey;
 function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 
 	if not aContainer then
 		return;
-	end
-
-	if aContainerData then
-		tContainerTemplate = aContainerData["containerTemplate"];
-
-		if tContainerTemplate then
-			tGroupKeys = aContainerData["groupKeys"];
-
-			if tGroupKeys then
-				for tGroupCnt = 1, #tGroupKeys do
-					tGroupKey = tGroupKeys[tGroupCnt];
-
-					if tGroupKey then
-						aContainer:SetAuraGroupMaxFrameCount(tGroupKey, 0);
-						aContainer:SetAuraGroupFilterString(tGroupKey, "");
-					end
-				end
-
-				aContainerData["groupsSuppressed"] = true;
-			end
-
-			tSlotKeys = aContainerData["slotKeys"];
-			tEngineSlotCnt = 0;
-
-			for tSlotCnt = 1, #(tContainerTemplate["slots"] or sEmpty) do
-				tSlot = tContainerTemplate["slots"][tSlotCnt];
-
-				if tSlot and not tSlot["isStaticBouquetSlot"] then
-					tEngineSlotCnt = tEngineSlotCnt + 1;
-					tRecordedKey = tSlotKeys and tSlotKeys[tEngineSlotCnt];
-
-					if tRecordedKey then
-						aContainer:SetAuraSlotFilterString(tRecordedKey, "");
-					end
-				end
-			end
-		end
 	end
 
 	if aContainerData and aContainerData["staticSlots"] and next(aContainerData["staticSlots"]) then
@@ -4014,16 +3946,20 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 		end
 	end
 
-	aContainer:SetUnit("none");
 
-	if not aContainer:IsEnabled() then
-		aContainer:SetEnabled(true);
+	if aContainer:IsEnabled() then
+		aContainer:SetEnabled(false);
 	end
 
-	aContainer:UpdateAllAuras();
+	if aContainer:IsShown() then
+		aContainer:SetShown(false);
+	end
 
-	aContainer:SetEnabled(false);
-	aContainer:SetShown(false);
+	if aContainer:GetUnit() ~= "none" then
+		aContainer:SetUnit("none");
+	end
+
+	aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
 
 	if aContainerData then
 		aContainerData["lastSyncedUnit"] = nil;
@@ -4032,12 +3968,48 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 		aContainerData["lastSyncedEnabled"] = nil;
 		aContainerData["lastSyncedGroupEnabled"] = nil;
 		aContainerData["lastSlotSuppress"] = nil;
-		aContainerData["lastSyncedAssistRestricted"] = nil;
-		aContainerData["lastSyncedAuraFilterRestricted"] = nil;
-		aContainerData["lastSyncedDisconnected"] = nil;
+		aContainerData["lastGroupSuppress"] = nil;
 		aContainerData["lastAuraFilterDenied"] = nil;
+		aContainerData["lastContainerSuppressed"] = nil;
+		aContainerData["appliedSlotCandidateSuppress"] = nil;
 		aContainerData["mixedPriorityCutoffs"] = nil;
 	end
+
+	return;
+
+end
+
+
+
+--
+local tClearBindingContainer;
+function VUHDO_clearAuraContainerBinding(aContainerData)
+
+	if not aContainerData or not aContainerData["container"] then
+		return;
+	end
+
+	tClearBindingContainer = aContainerData["container"];
+
+
+	if tClearBindingContainer:IsEnabled() then
+		tClearBindingContainer:SetEnabled(false);
+	end
+
+	if tClearBindingContainer:GetUnit() ~= "none" then
+		tClearBindingContainer:SetUnit("none");
+	end
+
+	if tClearBindingContainer:IsShown() then
+		tClearBindingContainer:SetShown(false);
+	end
+
+	tClearBindingContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_ONCE);
+
+	aContainerData["lastSyncedUnit"] = nil;
+	aContainerData["lastSyncedGuid"] = nil;
+	aContainerData["lastSyncedEnabled"] = nil;
+	aContainerData["lastSyncedGroupEnabled"] = nil;
 
 	return;
 
@@ -4054,8 +4026,6 @@ function VUHDO_refreshAuraContainer(aContainer)
 
 	aContainer:UpdateAllAuras();
 
-	aContainer:SetOnUpdateMode(VUHDO_ON_UPDATE_MODE_RUN_WHEN_VISIBLE);
-
 	return;
 
 end
@@ -4067,6 +4037,9 @@ local tIsAuraDataRestricted;
 local tCanAttack;
 local tOccupantGuid;
 local tButton;
+local tBindEnabled;
+local tBindShown;
+local tContainerSuppressed;
 function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 
 	if not aContainer or not aContainerData or not aUnit then
@@ -4077,16 +4050,27 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 		aContainerData["ownerButton"] = aButton;
 	end
 
-	aContainer:SetUnit(aUnit);
 
+	VUHDO_rewriteAuraContainerGateState(aUnit);
+
+	tContainerSuppressed = sGateState["isDisconnected"] or sGateState["isAuraFilterRestricted"];
 	tIsAuraDataRestricted = VUHDO_isAuraDataRestricted();
 
 	if VUHDO_isAuraModeContainers() then
-		aContainer:SetEnabled(true);
-		aContainer:SetShown(true);
+		if tContainerSuppressed then
+			tBindEnabled = false;
+			tBindShown = true;
+		else
+			tBindEnabled = true;
+			tBindShown = true;
+		end
 	else
-		aContainer:SetEnabled(tIsAuraDataRestricted);
-		aContainer:SetShown(tIsAuraDataRestricted);
+		tBindEnabled = tIsAuraDataRestricted;
+		tBindShown = tIsAuraDataRestricted;
+	end
+
+	if aContainer:GetUnit() ~= aUnit then
+		aContainer:SetUnit(aUnit);
 	end
 
 	aContainerData["lastSyncedRestricted"] = tIsAuraDataRestricted;
@@ -4107,7 +4091,21 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 		end
 	end
 
-	VUHDO_refreshAuraContainer(aContainer);
+	VUHDO_applyAuraContainerVisibility(aContainer, aContainerData);
+
+	if aContainer:IsEnabled() ~= tBindEnabled then
+
+		aContainer:SetEnabled(tBindEnabled);
+	end
+
+	if aContainer:IsShown() ~= tBindShown then
+
+		aContainer:SetShown(tBindShown);
+	end
+
+	if not tContainerSuppressed then
+		VUHDO_refreshAuraContainer(aContainer);
+	end
 
 	tOccupantGuid = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["guid"];
 
@@ -4121,89 +4119,17 @@ end
 
 
 --
-local tContainerTemplate;
-local tMixedPriorityCutoffs;
-local tMixedEntryIndex;
-local tMixedItemIndex;
-local tPriorityCutoff;
-local tShouldSuppress;
-local tLastSlotSuppress;
-local tSlotKey;
-local tIsDirty;
-function VUHDO_applyAuraContainerSlotFilters(aContainer, aContainerData, anIsHostile, anIsUnitRestricted)
-
-	if not aContainer or not aContainerData then
-		return false;
-	end
-
-	tContainerTemplate = aContainerData["containerTemplate"];
-
-	if not tContainerTemplate then
-		return false;
-	end
-
-	tMixedPriorityCutoffs = aContainerData["mixedPriorityCutoffs"];
-	tLastSlotSuppress = aContainerData["lastSlotSuppress"];
-	tIsDirty = false;
-
-	for _, tSlot in ipairs(tContainerTemplate["slots"] or sEmpty) do
-		if not tSlot["isStaticBouquetSlot"] and tSlot["key"] then
-			tShouldSuppress = anIsUnitRestricted and true or false;
-
-			if tSlot["friendlyOnly"] and anIsHostile then
-				tShouldSuppress = true;
-			end
-
-			tMixedEntryIndex = tSlot["mixedEntryIndex"];
-			tMixedItemIndex = tSlot["mixedItemIndex"];
-			tPriorityCutoff = tMixedPriorityCutoffs and tMixedEntryIndex and tMixedPriorityCutoffs[tMixedEntryIndex];
-
-			if tMixedItemIndex and tPriorityCutoff and tMixedItemIndex > tPriorityCutoff then
-				tShouldSuppress = true;
-			end
-
-			tSlotKey = tSlot["key"];
-
-			if not tLastSlotSuppress or tLastSlotSuppress[tSlotKey] ~= tShouldSuppress then
-				if tShouldSuppress then
-					aContainer:SetAuraSlotCandidateFilters(tSlotKey, sSuppressCandidateFilters);
-				else
-					aContainer:SetAuraSlotCandidateFilters(tSlotKey, tSlot["candidateFilters"]);
-				end
-
-				if not tLastSlotSuppress then
-					tLastSlotSuppress = { };
-					aContainerData["lastSlotSuppress"] = tLastSlotSuppress;
-				end
-
-				tLastSlotSuppress[tSlotKey] = tShouldSuppress;
-				tIsDirty = true;
-			end
-		end
-	end
-
-	return tIsDirty;
-
-end
-
-
-
---
 local tButtonName;
 local tContainer;
 local tNeedsSync;
 local tIsAuraDataRestricted;
-local tCanAttack;
 local tIsAssistRestricted;
 local tIsAuraFilterRestricted;
-local tIsDisconnected;
-local tUnitInfo;
-local tSlotFiltersDirty;
-local tAssistOnlyDirty;
 local tIsRestricted;
 local tIsPreviouslyRestricted;
 local tIsRestrictionRegained;
 local tOccupantGuid;
+local tVisibilityDirty;
 function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 	if not aButton or not aUnit then
@@ -4218,14 +4144,11 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 	tIsAuraDataRestricted = VUHDO_isAuraDataRestricted();
 
-	tCanAttack = UnitCanAttack("player", aUnit);
+	VUHDO_rewriteAuraContainerGateState(aUnit);
 
-	tIsAssistRestricted = VUHDO_isUnitAssistRestricted(aUnit);
-	tIsAuraFilterRestricted = VUHDO_isUnitAuraFilterRestricted(aUnit);
+	tIsAssistRestricted = sGateState["isAssistRestricted"];
+	tIsAuraFilterRestricted = sGateState["isAuraFilterRestricted"];
 	tIsRestricted = tIsAssistRestricted or tIsAuraFilterRestricted;
-
-	tUnitInfo = VUHDO_RAID[aUnit];
-	tIsDisconnected = tUnitInfo and not tUnitInfo["connected"];
 
 	if not UnitExists(aUnit) then
 		for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
@@ -4245,10 +4168,6 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 		if tContainer then
 			VUHDO_restoreAuraContainerGroups(tContainer, tContainerData);
 
-			tSlotFiltersDirty = VUHDO_applyAuraContainerSlotFilters(tContainer, tContainerData, tCanAttack, tIsAuraFilterRestricted);
-
-			tAssistOnlyDirty = VUHDO_applyAuraContainerAssistOnly(tContainer, tContainerData, tIsAssistRestricted, tIsAuraFilterRestricted, tIsDisconnected);
-
 			if VUHDO_isAuraModeContainers() then
 				tContainerData["lastSyncedRestricted"] = tIsAuraDataRestricted;
 
@@ -4258,7 +4177,7 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 			end
 
 			if not tNeedsSync then
-				tOccupantGuid = tUnitInfo and tUnitInfo["guid"];
+				tOccupantGuid = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["guid"];
 
 				if not tOccupantGuid or issecretvalue(tOccupantGuid) then
 					tNeedsSync = true;
@@ -4274,13 +4193,13 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 			if tNeedsSync then
 				VUHDO_bindAuraContainerUnit(tContainer, tContainerData, aUnit, aButton);
+			elseif tContainerData["staticSlots"] and next(tContainerData["staticSlots"]) then
+				VUHDO_updateStaticBouquetSlotsForButton(aButton, aUnit, tContainerData, sGateState["canAttack"]);
 			else
-				if tSlotFiltersDirty or tAssistOnlyDirty or tIsRestrictionRegained then
-					VUHDO_refreshAuraContainer(tContainer);
-				end
+				tVisibilityDirty = VUHDO_applyAuraContainerVisibility(tContainer, tContainerData);
 
-				if tContainerData["staticSlots"] and next(tContainerData["staticSlots"]) then
-					VUHDO_updateStaticBouquetSlotsForButton(aButton, aUnit, tContainerData, tCanAttack, true);
+				if tVisibilityDirty or tIsRestrictionRegained then
+					VUHDO_refreshAuraContainer(tContainer);
 				end
 			end
 		end
@@ -4389,7 +4308,7 @@ function VUHDO_releaseAuraContainersForButton(aButton)
 	end
 
 	for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
-		VUHDO_releaseAuraContainer(aButton, tContainerData);
+		VUHDO_retireAuraContainer(aButton, tContainerData);
 	end
 
 	VUHDO_AURA_CONTAINERS[tButtonName] = nil;
@@ -4415,37 +4334,21 @@ function VUHDO_processPendingAuraContainerBuilds()
 		twipe(sPendingContainerBuilds);
 	end
 
-	twipe(sPendingRetry);
-
-	for tButton, tButtonSetup in pairs(sPendingButtonLayouts) do
-		if not VUHDO_layoutBarAuraButtonFrames(tButtonSetup, tButton) then
-			sPendingRetry[tButton] = tButtonSetup;
-		end
-	end
-
-	twipe(sPendingButtonLayouts);
-
-	for tRetryButton, tRetryButtonSetup in pairs(sPendingRetry) do
-		sPendingButtonLayouts[tRetryButton] = tRetryButtonSetup;
-	end
-
-	twipe(sPendingRetry);
-
 	for tContainer, tUnit in pairs(sPendingClassColors) do
 		if not VUHDO_applyContainerClassColorBars(tContainer, tUnit) then
-			sPendingRetry[tContainer] = tUnit;
+			sPendingClassColorRetry[tContainer] = tUnit;
 		end
 	end
 
 	twipe(sPendingClassColors);
 
-	for tRetryContainer, tRetryUnit in pairs(sPendingRetry) do
+	for tRetryContainer, tRetryUnit in pairs(sPendingClassColorRetry) do
 		sPendingClassColors[tRetryContainer] = tRetryUnit;
 	end
 
-	twipe(sPendingRetry);
+	twipe(sPendingClassColorRetry);
 
-	if not next(sPendingContainerBuilds) and not next(sPendingButtonLayouts) and not next(sPendingClassColors) then
+	if not next(sPendingContainerBuilds) and not next(sPendingClassColors) then
 		sHasPendingBuilds = false;
 	end
 

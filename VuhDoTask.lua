@@ -63,6 +63,7 @@ VUHDO_DEFER_DEGRADE_AURA_CACHE_FOR_UNIT = 40;
 VUHDO_DEFER_REFRESH_UNIT_AURAS = 41;
 VUHDO_DEFER_ACQUIRE_OVERLAY_CONTAINER = 42;
 VUHDO_DEFER_FLUSH_PENDING_OVERLAY_REBUILD = 43;
+VUHDO_DEFER_VOLATILE_PASS_FOR_BUTTON = 44;
 
 local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_UPDATE_HEALTH,
@@ -106,6 +107,7 @@ local VUHDO_DEFERRED_TASK_TYPES = {
 	VUHDO_DEFER_REFRESH_UNIT_AURAS,
 	VUHDO_DEFER_ACQUIRE_OVERLAY_CONTAINER,
 	VUHDO_DEFER_FLUSH_PENDING_OVERLAY_REBUILD,
+	VUHDO_DEFER_VOLATILE_PASS_FOR_BUTTON,
 };
 
 local VUHDO_COMBAT_UNSAFE_TASKS = {
@@ -183,8 +185,8 @@ local VUHDO_TASK_TYPE_DEFAULT_COSTS = {
 	[35] = 25000,
 	[36] = 2500,
 	[37] = 450,
-	[38] = 25,
-	[39] = 50,
+	[38] = 800,
+	[39] = 1200,
 	[40] = 35,
 	[41] = 200,
 	[42] = 120,
@@ -610,6 +612,17 @@ end
 
 
 --
+function VUHDO_deferVolatilePassForButton(aButton, aPriority)
+
+	VUHDO_deferTask(VUHDO_DEFER_VOLATILE_PASS_FOR_BUTTON, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_NORMAL, aButton);
+
+	return;
+
+end
+
+
+
+--
 local tNewTask;
 local function VUHDO_createDeferredTaskDelegate()
 
@@ -651,16 +664,50 @@ end
 
 do
 	--
-	local tKey;
+	local sTaskDedupNilSentinel = { };
+	local sTaskDedupRoots = { };
+	local sTaskDedupNoArgLeaves = { };
+	local tDedupNode;
+	local tDedupArg;
 	local function VUHDO_getTaskKey(aType, aArgs)
 
-		tKey = tostring(aType);
+		if #aArgs == 0 then
+			tDedupNode = sTaskDedupNoArgLeaves[aType];
 
-		for tArgCnt = 1, #aArgs do
-			tKey = tKey .. "|" .. tostring(aArgs[tArgCnt] or "");
+			if not tDedupNode then
+				tDedupNode = { ["isLeaf"] = true };
+				sTaskDedupNoArgLeaves[aType] = tDedupNode;
+			end
+
+			return tDedupNode;
 		end
 
-		return tKey;
+		tDedupNode = sTaskDedupRoots[aType];
+
+		if not tDedupNode then
+			tDedupNode = { };
+			sTaskDedupRoots[aType] = tDedupNode;
+		end
+
+		for tArgCnt = 1, #aArgs do
+			tDedupArg = aArgs[tArgCnt];
+
+			if tDedupArg == nil then
+				tDedupArg = sTaskDedupNilSentinel;
+			end
+
+			if not tDedupNode[tDedupArg] then
+				if tArgCnt == #aArgs then
+					tDedupNode[tDedupArg] = { ["isLeaf"] = true };
+				else
+					tDedupNode[tDedupArg] = { };
+				end
+			end
+
+			tDedupNode = tDedupNode[tDedupArg];
+		end
+
+		return tDedupNode;
 
 	end
 
@@ -2374,6 +2421,7 @@ function VUHDO_initTaskSystem()
 			[VUHDO_DEFER_REFRESH_UNIT_AURAS] = _G["VUHDO_fullAuraRefresh"],
 			[VUHDO_DEFER_ACQUIRE_OVERLAY_CONTAINER] = _G["VUHDO_acquireOverlayContainerForEntry"],
 			[VUHDO_DEFER_FLUSH_PENDING_OVERLAY_REBUILD] = _G["VUHDO_flushPendingOverlayRebuild"],
+			[VUHDO_DEFER_VOLATILE_PASS_FOR_BUTTON] = _G["VUHDO_applyVolatilePassForButton"],
 		};
 
 		tTaskTypeCount = 0;
