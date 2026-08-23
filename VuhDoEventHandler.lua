@@ -16,6 +16,7 @@ local tinsert = table.insert;
 local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
+local issecretvalue = issecretvalue;
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
@@ -104,7 +105,6 @@ local VUHDO_syncOverlaysForUnit;
 local VUHDO_resetAuraContainersForUnit;
 local VUHDO_resetOverlaysForUnit;
 local VUHDO_syncAllOverlayUnits;
-local VUHDO_resetAuraFilterResultCachePerFrame;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -610,7 +610,6 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_resetAuraContainersForUnit = _G["VUHDO_resetAuraContainersForUnit"];
 	VUHDO_resetOverlaysForUnit = _G["VUHDO_resetOverlaysForUnit"];
 	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
-	VUHDO_resetAuraFilterResultCachePerFrame = _G["VUHDO_resetAuraFilterResultCachePerFrame"];
 
 	VUHDO_initTaskSystem();
 
@@ -1104,6 +1103,7 @@ do
 	local tBestProfileName;
 	local tBossUnit;
 	local tBossGuid;
+	local tIsBossGuidSecret;
 	function VUHDO_OnEvent(anInstance, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
@@ -1237,10 +1237,18 @@ do
 
 				for tBossCnt = 1, 8 do
 					tBossUnit = sBossUnitIds[tBossCnt];
-					tBossGuid = UnitExists(tBossUnit) and UnitGUID(tBossUnit) or nil;
 
-					if sLastBossUnitGuids[tBossCnt] ~= tBossGuid then
-						sLastBossUnitGuids[tBossCnt] = tBossGuid;
+					if UnitExists(tBossUnit) then
+						tBossGuid = UnitGUID(tBossUnit);
+					else
+						tBossGuid = nil;
+					end
+
+					tIsBossGuidSecret = tBossGuid and sSecretsEnabled and issecretvalue(tBossGuid);
+
+					-- FIXME: cannot track boss identity when GUID is secret
+					if tIsBossGuidSecret or sLastBossUnitGuids[tBossCnt] ~= tBossGuid then
+						sLastBossUnitGuids[tBossCnt] = not tIsBossGuidSecret and tBossGuid or nil;
 
 						VUHDO_resetAuraContainersForUnit(tBossUnit);
 						VUHDO_resetOverlaysForUnit(tBossUnit);
