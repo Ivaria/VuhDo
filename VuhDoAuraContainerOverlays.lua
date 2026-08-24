@@ -7,7 +7,6 @@ local strfind = string.find;
 local twipe = table.wipe;
 local min = math.min;
 
-local UnitCanAttack = UnitCanAttack;
 local InCombatLockdown = InCombatLockdown;
 local issecretvalue = issecretvalue;
 
@@ -2101,7 +2100,6 @@ do
 
 
 	--
-	local tSlotRecord;
 	local function VUHDO_copyOverlaySlotRecordFromSpec(aSlotRecord, aSlotSpec)
 
 		aSlotRecord["filterString"] = aSlotSpec["filterString"];
@@ -2324,7 +2322,6 @@ do
 
 
 	--
-	local tPendingPlan;
 	local tPlannedKey;
 	function VUHDO_flushPendingOverlaySlotPlans()
 
@@ -2532,10 +2529,6 @@ do
 	local tReconcileIndicatorKey;
 	local tReconcileEntryKey;
 	local tReconcileExistingOverlays;
-	local tReconcileRetireIndicatorKey;
-	local tReconcileRetireIndicatorEntry;
-	local tReconcileRetireEntryKey;
-	local tReconcileRetireContainerData;
 	local tReconcileExistingContainer;
 	function VUHDO_reconcileOverlayContainersForButton(aButton, aButtonName)
 
@@ -3431,39 +3424,9 @@ do
 
 
 	--
-	local tIsAuraDataRestricted;
-	local tIsAuraModeContainers;
-	local tIsBarColorsDispelOverlayConfigured;
-	local tCanAttack;
 	local tButtonName;
-	local tPanelNum;
-	local tContainer;
-	local tIsEnabled;
-	local tChainGroupMeta;
-	local tChainGroupMetaEntry;
-	local tGroupEnabled;
-	local tGroupKey;
-	local tLastSyncedGroupEnabled;
-	local tUnitGlowApplied;
-	local tGateInfo;
-	local tGateActive;
-	local tEnabledChanged;
-	local tGroupEnabledChanged;
-	local tUnitRebound;
-	local tOccupantGuid;
-	local tIsAuraFilterRestricted;
-	local tIsDisconnected;
-	local tShouldSuppress;
-	local tSlotHostData;
-	local tSlotEnabled;
-	local tSlotEnabledChanged;
-	local tLastSyncedSlotEnabled;
-	local tHostNeedsUnit;
-	local tDeferHostEnable;
-	local tNeedsHostRefresh;
 	local tCurrentUnit;
 	local tLastSyncedUnit;
-	local tDesiredFilterString;
 	function VUHDO_invalidateRemappedOverlayUnitBindings()
 
 		twipe(sInvalidateRemappedButtonNameToUnit);
@@ -3508,6 +3471,8 @@ do
 
 
 	--
+	local tButtonName;
+	local tSlotHostData;
 	function VUHDO_resetOverlaysForUnit(aUnit)
 
 		if not aUnit then
@@ -3549,6 +3514,37 @@ do
 
 
 	--
+	local tIsAuraDataRestricted;
+	local tIsAuraModeContainers;
+	local tIsBarColorsDispelOverlayConfigured;
+	local tCanAttack;
+	local tButtonName;
+	local tPanelNum;
+	local tContainer;
+	local tIsEnabled;
+	local tChainGroupMeta;
+	local tChainGroupMetaEntry;
+	local tGroupEnabled;
+	local tGroupKey;
+	local tLastSyncedGroupEnabled;
+	local tUnitGlowApplied;
+	local tGateInfo;
+	local tGateActive;
+	local tEnabledChanged;
+	local tGroupEnabledChanged;
+	local tUnitRebound;
+	local tOccupantGuid;
+	local tLastSyncedGuid;
+	local tIsDisconnected;
+	local tShouldSuppress;
+	local tSlotHostData;
+	local tSlotEnabled;
+	local tSlotEnabledChanged;
+	local tLastSyncedSlotEnabled;
+	local tHostNeedsUnit;
+	local tDeferHostEnable;
+	local tNeedsHostRefresh;
+	local tDesiredFilterString;
 	function VUHDO_syncOverlaysForUnit(aUnit)
 
 		if not aUnit then
@@ -3567,8 +3563,6 @@ do
 
 		tGateInfo = VUHDO_RAID and VUHDO_RAID[aUnit];
 		tCanAttack = VUHDO_AURA_CONTAINER_GATE_STATE["canAttack"];
-		tIsAssistRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAssistRestricted"];
-		tIsAuraFilterRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAuraFilterRestricted"];
 		tIsDisconnected = VUHDO_AURA_CONTAINER_GATE_STATE["isDisconnected"];
 
 		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
@@ -3682,9 +3676,13 @@ do
 							tUnitRebound = tSlotHostData["lastSyncedUnit"] ~= aUnit;
 
 							if not tUnitRebound then
+								tLastSyncedGuid = tSlotHostData["lastSyncedGuid"];
+
 								if not tOccupantGuid or issecretvalue(tOccupantGuid) then
 									tUnitRebound = true;
-								elseif tSlotHostData["lastSyncedGuid"] ~= tOccupantGuid then
+								elseif not tLastSyncedGuid or issecretvalue(tLastSyncedGuid) then
+									tUnitRebound = true;
+								elseif tLastSyncedGuid ~= tOccupantGuid then
 									tUnitRebound = true;
 								end
 							end
@@ -3692,6 +3690,10 @@ do
 							if tUnitRebound then
 								if tContainer:GetUnit() ~= aUnit then
 									tContainer:SetUnit(aUnit);
+								end
+
+								if tOccupantGuid and issecretvalue(tOccupantGuid) then
+									tOccupantGuid = nil;
 								end
 
 								tSlotHostData["lastSyncedUnit"] = aUnit;
@@ -3810,15 +3812,23 @@ do
 								tUnitRebound = tContainerData["lastSyncedUnit"] ~= aUnit;
 
 								if not tUnitRebound then
+									tLastSyncedGuid = tContainerData["lastSyncedGuid"];
+
 									if not tOccupantGuid or issecretvalue(tOccupantGuid) then
 										tUnitRebound = true;
-									elseif tContainerData["lastSyncedGuid"] ~= tOccupantGuid then
+									elseif not tLastSyncedGuid or issecretvalue(tLastSyncedGuid) then
+										tUnitRebound = true;
+									elseif tLastSyncedGuid ~= tOccupantGuid then
 										tUnitRebound = true;
 									end
 								end
 
 								if tUnitRebound then
 									tContainer:SetUnit(aUnit);
+
+									if tOccupantGuid and issecretvalue(tOccupantGuid) then
+										tOccupantGuid = nil;
+									end
 
 									tContainerData["lastSyncedUnit"] = aUnit;
 									tContainerData["lastSyncedGuid"] = tOccupantGuid;

@@ -4140,6 +4140,10 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 
 	tOccupantGuid = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["guid"];
 
+	if tOccupantGuid and issecretvalue(tOccupantGuid) then
+		tOccupantGuid = nil;
+	end
+
 	aContainerData["lastSyncedUnit"] = aUnit;
 	aContainerData["lastSyncedGuid"] = tOccupantGuid;
 
@@ -4160,6 +4164,7 @@ local tIsRestricted;
 local tIsPreviouslyRestricted;
 local tIsRestrictionRegained;
 local tOccupantGuid;
+local tLastSyncedGuid;
 local tVisibilityDirty;
 function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
@@ -4209,10 +4214,13 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 			if not tNeedsSync then
 				tOccupantGuid = VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["guid"];
+				tLastSyncedGuid = tContainerData["lastSyncedGuid"];
 
 				if not tOccupantGuid or issecretvalue(tOccupantGuid) then
 					tNeedsSync = true;
-				elseif tContainerData["lastSyncedGuid"] ~= tOccupantGuid then
+				elseif not tLastSyncedGuid or issecretvalue(tLastSyncedGuid) then
+					tNeedsSync = true;
+				elseif tLastSyncedGuid ~= tOccupantGuid then
 					tNeedsSync = true;
 				end
 			end
