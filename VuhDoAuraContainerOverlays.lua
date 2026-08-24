@@ -2837,6 +2837,29 @@ do
 
 
 	--
+	function VUHDO_invalidateAllOverlayPlans()
+
+		if InCombatLockdown() then
+			VUHDO_markOverlayRebuildPendingInCombat();
+
+			return;
+		end
+
+		twipe(sOverlayConfigKeys);
+		twipe(sOverlayEntryPrototypeCache);
+		twipe(sPendingOverlayBuilds);
+		twipe(sPendingOverlaySlotPlans);
+		twipe(sOverlayContainerPlans);
+
+		sOverlayConfigGeneration = sOverlayConfigGeneration + 1;
+
+		return;
+
+	end
+
+
+
+	--
 	function VUHDO_releaseAllOverlays()
 
 		if InCombatLockdown() then

@@ -387,6 +387,13 @@
 							<OnTextChanged>
 								VUHDO_auraGroupsNameChanged(self);
 							</OnTextChanged>
+							<OnEditFocusLost>
+								VUHDO_auraGroupsNameCommit(self);
+							</OnEditFocusLost>
+							<OnEnterPressed>
+								VUHDO_auraGroupsNameCommit(self);
+								self:ClearFocus();
+							</OnEnterPressed>
 						</Scripts>
 					</EditBox>
 

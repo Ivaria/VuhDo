@@ -200,6 +200,7 @@ local VUHDO_AURA_GROUP_LIST_ENTRY_ROW_HEIGHT = 22;
 VUHDO_AURA_GROUPS_NEW_BOUQUET_SELECTED = "";
 
 local sSelectedGroupId = nil;
+local sRefreshDepth = 0;
 local sAuraGroupEntryItems = { };
 local sSpellEntrySettingsGroupId = nil;
 local sSpellEntrySettingsEntryIdx = nil;
@@ -215,6 +216,21 @@ local sCandidateBoolFields = {
 	"nameplateShowAll",
 	"nameplateShowPersonal",
 };
+
+
+
+--
+local function VUHDO_auraGroupsRunRefresh(aCallback, ...)
+
+	sRefreshDepth = sRefreshDepth + 1;
+
+	aCallback(...);
+
+	sRefreshDepth = sRefreshDepth - 1;
+
+	return;
+
+end
 
 
 
@@ -394,6 +410,10 @@ end
 --
 function VUHDO_auraGroupsComboChanged(aComboBox, aValue, anArrayModel)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	VUHDO_AURA_GROUPS_SELECTED = aValue;
 	sSelectedGroupId = aValue;
 
@@ -408,9 +428,28 @@ end
 --
 function VUHDO_auraGroupsNameChanged(aEditBox)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if VUHDO_AURA_GROUPS_SELECTED and VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][VUHDO_AURA_GROUPS_SELECTED] and aEditBox:GetText() then
 		VUHDO_CONFIG["AURA_GROUPS"][VUHDO_AURA_GROUPS_SELECTED]["displayName"] = aEditBox:GetText();
+	end
 
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsNameCommit(aEditBox)
+
+	if sRefreshDepth > 0 then
+		return;
+	end
+
+	if VUHDO_AURA_GROUPS_SELECTED and VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][VUHDO_AURA_GROUPS_SELECTED] then
 		VUHDO_auraGroupsRefreshList();
 	end
 
@@ -447,7 +486,7 @@ end
 
 --
 local tGroupCombo;
-function VUHDO_auraGroupsRefreshList()
+local function VUHDO_initAuraGroupsList()
 
 	VUHDO_initAuraGroupsComboModel();
 
@@ -456,6 +495,17 @@ function VUHDO_auraGroupsRefreshList()
 	if tGroupCombo then
 		VUHDO_lnfComboBoxInitFromModel(tGroupCombo);
 	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsRefreshList()
+
+	VUHDO_auraGroupsRunRefresh(VUHDO_initAuraGroupsList);
 
 	return;
 
@@ -524,7 +574,7 @@ local tRow3TriState;
 local tSoundCombo;
 local tSoundLabel;
 local tFrame;
-function VUHDO_auraGroupsRefreshRightPanel()
+local function VUHDO_initAuraGroupsRightPanel()
 
 	tGroup = sSelectedGroupId and VUHDO_getAuraGroupRaw(sSelectedGroupId) or nil;
 	tIsBuiltIn = tGroup and VUHDO_isBuiltInAuraGroup(sSelectedGroupId);
@@ -1201,6 +1251,17 @@ end
 
 
 --
+function VUHDO_auraGroupsRefreshRightPanel()
+
+	VUHDO_auraGroupsRunRefresh(VUHDO_initAuraGroupsRightPanel);
+
+	return;
+
+end
+
+
+
+--
 local tNewId;
 function VUHDO_auraGroupsOnNewGroup()
 
@@ -1289,6 +1350,10 @@ end
 --
 function VUHDO_auraGroupsTypeChanged(aComboBox, aValue, anArrayModel)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		return;
 	end
@@ -1318,6 +1383,10 @@ end
 --
 function VUHDO_auraGroupsFilterChanged(aComboBox, aValue, anArrayModel)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["filter"] = aValue or "";
 
@@ -1326,7 +1395,7 @@ function VUHDO_auraGroupsFilterChanged(aComboBox, aValue, anArrayModel)
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["isHarmful"] = VUHDO_filterContainsToken(aValue, "HARMFUL");
 	end
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	return;
 
@@ -1403,11 +1472,15 @@ end
 --
 function VUHDO_auraGroupsCandidateBoolChanged(aCheckButton)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		tGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
 
 		VUHDO_auraGroupsWriteCandidateBooleans(tGroup);
-		VUHDO_rebuildCanColorBarGroupsCache();
+		VUHDO_timeRebuildAuraGroups(0.3);
 	end
 
 	return;
@@ -1419,6 +1492,10 @@ end
 --
 function VUHDO_auraGroupsHasDurationChanged(aCheckButton)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		tGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
 
@@ -1428,7 +1505,7 @@ function VUHDO_auraGroupsHasDurationChanged(aCheckButton)
 			tGroup["hasDuration"] = nil;
 		end
 
-		VUHDO_rebuildCanColorBarGroupsCache();
+		VUHDO_timeRebuildAuraGroups(0.3);
 	end
 
 	return;
@@ -1472,11 +1549,15 @@ end
 --
 function VUHDO_auraGroupsExcludeFilterChanged(aComboBox, aValue, anArrayModel)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["excludeFilter"] = (aValue ~= "" and aValue) or nil;
 	end
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	return;
 
@@ -1487,11 +1568,15 @@ end
 --
 function VUHDO_auraGroupsPriorityChanged(aComponent, aValue)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["priority"] = tonumber(aValue) or 50;
 	end
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	return;
 
@@ -1504,10 +1589,14 @@ local tOldValue = nil;
 local tSuccess;
 function VUHDO_auraGroupsSoundSelect(aComboBox, aValue, anArrayModel)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"] and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["sound"] = (aValue ~= nil and aValue ~= "") and aValue or nil;
 
-		VUHDO_rebuildCanColorBarGroupsCache();
+		VUHDO_timeRebuildAuraGroups(0.3);
 	end
 
 	if aValue ~= nil and tOldValue ~= aValue then
@@ -1530,7 +1619,7 @@ local tIgnoreList;
 local tSpellNameById;
 local tDisplayName;
 local tFrame;
-function VUHDO_auraGroupsRefreshIgnorePanel()
+local function VUHDO_initAuraGroupsIgnorePanel()
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 
@@ -1586,6 +1675,17 @@ function VUHDO_auraGroupsRefreshIgnorePanel()
 		VUHDO_initAuraGroupsComboModel();
 		VUHDO_lnfComboBoxInitFromModel(tFrame);
 	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsRefreshIgnorePanel()
+
+	VUHDO_auraGroupsRunRefresh(VUHDO_initAuraGroupsIgnorePanel);
 
 	return;
 
@@ -1729,13 +1829,17 @@ end
 --
 function VUHDO_auraGroupsColorTypeChanged(aComboBox, aValue, anArrayModel)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["colorType"] = aValue or VUHDO_AURA_GROUP_COLOR_OFF;
 	end
 
 	VUHDO_auraGroupsRefreshRightPanel();
-	VUHDO_rebuildCanColorBarGroupsCache();
-	VUHDO_registerAllBouquets(false);
+	VUHDO_timeRebuildAuraGroups(0.3);
+	VUHDO_timeRegisterBouquets(0.3);
 
 	return;
 
@@ -1746,7 +1850,11 @@ end
 --
 function VUHDO_auraGroupsCustomColorChanged(aColorSwatch)
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	if sRefreshDepth > 0 then
+		return;
+	end
+
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	return;
 
@@ -1777,11 +1885,15 @@ end
 --
 function VUHDO_auraGroupsCanColorBarChanged(aParent, aValue)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canColorBar"] = aValue;
 	end
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	VUHDO_auraGroupsUpdateCustomColorSwatchState();
 
@@ -1794,11 +1906,15 @@ end
 --
 function VUHDO_auraGroupsCanColorTextChanged(aParent, aValue)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canColorText"] = aValue;
 	end
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	VUHDO_auraGroupsUpdateCustomColorSwatchState();
 
@@ -1811,6 +1927,10 @@ end
 --
 function VUHDO_auraGroupsGlowBarStyleChanged(aParent, aValue)
 
+	if sRefreshDepth > 0 then
+		return;
+	end
+
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["canGlowBar"] = "none" ~= aValue;
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["glowBarStyle"] = "none" ~= aValue and aValue or nil;
@@ -1818,7 +1938,7 @@ function VUHDO_auraGroupsGlowBarStyleChanged(aParent, aValue)
 
 	VUHDO_AURA_GROUPS_CAN_GLOW_BAR = "none" ~= aValue;
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	VUHDO_auraGroupsRefreshRightPanel();
 
@@ -1831,7 +1951,11 @@ end
 --
 function VUHDO_auraGroupsGlowColorChanged(aColorSwatch)
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	if sRefreshDepth > 0 then
+		return;
+	end
+
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	return;
 
@@ -1841,6 +1965,10 @@ end
 
 --
 function VUHDO_auraGroupsEnabledChanged(aParent, aValue)
+
+	if sRefreshDepth > 0 then
+		return;
+	end
 
 	if not sSelectedGroupId then
 		return;
@@ -1862,12 +1990,12 @@ function VUHDO_auraGroupsEnabledChanged(aParent, aValue)
 		end
 	end
 
-	VUHDO_rebuildCanColorBarGroupsCache();
+	VUHDO_timeRebuildAuraGroups(0.3);
 
 	VUHDO_auraGroupsRefreshList();
 
-	VUHDO_registerAllBouquets(false);
-	VUHDO_reloadUI(false);
+	VUHDO_timeRegisterBouquets(0.3);
+	VUHDO_timeReloadUI(0.3, true);
 
 	return;
 
@@ -2057,7 +2185,7 @@ local tGroup;
 local tEntries;
 local tEntryScrollChild;
 local tIsBuiltInList;
-function VUHDO_auraGroupsRefreshListEntries()
+local function VUHDO_initAuraGroupsListEntries()
 
 	for _, tPanel in pairs(sAuraGroupEntryItems) do
 		tPanel:Hide();
@@ -2096,6 +2224,17 @@ function VUHDO_auraGroupsRefreshListEntries()
 	VUHDO_initEntrySettingsCache();
 
 	VUHDO_invalidateAuraContainerTemplateCache();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsRefreshListEntries()
+
+	VUHDO_auraGroupsRunRefresh(VUHDO_initAuraGroupsListEntries);
 
 	return;
 
@@ -2564,7 +2703,7 @@ end
 local tRootPane;
 local tControl;
 local tMode;
-function VUHDO_spellEntrySettingsRefreshFromModel(aFrame)
+local function VUHDO_initSpellEntrySettingsFromModel(aFrame)
 
 	if not aFrame then
 		return;
@@ -2692,10 +2831,25 @@ end
 
 
 --
+function VUHDO_spellEntrySettingsRefreshFromModel(aFrame)
+
+	VUHDO_auraGroupsRunRefresh(VUHDO_initSpellEntrySettingsFromModel, aFrame);
+
+	return;
+
+end
+
+
+
+--
 local tFrame;
 local tRootPane;
 local tControl;
 function VUHDO_spellEntrySettingsChanged()
+
+	if sRefreshDepth > 0 then
+		return;
+	end
 
 	VUHDO_spellEntrySettingsSaveToEntry();
 

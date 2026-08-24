@@ -2800,6 +2800,7 @@ do
 
 		sContainerClassColorBars[tContainer] = nil;
 		sPendingClassColors[tContainer] = nil;
+		sPendingClassColorRetry[tContainer] = nil;
 
 		tContainer:Hide();
 		tContainer:SetParent(nil);

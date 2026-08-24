@@ -34,7 +34,7 @@ local VUHDO_resolveAuraContainerSpellId;
 local VUHDO_addResolvedAuraContainerSpellIds;
 local VUHDO_getAuraGroup;
 local VUHDO_isAuraGroupContainerExpressible;
-local VUHDO_releaseAllOverlays;
+local VUHDO_invalidateAllOverlayPlans;
 local VUHDO_invalidateAuraContainerTemplateCache;
 local VUHDO_renderNonAuraListSlots;
 local VUHDO_deferSyncOverlaysForUnit;
@@ -222,7 +222,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_isAuraGroupContainerExpressible = _G["VUHDO_isAuraGroupContainerExpressible"];
-	VUHDO_releaseAllOverlays = _G["VUHDO_releaseAllOverlays"];
+	VUHDO_invalidateAllOverlayPlans = _G["VUHDO_invalidateAllOverlayPlans"];
 	VUHDO_invalidateAuraContainerTemplateCache = _G["VUHDO_invalidateAuraContainerTemplateCache"];
 	VUHDO_renderNonAuraListSlots = _G["VUHDO_renderNonAuraListSlots"];
 	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
@@ -4411,7 +4411,7 @@ do
 
 		VUHDO_invalidateBouquetRestrictedModeCache();
 		VUHDO_invalidateAuraContainerTemplateCache();
-		VUHDO_releaseAllOverlays();
+		VUHDO_invalidateAllOverlayPlans();
 
 		VUHDO_incrementAlphaChainConfigVersion();
 

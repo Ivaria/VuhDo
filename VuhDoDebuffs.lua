@@ -1838,7 +1838,7 @@ function VUHDO_initDebuffs()
 
 	if tInitDispelSignature ~= sDebuffDispelSignature
 		or (tInitConfigSignature ~= sDebuffConfigSignature and tInitConfigSignature ~= "") then
-		VUHDO_releaseAllOverlays();
+		VUHDO_invalidateAllOverlayPlans();
 	end
 
 	if not VUHDO_CONFIG then

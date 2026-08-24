@@ -698,6 +698,7 @@ local VUHDO_RELOAD_PANEL_NUM = nil;
 VUHDO_TIMERS = {
 	["RELOAD_UI"] = 0,
 	["REGISTER_BOUQUETS"] = 0,
+	["REBUILD_AURA_GROUPS"] = 0,
 	["RELOAD_PANEL"] = 0,
 	["CUSTOMIZE"] = 0,
 	["CHECK_PROFILES"] = 6.2,
@@ -2186,6 +2187,17 @@ end
 
 
 --
+function VUHDO_timeRebuildAuraGroups(aNumSecs)
+
+	VUHDO_TIMERS["REBUILD_AURA_GROUPS"] = aNumSecs;
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_timeRedrawPanel(aPanelNum, aNumSecs)
 
 	VUHDO_RELOAD_PANEL_NUM = aPanelNum;
@@ -2455,6 +2467,10 @@ do
 				VUHDO_registerAllBouquets(false);
 				VUHDO_initAllEventBouquets();
 			end
+		end
+
+		if VUHDO_checkTimer("REBUILD_AURA_GROUPS") then
+			VUHDO_rebuildCanColorBarGroupsCache();
 		end
 
 		return;
