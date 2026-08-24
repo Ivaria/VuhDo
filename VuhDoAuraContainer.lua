@@ -1923,6 +1923,9 @@ do
 	local tSlotKeys;
 	local tSlotFrames;
 	local tGroupKeys;
+	local tNeedsProcessAuraPolicy;
+	local tGroupCandidateFilters;
+	local tSlotCandidateFilters;
 	function VUHDO_buildManagedAuraContainer(aContainerTemplate)
 
 		tParent = aContainerTemplate["parent"];
@@ -1959,6 +1962,34 @@ do
 		if aContainerTemplate["isOverlay"] then
 			tContainer:EnableMouse(false);
 			tContainer:SetMouseMotionEnabled(false);
+		end
+
+		tNeedsProcessAuraPolicy = false;
+
+		for _, tGroup in ipairs(aContainerTemplate["groups"] or sEmpty) do
+			tGroupCandidateFilters = tGroup["candidateFilters"];
+
+			if tGroupCandidateFilters and tGroupCandidateFilters["processedAuraType"] then
+				tNeedsProcessAuraPolicy = true;
+
+				break;
+			end
+		end
+
+		if not tNeedsProcessAuraPolicy then
+			for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
+				tSlotCandidateFilters = tSlot["candidateFilters"];
+
+				if tSlotCandidateFilters and tSlotCandidateFilters["processedAuraType"] then
+					tNeedsProcessAuraPolicy = true;
+
+					break;
+				end
+			end
+		end
+
+		if tNeedsProcessAuraPolicy then
+			tContainer:SetAuraProcessingPolicy(CustomAuraContainerAuraProcessingPolicy.ProcessAura, nil);
 		end
 
 		tSlotKeys = { };

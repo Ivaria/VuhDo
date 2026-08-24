@@ -26,13 +26,11 @@ local VUHDO_AURA_LIST_ENTRY_SPELL;
 
 local VUHDO_getAuraGroup;
 local VUHDO_getAllAuraGroups;
-local VUHDO_auraMatchesFilter;
+local VUHDO_isAuraMatchingGroupFilters;
 local VUHDO_auraSourceMatchesFilter;
-local VUHDO_isAuraIgnored;
 local VUHDO_playSoundFile;
 local VUHDO_addResolvedAuraContainerSpellIds;
 local VUHDO_isAuraModeContainers;
-local VUHDO_LibSharedMedia;
 
 local sNextSoundTime = { };
 local sNativeAuraSoundIds = { };
@@ -60,13 +58,11 @@ function VUHDO_auraSoundsInitLocalOverrides()
 
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_getAllAuraGroups = _G["VUHDO_getAllAuraGroups"];
-	VUHDO_auraMatchesFilter = _G["VUHDO_auraMatchesFilter"];
+	VUHDO_isAuraMatchingGroupFilters = _G["VUHDO_isAuraMatchingGroupFilters"];
 	VUHDO_auraSourceMatchesFilter = _G["VUHDO_auraSourceMatchesFilter"];
-	VUHDO_isAuraIgnored = _G["VUHDO_isAuraIgnored"];
 	VUHDO_playSoundFile = _G["VUHDO_playSoundFile"];
 	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
-	VUHDO_LibSharedMedia = _G["VUHDO_LibSharedMedia"];
 
 	return;
 
@@ -524,11 +520,8 @@ function VUHDO_checkAuraGroupSounds(aUnit, anAuraData)
 				tGroupType = tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
 
 				if tGroupType == VUHDO_AURA_GROUP_TYPE_FILTER then
-					if tGroup["filter"] and VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["resolvedFilter"]) then
-						if (not tGroup["excludeFilter"] or not VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tGroup["excludeFilter"]))
-							and not VUHDO_isAuraIgnored(anAuraData, tGroupId) then
-							VUHDO_playAuraGroupSound(tGroupId);
-						end
+					if tGroup["filter"] and VUHDO_isAuraMatchingGroupFilters(aUnit, tGroupId, tGroup, anAuraData) then
+						VUHDO_playAuraGroupSound(tGroupId);
 					end
 				elseif tGroupType == VUHDO_AURA_GROUP_TYPE_LIST then
 					if VUHDO_auraMatchesListGroup(anAuraData, tGroup) then

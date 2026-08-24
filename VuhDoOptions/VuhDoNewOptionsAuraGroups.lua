@@ -6,7 +6,6 @@ local tinsert = table.insert;
 local tremove = table.remove;
 local tsort = table.sort;
 local twipe = table.wipe;
-local strfind = string.find;
 
 VUHDO_AURA_GROUPS_SELECTED = nil;
 VUHDO_AURA_GROUPS_PENDING_SELECTION = nil;
@@ -40,6 +39,20 @@ VUHDO_AURA_GROUPS_SOUND = nil;
 VUHDO_AURA_GROUPS_ENABLED = true;
 VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL = { };
 VUHDO_AURA_GROUPS_IGNORE_SELECTED = "";
+
+VUHDO_AURA_GROUPS_CONDITIONS = {
+	["isStealable"] = 2,
+	["isFromPlayerOrPlayerPet"] = 2,
+	["isRoleAura"] = 2,
+	["isPriorityAura"] = 2,
+	["isBossAura"] = 2,
+	["isBossOrRoleAura"] = 2,
+	["canApplyAura"] = 2,
+	["nameplateShowAll"] = 2,
+	["nameplateShowPersonal"] = 2,
+};
+
+VUHDO_AURA_GROUPS_HAS_DURATION = false;
 VUHDO_AURA_GROUPS_ADD_SPELL_SELECTED = "";
 VUHDO_AURA_GROUPS_ADD_SPELL_COMBO_MODEL = { };
 
@@ -89,18 +102,21 @@ VUHDO_AURA_FILTER_OPTIONS = {
 	{ "HELPFUL|PLAYER|RAID_IN_COMBAT", VUHDO_I18N_AURA_GROUP_MY_HOTS, nil, nil, VUHDO_I18N_TT.K637 },
 	{ "HELPFUL|RAID_IN_COMBAT", VUHDO_I18N_AURA_GROUP_ALL_HOTS, nil, nil, VUHDO_I18N_TT.K638 },
 	{ "HARMFUL|RAID_PLAYER_DISPELLABLE", VUHDO_I18N_AURA_FILTER_HARMFUL_DISPELLABLE, nil, nil, VUHDO_I18N_TT.K639 },
-	{ "HARMFUL|VUHDO_ALL_DISPELLABLE", VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE, nil, nil, VUHDO_I18N_TT.K826 },
+	{ "HARMFUL|DISPELLABLE", VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE, nil, nil, VUHDO_I18N_TT.K826 },
 	{ "HARMFUL|CROWD_CONTROL", VUHDO_I18N_AURA_GROUP_CC, nil, nil, VUHDO_I18N_TT.K640 },
 	{ "HELPFUL|BIG_DEFENSIVE", VUHDO_I18N_AURA_GROUP_BIG_DEF, nil, nil, VUHDO_I18N_TT.K641 },
 	{ "HELPFUL|EXTERNAL_DEFENSIVE", VUHDO_I18N_AURA_GROUP_EXTERNAL_DEF, nil, nil, VUHDO_I18N_TT.K642 },
+	{ "HELPFUL|PLAYER", VUHDO_I18N_AURA_FILTER_HELPFUL_PLAYER, nil, nil, VUHDO_I18N_TT.K842 },
 	{ "HELPFUL|RAID|PLAYER", VUHDO_I18N_AURA_GROUP_MY_BUFFS, nil, nil, VUHDO_I18N_TT.K643 },
 	{ "HELPFUL|RAID", VUHDO_I18N_AURA_GROUP_ALL_RAID_BUFFS, nil, nil, VUHDO_I18N_TT.K644 },
 	{ "HARMFUL|RAID", VUHDO_I18N_AURA_GROUP_RAID_DEBUFFS, nil, nil, VUHDO_I18N_TT.K645 },
 	{ "HELPFUL|IMPORTANT", VUHDO_I18N_AURA_GROUP_IMPORTANT_BUFFS, nil, nil, VUHDO_I18N_TT.K646 },
 	{ "HARMFUL|IMPORTANT", VUHDO_I18N_AURA_GROUP_IMPORTANT_DEBUFFS, nil, nil, VUHDO_I18N_TT.K647 },
 	{ "HELPFUL|CANCELABLE", VUHDO_I18N_AURA_GROUP_CANCELABLE, nil, nil, VUHDO_I18N_TT.K648 },
-	{ "HELPFUL|NOT_CANCELABLE", VUHDO_I18N_AURA_GROUP_NOT_CANCELABLE, nil, nil, VUHDO_I18N_TT.K649 },
+	{ "HELPFUL|!CANCELABLE", VUHDO_I18N_AURA_GROUP_NOT_CANCELABLE, nil, nil, VUHDO_I18N_TT.K649 },
 	{ "HELPFUL|MAW", VUHDO_I18N_AURA_GROUP_TORGHAST_ANIMA, nil, nil, VUHDO_I18N_TT.K650 },
+	{ "HELPFUL|RAID_PLAYER_DISPELLABLE", VUHDO_I18N_AURA_FILTER_HELPFUL_PURGEABLE, nil, nil, VUHDO_I18N_TT.K843 },
+	{ "HELPFUL|DISPELLABLE", VUHDO_I18N_AURA_FILTER_HELPFUL_ALL_PURGEABLE, nil, nil, VUHDO_I18N_TT.K844 },
 	{ "HARMFUL|INCLUDE_NAME_PLATE_ONLY|PLAYER", VUHDO_I18N_AURA_GROUP_MY_NAMEPLATE, nil, nil, VUHDO_I18N_TT.K651 },
 	{ "HARMFUL|INCLUDE_NAME_PLATE_ONLY", VUHDO_I18N_AURA_GROUP_ALL_NAMEPLATE, nil, nil, VUHDO_I18N_TT.K652 },
 	{ "HARMFUL|PLAYER", VUHDO_I18N_AURA_GROUP_MY_DEBUFFS, nil, nil, VUHDO_I18N_TT.K663 },
@@ -134,6 +150,9 @@ local VUHDO_AURA_GROUP_TOOLTIPS = {
 	["ENHANCEMENT_SHAMAN_BUFFS"] = VUHDO_I18N_TT.K683,
 	["BREWMASTER_MONK_BUFFS"] = VUHDO_I18N_TT.K684,
 	["WARLOCK_METAMORPHOSIS"] = VUHDO_I18N_TT.K685,
+	["BOSS_DEBUFFS"] = VUHDO_I18N_TT.K856,
+	["PRIORITY_DEBUFFS"] = VUHDO_I18N_TT.K857,
+	["RELEVANT_BUFFS"] = VUHDO_I18N_TT.K858,
 };
 
 local VUHDO_AURA_FILTER_TOOLTIPS = {
@@ -142,18 +161,21 @@ local VUHDO_AURA_FILTER_TOOLTIPS = {
 	["HELPFUL|PLAYER|RAID_IN_COMBAT"] = VUHDO_I18N_TT.K637,
 	["HELPFUL|RAID_IN_COMBAT"] = VUHDO_I18N_TT.K638,
 	["HARMFUL|RAID_PLAYER_DISPELLABLE"] = VUHDO_I18N_TT.K639,
-	["HARMFUL|VUHDO_ALL_DISPELLABLE"] = VUHDO_I18N_TT.K826,
+	["HARMFUL|DISPELLABLE"] = VUHDO_I18N_TT.K826,
 	["HARMFUL|CROWD_CONTROL"] = VUHDO_I18N_TT.K640,
 	["HELPFUL|BIG_DEFENSIVE"] = VUHDO_I18N_TT.K641,
 	["HELPFUL|EXTERNAL_DEFENSIVE"] = VUHDO_I18N_TT.K642,
+	["HELPFUL|PLAYER"] = VUHDO_I18N_TT.K842,
 	["HELPFUL|RAID|PLAYER"] = VUHDO_I18N_TT.K643,
 	["HELPFUL|RAID"] = VUHDO_I18N_TT.K644,
 	["HARMFUL|RAID"] = VUHDO_I18N_TT.K645,
 	["HELPFUL|IMPORTANT"] = VUHDO_I18N_TT.K646,
 	["HARMFUL|IMPORTANT"] = VUHDO_I18N_TT.K647,
 	["HELPFUL|CANCELABLE"] = VUHDO_I18N_TT.K648,
-	["HELPFUL|NOT_CANCELABLE"] = VUHDO_I18N_TT.K649,
+	["HELPFUL|!CANCELABLE"] = VUHDO_I18N_TT.K649,
 	["HELPFUL|MAW"] = VUHDO_I18N_TT.K650,
+	["HELPFUL|RAID_PLAYER_DISPELLABLE"] = VUHDO_I18N_TT.K843,
+	["HELPFUL|DISPELLABLE"] = VUHDO_I18N_TT.K844,
 	["HARMFUL|INCLUDE_NAME_PLATE_ONLY|PLAYER"] = VUHDO_I18N_TT.K651,
 	["HARMFUL|INCLUDE_NAME_PLATE_ONLY"] = VUHDO_I18N_TT.K652,
 	["HARMFUL|PLAYER"] = VUHDO_I18N_TT.K663,
@@ -181,6 +203,18 @@ local sSelectedGroupId = nil;
 local sAuraGroupEntryItems = { };
 local sSpellEntrySettingsGroupId = nil;
 local sSpellEntrySettingsEntryIdx = nil;
+
+local sCandidateBoolFields = {
+	"isStealable",
+	"isFromPlayerOrPlayerPet",
+	"isRoleAura",
+	"isPriorityAura",
+	"isBossAura",
+	"isBossOrRoleAura",
+	"canApplyAura",
+	"nameplateShowAll",
+	"nameplateShowPersonal",
+};
 
 
 
@@ -244,7 +278,6 @@ end
 
 
 --
-local tGlowName;
 local tGlowDef;
 local tDisplayName;
 function VUHDO_initGlowStyleComboModel()
@@ -483,11 +516,11 @@ local tAddSpellButton;
 local tNewBouquetCombo;
 local tAddBouquetButton;
 local tAddEmptyButton;
-local tIgnorePanel;
-local tIgnoreLabel;
-local tIgnoreCombo;
-local tIgnoreAddButton;
-local tIgnoreDeleteButton;
+local tIgnoreListButton;
+local tConditionsPanel;
+local tCondControl;
+local tCondNames;
+local tRow3TriState;
 local tSoundCombo;
 local tSoundLabel;
 local tFrame;
@@ -515,7 +548,8 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	tGlowBarColorSwatch = _G["VuhDoNewOptionsAuraGroupsStorePanelGlowBarColorTexture"];
 	tDeleteButton = _G["VuhDoNewOptionsAuraGroupsStorePanelDeleteButton"];
 	tEnabledCheck = _G["VuhDoNewOptionsAuraGroupsStorePanelEnabledCheckButton"];
-	tIgnorePanel = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnorePanel"];
+	tIgnoreListButton = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnoreListButton"];
+	tConditionsPanel = _G["VuhDoNewOptionsAuraGroupsStorePanelConditionsPanel"];
 	tSoundCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelSoundCombo"];
 	tSoundLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelSoundLabel"];
 
@@ -577,32 +611,14 @@ function VUHDO_auraGroupsRefreshRightPanel()
 	end
 
 	if not tGroup then
-		if tIgnorePanel then
-			tIgnorePanel:Show();
+		if tIgnoreListButton then
+			tIgnoreListButton:Show();
+			tIgnoreListButton:Disable();
+			tIgnoreListButton:SetAlpha(0.5);
+		end
 
-			tIgnoreLabel = _G[tIgnorePanel:GetName() .. "IgnoreLabel"];
-			tIgnoreCombo = _G[tIgnorePanel:GetName() .. "IgnoreCombo"];
-			tIgnoreAddButton = _G[tIgnorePanel:GetName() .. "IgnoreAddButton"];
-			tIgnoreDeleteButton = _G[tIgnorePanel:GetName() .. "IgnoreDeleteButton"];
-
-			if tIgnoreLabel then
-				tIgnoreLabel:SetAlpha(0.5);
-			end
-
-			if tIgnoreCombo then
-				tIgnoreCombo:Disable();
-				tIgnoreCombo:SetAlpha(0.5);
-			end
-
-			if tIgnoreAddButton then
-				tIgnoreAddButton:Disable();
-				tIgnoreAddButton:SetAlpha(0.5);
-			end
-
-			if tIgnoreDeleteButton then
-				tIgnoreDeleteButton:Disable();
-				tIgnoreDeleteButton:SetAlpha(0.5);
-			end
+		if tConditionsPanel then
+			tConditionsPanel:Hide();
 		end
 
 		if tFilterLabel then
@@ -625,8 +641,12 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tListEntriesPanel:Hide();
 		end
 	elseif (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
-		if tIgnorePanel then
-			tIgnorePanel:Hide();
+		if tIgnoreListButton then
+			tIgnoreListButton:Hide();
+		end
+
+		if tConditionsPanel then
+			tConditionsPanel:Hide();
 		end
 
 		if tFilterLabel then
@@ -783,52 +803,72 @@ function VUHDO_auraGroupsRefreshRightPanel()
 			tListEntriesPanel:Hide();
 		end
 
-		if tColorTypeLabel and tFilterCombo then
-			tColorTypeLabel:ClearAllPoints();
-			tColorTypeLabel:SetPoint("TOPLEFT", tFilterCombo, "BOTTOMLEFT", 0, -16);
+		if tConditionsPanel then
+			tConditionsPanel:Show();
+			VUHDO_auraGroupsSyncConditionModels(tGroup);
+
+			tCondNames = {
+				{ "ConditionsRow1IsStealableTriState", "isStealable" },
+				{ "ConditionsRow1FromMeTriState", "isFromPlayerOrPlayerPet" },
+				{ "ConditionsRow1RoleAuraTriState", "isRoleAura" },
+				{ "ConditionsRow1PriorityAuraTriState", "isPriorityAura" },
+				{ "ConditionsRow2BossAuraTriState", "isBossAura" },
+				{ "ConditionsRow2BossOrRoleTriState", "isBossOrRoleAura" },
+				{ "ConditionsRow2CanApplyTriState", "canApplyAura" },
+				{ "ConditionsRow2NameplateAllTriState", "nameplateShowAll" },
+				{ "ConditionsRow3NameplatePersonalTriState", "nameplateShowPersonal" },
+			};
+
+			for _, tEntry in ipairs(tCondNames) do
+				tCondControl = _G["VuhDoNewOptionsAuraGroupsStorePanelConditionsPanel" .. tEntry[1]];
+
+				if tCondControl then
+					if tIsBuiltIn or tGroup["isInferred"] then
+						tCondControl:Disable();
+						tCondControl:SetAlpha(0.5);
+					else
+						tCondControl:Enable();
+						tCondControl:SetAlpha(1);
+					end
+
+					VUHDO_lnfTriStateCheckButtonInitFromModel(tCondControl);
+				end
+			end
+
+			tCondControl = _G["VuhDoNewOptionsAuraGroupsStorePanelConditionsPanelHasDurationCheck"];
+
+			if tCondControl then
+				VUHDO_lnfSetModel(tCondControl, "VUHDO_AURA_GROUPS_HAS_DURATION");
+				VUHDO_lnfCheckButtonInitFromModel(tCondControl);
+
+				if tIsBuiltIn or tGroup["isInferred"] then
+					tCondControl:Disable();
+					tCondControl:SetAlpha(0.5);
+				else
+					tCondControl:Enable();
+					tCondControl:SetAlpha(1);
+				end
+			end
 		end
 
-		if tIgnorePanel then
-			tIgnorePanel:Show();
-			VUHDO_auraGroupsRefreshIgnorePanel();
+		if tColorTypeLabel then
+			tRow3TriState = _G["VuhDoNewOptionsAuraGroupsStorePanelConditionsPanelConditionsRow3NameplatePersonalTriState"];
 
-			tIgnoreLabel = _G[tIgnorePanel:GetName() .. "IgnoreLabel"];
-			tIgnoreCombo = _G[tIgnorePanel:GetName() .. "IgnoreCombo"];
-			tIgnoreAddButton = _G[tIgnorePanel:GetName() .. "IgnoreAddButton"];
-			tIgnoreDeleteButton = _G[tIgnorePanel:GetName() .. "IgnoreDeleteButton"];
-
-			if tIgnoreLabel then
-				tIgnoreLabel:SetAlpha(tIsBuiltIn and 0.5 or 1);
+			if tRow3TriState then
+				tColorTypeLabel:ClearAllPoints();
+				VUHDO_PixelUtil.SetPoint(tColorTypeLabel, "TOPLEFT", tRow3TriState, "BOTTOMLEFT", 0, -4);
 			end
+		end
 
-			if tIgnoreCombo then
-				if tIsBuiltIn then
-					tIgnoreCombo:Disable();
-					tIgnoreCombo:SetAlpha(0.5);
-				else
-					tIgnoreCombo:Enable();
-					tIgnoreCombo:SetAlpha(1);
-				end
-			end
+		if tIgnoreListButton then
+			tIgnoreListButton:Show();
 
-			if tIgnoreAddButton then
-				if tIsBuiltIn then
-					tIgnoreAddButton:Disable();
-					tIgnoreAddButton:SetAlpha(0.5);
-				else
-					tIgnoreAddButton:Enable();
-					tIgnoreAddButton:SetAlpha(1);
-				end
-			end
-
-			if tIgnoreDeleteButton then
-				if tIsBuiltIn then
-					tIgnoreDeleteButton:Disable();
-					tIgnoreDeleteButton:SetAlpha(0.5);
-				else
-					tIgnoreDeleteButton:Enable();
-					tIgnoreDeleteButton:SetAlpha(1);
-				end
+			if tIsBuiltIn then
+				tIgnoreListButton:Disable();
+				tIgnoreListButton:SetAlpha(0.5);
+			else
+				tIgnoreListButton:Enable();
+				tIgnoreListButton:SetAlpha(1);
 			end
 		end
 	end
@@ -1283,10 +1323,145 @@ function VUHDO_auraGroupsFilterChanged(aComboBox, aValue, anArrayModel)
 
 		VUHDO_resolveAuraGroupFilter(VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]);
 
-		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["isHarmful"] = (aValue and strfind(aValue, "HARMFUL")) and true or false;
+		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["isHarmful"] = VUHDO_filterContainsToken(aValue, "HARMFUL");
 	end
 
 	VUHDO_rebuildCanColorBarGroupsCache();
+
+	return;
+
+end
+
+
+
+--
+local tCandidateBooleans;
+local tBoolField;
+local tTriValue;
+function VUHDO_auraGroupsSyncConditionModels(aGroup)
+
+	twipe(VUHDO_AURA_GROUPS_CONDITIONS);
+	VUHDO_AURA_GROUPS_HAS_DURATION = false;
+
+	if not aGroup then
+		return;
+	end
+
+	tCandidateBooleans = aGroup["candidateBooleans"];
+
+	for tCnt = 1, #sCandidateBoolFields do
+		tBoolField = sCandidateBoolFields[tCnt];
+		tTriValue = tCandidateBooleans and tCandidateBooleans[tBoolField];
+		VUHDO_AURA_GROUPS_CONDITIONS[tBoolField] = (tTriValue == 1 or tTriValue == 3) and tTriValue or 2;
+	end
+
+	VUHDO_AURA_GROUPS_HAS_DURATION = aGroup["hasDuration"] == true;
+
+	return;
+
+end
+
+
+
+--
+local tGroup;
+local tCandidateBooleans;
+local tBoolField;
+local tTriValue;
+function VUHDO_auraGroupsWriteCandidateBooleans(aGroup)
+
+	if not aGroup then
+		return;
+	end
+
+	tCandidateBooleans = aGroup["candidateBooleans"];
+
+	for tCnt = 1, #sCandidateBoolFields do
+		tBoolField = sCandidateBoolFields[tCnt];
+		tTriValue = VUHDO_AURA_GROUPS_CONDITIONS[tBoolField];
+
+		if tTriValue == 1 or tTriValue == 3 then
+			tCandidateBooleans = tCandidateBooleans or { };
+			tCandidateBooleans[tBoolField] = tTriValue;
+		elseif tCandidateBooleans then
+			tCandidateBooleans[tBoolField] = nil;
+		end
+	end
+
+	if tCandidateBooleans and not next(tCandidateBooleans) then
+		aGroup["candidateBooleans"] = nil;
+	else
+		aGroup["candidateBooleans"] = tCandidateBooleans;
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsCandidateBoolChanged(aCheckButton)
+
+	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		tGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
+
+		VUHDO_auraGroupsWriteCandidateBooleans(tGroup);
+		VUHDO_rebuildCanColorBarGroupsCache();
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsHasDurationChanged(aCheckButton)
+
+	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		tGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
+
+		if VUHDO_AURA_GROUPS_HAS_DURATION then
+			tGroup["hasDuration"] = true;
+		else
+			tGroup["hasDuration"] = nil;
+		end
+
+		VUHDO_rebuildCanColorBarGroupsCache();
+	end
+
+	return;
+
+end
+
+
+
+--
+local tFrame;
+function VUHDO_auraGroupsIgnoreListShow()
+
+	tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrame"];
+
+	if tFrame then
+		VUHDO_auraGroupsRefreshIgnorePanel();
+		tFrame:Show();
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraGroupsIgnoreListHide()
+
+	tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrame"];
+
+	if tFrame then
+		tFrame:Hide();
+	end
 
 	return;
 
@@ -1300,6 +1475,8 @@ function VUHDO_auraGroupsExcludeFilterChanged(aComboBox, aValue, anArrayModel)
 	if sSelectedGroupId and VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
 		VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId]["excludeFilter"] = (aValue ~= "" and aValue) or nil;
 	end
+
+	VUHDO_rebuildCanColorBarGroupsCache();
 
 	return;
 
@@ -1387,7 +1564,7 @@ function VUHDO_auraGroupsRefreshIgnorePanel()
 		tinsert(VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL, { tName, tDisplayName });
 	end
 
-	tFrame = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnorePanel"];
+	tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrame"];
 
 	if tFrame then
 		tFrame = _G[tFrame:GetName() .. "IgnoreComboEditBox"];
@@ -1396,7 +1573,7 @@ function VUHDO_auraGroupsRefreshIgnorePanel()
 			tFrame:SetText("");
 		end
 
-		tFrame = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnorePanelIgnoreCombo"];
+		tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreCombo"];
 
 		if tFrame then
 			VUHDO_lnfComboBoxInitFromModel(tFrame);
@@ -1434,7 +1611,7 @@ function VUHDO_auraGroupsIgnoreAdd()
 		return;
 	end
 
-	tEditBox = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnorePanelIgnoreComboEditBox"];
+	tEditBox = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreComboEditBox"];
 
 	if not tEditBox then
 		return;
@@ -1496,7 +1673,7 @@ function VUHDO_auraGroupsIgnoreDelete()
 		return;
 	end
 
-	tComboEditBox = _G["VuhDoNewOptionsAuraGroupsStorePanelIgnorePanelIgnoreComboEditBox"];
+	tComboEditBox = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreComboEditBox"];
 
 	if not tComboEditBox then
 		return;

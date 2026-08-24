@@ -7,6 +7,7 @@ local tonumber = tonumber;
 local strsplit = strsplit;
 local strupper = string.upper;
 local strfind = string.find;
+local strsub = string.sub;
 local twipe = table.wipe;
 local tinsert = table.insert;
 local floor = math.floor;
@@ -75,7 +76,7 @@ local VUHDO_buildMixedBouquetListSlotTemplates;
 local VUHDO_applyBarButtonSetupFields;
 local VUHDO_getAuraTimerFormatter;
 local VUHDO_getAuraTimerColorCurve;
-local VUHDO_getAnchorTriStateBool;
+local VUHDO_getTriStateBool;
 local VUHDO_buildAnchorButtonSetup;
 local VUHDO_getHealthBarWidth;
 local VUHDO_getHealthBarHeight;
@@ -99,6 +100,23 @@ local sAllDispelGlowTypeNames = { };
 local sPlayerDispelGlowTypeNames = { };
 local sPlayerPurgeGlowTypeNames = { };
 local sGroupResolvedFilterCache = { };
+
+local sNonNegatableFilterTokens = {
+	["INCLUDE_NAME_PLATE_ONLY"] = true,
+	["MAW"] = true,
+};
+
+local sCandidateBooleanKeys = {
+	"isStealable",
+	"isFromPlayerOrPlayerPet",
+	"isRoleAura",
+	"isPriorityAura",
+	"isBossAura",
+	"isBossOrRoleAura",
+	"canApplyAura",
+	"nameplateShowAll",
+	"nameplateShowPersonal",
+};
 
 local sAuraBarFallbackColor = {
 	["R"] = 0.2,
@@ -222,7 +240,7 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_applyBarButtonSetupFields = _G["VUHDO_applyBarButtonSetupFields"];
 	VUHDO_getAuraTimerFormatter = _G["VUHDO_getAuraTimerFormatter"];
 	VUHDO_getAuraTimerColorCurve = _G["VUHDO_getAuraTimerColorCurve"];
-	VUHDO_getAnchorTriStateBool = _G["VUHDO_getAnchorTriStateBool"];
+	VUHDO_getTriStateBool = _G["VUHDO_getTriStateBool"];
 	VUHDO_buildAnchorButtonSetup = _G["VUHDO_buildAnchorButtonSetup"];
 	VUHDO_getHealthBarWidth = _G["VUHDO_getHealthBarWidth"];
 	VUHDO_getHealthBarHeight = _G["VUHDO_getHealthBarHeight"];
@@ -287,118 +305,98 @@ end
 
 
 
---
-local tType;
-local tFilter;
-local tExcludeFilter;
-local tTokens;
-local tNative;
-local tUpper;
-local tEmit;
-local tHasCategory;
-local tSeen = { };
-local tSlotIsMine;
-local tSlotIsOthers;
-local tEntryIsMine;
-local tEntryIsOthers;
-local tHasMixedSource;
-local tHasRaidPlayerDispellable;
-function VUHDO_buildAuraGroupNativeFilterString(aGroup)
+do
+	--
+	local tType;
+	local tFilter;
+	local tExcludeFilter;
+	local tTokens;
+	local tNative;
+	local tUpper;
+	local tEmit;
+	local tHasCategory;
+	local tSeen = { };
+	local tSlotIsMine;
+	local tSlotIsOthers;
+	local tEntryIsMine;
+	local tEntryIsOthers;
+	local tHasMixedSource;
+	local tHasRaidPlayerDispellable;
+	local tIsNegated;
+	local tBase;
+	function VUHDO_buildAuraGroupNativeFilterString(aGroup)
 
-	if not aGroup then
-		return "HELPFUL";
-	end
+		if not aGroup then
+			return "HELPFUL";
+		end
 
-	tType = aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
-	tFilter = aGroup["resolvedFilter"] or aGroup["filter"];
+		tType = aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
+		tFilter = aGroup["resolvedFilter"] or aGroup["filter"];
 
-	if tType == VUHDO_AURA_GROUP_TYPE_LIST then
-		tNative = aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
+		if tType == VUHDO_AURA_GROUP_TYPE_LIST then
+			tNative = aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
 
-		tSlotIsMine = nil;
-		tSlotIsOthers = nil;
-		tHasMixedSource = false;
+			tSlotIsMine = nil;
+			tSlotIsOthers = nil;
+			tHasMixedSource = false;
 
-		for _, tEntry in ipairs(aGroup["entries"] or sEmpty) do
-			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
-				if tSlotIsMine == nil then
-					tSlotIsMine = tEntry["mine"] ~= false;
-					tSlotIsOthers = tEntry["others"] == true;
-				else
-					tEntryIsMine = tEntry["mine"] ~= false;
-					tEntryIsOthers = tEntry["others"] == true;
+			for _, tEntry in ipairs(aGroup["entries"] or sEmpty) do
+				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+					if tSlotIsMine == nil then
+						tSlotIsMine = tEntry["mine"] ~= false;
+						tSlotIsOthers = tEntry["others"] == true;
+					else
+						tEntryIsMine = tEntry["mine"] ~= false;
+						tEntryIsOthers = tEntry["others"] == true;
 
-					if tEntryIsMine ~= tSlotIsMine or tEntryIsOthers ~= tSlotIsOthers then
-						tHasMixedSource = true;
+						if tEntryIsMine ~= tSlotIsMine or tEntryIsOthers ~= tSlotIsOthers then
+							tHasMixedSource = true;
 
-						break;
+							break;
+						end
 					end
 				end
 			end
-		end
 
-		if not tHasMixedSource and tSlotIsMine ~= nil then
-			if tSlotIsMine and not tSlotIsOthers then
-				return tNative .. "|PLAYER";
-			elseif tSlotIsOthers and not tSlotIsMine then
-				return tNative .. "|!PLAYER";
+			if not tHasMixedSource and tSlotIsMine ~= nil then
+				if tSlotIsMine and not tSlotIsOthers then
+					return tNative .. "|PLAYER";
+				elseif tSlotIsOthers and not tSlotIsMine then
+					return tNative .. "|!PLAYER";
+				end
 			end
+
+			return tNative;
 		end
 
-		return tNative;
-	end
-
-	if not tFilter then
-		return aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
-	end
-
-	tHasRaidPlayerDispellable = strfind(tFilter, "RAID_PLAYER_DISPELLABLE", 1, true) ~= nil;
-
-	twipe(tSeen);
-	tTokens = { strsplit("|", tFilter) };
-	tNative = "";
-	tHasCategory = false;
-
-	for _, tToken in ipairs(tTokens) do
-		tUpper = strupper(tToken);
-
-		if tUpper == "NOT_CANCELABLE" then
-			tEmit = "!CANCELABLE";
-		elseif tHasRaidPlayerDispellable and tUpper == "PLAYER" then
-			tEmit = nil;
-		elseif VUHDO_AURA_NATIVE_FILTER_TOKENS[tUpper] then
-			tEmit = tUpper;
-		else
-			tEmit = nil;
+		if not tFilter then
+			return aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
 		end
 
-		if tEmit and not tSeen[tEmit] then
-			tSeen[tEmit] = true;
+		tHasRaidPlayerDispellable = strfind(tFilter, "RAID_PLAYER_DISPELLABLE", 1, true) ~= nil;
 
-			tNative = tNative == "" and tEmit or (tNative .. "|" .. tEmit);
-
-			if tEmit == "HELPFUL" or tEmit == "HARMFUL" then
-				tHasCategory = true;
-			end
-		end
-	end
-
-	if not tHasCategory then
-		tNative = (aGroup["isHarmful"] and "HARMFUL" or "HELPFUL") .. (tNative == "" and "" or ("|" .. tNative));
-	end
-
-	tExcludeFilter = aGroup["excludeFilter"];
-
-	if tExcludeFilter then
-		tTokens = { strsplit("|", tExcludeFilter) };
+		twipe(tSeen);
+		tTokens = { strsplit("|", tFilter) };
+		tNative = "";
+		tHasCategory = false;
 
 		for _, tToken in ipairs(tTokens) do
 			tUpper = strupper(tToken);
+			tIsNegated = strfind(tUpper, "!", 1, true) == 1;
+			tBase = tIsNegated and strsub(tUpper, 2) or tUpper;
 
-			if tUpper == "NOT_CANCELABLE" then
-				tEmit = "CANCELABLE";
-			elseif VUHDO_AURA_NATIVE_FILTER_TOKENS[tUpper] then
-				tEmit = "!" .. tUpper;
+			if tBase == "NOT_CANCELABLE" then
+				tEmit = "!CANCELABLE";
+			elseif tHasRaidPlayerDispellable and tBase == "PLAYER" then
+				tEmit = nil;
+			elseif VUHDO_AURA_NATIVE_FILTER_TOKENS[tBase] then
+				if tIsNegated and sNonNegatableFilterTokens[tBase] then
+					tEmit = tBase;
+				elseif tIsNegated then
+					tEmit = "!" .. tBase;
+				else
+					tEmit = tBase;
+				end
 			else
 				tEmit = nil;
 			end
@@ -406,13 +404,51 @@ function VUHDO_buildAuraGroupNativeFilterString(aGroup)
 			if tEmit and not tSeen[tEmit] then
 				tSeen[tEmit] = true;
 
-				tNative = tNative .. "|" .. tEmit;
+				tNative = tNative == "" and tEmit or (tNative .. "|" .. tEmit);
+
+				if tEmit == "HELPFUL" or tEmit == "HARMFUL" then
+					tHasCategory = true;
+				end
 			end
 		end
+
+		if not tHasCategory then
+			tNative = (aGroup["isHarmful"] and "HARMFUL" or "HELPFUL") .. (tNative == "" and "" or ("|" .. tNative));
+		end
+
+		tExcludeFilter = aGroup["excludeFilter"];
+
+		if tExcludeFilter then
+			tTokens = { strsplit("|", tExcludeFilter) };
+
+			for _, tToken in ipairs(tTokens) do
+				tUpper = strupper(tToken);
+				tIsNegated = strfind(tUpper, "!", 1, true) == 1;
+				tBase = tIsNegated and strsub(tUpper, 2) or tUpper;
+
+				if tBase == "NOT_CANCELABLE" then
+					tEmit = "CANCELABLE";
+				elseif VUHDO_AURA_NATIVE_FILTER_TOKENS[tBase] then
+					if tIsNegated then
+						tEmit = tBase;
+					else
+						tEmit = "!" .. tBase;
+					end
+				else
+					tEmit = nil;
+				end
+
+				if tEmit and not tSeen[tEmit] then
+					tSeen[tEmit] = true;
+
+					tNative = tNative .. "|" .. tEmit;
+				end
+			end
+		end
+
+		return tNative;
+
 	end
-
-	return tNative;
-
 end
 
 
@@ -470,7 +506,6 @@ local tCandidateFilters;
 local tExpressible;
 local tType;
 local tSpellIds;
-local tNum;
 function VUHDO_getAuraGroupResolvedFilters(aGroup)
 
 	if not aGroup then
@@ -556,6 +591,7 @@ function VUHDO_resolveAuraGroupCandidateFilters(aGroup)
 			["Curse"] = true,
 			["Disease"] = true,
 			["Poison"] = true,
+			["Bleed"] = true,
 		};
 	end
 
@@ -949,7 +985,6 @@ end
 
 --
 local tResult;
-local tNum;
 function VUHDO_resolveGroupExcludeSpellIDs(aGroup)
 
 	if not aGroup then
@@ -1152,9 +1187,9 @@ do
 		tSlotEntryDurationMode = anEntry["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
 		tSlotEntryTimerThreshold = anEntry["timerThreshold"] or 9.99;
 
-		tSlotEntryShowTimer = VUHDO_getAnchorTriStateBool(anEntry, "showTimer", nil);
-		tSlotEntryShowStacks = VUHDO_getAnchorTriStateBool(anEntry, "showStacks", nil);
-		tSlotEntryShowClock = VUHDO_getAnchorTriStateBool(anEntry, "showClock", nil);
+		tSlotEntryShowTimer = VUHDO_getTriStateBool(anEntry, "showTimer", nil);
+		tSlotEntryShowStacks = VUHDO_getTriStateBool(anEntry, "showStacks", nil);
+		tSlotEntryShowClock = VUHDO_getTriStateBool(anEntry, "showClock", nil);
 
 		tNeedsSlotButtonCopy = tSlotEntryDurationMode ~= tAnchorDurationMode
 			or tSlotEntryTimerThreshold ~= tAnchorTimerThreshold
@@ -1834,53 +1869,110 @@ end
 
 
 --
-local tType;
-local tIsHarmful;
-local tCandidate;
-local tSpellIds;
-local tExcludeIds;
-local tValue;
-local tNum;
-function VUHDO_resolveGroupCandidateFilters(aGroup, anAnchorConfig)
+local tResolvedProcessedType;
+function VUHDO_resolveProcessedAuraType(aTypeName)
 
-	if not aGroup then
+	if not aTypeName then
 		return nil;
 	end
 
-	tCandidate = nil;
-	tType = aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
-	tIsHarmful = aGroup["isHarmful"] == true;
+	tResolvedProcessedType = AuraUtil.AuraUpdateChangedType[aTypeName];
 
-	if not tIsHarmful and tType == VUHDO_AURA_GROUP_TYPE_LIST and aGroup["entries"] then
-		tSpellIds = nil;
+	if not tResolvedProcessedType or tResolvedProcessedType == AuraUtil.AuraUpdateChangedType.None then
+		return nil;
+	end
 
-		for _, tEntry in ipairs(aGroup["entries"]) do
-			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
-				tValue = tEntry["value"];
+	return tResolvedProcessedType;
 
-				tSpellIds = tSpellIds or { };
+end
 
-				VUHDO_addResolvedAuraContainerSpellIds(tSpellIds, tValue);
+
+
+do
+	--
+	local tType;
+	local tIsHarmful;
+	local tCandidate;
+	local tSpellIds;
+	local tExcludeIds;
+	local tValue;
+	local tCandidateBooleans;
+	local tTriState;
+	local tBoolKey;
+	local tResolvedBool;
+	function VUHDO_resolveGroupCandidateFilters(aGroup, anAnchorConfig)
+
+		if not aGroup then
+			return nil;
+		end
+
+		tCandidate = nil;
+		tType = aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
+		tIsHarmful = aGroup["isHarmful"] == true;
+
+		if not tIsHarmful and tType == VUHDO_AURA_GROUP_TYPE_LIST and aGroup["entries"] then
+			tSpellIds = nil;
+
+			for _, tEntry in ipairs(aGroup["entries"]) do
+				if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
+					tValue = tEntry["value"];
+
+					tSpellIds = tSpellIds or { };
+
+					VUHDO_addResolvedAuraContainerSpellIds(tSpellIds, tValue);
+				end
+			end
+
+			if tSpellIds and next(tSpellIds) then
+				tCandidate = tCandidate or { };
+
+				tCandidate["includeSpellIDs"] = tSpellIds;
 			end
 		end
 
-		if tSpellIds and next(tSpellIds) then
+		tExcludeIds = VUHDO_resolveGroupExcludeSpellIDs(aGroup);
+
+		if tExcludeIds then
 			tCandidate = tCandidate or { };
 
-			tCandidate["includeSpellIDs"] = tSpellIds;
+			tCandidate["excludeSpellIDs"] = tExcludeIds;
 		end
+
+		tCandidateBooleans = aGroup["candidateBooleans"];
+
+		if tCandidateBooleans then
+			for tCnt = 1, #sCandidateBooleanKeys do
+				tBoolKey = sCandidateBooleanKeys[tCnt];
+				tTriState = tCandidateBooleans[tBoolKey];
+				tResolvedBool = VUHDO_getTriStateBool({ [tBoolKey] = tTriState }, tBoolKey, nil);
+
+				if tResolvedBool ~= nil then
+					tCandidate = tCandidate or { };
+
+					tCandidate[tBoolKey] = tResolvedBool;
+				end
+			end
+		end
+
+		if aGroup["processedAuraType"] then
+			tResolvedProcessedType = VUHDO_resolveProcessedAuraType(aGroup["processedAuraType"]);
+
+			if tResolvedProcessedType then
+				tCandidate = tCandidate or { };
+
+				tCandidate["processedAuraType"] = tResolvedProcessedType;
+			end
+		end
+
+		if aGroup["hasDuration"] then
+			tCandidate = tCandidate or { };
+
+			tCandidate["maxDuration"] = math.huge;
+		end
+
+		return tCandidate;
+
 	end
-
-	tExcludeIds = VUHDO_resolveGroupExcludeSpellIDs(aGroup);
-
-	if tExcludeIds then
-		tCandidate = tCandidate or { };
-
-		tCandidate["excludeSpellIDs"] = tExcludeIds;
-	end
-
-	return tCandidate;
-
 end
 
 
