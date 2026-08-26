@@ -4,6 +4,7 @@ local pairs = pairs;
 local ipairs = ipairs;
 local next = next;
 local strfind = string.find;
+local tostring = tostring;
 local twipe = table.wipe;
 local min = math.min;
 
@@ -1752,7 +1753,7 @@ do
 						["bouquetIdx"] = tCnt,
 						["shadowValueMode"] = tShadowValueMode,
 						["friendlyOnly"] = true,
-						["entryKey"] = tCnt .. ":spell:" .. tSpellId .. ":friendly",
+						["entryKey"] = tCnt .. ":spell:" .. tostring(tSpellId or tItem["name"]) .. ":friendly",
 					};
 
 					if tOverlayTarget["shape"] == "bar" then

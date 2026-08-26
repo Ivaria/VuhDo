@@ -876,7 +876,7 @@ function VUHDO_resolveAuraContainerSpellId(aValue)
 		return nil;
 	end
 
-	tResolvedSpellId = tonumber(aValue) or VUHDO_SPELL_NAME_TO_ID[aValue] or GetSpellIDForSpellIdentifier(aValue);
+	tResolvedSpellId = tonumber(aValue) or VUHDO_AURA_NAME_PREFERRED_SPELL_ID[aValue] or VUHDO_SPELL_NAME_TO_ID[aValue] or GetSpellIDForSpellIdentifier(aValue);
 
 	return tResolvedSpellId;
 
