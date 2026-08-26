@@ -13,7 +13,7 @@ local InCombatLockdown = InCombatLockdown;
 local UnitExists = UnitExists;
 local UnitCanAttack = UnitCanAttack;
 local UnitCanAssist = UnitCanAssist;
-local UnitUsingVehicle = UnitUsingVehicle;
+local UnitIsPlayerControlledOrGroupMember = UnitIsPlayerControlledOrGroupMember;
 local UnitIsDeadOrGhost = UnitIsDeadOrGhost;
 local UnitIsVisible = UnitIsVisible;
 local issecretvalue = issecretvalue;
@@ -135,6 +135,8 @@ local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
 local VUHDO_SPELL_DURATION_MODE_FULL;
 local VUHDO_SPELL_DURATION_MODE_ALIVE;
 local VUHDO_ATLAS_TEXTURES;
+local VUHDO_AURA_IDENTITY_GATE_HELPFUL;
+local VUHDO_AURA_IDENTITY_GATE_HARMFUL;
 
 local VUHDO_PixelUtil;
 local VUHDO_LibSharedMedia;
@@ -196,7 +198,8 @@ local sEmpty = { };
 
 local sGateState = {
 	["canAttack"] = false,
-	["isAssistRestricted"] = false,
+	["canApplyHelpfulIdentity"] = false,
+	["canApplyHarmfulIdentity"] = false,
 	["isAuraFilterRestricted"] = false,
 	["isDisconnected"] = false,
 };
@@ -385,6 +388,8 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_SPELL_DURATION_MODE_FULL = _G["VUHDO_SPELL_DURATION_MODE_FULL"];
 	VUHDO_SPELL_DURATION_MODE_ALIVE = _G["VUHDO_SPELL_DURATION_MODE_ALIVE"];
 	VUHDO_ATLAS_TEXTURES = _G["VUHDO_ATLAS_TEXTURES"];
+	VUHDO_AURA_IDENTITY_GATE_HELPFUL = _G["VUHDO_AURA_IDENTITY_GATE_HELPFUL"];
+	VUHDO_AURA_IDENTITY_GATE_HARMFUL = _G["VUHDO_AURA_IDENTITY_GATE_HARMFUL"];
 
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 	VUHDO_LibSharedMedia = _G["VUHDO_LibSharedMedia"];
@@ -1749,7 +1754,7 @@ do
 			tinsert(aGroupRefs, tTemplateRef);
 		end
 
-		tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(aGroup);
+		tTemplateRef["identityGate"] = VUHDO_getTemplateIdentityGate(aGroup);
 		tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(aGroup);
 
 		tOptions = {
@@ -1793,7 +1798,7 @@ do
 			tinsert(aSlotRefs, tTemplateRef);
 		end
 
-		tTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(aSlot);
+		tTemplateRef["identityGate"] = VUHDO_getTemplateIdentityGate(aSlot);
 		tTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(aSlot);
 
 		tSlotOptions = {
@@ -2468,7 +2473,7 @@ do
 
 					if tFilterTemplateRef then
 						tFilterTemplateRef["template"] = tFilterSlot;
-						tFilterTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tFilterSlot);
+						tFilterTemplateRef["identityGate"] = VUHDO_getTemplateIdentityGate(tFilterSlot);
 						tFilterTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tFilterSlot);
 					end
 				end
@@ -2491,7 +2496,7 @@ do
 
 				if tFilterTemplateRef then
 					tFilterTemplateRef["template"] = tFilterGroup;
-					tFilterTemplateRef["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(tFilterGroup);
+					tFilterTemplateRef["identityGate"] = VUHDO_getTemplateIdentityGate(tFilterGroup);
 					tFilterTemplateRef["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(tFilterGroup);
 				end
 			end
@@ -3554,23 +3559,23 @@ end
 do
 	--
 	local tCandidateFilters;
-	function VUHDO_isAssistOnlyTemplate(aTemplate)
+	function VUHDO_getTemplateIdentityGate(aTemplate)
 
 		if not aTemplate then
-			return false;
-		end
-
-		if aTemplate["isHarmful"] then
-			return false;
+			return nil;
 		end
 
 		tCandidateFilters = aTemplate["candidateFilters"];
 
 		if not tCandidateFilters or not tCandidateFilters["includeSpellIDs"] then
-			return false;
+			return nil;
 		end
 
-		return true;
+		if aTemplate["isHarmful"] then
+			return VUHDO_AURA_IDENTITY_GATE_HARMFUL;
+		end
+
+		return VUHDO_AURA_IDENTITY_GATE_HELPFUL;
 
 	end
 end
@@ -3661,48 +3666,50 @@ end
 
 do
 	--
+	local tUnitInfo;
 	local tCanAssist;
-	local tIsUsingVehicle;
-	function VUHDO_isUnitAssistRestricted(aUnit)
+	local tIsGroupMember;
+	local tIdentityGate;
+	function VUHDO_rewriteAuraContainerIdentityGates(aUnit)
 
 		if not aUnit then
-			return true;
+			sGateState["canApplyHelpfulIdentity"] = false;
+			sGateState["canApplyHarmfulIdentity"] = false;
+
+			return;
 		end
 
-		tIsUsingVehicle = UnitUsingVehicle(aUnit);
-
-		if not issecretvalue(tIsUsingVehicle) and tIsUsingVehicle then
-			return true;
-		end
-
-		tCanAssist = UnitCanAssist("player", aUnit);
+		tCanAssist = UnitCanAssist("player", aUnit, true, true);
 
 		if issecretvalue(tCanAssist) then
-			return false;
+			tCanAssist = true;
 		end
 
-		if not tCanAssist then
-			return true;
+		tIsGroupMember = UnitIsPlayerControlledOrGroupMember(aUnit);
+
+		if issecretvalue(tIsGroupMember) then
+			tIsGroupMember = false;
 		end
 
-		return false;
+		sGateState["canApplyHelpfulIdentity"] = tIsGroupMember or tCanAssist;
+		sGateState["canApplyHarmfulIdentity"] = not tCanAssist;
+
+		return;
 
 	end
-end
 
 
 
-do
 	--
-	local tUnitInfo;
 	function VUHDO_rewriteAuraContainerGateState(aUnit)
 
 		tUnitInfo = VUHDO_RAID[aUnit];
 
 		sGateState["canAttack"] = aUnit and UnitCanAttack("player", aUnit) or false;
-		sGateState["isAssistRestricted"] = VUHDO_isUnitAssistRestricted(aUnit);
 		sGateState["isAuraFilterRestricted"] = VUHDO_isUnitAuraFilterRestricted(aUnit);
 		sGateState["isDisconnected"] = tUnitInfo and tUnitInfo["connected"] == false;
+
+		VUHDO_rewriteAuraContainerIdentityGates(aUnit);
 
 		return;
 
@@ -3715,7 +3722,21 @@ do
 
 		aGateState = aGateState or sGateState;
 
-		return aGateState["isDisconnected"] or aGateState["isAuraFilterRestricted"] or (aTemplateRef["isAssistOnly"] and aGateState["isAssistRestricted"]);
+		if aGateState["isDisconnected"] or aGateState["isAuraFilterRestricted"] then
+			return true;
+		end
+
+		tIdentityGate = aTemplateRef["identityGate"];
+
+		if not tIdentityGate then
+			return false;
+		end
+
+		if VUHDO_AURA_IDENTITY_GATE_HARMFUL == tIdentityGate then
+			return not aGateState["canApplyHarmfulIdentity"];
+		end
+
+		return not aGateState["canApplyHelpfulIdentity"];
 
 	end
 end
@@ -3762,6 +3783,8 @@ do
 		end
 
 		tMixedPriorityCutoffs = aContainerData["mixedPriorityCutoffs"];
+		tGroupKeys = aContainerData["groupKeys"];
+		tGroupTemplateRefs = aContainerData["groupTemplateRefs"];
 		tLastSlotSuppress = aContainerData["lastSlotSuppress"];
 		tLastGroupSuppress = aContainerData["lastGroupSuppress"];
 		tAppliedSlotCandidateSuppress = aContainerData["appliedSlotCandidateSuppress"];
@@ -3811,9 +3834,6 @@ do
 				end
 			end
 		end
-
-		tGroupKeys = aContainerData["groupKeys"];
-		tGroupTemplateRefs = aContainerData["groupTemplateRefs"];
 
 		if tGroupKeys and tGroupTemplateRefs then
 			for tGroupCnt = 1, #tGroupKeys do
@@ -4002,6 +4022,8 @@ function VUHDO_clearAuraContainerUnit(aContainer, aContainerData)
 		aContainerData["lastSlotSuppress"] = nil;
 		aContainerData["lastGroupSuppress"] = nil;
 		aContainerData["lastAuraFilterDenied"] = nil;
+		aContainerData["lastHelpfulIdentity"] = nil;
+		aContainerData["lastHarmfulIdentity"] = nil;
 		aContainerData["lastContainerSuppressed"] = nil;
 		aContainerData["appliedSlotCandidateSuppress"] = nil;
 		aContainerData["mixedPriorityCutoffs"] = nil;
@@ -4147,6 +4169,8 @@ function VUHDO_bindAuraContainerUnit(aContainer, aContainerData, aUnit, aButton)
 
 	aContainerData["lastSyncedUnit"] = aUnit;
 	aContainerData["lastSyncedGuid"] = tOccupantGuid;
+	aContainerData["lastHelpfulIdentity"] = sGateState["canApplyHelpfulIdentity"];
+	aContainerData["lastHarmfulIdentity"] = sGateState["canApplyHarmfulIdentity"];
 
 	return;
 
@@ -4159,11 +4183,15 @@ local tButtonName;
 local tContainer;
 local tNeedsSync;
 local tIsAuraDataRestricted;
-local tIsAssistRestricted;
 local tIsAuraFilterRestricted;
 local tIsRestricted;
 local tIsPreviouslyRestricted;
 local tIsRestrictionRegained;
+local tCanApplyHelpfulIdentity;
+local tCanApplyHarmfulIdentity;
+local tLastHelpfulIdentity;
+local tLastHarmfulIdentity;
+local tIdentityGateRegained;
 local tOccupantGuid;
 local tLastSyncedGuid;
 local tVisibilityDirty;
@@ -4183,9 +4211,10 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 
 	VUHDO_rewriteAuraContainerGateState(aUnit);
 
-	tIsAssistRestricted = sGateState["isAssistRestricted"];
 	tIsAuraFilterRestricted = sGateState["isAuraFilterRestricted"];
-	tIsRestricted = tIsAssistRestricted or tIsAuraFilterRestricted;
+	tIsRestricted = tIsAuraFilterRestricted;
+	tCanApplyHelpfulIdentity = sGateState["canApplyHelpfulIdentity"];
+	tCanApplyHarmfulIdentity = sGateState["canApplyHarmfulIdentity"];
 
 	if not UnitExists(aUnit) then
 		for _, tContainerData in pairs(VUHDO_AURA_CONTAINERS[tButtonName]) do
@@ -4226,10 +4255,26 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 				end
 			end
 
+			tLastHelpfulIdentity = tContainerData["lastHelpfulIdentity"];
+			tLastHarmfulIdentity = tContainerData["lastHarmfulIdentity"];
+
+			if not tNeedsSync and tLastHelpfulIdentity ~= nil and tLastHelpfulIdentity ~= tCanApplyHelpfulIdentity then
+				tNeedsSync = true;
+			end
+
+			if not tNeedsSync and tLastHarmfulIdentity ~= nil and tLastHarmfulIdentity ~= tCanApplyHarmfulIdentity then
+				tNeedsSync = true;
+			end
+
 			tIsPreviouslyRestricted = tContainerData["lastAuraFilterDenied"] == true;
 			tIsRestrictionRegained = tIsPreviouslyRestricted and not tIsRestricted;
 
+			tIdentityGateRegained = (tLastHelpfulIdentity == false and tCanApplyHelpfulIdentity)
+				or (tLastHarmfulIdentity == false and tCanApplyHarmfulIdentity);
+
 			tContainerData["lastAuraFilterDenied"] = tIsRestricted;
+			tContainerData["lastHelpfulIdentity"] = tCanApplyHelpfulIdentity;
+			tContainerData["lastHarmfulIdentity"] = tCanApplyHarmfulIdentity;
 
 			if tNeedsSync then
 				VUHDO_bindAuraContainerUnit(tContainer, tContainerData, aUnit, aButton);
@@ -4238,7 +4283,7 @@ function VUHDO_syncAuraContainersForButton(aButton, aUnit)
 			else
 				tVisibilityDirty = VUHDO_applyAuraContainerVisibility(tContainer, tContainerData);
 
-				if tVisibilityDirty or tIsRestrictionRegained then
+				if tVisibilityDirty or tIsRestrictionRegained or tIdentityGateRegained then
 					VUHDO_refreshAuraContainer(tContainer);
 				end
 			end

@@ -13,12 +13,14 @@ local issecretvalue = issecretvalue;
 local UnitExists = UnitExists;
 local UnitCanAssist = UnitCanAssist;
 local UnitCanAttack = UnitCanAttack;
+local UnitIsPlayerControlledOrGroupMember = UnitIsPlayerControlledOrGroupMember;
 local gsub = string.gsub;
 
 local sAuraDiagVerbose = false;
 local sAuraDiagIndicator = nil;
 local sAuraDiagUnit = nil;
-local sAuraDiagAssistRestricted = false;
+local sAuraDiagCanApplyHelpfulIdentity = false;
+local sAuraDiagCanApplyHarmfulIdentity = false;
 local sAuraDiagAuraFilterRestricted = false;
 local sAuraDiagDisconnected = false;
 
@@ -376,7 +378,7 @@ do
 							"hasFrame", tHasFrame and 1 or 0,
 							"filter", VUHDO_escapeAuraDiagFilterString(tSlotTemplate and tSlotTemplate["filterString"]),
 							"candidates", VUHDO_auraDiagFormatCandidateSummary(tSlotTemplate and tSlotTemplate["candidateFilters"], nil),
-							"assistOnly", tTemplateRef["isAssistOnly"],
+							"identityGate", tTemplateRef["identityGate"],
 							"compound", tTemplateRef["isCompoundFilterString"],
 							"suppress", tShouldSuppress,
 							"slotSuppress", aContainerData["lastSlotSuppress"] and aContainerData["lastSlotSuppress"][tRecordedKey],
@@ -663,7 +665,7 @@ do
 	local tChainBaselineRgba;
 	local tStoredBaselineRgba;
 	local tGroupDiagTemplate;
-	local tAssistOnly;
+	local tIdentityGate;
 	local tCompound;
 	local tShouldSuppress;
 	function VUHDO_dumpFillChainDiagnostics(aContainerData, aContainerTemplate)
@@ -758,11 +760,12 @@ do
 					["candidateFilters"] = tGroupCandidateFilters,
 				};
 
-				tAssistOnly = tChainGroupMetaEntry and tChainGroupMetaEntry["isAssistOnly"] or VUHDO_isAssistOnlyTemplate(tGroupDiagTemplate);
+				tIdentityGate = tChainGroupMetaEntry and tChainGroupMetaEntry["identityGate"] or VUHDO_getTemplateIdentityGate(tGroupDiagTemplate);
 				tCompound = tChainGroupMetaEntry and tChainGroupMetaEntry["isCompoundFilterString"] or VUHDO_isCompoundFilterStringTemplate(tGroupDiagTemplate);
 				tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tGroupDiagTemplate, {
 					["isDisconnected"] = sAuraDiagDisconnected,
-					["isAssistRestricted"] = sAuraDiagAssistRestricted,
+					["canApplyHelpfulIdentity"] = sAuraDiagCanApplyHelpfulIdentity,
+					["canApplyHarmfulIdentity"] = sAuraDiagCanApplyHarmfulIdentity,
 					["isAuraFilterRestricted"] = sAuraDiagAuraFilterRestricted,
 				});
 
@@ -772,7 +775,7 @@ do
 					"groupKey", tMetaGroupKey ~= tGroupKey and tMetaGroupKey or nil,
 					"filter", VUHDO_escapeAuraDiagFilterString(tGroupFilterString),
 					"candidates", tCandidateSummary,
-					"assistOnly", tAssistOnly,
+					"identityGate", tIdentityGate,
 					"compound", tCompound,
 					"suppress", tShouldSuppress and 1 or 0,
 					"enabled", tLastSyncedGroupEnabled and tLastSyncedGroupEnabled[tGroupKey],
@@ -866,7 +869,8 @@ do
 					tSlotFrame = tSlotRecord["slotFrame"];
 					tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tSlotRecord, {
 						["isDisconnected"] = sAuraDiagDisconnected,
-						["isAssistRestricted"] = sAuraDiagAssistRestricted,
+						["canApplyHelpfulIdentity"] = sAuraDiagCanApplyHelpfulIdentity,
+						["canApplyHarmfulIdentity"] = sAuraDiagCanApplyHarmfulIdentity,
 						["isAuraFilterRestricted"] = sAuraDiagAuraFilterRestricted,
 					});
 
@@ -888,7 +892,7 @@ do
 						"candidates", VUHDO_auraDiagFormatCandidateSummary(tSlotRecord["candidateFilters"], nil),
 						"friendlyOnly", tSlotRecord["friendlyOnly"],
 						"hostileOnly", tSlotRecord["hostileOnly"],
-						"assistOnly", tSlotRecord["isAssistOnly"],
+						"identityGate", tSlotRecord["identityGate"],
 						"compound", tSlotRecord["isCompoundFilterString"],
 						"suppress", tShouldSuppress and 1 or 0,
 						"appliedSuppress", tSlotRecord["appliedSuppress"] and 1 or 0,
@@ -996,7 +1000,8 @@ do
 
 						tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tContainerData, {
 							["isDisconnected"] = sAuraDiagDisconnected,
-							["isAssistRestricted"] = sAuraDiagAssistRestricted,
+							["canApplyHelpfulIdentity"] = sAuraDiagCanApplyHelpfulIdentity,
+							["canApplyHarmfulIdentity"] = sAuraDiagCanApplyHarmfulIdentity,
 							["isAuraFilterRestricted"] = sAuraDiagAuraFilterRestricted,
 						});
 
@@ -1014,7 +1019,7 @@ do
 							"warn", tWarnField,
 							"friendlyOnly", tContainerData["friendlyOnly"],
 							"hostileOnly", tContainerData["hostileOnly"],
-							"assistOnly", tContainerData["isAssistOnly"],
+							"identityGate", tContainerData["identityGate"],
 							"suppress", tShouldSuppress and 1 or 0,
 							"lastSyncedEnabled", tContainerData["lastSyncedEnabled"],
 							"ownsBackgroundFill", tContainerData["ownsBackgroundFill"],
@@ -1311,20 +1316,24 @@ do
 		VUHDO_rewriteAuraContainerGateState(aUnit);
 
 		tUnitInfo = VUHDO_RAID[aUnit];
-		tIsAssistRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAssistRestricted"];
+		tCanApplyHelpfulIdentity = VUHDO_AURA_CONTAINER_GATE_STATE["canApplyHelpfulIdentity"];
+		tCanApplyHarmfulIdentity = VUHDO_AURA_CONTAINER_GATE_STATE["canApplyHarmfulIdentity"];
 		tIsAuraFilterRestricted = VUHDO_AURA_CONTAINER_GATE_STATE["isAuraFilterRestricted"];
 		tIsDisconnected = VUHDO_AURA_CONTAINER_GATE_STATE["isDisconnected"];
 		tPhaseReason = VUHDO_unitPhaseReason(aUnit);
 
-		sAuraDiagAssistRestricted = tIsAssistRestricted;
+		sAuraDiagCanApplyHelpfulIdentity = tCanApplyHelpfulIdentity;
+		sAuraDiagCanApplyHarmfulIdentity = tCanApplyHarmfulIdentity;
 		sAuraDiagAuraFilterRestricted = tIsAuraFilterRestricted;
 		sAuraDiagDisconnected = tIsDisconnected and true or false;
 
 		VUHDO_auraDiagLine("gates",
 			"exists", UnitExists(aUnit),
-			"canAssist", VUHDO_formatAuraDiagValue(UnitCanAssist("player", aUnit)),
+			"canAssist4", VUHDO_formatAuraDiagValue(UnitCanAssist("player", aUnit, true, true)),
+			"groupMember", VUHDO_formatAuraDiagValue(UnitIsPlayerControlledOrGroupMember(aUnit)),
 			"canAttack", VUHDO_formatAuraDiagValue(UnitCanAttack("player", aUnit)),
-			"assistRestricted", tIsAssistRestricted,
+			"canApplyHelpfulIdentity", tCanApplyHelpfulIdentity,
+			"canApplyHarmfulIdentity", tCanApplyHarmfulIdentity,
 			"filterRestricted", tIsAuraFilterRestricted,
 			"disconnected", tIsDisconnected and 1 or 0,
 			"connected", tUnitInfo and tUnitInfo["connected"],
@@ -1455,7 +1464,7 @@ do
 											"key", tGroupKeys and tGroupKeys[tGroupCnt],
 											"filter", VUHDO_escapeAuraDiagFilterString(tTemplateRef["template"] and tTemplateRef["template"]["filterString"]),
 											"candidates", VUHDO_auraDiagFormatCandidateSummary(tTemplateRef["template"] and tTemplateRef["template"]["candidateFilters"], nil),
-											"assistOnly", tTemplateRef["isAssistOnly"],
+											"identityGate", tTemplateRef["identityGate"],
 											"compound", tTemplateRef["isCompoundFilterString"],
 											"suppress", tShouldSuppress);
 									end

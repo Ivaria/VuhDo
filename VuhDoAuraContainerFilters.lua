@@ -100,6 +100,7 @@ local sAllDispelGlowTypeNames = { };
 local sPlayerDispelGlowTypeNames = { };
 local sPlayerPurgeGlowTypeNames = { };
 local sGroupResolvedFilterCache = { };
+local sGlobalIgnoreSpellIds;
 
 local sNonNegatableFilterTokens = {
 	["INCLUDE_NAME_PLATE_ONLY"] = true,
@@ -565,6 +566,8 @@ function VUHDO_invalidateAuraGroupFilterCache()
 
 	twipe(sGroupResolvedFilterCache);
 
+	sGlobalIgnoreSpellIds = nil;
+
 	return;
 
 end
@@ -991,20 +994,18 @@ function VUHDO_resolveGroupExcludeSpellIDs(aGroup)
 		return nil;
 	end
 
-	if not sGroupResolvedFilterCache["__globalIgnore__"] then
-		tResult = { };
+	if not sGlobalIgnoreSpellIds then
+		sGlobalIgnoreSpellIds = { };
 
 		-- FIXME: 12.1 only supports spell ID ignore list entries
 		for tKey, _ in pairs(VUHDO_AURA_IGNORE_LIST or sEmpty) do
-			VUHDO_addResolvedAuraContainerSpellIds(tResult, tKey);
+			VUHDO_addResolvedAuraContainerSpellIds(sGlobalIgnoreSpellIds, tKey);
 		end
-
-		sGroupResolvedFilterCache["__globalIgnore__"] = tResult;
 	end
 
 	tResult = nil;
 
-	for tNum, _ in pairs(sGroupResolvedFilterCache["__globalIgnore__"]) do
+	for tNum, _ in pairs(sGlobalIgnoreSpellIds) do
 		tResult = tResult or { };
 
 		tResult[tNum] = true;
@@ -1891,7 +1892,6 @@ end
 do
 	--
 	local tType;
-	local tIsHarmful;
 	local tCandidate;
 	local tSpellIds;
 	local tExcludeIds;
@@ -1908,9 +1908,8 @@ do
 
 		tCandidate = nil;
 		tType = aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER;
-		tIsHarmful = aGroup["isHarmful"] == true;
 
-		if not tIsHarmful and tType == VUHDO_AURA_GROUP_TYPE_LIST and aGroup["entries"] then
+		if tType == VUHDO_AURA_GROUP_TYPE_LIST and aGroup["entries"] then
 			tSpellIds = nil;
 
 			for _, tEntry in ipairs(aGroup["entries"]) do

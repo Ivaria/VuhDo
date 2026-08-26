@@ -79,7 +79,7 @@ local VUHDO_deferSyncOverlaysForUnit;
 local VUHDO_applyStoredChainBaselineColor;
 local VUHDO_showOverlayFillChainBackgroundForData;
 local VUHDO_hideOverlayFillChainBackgroundForData;
-local VUHDO_isAssistOnlyTemplate;
+local VUHDO_getTemplateIdentityGate;
 local VUHDO_isCompoundFilterStringTemplate;
 local VUHDO_rewriteAuraContainerGateState;
 local VUHDO_isAuraDisplaySuppressed;
@@ -238,7 +238,7 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 	VUHDO_applyStoredChainBaselineColor = _G["VUHDO_applyStoredChainBaselineColor"];
 	VUHDO_showOverlayFillChainBackgroundForData = _G["VUHDO_showOverlayFillChainBackgroundForData"];
 	VUHDO_hideOverlayFillChainBackgroundForData = _G["VUHDO_hideOverlayFillChainBackgroundForData"];
-	VUHDO_isAssistOnlyTemplate = _G["VUHDO_isAssistOnlyTemplate"];
+	VUHDO_getTemplateIdentityGate = _G["VUHDO_getTemplateIdentityGate"];
 	VUHDO_isCompoundFilterStringTemplate = _G["VUHDO_isCompoundFilterStringTemplate"];
 	VUHDO_rewriteAuraContainerGateState = _G["VUHDO_rewriteAuraContainerGateState"];
 	VUHDO_isAuraDisplaySuppressed = _G["VUHDO_isAuraDisplaySuppressed"];
@@ -261,7 +261,7 @@ do
 		tFilterString = anEntry["filterString"];
 
 		anEntry["isHarmful"] = tFilterString and strfind(tFilterString, "HARMFUL", 1, true) ~= nil or false;
-		anEntry["isAssistOnly"] = VUHDO_isAssistOnlyTemplate(anEntry);
+		anEntry["identityGate"] = VUHDO_getTemplateIdentityGate(anEntry);
 		anEntry["isCompoundFilterString"] = VUHDO_isCompoundFilterStringTemplate(anEntry);
 
 		return;
@@ -2066,7 +2066,7 @@ do
 			["entryKey"] = anEntryKey,
 			["friendlyOnly"] = anOverlayEntry["friendlyOnly"] or nil,
 			["hostileOnly"] = anOverlayEntry["hostileOnly"] or nil,
-			["isAssistOnly"] = anOverlayEntry["isAssistOnly"] or nil,
+			["identityGate"] = anOverlayEntry["identityGate"] or nil,
 			["isCompoundFilterString"] = anOverlayEntry["isCompoundFilterString"] or nil,
 			["alwaysEnabled"] = anOverlayEntry["alwaysEnabled"] or nil,
 			["valueGates"] = anOverlayEntry["valueGates"] or nil,
@@ -2106,7 +2106,7 @@ do
 		aSlotRecord["candidateFilters"] = aSlotSpec["candidateFilters"];
 		aSlotRecord["friendlyOnly"] = aSlotSpec["friendlyOnly"];
 		aSlotRecord["hostileOnly"] = aSlotSpec["hostileOnly"];
-		aSlotRecord["isAssistOnly"] = aSlotSpec["isAssistOnly"];
+		aSlotRecord["identityGate"] = aSlotSpec["identityGate"];
 		aSlotRecord["isCompoundFilterString"] = aSlotSpec["isCompoundFilterString"];
 		aSlotRecord["alwaysEnabled"] = aSlotSpec["alwaysEnabled"];
 		aSlotRecord["valueGates"] = aSlotSpec["valueGates"];

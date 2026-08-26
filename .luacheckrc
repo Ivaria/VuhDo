@@ -3866,6 +3866,7 @@ globals = {
 	"UnitIsPVPFreeForAll",
 	"UnitIsPVPSanctuary",
 	"UnitIsPlayer",
+	"UnitIsPlayerControlledOrGroupMember",
 	"UnitIsPossessed",
 	"UnitIsQuestBoss",
 	"UnitIsRaidOfficer",
