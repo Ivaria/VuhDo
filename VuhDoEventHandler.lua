@@ -1239,6 +1239,12 @@ do
 				end
 			end
 
+			if VUHDO_VARIABLES_LOADED then
+				if VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] < 0.9 then
+					VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = 0.9;
+				end
+			end
+
 		elseif "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_updateToggledUnitEvents();
@@ -1263,6 +1269,7 @@ do
 
 						if tBossGuid then
 							VUHDO_syncAuraContainersForUnit(tBossUnit);
+							VUHDO_syncOverlaysForUnit(tBossUnit);
 						end
 					end
 				end
