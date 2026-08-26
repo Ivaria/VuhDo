@@ -3170,7 +3170,7 @@ function VUHDO_showAuraTooltip(aAuraFrame)
 		tAnchorConfig = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"][aAuraFrame["anchorIndex"]];
 	end
 
-	tShowTooltip = sAnchorSettingsCache["showTooltip"][tPanelNum] and sAnchorSettingsCache["showTooltip"][tPanelNum][aAuraFrame["anchorIndex"]] or VUHDO_resolveAuraTriState(tAnchorConfig and tAnchorConfig["showTooltip"], "showTooltip");
+	tShowTooltip = VUHDO_resolveAuraTriState(tAnchorConfig and tAnchorConfig["showTooltip"], "showTooltip");
 
 	if not tShowTooltip then
 		return false;

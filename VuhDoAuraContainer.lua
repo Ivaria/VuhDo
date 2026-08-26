@@ -2251,6 +2251,7 @@ do
 		tinsert(aSignatureParts, aButtonSetup["borderFile"] or "");
 		tinsert(aSignatureParts, aButtonSetup["glowIcon"] and "1" or "0");
 		tinsert(aSignatureParts, aButtonSetup["dispelOverlayChrome"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["disableMouse"] and "1" or "0");
 
 		VUHDO_appendAuraContainerBuildSignatureExtras(aSignatureParts, aButtonSetup);
 
@@ -3343,7 +3344,7 @@ function VUHDO_buildAnchorButtonSetup(anAnchorConfig, aPixelWidth, aPixelHeight,
 		["hideIcon"] = tIconType >= 4,
 		["applicationCount"] = VUHDO_resolveAuraTriState(anAnchorConfig["showStacks"], "showStacks"),
 		["mouseMotion"] = tShowTooltip,
-		["disableMouse"] = false,
+		["disableMouse"] = not tShowTooltip,
 		["width"] = aPixelWidth,
 		["height"] = aPixelHeight,
 		["textSize"] = aPixelHeight or 20,

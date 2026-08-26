@@ -1294,6 +1294,7 @@ do
 		aBouquetSlotTemplate["buttonSetup"]["durationCooldown"] = aAnchorButtonSetup["durationCooldown"];
 		aBouquetSlotTemplate["buttonSetup"]["applicationCount"] = aAnchorButtonSetup["applicationCount"];
 		aBouquetSlotTemplate["buttonSetup"]["mouseMotion"] = aAnchorButtonSetup["mouseMotion"];
+		aBouquetSlotTemplate["buttonSetup"]["disableMouse"] = aAnchorButtonSetup["disableMouse"];
 		aBouquetSlotTemplate["buttonSetup"]["durationTextOptions"] = aAnchorButtonSetup["durationTextOptions"];
 
 		if anIsBar then
