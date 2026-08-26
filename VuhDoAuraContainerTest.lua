@@ -889,6 +889,7 @@ do
 						"slotKey", tSlotKey,
 						"shown", tSlotFrame and tSlotFrame:IsShown(),
 						"filter", VUHDO_escapeAuraDiagFilterString(tSlotRecord["filterString"]),
+						"appliedFilter", VUHDO_escapeAuraDiagFilterString(tSlotRecord["appliedFilterString"]),
 						"candidates", VUHDO_auraDiagFormatCandidateSummary(tSlotRecord["candidateFilters"], nil),
 						"friendlyOnly", tSlotRecord["friendlyOnly"],
 						"hostileOnly", tSlotRecord["hostileOnly"],

@@ -2137,6 +2137,7 @@ do
 	local tAuraFrame;
 	local tExistingRecord;
 	local tSlotRecord;
+	local tDesiredFilterString;
 	local function VUHDO_addOverlaySlotFromSpec(aHostData, aSlotSpec)
 
 		tContainer = aHostData["container"];
@@ -2149,22 +2150,33 @@ do
 
 			VUHDO_copyOverlaySlotRecordFromSpec(tExistingRecord, aSlotSpec);
 
-			if tFilterChanged then
-				tContainer:SetAuraSlotFilterString(tSlotKey, aSlotSpec["filterString"]);
-				tExistingRecord["appliedFilterString"] = aSlotSpec["filterString"] or "HELPFUL";
-			end
-
-			if tCandidateChanged then
-				if tExistingRecord["appliedSuppress"] then
+			if tExistingRecord["appliedSuppress"] then
+				if tExistingRecord["appliedFilterString"] ~= "" then
 					tContainer:SetAuraSlotFilterString(tSlotKey, "");
-				else
-					tContainer:SetAuraSlotCandidateFilters(tSlotKey, aSlotSpec["candidateFilters"]);
-				end
-			end
 
-			if tFilterChanged or tCandidateChanged then
+					tExistingRecord["appliedFilterString"] = "";
+				end
+
 				if aHostData["lastSyncedSlotEnabled"] then
 					aHostData["lastSyncedSlotEnabled"][tSlotKey] = nil;
+				end
+			else
+				tDesiredFilterString = aSlotSpec["filterString"] or "HELPFUL";
+
+				if tFilterChanged then
+					tContainer:SetAuraSlotFilterString(tSlotKey, tDesiredFilterString);
+
+					tExistingRecord["appliedFilterString"] = tDesiredFilterString;
+				end
+
+				if tCandidateChanged then
+					tContainer:SetAuraSlotCandidateFilters(tSlotKey, aSlotSpec["candidateFilters"]);
+				end
+
+				if tFilterChanged or tCandidateChanged then
+					if aHostData["lastSyncedSlotEnabled"] then
+						aHostData["lastSyncedSlotEnabled"][tSlotKey] = nil;
+					end
 				end
 			end
 
@@ -3629,71 +3641,69 @@ do
 						tLastSyncedSlotEnabled = tSlotHostData["lastSyncedSlotEnabled"];
 
 						for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"]) do
-						tSlotEnabled = tSlotHostData["plannedSlots"] and tSlotHostData["plannedSlots"][tSlotKey]
-							and (tSlotRecord["alwaysEnabled"] or tIsAuraDataRestricted or tIsAuraModeContainers);
+							tSlotEnabled = tSlotHostData["plannedSlots"] and tSlotHostData["plannedSlots"][tSlotKey] and (tSlotRecord["alwaysEnabled"] or tIsAuraDataRestricted or tIsAuraModeContainers);
 
-						if tSlotEnabled then
-							if tSlotRecord["friendlyOnly"] and tCanAttack then
-								tSlotEnabled = false;
-							end
-
-							if tSlotRecord["hostileOnly"] and not tCanAttack then
-								tSlotEnabled = false;
-							end
-						end
-
-						tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tSlotRecord);
-
-						if tSlotEnabled and tShouldSuppress then
-							tSlotEnabled = false;
-						end
-
-						if tSlotEnabled and tSlotRecord["valueGates"] then
-							tGateActive = VUHDO_isAnyOverlayValueGateActive(tSlotRecord["valueGates"], tGateInfo);
-
-							if tGateActive ~= (tSlotRecord["isValueGateActiveVariant"] or false) then
-								tSlotEnabled = false;
-							end
-						end
-
-						tSlotEnabled = tSlotEnabled and true or false;
-
-						if tLastSyncedSlotEnabled[tSlotKey] ~= tSlotEnabled then
-							tDesiredFilterString = tSlotEnabled and (tSlotRecord["filterString"] or "HELPFUL") or "";
-
-							if tSlotRecord["appliedFilterString"] ~= tDesiredFilterString then
-								if tSlotEnabled then
-									tContainer:SetAuraSlotFilterString(tSlotKey, tSlotRecord["filterString"] or "HELPFUL");
-									tContainer:SetAuraSlotCandidateFilters(tSlotKey, tSlotRecord["candidateFilters"]);
-
-									tSlotRecord["appliedFilterString"] = tSlotRecord["filterString"] or "HELPFUL";
-									tSlotRecord["appliedSuppress"] = false;
-								else
-									tContainer:SetAuraSlotFilterString(tSlotKey, "");
-
-									tSlotRecord["appliedFilterString"] = "";
-									tSlotRecord["appliedSuppress"] = true;
+							if tSlotEnabled then
+								if tSlotRecord["friendlyOnly"] and tCanAttack then
+									tSlotEnabled = false;
 								end
 
-								tSlotEnabledChanged = true;
-							else
+								if tSlotRecord["hostileOnly"] and not tCanAttack then
+									tSlotEnabled = false;
+								end
 							end
 
-							tLastSyncedSlotEnabled[tSlotKey] = tSlotEnabled;
+							tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tSlotRecord);
 
-							VUHDO_syncOverlayThreatMarkFlashForSlotRecord(tSlotRecord, tSlotEnabled);
-						end
+							if tSlotEnabled and tShouldSuppress then
+								tSlotEnabled = false;
+							end
 
-						if tSlotEnabled then
-							tHostNeedsUnit = true;
-						end
+							if tSlotEnabled and tSlotRecord["valueGates"] then
+								tGateActive = VUHDO_isAnyOverlayValueGateActive(tSlotRecord["valueGates"], tGateInfo);
 
-						if tSlotRecord["auraGroupBarGlow"] then
-							if VUHDO_syncAuraGroupBarGlowOverlay(tSlotRecord["unitButton"] or tButton, tSlotRecord, tSlotEnabled) then
-								tUnitGlowApplied = true;
+								if tGateActive ~= (tSlotRecord["isValueGateActiveVariant"] or false) then
+									tSlotEnabled = false;
+								end
+							end
+
+							tSlotEnabled = tSlotEnabled and true or false;
+
+							if tLastSyncedSlotEnabled[tSlotKey] ~= tSlotEnabled then
+								tDesiredFilterString = tSlotEnabled and (tSlotRecord["filterString"] or "HELPFUL") or "";
+
+								if tSlotRecord["appliedFilterString"] ~= tDesiredFilterString or tSlotRecord["appliedSuppress"] ~= (not tSlotEnabled) then
+									if tSlotEnabled then
+										tContainer:SetAuraSlotFilterString(tSlotKey, tSlotRecord["filterString"] or "HELPFUL");
+										tContainer:SetAuraSlotCandidateFilters(tSlotKey, tSlotRecord["candidateFilters"]);
+
+										tSlotRecord["appliedFilterString"] = tSlotRecord["filterString"] or "HELPFUL";
+										tSlotRecord["appliedSuppress"] = false;
+									else
+										tContainer:SetAuraSlotFilterString(tSlotKey, "");
+
+										tSlotRecord["appliedFilterString"] = "";
+										tSlotRecord["appliedSuppress"] = true;
+									end
+
+									tSlotEnabledChanged = true;
+								end
+
+								tLastSyncedSlotEnabled[tSlotKey] = tSlotEnabled;
+
+								VUHDO_syncOverlayThreatMarkFlashForSlotRecord(tSlotRecord, tSlotEnabled);
+							end
+
+							if tSlotEnabled then
+								tHostNeedsUnit = true;
+							end
+
+							if tSlotRecord["auraGroupBarGlow"] then
+								if VUHDO_syncAuraGroupBarGlowOverlay(tSlotRecord["unitButton"] or tButton, tSlotRecord, tSlotEnabled) then
+									tUnitGlowApplied = true;
+								end
 							end
 						end
-					end
 
 						if tHostNeedsUnit then
 							tOccupantGuid = tGateInfo and tGateInfo["guid"];
