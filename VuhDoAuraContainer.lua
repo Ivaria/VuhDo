@@ -1412,7 +1412,12 @@ do
 		else
 			aAuraButton:EnableMouse(true);
 			aAuraButton:SetMouseMotionEnabled(true);
+			aAuraButton:SetPropagateMouseMotion(true);
 			aAuraButton:SetMouseClickEnabled(false);
+
+			if not InCombatLockdown() then
+				aAuraButton:SetPropagateMouseClicks(true);
+			end
 		end
 
 		if anButtonSetup["glowIcon"] then
