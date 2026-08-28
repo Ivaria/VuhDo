@@ -357,6 +357,7 @@ local tPointEntry;
 function VUHDO_populateDispelTypeBackgroundCurves(aFillCurve, aBackingCurve, aBrightness, anOpacityProduct)
 
 	tPopulateColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+
 	tPopulateDefaultColor = CreateColor(0.5, 0.5, 0.5, 1);
 	tPopulateTransparent = CreateColor(0, 0, 0, 0);
 
@@ -396,24 +397,24 @@ end
 --
 local tPopulateBorderColors;
 local tPopulateBorderTransparent;
+local tBorderPointEntry;
 function VUHDO_populateDispelTypeBorderCurve(aBorderCurve)
 
 	tPopulateBorderColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
 
 	tPopulateBorderTransparent = CreateColor(0, 0, 0, 0);
 
-	aBorderCurve:AddPoint(0, tPopulateBorderTransparent);
-
 	if not tPopulateBorderColors then
+		aBorderCurve:AddPoint(0, tPopulateBorderTransparent);
+
 		return;
 	end
 
-	aBorderCurve:AddPoint(1, VUHDO_safeBorderDispelColorFromTable(tPopulateBorderColors["DEBUFF3"], tPopulateBorderTransparent));
-	aBorderCurve:AddPoint(2, VUHDO_safeBorderDispelColorFromTable(tPopulateBorderColors["DEBUFF4"], tPopulateBorderTransparent));
-	aBorderCurve:AddPoint(3, VUHDO_safeBorderDispelColorFromTable(tPopulateBorderColors["DEBUFF2"], tPopulateBorderTransparent));
-	aBorderCurve:AddPoint(4, VUHDO_safeBorderDispelColorFromTable(tPopulateBorderColors["DEBUFF1"], tPopulateBorderTransparent));
-	aBorderCurve:AddPoint(9, VUHDO_safeBorderDispelColorFromTable(tPopulateBorderColors["DEBUFF9"], tPopulateBorderTransparent));
-	aBorderCurve:AddPoint(11, VUHDO_safeBorderDispelColorFromTable(tPopulateBorderColors["DEBUFF8"], tPopulateBorderTransparent));
+	for tIdx = 1, #sDispelTypeCurvePointKeys do
+		tBorderPointEntry = sDispelTypeCurvePointKeys[tIdx];
+
+		aBorderCurve:AddPoint(tBorderPointEntry[1], VUHDO_safeBorderDispelColorFromTable(tPopulateBorderColors[tBorderPointEntry[2]], tPopulateBorderTransparent));
+	end
 
 	return;
 
