@@ -2885,13 +2885,11 @@ function VUHDO_loadProfile(aName)
 	VUHDO_resolveAllAuraGroupFilters();
 	VUHDO_initPanelModels();
 	VUHDO_initDynamicPanelModels();
-	VUHDO_registerAllBouquets(false);
-	VUHDO_initAllEventBouquets();
 	VUHDO_initDebuffs();
+	VUHDO_bouqetsChanged();
 	VUHDO_reloadUI(true);
 	VUHDO_resetTooltip();
 	VUHDO_initBlizzFrames();
-	VUHDO_bouqetsChanged();
 
 	if not VUHDO_SECRETS_ENABLED and (VUHDO_initCustomDebuffComboModel ~= nil) then
 		VUHDO_initCustomDebuffComboModel();

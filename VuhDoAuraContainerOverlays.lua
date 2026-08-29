@@ -3550,6 +3550,37 @@ do
 
 
 	--
+	function VUHDO_clearOverlaysForUnit(aUnit)
+
+		if not aUnit then
+			return;
+		end
+
+		for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
+			tButtonName = tButton:GetName();
+
+			if tButtonName then
+				tSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS[tButtonName];
+
+				if tSlotHostData then
+					VUHDO_clearOverlaySlotHostUnit(tSlotHostData);
+				end
+
+				for _, tIndicatorEntry in pairs(VUHDO_OVERLAY_CONTAINERS[tButtonName] or sEmpty) do
+					for _, tContainerData in pairs(tIndicatorEntry) do
+						VUHDO_clearAuraContainerBinding(tContainerData);
+					end
+				end
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tIsAuraDataRestricted;
 	local tIsAuraModeContainers;
 	local tIsBarColorsDispelOverlayConfigured;

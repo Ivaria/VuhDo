@@ -59,6 +59,7 @@ local VUHDO_HANDLER_EVENT_SNAPSHOTS = {
 
 local sBossUnitIds = { "boss1", "boss2", "boss3", "boss4", "boss5", "boss6", "boss7", "boss8" };
 local sLastBossUnitGuids = { };
+local sEmpty = { };
 
 local VUHDO_parseAddonMessage;
 local VUHDO_spellcastSent;
@@ -104,6 +105,7 @@ local VUHDO_syncAuraContainersForAllRaidUnits;
 local VUHDO_syncOverlaysForUnit;
 local VUHDO_resetAuraContainersForUnit;
 local VUHDO_resetOverlaysForUnit;
+local VUHDO_clearOverlaysForUnit;
 local VUHDO_syncAllOverlayUnits;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
@@ -609,6 +611,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
 	VUHDO_resetAuraContainersForUnit = _G["VUHDO_resetAuraContainersForUnit"];
 	VUHDO_resetOverlaysForUnit = _G["VUHDO_resetOverlaysForUnit"];
+	VUHDO_clearOverlaysForUnit = _G["VUHDO_clearOverlaysForUnit"];
 	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
 
 	VUHDO_initTaskSystem();
@@ -1095,6 +1098,61 @@ end
 
 
 --
+local tBossUnit;
+local tBossGuid;
+local function VUHDO_updateBossUnits()
+
+	VUHDO_updateToggledUnitEvents();
+
+	for tBossCnt = 1, 8 do
+		tBossUnit = sBossUnitIds[tBossCnt];
+
+		if UnitExists(tBossUnit) then
+			tBossGuid = UnitGUID(tBossUnit);
+
+			if tBossGuid and sSecretsEnabled and issecretvalue(tBossGuid) then
+				tBossGuid = sEmpty;
+			end
+		else
+			tBossGuid = nil;
+		end
+
+		if sLastBossUnitGuids[tBossCnt] ~= tBossGuid then
+			sLastBossUnitGuids[tBossCnt] = tBossGuid;
+
+			VUHDO_resetAuraContainersForUnit(tBossUnit);
+			VUHDO_resetOverlaysForUnit(tBossUnit);
+
+			if tBossGuid then
+				VUHDO_setHealth(tBossUnit, 1); -- VUHDO_UPDATE_ALL
+				VUHDO_updateHealthBarsFor(tBossUnit, 1); -- VUHDO_UPDATE_ALL
+				VUHDO_initEventBouquetsFor(tBossUnit);
+
+				VUHDO_syncAuraContainersForUnit(tBossUnit);
+				VUHDO_syncOverlaysForUnit(tBossUnit);
+			else
+				VUHDO_clearOverlaysForUnit(tBossUnit);
+			end
+
+			if VUHDO_TIMERS["RELOAD_ROSTER"] < 0.15 then
+				VUHDO_TIMERS["RELOAD_ROSTER"] = 0.15;
+			end
+		elseif tBossGuid == sEmpty then
+			VUHDO_resetAuraContainersForUnit(tBossUnit);
+			VUHDO_resetOverlaysForUnit(tBossUnit);
+
+			VUHDO_syncAuraContainersForUnit(tBossUnit);
+			VUHDO_syncOverlaysForUnit(tBossUnit);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
 do
 	--
 	local tEventTotalStartTime;
@@ -1102,9 +1160,6 @@ do
 	local tEmptyRaid = { };
 	local tSpecNumber;
 	local tBestProfileName;
-	local tBossUnit;
-	local tBossGuid;
-	local tIsBossGuidSecret;
 	function VUHDO_OnEvent(anInstance, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
@@ -1247,32 +1302,7 @@ do
 
 		elseif "INSTANCE_ENCOUNTER_ENGAGE_UNIT" == anEvent then
 			if VUHDO_VARIABLES_LOADED then
-				VUHDO_updateToggledUnitEvents();
-
-				for tBossCnt = 1, 8 do
-					tBossUnit = sBossUnitIds[tBossCnt];
-
-					if UnitExists(tBossUnit) then
-						tBossGuid = UnitGUID(tBossUnit);
-					else
-						tBossGuid = nil;
-					end
-
-					tIsBossGuidSecret = tBossGuid and sSecretsEnabled and issecretvalue(tBossGuid);
-
-					-- FIXME: cannot track boss identity when GUID is secret
-					if tIsBossGuidSecret or sLastBossUnitGuids[tBossCnt] ~= tBossGuid then
-						sLastBossUnitGuids[tBossCnt] = not tIsBossGuidSecret and tBossGuid or nil;
-
-						VUHDO_resetAuraContainersForUnit(tBossUnit);
-						VUHDO_resetOverlaysForUnit(tBossUnit);
-
-						if tBossGuid then
-							VUHDO_syncAuraContainersForUnit(tBossUnit);
-							VUHDO_syncOverlaysForUnit(tBossUnit);
-						end
-					end
-				end
+				VUHDO_updateBossUnits();
 			end
 
 		elseif "PLAYER_FOCUS_CHANGED" == anEvent then
