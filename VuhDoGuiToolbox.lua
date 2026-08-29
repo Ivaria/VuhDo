@@ -18,6 +18,7 @@ local twipe = table.wipe;
 local pcall = pcall;
 local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor;
 local CreateColor = CreateColor;
+local issecretvalue = issecretvalue;
 
 local MEMBERS_PER_RAID_GROUP = MEMBERS_PER_RAID_GROUP or 5;
 
@@ -58,6 +59,7 @@ local VUHDO_getResolvedTextProvider;
 local VUHDO_CONFIG = { };
 local VUHDO_PANEL_SETUP = { };
 local VUHDO_USER_CLASS_COLORS = { };
+local VUHDO_ATLAS_TEXTURES = { };
 function VUHDO_guiToolboxInitLocalOverrides()
 
 	--VUHDO_getNumbersFromString = _G["VUHDO_getNumbersFromString"];
@@ -65,6 +67,7 @@ function VUHDO_guiToolboxInitLocalOverrides()
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
+	VUHDO_ATLAS_TEXTURES = _G["VUHDO_ATLAS_TEXTURES"];
 	VUHDO_LibSharedMedia = _G["VUHDO_LibSharedMedia"];
 	VUHDO_getActionPanelOrStub = _G["VUHDO_getActionPanelOrStub"];
 	VUHDO_getPanelButtons = _G["VUHDO_getPanelButtons"];
@@ -1301,6 +1304,30 @@ function VUHDO_setLlcStatusBarTexture(aStatusBar, aTextureName)
 		aStatusBar:SetStatusBarTexture(tFile);
 		VUHDO_PixelUtil.ApplySettings(aStatusBar:GetStatusBarTexture());
 	end
+end
+
+
+
+--
+local tIsAtlas;
+function VUHDO_setTextureOrAtlas(aTexture, anIcon, aClipL, aClipR, aClipT, aClipB)
+
+	if not aTexture or not anIcon then
+		return false;
+	end
+
+	tIsAtlas = not issecretvalue(anIcon) and VUHDO_ATLAS_TEXTURES[anIcon] and true or false;
+
+	if tIsAtlas then
+		aTexture:SetAtlas(anIcon);
+		aTexture:SetTexCoord(0, 1, 0, 1);
+	else
+		aTexture:SetTexture(anIcon);
+		aTexture:SetTexCoord(aClipL or 0, aClipR or 1, aClipT or 0, aClipB or 1);
+	end
+
+	return tIsAtlas;
+
 end
 
 
