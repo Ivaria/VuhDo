@@ -40,7 +40,8 @@ VUHDO_AURA_BUTTON_DISPEL_OVERLAY_TEMPLATE = "VuhDoAuraButtonDispelOverlayTemplat
 
 VUHDO_AURA_CONTAINER_TEMPLATE_CACHE = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE or { };
 local VUHDO_AURA_CONTAINER_TEMPLATE_CACHE = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE;
-VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION or 0;
+VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION or 0;
+local VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION;
 
 VUHDO_AURA_CONTAINER_METRICS = VUHDO_AURA_CONTAINER_METRICS or {
 	["builds"] = { },
@@ -158,7 +159,7 @@ local VUHDO_getDispelTypeColorMap;
 local VUHDO_getDispelTypeColorMapOpaque;
 local VUHDO_getDispelTypeBorderCurve;
 local VUHDO_applyAuraGroupBarGlowFromAuraButton;
-local VUHDO_getManaAdjustedYOffset;
+local VUHDO_getAuraAnchorHost;
 local VUHDO_unitPhaseReason;
 local VUHDO_isSpecialUnit;
 local VUHDO_stopOverlayThreatMarkFlashForSlotRecord;
@@ -411,7 +412,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_getDispelTypeColorMapOpaque = _G["VUHDO_getDispelTypeColorMapOpaque"];
 	VUHDO_getDispelTypeBorderCurve = _G["VUHDO_getDispelTypeBorderCurve"];
 	VUHDO_applyAuraGroupBarGlowFromAuraButton = _G["VUHDO_applyAuraGroupBarGlowFromAuraButton"];
-	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
+	VUHDO_getAuraAnchorHost = _G["VUHDO_getAuraAnchorHost"];
 	VUHDO_unitPhaseReason = _G["VUHDO_unitPhaseReason"];
 	VUHDO_isSpecialUnit = _G["VUHDO_isSpecialUnit"];
 	VUHDO_stopOverlayThreatMarkFlashForSlotRecord = _G["VUHDO_stopOverlayThreatMarkFlashForSlotRecord"];
@@ -1602,7 +1603,6 @@ do
 	--
 	local tMode;
 	local tRelFrame;
-	local tRelPoint;
 	local tYOff;
 	local tLevelBase;
 	local tOffsetX;
@@ -1620,7 +1620,8 @@ do
 		tMode = anAnchor["mode"];
 
 		if tMode == "healthBarCover" then
-			tRelFrame = VUHDO_getHealthBar(aParent, 3) or aParent;
+			tRelFrame = VUHDO_getAuraAnchorHost(aParent) or aParent;
+
 			tOffsetX = anAnchor["offsetX"] or 0;
 			tOffsetY = anAnchor["offsetY"] or 0;
 
@@ -1629,7 +1630,7 @@ do
 		elseif tMode == "anchorpos" and anAnchor["points"] then
 			for _, tPoint in ipairs(anAnchor["points"]) do
 				if tPoint["relFrame"] == "HealthBar" then
-					tRelFrame = VUHDO_getHealthBar(aParent, 3);
+					tRelFrame = VUHDO_getAuraAnchorHost(aParent);
 				else
 					tRelFrame = aParent;
 				end
@@ -1639,12 +1640,6 @@ do
 				end
 
 				tYOff = tPoint["y"] or 0;
-
-				if tPoint["relFrame"] == "HealthBar" then
-					tRelPoint = tPoint["relativePoint"] or tPoint["point"] or "TOPLEFT";
-
-					tYOff = VUHDO_getManaAdjustedYOffset(aParent, tRelPoint, tYOff);
-				end
 
 				VUHDO_PixelUtil.SetPoint(aContainer, tPoint["point"] or "TOPLEFT", tRelFrame, tPoint["relativePoint"] or tPoint["point"] or "TOPLEFT", tPoint["x"] or 0, tYOff);
 			end
@@ -3282,7 +3277,8 @@ end
 --
 function VUHDO_invalidateAuraContainerTemplateCache()
 
-	VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_GENERATION + 1;
+	_G["VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION"] = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION + 1;
+	VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION = _G["VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION"];
 
 	twipe(VUHDO_AURA_CONTAINER_TEMPLATE_CACHE);
 
@@ -3481,6 +3477,8 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 					tContainerData["groupsSuppressed"] = nil;
 					tContainerData["lastContainerSuppressed"] = nil;
 					tContainerData["appliedSlotCandidateSuppress"] = nil;
+
+					VUHDO_applyAuraContainerAnchor(tContainerData["container"], tContainerTemplate["anchor"], aButton);
 
 					tFilterSignature = VUHDO_getAuraContainerFilterSignature(tContainerTemplate);
 					tFilterContainer = tContainerData["container"];

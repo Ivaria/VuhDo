@@ -42,6 +42,7 @@ local sCompactPartyOnShowHooked = false;
 local sBlizzRestoreNeedsReload = false;
 local sFontTestRegion;
 local sFontValidationCache = { };
+local sPendingAuraHostUpdates = { };
 
 local tEmptyColor = { };
 
@@ -52,6 +53,9 @@ local VUHDO_getHealthBarText;
 local VUHDO_getUnitButtonsSafe;
 local VUHDO_isModelInPanel;
 local VUHDO_getResolvedTextProvider;
+local VUHDO_getAuraAnchorHost;
+local VUHDO_getHealthBar;
+local VUHDO_PixelUtil;
 
 -----------------------------------------------------------------------
 --local VUHDO_getNumbersFromString;
@@ -75,6 +79,9 @@ function VUHDO_guiToolboxInitLocalOverrides()
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_isModelInPanel = _G["VUHDO_isModelInPanel"];
 	VUHDO_getResolvedTextProvider = _G["VUHDO_getResolvedTextProvider"];
+	VUHDO_getAuraAnchorHost = _G["VUHDO_getAuraAnchorHost"];
+	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
+	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 
 	for tPanelNum = 1, 10 do -- VUHDO_MAX_PANELS
 		sIsManaBar[tPanelNum] = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["MANA_BAR"] ~= "";
@@ -1788,12 +1795,44 @@ end
 
 
 --
-function VUHDO_getManaAdjustedYOffset(aButton, aRelPoint, aYOff)
+local tHost;
+local tBgBar;
+function VUHDO_updateAuraAnchorHost(aButton)
 
-	if aRelPoint and aButton then
-		return (aYOff or 0) + (aButton["manaBarLayoutHeight"] or 0) * (VUHDO_REL_POINT_MANA_FACTOR[aRelPoint] or 0);
+	if InCombatLockdown() then
+		sPendingAuraHostUpdates[aButton] = true;
+
+		return;
 	end
 
-	return aYOff or 0;
+	tHost = VUHDO_getAuraAnchorHost(aButton);
+
+	if not tHost then
+		return;
+	end
+
+	tBgBar = VUHDO_getHealthBar(aButton, 3);
+
+	VUHDO_PixelUtil.ClearAllPoints(tHost);
+
+	VUHDO_PixelUtil.SetPoint(tHost, "TOPLEFT", tBgBar, "TOPLEFT", 0, 0);
+	VUHDO_PixelUtil.SetPoint(tHost, "BOTTOMRIGHT", tBgBar, "BOTTOMRIGHT", 0, aButton["manaBarLayoutHeight"] or 0);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_processPendingAuraHostUpdates()
+
+	for tButton, _ in pairs(sPendingAuraHostUpdates) do
+		VUHDO_updateAuraAnchorHost(tButton);
+	end
+
+	twipe(sPendingAuraHostUpdates);
+
+	return;
 
 end

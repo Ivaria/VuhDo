@@ -25,6 +25,8 @@ local VUHDO_setStatusBarVuhDoColor;
 local VUHDO_applyAllLayersToBar;
 local VUHDO_updateHealthLossBar;
 local VUHDO_syncOverlaysForUnit;
+local VUHDO_updateAuraAnchorHost;
+local VUHDO_repositionAuraFramesForButton;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sIsInverted;
@@ -54,6 +56,8 @@ function VUHDO_customManaInitLocalOverrides()
 	VUHDO_applyAllLayersToBar = _G["VUHDO_applyAllLayersToBar"];
 	VUHDO_updateHealthLossBar = _G["VUHDO_updateHealthLossBar"];
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_syncOverlaysForUnit"];
+	VUHDO_updateAuraAnchorHost = _G["VUHDO_updateAuraAnchorHost"];
+	VUHDO_repositionAuraFramesForButton = _G["VUHDO_repositionAuraFramesForButton"];
 
 	VUHDO_syncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
 
@@ -204,6 +208,8 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 				tPrevManaLayoutHeight = tButton["manaBarLayoutHeight"];
 				tButton["manaBarLayoutHeight"] = tManaBarHeight;
 
+				VUHDO_updateAuraAnchorHost(tButton);
+
 				if tManaBarHeight > 0 then
 					VUHDO_PixelUtil.SetHeight(tManaBar, tManaBarHeight);
 				end
@@ -289,6 +295,8 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 			if not InCombatLockdown() then
 				tPrevManaLayoutHeight = tButton["manaBarLayoutHeight"];
 				tButton["manaBarLayoutHeight"] = tManaBarHeight;
+
+				VUHDO_updateAuraAnchorHost(tButton);
 
 				if tManaBarHeight > 0 then
 					VUHDO_PixelUtil.SetHeight(tManaBar, tManaBarHeight);

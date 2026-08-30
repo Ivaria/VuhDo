@@ -2880,8 +2880,8 @@ function VUHDO_loadProfile(aName)
 	VUHDO_incrementAuraAnchorConfigVersion();
 
 	VUHDO_clearBackdropCache();
-	VUHDO_initAllBurstCaches();
 	VUHDO_loadVariables();
+	VUHDO_initAllBurstCaches();
 	VUHDO_resolveAllAuraGroupFilters();
 	VUHDO_initPanelModels();
 	VUHDO_initDynamicPanelModels();

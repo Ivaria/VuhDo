@@ -95,6 +95,7 @@ local VUHDO_unregisterUnitForEvents;
 local VUHDO_isDeferredRefreshActive;
 local VUHDO_isDeferredRedrawActive;
 local VUHDO_processPendingAuraContainerBuilds;
+local VUHDO_processPendingAuraHostUpdates;
 local VUHDO_processPendingNativeAuraSounds;
 local VUHDO_flushPendingOverlayRebuild;
 local VUHDO_flushPendingOverlayAcquires;
@@ -601,6 +602,7 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_isDeferredRefreshActive = _G["VUHDO_isDeferredRefreshActive"];
 	VUHDO_isDeferredRedrawActive = _G["VUHDO_isDeferredRedrawActive"];
 	VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
+	VUHDO_processPendingAuraHostUpdates = _G["VUHDO_processPendingAuraHostUpdates"];
 	VUHDO_processPendingNativeAuraSounds = _G["VUHDO_processPendingNativeAuraSounds"];
 	VUHDO_flushPendingOverlayRebuild = _G["VUHDO_flushPendingOverlayRebuild"];
 	VUHDO_flushPendingOverlayAcquires = _G["VUHDO_flushPendingOverlayAcquires"];
@@ -1031,6 +1033,8 @@ local function VUHDO_init()
 		VUHDO_initKeyboardMacros();
 	end
 
+	VUHDO_incrementAuraAnchorConfigVersion();
+
 	VUHDO_timeReloadUI(3);
 	VUHDO_aoeUpdateTalents();
 
@@ -1229,6 +1233,8 @@ do
 				VUHDO_updateAuraDataRestrictedState(false);
 
 				VUHDO_processPendingAuraContainerBuilds();
+
+				VUHDO_processPendingAuraHostUpdates();
 
 				VUHDO_processPendingNativeAuraSounds();
 
@@ -2501,12 +2507,12 @@ do
 				VUHDO_PROHIBIT_REPOS = true;
 
 				VUHDO_initAllBurstCaches();
-				VUHDO_redrawPanel(VUHDO_RELOAD_PANEL_NUM);
-				VUHDO_updateAllPanelBars(VUHDO_RELOAD_PANEL_NUM);
 				VUHDO_buildGenericHealthBarBouquet();
 				VUHDO_buildGenericTargetHealthBouquet();
 				VUHDO_registerAllBouquets(false);
 				VUHDO_initAllEventBouquets();
+				VUHDO_redrawPanel(VUHDO_RELOAD_PANEL_NUM);
+				VUHDO_updateAllPanelBars(VUHDO_RELOAD_PANEL_NUM);
 
 				if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
 					VUHDO_redisplayAllUnitAuras();

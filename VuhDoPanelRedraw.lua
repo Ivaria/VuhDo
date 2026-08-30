@@ -15,6 +15,7 @@ local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnc
 
 local VUHDO_getFont;
 local VUHDO_getHealthBar;
+local VUHDO_updateAuraAnchorHost;
 local VUHDO_getPixelPerfectBorderEdgeSize;
 local VUHDO_getPixelPerfectBorderInsets;
 local VUHDO_getDynamicModelArray;
@@ -133,6 +134,7 @@ function VUHDO_panelRedrawInitLocalOverrides()
 
 	VUHDO_getFont = _G["VUHDO_getFont"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
+	VUHDO_updateAuraAnchorHost = _G["VUHDO_updateAuraAnchorHost"];
 	VUHDO_getPixelPerfectBorderEdgeSize = _G["VUHDO_getPixelPerfectBorderEdgeSize"];
 	VUHDO_getPixelPerfectBorderInsets = _G["VUHDO_getPixelPerfectBorderInsets"];
 	VUHDO_getDynamicModelArray = _G["VUHDO_getDynamicModelArray"];
@@ -800,9 +802,11 @@ do
 		tIsManaLayoutActive = aButton["manaBarLayoutHeight"] == nil or aButton["manaBarLayoutHeight"] > 0;
 		tManaLayoutHeight = (tIsManaBouquet and tIsManaLayoutActive) and sPanelConfig[aPanelNum]["barScaling"]["manaBarHeight"] or 0;
 
-		aButton["manaBarLayoutHeight"] = tManaLayoutHeight;
+	aButton["manaBarLayoutHeight"] = tManaLayoutHeight;
 
-		if tIsManaBouquet then
+	VUHDO_updateAuraAnchorHost(aButton);
+
+	if tIsManaBouquet then
 			VUHDO_PixelUtil.Show(aManaBar);
 			VUHDO_PixelUtil.SetHeight(aManaBar, tManaHeight);
 

@@ -1802,6 +1802,8 @@ do
 	local tProfilerResult;
 	local tChunkStartTime;
 	local tChunkTaskMetrics;
+	local tDrainSuccess;
+	local tDrainError;
 	function VUHDO_processDeferredTaskQueue(aTimeDelta)
 
 		VUHDO_checkAllSemaphoreTimeouts();
@@ -1853,9 +1855,17 @@ do
 			tTaskState["lastAdjustTime"] = GetTime();
 		end
 
-		xpcall(VUHDO_processPendingAuraContainerBuilds, VUHDO_deferredTaskErrorHandler);
+		tDrainSuccess, tDrainError = xpcall(VUHDO_processPendingAuraContainerBuilds, VUHDO_deferredTaskErrorHandler);
 
-		xpcall(VUHDO_processPendingNativeAuraSounds, VUHDO_deferredTaskErrorHandler);
+		if not tDrainSuccess then
+			VUHDO_Msg(format("Aura container build drain failure:\nError: %s", tostring(tDrainError)));
+		end
+
+		tDrainSuccess, tDrainError = xpcall(VUHDO_processPendingNativeAuraSounds, VUHDO_deferredTaskErrorHandler);
+
+		if not tDrainSuccess then
+			VUHDO_Msg(format("Native aura sound drain failure:\nError: %s", tostring(tDrainError)));
+		end
 
 		return;
 

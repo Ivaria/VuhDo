@@ -85,7 +85,6 @@ local VUHDO_getAuraBarWidthPixels;
 local VUHDO_getAuraBarHeightPixels;
 local VUHDO_getAuraBarWidthPixelsVertical;
 local VUHDO_getAuraBarHeightPixelsVertical;
-local VUHDO_getManaAdjustedYOffset;
 local VUHDO_deepCopyTable;
 
 local sEmpty = { };
@@ -250,7 +249,6 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_getAuraBarHeightPixels = _G["VUHDO_getAuraBarHeightPixels"];
 	VUHDO_getAuraBarWidthPixelsVertical = _G["VUHDO_getAuraBarWidthPixelsVertical"];
 	VUHDO_getAuraBarHeightPixelsVertical = _G["VUHDO_getAuraBarHeightPixelsVertical"];
-	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
 	VUHDO_deepCopyTable = _G["VUHDO_deepCopyTable"];
 
 	VUHDO_rebuildDispelTypeNameMaps();
@@ -1047,7 +1045,7 @@ do
 	local tXOff;
 	local tYOff;
 	local tNumBasePositions;
-	function VUHDO_resolveFixedAuraSlotPlacement(aRadioValue, aSlotIndex, aBarWidth, aBarHeight, anAnchorConfig, aButton, anIconSize)
+	function VUHDO_resolveFixedAuraSlotPlacement(aRadioValue, aSlotIndex, aBarWidth, aBarHeight, anAnchorConfig, anIconSize)
 
 		tNumBasePositions = 9;
 
@@ -1095,8 +1093,6 @@ do
 			tXOff = tXOff + tGrowthXOff;
 			tYOff = tYOff + tGrowthYOff;
 		end
-
-		tYOff = VUHDO_getManaAdjustedYOffset(aButton, tSlotPos["relPoint"], tYOff);
 
 		return tSlotPos["anchor"], tSlotPos["relPoint"], tXOff, tYOff;
 
@@ -1447,7 +1443,7 @@ do
 	local tCol;
 	local tRow;
 	local tIsSlotDropped;
-	function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelHeight, aSpacing, aMaxCols, aMaxFrameCount, aTemplateName, aAnchorButtonSetup, anIsBar, aGrowthDir, aWrapDir, anIsFixedLayout, aFixedRadioValue, aBarWidth, aBarHeight, aButton)
+	function VUHDO_buildListAnchorSlots(aGroup, anAnchorConfig, aPixelWidth, aPixelHeight, aSpacing, aMaxCols, aMaxFrameCount, aTemplateName, aAnchorButtonSetup, anIsBar, aGrowthDir, aWrapDir, anIsFixedLayout, aFixedRadioValue, aBarWidth, aBarHeight)
 
 		tSlots = { };
 
@@ -1465,7 +1461,7 @@ do
 			tIsSlotDropped = false;
 
 			if anIsFixedLayout then
-				tFixedSlotAnchor, tFixedSlotRelPoint, tSlotX, tSlotY = VUHDO_resolveFixedAuraSlotPlacement(aFixedRadioValue, tEntryIndex, aBarWidth, aBarHeight, anAnchorConfig, aButton, aPixelWidth);
+				tFixedSlotAnchor, tFixedSlotRelPoint, tSlotX, tSlotY = VUHDO_resolveFixedAuraSlotPlacement(aFixedRadioValue, tEntryIndex, aBarWidth, aBarHeight, anAnchorConfig, aPixelWidth);
 
 				if not tFixedSlotAnchor then
 					tIsSlotDropped = true;
@@ -1683,7 +1679,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 	if tPanelNum then
 		tCachedEntry = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE[tPanelNum] and VUHDO_AURA_CONTAINER_TEMPLATE_CACHE[tPanelNum][anAnchorIndex];
 
-		if tCachedEntry then
+		if tCachedEntry and tCachedEntry["version"] == VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION then
 			tCachedTemplate = tCachedEntry["template"];
 
 			if not tCachedEntry["instanceTemplate"] then
@@ -1797,7 +1793,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 		if VUHDO_isListCollapseEligible(tGroup, tUseFixedSlots, tIsFixedLayout) then
 			tGroups = VUHDO_buildListAnchorEntryGroups(tGroup, anAnchorConfig, tPixelWidth, tPixelHeight, tSpacing, tMaxFrameCount, tTemplateName, tAnchorButtonSetup, tIsBar);
 		else
-			tSlots = VUHDO_buildListAnchorSlots(tGroup, anAnchorConfig, tPixelWidth, tPixelHeight, tSpacing, tMaxCols, tMaxFrameCount, tTemplateName, tAnchorButtonSetup, tIsBar, tGrowthDir, tWrapDir, tIsFixedLayout, tFixedRadioValue, tHealthBarWidthPx, tHealthBarHeightPx, aButton);
+			tSlots = VUHDO_buildListAnchorSlots(tGroup, anAnchorConfig, tPixelWidth, tPixelHeight, tSpacing, tMaxCols, tMaxFrameCount, tTemplateName, tAnchorButtonSetup, tIsBar, tGrowthDir, tWrapDir, tIsFixedLayout, tFixedRadioValue, tHealthBarWidthPx, tHealthBarHeightPx);
 		end
 	end
 
@@ -1837,6 +1833,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 		end
 
 		VUHDO_AURA_CONTAINER_TEMPLATE_CACHE[tPanelNum][anAnchorIndex] = {
+			["version"] = VUHDO_AURA_CONTAINER_TEMPLATE_CACHE_VERSION,
 			["template"] = tCachedTemplate,
 			["instanceTemplate"] = {
 				["parent"] = aButton,

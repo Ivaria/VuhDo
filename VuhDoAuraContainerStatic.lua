@@ -15,7 +15,6 @@ local VUHDO_AURA_FRAMES;
 local VUHDO_AURA_CONTAINERS;
 
 local VUHDO_PixelUtil;
-local VUHDO_getHealthBar;
 local VUHDO_getUnitButtonsPanel;
 local VUHDO_displayAuraInSlot;
 local VUHDO_hideAuraSlot;
@@ -24,7 +23,7 @@ local VUHDO_evaluateBouquetItemForStaticSlot;
 local VUHDO_applyAuraContainerVisibility;
 local VUHDO_rewriteAuraContainerGateState;
 local VUHDO_isUnitAuraFilterRestricted;
-local VUHDO_getManaAdjustedYOffset;
+local VUHDO_getAuraAnchorHost;
 local VUHDO_acquireAuraIconFrame;
 local VUHDO_acquireAuraBarFrame;
 
@@ -48,7 +47,6 @@ function VUHDO_auraContainerStaticInitLocalOverrides()
 	VUHDO_AURA_CONTAINERS = _G["VUHDO_AURA_CONTAINERS"];
 
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
-	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getUnitButtonsPanel = _G["VUHDO_getUnitButtonsPanel"];
 	VUHDO_displayAuraInSlot = _G["VUHDO_displayAuraInSlot"];
 	VUHDO_hideAuraSlot = _G["VUHDO_hideAuraSlot"];
@@ -57,7 +55,7 @@ function VUHDO_auraContainerStaticInitLocalOverrides()
 	VUHDO_applyAuraContainerVisibility = _G["VUHDO_applyAuraContainerVisibility"];
 	VUHDO_rewriteAuraContainerGateState = _G["VUHDO_rewriteAuraContainerGateState"];
 	VUHDO_isUnitAuraFilterRestricted = _G["VUHDO_isUnitAuraFilterRestricted"];
-	VUHDO_getManaAdjustedYOffset = _G["VUHDO_getManaAdjustedYOffset"];
+	VUHDO_getAuraAnchorHost = _G["VUHDO_getAuraAnchorHost"];
 	VUHDO_acquireAuraIconFrame = _G["VUHDO_acquireAuraIconFrame"];
 	VUHDO_acquireAuraBarFrame = _G["VUHDO_acquireAuraBarFrame"];
 
@@ -89,7 +87,7 @@ do
 		tSlotAnchor = aStaticSlot["anchor"];
 
 		if tSlotAnchor then
-			tRelFrame = VUHDO_getHealthBar(aButton, 3);
+			tRelFrame = VUHDO_getAuraAnchorHost(aButton);
 
 			if not tRelFrame then
 				tRelFrame = aButton;
@@ -102,7 +100,7 @@ do
 
 		if tPoint then
 			if tPoint["relFrame"] == "HealthBar" then
-				tRelFrame = VUHDO_getHealthBar(aButton, 3);
+				tRelFrame = VUHDO_getAuraAnchorHost(aButton);
 			else
 				tRelFrame = aButton;
 			end
@@ -114,10 +112,6 @@ do
 			tRelPoint = tPoint["relativePoint"] or tPoint["point"] or tAnchorPoint;
 			tXOff = (tPoint["x"] or 0) + (aStaticSlot["x"] or 0);
 			tYOff = (tPoint["y"] or 0) + (aStaticSlot["y"] or 0);
-
-			if tPoint["relFrame"] == "HealthBar" then
-				tYOff = VUHDO_getManaAdjustedYOffset(aButton, tRelPoint, tYOff);
-			end
 
 			return tPoint["point"] or tAnchorPoint, tRelFrame, tRelPoint, tXOff, tYOff;
 		end

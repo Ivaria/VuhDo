@@ -310,6 +310,8 @@
 				</Frames>
 			</StatusBar>
 
+			<Frame name="$parentAuHost" />
+
 		</Frames>
 	</Button>
 
@@ -760,6 +762,8 @@
 
 				</Frames>
 			</StatusBar>
+
+			<Frame name="$parentAuHost" />
 
 			<Button name="$parentTg" inherits="VuhDoButtonSecureTargetTemplate"> </Button>
 			<Button name="$parentTot" inherits="VuhDoButtonSecureTargetTemplate"> </Button>
