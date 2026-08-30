@@ -223,6 +223,17 @@ local sComboTableInitialized = false;
 local sOriginalBackdropFiles = { };
 local sEmpty = { };
 
+VUHDO_LNF_IS_CJK_LOCALE = GetLocale() == "zhCN" or GetLocale() == "zhTW" or GetLocale() == "koKR";
+VUHDO_LNF_CJK_FONT_PATH = nil;
+
+VUHDO_LNF_CJK_BUTTON_FONT_NAMES = {
+	"VuDoButtonFont",
+	"VuDoButtonFontLight",
+	"VuDoButtonFontDark",
+	"VuDoButtonFontBig",
+	"VuDoButtonFontBigLight",
+};
+
 local sNativeTextures = { };
 local sNativeBackdrops = { };
 local sNativeFontStrings = { };
@@ -851,13 +862,15 @@ local function VUHDO_lnfSkinStyleFontFace(aRegion)
 		return;
 	end
 
-	if GetLocale() == "zhCN" or GetLocale() == "zhTW" or GetLocale() == "koKR" then
-		return;
-	end
-
 	tEntry = VUHDO_lnfSkinSnapshotFontString(aRegion);
 
 	if not tEntry or not tEntry["fontSize"] then
+		return;
+	end
+
+	if VUHDO_LNF_IS_CJK_LOCALE then
+		aRegion:SetFont(VUHDO_LNF_CJK_FONT_PATH, tEntry["fontSize"], tEntry["fontFlags"] or "");
+
 		return;
 	end
 
@@ -2580,6 +2593,14 @@ local function VUHDO_lnfSkinApplyFontColors(aFrame)
 		end
 	end
 
+	if VUHDO_LNF_IS_CJK_LOCALE then
+		for _, tRegion in ipairs(tRegions) do
+			if tRegion.GetObjectType and tRegion:GetObjectType() == "FontString" then
+				VUHDO_lnfSkinStyleFontFace(tRegion);
+			end
+		end
+	end
+
 	return;
 
 end
@@ -4077,6 +4098,18 @@ function VUHDO_lnfSkinInit()
 		hooksecurefunc("VUHDO_lnfColorSwatchInitFromModel", VUHDO_lnfSkinStyleColorSwatch);
 
 		sAuraGroupsHooked = true;
+	end
+
+	if VUHDO_LNF_IS_CJK_LOCALE then
+		VUHDO_LNF_CJK_FONT_PATH = VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME);
+
+		for tCnt = 1, #VUHDO_LNF_CJK_BUTTON_FONT_NAMES do
+			tName = VUHDO_LNF_CJK_BUTTON_FONT_NAMES[tCnt];
+
+			_, tNativeR, tNativeG = _G[tName]:GetFont();
+
+			_G[tName]:SetFont(VUHDO_LNF_CJK_FONT_PATH, tNativeR, tNativeG or "");
+		end
 	end
 
 	sSkinReady = true;

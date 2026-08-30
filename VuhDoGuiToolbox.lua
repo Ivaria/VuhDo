@@ -1277,10 +1277,17 @@ end
 
 
 --
+local tLabel;
+local tFontSize;
+local tFontFlags;
 function VUHDO_lnfPatchFont(aComponent, aLabelName)
 
 	if not sIsNotInChina then
-		_G[aComponent:GetName() .. aLabelName]:SetFont(VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME), 12, "");
+		tLabel = _G[aComponent:GetName() .. aLabelName];
+
+		_, tFontSize, tFontFlags = tLabel:GetFont();
+
+		tLabel:SetFont(VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME), tFontSize, tFontFlags or "");
 	end
 
 	return;

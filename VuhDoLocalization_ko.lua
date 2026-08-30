@@ -152,7 +152,7 @@ VUHDO_I18N_VEHICLES = "탈것";
 VUHDO_I18N_DEFAULT_RES_ANNOUNCE = "일어나세요, 당신이 필요합니다!";
 -- #v+1.151
 VUHDO_I18N_MAIN_ASSISTS = "지원공격 전담";
-VUHDO_OPTIONS_FONT_NAME = "Fonts\\2002.ttf";
+VUHDO_OPTIONS_FONT_NAME = GameFontNormal:GetFont();
 -- #v+1.169
 -- #+v1.184
 VUHDO_I18N_BW_CD = "CD";
