@@ -365,6 +365,7 @@ function VUHDO_determineRole(aUnit)
 	-- Role determined by non-hybrid class?
 	tClassId = tInfo["classId"];
 	tClassRole = VUHDO_CLASS_ROLES[tClassId];
+
 	if tClassRole then
 		return tClassRole;
 	end
@@ -394,8 +395,10 @@ function VUHDO_determineRole(aUnit)
 
 	if 29 == tClassId then -- VUHDO_ID_DEATH_KNIGHT
 		tBuffExist = VUHDO_unitBuff(aUnit, VUHDO_SPELL_ID.BUFF_BLOOD_PRESENCE);
+
 		if tBuffExist then
 			--VUHDO_FIX_ROLES[tName] = 60; -- VUHDO_ID_MELEE_TANK
+
 			return 60; -- VUHDO_ID_MELEE_TANK
 		else
 			VUHDO_FIX_ROLES[tName] = 61; -- VUHDO_ID_MELEE_DAMAGE
@@ -403,9 +406,11 @@ function VUHDO_determineRole(aUnit)
 		end
 
 	elseif 28 == tClassId then -- VUHDO_ID_PRIESTS
-		tPowerType = UnitPowerType(aUnit);
-		if VUHDO_UNIT_POWER_INSANITY == tPowerType then
+		tBuffExist = VUHDO_unitBuff(aUnit, VUHDO_SPELL_ID.SHADOWFORM);
+
+		if tBuffExist then
 			VUHDO_FIX_ROLES[tName] = 62; -- VUHDO_ID_RANGED_DAMAGE
+
 			return 62; -- VUHDO_ID_RANGED_DAMAGE
 		else
 			return 63; -- VUHDO_ID_RANGED_HEAL
@@ -421,10 +426,15 @@ function VUHDO_determineRole(aUnit)
 	elseif 27 == tClassId then -- VUHDO_ID_DRUIDS
 		tPowerType = UnitPowerType(aUnit);
 		if VUHDO_UNIT_POWER_MANA == tPowerType then
-			return 63; -- VUHDO_ID_RANGED_HEAL
-		elseif VUHDO_UNIT_POWER_LUNAR_POWER == tPowerType then
-			VUHDO_FIX_ROLES[tName] = 62; --	VUHDO_ID_RANGED_DAMAGE
-			return 62; -- VUHDO_ID_RANGED_DAMAGE
+			tBuffExist = VUHDO_unitBuff(aUnit, VUHDO_SPELL_ID.MOONKIN_FORM);
+
+			if tBuffExist then
+				VUHDO_FIX_ROLES[tName] = 62; -- VUHDO_ID_RANGED_DAMAGE
+
+				return 62; -- VUHDO_ID_RANGED_DAMAGE
+			else
+				return 63; -- VUHDO_ID_RANGED_HEAL
+			end
 		elseif VUHDO_UNIT_POWER_RAGE == tPowerType then
 			VUHDO_FIX_ROLES[tName] = 60; -- VUHDO_ID_MELEE_TANK
 			return 60; -- VUHDO_ID_MELEE_TANK
@@ -454,12 +464,7 @@ function VUHDO_determineRole(aUnit)
 		if tAgility > tIntellect then
 			return 61; -- VUHDO_ID_MELEE_DAMAGE
 		else
-			tPowerType = UnitPowerType(aUnit);
-			if VUHDO_UNIT_POWER_MAELSTROM == tPowerType then -- VUHDO_ID_RANGED_DAMAGE
-				return 62; -- VUHDO_ID_RANGED_DAMAGE
-			else
-				return 63; -- VUHDO_ID_RANGED_HEAL
-			end
+			return 62; -- VUHDO_ID_RANGED_DAMAGE
 		end
 
 	elseif 31 == tClassId then -- VUHDO_ID_DEMON_HUNTERS
