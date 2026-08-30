@@ -1234,6 +1234,8 @@ do
 
 				VUHDO_processPendingAuraContainerBuilds();
 
+				VUHDO_processPendingManaBarLayouts();
+
 				VUHDO_processPendingAuraHostUpdates();
 
 				VUHDO_processPendingNativeAuraSounds();

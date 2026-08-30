@@ -802,11 +802,11 @@ do
 		tIsManaLayoutActive = aButton["manaBarLayoutHeight"] == nil or aButton["manaBarLayoutHeight"] > 0;
 		tManaLayoutHeight = (tIsManaBouquet and tIsManaLayoutActive) and sPanelConfig[aPanelNum]["barScaling"]["manaBarHeight"] or 0;
 
-	aButton["manaBarLayoutHeight"] = tManaLayoutHeight;
+		aButton["manaBarLayoutHeight"] = tManaLayoutHeight;
 
-	VUHDO_updateAuraAnchorHost(aButton);
+		VUHDO_updateAuraAnchorHost(aButton);
 
-	if tIsManaBouquet then
+		if tIsManaBouquet then
 			VUHDO_PixelUtil.Show(aManaBar);
 			VUHDO_PixelUtil.SetHeight(aManaBar, tManaHeight);
 
