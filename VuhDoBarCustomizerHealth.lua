@@ -1614,10 +1614,6 @@ do
 							end
 						end
 
-						if tLossBar:GetFrameLevel() >= tLossHealthBar:GetFrameLevel() then
-							VUHDO_PixelUtil.SetFrameLevel(tLossBar, tLossHealthBar:GetFrameLevel() - 1);
-						end
-
 						if sSecretsEnabled and tLossHealthBar["secretCurveColor"] and tLossHealthBar["secretCurveColor"]["R"] then
 							sConfigHealthLossColor = VUHDO_getStatusBarColor("HEALTH_LOSS", aUnit);
 

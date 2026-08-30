@@ -2015,10 +2015,6 @@ do
 			tPredHealthLossBar:SetAllPoints(tPredBgBar);
 			VUHDO_setStatusBarOrientation(tPredHealthLossBar, VUHDO_getStatusbarOrientationNumber("HEALTH_BAR", aPanelNum));
 			tPredHealthLossBar:SetReverseFill(tPredIsInverted == (tPredHealthLossDerived == "HORIZONTAL_INV" or tPredHealthLossDerived == "VERTICAL_INV"));
-
-			if tPredHealthLossBar:GetFrameLevel() >= tPredHealthBar:GetFrameLevel() then
-				VUHDO_PixelUtil.SetFrameLevel(tPredHealthLossBar, tPredHealthBar:GetFrameLevel() - 1);
-			end
 		end
 
 		return;
