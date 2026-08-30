@@ -17,6 +17,10 @@ local tremove = table.remove;
 local twipe = table.wipe;
 local floor = math.floor;
 local issecretvalue = issecretvalue;
+local SetCVar = SetCVar;
+local GetCVar = GetCVar;
+local ShouldAurasBeSecret = C_Secrets and C_Secrets.ShouldAurasBeSecret;
+local IsAddOnRestrictionActive = C_RestrictedActions and C_RestrictedActions.IsAddOnRestrictionActive;
 
 VUHDO_INTERNAL_TOGGLES = { };
 local VUHDO_INTERNAL_TOGGLES = VUHDO_INTERNAL_TOGGLES;
@@ -60,6 +64,21 @@ local VUHDO_HANDLER_EVENT_SNAPSHOTS = {
 local sBossUnitIds = { "boss1", "boss2", "boss3", "boss4", "boss5", "boss6", "boss7", "boss8" };
 local sLastBossUnitGuids = { };
 local sEmpty = { };
+
+local sAddonRestrictionCvars = {
+	"addonChallengeModeRestrictionsForced",
+	"addonCombatRestrictionsForced",
+	"addonEncounterRestrictionsForced",
+	"addonPvPMatchRestrictionsForced",
+	"addonMapRestrictionsForced",
+	"addonChatRestrictionsForced",
+};
+
+local sAddonRestrictionEnableCvars = {
+	"addonChallengeModeRestrictionsForced",
+	"addonCombatRestrictionsForced",
+	"addonEncounterRestrictionsForced",
+};
 
 local VUHDO_parseAddonMessage;
 local VUHDO_spellcastSent;
@@ -1691,6 +1710,22 @@ do
 				VUHDO_loadProfile(strtrim(tTokens[1]));
 			end
 
+		elseif tCommandWord == "restrict" then
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "on" then
+				VUHDO_setForcedAddonRestrictions(true);
+			elseif tSubCommand == "off" then
+				VUHDO_setForcedAddonRestrictions(false);
+			elseif tSubCommand == "status" then
+				VUHDO_printForcedAddonRestrictionStatus();
+			elseif tSubCommand == "" then
+				tCurrentValue = GetCVar("addonChallengeModeRestrictionsForced") or "0";
+				VUHDO_setForcedAddonRestrictions(tCurrentValue ~= "1");
+			else
+				VUHDO_Msg("Usage: /vd restrict [on|off|status]");
+			end
+
 		elseif strfind(tCommandWord, "res") then
 			for tPanelNum = 1, VUHDO_MAX_PANELS do
 				VUHDO_PANEL_SETUP[tPanelNum]["POSITION"] = nil;
@@ -1736,24 +1771,6 @@ do
 
 		elseif tCommandWord == "proff" then
 			SetCVar("scriptProfile", "0");
-			ReloadUI();
-
-		elseif tCommandWord == "secrets" then
-			tCurrentValue = GetCVar("secretCombatRestrictionsForced") or "0";
-
-			if tCurrentValue == "1" then
-				SetCVar("secretCombatRestrictionsForced", "0");
-				SetCVar("secretEncounterRestrictionsForced", "0");
-				SetCVar("secretChallengeModeRestrictionsForced", "0");
-				SetCVar("secretPvPMatchRestrictionsForced", "0");
-				SetCVar("secretMapRestrictionsForced", "0");
-				VUHDO_Msg("Secret restrictions DISABLED - reloading UI...");
-			else
-				SetCVar("secretCombatRestrictionsForced", "1");
-				SetCVar("secretEncounterRestrictionsForced", "1");
-				VUHDO_Msg("Secret restrictions ENABLED (combat+encounter) - reloading UI...");
-			end
-
 			ReloadUI();
 
 		elseif (strfind(tCommandWord, "chkvars")) then
@@ -3125,6 +3142,59 @@ do
 		return;
 
 	end
+end
+
+
+
+--
+local tCvar;
+local tCvarValue;
+local tCvarList;
+function VUHDO_setForcedAddonRestrictions(anIsEnabled)
+
+	if anIsEnabled then
+		tCvarList = sAddonRestrictionEnableCvars;
+	else
+		tCvarList = sAddonRestrictionCvars;
+	end
+
+	for tCnt = 1, #tCvarList do
+		tCvar = tCvarList[tCnt];
+
+		SetCVar(tCvar, anIsEnabled and "1" or "0");
+	end
+
+	if anIsEnabled then
+		VUHDO_Msg("Forced addon restrictions ENABLED - reloading UI.");
+	else
+		VUHDO_Msg("Forced addon restrictions DISABLED - reloading UI.");
+	end
+
+	ReloadUI();
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_printForcedAddonRestrictionStatus()
+
+	for tCnt = 1, #sAddonRestrictionCvars do
+		tCvar = sAddonRestrictionCvars[tCnt];
+		tCvarValue = GetCVar(tCvar) or "0";
+
+		VUHDO_Msg(tCvar .. " = " .. tCvarValue);
+	end
+
+	VUHDO_Msg("ShouldAurasBeSecret: " .. (ShouldAurasBeSecret() and "yes" or "no"));
+	VUHDO_Msg("AddOnRestriction Combat: " .. (IsAddOnRestrictionActive(Enum.AddOnRestrictionType["Combat"]) and "active" or "inactive"));
+	VUHDO_Msg("AddOnRestriction Encounter: " .. (IsAddOnRestrictionActive(Enum.AddOnRestrictionType["Encounter"]) and "active" or "inactive"));
+	VUHDO_Msg("AddOnRestriction ChallengeMode: " .. (IsAddOnRestrictionActive(Enum.AddOnRestrictionType["ChallengeMode"]) and "active" or "inactive"));
+
+	return;
+
 end
 
 
