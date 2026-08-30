@@ -1178,7 +1178,6 @@ do
 	local tHealthBar;
 	local tPanelNum;
 	local tQuota;
-	local tBackgroundBouquet;
 	local tCanGlow;
 	local tGlowColor;
 	local tGlowStyle;
@@ -1258,11 +1257,7 @@ do
 				end
 
 				if sSecretsEnabled then
-					tBackgroundBouquet = VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"]["BACKGROUND_BAR"];
-
-					if not tBackgroundBouquet or tBackgroundBouquet == "" then
-						VUHDO_updateIndicatorAlphaChain(tButton, "HEALTH_BAR", VUHDO_RAID[aUnit]);
-					end
+					VUHDO_updateIndicatorAlphaChain(tButton, "HEALTH_BAR", VUHDO_RAID[aUnit]);
 				end
 			end
 		end

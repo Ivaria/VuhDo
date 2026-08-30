@@ -7,6 +7,7 @@ local format = string.format;
 
 local CreateFrame = CreateFrame;
 local InCombatLockdown = InCombatLockdown;
+local UnitHealthPercent = UnitHealthPercent;
 
 local VUHDO_META_NEW_ARRAY = VUHDO_META_NEW_ARRAY;
 local VUHDO_BOUQUET_BUFFS_SPECIAL;
@@ -240,13 +241,73 @@ end
 
 
 --
+local tFrame;
+local function VUHDO_createThresholdBackgroundOverlay(aButton, aTarget, aValidatorName, aTargetType, aThresholdMixin)
+
+	tTargetOverlays = sBooleanOverlayLayers[aButton][aTarget];
+
+	if not tTargetOverlays then
+		tTargetOverlays = { };
+
+		sBooleanOverlayLayers[aButton][aTarget] = tTargetOverlays;
+	end
+
+	if tTargetOverlays[aValidatorName] and tTargetOverlays[aValidatorName]["frame"] then
+		return tTargetOverlays[aValidatorName];
+	end
+
+	if tTargetOverlays[aValidatorName] and tTargetOverlays[aValidatorName]["texture"] then
+		tTargetOverlays[aValidatorName]["texture"]:Hide();
+	end
+
+	if aTargetType == VUHDO_TARGET_TYPE_BAR then
+		tFillAnchorRegion = aTarget:GetStatusBarTexture() or aTarget;
+	else
+		tFillAnchorRegion = aTarget;
+	end
+
+	tFrame = CreateFrame("Frame", nil, aTarget);
+
+	tFrame:ClearAllPoints();
+	VUHDO_PixelUtil.SetPoint(tFrame, "TOPLEFT", tFillAnchorRegion, "TOPLEFT", 0, 0);
+	VUHDO_PixelUtil.SetPoint(tFrame, "BOTTOMRIGHT", tFillAnchorRegion, "BOTTOMRIGHT", 0, 0);
+
+	tTexture = tFrame:CreateTexture(nil, "ARTWORK");
+	tTexture:SetAllPoints(tFrame);
+	tTexture:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMP", "CLAMP", "NEAREST");
+
+	VUHDO_PixelUtil.ApplySettings(tTexture);
+
+	tTexture:SetVertexColor(aThresholdMixin["r"], aThresholdMixin["g"], aThresholdMixin["b"], aThresholdMixin["a"] or 1);
+	tTexture:SetAlpha(1);
+
+	tFrame:SetAlpha(0);
+	tFrame:Show();
+
+	tTargetOverlays[aValidatorName] = {
+		["frame"] = tFrame,
+		["texture"] = tTexture,
+		["isCleared"] = true,
+	};
+
+	return tTargetOverlays[aValidatorName];
+
+end
+
+
+
+--
 local function VUHDO_clearBooleanOverlay(aOverlay)
 
 	if aOverlay["isCleared"] then
 		return;
 	end
 
-	aOverlay["texture"]:SetAlpha(0);
+	if aOverlay["frame"] then
+		aOverlay["frame"]:SetAlpha(0);
+	else
+		aOverlay["texture"]:SetAlpha(0);
+	end
 
 	aOverlay["isCleared"] = true;
 
@@ -443,7 +504,9 @@ local tBooleanStepByName = { };
 local tItemTrueAlpha;
 local tItemFalseAlpha;
 local tExistingEntry;
-function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBouquet, aPanelNum)
+local tLayerTemplate;
+local tHealthOpacityCurveIdx;
+function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBouquetName, aBouquet, aPanelNum)
 
 	if not aBouquet or not sSecretsEnabled then
 		return;
@@ -501,6 +564,9 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 	end
 
 	tStepCnt = 0;
+	tHealthOpacityCurveIdx = 0;
+
+	tLayerTemplate = aBouquetName and VUHDO_getBouquetLayerTemplate(aBouquetName);
 
 	twipe(tBooleanStepByName);
 
@@ -550,6 +616,33 @@ function VUHDO_buildGlobalAlphaChainsForIndicator(aButton, anIndicatorName, aBou
 
 					tinsert(tChain["nonSecretSteps"], tEntry);
 				end
+			end
+		end
+	end
+
+	for tCnt = 1, #aBouquet do
+		tItem = aBouquet[tCnt];
+
+		if (tItem["name"] == "HEALTH_ABOVE" or tItem["name"] == "HEALTH_BELOW") and tItem["color"] and tItem["color"]["useOpacity"] and not tItem["color"]["useBackground"] then
+			tHealthOpacityCurveIdx = tHealthOpacityCurveIdx + 1;
+
+			if tStepCnt < VUHDO_MAX_ALPHA_CHAIN_STEPS and tLayerTemplate and tLayerTemplate["healthOpacityCurves"] and tLayerTemplate["healthOpacityCurves"][tHealthOpacityCurveIdx] then
+				tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tItem["name"]];
+
+				tStepCnt = tStepCnt + 1;
+
+				tWrapper = tWrapperData["wrappers"][tStepCnt];
+
+				tEntry = sAlphaChainStepEntryPool:get();
+
+				tEntry["frame"] = tWrapper;
+				tEntry["wrapperIndex"] = tStepCnt;
+				tEntry["item"] = tItem;
+				tEntry["special"] = tSpecial;
+				tEntry["index"] = tCnt;
+				tEntry["healthOpacityCurve"] = tLayerTemplate["healthOpacityCurves"][tHealthOpacityCurveIdx];
+
+				tinsert(tChain["steps"], tEntry);
 			end
 		end
 	end
@@ -632,7 +725,7 @@ function VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum)
 			tBouquet = VUHDO_decompressIfCompressed(tBouquet);
 			VUHDO_BOUQUETS["STORED"][tBouquetName] = tBouquet;
 
-			VUHDO_buildGlobalAlphaChainsForIndicator(aButton, tIndicatorName, tBouquet, aPanelNum);
+			VUHDO_buildGlobalAlphaChainsForIndicator(aButton, tIndicatorName, tBouquetName, tBouquet, aPanelNum);
 		end
 	end
 
@@ -644,7 +737,7 @@ function VUHDO_buildAllIndicatorAlphaChains(aButton, aPanelNum)
 			tBouquet = VUHDO_decompressIfCompressed(tBouquet);
 			VUHDO_BOUQUETS["STORED"][tBouquetName] = tBouquet;
 
-			VUHDO_buildGlobalAlphaChainsForIndicator(aButton, tIndicatorName, tBouquet, aPanelNum);
+			VUHDO_buildGlobalAlphaChainsForIndicator(aButton, tIndicatorName, tBouquetName, tBouquet, aPanelNum);
 		end
 	end
 
@@ -683,8 +776,8 @@ function VUHDO_buildTargetIndicatorAlphaChains(aButton, aPanelNum)
 	tBouquet = VUHDO_decompressIfCompressed(tBouquet);
 	VUHDO_BOUQUETS["STORED"][VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH] = tBouquet;
 
-	VUHDO_buildGlobalAlphaChainsForIndicator(aButton, "HEALTH_BAR", tBouquet, aPanelNum);
-	VUHDO_buildGlobalAlphaChainsForIndicator(aButton, "MANA_BAR", tBouquet, aPanelNum);
+	VUHDO_buildGlobalAlphaChainsForIndicator(aButton, "HEALTH_BAR", VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH, tBouquet, aPanelNum);
+	VUHDO_buildGlobalAlphaChainsForIndicator(aButton, "MANA_BAR", VUHDO_I18N_DEF_BOUQUET_TARGET_HEALTH, tBouquet, aPanelNum);
 
 	aButton["alphaChainConfigVersion"] = sAlphaChainConfigVersion;
 	aButton["alphaChainPanelNum"] = aPanelNum;
@@ -710,6 +803,11 @@ local function VUHDO_buildBooleanOverlaysForTarget(aButton, aTarget, aTargetType
 		if tOverlay then
 			VUHDO_applyBooleanOverlayFillTexture(tOverlay["texture"], aTarget, aTargetType);
 		end
+	end
+
+	if aLayerTemplate["hasThresholdBackgroundOverlay"] then
+		tOverlay = VUHDO_createThresholdBackgroundOverlay(aButton, aTarget,
+			aLayerTemplate["thresholdBackgroundOverlayName"], aTargetType, aLayerTemplate["thresholdBackgroundOverlayMixin"]);
 	end
 
 	return;
@@ -743,7 +841,7 @@ function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 		tBouquetName = tIndicatorConfig["BOUQUETS"][tIndicatorName];
 		tLayerTemplate = tBouquetName and tBouquetName ~= "" and VUHDO_getBouquetLayerTemplate(tBouquetName);
 
-		if tLayerTemplate and tLayerTemplate["hasBools"] then
+		if tLayerTemplate and (tLayerTemplate["hasBools"] or tLayerTemplate["hasThresholdBackgroundOverlay"]) then
 			tBuildBarIndex = VUHDO_INDICATOR_BAR_MAP[tIndicatorName];
 			tIndicatorBar = VUHDO_getHealthBar(aButton, tBuildBarIndex);
 
@@ -757,7 +855,7 @@ function VUHDO_buildBooleanOverlaysForButton(aButton, aPanelNum)
 		tBouquetName = tIndicatorConfig["BOUQUETS"][tIndicatorName];
 		tLayerTemplate = tBouquetName and tBouquetName ~= "" and VUHDO_getBouquetLayerTemplate(tBouquetName);
 
-		if tLayerTemplate and tLayerTemplate["hasBools"] then
+		if tLayerTemplate and (tLayerTemplate["hasBools"] or tLayerTemplate["hasThresholdBackgroundOverlay"]) then
 			tFrameGetter = VUHDO_INDICATOR_FRAME_GETTERS[tIndicatorName];
 			tIndicatorBar = _G[tFrameGetter](aButton);
 
@@ -786,6 +884,7 @@ local tMinOverrideIndex;
 local tOverride;
 local tStepItemColor;
 local tIsOpacityOnlyStep;
+local tAlphaColor;
 function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 
 	if not anInfo then
@@ -858,6 +957,10 @@ function VUHDO_updateIndicatorAlphaChain(aButton, anIndicatorName, anInfo)
 
 		if tMinOverrideIndex and tStep["index"] > tMinOverrideIndex and not tIsOpacityOnlyStep then
 			tStep["frame"]:SetAlpha(1);
+		elseif tStep["healthOpacityCurve"] then
+			tAlphaColor = UnitHealthPercent(anInfo["unit"], true, tStep["healthOpacityCurve"]);
+
+			tStep["frame"]:SetAlpha(tAlphaColor and tAlphaColor["a"] or 1);
 		else
 			tIsActive, _, _, _, _, _, _, _, _, _, _, tSecretBool = tStep["special"]["validator"](anInfo, tStep["item"]);
 
@@ -1310,12 +1413,39 @@ end
 
 
 --
+local tOverlay;
+local tUnit;
+local tAlphaColor;
+local function VUHDO_applyThresholdBackgroundOverlay(aButton, aTarget, aTargetType, aLayerTemplate)
+
+	if not aLayerTemplate["hasThresholdBackgroundOverlay"] then
+		return;
+	end
+
+	tUnit = aButton:GetAttribute("unit");
+
+	tOverlay = VUHDO_getBooleanOverlay(aButton, aTarget, aLayerTemplate["thresholdBackgroundOverlayName"], aTargetType);
+
+	if tOverlay and tOverlay["frame"] then
+		tAlphaColor = UnitHealthPercent(tUnit, true, aLayerTemplate["thresholdBackgroundOverlayAlphaCurve"]);
+
+		tOverlay["frame"]:SetAlpha(tAlphaColor["a"]);
+		tOverlay["isCleared"] = nil;
+	end
+
+	return;
+
+end
+
+
+
+--
 local tResultSlot;
 local tR;
 local tG;
 local tB;
 local tA;
-local function VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate, aResultIdx)
+local function VUHDO_applyCurveColorByIndex(aButton, aTarget, aTargetType, aLayerTemplate, aResultIdx)
 
 	tResultSlot = aLayerTemplate["curveResults"][aResultIdx];
 
@@ -1324,6 +1454,31 @@ local function VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate
 	end
 
 	if aTargetType == VUHDO_TARGET_TYPE_BAR and tResultSlot["useBarTextureGradient"] and tResultSlot["gradientMinMixin"] and tResultSlot["gradientMaxMixin"] then
+		if tResultSlot["gradientSampleMinColor"] then
+			tR, tG, tB, tA = tResultSlot["gradientSampleMinColor"]["r"], tResultSlot["gradientSampleMinColor"]["g"], tResultSlot["gradientSampleMinColor"]["b"], tResultSlot["gradientSampleMinColor"]["a"];
+
+			if sSecretsEnabled then
+				aTarget["secretCurveColor"]["R"] = tR;
+				aTarget["secretCurveColor"]["G"] = tG;
+				aTarget["secretCurveColor"]["B"] = tB;
+				aTarget["secretCurveColor"]["O"] = tA;
+			end
+
+			if aLayerTemplate["useBackground"] then
+				aTarget:GetStatusBarTexture():SetGradient("HORIZONTAL", tResultSlot["gradientMinMixin"], tResultSlot["gradientMaxMixin"]);
+			end
+
+			VUHDO_applyThresholdBackgroundOverlay(aButton, aTarget, aTargetType, aLayerTemplate);
+
+			if tResultSlot["useText"] and tResultSlot["r"] then
+				tR, tG, tB = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"];
+
+				VUHDO_applyTextColorToBar(aTarget, tR, tG, tB);
+			end
+
+			return;
+		end
+
 		if tResultSlot["r"] and sSecretsEnabled then
 			tR, tG, tB, tA = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"], tResultSlot["a"];
 
@@ -1337,7 +1492,9 @@ local function VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate
 			aTarget:GetStatusBarTexture():SetGradient("HORIZONTAL", tResultSlot["gradientMinMixin"], tResultSlot["gradientMaxMixin"]);
 		end
 
-		if aLayerTemplate["useText"] and tResultSlot["r"] then
+		VUHDO_applyThresholdBackgroundOverlay(aButton, aTarget, aTargetType, aLayerTemplate);
+
+		if tResultSlot["useText"] and tResultSlot["r"] then
 			tR, tG, tB = tResultSlot["r"], tResultSlot["g"], tResultSlot["b"];
 
 			VUHDO_applyTextColorToBar(aTarget, tR, tG, tB);
@@ -1361,7 +1518,7 @@ local function VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate
 
 	VUHDO_applyRawColorToTarget(aTarget, aTargetType, tR, tG, tB, tA, aLayerTemplate);
 
-	if aTargetType == VUHDO_TARGET_TYPE_BAR and aLayerTemplate["useText"] then
+	if aTargetType == VUHDO_TARGET_TYPE_BAR and tResultSlot["useText"] then
 		VUHDO_applyTextColorToBar(aTarget, tR, tG, tB);
 	end
 
@@ -1431,7 +1588,7 @@ local function VUHDO_applySortedValidatorsToTarget(aButton, aTarget, aTargetType
 				VUHDO_applyNonSecretColorByIndex(aTarget, aTargetType, aLayerTemplate, tResultIdx);
 			end
 		elseif tType == VUHDO_BOUQUET_LAYER_TYPE_CURVE then
-			VUHDO_applyCurveColorByIndex(aTarget, aTargetType, aLayerTemplate, tResultIdx);
+			VUHDO_applyCurveColorByIndex(aButton, aTarget, aTargetType, aLayerTemplate, tResultIdx);
 		elseif tType == VUHDO_BOUQUET_LAYER_TYPE_DISPEL then
 			tResult = aLayerTemplate["dispelResults"][tResultIdx];
 

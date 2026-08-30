@@ -754,7 +754,10 @@ do
 	local tName;
 	local tEntry;
 	local tHealthBright;
-	function VUHDO_buildCompositeHealthCurve(aBouquet, anInfo)
+	local tUseBackground;
+	local tUseOpacity;
+	local tThresholdAlpha;
+	function VUHDO_buildCompositeHealthCurve(aBouquet, anInfo, aBaseColorOverride)
 
 		twipe(sThresholds);
 
@@ -808,6 +811,11 @@ do
 			end
 		end
 
+		if aBaseColorOverride then
+			tBaseColor = aBaseColorOverride;
+			tLowColor, tMedColor, tHighColor = nil, nil, nil;
+		end
+
 		tsort(sThresholds, function(a, b) return a["percent"] < b["percent"]; end);
 
 		tCurve = CreateColorCurve();
@@ -816,7 +824,7 @@ do
 		tBaseColorMixin = nil;
 
 		if tBaseColor then
-			if 2 == tRadio then
+			if 2 == tRadio and not aBaseColorOverride then
 				tBaseColorMixin = CreateColor(tBaseColor["R"] * tHealthBright, tBaseColor["G"] * tHealthBright, tBaseColor["B"] * tHealthBright, tBaseColor["O"] or 1);
 			else
 				tBaseColorMixin = CreateColor(tBaseColor["R"], tBaseColor["G"], tBaseColor["B"], tBaseColor["O"] or 1);
@@ -854,40 +862,44 @@ do
 
 		for _, tThreshold in ipairs(sThresholds) do
 			tThresholdFraction = tThreshold["percent"] / 100;
+			tThresholdColorMixin = nil;
 
-			tThresholdColorMixin = CreateColor(
-				tThreshold["color"]["R"], tThreshold["color"]["G"],
-				tThreshold["color"]["B"], tThreshold["color"]["O"] or 1
-			);
+			tUseBackground = tThreshold["color"]["useBackground"];
+			tUseOpacity = tThreshold["color"]["useOpacity"];
 
-			if tThreshold["type"] == "below" then
-				tCurve:AddPoint(tCurrentX, tThresholdColorMixin);
-				tCurve:AddPoint(tThresholdFraction - 0.005, tThresholdColorMixin);
+			if tUseBackground then
+				tThresholdAlpha = tUseOpacity and (tThreshold["color"]["O"] or 1) or 1;
 
-				tCurrentX = tThresholdFraction;
+				tThresholdColorMixin = CreateColor(tThreshold["color"]["R"], tThreshold["color"]["G"], tThreshold["color"]["B"], tThresholdAlpha);
 
-			elseif tThreshold["type"] == "above" then
-				if tCurrentX < tThresholdFraction then
-					if tRadio == 3 and tLowColorMixin then
-						VUHDO_addGradientPointsToRange(tCurve, tCurrentX, tThresholdFraction,
-							tLowColorMixin, tMedColorMixin, tHighColorMixin);
-					elseif tBaseColorMixin then
-						tCurve:AddPoint(tCurrentX, tBaseColorMixin);
-						tCurve:AddPoint(tThresholdFraction - 0.005, tBaseColorMixin);
+				if tThreshold["type"] == "below" then
+					tCurve:AddPoint(tCurrentX, tThresholdColorMixin);
+					tCurve:AddPoint(tThresholdFraction - 0.005, tThresholdColorMixin);
+
+					tCurrentX = tThresholdFraction;
+
+				elseif tThreshold["type"] == "above" then
+					if tCurrentX < tThresholdFraction then
+						if tRadio == 3 and tLowColorMixin then
+							VUHDO_addGradientPointsToRange(tCurve, tCurrentX, tThresholdFraction, tLowColorMixin, tMedColorMixin, tHighColorMixin);
+						elseif tBaseColorMixin then
+							tCurve:AddPoint(tCurrentX, tBaseColorMixin);
+							tCurve:AddPoint(tThresholdFraction - 0.005, tBaseColorMixin);
+						end
 					end
+
+					tCurve:AddPoint(tThresholdFraction, tThresholdColorMixin);
+					tCurve:AddPoint(1.00, tThresholdColorMixin);
+
+					tCurrentX = 1.00;
 				end
 
-				tCurve:AddPoint(tThresholdFraction, tThresholdColorMixin);
-				tCurve:AddPoint(1.00, tThresholdColorMixin);
-
-				tCurrentX = 1.00;
 			end
 		end
 
 		if tCurrentX < 1.00 then
 			if tRadio == 3 and tLowColorMixin then
-				VUHDO_addGradientPointsToRange(tCurve, tCurrentX, 1.00,
-					tLowColorMixin, tMedColorMixin, tHighColorMixin);
+				VUHDO_addGradientPointsToRange(tCurve, tCurrentX, 1.00, tLowColorMixin, tMedColorMixin, tHighColorMixin);
 			elseif tBaseColorMixin then
 				tCurve:AddPoint(tCurrentX, tBaseColorMixin);
 				tCurve:AddPoint(1.00, tBaseColorMixin);
@@ -917,9 +929,11 @@ do
 	local tRange;
 	local tX;
 	local tColorMixin;
-	function VUHDO_addGradientPointsToRange(aCurve, aStartX, aEndX, aLowColor, aMedColor, aHighColor)
+	local tAlpha;
+	function VUHDO_addGradientPointsToRange(aCurve, aStartX, aEndX, aLowColor, aMedColor, aHighColor, anAlpha)
 
 		tRange = aEndX - aStartX;
+		tAlpha = anAlpha or 1;
 
 		for tStep = 0, 6 do
 			tX = aStartX + (tStep / 6) * tRange;
@@ -934,18 +948,18 @@ do
 
 				tInvModi = 1 - tModi;
 
-				tR = aMedColor:GetRed() * tInvModi + aHighColor:GetRed() * tModi;
-				tG = aMedColor:GetGreen() * tInvModi + aHighColor:GetGreen() * tModi;
-				tB = aMedColor:GetBlue() * tInvModi + aHighColor:GetBlue() * tModi;
+				tR = aMedColor["r"] * tInvModi + aHighColor["r"] * tModi;
+				tG = aMedColor["g"] * tInvModi + aHighColor["g"] * tModi;
+				tB = aMedColor["b"] * tInvModi + aHighColor["b"] * tModi;
 			else
 				tInvModi = 1 - tModi;
 
-				tR = aLowColor:GetRed() * tInvModi + aMedColor:GetRed() * tModi;
-				tG = aLowColor:GetGreen() * tInvModi + aMedColor:GetGreen() * tModi;
-				tB = aLowColor:GetBlue() * tInvModi + aMedColor:GetBlue() * tModi;
+				tR = aLowColor["r"] * tInvModi + aMedColor["r"] * tModi;
+				tG = aLowColor["g"] * tInvModi + aMedColor["g"] * tModi;
+				tB = aLowColor["b"] * tInvModi + aMedColor["b"] * tModi;
 			end
 
-			tColorMixin = CreateColor(tR, tG, tB, 1);
+			tColorMixin = CreateColor(tR, tG, tB, tAlpha);
 			aCurve:AddPoint(tX, tColorMixin);
 		end
 
@@ -1417,6 +1431,64 @@ end
 
 do
 	--
+	local tHealthOpacityCurve;
+	local tThresholdDecimal;
+	local tOpacity;
+	function VUHDO_buildHealthOpacityStepCurve(aThresholdType, aThresholdPercent, anOpacity)
+
+		tHealthOpacityCurve = CreateColorCurve();
+		tHealthOpacityCurve:SetType(Enum.LuaCurveType.Step);
+
+		tThresholdDecimal = aThresholdPercent / 100;
+		tOpacity = anOpacity or 1;
+
+		if aThresholdType == "above" then
+			tHealthOpacityCurve:AddPoint(0.0, CreateColor(1, 1, 1, 1));
+			tHealthOpacityCurve:AddPoint(tThresholdDecimal, CreateColor(1, 1, 1, tOpacity));
+			tHealthOpacityCurve:AddPoint(1.0, CreateColor(1, 1, 1, tOpacity));
+		else
+			tHealthOpacityCurve:AddPoint(0.0, CreateColor(1, 1, 1, tOpacity));
+			tHealthOpacityCurve:AddPoint(tThresholdDecimal, CreateColor(1, 1, 1, tOpacity));
+			tHealthOpacityCurve:AddPoint(1.0, CreateColor(1, 1, 1, 1));
+		end
+
+		return tHealthOpacityCurve;
+
+	end
+
+
+
+	--
+	local tOverlayOpacityCurve;
+	local tOverlayThresholdDecimal;
+	local tOverlayOpacity;
+	function VUHDO_buildHealthThresholdBackgroundOverlayAlphaCurve(aThresholdType, aThresholdPercent, anOpacity)
+
+		tOverlayOpacityCurve = CreateColorCurve();
+		tOverlayOpacityCurve:SetType(Enum.LuaCurveType.Step);
+
+		tOverlayThresholdDecimal = aThresholdPercent / 100;
+		tOverlayOpacity = anOpacity or 1;
+
+		if aThresholdType == "above" then
+			tOverlayOpacityCurve:AddPoint(0.0, CreateColor(1, 1, 1, 0));
+			tOverlayOpacityCurve:AddPoint(tOverlayThresholdDecimal, CreateColor(1, 1, 1, tOverlayOpacity));
+			tOverlayOpacityCurve:AddPoint(1.0, CreateColor(1, 1, 1, tOverlayOpacity));
+		else
+			tOverlayOpacityCurve:AddPoint(0.0, CreateColor(1, 1, 1, tOverlayOpacity));
+			tOverlayOpacityCurve:AddPoint(tOverlayThresholdDecimal, CreateColor(1, 1, 1, tOverlayOpacity));
+			tOverlayOpacityCurve:AddPoint(1.0, CreateColor(1, 1, 1, 0));
+		end
+
+		return tOverlayOpacityCurve;
+
+	end
+end
+
+
+
+do
+	--
 	local tItem;
 	local tSpecial;
 	local tSecretType;
@@ -1439,6 +1511,12 @@ do
 	local tBuildGradMin;
 	local tBuildGradFactor;
 	local tTrueTextColor;
+	local tHasThresholdBackground;
+	local tThresholdItem;
+	local tMinColorForCurve;
+	local tMaxColorForCurve;
+	local tMockClassInfo;
+	local tThresholdAlpha;
 	function VUHDO_buildBouquetLayerTemplate(aBouquetName)
 
 		tBouquet = VUHDO_BOUQUETS["STORED"][aBouquetName];
@@ -1530,154 +1608,270 @@ do
 				tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
 				if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT or tSecretType == VUHDO_SECRET_TYPE_POWER_PERCENT then
-					tCurveIdx = tCurveIdx + 1;
+					if tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR then
+						tCurveIdx = tCurveIdx + 1;
 
-					tTemplate["hasCurves"] = true;
+						tTemplate["hasCurves"] = true;
 
-					tTemplate["curveValidators"][tCurveIdx] = {
-						["item"] = tItem,
-						["special"] = tSpecial,
-						["index"] = tCnt,
-					};
+						tTemplate["curveValidators"][tCurveIdx] = {
+							["item"] = tItem,
+							["special"] = tSpecial,
+							["index"] = tCnt,
+						};
 
-					tTemplate["curveResults"][tCurveIdx] = {
-						["isActive"] = false,
-						["r"] = nil,
-						["g"] = nil,
-						["b"] = nil,
-						["a"] = nil,
-						["maxR"] = nil,
-						["maxG"] = nil,
-						["maxB"] = nil,
-						["maxO"] = nil,
-						["useBarTextureGradient"] = false,
-						["gradientMinMixin"] = nil,
-						["gradientMaxMixin"] = nil,
-						["gradientClassMaxMixins"] = nil,
-						["gradientClassMaxMixinFallback"] = nil,
-						["gradientClassMinMixins"] = nil,
-						["gradientClassMinMixinFallback"] = nil,
-						["gradientIsClassMode"] = false,
-						["value"] = nil,
-						["maxValue"] = 100,
-						["timer"] = 0,
-						["duration"] = 0,
-						["timer2"] = 0,
-					};
+						tTemplate["curveResults"][tCurveIdx] = {
+							["isActive"] = false,
+							["r"] = nil,
+							["g"] = nil,
+							["b"] = nil,
+							["a"] = nil,
+							["maxR"] = nil,
+							["maxG"] = nil,
+							["maxB"] = nil,
+							["maxO"] = nil,
+							["useBarTextureGradient"] = false,
+							["useText"] = false,
+							["gradientMinMixin"] = nil,
+							["gradientMaxMixin"] = nil,
+							["gradientClassMaxMixins"] = nil,
+							["gradientClassMaxMixinFallback"] = nil,
+							["gradientClassMinMixins"] = nil,
+							["gradientClassMinMixinFallback"] = nil,
+							["gradientIsClassMode"] = false,
+							["value"] = nil,
+							["maxValue"] = 100,
+							["timer"] = 0,
+							["duration"] = 0,
+							["timer2"] = 0,
+						};
 
-					if tSpecial["custom_type"] == VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR and not tSpecial["no_color"] and tItem["custom"] then
-						tHealthRadio = tItem["custom"]["radio"] or 3;
-
-						if tHealthRadio == 1 and tItem["custom"]["isSolidGradient"] then
-							tTemplate["curveResults"][tCurveIdx]["useBarTextureGradient"] = true;
-						elseif tHealthRadio == 2 and tItem["custom"]["isClassGradient"] then
-							tTemplate["curveResults"][tCurveIdx]["useBarTextureGradient"] = true;
-						end
-
-						if tTemplate["curveResults"][tCurveIdx]["useBarTextureGradient"] then
-							tCurveSlot = tTemplate["curveResults"][tCurveIdx];
+						if not tSpecial["no_color"] and tItem["custom"] then
+							tHealthRadio = tItem["custom"]["radio"] or 3;
 
 							if tHealthRadio == 1 and tItem["custom"]["isSolidGradient"] then
-								tBuildGradMin = tItem["color"];
-
-								if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
-									tCurveSlot["gradientMinMixin"] = CreateColor(
-										tBuildGradMin["R"],
-										tBuildGradMin["G"],
-										tBuildGradMin["B"],
-										tBuildGradMin["O"] or 1
-									);
-								end
-
-								tBuildGradMax = tItem["custom"]["maxColor"];
-
-								if tBuildGradMax and tBuildGradMax["R"] and tBuildGradMax["G"] and tBuildGradMax["B"] then
-									tCurveSlot["gradientMaxMixin"] = CreateColor(
-										tBuildGradMax["R"],
-										tBuildGradMax["G"],
-										tBuildGradMax["B"],
-										tBuildGradMax["O"] or 1
-									);
-								end
+								tTemplate["curveResults"][tCurveIdx]["useBarTextureGradient"] = true;
 							elseif tHealthRadio == 2 and tItem["custom"]["isClassGradient"] then
-								tCurveSlot["gradientIsClassMode"] = true;
+								tTemplate["curveResults"][tCurveIdx]["useBarTextureGradient"] = true;
+							end
 
-								VUHDO_initClassColors();
+							if tTemplate["curveResults"][tCurveIdx]["useBarTextureGradient"] then
+								tCurveSlot = tTemplate["curveResults"][tCurveIdx];
 
-								tBuildGradFactor = tItem["custom"]["bright"] or 1;
-								tCurveSlot["gradientClassMinMixins"] = { };
-								tCurveSlot["gradientClassMaxMixins"] = { };
+								if tHealthRadio == 1 and tItem["custom"]["isSolidGradient"] then
+									tBuildGradMin = tItem["color"];
 
-								for tBuildClassGradId, tBuildClassGradEntry in pairs(VUHDO_USER_CLASS_GRADIENT_COLORS) do
-									if type(tBuildClassGradId) == "number" and tBuildClassGradEntry then
-										tBuildGradMin = tBuildClassGradEntry["min"] or tItem["color"];
-										tBuildGradMax = tBuildClassGradEntry["max"] or tItem["custom"]["maxColor"];
+									if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
+										tCurveSlot["gradientMinMixin"] = CreateColor(
+											tBuildGradMin["R"],
+											tBuildGradMin["G"],
+											tBuildGradMin["B"],
+											tBuildGradMin["O"] or 1
+										);
+									end
 
-										if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
-											tCurveSlot["gradientClassMinMixins"][tBuildClassGradId] = CreateColor(
-												tBuildGradMin["R"] * tBuildGradFactor,
-												tBuildGradMin["G"] * tBuildGradFactor,
-												tBuildGradMin["B"] * tBuildGradFactor,
-												tBuildGradMin["O"] or 1
-											);
+									tBuildGradMax = tItem["custom"]["maxColor"];
+
+									if tBuildGradMax and tBuildGradMax["R"] and tBuildGradMax["G"] and tBuildGradMax["B"] then
+										tCurveSlot["gradientMaxMixin"] = CreateColor(
+											tBuildGradMax["R"],
+											tBuildGradMax["G"],
+											tBuildGradMax["B"],
+											tBuildGradMax["O"] or 1
+										);
+									end
+								elseif tHealthRadio == 2 and tItem["custom"]["isClassGradient"] then
+									tCurveSlot["gradientIsClassMode"] = true;
+
+									VUHDO_initClassColors();
+
+									tBuildGradFactor = tItem["custom"]["bright"] or 1;
+									tCurveSlot["gradientClassMinMixins"] = { };
+									tCurveSlot["gradientClassMaxMixins"] = { };
+
+									for tBuildClassGradId, tBuildClassGradEntry in pairs(VUHDO_USER_CLASS_GRADIENT_COLORS) do
+										if type(tBuildClassGradId) == "number" and tBuildClassGradEntry then
+											tBuildGradMin = tBuildClassGradEntry["min"] or tItem["color"];
+											tBuildGradMax = tBuildClassGradEntry["max"] or tItem["custom"]["maxColor"];
+
+											if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
+												tCurveSlot["gradientClassMinMixins"][tBuildClassGradId] = CreateColor(
+													tBuildGradMin["R"] * tBuildGradFactor,
+													tBuildGradMin["G"] * tBuildGradFactor,
+													tBuildGradMin["B"] * tBuildGradFactor,
+													tBuildGradMin["O"] or 1
+												);
+											end
+
+											if tBuildGradMax and tBuildGradMax["R"] and tBuildGradMax["G"] and tBuildGradMax["B"] then
+												tCurveSlot["gradientClassMaxMixins"][tBuildClassGradId] = CreateColor(
+													tBuildGradMax["R"] * tBuildGradFactor,
+													tBuildGradMax["G"] * tBuildGradFactor,
+													tBuildGradMax["B"] * tBuildGradFactor,
+													tBuildGradMax["O"] or 1
+												);
+											end
+										end
+									end
+
+									tBuildGradMin = tItem["color"];
+
+									if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
+										tCurveSlot["gradientClassMinMixinFallback"] = CreateColor(
+											tBuildGradMin["R"] * tBuildGradFactor,
+											tBuildGradMin["G"] * tBuildGradFactor,
+											tBuildGradMin["B"] * tBuildGradFactor,
+											tBuildGradMin["O"] or 1
+										);
+									end
+
+									tBuildGradMax = tItem["custom"]["maxColor"];
+
+									if tBuildGradMax and tBuildGradMax["R"] and tBuildGradMax["G"] and tBuildGradMax["B"] then
+										tCurveSlot["gradientClassMaxMixinFallback"] = CreateColor(
+											tBuildGradMax["R"] * tBuildGradFactor,
+											tBuildGradMax["G"] * tBuildGradFactor,
+											tBuildGradMax["B"] * tBuildGradFactor,
+											tBuildGradMax["O"] or 1
+										);
+									end
+
+									tHasThresholdBackground = false;
+
+									for tThresholdCnt = 1, #tBouquet do
+										tThresholdItem = tBouquet[tThresholdCnt];
+
+										if (tThresholdItem["name"] == "HEALTH_ABOVE" or tThresholdItem["name"] == "HEALTH_BELOW") and tThresholdItem["color"] and tThresholdItem["color"]["useBackground"] then
+											tHasThresholdBackground = true;
+
+											break;
+										end
+									end
+
+									if tHasThresholdBackground then
+										tMockClassInfo = { ["classId"] = 0 };
+
+										tCurveSlot["gradientSampleMinMixin"] = CreateColor(1, 1, 1, 1);
+										tCurveSlot["gradientSampleMaxMixin"] = CreateColor(1, 1, 1, 1);
+										tCurveSlot["gradientMinMixin"] = tCurveSlot["gradientSampleMinMixin"];
+										tCurveSlot["gradientMaxMixin"] = tCurveSlot["gradientSampleMaxMixin"];
+
+										for tThresholdCnt = 1, #tBouquet do
+											tThresholdItem = tBouquet[tThresholdCnt];
+
+											if (tThresholdItem["name"] == "HEALTH_ABOVE" or tThresholdItem["name"] == "HEALTH_BELOW") and tThresholdItem["color"] and tThresholdItem["color"]["useBackground"] then
+												tTemplate["hasThresholdBackgroundOverlay"] = true;
+												tTemplate["thresholdBackgroundOverlayName"] = tThresholdItem["name"];
+
+												tThresholdAlpha = tThresholdItem["color"]["useOpacity"] and (tThresholdItem["color"]["O"] or 1) or 1;
+
+												tTemplate["thresholdBackgroundOverlayMixin"] = CreateColor(
+													tThresholdItem["color"]["R"],
+													tThresholdItem["color"]["G"],
+													tThresholdItem["color"]["B"],
+													tThresholdAlpha
+												);
+
+												tTemplate["thresholdBackgroundOverlayAlphaCurve"] = VUHDO_buildHealthThresholdBackgroundOverlayAlphaCurve(
+													tThresholdItem["name"] == "HEALTH_ABOVE" and "above" or "below",
+													tThresholdItem["custom"][1],
+													tThresholdAlpha
+												);
+
+												break;
+											end
 										end
 
+										tCurveSlot["gradientClassMinCurves"] = { };
+										tCurveSlot["gradientClassMaxCurves"] = { };
+
+										for tBuildClassGradId, tBuildClassGradEntry in pairs(VUHDO_USER_CLASS_GRADIENT_COLORS) do
+											if type(tBuildClassGradId) == "number" and tBuildClassGradEntry then
+												tBuildGradMin = tBuildClassGradEntry["min"] or tItem["color"];
+												tBuildGradMax = tBuildClassGradEntry["max"] or tItem["custom"]["maxColor"];
+
+												if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
+													tMinColorForCurve = {
+														["R"] = tBuildGradMin["R"] * tBuildGradFactor,
+														["G"] = tBuildGradMin["G"] * tBuildGradFactor,
+														["B"] = tBuildGradMin["B"] * tBuildGradFactor,
+														["O"] = tBuildGradMin["O"] or 1,
+													};
+
+													tCurveSlot["gradientClassMinCurves"][tBuildClassGradId] = VUHDO_buildCompositeHealthCurve(tBouquet, tMockClassInfo, tMinColorForCurve);
+												end
+
+												if tBuildGradMax and tBuildGradMax["R"] and tBuildGradMax["G"] and tBuildGradMax["B"] then
+													tMaxColorForCurve = {
+														["R"] = tBuildGradMax["R"] * tBuildGradFactor,
+														["G"] = tBuildGradMax["G"] * tBuildGradFactor,
+														["B"] = tBuildGradMax["B"] * tBuildGradFactor,
+														["O"] = tBuildGradMax["O"] or 1,
+													};
+
+													tCurveSlot["gradientClassMaxCurves"][tBuildClassGradId] = VUHDO_buildCompositeHealthCurve(tBouquet, tMockClassInfo, tMaxColorForCurve);
+												end
+											end
+										end
+
+										tBuildGradMin = tItem["color"];
+
+										if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
+											tMinColorForCurve = {
+												["R"] = tBuildGradMin["R"] * tBuildGradFactor,
+												["G"] = tBuildGradMin["G"] * tBuildGradFactor,
+												["B"] = tBuildGradMin["B"] * tBuildGradFactor,
+												["O"] = tBuildGradMin["O"] or 1,
+											};
+
+											tCurveSlot["gradientClassMinCurveFallback"] = VUHDO_buildCompositeHealthCurve(tBouquet, tMockClassInfo, tMinColorForCurve);
+										end
+
+										tBuildGradMax = tItem["custom"]["maxColor"];
+
 										if tBuildGradMax and tBuildGradMax["R"] and tBuildGradMax["G"] and tBuildGradMax["B"] then
-											tCurveSlot["gradientClassMaxMixins"][tBuildClassGradId] = CreateColor(
-												tBuildGradMax["R"] * tBuildGradFactor,
-												tBuildGradMax["G"] * tBuildGradFactor,
-												tBuildGradMax["B"] * tBuildGradFactor,
-												tBuildGradMax["O"] or 1
-											);
+											tMaxColorForCurve = {
+												["R"] = tBuildGradMax["R"] * tBuildGradFactor,
+												["G"] = tBuildGradMax["G"] * tBuildGradFactor,
+												["B"] = tBuildGradMax["B"] * tBuildGradFactor,
+												["O"] = tBuildGradMax["O"] or 1,
+											};
+
+											tCurveSlot["gradientClassMaxCurveFallback"] = VUHDO_buildCompositeHealthCurve(tBouquet, tMockClassInfo, tMaxColorForCurve);
 										end
 									end
 								end
-
-								tBuildGradMin = tItem["color"];
-
-								if tBuildGradMin and tBuildGradMin["R"] and tBuildGradMin["G"] and tBuildGradMin["B"] then
-									tCurveSlot["gradientClassMinMixinFallback"] = CreateColor(
-										tBuildGradMin["R"] * tBuildGradFactor,
-										tBuildGradMin["G"] * tBuildGradFactor,
-										tBuildGradMin["B"] * tBuildGradFactor,
-										tBuildGradMin["O"] or 1
-									);
-								end
-
-								tBuildGradMax = tItem["custom"]["maxColor"];
-
-								if tBuildGradMax and tBuildGradMax["R"] and tBuildGradMax["G"] and tBuildGradMax["B"] then
-									tCurveSlot["gradientClassMaxMixinFallback"] = CreateColor(
-										tBuildGradMax["R"] * tBuildGradFactor,
-										tBuildGradMax["G"] * tBuildGradFactor,
-										tBuildGradMax["B"] * tBuildGradFactor,
-										tBuildGradMax["O"] or 1
-									);
-								end
 							end
 						end
-					end
 
-					if not tTemplate["baseType"] then
-						if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT then
-							tTemplate["baseType"] = "health";
-						else
-							tTemplate["baseType"] = "power";
-						end
-					end
-
-					if tItem["color"] then
-						if tItem["color"]["useBackground"] then
-							tTemplate["useBackground"] = true;
+						if not tTemplate["baseType"] then
+							if tSecretType == VUHDO_SECRET_TYPE_HEALTH_PERCENT then
+								tTemplate["baseType"] = "health";
+							else
+								tTemplate["baseType"] = "power";
+							end
 						end
 
-						if tItem["color"]["useText"] then
-							tTemplate["useText"] = true;
+						if tItem["color"] then
+							tTemplate["curveResults"][tCurveIdx]["useText"] = tItem["color"]["useText"];
+
+							if tItem["color"]["useBackground"] then
+								tTemplate["useBackground"] = true;
+							end
+
+							if tItem["color"]["useText"] then
+								tTemplate["useText"] = true;
+							end
+
+							if tItem["color"]["useOpacity"] then
+								tTemplate["useOpacity"] = true;
+							end
+						end
+					elseif (tItem["name"] == "HEALTH_ABOVE" or tItem["name"] == "HEALTH_BELOW") and tItem["color"] and tItem["color"]["useOpacity"] and not tItem["color"]["useBackground"] then
+						if not tTemplate["healthOpacityCurves"] then
+							tTemplate["healthOpacityCurves"] = { };
 						end
 
-						if tItem["color"]["useOpacity"] then
-							tTemplate["useOpacity"] = true;
-						end
+						tinsert(tTemplate["healthOpacityCurves"], VUHDO_buildHealthOpacityStepCurve(tItem["name"] == "HEALTH_ABOVE" and "above" or "below", tItem["custom"][1], tItem["color"]["O"] or 1));
 					end
 				elseif tSecretType == VUHDO_SECRET_TYPE_BOOLEAN then
 					tBoolIdx = tBoolIdx + 1;
@@ -2299,10 +2493,6 @@ do
 	local tSpellId;
 	local tExpiration;
 	local tNow;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretAuraLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2480,10 +2670,6 @@ do
 	local tClipR;
 	local tClipT;
 	local tClipB;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretNonSecretLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2714,10 +2900,7 @@ do
 	local tTimer2;
 	local tSecretColor;
 	local tGradientClassId;
-
-
-
-	--
+	local tCurve;
 	function VUHDO_evaluateBouquetSecretCurveLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2745,8 +2928,31 @@ do
 				if tResultSlot["useBarTextureGradient"] and tIsActive and tResultSlot["gradientIsClassMode"] then
 					tGradientClassId = aInfo["classId"];
 
-					tResultSlot["gradientMinMixin"] = tResultSlot["gradientClassMinMixins"][tGradientClassId] or tResultSlot["gradientClassMinMixinFallback"];
-					tResultSlot["gradientMaxMixin"] = tResultSlot["gradientClassMaxMixins"][tGradientClassId] or tResultSlot["gradientClassMaxMixinFallback"];
+					if tResultSlot["gradientClassMinCurves"] then
+						tResultSlot["gradientSampleMinColor"] = nil;
+						tResultSlot["gradientSampleMaxColor"] = nil;
+
+						tCurve = tResultSlot["gradientClassMinCurves"][tGradientClassId] or tResultSlot["gradientClassMinCurveFallback"];
+
+						if tCurve then
+							tResultSlot["gradientSampleMinColor"] = UnitHealthPercent(aUnit, true, tCurve);
+						end
+
+						tCurve = tResultSlot["gradientClassMaxCurves"][tGradientClassId] or tResultSlot["gradientClassMaxCurveFallback"];
+
+						if tCurve then
+							tResultSlot["gradientSampleMaxColor"] = UnitHealthPercent(aUnit, true, tCurve);
+						end
+
+						tResultSlot["gradientMinMixin"] = tResultSlot["gradientClassMinMixins"][tGradientClassId] or tResultSlot["gradientClassMinMixinFallback"];
+						tResultSlot["gradientMaxMixin"] = tResultSlot["gradientClassMaxMixins"][tGradientClassId] or tResultSlot["gradientClassMaxMixinFallback"];
+					else
+						tResultSlot["gradientSampleMinColor"] = nil;
+						tResultSlot["gradientSampleMaxColor"] = nil;
+
+						tResultSlot["gradientMinMixin"] = tResultSlot["gradientClassMinMixins"][tGradientClassId] or tResultSlot["gradientClassMinMixinFallback"];
+						tResultSlot["gradientMaxMixin"] = tResultSlot["gradientClassMaxMixins"][tGradientClassId] or tResultSlot["gradientClassMaxMixinFallback"];
+					end
 				end
 			end
 		elseif tSecretType == VUHDO_SECRET_TYPE_POWER_PERCENT then
@@ -2810,10 +3016,6 @@ do
 	local tSpecial;
 	local tResultSlot;
 	local tBooleanSecretBool;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretBooleanLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2849,10 +3051,6 @@ do
 	local tTextColorType;
 	local tNeedsCopy;
 	local tAuraInstanceId;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretDispelLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2959,10 +3157,6 @@ do
 	local tIsActive;
 	local tIcon;
 	local tSpriteCell;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretSpriteCellLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -3003,10 +3197,6 @@ do
 	local tCnt;
 	local tResultSlot;
 	local tSecretBool;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, aInfo, aBouquet, aAnzInfos, aLayerTemplate)
 
 		txState["activeAuras"] = 0;
@@ -3145,10 +3335,6 @@ do
 	local tFactor;
 	local tMaxColor;
 	local tWorkingColor = { };
-
-
-
-	--
 	function VUHDO_evaluateBouquetNonSecret(aUnit, aInfo, aBouquet, aAnzInfos)
 
 		for tCnt = aAnzInfos, 1, -1  do

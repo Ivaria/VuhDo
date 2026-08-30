@@ -1286,13 +1286,11 @@ local function _VUHDO_buildGenericHealthBarBouquet(aType, aName)
 		tBouquet[#tBouquet + 1] = tItem;
 	end
 
-	-- FIXME: operation modes other than neutral with 100% trigger are bugged
+	-- FIXME: operation modes other than neutral are bugged
 	--if VUHDO_CONFIG["MODE"] == VUHDO_MODE_NEUTRAL then
 	if true then
 		-- Irrelevant
-		-- FIXME: operation modes other than neutral with 100% trigger are bugged
-		--if VUHDO_CONFIG["EMERGENCY_TRIGGER"] < 100 then
-		if false then
+		if VUHDO_CONFIG["EMERGENCY_TRIGGER"] < 100 then
 			tItem = VUHDO_createBouquetItem("HEALTH_ABOVE", VUHDO_PANEL_SETUP["BAR_COLORS"]["IRRELEVANT"]);
 			tItem["custom"][1] = VUHDO_CONFIG["EMERGENCY_TRIGGER"];
 			tBouquet[#tBouquet + 1] = tItem;
