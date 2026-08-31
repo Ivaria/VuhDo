@@ -1902,6 +1902,7 @@ do
 				VUHDO_resetDeferredTaskMetrics();
 				VUHDO_resetPoolMetrics();
 				VUHDO_resetSemaphoreMetrics();
+				VUHDO_resetAuraContainerMetrics();
 
 				VUHDO_Msg("All profiling metrics reset.");
 			elseif tSubCommand == "test" then

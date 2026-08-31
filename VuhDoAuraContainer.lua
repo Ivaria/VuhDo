@@ -3013,15 +3013,32 @@ end
 
 
 --
+function VUHDO_resetAuraContainerMetrics()
+
+	twipe(VUHDO_AURA_CONTAINER_METRICS["builds"]);
+	twipe(VUHDO_AURA_CONTAINER_METRICS["releases"]);
+
+	VUHDO_Msg("Aura container metrics reset.");
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_printAuraContainerMetrics()
 
-	VUHDO_Msg(format("|cffFFD100--- Aura Container Metrics ---|r"));
-	VUHDO_Msg(format("  containers: builds=%d releases=%d",
+	VUHDO_Msg("|cffFFD100--- Aura Container Metrics ---|r");
+
+	VUHDO_Msg(format("|cffFFA500** Containers:|r |cff98FB98Builds=|r%d |cff98FB98Releases=|r%d",
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["container"] or 0,
 		VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0));
-	VUHDO_Msg(format("  overlay slots: slotHostBuilds=%d overlaySlotBuilds=%d",
+	VUHDO_Msg(format("|cffFFA500** Overlay Slots:|r |cff98FB98SlotHosts=|r%d |cff98FB98Slots=|r%d",
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["slotHost"] or 0,
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] or 0));
+
+	VUHDO_Msg("|cffFFD100--- End of Metrics ---|r");
 
 	return;
 
