@@ -1294,6 +1294,10 @@ function VUHDO_lnfPatchFont(aComponent, aLabelName)
 
 		_, tFontSize, tFontFlags = tLabel:GetFont();
 
+		if type(tFontSize) ~= "number" or tFontSize <= 0 then
+			tFontSize = 12;
+		end
+
 		tLabel:SetFont(VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME), tFontSize, tFontFlags or "");
 	end
 

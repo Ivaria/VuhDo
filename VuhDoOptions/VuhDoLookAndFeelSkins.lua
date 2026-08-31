@@ -212,21 +212,13 @@ local sBackdropFileKeys = {
 };
 
 local sSkinReady = false;
-local sPatchFontHooked = false;
-local sTabGlyphHooked = false;
-local sTriStateHooked = false;
-local sComboHooked = false;
-local sSquareDemoHooked = false;
-local sAuraGroupsHooked = false;
-local sBackdropsSnapshotted = false;
-local sComboTableInitialized = false;
+local sHooked = { };
 local sOriginalBackdropFiles = { };
 local sEmpty = { };
 
-VUHDO_LNF_IS_CJK_LOCALE = GetLocale() == "zhCN" or GetLocale() == "zhTW" or GetLocale() == "koKR";
-VUHDO_LNF_CJK_FONT_PATH = nil;
-
-VUHDO_LNF_CJK_BUTTON_FONT_NAMES = {
+local sIsCjkLocale = GetLocale() == "zhCN" or GetLocale() == "zhTW" or GetLocale() == "koKR";
+local sCjkFontPath;
+local sCjkButtonFontNames = {
 	"VuDoButtonFont",
 	"VuDoButtonFontLight",
 	"VuDoButtonFontDark",
@@ -864,12 +856,12 @@ local function VUHDO_lnfSkinStyleFontFace(aRegion)
 
 	tEntry = VUHDO_lnfSkinSnapshotFontString(aRegion);
 
-	if not tEntry or not tEntry["fontSize"] then
+	if not tEntry or type(tEntry["fontSize"]) ~= "number" or tEntry["fontSize"] <= 0 then
 		return;
 	end
 
-	if VUHDO_LNF_IS_CJK_LOCALE then
-		aRegion:SetFont(VUHDO_LNF_CJK_FONT_PATH, tEntry["fontSize"], tEntry["fontFlags"] or "");
+	if sIsCjkLocale then
+		aRegion:SetFont(sCjkFontPath, tEntry["fontSize"], tEntry["fontFlags"] or "");
 
 		return;
 	end
@@ -1228,7 +1220,7 @@ local tOriginal;
 local tColors;
 function VUHDO_lnfSkinSnapshotBackdrops()
 
-	if sBackdropsSnapshotted then
+	if sHooked["backdropsSnapshotted"] then
 		return;
 	end
 
@@ -1243,7 +1235,7 @@ function VUHDO_lnfSkinSnapshotBackdrops()
 		end
 	end
 
-	sBackdropsSnapshotted = true;
+	sHooked["backdropsSnapshotted"] = true;
 
 	return;
 
@@ -2593,7 +2585,7 @@ local function VUHDO_lnfSkinApplyFontColors(aFrame)
 		end
 	end
 
-	if VUHDO_LNF_IS_CJK_LOCALE then
+	if sIsCjkLocale then
 		for _, tRegion in ipairs(tRegions) do
 			if tRegion.GetObjectType and tRegion:GetObjectType() == "FontString" then
 				VUHDO_lnfSkinStyleFontFace(tRegion);
@@ -3923,7 +3915,7 @@ function VUHDO_registerSkin(aName, aSkinData)
 
 	VUHDO_OPTIONS_SKINS[aName] = aSkinData;
 
-	if sComboTableInitialized then
+	if sHooked["comboTableInitialized"] then
 		VUHDO_lnfSkinInitComboTable();
 	end
 
@@ -3959,7 +3951,7 @@ function VUHDO_unregisterSkin(aName)
 		VUHDO_lnfSkinApplyAll();
 	end
 
-	if sComboTableInitialized then
+	if sHooked["comboTableInitialized"] then
 		VUHDO_lnfSkinInitComboTable();
 	end
 
@@ -4021,7 +4013,7 @@ function VUHDO_lnfSkinInitComboTable()
 
 	tsort(VUHDO_OPTIONS_SKIN_COMBO_TABLE, VUHDO_lnfSkinComboTableSort);
 
-	sComboTableInitialized = true;
+	sHooked["comboTableInitialized"] = true;
 
 	return;
 
@@ -4030,6 +4022,8 @@ end
 
 
 --
+local tFontSize;
+local tFontFlags;
 function VUHDO_lnfSkinInit()
 
 	if not VUHDO_OPTIONS_SETTINGS then
@@ -4049,13 +4043,13 @@ function VUHDO_lnfSkinInit()
 	VUHDO_lnfSkinInitComboTable();
 	VUHDO_lnfSkinRewriteBackdrops();
 
-	if not sPatchFontHooked then
+	if not sHooked["patchFont"] then
 		hooksecurefunc("VUHDO_lnfPatchFont", VUHDO_lnfSkinApplyToComponent);
 
-		sPatchFontHooked = true;
+		sHooked["patchFont"] = true;
 	end
 
-	if not sTabGlyphHooked then
+	if not sHooked["tabGlyph"] then
 		hooksecurefunc("VUHDO_lnfTabCheckButtonClicked", VUHDO_lnfSkinOnTabCheckButtonClicked);
 		hooksecurefunc("VUHDO_lnfRadioButtonClicked", VUHDO_lnfSkinOnRadioButtonClicked);
 		hooksecurefunc("VUHDO_lnfCheckButtonOnEnter", VUHDO_lnfSkinOnCheckButtonEnter);
@@ -4064,17 +4058,17 @@ function VUHDO_lnfSkinInit()
 		hooksecurefunc("VUHDO_lnfTabCheckButtonOnLeave", VUHDO_lnfSkinRefreshTabButton);
 		hooksecurefunc("VUHDO_lnfCheckButtonOnLoad", VUHDO_lnfSkinApplyCheckLabelAnchors);
 
-		sTabGlyphHooked = true;
+		sHooked["tabGlyph"] = true;
 	end
 
-	if not sTriStateHooked then
+	if not sHooked["triState"] then
 		hooksecurefunc("VUHDO_lnfTriStateCheckButtonUpdateModel", VUHDO_lnfSkinOnTriStateCheckButtonUpdateModel);
 		hooksecurefunc("VUHDO_lnfTriStateCheckButtonInitFromModel", VUHDO_lnfSkinOnTriStateCheckButtonUpdateModel);
 
-		sTriStateHooked = true;
+		sHooked["triState"] = true;
 	end
 
-	if not sComboHooked then
+	if not sHooked["combo"] then
 		hooksecurefunc("VUHDO_lnfComboInitItems", VUHDO_lnfSkinOnComboInitItems);
 		hooksecurefunc("VUHDO_lnfComboItemOnEnter", VUHDO_lnfSkinOnComboItemOnEnter);
 		hooksecurefunc("VUHDO_lnfComboItemOnLeave", VUHDO_lnfSkinOnComboItemOnLeave);
@@ -4082,33 +4076,34 @@ function VUHDO_lnfSkinInit()
 		hooksecurefunc("VUHDO_lnfCheckTreeRowOnEnter", VUHDO_lnfSkinOnCheckTreeRowOnEnter);
 		hooksecurefunc("VUHDO_lnfCheckTreeRowOnLeave", VUHDO_lnfSkinOnCheckTreeRowOnLeave);
 
-		sComboHooked = true;
+		sHooked["combo"] = true;
 	end
 
-	if not sSquareDemoHooked then
+	if not sHooked["squareDemo"] then
 		hooksecurefunc("VUHDO_squareDemoOnShow", VUHDO_lnfSkinOnSquareDemoOnShow);
 
-		sSquareDemoHooked = true;
+		sHooked["squareDemo"] = true;
 	end
 
-	if not sAuraGroupsHooked then
+	if not sHooked["auraGroups"] then
 		hooksecurefunc("VUHDO_auraGroupsRefreshListEntries", VUHDO_lnfSkinOnAuraGroupsRefresh);
 		hooksecurefunc("VUHDO_buildAllBuffSetupGenerericPanel", VUHDO_lnfSkinOnBuffWatchRefresh);
 		hooksecurefunc("VUHDO_positionAllGroupConfigPanels", VUHDO_lnfSkinStyleMovePanelConfigIcons);
 		hooksecurefunc("VUHDO_lnfColorSwatchInitFromModel", VUHDO_lnfSkinStyleColorSwatch);
 
-		sAuraGroupsHooked = true;
+		sHooked["auraGroups"] = true;
 	end
 
-	if VUHDO_LNF_IS_CJK_LOCALE then
-		VUHDO_LNF_CJK_FONT_PATH = VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME);
+	if sIsCjkLocale then
+		sCjkFontPath = VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME);
 
-		for tCnt = 1, #VUHDO_LNF_CJK_BUTTON_FONT_NAMES do
-			tName = VUHDO_LNF_CJK_BUTTON_FONT_NAMES[tCnt];
+		for tCnt = 1, #sCjkButtonFontNames do
+			tName = sCjkButtonFontNames[tCnt];
+			_, tFontSize, tFontFlags = _G[tName]:GetFont();
 
-			_, tNativeR, tNativeG = _G[tName]:GetFont();
-
-			_G[tName]:SetFont(VUHDO_LNF_CJK_FONT_PATH, tNativeR, tNativeG or "");
+			if type(tFontSize) == "number" and tFontSize > 0 then
+				_G[tName]:SetFont(sCjkFontPath, tFontSize, tFontFlags or "");
+			end
 		end
 	end
 
