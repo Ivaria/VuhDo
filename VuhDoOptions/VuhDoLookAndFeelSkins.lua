@@ -269,6 +269,7 @@ local sKnownSkinKeys = {
 	["displayName"] = true,
 	["imagesPath"] = true,
 	["indicatorPlate"] = true,
+	["indicatorLabelPlate"] = true,
 	["textures"] = true,
 	["textureTints"] = true,
 	["backdropColors"] = true,
@@ -307,6 +308,9 @@ local sValidFontColorKeys = {
 	["active"] = true,
 	["value"] = true,
 };
+
+local sIndicatorSchemaTexLeft = 18 / 128;
+local sIndicatorSchemaTexRight = 108 / 128;
 
 local tDarkTextureNames = {
 	"blue_dk_square_16_16",
@@ -421,15 +425,50 @@ end
 
 
 
---
-function VUHDO_lnfSkinGetIndicatorPlateColor()
+do
+	--
+	local tPlate;
+	local tAlpha;
+	function VUHDO_lnfSkinGetIndicatorPlateColor()
 
-	if VUHDO_lnfSkinGetActiveEntry()["indicatorPlate"] then
-		return VUHDO_lnfSkinGetActiveEntry()["indicatorPlate"][1], VUHDO_lnfSkinGetActiveEntry()["indicatorPlate"][2], VUHDO_lnfSkinGetActiveEntry()["indicatorPlate"][3], VUHDO_lnfSkinGetActiveEntry()["indicatorPlate"][4] or 1;
+		tPlate = VUHDO_lnfSkinGetActiveEntry()["indicatorPlate"];
+
+		if tPlate then
+			tAlpha = tPlate[4];
+
+			if tAlpha == nil then
+				tAlpha = 1;
+			end
+
+			return tPlate[1], tPlate[2], tPlate[3], tAlpha;
+		end
+
+		return;
+
 	end
 
-	return;
 
+
+	--
+	local tPlate;
+	local tAlpha;
+	function VUHDO_lnfSkinGetIndicatorLabelPlateColor()
+
+		tPlate = VUHDO_lnfSkinGetActiveEntry()["indicatorLabelPlate"];
+
+		if tPlate then
+			tAlpha = tPlate[4];
+
+			if tAlpha == nil then
+				tAlpha = 1;
+			end
+
+			return tPlate[1], tPlate[2], tPlate[3], tAlpha;
+		end
+
+		return;
+
+	end
 end
 
 
@@ -545,7 +584,6 @@ end
 
 
 do
-
 	--
 	local tTints;
 	function VUHDO_lnfSkinResolveTint(aKey)
@@ -559,7 +597,6 @@ do
 		return nil;
 
 	end
-
 end
 
 
@@ -596,6 +633,73 @@ local function VUHDO_lnfSkinSnapshotTexture(aTexture)
 
 	return tEntry;
 
+end
+
+
+
+do
+	--
+	local tSlotName;
+	local tSchemaPlate;
+	local tLabelPlate;
+	local tSchemaTexture;
+	local tSchemaPlateR;
+	local tSchemaPlateG;
+	local tSchemaPlateB;
+	local tSchemaPlateA;
+	local tLabelPlateR;
+	local tLabelPlateG;
+	local tLabelPlateB;
+	local tLabelPlateA;
+	function VUHDO_lnfSkinStyleIndicatorBouquetSlot(aPanel)
+
+		if not aPanel then
+			return;
+		end
+
+		tSlotName = aPanel:GetName();
+
+		if not tSlotName then
+			return;
+		end
+
+		tSchemaPlate = _G[tSlotName .. "SchemaPlate"];
+		tLabelPlate = _G[tSlotName .. "SelectLabelTexture"];
+
+		if not tSchemaPlate or not tLabelPlate then
+			return;
+		end
+
+		tSchemaPlateR, tSchemaPlateG, tSchemaPlateB, tSchemaPlateA = VUHDO_lnfSkinGetIndicatorPlateColor();
+
+		if tSchemaPlateR then
+			tSchemaPlate:SetVertexColor(tSchemaPlateR, tSchemaPlateG, tSchemaPlateB, tSchemaPlateA);
+		else
+			tSchemaPlate:SetVertexColor(1, 1, 1, 0);
+		end
+
+		tLabelPlateR, tLabelPlateG, tLabelPlateB, tLabelPlateA = VUHDO_lnfSkinGetIndicatorLabelPlateColor();
+
+		if tLabelPlateR then
+			tLabelPlate:SetVertexColor(tLabelPlateR, tLabelPlateG, tLabelPlateB, tLabelPlateA);
+			tLabelPlate:SetAlpha(tLabelPlateA);
+		elseif tSchemaPlateR then
+			tLabelPlate:SetAlpha(0);
+		else
+			tLabelPlate:SetVertexColor(1, 1, 1, 0.9);
+			tLabelPlate:SetAlpha(0.9);
+		end
+
+		tSchemaTexture = _G[tSlotName .. "SchemaTexture"];
+
+		if tSchemaTexture and aPanel["indicatorIcon"] then
+			tSchemaTexture:SetTexture(VUHDO_lnfSkinResolveOptionsImage(aPanel["indicatorIcon"]));
+			tSchemaTexture:SetTexCoord(sIndicatorSchemaTexLeft, sIndicatorSchemaTexRight, 0, 1);
+		end
+
+		return;
+
+	end
 end
 
 
@@ -3437,6 +3541,12 @@ function VUHDO_lnfSkinApplyToComponent(aComponent, aLabelName)
 		end
 	elseif tObjectType == "ScrollFrame" then
 		VUHDO_lnfSkinApplyFrameBackdrop(aComponent);
+
+		tName = aComponent:GetName();
+
+		if tName and _G[tName .. "SchemaPlate"] and _G[tName .. "SelectLabelTexture"] then
+			VUHDO_lnfSkinStyleIndicatorBouquetSlot(aComponent);
+		end
 	elseif tObjectType == "ColorSelect" then
 		VUHDO_lnfSkinApplyFrameBackdrop(aComponent);
 	end
@@ -3711,6 +3821,12 @@ local function VUHDO_lnfSkinValidate(aName, aSkinData)
 
 	if aSkinData["indicatorPlate"] then
 		if not VUHDO_lnfSkinValidateColorArray(aSkinData["indicatorPlate"], format("\"%s\".indicatorPlate", aName)) then
+			return false;
+		end
+	end
+
+	if aSkinData["indicatorLabelPlate"] then
+		if not VUHDO_lnfSkinValidateColorArray(aSkinData["indicatorLabelPlate"], format("\"%s\".indicatorLabelPlate", aName)) then
 			return false;
 		end
 	end
