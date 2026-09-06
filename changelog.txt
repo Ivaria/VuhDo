@@ -64,6 +64,7 @@ Bugfixes:
   
   
 Improvements:  
+-- Added option to fade aura icons when unit is out of range  
   
   
 --------------------------------------------------------------  
