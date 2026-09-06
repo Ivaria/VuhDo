@@ -51,9 +51,21 @@ local VUHDO_restoreLifeTextAlpha;
 local VUHDO_decompressIfCompressed;
 local VUHDO_getBouquetGlobalOpacityNames;
 local VUHDO_isAuraDataRestricted;
+local VUHDO_isAuraModeContainers;
 local VUHDO_copyStatusBarFillTexture;
 local VUHDO_getBouquetLayerTemplate;
 local VUHDO_invalidatePanelButtonInits;
+local VUHDO_getSecretBoolOverlayName;
+local VUHDO_getUnitButtonsSafe;
+local VUHDO_formatRangeProbeValue;
+local VUHDO_updateBouquetsForEvent;
+local VUHDO_updateUnitVisibilityCharmRange;
+local VUHDO_BUTTON_CACHE;
+local VUHDO_RAID;
+
+local UnitIsCharmed = UnitIsCharmed;
+local UnitCanAttack = UnitCanAttack;
+local issecretvalue = issecretvalue;
 
 local VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS or { };
 local VUHDO_OVERLAY_SLOT_HOSTS = VUHDO_OVERLAY_SLOT_HOSTS or { };
@@ -150,6 +162,9 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_BOUQUET_LAYER_TYPE_DISPEL = _G["VUHDO_BOUQUET_LAYER_TYPE_DISPEL"];
 	VUHDO_BOUQUET_LAYER_TYPE_AURA = _G["VUHDO_BOUQUET_LAYER_TYPE_AURA"];
 
+	VUHDO_OVERLAY_CONTAINERS = _G["VUHDO_OVERLAY_CONTAINERS"];
+	VUHDO_OVERLAY_SLOT_HOSTS = _G["VUHDO_OVERLAY_SLOT_HOSTS"];
+
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
@@ -160,9 +175,17 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_decompressIfCompressed = _G["VUHDO_decompressIfCompressed"];
 	VUHDO_getBouquetGlobalOpacityNames = _G["VUHDO_getBouquetGlobalOpacityNames"];
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
+	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 	VUHDO_copyStatusBarFillTexture = _G["VUHDO_copyStatusBarFillTexture"];
 	VUHDO_getBouquetLayerTemplate = _G["VUHDO_getBouquetLayerTemplate"];
 	VUHDO_invalidatePanelButtonInits = _G["VUHDO_invalidatePanelButtonInits"];
+	VUHDO_getSecretBoolOverlayName = _G["VUHDO_getSecretBoolOverlayName"];
+	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
+	VUHDO_formatRangeProbeValue = _G["VUHDO_formatRangeProbeValue"];
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_updateBouquetsForEvent"];
+	VUHDO_updateUnitVisibilityCharmRange = _G["VUHDO_updateUnitVisibilityCharmRange"];
+	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
+	VUHDO_RAID = _G["VUHDO_RAID"];
 
 	sAlphaChainStepEntryPool = VUHDO_createTablePool("AlphaChainStepEntry", 100);
 	sAlphaChainPool = VUHDO_createTablePool("AlphaChain", 50, VUHDO_createAlphaChainDelegate, VUHDO_cleanupAlphaChainDelegate);
@@ -200,6 +223,8 @@ local function VUHDO_applyBooleanOverlayFillTexture(aTexture, aTarget, aTargetTy
 
 		VUHDO_PixelUtil.ApplySettings(aTexture);
 	end
+
+	aTexture:SetDrawLayer("OVERLAY", 7);
 
 	return;
 
@@ -1500,15 +1525,11 @@ local tSlotHostData;
 local tSlotFrame;
 function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, aLayerTemplate, aTargetBar)
 
-	if not aButton or not anIndicatorKey or not aLayerTemplate or not VUHDO_isAuraDataRestricted() then
+	if not aButton or not anIndicatorKey or not aLayerTemplate then
 		return;
 	end
 
 	tButtonName = aButton:GetName();
-
-	if not tButtonName or (not VUHDO_OVERLAY_CONTAINERS[tButtonName] and not VUHDO_OVERLAY_SLOT_HOSTS[tButtonName]) then
-		return;
-	end
 
 	tGateIdx = 0;
 
@@ -1526,53 +1547,59 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 		end
 	end
 
-	tIndicatorEntry = VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey];
+	if VUHDO_isAuraModeContainers() or VUHDO_isAuraDataRestricted() then
+		if tButtonName and (VUHDO_OVERLAY_CONTAINERS[tButtonName] or VUHDO_OVERLAY_SLOT_HOSTS[tButtonName]) then
+			tIndicatorEntry = VUHDO_OVERLAY_CONTAINERS[tButtonName] and VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey];
 
-	if tIndicatorEntry then
-		for _, tContainerData in pairs(tIndicatorEntry) do
-			tContainer = tContainerData and tContainerData["container"];
-			tGroupEntry = tContainerData and tContainerData["containerTemplate"] and tContainerData["containerTemplate"]["groups"] and tContainerData["containerTemplate"]["groups"][1];
-			tBouquetIdx = tGroupEntry and tGroupEntry["bouquetIdx"];
+			if tIndicatorEntry then
+				for _, tContainerData in pairs(tIndicatorEntry) do
+					tContainer = tContainerData and tContainerData["container"];
+					tGroupEntry = tContainerData and tContainerData["containerTemplate"] and tContainerData["containerTemplate"]["groups"] and tContainerData["containerTemplate"]["groups"][1];
+					tBouquetIdx = tGroupEntry and tGroupEntry["bouquetIdx"];
 
-			if tContainer then
-				if tGateIdx > 0 and tBouquetIdx and tBouquetIdx > tGateIdx then
-					tContainer:Hide();
-				else
-					tContainer:Show();
+					if tContainer and tBouquetIdx then
+						if tGateIdx > 0 and tBouquetIdx > tGateIdx then
+							tContainer:Hide();
+						else
+							tContainer:Show();
+						end
+					end
 				end
 			end
-		end
-	end
 
-	tSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS[tButtonName];
+			tSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS[tButtonName];
 
-	if tSlotHostData and tSlotHostData["slotRecords"] then
-		for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"]) do
-			if tSlotRecord["indicatorKey"] == anIndicatorKey then
-				tSlotFrame = tSlotRecord["slotFrame"];
-				tBouquetIdx = tSlotRecord["bouquetIdx"];
+			if tSlotHostData and tSlotHostData["slotRecords"] then
+				for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"]) do
+					if tSlotRecord["indicatorKey"] == anIndicatorKey then
+						tSlotFrame = tSlotRecord["slotFrame"];
+						tBouquetIdx = tSlotRecord["bouquetIdx"];
 
-				if tSlotFrame then
-					if tGateIdx > 0 and tBouquetIdx and tBouquetIdx > tGateIdx then
-						tSlotFrame:Hide();
-					else
-						tSlotFrame:Show();
+						if tSlotFrame then
+							if tGateIdx > 0 and tBouquetIdx and tBouquetIdx > tGateIdx then
+								tSlotFrame:Hide();
+							else
+								tSlotFrame:Show();
+							end
+						end
 					end
 				end
 			end
 		end
 	end
 
-	aTargetBar = aTargetBar or VUHDO_getHealthBar(aButton, VUHDO_INDICATOR_BAR_MAP[anIndicatorKey] or 1);
+	if sSecretsEnabled then
+		aTargetBar = aTargetBar or VUHDO_getHealthBar(aButton, VUHDO_INDICATOR_BAR_MAP[anIndicatorKey] or 1);
 
-	for tIdx = 1, #aLayerTemplate["booleanResults"] do
-		tValidatorEntry = aLayerTemplate["booleanValidators"][tIdx];
+		for tIdx = 1, #aLayerTemplate["booleanResults"] do
+			tValidatorEntry = aLayerTemplate["booleanValidators"][tIdx];
 
-		if tGateIdx > 0 and tValidatorEntry and tValidatorEntry["index"] and tValidatorEntry["index"] > tGateIdx then
-			tOverlay = VUHDO_getBooleanOverlay(aButton, aTargetBar, tValidatorEntry["item"]["name"], VUHDO_TARGET_TYPE_BAR);
+			if tGateIdx > 0 and tValidatorEntry and tValidatorEntry["index"] and tValidatorEntry["index"] > tGateIdx then
+				tOverlay = VUHDO_getBooleanOverlay(aButton, aTargetBar, tValidatorEntry["item"]["name"], VUHDO_TARGET_TYPE_BAR);
 
-			if tOverlay then
-				VUHDO_clearBooleanOverlay(tOverlay);
+				if tOverlay then
+					VUHDO_clearBooleanOverlay(tOverlay);
+				end
 			end
 		end
 	end
@@ -1604,6 +1631,176 @@ function VUHDO_applyAllLayersToBar(aButton, aBar, aLayerTemplate, anIndicatorKey
 	if anIndicatorKey then
 		VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, aLayerTemplate, aBar);
 	end
+
+	return;
+
+end
+
+
+
+--
+local tCharmInfo;
+local tCharmUnitCharmed;
+local tCharmUnitCanAttack;
+local tCharmButtons;
+local tCharmPanelNum;
+local tCharmBouquetName;
+local tCharmLayerTemplate;
+local tCharmOverlayName;
+local tCharmValidatorEntry;
+local tCharmResultSlot;
+local tCharmBar;
+local tCharmTargetOverlays;
+local tCharmOverlayEntry;
+local tCharmTexture;
+local tCharmParent;
+local tCharmTrueColor;
+local tCharmContainerEntry;
+local tCharmContainer;
+local tCharmSlotHostData;
+local tCharmSlotFrame;
+local tCharmDrawLayer;
+local tCharmDrawSublevel;
+function VUHDO_dumpCharmDiagnostics(aUnit)
+
+	if not aUnit or not VUHDO_RAID or not VUHDO_RAID[aUnit] then
+		VUHDO_Msg("Charm diagnostic: unit not in raid roster.");
+
+		return;
+	end
+
+	VUHDO_updateUnitVisibilityCharmRange(aUnit);
+	VUHDO_updateBouquetsForEvent(aUnit, 4);
+
+	tCharmInfo = VUHDO_RAID[aUnit];
+	tCharmUnitCharmed = UnitIsCharmed(aUnit);
+	tCharmUnitCanAttack = UnitCanAttack("player", aUnit);
+
+	VUHDO_Msg(format("Charm diagnostic for %s:", aUnit));
+	VUHDO_Msg(format("  UnitIsCharmed=%s isSecret=%s UnitCanAttack=%s",
+		VUHDO_formatRangeProbeValue(tCharmUnitCharmed),
+		tostring(sSecretsEnabled and issecretvalue(tCharmUnitCharmed)),
+		VUHDO_formatRangeProbeValue(tCharmUnitCanAttack)));
+	VUHDO_Msg(format("  hasSecretCharmed=%s charmed=%s dead=%s debuff=%s",
+		tostring(tCharmInfo["hasSecretCharmed"]),
+		tostring(tCharmInfo["charmed"]),
+		tostring(tCharmInfo["dead"]),
+		tostring(tCharmInfo["debuff"])));
+
+	tCharmOverlayName = VUHDO_getSecretBoolOverlayName("DEBUFF_BAR_COLOR", "DEBUFF_CHARMED");
+
+	tCharmButtons = VUHDO_getUnitButtonsSafe(aUnit);
+
+	for _, tCharmButton in pairs(tCharmButtons) do
+		tCharmPanelNum = VUHDO_BUTTON_CACHE[tCharmButton];
+
+		if tCharmPanelNum and VUHDO_INDICATOR_CONFIG[tCharmPanelNum] then
+			VUHDO_Msg(format("  button=%s panel=%d", tCharmButton:GetName(), tCharmPanelNum));
+
+			for tCharmIndicatorName, _ in pairs(VUHDO_INDICATOR_BAR_MAP) do
+				tCharmBouquetName = VUHDO_INDICATOR_CONFIG[tCharmPanelNum]["BOUQUETS"][tCharmIndicatorName];
+				tCharmLayerTemplate = tCharmBouquetName and tCharmBouquetName ~= "" and VUHDO_getBouquetLayerTemplate(tCharmBouquetName);
+
+				if tCharmLayerTemplate and tCharmLayerTemplate["hasBools"] then
+					for tCharmBoolIdx = 1, #tCharmLayerTemplate["booleanValidators"] do
+						tCharmValidatorEntry = tCharmLayerTemplate["booleanValidators"][tCharmBoolIdx];
+
+						if tCharmValidatorEntry["item"]["name"] == tCharmOverlayName then
+							tCharmResultSlot = tCharmLayerTemplate["booleanResults"][tCharmBoolIdx];
+
+							VUHDO_Msg(format("    %s template: index=%s hasBools=%s",
+								tCharmIndicatorName,
+								tostring(tCharmValidatorEntry["index"]),
+								tostring(tCharmLayerTemplate["hasBools"])));
+
+							if tCharmResultSlot then
+								VUHDO_Msg(format("      secretBool=%s",
+									VUHDO_formatRangeProbeValue(tCharmResultSlot["secretBool"])));
+
+								tCharmTrueColor = tCharmResultSlot["trueColorMixin"];
+
+								if tCharmTrueColor and tCharmTrueColor.GetRGBA then
+									VUHDO_Msg(format("      trueColorMixin=%.3f,%.3f,%.3f,%.3f",
+										tCharmTrueColor:GetRGBA()));
+								else
+									VUHDO_Msg("      trueColorMixin=<nil>");
+								end
+							end
+
+							tCharmBar = VUHDO_getHealthBar(tCharmButton, VUHDO_INDICATOR_BAR_MAP[tCharmIndicatorName]);
+
+							if tCharmBar then
+								tCharmTargetOverlays = sBooleanOverlayLayers[tCharmButton][tCharmBar];
+								tCharmOverlayEntry = tCharmTargetOverlays and tCharmTargetOverlays[tCharmOverlayName];
+
+								if tCharmOverlayEntry then
+									tCharmTexture = tCharmOverlayEntry["texture"];
+									tCharmParent = tCharmTexture:GetParent();
+									tCharmDrawLayer, tCharmDrawSublevel = tCharmTexture:GetDrawLayer();
+
+									VUHDO_Msg(format("      overlay=exists parent=%s drawLayer=%s drawSublevel=%s alpha=%s parentLevel=%s",
+										tCharmParent and tCharmParent:GetName() or "<nil>",
+										tostring(tCharmDrawLayer),
+										tostring(tCharmDrawSublevel),
+										VUHDO_formatRangeProbeValue(tCharmTexture:GetAlpha()),
+										tCharmParent and tostring(tCharmParent:GetFrameLevel()) or "<nil>"));
+								else
+									VUHDO_Msg("      overlay=<missing>");
+								end
+							end
+						end
+					end
+				end
+			end
+
+			tCharmBar = VUHDO_getHealthBar(tCharmButton, 3);
+
+			if tCharmBar then
+				tCharmContainerEntry = VUHDO_OVERLAY_CONTAINERS[tCharmButton:GetName()];
+
+				if tCharmContainerEntry and tCharmContainerEntry["DISPEL_OVERLAY"] then
+					for _, tCharmContainerData in pairs(tCharmContainerEntry["DISPEL_OVERLAY"]) do
+						tCharmContainer = tCharmContainerData and tCharmContainerData["container"];
+
+						if tCharmContainer then
+							VUHDO_Msg(format("    DISPEL_OVERLAY container level=%s shown=%s",
+								tostring(tCharmContainer:GetFrameLevel()),
+								tostring(tCharmContainer:IsShown())));
+						end
+					end
+				end
+
+				tCharmSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS[tCharmButton:GetName()];
+
+				if tCharmSlotHostData and tCharmSlotHostData["slotRecords"] then
+					for _, tCharmSlotRecord in pairs(tCharmSlotHostData["slotRecords"]) do
+						if tCharmSlotRecord["indicatorKey"] == "DISPEL_OVERLAY" then
+							tCharmSlotFrame = tCharmSlotRecord["slotFrame"];
+
+							if tCharmSlotFrame then
+								VUHDO_Msg(format("    DISPEL_OVERLAY slot level=%s shown=%s",
+									tostring(tCharmSlotFrame:GetFrameLevel()),
+									tostring(tCharmSlotFrame:IsShown())));
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_debugCharmHelp()
+
+	VUHDO_Msg("|cffFFD100--- Charm Debug Commands ---|r");
+	VUHDO_Msg("  |cffB0E0E6/vd debug charm [unit]|r - Dump charm state and overlay chain (default: target)");
+	VUHDO_Msg("|cffFFD100--- End of Charm Debug Commands ---|r");
 
 	return;
 
