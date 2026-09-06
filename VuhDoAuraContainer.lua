@@ -1661,6 +1661,49 @@ do
 		return;
 
 	end
+
+
+
+	--
+	function VUHDO_getAuraRangeFadeParent(aButton, anIsRangeFade)
+
+		if anIsRangeFade then
+			return VUHDO_getHealthBar(aButton, 3) or aButton;
+		end
+
+		return aButton;
+
+	end
+
+
+
+	--
+	local tFadeParent;
+	function VUHDO_applyAuraContainerFadeParent(aContainer, aButton, aContainerTemplate)
+
+		if not aContainer or not aButton or not aContainerTemplate then
+			return;
+		end
+
+		if aContainerTemplate["isOverlay"] then
+			return;
+		end
+
+		if InCombatLockdown() then
+			return;
+		end
+
+		tFadeParent = VUHDO_getAuraRangeFadeParent(aButton, aContainerTemplate["rangeFade"]);
+
+		if aContainer:GetParent() ~= tFadeParent then
+			aContainer:SetParent(tFadeParent);
+
+			VUHDO_applyAuraContainerAnchor(aContainer, aContainerTemplate["anchor"], aButton);
+		end
+
+		return;
+
+	end
 end
 
 
@@ -3497,6 +3540,8 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 
 					VUHDO_applyAuraContainerAnchor(tContainerData["container"], tContainerTemplate["anchor"], aButton);
 
+					VUHDO_applyAuraContainerFadeParent(tContainerData["container"], aButton, tContainerTemplate);
+
 					tFilterSignature = VUHDO_getAuraContainerFilterSignature(tContainerTemplate);
 					tFilterContainer = tContainerData["container"];
 
@@ -3516,6 +3561,8 @@ function VUHDO_initAuraContainersForButton(aButton, aPanelNum)
 
 					if tContainerData then
 						VUHDO_AURA_CONTAINERS[tButtonName][tAnchorIndex] = tContainerData;
+
+						VUHDO_applyAuraContainerFadeParent(tContainerData["container"], aButton, tContainerTemplate);
 					end
 				end
 			end

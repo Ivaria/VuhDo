@@ -3191,6 +3191,7 @@ local VUHDO_DEFAULT_PANEL_SETUP = {
 		["flashThreshold"] = 2,
 		["dispelBorder"] = false,
 		["showTooltip"] = true,
+		["rangeFade"] = true,
 	},
 };
 
@@ -4033,6 +4034,7 @@ VUHDO_DEFAULT_AURA_ANCHORS = {
 		["fadeOnLow"] = 2,
 		["flashOnLow"] = 2,
 		["dispelBorder"] = 2,
+		["rangeFade"] = 2,
 		["colorMode"] = "default",
 		["iconType"] = 1,
 		["stackType"] = 1,
@@ -4088,6 +4090,7 @@ VUHDO_DEFAULT_AURA_ANCHORS = {
 		["fadeOnLow"] = 2,
 		["flashOnLow"] = 2,
 		["dispelBorder"] = 1,
+		["rangeFade"] = 2,
 		["colorMode"] = "default",
 		["iconType"] = 1,
 		["stackType"] = 1,

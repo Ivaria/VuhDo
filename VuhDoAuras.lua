@@ -84,7 +84,7 @@ local VUHDO_ACTIVE_AURA_FILTERS = VUHDO_ACTIVE_AURA_FILTERS;
 VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS or { };
 local VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS;
 
-VUHDO_AURA_MIGRATION_VERSION = 7;
+VUHDO_AURA_MIGRATION_VERSION = 8;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
@@ -3534,6 +3534,29 @@ do
 
 
 	--
+	function VUHDO_migrateAuraDefaultsRangeFade()
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+
+		if not tPanelSetup then
+			return;
+		end
+
+		if not tPanelSetup["AURA_DEFAULTS"] then
+			tPanelSetup["AURA_DEFAULTS"] = { };
+		end
+
+		if tPanelSetup["AURA_DEFAULTS"]["rangeFade"] == nil then
+			tPanelSetup["AURA_DEFAULTS"]["rangeFade"] = true;
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tPanelSetup;
 	local tCurrentMigrationVersion;
 	function VUHDO_migrateOldConfigsToAuraAnchors()
@@ -3576,6 +3599,10 @@ do
 
 		if tCurrentMigrationVersion < 7 then
 			VUHDO_migrateAuraGroupFilterTokens();
+		end
+
+		if tCurrentMigrationVersion < 8 then
+			VUHDO_migrateAuraDefaultsRangeFade();
 		end
 
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;

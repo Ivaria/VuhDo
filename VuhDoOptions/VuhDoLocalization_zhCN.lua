@@ -912,6 +912,7 @@ VUHDO_I18N_TT.K855 = "An aura must pass every condition to appear in this group.
 VUHDO_I18N_TT.K856 = "Shows boss encounter debuffs and role-specific auras such as tank taunts. These are the auras Blizzard enlarges on default raid frames.";
 VUHDO_I18N_TT.K857 = "Shows debuffs Blizzard flags as priority, such as Forbearance. These always appear on default raid frames.";
 VUHDO_I18N_TT.K858 = "Shows the buffs Blizzard would display on default raid frames. Cosmetic and system buffs (Flight Style, Warband Mentored, toy effects) are excluded. Narrower than All Buffs.";
+VUHDO_I18N_TT.K859 = "Fade aura icons to the Out of Range opacity when the unit is out of range.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "预设存档";
 VUHDO_I18N_DEFAULT_LAYOUT = "预设按键配置";
@@ -1721,3 +1722,5 @@ VUHDO_I18N_AURA_CONDITION_CAN_APPLY = "Can Apply";
 VUHDO_I18N_AURA_CONDITION_NAMEPLATE_ALL = "Nameplate (All)";
 VUHDO_I18N_AURA_CONDITION_NAMEPLATE_PERSONAL = "Nameplate (Mine)";
 VUHDO_I18N_AURA_HAS_DURATION = "Has\nDuration";
+
+VUHDO_I18N_RANGE_FADE = "Range Fade";

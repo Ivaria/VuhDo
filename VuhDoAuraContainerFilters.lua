@@ -77,6 +77,7 @@ local VUHDO_applyBarButtonSetupFields;
 local VUHDO_getAuraTimerFormatter;
 local VUHDO_getAuraTimerColorCurve;
 local VUHDO_getTriStateBool;
+local VUHDO_resolveAuraTriState;
 local VUHDO_buildAnchorButtonSetup;
 local VUHDO_getHealthBarWidth;
 local VUHDO_getHealthBarHeight;
@@ -241,6 +242,7 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_getAuraTimerFormatter = _G["VUHDO_getAuraTimerFormatter"];
 	VUHDO_getAuraTimerColorCurve = _G["VUHDO_getAuraTimerColorCurve"];
 	VUHDO_getTriStateBool = _G["VUHDO_getTriStateBool"];
+	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
 	VUHDO_buildAnchorButtonSetup = _G["VUHDO_buildAnchorButtonSetup"];
 	VUHDO_getHealthBarWidth = _G["VUHDO_getHealthBarWidth"];
 	VUHDO_getHealthBarHeight = _G["VUHDO_getHealthBarHeight"];
@@ -1692,12 +1694,14 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 					["buildSignature"] = tCachedTemplate["buildSignature"],
 					["staticSlots"] = tCachedTemplate["staticSlots"],
 					["usesDispelTextures"] = tCachedTemplate["usesDispelTextures"],
+					["rangeFade"] = tCachedTemplate["rangeFade"],
 					["panelNum"] = tPanelNum,
 					["anchorIndex"] = anAnchorIndex,
 				};
 			end
 
 			tCachedEntry["instanceTemplate"]["parent"] = aButton;
+			tCachedEntry["instanceTemplate"]["rangeFade"] = tCachedTemplate["rangeFade"];
 
 			return tCachedEntry["instanceTemplate"];
 		end
@@ -1823,6 +1827,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 		["containerLayout"] = tContainerLayout,
 		["groups"] = tGroups,
 		["slots"] = tSlots,
+		["rangeFade"] = VUHDO_resolveAuraTriState(anAnchorConfig["rangeFade"], "rangeFade"),
 	};
 
 	VUHDO_finalizeCachedAuraContainerTemplate(tCachedTemplate);
@@ -1844,6 +1849,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 				["buildSignature"] = tCachedTemplate["buildSignature"],
 				["staticSlots"] = tCachedTemplate["staticSlots"],
 				["usesDispelTextures"] = tCachedTemplate["usesDispelTextures"],
+				["rangeFade"] = tCachedTemplate["rangeFade"],
 				["panelNum"] = tPanelNum,
 				["anchorIndex"] = anAnchorIndex,
 			},
@@ -1859,6 +1865,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 		["buildSignature"] = tCachedTemplate["buildSignature"],
 		["staticSlots"] = tCachedTemplate["staticSlots"],
 		["usesDispelTextures"] = tCachedTemplate["usesDispelTextures"],
+		["rangeFade"] = tCachedTemplate["rangeFade"],
 		["panelNum"] = tPanelNum,
 		["anchorIndex"] = anAnchorIndex,
 	};
