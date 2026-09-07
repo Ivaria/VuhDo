@@ -25,9 +25,12 @@ local sClassicSkin = {
 	["tabStyle"] = "pill",
 	["textures"] = {
 		["combo_glow_icon_base"] = sImagesPath .. "blue_dk_square_16_16",
+		["icon_check_tri"] = sImagesPath .. "icon_check",
 	},
 	["textureTints"] = {
 		["icon_tree_expand"] = { 0.30, 0.47, 0.80, 1 },
+		["combo_check_disabled"] = { 1, 1, 1, 0.4 },
+		["combo_check_mark"] = { 1, 1, 1, 1 },
 	},
 	["comboGlowPreviewColorBoost"] = 1.3,
 	["comboGlowPreviewBlend"] = "BLEND",
@@ -61,6 +64,8 @@ local sDarkSkin = {
 		["icon_red"] = { 0.85, 0.25, 0.25, 1 },
 		["status_dot"] = { 0.55, 0.58, 0.63, 1 },
 		["combo_select_dot"] = { 0.55, 0.58, 0.63, 1 },
+		["combo_check_disabled"] = { 0.4, 0.4, 0.4, 1 },
+		["combo_check_mark"] = { 1, 1, 1, 1 },
 		["icon_white_square"] = { 0.75, 0.78, 0.82, 1 },
 		["icon_check_2"] = { 0.75, 0.78, 0.82, 1 },
 		["bar_example"] = { 0.25, 0.27, 0.31, 1 },
@@ -1953,20 +1958,34 @@ function VUHDO_lnfSkinStyleComboItemCheck(aComboItem)
 		return;
 	end
 
-	if (aComboItem["parentCombo"] or sEmpty)["isMulti"] then
-		return;
-	end
-
 	tName = aComboItem:GetName();
 
 	if not tName then
 		return;
 	end
 
-	tRegion = _G[tName .. "CheckTextureTexture"];
+	if (aComboItem["parentCombo"] or sEmpty)["isMulti"] then
+		tPath = VUHDO_lnfSkinResolveTexture("icon_blue_square");
+		tRegion = _G[tName .. "CheckBoxTexture"];
 
-	if tRegion then
-		VUHDO_lnfSkinStyleTextureKeyed(tRegion, "combo_select_dot");
+		if tRegion and tRegion:GetTexture() ~= tPath then
+			tRegion:SetTexture(tPath);
+		end
+
+		tPath = VUHDO_lnfSkinResolveTexture("icon_check_tri");
+		tRegion = _G[tName .. "CheckTextureTexture"];
+
+		if tRegion and tRegion:GetTexture() ~= tPath then
+			tRegion:SetTexture(tPath);
+		end
+
+		VUHDO_lnfComboItemApplyCheckVertexColor(aComboItem, aComboItem["isDisabledEntry"]);
+	else
+		tRegion = _G[tName .. "CheckTextureTexture"];
+
+		if tRegion then
+			VUHDO_lnfSkinStyleTextureKeyed(tRegion, "combo_select_dot");
+		end
 	end
 
 	return;
@@ -2278,6 +2297,10 @@ local function VUHDO_lnfSkinOnComboButtonClicked(aButton)
 
 	if tSelectPanel and tSelectPanel:IsShown() then
 		VUHDO_lnfSkinApplyToFrameTree(tSelectPanel);
+
+		if tComboBox["isMulti"] and tComboBox["itemsBuilt"] then
+			VUHDO_lnfComboRefreshItemStates(tComboBox);
+		end
 	end
 
 	return;
