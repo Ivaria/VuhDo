@@ -46,6 +46,7 @@ local VUHDO_CONFIG = { };
 local VUHDO_BOUQUET_BUFFS_SPECIAL = { };
 local VUHDO_CUSTOM_ICONS;
 local VUHDO_USER_CLASS_COLORS;
+local VUHDO_USER_CLASS_GRADIENT_COLORS;
 local VUHDO_POWER_TYPE_COLORS;
 local VUHDO_PANEL_SETUP;
 local VUHDO_PANEL_MODELS;
@@ -91,6 +92,8 @@ local VUHDO_CUSTOM_BOUQUETS = {
 };
 
 VUHDO_DISPEL_COLOR_GENERATION = 0;
+
+local VUHDO_ALL_CLASS_IDS = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 40 };
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 local sEmpty = { };
@@ -169,6 +172,38 @@ local sIsDispelColorType = { };
 
 
 --
+local function VUHDO_bouquetsInitLocalOverridesFunctions()
+
+	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
+	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
+	VUHDO_getAuraGroupRaw = _G["VUHDO_getAuraGroupRaw"];
+	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
+	VUHDO_isAuraDisplaySuspended = _G["VUHDO_isAuraDisplaySuspended"];
+	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
+	VUHDO_getAuraBarColorType = _G["VUHDO_getAuraBarColorType"];
+	VUHDO_getAuraTextColorType = _G["VUHDO_getAuraTextColorType"];
+	VUHDO_determineAura = _G["VUHDO_determineAura"];
+	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
+	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
+	VUHDO_resolveGroupCandidateFilters = _G["VUHDO_resolveGroupCandidateFilters"];
+	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
+	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
+	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
+	VUHDO_isAuraGroupContainerExpressible = _G["VUHDO_isAuraGroupContainerExpressible"];
+	VUHDO_invalidateAllOverlayPlans = _G["VUHDO_invalidateAllOverlayPlans"];
+	VUHDO_invalidateAuraContainerTemplateCache = _G["VUHDO_invalidateAuraContainerTemplateCache"];
+	VUHDO_renderNonAuraListSlots = _G["VUHDO_renderNonAuraListSlots"];
+	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
+	VUHDO_incrementAlphaChainConfigVersion = _G["VUHDO_incrementAlphaChainConfigVersion"];
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_bouquetsInitLocalOverrides()
 
 	VUHDO_BOUQUETS = _G["VUHDO_BOUQUETS"];
@@ -178,6 +213,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_BOUQUET_BUFFS_SPECIAL = _G["VUHDO_BOUQUET_BUFFS_SPECIAL"];
 
 	VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
+	VUHDO_USER_CLASS_GRADIENT_COLORS = _G["VUHDO_USER_CLASS_GRADIENT_COLORS"];
 	VUHDO_POWER_TYPE_COLORS = _G["VUHDO_POWER_TYPE_COLORS"];
 	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
 	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
@@ -205,32 +241,12 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_BOUQUET_LAYER_TYPE_BOOLEAN = _G["VUHDO_BOUQUET_LAYER_TYPE_BOOLEAN"];
 	VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR = _G["VUHDO_BOUQUET_CUSTOM_TYPE_STATUSBAR"];
 
-	VUHDO_copyColorTo = _G["VUHDO_copyColorTo"];
-	VUHDO_isConfigDemoUsers = _G["VUHDO_isConfigDemoUsers"];
-	VUHDO_getAuraGroupRaw = _G["VUHDO_getAuraGroupRaw"];
-	VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];
-	VUHDO_isAuraDisplaySuspended = _G["VUHDO_isAuraDisplaySuspended"];
-	VUHDO_getSlotData = _G["VUHDO_getSlotData"];
-	VUHDO_getAuraBarColorType = _G["VUHDO_getAuraBarColorType"];
-	VUHDO_getAuraTextColorType = _G["VUHDO_getAuraTextColorType"];
-	VUHDO_determineAura = _G["VUHDO_determineAura"];
-	VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
-	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
-	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
-	VUHDO_resolveGroupCandidateFilters = _G["VUHDO_resolveGroupCandidateFilters"];
-	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
-	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
-	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
-	VUHDO_isAuraGroupContainerExpressible = _G["VUHDO_isAuraGroupContainerExpressible"];
-	VUHDO_invalidateAllOverlayPlans = _G["VUHDO_invalidateAllOverlayPlans"];
-	VUHDO_invalidateAuraContainerTemplateCache = _G["VUHDO_invalidateAuraContainerTemplateCache"];
-	VUHDO_renderNonAuraListSlots = _G["VUHDO_renderNonAuraListSlots"];
-	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
-	VUHDO_incrementAlphaChainConfigVersion = _G["VUHDO_incrementAlphaChainConfigVersion"];
+	VUHDO_bouquetsInitLocalOverridesFunctions();
 
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 
 	twipe(sIsDispelColorType);
+
 	sIsDispelColorType[VUHDO_AURA_GROUP_COLOR_DISPEL] = true;
 	sIsDispelColorType[VUHDO_AURA_GROUP_COLOR_ALL_DISPEL] = true;
 
@@ -764,6 +780,9 @@ do
 
 		if not VUHDO_USER_CLASS_COLORS or not VUHDO_USER_CLASS_GRADIENT_COLORS then
 			VUHDO_initClassColors();
+
+			VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
+			VUHDO_USER_CLASS_GRADIENT_COLORS = _G["VUHDO_USER_CLASS_GRADIENT_COLORS"];
 		end
 
 		for tCnt = 1, #aBouquet do
@@ -958,7 +977,6 @@ end
 
 do
 	--
-	local VUHDO_ALL_CLASS_IDS = { 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 40 };
 	local tMockInfo;
 	local tItem;
 	local tRadio;
@@ -973,13 +991,24 @@ do
 
 				if tRadio == 2 then
 					for _, tClassId in ipairs(VUHDO_ALL_CLASS_IDS) do
-						tMockInfo = { ["classId"] = tClassId };
+						tMockInfo = {
+							["classId"] = tClassId,
+						};
 
 						tCacheKey = aBouquetName .. "_" .. tClassId;
 						sCurveCache[tCacheKey] = VUHDO_buildCompositeHealthCurve(aBouquet, tMockInfo);
 					end
+
+					tMockInfo = {
+						["classId"] = 0,
+					};
+
+					tCacheKey = aBouquetName .. "_0";
+					sCurveCache[tCacheKey] = VUHDO_buildCompositeHealthCurve(aBouquet, tMockInfo);
 				else
-					tMockInfo = { ["classId"] = 0 };
+					tMockInfo = {
+						["classId"] = 0,
+					};
 
 					tCacheKey = aBouquetName .. "_0";
 					sCurveCache[tCacheKey] = VUHDO_buildCompositeHealthCurve(aBouquet, tMockInfo);
@@ -1013,7 +1042,11 @@ do
 		tPowerBaseColor = VUHDO_POWER_TYPE_COLORS and VUHDO_POWER_TYPE_COLORS[aPowerType];
 
 		if not tPowerBaseColor then
-			tPowerBaseColor = { ["R"] = 0, ["G"] = 0.5, ["B"] = 1 };
+			tPowerBaseColor = {
+				["R"] = 0,
+				["G"] = 0.5,
+				["B"] = 1,
+			};
 		end
 
 		for tCnt = 1, #aBouquet do
@@ -1051,8 +1084,6 @@ do
 	local tColors;
 	local tDefaultColor;
 	local tTransparent;
-	local tDispelName;
-	local tColorKey;
 	local tBrightMap;
 	local tBrightOpaqueMap;
 	local tBrightBackgroundFillMap;
@@ -1060,8 +1091,10 @@ do
 	function VUHDO_buildDispelTypeColorMapVariant(aBrightness, aOpacity)
 
 		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+
 		tDefaultColor = CreateColor(0.5, 0.5, 0.5, 1);
 		tTransparent = CreateColor(0, 0, 0, 0);
+
 		tBrightMap = { };
 		tBrightOpaqueMap = { };
 		tBrightBackgroundFillMap = { };
@@ -1136,8 +1169,6 @@ do
 	local tColors;
 	local tDefaultColor;
 	local tTransparent;
-	local tDispelName;
-	local tColorKey;
 	local tPointEntry;
 	function VUHDO_buildDispelTypeCurve()
 
@@ -1163,6 +1194,7 @@ do
 		VUHDO_DISPEL_COLOR_GENERATION = VUHDO_DISPEL_COLOR_GENERATION + 1;
 
 		tColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+
 		tDefaultColor = CreateColor(0.5, 0.5, 0.5, 1);
 		tTransparent = CreateColor(0, 0, 0, 0);
 
@@ -1923,8 +1955,10 @@ do
 
 		tTemplate["healthCurvesByClassId"] = { };
 
-		for tClassId = 0, 13 do
-			tTemplate["healthCurvesByClassId"][tClassId] = VUHDO_getHealthCurve(aBouquetName, 0 == tClassId and nil or tClassId);
+		tTemplate["healthCurvesByClassId"][0] = VUHDO_getHealthCurve(aBouquetName, nil);
+
+		for _, tClassId in ipairs(VUHDO_ALL_CLASS_IDS) do
+			tTemplate["healthCurvesByClassId"][tClassId] = VUHDO_getHealthCurve(aBouquetName, tClassId);
 		end
 
 		sBouquetLayerTemplates[aBouquetName] = tTemplate;
@@ -2085,6 +2119,9 @@ do
 
 		if not VUHDO_USER_CLASS_COLORS or not VUHDO_USER_CLASS_GRADIENT_COLORS then
 			VUHDO_initClassColors();
+
+			VUHDO_USER_CLASS_COLORS = _G["VUHDO_USER_CLASS_COLORS"];
+			VUHDO_USER_CLASS_GRADIENT_COLORS = _G["VUHDO_USER_CLASS_GRADIENT_COLORS"];
 		end
 
 		return;
