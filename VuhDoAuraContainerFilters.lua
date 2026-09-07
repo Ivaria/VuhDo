@@ -390,6 +390,8 @@ do
 				tEmit = "!CANCELABLE";
 			elseif tHasRaidPlayerDispellable and tBase == "PLAYER" then
 				tEmit = nil;
+			elseif tBase == "RAID_PLAYER_DISPELLABLE" and aGroup["isHarmful"] then
+				tEmit = "DISPELLABLE";
 			elseif VUHDO_AURA_NATIVE_FILTER_TOKENS[tBase] then
 				if tIsNegated and sNonNegatableFilterTokens[tBase] then
 					tEmit = tBase;
@@ -578,6 +580,7 @@ end
 local tCandidate;
 local tFilter;
 local tDispelTypes;
+local tDispelSnapshot;
 function VUHDO_resolveAuraGroupCandidateFilters(aGroup)
 
 	if not aGroup then
@@ -605,12 +608,30 @@ function VUHDO_resolveAuraGroupCandidateFilters(aGroup)
 
 		if aGroup["isHarmful"] then
 			tDispelTypes = VUHDO_getPlayerDispelTypeNames();
+
+			tDispelSnapshot = { };
+
+			for tDispelName, tIsIncluded in pairs(tDispelTypes) do
+				if tIsIncluded then
+					tDispelSnapshot[tDispelName] = true;
+				end
+			end
+
+			tCandidate["includeDispelTypes"] = tDispelSnapshot;
 		else
 			tDispelTypes = VUHDO_getPlayerPurgeDispelTypeNames();
-		end
 
-		if next(tDispelTypes) ~= nil then
-			tCandidate["includeDispelTypes"] = tDispelTypes;
+			if next(tDispelTypes) ~= nil then
+				tDispelSnapshot = { };
+
+				for tDispelName, tIsIncluded in pairs(tDispelTypes) do
+					if tIsIncluded then
+						tDispelSnapshot[tDispelName] = true;
+					end
+				end
+
+				tCandidate["includeDispelTypes"] = tDispelSnapshot;
+			end
 		end
 	end
 
@@ -1708,7 +1729,7 @@ function VUHDO_buildAnchorContainerTemplate(aButton, anAnchorIndex, anAnchorConf
 	end
 
 	tFilterString = VUHDO_resolveAuraContainerFilter(anAnchorConfig);
-	tCandidateFilters = VUHDO_resolveGroupCandidateFilters(tGroup, anAnchorConfig);
+	tCandidateFilters = VUHDO_resolveAuraGroupCandidateFilters(tGroup);
 
 	tType = tGroup and tGroup["type"];
 

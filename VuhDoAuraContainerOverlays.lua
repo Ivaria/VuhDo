@@ -913,10 +913,6 @@ do
 						["friendlyOnly"] = true,
 					};
 
-					if tFilterString and not strfind(tFilterString, "|RAID", 1, true) then
-						tOverlayEntry["filterString"] = tFilterString .. "|RAID";
-					end
-
 					tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
 					tOverlayEntry["dispelOpacity"] = VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct);
 
@@ -1005,10 +1001,6 @@ do
 						["friendlyOnly"] = true,
 					};
 
-					if tFilterString and not strfind(tFilterString, "|RAID", 1, true) then
-						tOverlayEntry["filterString"] = tFilterString .. "|RAID";
-					end
-
 					tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
 					tOverlayEntry["dispelOpacity"] = VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct);
 
@@ -1085,10 +1077,6 @@ do
 						["dispelIcon"] = true,
 						["friendlyOnly"] = true,
 					};
-
-					if tFilterString and not strfind(tFilterString, "|RAID", 1, true) then
-						tOverlayEntry["filterString"] = tFilterString .. "|RAID";
-					end
 
 					tOverlayEntry["dispelBright"] = VUHDO_getOverlayItemDispelBright(aItem);
 					tOverlayEntry["dispelOpacity"] = VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct);
@@ -1230,10 +1218,6 @@ do
 					["friendlyOnly"] = true,
 				};
 
-				if tFilterString and not strfind(tFilterString, "|RAID", 1, true) then
-					tOverlayEntry["filterString"] = tFilterString .. "|RAID";
-				end
-
 				if aOverlayTarget["shape"] == "bar" then
 					tOverlayEntry["dispelFill"] = true;
 				elseif aOverlayTarget["shape"] == "border" then
@@ -1364,7 +1348,7 @@ do
 			tFilterString = "HARMFUL|DISPELLABLE";
 			tDispelTypeNames = VUHDO_getAllDispelTypeNames();
 		else
-			tFilterString = "HARMFUL|RAID_PLAYER_DISPELLABLE";
+			tFilterString = "HARMFUL|DISPELLABLE";
 			tDispelTypeNames = VUHDO_getPlayerDispelTypeNames();
 		end
 
@@ -2975,10 +2959,6 @@ do
 			sOverlayBuild["barGlowFilterEntries"][1] = tBarGlowFilterEntry;
 		elseif aColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
 			tBarGlowFilterString = aFilterString;
-
-			if tBarGlowFilterString and not strfind(tBarGlowFilterString, "|RAID", 1, true) then
-				tBarGlowFilterString = tBarGlowFilterString .. "|RAID";
-			end
 
 			tDispelTypeNames = VUHDO_getPlayerDispelGlowTypeNames();
 

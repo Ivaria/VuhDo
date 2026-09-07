@@ -1839,6 +1839,9 @@ function VUHDO_initDebuffs()
 	if tInitDispelSignature ~= sDebuffDispelSignature
 		or (tInitConfigSignature ~= sDebuffConfigSignature and tInitConfigSignature ~= "") then
 		VUHDO_invalidateAllOverlayPlans();
+		VUHDO_invalidateAuraContainerTemplateCache();
+
+		VUHDO_timeReloadUI(1);
 	end
 
 	if not VUHDO_CONFIG then

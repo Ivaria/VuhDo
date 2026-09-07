@@ -1026,7 +1026,13 @@ function VUHDO_resolveAuraGroupFilter(aGroup)
 
 		aGroup["resolvedFilter"] = tNative;
 	else
-		aGroup["resolvedFilter"] = tFilter;
+		tNative = tFilter;
+
+		if strfind(tFilter, "RAID_PLAYER_DISPELLABLE", 1, true) and VUHDO_filterContainsToken(tFilter, "HARMFUL") then
+			tNative = gsub(tFilter, "RAID_PLAYER_DISPELLABLE", "DISPELLABLE");
+		end
+
+		aGroup["resolvedFilter"] = tNative;
 	end
 
 	aGroup["dispellableOnly"] = nil;

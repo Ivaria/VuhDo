@@ -4180,7 +4180,7 @@ do
 
 				tinsert(tMixedResult, {
 					["key"] = tMixedPieceKey,
-					["filterString"] = "HARMFUL|RAID",
+					["filterString"] = "HARMFUL|DISPELLABLE",
 					["candidateFilters"] = {
 						["includeDispelTypes"] = {
 							[tMixedDispelName] = true,
