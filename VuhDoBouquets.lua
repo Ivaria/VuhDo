@@ -1724,6 +1724,7 @@ do
 							["item"] = tItem,
 							["special"] = tSpecial,
 							["index"] = tCnt,
+							["boolIdx"] = tBoolIdx,
 						};
 
 						if tSpecial and tSpecial["isInverted"] then
@@ -1919,6 +1920,12 @@ do
 		end);
 
 		tTemplate["sortedValidators"] = tAllValidators;
+
+		tTemplate["healthCurvesByClassId"] = { };
+
+		for tClassId = 0, 13 do
+			tTemplate["healthCurvesByClassId"][tClassId] = VUHDO_getHealthCurve(aBouquetName, 0 == tClassId and nil or tClassId);
+		end
 
 		sBouquetLayerTemplates[aBouquetName] = tTemplate;
 
@@ -2486,13 +2493,13 @@ do
 	--
 	function VUHDO_evaluateBouquetSecretNonSecretLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
+		tResultSlot = aLayerTemplate["nonSecretResults"][aValidatorEntry["resultIdx"]];
+
 		tInfos = aBouquet[aCnt];
 		tSpecial = VUHDO_BOUQUET_BUFFS_SPECIAL[tInfos["name"]];
 		tSecretType = tSpecial["secretType"] or VUHDO_SECRET_TYPE_NONE;
 
 		if tSecretType == VUHDO_SECRET_TYPE_NONE or tSecretType == VUHDO_SECRET_TYPE_VALUES then
-			tResultSlot = aLayerTemplate["nonSecretResults"][aValidatorEntry["resultIdx"]];
-
 			if tResultSlot then
 				tName = nil;
 
@@ -2566,8 +2573,6 @@ do
 				end
 			end
 		end
-
-		tResultSlot = aLayerTemplate["nonSecretResults"][aValidatorEntry["resultIdx"]];
 
 		if tResultSlot and tResultSlot["isActive"] then
 			txState["active"] = true;
@@ -2776,8 +2781,6 @@ do
 			end
 		end
 
-		tResultSlot = aLayerTemplate["curveResults"][aValidatorEntry["resultIdx"]];
-
 		if tResultSlot and tResultSlot["isActive"] then
 			txState["active"] = true;
 
@@ -2860,7 +2863,7 @@ do
 		tResultSlot = aLayerTemplate["dispelResults"][aValidatorEntry["resultIdx"]];
 
 		if tResultSlot then
-			tDispelValidatorEntry = VUHDO_findDispelValidatorEntry(aLayerTemplate, aCnt);
+			tDispelValidatorEntry = aLayerTemplate["dispelValidators"][aValidatorEntry["resultIdx"]];
 
 			if tDispelValidatorEntry and tDispelValidatorEntry["curves"] and tDispelValidatorEntry["special"]["getCurve"] then
 				txState["secretContext"]["dispelCurve"] = tDispelValidatorEntry["special"]["getCurve"](tDispelValidatorEntry["curves"], aUnit, true);
@@ -2940,7 +2943,7 @@ do
 			end
 		end
 
-		if aLayerTemplate["dispelResults"][aValidatorEntry["resultIdx"]]["isActive"] then
+		if tResultSlot and tResultSlot["isActive"] then
 			txState["active"] = true;
 		end
 
@@ -3002,7 +3005,7 @@ do
 	local tValidatorEntry;
 	local tCnt;
 	local tResultSlot;
-	local tSecretBool;
+	local tClassId;
 
 
 
@@ -3011,9 +3014,10 @@ do
 
 		txState["activeAuras"] = 0;
 
-		if sSecretsEnabled then
+		if aLayerTemplate then
 			txState["secretContext"]["powerCurves"] = sBouquetCurves[aBouquetName] and sBouquetCurves[aBouquetName]["power"];
-			tHealthCurve = VUHDO_getHealthCurve(aBouquetName, aInfo["classId"]);
+			tClassId = aInfo["classId"] or 0;
+			tHealthCurve = aLayerTemplate["healthCurvesByClassId"][tClassId] or aLayerTemplate["healthCurvesByClassId"][0];
 
 			txState["secretContext"]["blizzardClassColor"] = nil;
 
@@ -3024,56 +3028,72 @@ do
 			txState["secretContext"]["healthCurve"] = tHealthCurve;
 			txState["secretContext"]["dispelCurves"] = sDebuffTypeCurves;
 			txState["secretContext"]["defaultDispelCurve"] = VUHDO_getDispelTypeCurve();
-		end
 
-		if aLayerTemplate then
-			for tIdx = 1, #aLayerTemplate["nonSecretResults"] do
-				aLayerTemplate["nonSecretResults"][tIdx]["isActive"] = false;
+			if aLayerTemplate["hasNonSecrets"] then
+				for tIdx = 1, #aLayerTemplate["nonSecretResults"] do
+					aLayerTemplate["nonSecretResults"][tIdx]["isActive"] = false;
+				end
 			end
 
-			for tIdx = 1, #aLayerTemplate["auraResults"] do
-				aLayerTemplate["auraResults"][tIdx]["isActive"] = false;
+			if aLayerTemplate["hasAuras"] then
+				for tIdx = 1, #aLayerTemplate["auraResults"] do
+					aLayerTemplate["auraResults"][tIdx]["isActive"] = false;
+				end
 			end
 
-			for tIdx = 1, #aLayerTemplate["curveResults"] do
-				aLayerTemplate["curveResults"][tIdx]["isActive"] = false;
-				aLayerTemplate["curveResults"][tIdx]["r"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["g"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["b"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["a"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["maxR"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["maxG"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["maxB"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["maxO"] = nil;
-				aLayerTemplate["curveResults"][tIdx]["timer"] = 0;
-				aLayerTemplate["curveResults"][tIdx]["duration"] = 0;
-				aLayerTemplate["curveResults"][tIdx]["timer2"] = 0;
+			if aLayerTemplate["hasCurves"] then
+				for tIdx = 1, #aLayerTemplate["curveResults"] do
+					tResultSlot = aLayerTemplate["curveResults"][tIdx];
+
+					tResultSlot["isActive"] = false;
+					tResultSlot["r"] = nil;
+					tResultSlot["g"] = nil;
+					tResultSlot["b"] = nil;
+					tResultSlot["a"] = nil;
+					tResultSlot["maxR"] = nil;
+					tResultSlot["maxG"] = nil;
+					tResultSlot["maxB"] = nil;
+					tResultSlot["maxO"] = nil;
+					tResultSlot["timer"] = 0;
+					tResultSlot["duration"] = 0;
+					tResultSlot["timer2"] = 0;
+				end
 			end
 
-			for tIdx = 1, #aLayerTemplate["booleanResults"] do
-				aLayerTemplate["booleanResults"][tIdx]["secretBool"] = nil;
+			if aLayerTemplate["hasBools"] then
+				for tIdx = 1, #aLayerTemplate["booleanResults"] do
+					aLayerTemplate["booleanResults"][tIdx]["secretBool"] = nil;
+				end
 			end
 
-			for tIdx = 1, #aLayerTemplate["dispelResults"] do
-				aLayerTemplate["dispelResults"][tIdx]["isActive"] = false;
-				aLayerTemplate["dispelResults"][tIdx]["barColor"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["r"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["g"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["b"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["a"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["tr"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["tg"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["tb"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["ta"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["auraInstanceId"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["useBackground"] = nil;
-				aLayerTemplate["dispelResults"][tIdx]["useText"] = nil;
+			if aLayerTemplate["hasDispels"] then
+				for tIdx = 1, #aLayerTemplate["dispelResults"] do
+					tResultSlot = aLayerTemplate["dispelResults"][tIdx];
+
+					tResultSlot["isActive"] = false;
+					tResultSlot["barColor"] = nil;
+					tResultSlot["r"] = nil;
+					tResultSlot["g"] = nil;
+					tResultSlot["b"] = nil;
+					tResultSlot["a"] = nil;
+					tResultSlot["tr"] = nil;
+					tResultSlot["tg"] = nil;
+					tResultSlot["tb"] = nil;
+					tResultSlot["ta"] = nil;
+					tResultSlot["auraInstanceId"] = nil;
+					tResultSlot["useBackground"] = nil;
+					tResultSlot["useText"] = nil;
+				end
 			end
 
-			for tIdx = 1, #aLayerTemplate["spriteCellResults"] do
-				aLayerTemplate["spriteCellResults"][tIdx]["isActive"] = false;
-				aLayerTemplate["spriteCellResults"][tIdx]["icon"] = nil;
-				aLayerTemplate["spriteCellResults"][tIdx]["spriteCell"] = nil;
+			if aLayerTemplate["hasSpriteCells"] then
+				for tIdx = 1, #aLayerTemplate["spriteCellResults"] do
+					tResultSlot = aLayerTemplate["spriteCellResults"][tIdx];
+
+					tResultSlot["isActive"] = false;
+					tResultSlot["icon"] = nil;
+					tResultSlot["spriteCell"] = nil;
+				end
 			end
 
 			txState["isColorInit"] = false;
@@ -3103,9 +3123,7 @@ do
 					tValidatorEntry = aLayerTemplate["alphaValidators"][tIdx];
 					tResultSlot = aLayerTemplate["alphaResults"][tIdx];
 
-					_, _, _, _, _, _, _, _, _, _, _, tSecretBool = tValidatorEntry["special"]["validator"](aInfo, tValidatorEntry["item"], sSecretsEnabled and txState["secretContext"] or nil);
-
-					tResultSlot["secretBool"] = tSecretBool;
+					tResultSlot["secretBool"] = aLayerTemplate["booleanResults"][tValidatorEntry["boolIdx"]]["secretBool"];
 				end
 			end
 
