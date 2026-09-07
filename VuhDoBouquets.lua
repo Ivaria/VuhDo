@@ -998,13 +998,6 @@ do
 						tCacheKey = aBouquetName .. "_" .. tClassId;
 						sCurveCache[tCacheKey] = VUHDO_buildCompositeHealthCurve(aBouquet, tMockInfo);
 					end
-
-					tMockInfo = {
-						["classId"] = 0,
-					};
-
-					tCacheKey = aBouquetName .. "_0";
-					sCurveCache[tCacheKey] = VUHDO_buildCompositeHealthCurve(aBouquet, tMockInfo);
 				else
 					tMockInfo = {
 						["classId"] = 0,
