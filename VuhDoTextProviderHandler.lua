@@ -210,11 +210,11 @@ function VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName,
 						for tResolved, tFunction in pairs(VUHDO_INDICATOR_TEXT_PROVIDERS[tIndicatorName]) do
 							if VUHDO_isTextProviderInterestedInEvent(tResolved, anEventType) then
 								if not anIsActive then
-									tFunction(aUnit, tResolved, "", tIndicatorName, "%s", "");
+									tFunction(aUnit, tResolved, "", tIndicatorName, aBouquetName, "%s", "");
 								else
 									tValue, tMaxValue = tResolved["source"]["calculator"](tInfo);
 
-									tFunction(aUnit, tResolved, tValue, tIndicatorName,
+									tFunction(aUnit, tResolved, tValue, tIndicatorName, aBouquetName,
 										tResolved["format"]["validator"](tInfo, tValue, tMaxValue));
 								end
 							end
@@ -230,11 +230,11 @@ function VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName,
 				tFunction = tCacheEntry["func"];
 
 				if VUHDO_isIndicatorBouquetInactive(aUnit, tIndicatorName) then
-					tFunction(aUnit, tResolved, "", tIndicatorName, "%s", "");
+					tFunction(aUnit, tResolved, "", tIndicatorName, nil, "%s", "");
 				else
 					tValue, tMaxValue = tResolved["source"]["calculator"](tInfo);
 
-					tFunction(aUnit, tResolved, tValue, tIndicatorName, tResolved["format"]["validator"](tInfo, tValue, tMaxValue));
+					tFunction(aUnit, tResolved, tValue, tIndicatorName, nil, tResolved["format"]["validator"](tInfo, tValue, tMaxValue));
 				end
 			end
 		end
@@ -242,7 +242,7 @@ function VUHDO_updateAllTextIndicatorsForEvent(aUnit, anEventType, aBouquetName,
 		for tCnt = 1, #sProviderInterestCache[anEventType]["clearEntries"] do
 			tCacheEntry = sProviderInterestCache[anEventType]["clearEntries"][tCnt];
 
-			tCacheEntry["func"](aUnit, tCacheEntry["resolved"], "", tCacheEntry["indicatorName"], "%s", "");
+			tCacheEntry["func"](aUnit, tCacheEntry["resolved"], "", tCacheEntry["indicatorName"], nil, "%s", "");
 		end
 	end
 

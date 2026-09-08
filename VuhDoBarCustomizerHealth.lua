@@ -1093,13 +1093,14 @@ local tRatio, tBar, tScale;
 local tPanelNum;
 local tIndicatorConfig;
 local tFontString;
-function VUHDO_overhealTextCallback(aUnit, aProviderName, aValue, anIndicatorName, ...)
+function VUHDO_overhealTextCallback(aUnit, aProviderName, aValue, anIndicatorName, aBouquetName, ...)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 		tIndicatorConfig = VUHDO_INDICATOR_CONFIG[tPanelNum]["TEXT_INDICATORS"][anIndicatorName];
 
-		if VUHDO_getResolvedTextProvider(tIndicatorConfig["TEXT_PROVIDER_SOURCE"], tIndicatorConfig["TEXT_PROVIDER_FORMAT"]) == aProviderName then
+		if (aBouquetName == nil or VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"][anIndicatorName] == aBouquetName)
+			and VUHDO_getResolvedTextProvider(tIndicatorConfig["TEXT_PROVIDER_SOURCE"], tIndicatorConfig["TEXT_PROVIDER_FORMAT"]) == aProviderName then
 			tBar = VUHDO_getHealthBar(tButton, 1);
 			tFontString = VUHDO_getOverhealText(tBar);
 
