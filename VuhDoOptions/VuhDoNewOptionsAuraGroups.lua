@@ -644,7 +644,7 @@ do
 	local tFilterParts;
 	function VUHDO_auraGroupsWriteConditions(aGroup)
 
-		if not aGroup then
+		if not aGroup or (aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) ~= VUHDO_AURA_GROUP_TYPE_FILTER then
 			return;
 		end
 
@@ -1410,6 +1410,8 @@ do
 			if tPresetCombo then
 				tPresetCombo:Hide();
 			end
+
+			VUHDO_auraGroupsSyncConditionModels(tGroup);
 
 			if tListEntriesPanel then
 				if VUHDO_initBouquetComboModel then

@@ -84,7 +84,7 @@ local VUHDO_ACTIVE_AURA_FILTERS = VUHDO_ACTIVE_AURA_FILTERS;
 VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS or { };
 local VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS;
 
-VUHDO_AURA_MIGRATION_VERSION = 9;
+VUHDO_AURA_MIGRATION_VERSION = 10;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
@@ -3729,6 +3729,10 @@ do
 			VUHDO_migrateAuraGroupConditions();
 		end
 
+		if tCurrentMigrationVersion < 10 then
+			VUHDO_migrateAuraGroupListFilters();
+		end
+
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
 
 		return;
@@ -3804,6 +3808,64 @@ do
 			for _, tGroup in pairs(tDefaultGroups) do
 				VUHDO_migrateOneAuraGroupConditions(tGroup);
 			end
+		end
+
+		VUHDO_invalidateAuraGroupFilterCache();
+		VUHDO_resolveAllAuraGroupFilters();
+
+		return;
+
+	end
+
+
+
+	--
+	local tConfig;
+	local tFilterParts;
+	local tFilterUpper;
+	function VUHDO_migrateAuraGroupListFilters()
+
+		tConfig = _G["VUHDO_CONFIG"];
+
+		if not tConfig or not tConfig["AURA_GROUPS"] then
+			return;
+		end
+
+		local function VUHDO_migrateOneAuraGroupListFilter(aGroup)
+
+			if not aGroup or (aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) ~= VUHDO_AURA_GROUP_TYPE_LIST then
+				return;
+			end
+
+			if aGroup["filter"] then
+				tFilterParts = { };
+
+				for tFilterToken in gmatch(aGroup["filter"], "[^|]+") do
+					tFilterUpper = strupper(tFilterToken);
+
+					if tFilterUpper == "HARMFUL" then
+						tinsert(tFilterParts, "HELPFUL");
+					else
+						tinsert(tFilterParts, tFilterToken);
+					end
+				end
+
+				if #tFilterParts > 0 then
+					aGroup["filter"] = table.concat(tFilterParts, "|");
+				else
+					aGroup["filter"] = "HELPFUL";
+				end
+			end
+
+			aGroup["isHarmful"] = nil;
+			aGroup["resolvedFilter"] = nil;
+
+			return;
+
+		end
+
+		for _, tGroup in pairs(tConfig["AURA_GROUPS"]) do
+			VUHDO_migrateOneAuraGroupListFilter(tGroup);
 		end
 
 		VUHDO_invalidateAuraGroupFilterCache();

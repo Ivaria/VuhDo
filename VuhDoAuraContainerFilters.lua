@@ -67,6 +67,7 @@ local VUHDO_AURA_BUTTON_BAR_TEMPLATE;
 local VUHDO_DEBUFF_TYPES;
 local VUHDO_PLAYER_DISPEL_ABILITIES;
 local VUHDO_PLAYER_PURGE_ABILITIES;
+local VUHDO_DEFAULT_AURA_GLOW_STYLE;
 local VUHDO_AURA_MAX_MATCH_ANY;
 local VUHDO_AURA_MATCH_ANY_FILTER_TOKENS;
 
@@ -455,6 +456,7 @@ do
 	local tBranchBase;
 	local tBranchIsNegated;
 	local tBranchEmit;
+	local tBranchHasCategory;
 	function VUHDO_buildAuraGroupBranchFilterString(aBaseFilterString, aMatchAnyShows, aBranchIndex)
 
 		if not aBaseFilterString or not aMatchAnyShows or not aBranchIndex then
@@ -2282,7 +2284,9 @@ do
 				end
 			end
 
-			tinsert(tBranches, VUHDO_applyGroupDispelCandidateExtras(aGroup, tBranch));
+			tBranch = VUHDO_applyGroupDispelCandidateExtras(aGroup, tBranch);
+
+			tinsert(tBranches, tBranch or { });
 			tinsert(tBranchFilterStrings, VUHDO_buildAuraGroupBranchFilterString(tBaseFilterString, tMatchAnyShows, 1));
 
 			return tBranches, tDroppedKeys, tBranchFilterStrings, tDroppedTokens;
