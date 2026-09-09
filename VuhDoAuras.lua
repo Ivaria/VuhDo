@@ -84,7 +84,7 @@ local VUHDO_ACTIVE_AURA_FILTERS = VUHDO_ACTIVE_AURA_FILTERS;
 VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS or { };
 local VUHDO_AURA_SPELL_TO_BOUQUETS = VUHDO_AURA_SPELL_TO_BOUQUETS;
 
-VUHDO_AURA_MIGRATION_VERSION = 7;
+VUHDO_AURA_MIGRATION_VERSION = 10;
 local VUHDO_AURA_MIGRATION_VERSION = VUHDO_AURA_MIGRATION_VERSION;
 
 VUHDO_AURA_GROUP_COLOR_OFF = 1;
@@ -174,6 +174,30 @@ local sAllGroups = { };
 local sScaleCounts = { };
 local sProcessAuraScratch = { };
 
+local sMatchAnyCandidateKeys = {
+	"isBossOrRoleAura",
+	"isBossAura",
+	"isRoleAura",
+	"isPriorityAura",
+	"isStealable",
+};
+
+local sMatchAllCandidateKeys = {
+	"isFromPlayerOrPlayerPet",
+	"canApplyAura",
+	"nameplateShowAll",
+	"nameplateShowPersonal",
+};
+
+local sMatchAnyFilterTokenOrder = {
+	"DISPELLABLE",
+	"RAID_PLAYER_DISPELLABLE",
+	"IMPORTANT",
+	"RAID",
+	"CROWD_CONTROL",
+	"CANCELABLE",
+};
+
 local sSpecialAuraUnits = { "player", "pet", "target", "focus" };
 
 for tCnt = 1, VUHDO_MAX_BOSS_FRAMES do
@@ -203,7 +227,9 @@ end
 --
 local function VUHDO_createSlotDataDelegate()
 
-	return { ["color"] = { } };
+	return {
+		["color"] = { },
+	};
 
 end
 
@@ -1026,7 +1052,13 @@ function VUHDO_resolveAuraGroupFilter(aGroup)
 
 		aGroup["resolvedFilter"] = tNative;
 	else
-		aGroup["resolvedFilter"] = tFilter;
+		tNative = tFilter;
+
+		if strfind(tFilter, "RAID_PLAYER_DISPELLABLE", 1, true) and VUHDO_filterContainsToken(tFilter, "HARMFUL") then
+			tNative = gsub(tFilter, "RAID_PLAYER_DISPELLABLE", "DISPELLABLE");
+		end
+
+		aGroup["resolvedFilter"] = tNative;
 	end
 
 	aGroup["dispellableOnly"] = nil;
@@ -1146,17 +1178,15 @@ local tResolvedBool;
 local tResolvedType;
 local tProcessAuraData;
 local tFullAuraData;
-local tBoolKeys = {
-	"isStealable",
-	"isFromPlayerOrPlayerPet",
-	"isRoleAura",
-	"isPriorityAura",
-	"isBossAura",
-	"isBossOrRoleAura",
-	"canApplyAura",
-	"nameplateShowAll",
-	"nameplateShowPersonal",
-};
+local tAnyShowRequired;
+local tAnyShowMatched;
+local tBoolMatches;
+local tMatchAnyBooleans;
+local tMatchAnyFilters;
+local tFilterToken;
+local tBranchFilterString;
+local tMaxDuration;
+local tExcludeDispel;
 function VUHDO_isAuraMatchingGroupFilters(aUnit, aGroupId, aGroup, anAuraData)
 
 	if not aGroup or not anAuraData then
@@ -1198,30 +1228,111 @@ function VUHDO_isAuraMatchingGroupFilters(aUnit, aGroupId, aGroup, anAuraData)
 	end
 
 	tCandidateBooleans = aGroup["candidateBooleans"];
+	tMatchAnyBooleans = aGroup["matchAnyBooleans"];
+	tMatchAnyFilters = aGroup["matchAnyFilters"];
+
+	tAnyShowRequired = false;
+	tAnyShowMatched = false;
 
 	if tCandidateBooleans then
-		for tCnt = 1, #tBoolKeys do
-			tBoolKey = tBoolKeys[tCnt];
+		for tCnt = 1, #sMatchAllCandidateKeys do
+			tBoolKey = sMatchAllCandidateKeys[tCnt];
 			tResolvedBool = VUHDO_getTriStateBool(tCandidateBooleans, tBoolKey, nil);
 
-			if tResolvedBool ~= nil then
-				if tBoolKey == "isRoleAura" then
-					if AuraUtil.IsRoleAura(anAuraData) ~= tResolvedBool then
+			if tResolvedBool ~= nil and anAuraData[tBoolKey] ~= tResolvedBool then
+				return false;
+			end
+		end
+
+		if not tMatchAnyBooleans then
+			for tCnt = 1, #sMatchAnyCandidateKeys do
+				tBoolKey = sMatchAnyCandidateKeys[tCnt];
+				tResolvedBool = VUHDO_getTriStateBool(tCandidateBooleans, tBoolKey, nil);
+
+				if tResolvedBool == false then
+					if tBoolKey == "isRoleAura" then
+						if AuraUtil.IsRoleAura(anAuraData) then
+							return false;
+						end
+					elseif tBoolKey == "isPriorityAura" then
+						if AuraUtil.IsPriorityDebuff(anAuraData["spellId"]) then
+							return false;
+						end
+					elseif tBoolKey == "isBossOrRoleAura" then
+						if anAuraData["isBossAura"] or AuraUtil.IsRoleAura(anAuraData) then
+							return false;
+						end
+					elseif anAuraData[tBoolKey] then
 						return false;
 					end
-				elseif tBoolKey == "isPriorityAura" then
-					if AuraUtil.IsPriorityDebuff(anAuraData["spellId"]) ~= tResolvedBool then
-						return false;
+				elseif tResolvedBool == true then
+					tAnyShowRequired = true;
+
+					if tBoolKey == "isRoleAura" then
+						tBoolMatches = AuraUtil.IsRoleAura(anAuraData);
+					elseif tBoolKey == "isPriorityAura" then
+						tBoolMatches = AuraUtil.IsPriorityDebuff(anAuraData["spellId"]);
+					elseif tBoolKey == "isBossOrRoleAura" then
+						tBoolMatches = anAuraData["isBossAura"] or AuraUtil.IsRoleAura(anAuraData);
+					else
+						tBoolMatches = anAuraData[tBoolKey];
 					end
-				elseif tBoolKey == "isBossOrRoleAura" then
-					if (anAuraData["isBossAura"] or AuraUtil.IsRoleAura(anAuraData)) ~= tResolvedBool then
-						return false;
+
+					if tBoolMatches then
+						tAnyShowMatched = true;
 					end
-				elseif anAuraData[tBoolKey] ~= tResolvedBool then
-					return false;
 				end
 			end
 		end
+	end
+
+	if tMatchAnyBooleans then
+		for tCnt = 1, #sMatchAnyCandidateKeys do
+			tBoolKey = sMatchAnyCandidateKeys[tCnt];
+
+			if tMatchAnyBooleans[tBoolKey] == 1 then
+				tAnyShowRequired = true;
+
+				if tBoolKey == "isRoleAura" then
+					tBoolMatches = AuraUtil.IsRoleAura(anAuraData);
+				elseif tBoolKey == "isPriorityAura" then
+					tBoolMatches = AuraUtil.IsPriorityDebuff(anAuraData["spellId"]);
+				elseif tBoolKey == "isBossOrRoleAura" then
+					tBoolMatches = anAuraData["isBossAura"] or AuraUtil.IsRoleAura(anAuraData);
+				else
+					tBoolMatches = anAuraData[tBoolKey];
+				end
+
+				if tBoolMatches then
+					tAnyShowMatched = true;
+				end
+			end
+		end
+	end
+
+	if tMatchAnyFilters and anAuraData["auraInstanceID"] then
+		for tCnt = 1, #sMatchAnyFilterTokenOrder do
+			tFilterToken = sMatchAnyFilterTokenOrder[tCnt];
+
+			if tMatchAnyFilters[tFilterToken] == 1 then
+				tAnyShowRequired = true;
+				tBranchFilterString = (aGroup["resolvedFilter"] or aGroup["filter"] or "") .. "|" .. tFilterToken;
+
+				if VUHDO_auraMatchesFilter(aUnit, anAuraData["auraInstanceID"], tBranchFilterString) then
+					tAnyShowMatched = true;
+				end
+			end
+		end
+	end
+
+	if tAnyShowRequired and not tAnyShowMatched then
+		return false;
+	end
+
+	tExcludeDispel = aGroup["excludeDispelTypes"];
+
+	if tExcludeDispel and tExcludeDispel[anAuraData["dispelName"]] then
+		return false;
 	end
 
 	if aGroup["processedAuraType"] then
@@ -1248,7 +1359,17 @@ function VUHDO_isAuraMatchingGroupFilters(aUnit, aGroupId, aGroup, anAuraData)
 		end
 	end
 
-	if aGroup["hasDuration"] and anAuraData["duration"] == 0 then
+	tMaxDuration = aGroup["maxDurationSeconds"];
+
+	if tMaxDuration ~= nil then
+		if tMaxDuration <= 0 then
+			if anAuraData["duration"] == 0 then
+				return false;
+			end
+		elseif anAuraData["duration"] > tMaxDuration or anAuraData["duration"] == 0 then
+			return false;
+		end
+	elseif aGroup["hasDuration"] and anAuraData["duration"] == 0 then
 		return false;
 	end
 
@@ -3508,7 +3629,6 @@ do
 
 	--
 	local tConfig;
-	local tGroup;
 	function VUHDO_migrateAuraGroupGlowBarStyle()
 
 		tConfig = _G["VUHDO_CONFIG"];
@@ -3525,6 +3645,29 @@ do
 					tGroup["glowBarStyle"] = nil;
 				end
 			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_migrateAuraDefaultsRangeFade()
+
+		tPanelSetup = _G["VUHDO_PANEL_SETUP"];
+
+		if not tPanelSetup then
+			return;
+		end
+
+		if not tPanelSetup["AURA_DEFAULTS"] then
+			tPanelSetup["AURA_DEFAULTS"] = { };
+		end
+
+		if tPanelSetup["AURA_DEFAULTS"]["rangeFade"] == nil then
+			tPanelSetup["AURA_DEFAULTS"]["rangeFade"] = true;
 		end
 
 		return;
@@ -3578,7 +3721,155 @@ do
 			VUHDO_migrateAuraGroupFilterTokens();
 		end
 
+		if tCurrentMigrationVersion < 8 then
+			VUHDO_migrateAuraDefaultsRangeFade();
+		end
+
+		if tCurrentMigrationVersion < 9 then
+			VUHDO_migrateAuraGroupConditions();
+		end
+
+		if tCurrentMigrationVersion < 10 then
+			VUHDO_migrateAuraGroupListFilters();
+		end
+
 		tPanelSetup["AURA_MIGRATION_VERSION"] = VUHDO_AURA_MIGRATION_VERSION;
+
+		return;
+
+	end
+
+
+
+	--
+	local tConfig;
+	local tDefaultGroups;
+	local tCandidateBooleans;
+	local tMatchAnyBooleans;
+	local tBoolKey;
+	local tMatchAnyBoolKeys;
+	function VUHDO_migrateAuraGroupConditions()
+
+		tConfig = _G["VUHDO_CONFIG"];
+		tDefaultGroups = _G["VUHDO_DEFAULT_AURA_GROUPS"];
+		tMatchAnyBoolKeys = _G["VUHDO_AURA_MATCH_ANY_BOOLEAN_KEYS"];
+
+		if not tMatchAnyBoolKeys then
+			return;
+		end
+
+		local function VUHDO_migrateOneAuraGroupConditions(aGroup)
+
+			if not aGroup or (aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) ~= VUHDO_AURA_GROUP_TYPE_FILTER then
+				return;
+			end
+
+			tCandidateBooleans = aGroup["candidateBooleans"];
+
+			if tCandidateBooleans then
+				tMatchAnyBooleans = aGroup["matchAnyBooleans"] or { };
+
+				for tCnt = 1, #tMatchAnyBoolKeys do
+					tBoolKey = tMatchAnyBoolKeys[tCnt];
+
+					if tCandidateBooleans[tBoolKey] == 1 then
+						tMatchAnyBooleans[tBoolKey] = 1;
+						tCandidateBooleans[tBoolKey] = nil;
+					end
+				end
+
+				if next(tMatchAnyBooleans) then
+					aGroup["matchAnyBooleans"] = tMatchAnyBooleans;
+				end
+
+				if not next(tCandidateBooleans) then
+					aGroup["candidateBooleans"] = nil;
+				end
+			end
+
+			if aGroup["hasDuration"] and aGroup["maxDurationSeconds"] == nil then
+				aGroup["maxDurationSeconds"] = 0;
+				aGroup["hasDuration"] = nil;
+			end
+
+			aGroup["resolvedFilter"] = nil;
+
+			return;
+
+		end
+
+		if tConfig and tConfig["AURA_GROUPS"] then
+			for _, tGroup in pairs(tConfig["AURA_GROUPS"]) do
+				VUHDO_migrateOneAuraGroupConditions(tGroup);
+			end
+		end
+
+		if tDefaultGroups then
+			for _, tGroup in pairs(tDefaultGroups) do
+				VUHDO_migrateOneAuraGroupConditions(tGroup);
+			end
+		end
+
+		VUHDO_invalidateAuraGroupFilterCache();
+		VUHDO_resolveAllAuraGroupFilters();
+
+		return;
+
+	end
+
+
+
+	--
+	local tConfig;
+	local tFilterParts;
+	local tFilterUpper;
+	function VUHDO_migrateAuraGroupListFilters()
+
+		tConfig = _G["VUHDO_CONFIG"];
+
+		if not tConfig or not tConfig["AURA_GROUPS"] then
+			return;
+		end
+
+		local function VUHDO_migrateOneAuraGroupListFilter(aGroup)
+
+			if not aGroup or (aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) ~= VUHDO_AURA_GROUP_TYPE_LIST then
+				return;
+			end
+
+			if aGroup["filter"] then
+				tFilterParts = { };
+
+				for tFilterToken in gmatch(aGroup["filter"], "[^|]+") do
+					tFilterUpper = strupper(tFilterToken);
+
+					if tFilterUpper == "HARMFUL" then
+						tinsert(tFilterParts, "HELPFUL");
+					else
+						tinsert(tFilterParts, tFilterToken);
+					end
+				end
+
+				if #tFilterParts > 0 then
+					aGroup["filter"] = table.concat(tFilterParts, "|");
+				else
+					aGroup["filter"] = "HELPFUL";
+				end
+			end
+
+			aGroup["isHarmful"] = nil;
+			aGroup["resolvedFilter"] = nil;
+
+			return;
+
+		end
+
+		for _, tGroup in pairs(tConfig["AURA_GROUPS"]) do
+			VUHDO_migrateOneAuraGroupListFilter(tGroup);
+		end
+
+		VUHDO_invalidateAuraGroupFilterCache();
+		VUHDO_resolveAllAuraGroupFilters();
 
 		return;
 

@@ -1751,17 +1751,29 @@ end
 local tPanelNum;
 local tIndicatorConfig;
 local tFontString;
-function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aValue, anIndicatorName, ...)
+local tAlpha;
+function VUHDO_indicatorTextCallback(aBarNum, aUnit, aProviderName, aValue, anIndicatorName, aBouquetName, ...)
 
 	for _, tButton in pairs(VUHDO_getUnitButtonsSafe(aUnit)) do
 		tPanelNum = VUHDO_BUTTON_CACHE[tButton];
 		tIndicatorConfig = VUHDO_INDICATOR_CONFIG[tPanelNum]["TEXT_INDICATORS"][anIndicatorName];
 
-		if VUHDO_getResolvedTextProvider(tIndicatorConfig["TEXT_PROVIDER_SOURCE"], tIndicatorConfig["TEXT_PROVIDER_FORMAT"]) == aProviderName then
+		if (aBouquetName == nil or VUHDO_INDICATOR_CONFIG[tPanelNum]["BOUQUETS"][anIndicatorName] == aBouquetName)
+			and VUHDO_getResolvedTextProvider(tIndicatorConfig["TEXT_PROVIDER_SOURCE"], tIndicatorConfig["TEXT_PROVIDER_FORMAT"]) == aProviderName then
 			tFontString = VUHDO_getHealthBarText(tButton, aBarNum);
 
+			if type(aValue) == "string" then
+				tAlpha = 0;
+			elseif issecretvalue(aValue) then
+				tAlpha = 1;
+			elseif aValue == 0 then
+				tAlpha = 0;
+			else
+				tAlpha = 1;
+			end
+
 			tFontString:SetText(format(...));
-			tFontString:SetAlpha(type(aValue) == "string" and 0 or aValue);
+			tFontString:SetAlpha(tAlpha);
 		end
 	end
 

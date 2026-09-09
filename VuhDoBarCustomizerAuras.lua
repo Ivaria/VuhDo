@@ -89,6 +89,7 @@ local sAnchorSettingsCache = {
 	["showTimer"] = { },
 	["showStacks"] = { },
 	["flashOnLow"] = { },
+	["rangeFade"] = { },
 };
 
 local sEntrySettingsCache = {
@@ -531,6 +532,7 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 		sAnchorSettingsCache["showTimer"][tPanelNum] = { };
 		sAnchorSettingsCache["showStacks"][tPanelNum] = { };
 		sAnchorSettingsCache["flashOnLow"][tPanelNum] = { };
+		sAnchorSettingsCache["rangeFade"][tPanelNum] = { };
 
 		tPanelAnchors = VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["AURA_ANCHORS"];
 
@@ -543,6 +545,7 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 				sAnchorSettingsCache["showTimer"][tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["showTimer"], "showTimer");
 				sAnchorSettingsCache["showStacks"][tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["showStacks"], "showStacks");
 				sAnchorSettingsCache["flashOnLow"][tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["flashOnLow"], "flashOnLow");
+				sAnchorSettingsCache["rangeFade"][tPanelNum][tAnchorIndex] = VUHDO_resolveAuraTriState(tAnchorConfig["rangeFade"], "rangeFade");
 			end
 		end
 	end
@@ -1642,6 +1645,24 @@ do
 
 
 	--
+	local tLegacyRangeFadePanelNum;
+	local function VUHDO_resolveLegacyAuraFrameParent(aButton, anAnchorIndex)
+
+		tLegacyRangeFadePanelNum = VUHDO_BUTTON_CACHE[aButton];
+
+		if tLegacyRangeFadePanelNum
+			and sAnchorSettingsCache["rangeFade"][tLegacyRangeFadePanelNum]
+			and sAnchorSettingsCache["rangeFade"][tLegacyRangeFadePanelNum][anAnchorIndex] then
+			return _G[aButton:GetName() .. "BgBar"] or aButton;
+		end
+
+		return aButton;
+
+	end
+
+
+
+	--
 	local tFrame;
 	local tFrameName;
 	local tParent;
@@ -1713,11 +1734,9 @@ do
 			end
 		end
 
-		tParent = _G[aButton:GetName() .. "BgBar"];
+		tParent = VUHDO_resolveLegacyAuraFrameParent(aButton, anAnchorIndex);
 
-		if tParent then
-			tFrame:SetParent(tParent);
-		end
+		tFrame:SetParent(tParent);
 
 		VUHDO_setupAuraFrameForTooltips(tFrame, aButton);
 
@@ -1810,11 +1829,9 @@ do
 			tFrame["childBar"]:SetFrameLevel(tFrame:GetFrameLevel() - 1);
 		end
 
-		tParent = _G[aButton:GetName() .. "BgBar"];
+		tParent = VUHDO_resolveLegacyAuraFrameParent(aButton, anAnchorIndex);
 
-		if tParent then
-			tFrame:SetParent(tParent);
-		end
+		tFrame:SetParent(tParent);
 
 		VUHDO_setupAuraFrameForTooltips(tFrame, aButton);
 

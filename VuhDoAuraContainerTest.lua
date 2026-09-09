@@ -269,6 +269,62 @@ do
 		return "-", nil;
 
 	end
+
+
+
+	--
+	local tBranchSummaryParts;
+	local tBranchCandidateSummary;
+	local tBranchFilterString;
+	local tBranchFilterStrings;
+	local tDroppedKeyList;
+	local tDroppedTokenList;
+	local tDroppedKeySummary;
+	local tCandidateBranches;
+	function VUHDO_auraDiagFormatCandidateBranchSummary(aResolvedFilters)
+
+		if not aResolvedFilters then
+			return "-", 0, nil;
+		end
+
+		tCandidateBranches = aResolvedFilters["candidateBranches"];
+		tBranchFilterStrings = aResolvedFilters["candidateBranchFilterStrings"];
+
+		if not tCandidateBranches or #tCandidateBranches == 0 then
+			tBranchCandidateSummary = VUHDO_auraDiagFormatCandidateSummary(aResolvedFilters["candidateFilters"], nil);
+			tBranchFilterString = aResolvedFilters["filterString"] or "-";
+
+			return tBranchCandidateSummary .. " filter=" .. tBranchFilterString, 1, nil;
+		end
+
+		tBranchSummaryParts = { };
+		tDroppedKeyList = aResolvedFilters["candidateBranchDroppedKeys"];
+		tDroppedTokenList = aResolvedFilters["candidateBranchDroppedTokens"];
+
+		for tBranchCnt = 1, #tCandidateBranches do
+			tBranchCandidateSummary = VUHDO_auraDiagFormatCandidateSummary(tCandidateBranches[tBranchCnt], nil);
+			tBranchFilterString = (tBranchFilterStrings and tBranchFilterStrings[tBranchCnt]) or aResolvedFilters["filterString"] or "-";
+
+			tinsert(tBranchSummaryParts, tostring(tBranchCnt) .. ":" .. tBranchCandidateSummary .. " filter=" .. tBranchFilterString);
+		end
+
+		tDroppedKeySummary = nil;
+
+		if tDroppedKeyList and #tDroppedKeyList > 0 then
+			tDroppedKeySummary = tconcat(tDroppedKeyList, ",");
+		end
+
+		if tDroppedTokenList and #tDroppedTokenList > 0 then
+			if tDroppedKeySummary then
+				tDroppedKeySummary = tDroppedKeySummary .. ";tokens:" .. tconcat(tDroppedTokenList, ",");
+			else
+				tDroppedKeySummary = "tokens:" .. tconcat(tDroppedTokenList, ",");
+			end
+		end
+
+		return tconcat(tBranchSummaryParts, ";"), #tCandidateBranches, tDroppedKeySummary;
+
+	end
 end
 
 
@@ -1276,6 +1332,9 @@ do
 	local tIndicatorBouquetName;
 	local tPrototypeGeneration;
 	local tPrototypeCount;
+	local tBranchCandidateSummary;
+	local tBranchCount;
+	local tDroppedBranchKeys;
 	function VUHDO_dumpAuraDiagnostics(aUnit, anIndicatorKey, anIsVerbose)
 
 		aUnit = aUnit or "player";
@@ -1350,6 +1409,7 @@ do
 			tGroupId = tCanColorGroup["groupId"];
 			tGroup = VUHDO_getAuraGroup(tGroupId);
 			tResolved = tGroup and VUHDO_getAuraGroupResolvedFilters(tGroup);
+			tBranchCandidateSummary, tBranchCount, tDroppedBranchKeys = VUHDO_auraDiagFormatCandidateBranchSummary(tResolved);
 
 			VUHDO_auraDiagLine("canColorBarGroup",
 				"i", tGroupCnt,
@@ -1359,7 +1419,10 @@ do
 				"canColorBar", tCanColorGroup["canColorBar"],
 				"canGlowBar", tCanColorGroup["canGlowBar"],
 				"groupResolves", tGroup ~= nil and 1 or 0,
-				"expressible", tResolved and tResolved["expressible"]);
+				"expressible", tResolved and tResolved["expressible"],
+				"candidateBranches", tBranchCount,
+				"candidateBranchSummary", tBranchCandidateSummary,
+				"candidateBranchDropped", tDroppedBranchKeys);
 		end
 
 		VUHDO_dumpAuraPanelAnchors();
@@ -1474,6 +1537,8 @@ do
 								for tGroupIndex, tGroup in ipairs(tGroups) do
 									VUHDO_auraDiagLine("containerGroup",
 										"i", tGroupIndex,
+										"key", tGroup["key"],
+										"layoutIndex", tGroup["layout"] and tGroup["layout"]["layoutIndex"],
 										"filter", VUHDO_escapeAuraDiagFilterString(tGroup["filterString"]),
 										"candidates", VUHDO_auraDiagFormatCandidateSummary(tGroup["candidateFilters"], nil),
 										"maxFrames", tGroup["maxFrameCount"]);
