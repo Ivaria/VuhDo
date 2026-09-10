@@ -2363,9 +2363,26 @@ end
 
 
 --
+local tRootPane;
+local tCombo;
+local tEditBox;
+local function VUHDO_getAuraGroupsIgnoreListWidgets()
+
+	tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrame"];
+
+	tRootPane = tFrame and _G[tFrame:GetName() .. "RootPane"];
+	tCombo = tRootPane and _G[tRootPane:GetName() .. "IgnoreCombo"];
+	tEditBox = tCombo and _G[tCombo:GetName() .. "EditBox"];
+
+	return tRootPane, tCombo, tEditBox;
+
+end
+
+
+
+--
 local tGroup;
 local tIgnoreList;
-local tSpellNameById;
 local tDisplayName;
 local tFrame;
 local function VUHDO_initAuraGroupsIgnorePanel()
@@ -2391,31 +2408,19 @@ local function VUHDO_initAuraGroupsIgnorePanel()
 	VUHDO_AURA_GROUPS_IGNORE_SELECTED = "";
 
 	for tName, _ in pairs(tIgnoreList) do
-		tSpellNameById = VUHDO_resolveSpellId(tName);
-
-		if (tSpellNameById ~= tName) then
-			tDisplayName = "[" .. tName .. "] " .. tSpellNameById;
-		else
-			tDisplayName = tName;
-		end
+		tDisplayName = VUHDO_formatAuraSpellDisplayName(tName);
 
 		tinsert(VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL, { tName, tDisplayName });
 	end
 
-	tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrame"];
+	_, tCombo, tEditBox = VUHDO_getAuraGroupsIgnoreListWidgets();
 
-	if tFrame then
-		tFrame = _G[tFrame:GetName() .. "IgnoreComboEditBox"];
+	if tEditBox then
+		tEditBox:SetText("");
+	end
 
-		if tFrame then
-			tFrame:SetText("");
-		end
-
-		tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreCombo"];
-
-		if tFrame then
-			VUHDO_lnfComboBoxInitFromModel(tFrame);
-		end
+	if tCombo then
+		VUHDO_lnfComboBoxInitFromModel(tCombo);
 	end
 
 	tFrame = _G["VuhDoNewOptionsAuraGroupsStorePanelGroupCombo"];
@@ -2447,7 +2452,6 @@ local tText;
 local tKey;
 local tGroup;
 local tDisplayName;
-local tEditBox;
 function VUHDO_auraGroupsIgnoreAdd()
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -2460,7 +2464,7 @@ function VUHDO_auraGroupsIgnoreAdd()
 		return;
 	end
 
-	tEditBox = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreComboEditBox"];
+	_, _, tEditBox = VUHDO_getAuraGroupsIgnoreListWidgets();
 
 	if not tEditBox then
 		return;
@@ -2495,6 +2499,8 @@ function VUHDO_auraGroupsIgnoreAdd()
 
 	tEditBox:SetText("");
 
+	VUHDO_invalidateAuraGroupFilterCache();
+
 	VUHDO_auraGroupsRefreshIgnorePanel();
 
 	return;
@@ -2509,7 +2515,6 @@ local tSpellId;
 local tKeyToRemove;
 local tGroup;
 local tDisplayName;
-local tComboEditBox;
 function VUHDO_auraGroupsIgnoreDelete()
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -2522,13 +2527,13 @@ function VUHDO_auraGroupsIgnoreDelete()
 		return;
 	end
 
-	tComboEditBox = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreComboEditBox"];
+	_, _, tEditBox = VUHDO_getAuraGroupsIgnoreListWidgets();
 
-	if not tComboEditBox then
+	if not tEditBox then
 		return;
 	end
 
-	tText = tComboEditBox:GetText();
+	tText = tEditBox:GetText();
 
 	if not tText or tText == "" then
 		return;
@@ -2566,6 +2571,8 @@ function VUHDO_auraGroupsIgnoreDelete()
 	else
 		VUHDO_Msg(string.format(VUHDO_I18N_AURA_DOES_NOT_EXIST_IN_IGNORE_LIST, tDisplayName));
 	end
+
+	VUHDO_invalidateAuraGroupFilterCache();
 
 	VUHDO_auraGroupsRefreshIgnorePanel();
 

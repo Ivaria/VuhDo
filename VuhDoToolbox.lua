@@ -234,7 +234,7 @@ function VUHDO_formatAuraSpellDisplayName(aSpellName)
 
 	tResolvedName = VUHDO_resolveSpellId(aSpellName);
 
-	return (tResolvedName ~= aSpellName) and ("[" .. aSpellName .. "] " .. tResolvedName) or aSpellName;
+	return (tResolvedName ~= aSpellName) and ("[" .. aSpellName .. "] " .. tResolvedName) or tostring(aSpellName);
 
 end
 
