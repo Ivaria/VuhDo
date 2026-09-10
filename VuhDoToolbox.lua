@@ -2005,6 +2005,19 @@ end
 
 
 --
+function VUHDO_argToString(aValue)
+
+	if sSecretsEnabled and issecretvalue(aValue) then
+		return "<secret>";
+	end
+
+	return tostring(aValue);
+
+end
+
+
+
+--
 local tInfo;
 local tSpellInRange;
 local tUnitInRange;

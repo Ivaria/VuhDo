@@ -170,7 +170,7 @@ do
 		tArgs = { };
 
 		for tCnt = 1, select("#", ...) do
-			tinsert(tArgs, tostring(select(tCnt, ...)));
+			tinsert(tArgs, VUHDO_argToString(select(tCnt, ...)));
 
 			-- don't capture more than 5 arguments
 			if tCnt >= 5 then
@@ -186,7 +186,7 @@ do
 				tArgs = { };
 
 				for _, tArg in ipairs(tExistingSnapshot["args"] or { }) do
-					tinsert(tArgs, tostring(tArg));
+					tinsert(tArgs, VUHDO_argToString(tArg));
 				end
 
 				tExistingSnapshot["compositionKey"] = tExistingSnapshot["eventName"] .. ":" .. table.concat(tArgs, ",");
