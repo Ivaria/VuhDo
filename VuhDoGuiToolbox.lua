@@ -26,6 +26,7 @@ local VUHDO_RAID_TARGET_TEXTURE_ROWS = 4;
 local VUHDO_RAID_TARGET_TEXTURE_COLUMNS = 4;
 
 local sIsNotInChina = GetLocale() ~= "zhCN" and GetLocale() ~= "zhTW" and GetLocale() ~= "koKR";
+local sCjkFontSize = 12;
 local sIsManaBar = { };
 local sIsSideBarLeft = { };
 local sIsSideBarRight = { };
@@ -1285,18 +1286,15 @@ end
 
 --
 local tLabel;
-local tFontSize;
 local tFontFlags;
 function VUHDO_lnfPatchFont(aComponent, aLabelName)
 
 	if not sIsNotInChina then
 		tLabel = _G[aComponent:GetName() .. aLabelName];
 
-		_, tFontSize, tFontFlags = tLabel:GetFont();
+		_, _, tFontFlags = tLabel:GetFont();
 
-		if type(tFontSize) == "number" and tFontSize > 0 then
-			tLabel:SetFont(VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME), tFontSize, tFontFlags or "");
-		end
+		tLabel:SetFont(VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME), sCjkFontSize, tFontFlags or "");
 	end
 
 	return;
