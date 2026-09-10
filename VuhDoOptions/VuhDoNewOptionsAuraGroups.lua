@@ -224,30 +224,6 @@ local sSpellEntrySettingsEntryIdx = nil;
 
 
 do
-	local sMatchAnyCandidateKeys = {
-		"isBossOrRoleAura",
-		"isBossAura",
-		"isRoleAura",
-		"isPriorityAura",
-		"isStealable",
-	};
-
-	local sMatchAllCandidateKeys = {
-		"isFromPlayerOrPlayerPet",
-		"canApplyAura",
-		"nameplateShowAll",
-		"nameplateShowPersonal",
-	};
-
-	local sMatchAnyFilterTokenOrder = {
-		"DISPELLABLE",
-		"RAID_PLAYER_DISPELLABLE",
-		"IMPORTANT",
-		"RAID",
-		"CROWD_CONTROL",
-		"CANCELABLE",
-	};
-
 	local sAuraConditionBooleanLabels = {
 		["isBossOrRoleAura"] = VUHDO_I18N_AURA_CONDITION_BOSS_OR_ROLE,
 		["isBossAura"] = VUHDO_I18N_AURA_CONDITION_BOSS_AURA,
@@ -310,6 +286,7 @@ do
 	local sPresetScratchMatchAll = { };
 	local sPresetScratchNeverShow = { };
 	local sPresetScratchAuras;
+	local sFilterParts = { };
 
 
 
@@ -319,11 +296,64 @@ do
 	local tDurationValue;
 	local tDurationLabel;
 	local tConditionTooltip;
+	local tCapability;
+	local function VUHDO_auraGroupsIsMatchAnyCondition(aKey)
+
+		tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[aKey];
+
+		if not tCapability or not tCapability["matchAny"] then
+			return false;
+		end
+
+		if tCapability["storage"] == "boolean" then
+			return sAuraConditionBooleanLabels[aKey] ~= nil;
+		end
+
+		return sAuraConditionTokenLabels[aKey] ~= nil;
+
+	end
+
+
+
+	--
+	local function VUHDO_auraGroupsBuildFilterString(aPolarity, aMatchAll, aNeverShow)
+
+		twipe(sFilterParts);
+
+		tinsert(sFilterParts, aPolarity);
+
+		for tCnt = 1, #VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS do
+			tTokenKey = VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS[tCnt];
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tTokenKey];
+
+			if tCapability and tCapability["matchAll"] and aMatchAll[tTokenKey] then
+				tinsert(sFilterParts, tTokenKey);
+			end
+		end
+
+		for tCnt = 1, #VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS do
+			tTokenKey = VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS[tCnt];
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tTokenKey];
+
+			if tCapability and tCapability["neverShow"] and aNeverShow[tTokenKey] then
+				tinsert(sFilterParts, "!" .. tTokenKey);
+			end
+		end
+
+		return tconcat(sFilterParts, "|");
+
+	end
+
+
+
+	--
 	function VUHDO_initAuraGroupConditionComboModels()
 
 		twipe(VUHDO_AURA_CONDITION_COMBO_MODEL);
 
-		for tBoolKey, tDurationLabel in pairs(sAuraConditionBooleanLabels) do
+		for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+			tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
+			tDurationLabel = sAuraConditionBooleanLabels[tBoolKey];
 			tConditionTooltip = sAuraConditionBooleanTooltips[tBoolKey];
 
 			tinsert(VUHDO_AURA_CONDITION_COMBO_MODEL, { tBoolKey, tDurationLabel, nil, nil, tConditionTooltip });
@@ -523,6 +553,8 @@ do
 			return;
 		end
 
+		VUHDO_migrateAuraGroupConditions(aGroup);
+
 		VUHDO_AURA_GROUPS_AURAS_SELECTED = aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
 
 		if aGroup["maxDurationSeconds"] ~= nil then
@@ -534,10 +566,11 @@ do
 		tMatchAnyBooleans = aGroup["matchAnyBooleans"];
 
 		if tMatchAnyBooleans then
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
+				tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
 
-				if tMatchAnyBooleans[tBoolKey] == 1 then
+				if tCapability and tCapability["matchAny"] and tMatchAnyBooleans[tBoolKey] == 1 then
 					VUHDO_AURA_GROUPS_CONDITIONS["matchAny"][tBoolKey] = true;
 				end
 			end
@@ -546,10 +579,11 @@ do
 		tMatchAnyFilters = aGroup["matchAnyFilters"];
 
 		if tMatchAnyFilters then
-			for tCnt = 1, #sMatchAnyFilterTokenOrder do
-				tTokenKey = sMatchAnyFilterTokenOrder[tCnt];
+			for tCnt = 1, #VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER do
+				tTokenKey = VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER[tCnt];
+				tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tTokenKey];
 
-				if tMatchAnyFilters[tTokenKey] == 1 then
+				if tCapability and tCapability["matchAny"] and tMatchAnyFilters[tTokenKey] == 1 then
 					VUHDO_AURA_GROUPS_CONDITIONS["matchAny"][tTokenKey] = true;
 				end
 			end
@@ -558,31 +592,16 @@ do
 		tCandidateBooleans = aGroup["candidateBooleans"];
 
 		if tCandidateBooleans then
-			if not tMatchAnyBooleans then
-				for tCnt = 1, #sMatchAnyCandidateKeys do
-					tBoolKey = sMatchAnyCandidateKeys[tCnt];
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
+				tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
 
-					if tCandidateBooleans[tBoolKey] == 1 then
-						VUHDO_AURA_GROUPS_CONDITIONS["matchAny"][tBoolKey] = true;
+				if tCapability then
+					if tCandidateBooleans[tBoolKey] == 1 and tCapability["matchAll"] then
+						VUHDO_AURA_GROUPS_CONDITIONS["matchAll"][tBoolKey] = true;
+					elseif tCandidateBooleans[tBoolKey] == 3 and tCapability["neverShow"] then
+						VUHDO_AURA_GROUPS_CONDITIONS["neverShow"][tBoolKey] = true;
 					end
-				end
-			end
-
-			for tCnt = 1, #sMatchAllCandidateKeys do
-				tBoolKey = sMatchAllCandidateKeys[tCnt];
-
-				if tCandidateBooleans[tBoolKey] == 1 then
-					VUHDO_AURA_GROUPS_CONDITIONS["matchAll"][tBoolKey] = true;
-				elseif tCandidateBooleans[tBoolKey] == 3 then
-					VUHDO_AURA_GROUPS_CONDITIONS["neverShow"][tBoolKey] = true;
-				end
-			end
-
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
-
-				if tCandidateBooleans[tBoolKey] == 3 then
-					VUHDO_AURA_GROUPS_CONDITIONS["neverShow"][tBoolKey] = true;
 				end
 			end
 		end
@@ -641,7 +660,6 @@ do
 
 	--
 	local tExcludeDispelTypes;
-	local tFilterParts;
 	function VUHDO_auraGroupsWriteConditions(aGroup)
 
 		if not aGroup or (aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) ~= VUHDO_AURA_GROUP_TYPE_FILTER then
@@ -657,13 +675,8 @@ do
 		tMatchAnyFilters = aGroup["matchAnyFilters"];
 
 		if tCandidateBooleans then
-			for tCnt = 1, #sMatchAllCandidateKeys do
-				tBoolKey = sMatchAllCandidateKeys[tCnt];
-				tCandidateBooleans[tBoolKey] = nil;
-			end
-
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
 				tCandidateBooleans[tBoolKey] = nil;
 			end
 		else
@@ -685,21 +698,27 @@ do
 		twipe(tMatchAnyFilters);
 
 		for tBoolKey, _ in pairs(tMatchAll) do
-			if sAuraConditionBooleanLabels[tBoolKey] then
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
+
+			if tCapability and tCapability["storage"] == "boolean" and tCapability["matchAll"] then
 				tCandidateBooleans[tBoolKey] = 1;
 			end
 		end
 
 		for tBoolKey, _ in pairs(tNeverShow) do
-			if sAuraConditionBooleanLabels[tBoolKey] then
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
+
+			if tCapability and tCapability["storage"] == "boolean" and tCapability["neverShow"] then
 				tCandidateBooleans[tBoolKey] = 3;
 			end
 		end
 
 		for tBoolKey, _ in pairs(tMatchAny) do
-			if sAuraConditionBooleanLabels[tBoolKey] then
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
+
+			if tCapability and tCapability["storage"] == "boolean" and tCapability["matchAny"] then
 				tMatchAnyBooleans[tBoolKey] = 1;
-			elseif VUHDO_AURA_MATCH_ANY_FILTER_TOKENS[tBoolKey] then
+			elseif tCapability and tCapability["storage"] == "filterToken" and tCapability["matchAny"] then
 				tMatchAnyFilters[tBoolKey] = 1;
 			end
 		end
@@ -716,21 +735,8 @@ do
 			aGroup["matchAnyFilters"] = nil;
 		end
 
-		tFilterParts = { VUHDO_AURA_GROUPS_AURAS_SELECTED };
-
-		for tTokenKey, _ in pairs(tMatchAll) do
-			if sAuraConditionTokenLabels[tTokenKey] then
-				tinsert(tFilterParts, tTokenKey);
-			end
-		end
-
-		for tTokenKey, _ in pairs(tNeverShow) do
-			if sAuraConditionTokenLabels[tTokenKey] and not sNonNegatableFilterTokens[tTokenKey] then
-				tinsert(tFilterParts, "!" .. tTokenKey);
-			end
-		end
-
-		aGroup["filter"] = tconcat(tFilterParts, "|");
+		aGroup["filter"] = VUHDO_auraGroupsBuildFilterString(VUHDO_AURA_GROUPS_AURAS_SELECTED, tMatchAll, tNeverShow);
+		aGroup["conditionsVersion"] = VUHDO_AURA_GROUP_CONDITIONS_VERSION;
 		aGroup["isHarmful"] = VUHDO_AURA_GROUPS_AURAS_SELECTED == "HARMFUL";
 
 		aGroup["excludeFilter"] = tNeverShow["PLAYER"] and "PLAYER" or nil;
@@ -785,7 +791,7 @@ do
 		tMatchAnyCount = 0;
 
 		for tBoolKey, _ in pairs(VUHDO_AURA_GROUPS_CONDITIONS["matchAny"]) do
-			if sAuraConditionBooleanLabels[tBoolKey] or VUHDO_AURA_MATCH_ANY_FILTER_TOKENS[tBoolKey] then
+			if VUHDO_auraGroupsIsMatchAnyCondition(tBoolKey) then
 				tMatchAnyCount = tMatchAnyCount + 1;
 			end
 		end
@@ -811,6 +817,8 @@ do
 		tMatchAll = VUHDO_AURA_GROUPS_CONDITIONS["matchAll"];
 		tNeverShow = VUHDO_AURA_GROUPS_CONDITIONS["neverShow"];
 
+		tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[aValue];
+
 		if tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAny" and tMatchAny[aValue] then
 			return false;
 		elseif tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAll" and tMatchAll[aValue] then
@@ -820,6 +828,10 @@ do
 		end
 
 		if tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAny" then
+			if not tCapability or not tCapability["matchAny"] then
+				return true;
+			end
+
 			if tMatchAll[aValue] or tNeverShow[aValue] then
 				return true;
 			end
@@ -839,7 +851,7 @@ do
 			tMatchAnyCount = 0;
 
 			for tBoolKey, _ in pairs(tMatchAny) do
-				if sAuraConditionBooleanLabels[tBoolKey] or VUHDO_AURA_MATCH_ANY_FILTER_TOKENS[tBoolKey] then
+				if VUHDO_auraGroupsIsMatchAnyCondition(tBoolKey) then
 					tMatchAnyCount = tMatchAnyCount + 1;
 				end
 			end
@@ -848,6 +860,10 @@ do
 				return true;
 			end
 		elseif tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAll" then
+			if not tCapability or not tCapability["matchAll"] then
+				return true;
+			end
+
 			if tMatchAny[aValue] or tNeverShow[aValue] then
 				return true;
 			end
@@ -856,6 +872,10 @@ do
 				return true;
 			end
 		elseif tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.neverShow" then
+			if not tCapability or not tCapability["neverShow"] then
+				return true;
+			end
+
 			if tMatchAny[aValue] or tMatchAll[aValue] then
 				return true;
 			end

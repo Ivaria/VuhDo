@@ -876,6 +876,157 @@ VUHDO_AURA_MATCH_ANY_FILTER_TOKENS = {
 	["RAID"] = true,
 	["CROWD_CONTROL"] = true,
 	["CANCELABLE"] = true,
+	["PLAYER"] = true,
+	["RAID_IN_COMBAT"] = true,
+	["EXTERNAL_DEFENSIVE"] = true,
+	["BIG_DEFENSIVE"] = true,
+};
+
+VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER = {
+	"DISPELLABLE",
+	"RAID_PLAYER_DISPELLABLE",
+	"IMPORTANT",
+	"RAID",
+	"CROWD_CONTROL",
+	"CANCELABLE",
+	"PLAYER",
+	"RAID_IN_COMBAT",
+	"EXTERNAL_DEFENSIVE",
+	"BIG_DEFENSIVE",
+};
+
+VUHDO_AURA_CONDITION_BUCKET_MATCH_ALL = "matchAll";
+VUHDO_AURA_CONDITION_BUCKET_MATCH_ANY = "matchAny";
+VUHDO_AURA_CONDITION_BUCKET_NEVER_SHOW = "neverShow";
+
+VUHDO_AURA_CONDITION_STORAGE_BOOLEAN = "boolean";
+VUHDO_AURA_CONDITION_STORAGE_FILTER_TOKEN = "filterToken";
+
+VUHDO_AURA_GROUP_CONDITIONS_VERSION = 1;
+
+VUHDO_AURA_CONDITION_CAPABILITIES = {
+	["isBossOrRoleAura"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["isBossAura"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["isRoleAura"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["isPriorityAura"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["isStealable"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["isFromPlayerOrPlayerPet"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["canApplyAura"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["nameplateShowAll"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["nameplateShowPersonal"] = {
+		["storage"] = "boolean",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["PLAYER"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["RAID"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["RAID_IN_COMBAT"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["CANCELABLE"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["INCLUDE_NAME_PLATE_ONLY"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+	},
+	["MAW"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+	},
+	["EXTERNAL_DEFENSIVE"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["CROWD_CONTROL"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["RAID_PLAYER_DISPELLABLE"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["BIG_DEFENSIVE"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["IMPORTANT"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
+	["DISPELLABLE"] = {
+		["storage"] = "filterToken",
+		["matchAll"] = true,
+		["matchAny"] = true,
+		["neverShow"] = true,
+	},
 };
 
 VUHDO_AURA_DURATION_COMBO_NONE = -1;
@@ -895,5 +1046,3 @@ VUHDO_AURA_DURATION_COMBO_VALUES = {
 	1800,
 	3600,
 };
-
-VUHDO_AURA_GROUPS_CONDITIONS_MIGRATED = false;

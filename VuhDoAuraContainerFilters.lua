@@ -69,7 +69,8 @@ local VUHDO_PLAYER_DISPEL_ABILITIES;
 local VUHDO_PLAYER_PURGE_ABILITIES;
 local VUHDO_DEFAULT_AURA_GLOW_STYLE;
 local VUHDO_AURA_MAX_MATCH_ANY;
-local VUHDO_AURA_MATCH_ANY_FILTER_TOKENS;
+local VUHDO_AURA_CONDITION_BOOLEAN_KEYS;
+local VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER;
 
 local VUHDO_getAuraGroup;
 local VUHDO_classifyBouquetRestrictedMode;
@@ -219,7 +220,8 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_PLAYER_PURGE_ABILITIES = _G["VUHDO_PLAYER_PURGE_ABILITIES"];
 	VUHDO_DEFAULT_AURA_GLOW_STYLE = _G["VUHDO_DEFAULT_AURA_GLOW_STYLE"];
 	VUHDO_AURA_MAX_MATCH_ANY = _G["VUHDO_AURA_MAX_MATCH_ANY"];
-	VUHDO_AURA_MATCH_ANY_FILTER_TOKENS = _G["VUHDO_AURA_MATCH_ANY_FILTER_TOKENS"];
+	VUHDO_AURA_CONDITION_BOOLEAN_KEYS = _G["VUHDO_AURA_CONDITION_BOOLEAN_KEYS"];
+	VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER = _G["VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER"];
 
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_classifyBouquetRestrictedMode = _G["VUHDO_classifyBouquetRestrictedMode"];
@@ -2033,32 +2035,6 @@ end
 
 
 do
-	local sMatchAnyCandidateKeys = {
-		"isBossOrRoleAura",
-		"isBossAura",
-		"isRoleAura",
-		"isPriorityAura",
-		"isStealable",
-	};
-
-	local sMatchAnyFilterTokenOrder = {
-		"DISPELLABLE",
-		"RAID_PLAYER_DISPELLABLE",
-		"IMPORTANT",
-		"RAID",
-		"CROWD_CONTROL",
-		"CANCELABLE",
-	};
-
-	local sMatchAllCandidateKeys = {
-		"isFromPlayerOrPlayerPet",
-		"canApplyAura",
-		"nameplateShowAll",
-		"nameplateShowPersonal",
-	};
-
-
-
 	--
 	local tCopy;
 	local function VUHDO_copyCandidateFilterTable(aSource)
@@ -2086,7 +2062,6 @@ do
 	local tExcludeIds;
 	local tValue;
 	local tCandidateBooleans;
-	local tTriState;
 	local tBoolKey;
 	local tResolvedBool;
 	local tMaxDuration;
@@ -2131,27 +2106,14 @@ do
 		tCandidateBooleans = aGroup["candidateBooleans"];
 
 		if tCandidateBooleans then
-			for tCnt = 1, #sMatchAllCandidateKeys do
-				tBoolKey = sMatchAllCandidateKeys[tCnt];
-				tTriState = tCandidateBooleans[tBoolKey];
-				tResolvedBool = VUHDO_getTriStateBool({ [tBoolKey] = tTriState }, tBoolKey, nil);
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
+				tResolvedBool = VUHDO_getTriStateBool(tCandidateBooleans, tBoolKey, nil);
 
 				if tResolvedBool ~= nil then
 					tCandidate = tCandidate or { };
 
 					tCandidate[tBoolKey] = tResolvedBool;
-				end
-			end
-
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
-				tTriState = tCandidateBooleans[tBoolKey];
-				tResolvedBool = VUHDO_getTriStateBool({ [tBoolKey] = tTriState }, tBoolKey, nil);
-
-				if tResolvedBool == false then
-					tCandidate = tCandidate or { };
-
-					tCandidate[tBoolKey] = false;
 				end
 			end
 		end
@@ -2226,24 +2188,10 @@ do
 		tMatchAnyFilters = aGroup and aGroup["matchAnyFilters"];
 
 		if tMatchAnyBooleans then
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
 
 				if tMatchAnyBooleans[tBoolKey] == 1 then
-					tShowEntry = {
-						["entryType"] = VUHDO_AURA_MATCH_ANY_ENTRY_BOOLEAN,
-						["value"] = tBoolKey,
-					};
-
-					tinsert(tMatchAnyShows, tShowEntry);
-				end
-			end
-		elseif aGroup and aGroup["candidateBooleans"] then
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
-				tTriState = aGroup["candidateBooleans"][tBoolKey];
-
-				if VUHDO_getTriStateBool({ [tBoolKey] = tTriState }, tBoolKey, nil) == true then
 					tShowEntry = {
 						["entryType"] = VUHDO_AURA_MATCH_ANY_ENTRY_BOOLEAN,
 						["value"] = tBoolKey,
@@ -2255,10 +2203,10 @@ do
 		end
 
 		if tMatchAnyFilters then
-			for tFilterTokenCnt = 1, #sMatchAnyFilterTokenOrder do
-				tTokenKey = sMatchAnyFilterTokenOrder[tFilterTokenCnt];
+			for tFilterTokenCnt = 1, #VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER do
+				tTokenKey = VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER[tFilterTokenCnt];
 
-				if tMatchAnyFilters[tTokenKey] == 1 and VUHDO_AURA_MATCH_ANY_FILTER_TOKENS[tTokenKey] then
+				if tMatchAnyFilters[tTokenKey] == 1 then
 					tShowEntry = {
 						["entryType"] = VUHDO_AURA_MATCH_ANY_ENTRY_FILTER_TOKEN,
 						["value"] = tTokenKey,
