@@ -1844,8 +1844,13 @@ do
 
 
 	--
-	local tFrame;
-	local tFrameName;
+	local tIconFrame;
+	local tChild;
+	local tTexture;
+	local tAnchor;
+	local tRelPoint;
+	local tPosX;
+	local tPosY;
 	function VUHDO_displayPlayerIcon(aButton, aSlotIndex, aTexture, aTexCoords, aWidth, aHeight, aPositionIndex)
 
 		if not aButton or not aSlotIndex or not aTexture then

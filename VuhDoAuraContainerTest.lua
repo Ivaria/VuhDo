@@ -724,6 +724,10 @@ do
 	local tIdentityGate;
 	local tCompound;
 	local tShouldSuppress;
+	local tDiagR;
+	local tDiagG;
+	local tDiagB;
+	local tDiagA;
 	function VUHDO_dumpFillChainDiagnostics(aContainerData, aContainerTemplate)
 
 		tContainer = aContainerData["container"];
@@ -905,6 +909,27 @@ do
 	local tShouldSuppress;
 	local tBarColors;
 	local sEmpty = { };
+	local tIsShown;
+	local tIsEnabled;
+	local tIsVisible;
+	local tContainerAlpha;
+	local tEffectiveAlpha;
+	local tContainerUnit;
+	local tParentFrame;
+	local tParentName;
+	local tParentShown;
+	local tParentAlpha;
+	local tParentClips;
+	local tContainerTemplate;
+	local tFilterString;
+	local tCandidateFilters;
+	local tHasStaticColor;
+	local tSlots;
+	local tSlot;
+	local tTargetBarTexture;
+	local tTargetBarAlpha;
+	local tWarnParts;
+	local tWarnField;
 	function VUHDO_dumpAuraOverlayDiagnostics(aButtonName)
 
 		tSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS and VUHDO_OVERLAY_SLOT_HOSTS[aButtonName];
@@ -1335,6 +1360,8 @@ do
 	local tBranchCandidateSummary;
 	local tBranchCount;
 	local tDroppedBranchKeys;
+	local tCanApplyHelpfulIdentity;
+	local tCanApplyHarmfulIdentity;
 	function VUHDO_dumpAuraDiagnostics(aUnit, anIndicatorKey, anIsVerbose)
 
 		aUnit = aUnit or "player";

@@ -1500,6 +1500,8 @@ do
 
 
 	--
+	local tSourceUnit;
+	local tIsMine;
 	local function VUHDO_cachedAuraMatchesSourceType(aCachedInfo, aSourceType)
 
 		if aSourceType == VUHDO_UNIT_AURA_SOURCE_BOTH then
