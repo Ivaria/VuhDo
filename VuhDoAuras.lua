@@ -282,6 +282,8 @@ do
 		VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
 		VUHDO_needsUnitAuraEvent = _G["VUHDO_needsUnitAuraEvent"];
 		VUHDO_checkAuraGroupSounds = _G["VUHDO_checkAuraGroupSounds"];
+		VUHDO_getPlayerDispelTypeNames = _G["VUHDO_getPlayerDispelTypeNames"];
+		VUHDO_getPlayerPurgeDispelTypeNames = _G["VUHDO_getPlayerPurgeDispelTypeNames"];
 		VUHDO_shouldDropRestrictedAuraEvent = _G["VUHDO_shouldDropRestrictedAuraEvent"];
 		VUHDO_resetAuraFrameDisplayCache = _G["VUHDO_resetAuraFrameDisplayCache"];
 		VUHDO_displayAurasAtAnchorFromCache = _G["VUHDO_displayAurasAtAnchorFromCache"];

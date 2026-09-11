@@ -368,7 +368,7 @@ do
 			return aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
 		end
 
-		tHasRaidPlayerDispellable = strfind(tFilter, "RAID_PLAYER_DISPELLABLE", 1, true) ~= nil;
+		tHasRaidPlayerDispellable = aGroup["filter"] and strfind(aGroup["filter"], "RAID_PLAYER_DISPELLABLE", 1, true) ~= nil;
 
 		twipe(tSeen);
 		tTokens = { strsplit("|", tFilter) };
@@ -474,7 +474,7 @@ do
 				if aMatchAnyShows[tNegCnt]["entryType"] == VUHDO_AURA_MATCH_ANY_ENTRY_FILTER_TOKEN then
 					tBranchBase = aMatchAnyShows[tNegCnt]["value"];
 
-					if not sNonNegatableFilterTokens[tBranchBase] then
+					if tBranchBase ~= "RAID_PLAYER_DISPELLABLE" and not sNonNegatableFilterTokens[tBranchBase] then
 						tBranchFilterString = tBranchFilterString .. "|!" .. tBranchBase;
 					end
 				end
@@ -512,7 +512,7 @@ do
 			if aMatchAnyShows[tNegCnt]["entryType"] == VUHDO_AURA_MATCH_ANY_ENTRY_FILTER_TOKEN then
 				tBranchBase = aMatchAnyShows[tNegCnt]["value"];
 
-				if not sNonNegatableFilterTokens[tBranchBase] and not tBranchSeen["!" .. tBranchBase] then
+				if tBranchBase ~= "RAID_PLAYER_DISPELLABLE" and not sNonNegatableFilterTokens[tBranchBase] and not tBranchSeen["!" .. tBranchBase] then
 					tBranchSeen["!" .. tBranchBase] = true;
 
 					tBranchFilterString = tBranchFilterString .. "|!" .. tBranchBase;
@@ -522,7 +522,7 @@ do
 
 		tBranchBase = tBranchEntry["value"];
 
-		if not tBranchSeen[tBranchBase] then
+		if tBranchBase ~= "RAID_PLAYER_DISPELLABLE" and not tBranchSeen[tBranchBase] then
 			tBranchSeen[tBranchBase] = true;
 
 			tBranchFilterString = tBranchFilterString .. "|" .. tBranchBase;
@@ -673,7 +673,129 @@ do
 
 
 	--
-	function VUHDO_applyGroupDispelCandidateExtras(aGroup, aCandidate)
+	local tAllDispelSnapshot;
+	local tDispelName;
+	function VUHDO_intersectCandidateIncludeDispelTypes(aCandidate, aSnapshot)
+
+		if not aSnapshot then
+			return;
+		end
+
+		if aCandidate["includeDispelTypes"] then
+			for tDispelName, _ in pairs(aCandidate["includeDispelTypes"]) do
+				if not aSnapshot[tDispelName] then
+					aCandidate["includeDispelTypes"][tDispelName] = nil;
+				end
+			end
+		else
+			aCandidate["includeDispelTypes"] = { };
+
+			for tDispelName, _ in pairs(aSnapshot) do
+				aCandidate["includeDispelTypes"][tDispelName] = true;
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_unionCandidateExcludeDispelTypes(aCandidate, aSnapshot)
+
+		if not aSnapshot then
+			return;
+		end
+
+		aCandidate["excludeDispelTypes"] = aCandidate["excludeDispelTypes"] or { };
+
+		for tDispelName, _ in pairs(aSnapshot) do
+			aCandidate["excludeDispelTypes"][tDispelName] = true;
+		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_buildPlayerDispelCandidateSnapshot(aGroup)
+
+		if aGroup["isHarmful"] then
+			tDispelTypes = VUHDO_getPlayerDispelTypeNames();
+			tDispelSnapshot = { };
+
+			for tDispelName, tIsIncluded in pairs(tDispelTypes) do
+				if tIsIncluded then
+					tDispelSnapshot[tDispelName] = true;
+				end
+			end
+
+			return tDispelSnapshot;
+		end
+
+		tDispelTypes = VUHDO_getPlayerPurgeDispelTypeNames();
+
+		if next(tDispelTypes) == nil then
+			return nil;
+		end
+
+		tDispelSnapshot = { };
+
+		for tDispelName, tIsIncluded in pairs(tDispelTypes) do
+			if tIsIncluded then
+				tDispelSnapshot[tDispelName] = true;
+			end
+		end
+
+		return tDispelSnapshot;
+
+	end
+
+
+
+	--
+	local tMatchAnyShowEntry;
+	function VUHDO_applyMatchAnyBranchCandidateDispelTypes(aGroup, aBranch, aMatchAnyShows, aBranchIndex)
+
+		if not aMatchAnyShows or not aBranchIndex then
+			return aBranch;
+		end
+
+		tMatchAnyShowEntry = aMatchAnyShows[aBranchIndex];
+
+		if tMatchAnyShowEntry and tMatchAnyShowEntry["entryType"] == VUHDO_AURA_MATCH_ANY_ENTRY_FILTER_TOKEN
+			and tMatchAnyShowEntry["value"] == "RAID_PLAYER_DISPELLABLE" then
+			aBranch = aBranch or { };
+
+			tDispelSnapshot = VUHDO_buildPlayerDispelCandidateSnapshot(aGroup);
+
+			VUHDO_intersectCandidateIncludeDispelTypes(aBranch, tDispelSnapshot);
+		end
+
+		for tNegCnt = 1, aBranchIndex - 1 do
+			tMatchAnyShowEntry = aMatchAnyShows[tNegCnt];
+
+			if tMatchAnyShowEntry and tMatchAnyShowEntry["entryType"] == VUHDO_AURA_MATCH_ANY_ENTRY_FILTER_TOKEN
+				and tMatchAnyShowEntry["value"] == "RAID_PLAYER_DISPELLABLE" then
+				aBranch = aBranch or { };
+
+				tDispelSnapshot = VUHDO_buildPlayerDispelCandidateSnapshot(aGroup);
+
+				VUHDO_unionCandidateExcludeDispelTypes(aBranch, tDispelSnapshot);
+			end
+		end
+
+		return aBranch;
+
+	end
+
+
+
+	--
+	function VUHDO_applyGroupCandidateDispelTypes(aGroup, aCandidate)
 
 		if not aGroup then
 			return aCandidate;
@@ -682,46 +804,30 @@ do
 		if aGroup["allDispel"] then
 			aCandidate = aCandidate or { };
 
-			aCandidate["includeDispelTypes"] = {
+			tAllDispelSnapshot = {
 				["Magic"] = true,
 				["Curse"] = true,
 				["Disease"] = true,
 				["Poison"] = true,
 				["Bleed"] = true,
 			};
+
+			VUHDO_intersectCandidateIncludeDispelTypes(aCandidate, tAllDispelSnapshot);
 		end
 
-		tFilter = aGroup["resolvedFilter"] or aGroup["filter"];
-
-		if tFilter and strfind(tFilter, "RAID_PLAYER_DISPELLABLE", 1, true) then
+		if aGroup["dispellableOnly"] == "harmful" then
 			aCandidate = aCandidate or { };
 
-			if aGroup["isHarmful"] then
-				tDispelTypes = VUHDO_getPlayerDispelTypeNames();
+			tDispelSnapshot = VUHDO_buildPlayerDispelCandidateSnapshot(aGroup);
 
-				tDispelSnapshot = { };
+			VUHDO_intersectCandidateIncludeDispelTypes(aCandidate, tDispelSnapshot);
+		elseif aGroup["dispellableOnly"] == "helpful" then
+			tDispelSnapshot = VUHDO_buildPlayerDispelCandidateSnapshot(aGroup);
 
-				for tDispelName, tIsIncluded in pairs(tDispelTypes) do
-					if tIsIncluded then
-						tDispelSnapshot[tDispelName] = true;
-					end
-				end
+			if tDispelSnapshot then
+				aCandidate = aCandidate or { };
 
-				aCandidate["includeDispelTypes"] = tDispelSnapshot;
-			else
-				tDispelTypes = VUHDO_getPlayerPurgeDispelTypeNames();
-
-				if next(tDispelTypes) ~= nil then
-					tDispelSnapshot = { };
-
-					for tDispelName, tIsIncluded in pairs(tDispelTypes) do
-						if tIsIncluded then
-							tDispelSnapshot[tDispelName] = true;
-						end
-					end
-
-					aCandidate["includeDispelTypes"] = tDispelSnapshot;
-				end
+				VUHDO_intersectCandidateIncludeDispelTypes(aCandidate, tDispelSnapshot);
 			end
 		end
 
@@ -738,7 +844,7 @@ do
 			return nil;
 		end
 
-		return VUHDO_applyGroupDispelCandidateExtras(aGroup, VUHDO_resolveGroupCandidateFilters(aGroup, nil));
+		return VUHDO_applyGroupCandidateDispelTypes(aGroup, VUHDO_resolveGroupCandidateFilters(aGroup, nil));
 
 	end
 end
@@ -773,6 +879,8 @@ function VUHDO_rebuildDispelTypeNameMaps()
 	end
 
 	VUHDO_rebuildDerivedDispelTypeNameMaps();
+
+	VUHDO_invalidateAuraGroupFilterCache();
 
 	return;
 
@@ -2232,7 +2340,8 @@ do
 				end
 			end
 
-			tBranch = VUHDO_applyGroupDispelCandidateExtras(aGroup, tBranch);
+			tBranch = VUHDO_applyMatchAnyBranchCandidateDispelTypes(aGroup, tBranch, tMatchAnyShows, 1);
+			tBranch = VUHDO_applyGroupCandidateDispelTypes(aGroup, tBranch);
 
 			tinsert(tBranches, tBranch or { });
 			tinsert(tBranchFilterStrings, VUHDO_buildAuraGroupBranchFilterString(tBaseFilterString, tMatchAnyShows, 1));
@@ -2276,7 +2385,9 @@ do
 				end
 			end
 
-			tinsert(tBranches, VUHDO_applyGroupDispelCandidateExtras(aGroup, tBranch));
+			tBranch = VUHDO_applyMatchAnyBranchCandidateDispelTypes(aGroup, tBranch, tMatchAnyShows, tBranchCnt);
+
+			tinsert(tBranches, VUHDO_applyGroupCandidateDispelTypes(aGroup, tBranch));
 			tinsert(tBranchFilterStrings, VUHDO_buildAuraGroupBranchFilterString(tBaseFilterString, tMatchAnyShows, tBranchCnt));
 		end
 
