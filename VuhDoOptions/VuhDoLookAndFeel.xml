@@ -2991,6 +2991,30 @@
 			local tFontPath, _, tFontFlags = VuhDoYesNoFrameText:GetFont();
 			VuhDoYesNoFrameText:SetFont(tFontPath, 14, tFontFlags or "");
 		</OnShow>
+		<OnHide>
+			VuhDoYesNoFrameRootPaneTitleLabelLabel:SetText("");
+
+			VuhDoYesNoFrameYesButton:SetText(VUHDO_I18N_YES);
+			VuhDoYesNoFrameNoButton:SetText(VUHDO_I18N_NO);
+
+			VUHDO_PixelUtil.SetSize(VuhDoYesNoFrameYesButton, 100, 32);
+			VUHDO_PixelUtil.SetSize(VuhDoYesNoFrameNoButton, 100, 32);
+
+			local tText = VuhDoYesNoFrameYesButton:GetFontString();
+			tText:ClearAllPoints();
+			tText:SetJustifyH("LEFT");
+			tText:SetJustifyV("MIDDLE");
+			VUHDO_PixelUtil.SetPoint(tText, "LEFT", VuhDoYesNoFrameYesButton, "LEFT", 12, 0);
+
+			tText = VuhDoYesNoFrameNoButton:GetFontString();
+			tText:ClearAllPoints();
+			tText:SetJustifyH("LEFT");
+			tText:SetJustifyV("MIDDLE");
+			VUHDO_PixelUtil.SetPoint(tText, "LEFT", VuhDoYesNoFrameNoButton, "LEFT", 12, 0);
+
+			VuhDoYesNoFrameYesButtonIcon:Show();
+			VuhDoYesNoFrameNoButtonIcon:Show();
+		</OnHide>
 	</Scripts>
 </Frame>
 

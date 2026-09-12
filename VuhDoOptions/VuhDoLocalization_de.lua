@@ -1772,3 +1772,4 @@ VUHDO_I18N_AURA_TOKEN_RAID = "Raid";
 VUHDO_I18N_AURA_TOKEN_RAID_IN_COMBAT = "Raid (In Combat)";
 VUHDO_I18N_AURA_TOKEN_CANCELABLE = "Cancelable";
 VUHDO_I18N_AURA_TOKEN_NAMEPLATE_ONLY = "Nameplate Only";
+VUHDO_I18N_SKIN_PROMPT = "Choose a light or dark theme for VuhDo Options. You can change this later under Tools > Reset.";
