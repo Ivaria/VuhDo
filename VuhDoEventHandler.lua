@@ -1653,17 +1653,7 @@ local function VUHDO_slashCmdPrivateTanks(aArgument)
 				tUnit, tAmbiguousNames = VUHDO_getUnitByPrivateTankName(tName);
 
 				if tAmbiguousNames then
-					tAmbiguousMsg = "Private tank name ambiguous: ";
-
-					for tAmbiguousCnt = 1, #tAmbiguousNames do
-						if tAmbiguousCnt > 1 then
-							tAmbiguousMsg = tAmbiguousMsg .. ", ";
-						end
-
-						tAmbiguousMsg = tAmbiguousMsg .. tAmbiguousNames[tAmbiguousCnt];
-					end
-
-					tAmbiguousMsg = tAmbiguousMsg .. ". Use a realm-qualified full name.";
+					tAmbiguousMsg = format(VUHDO_I18N_PT_NAME_AMBIGUOUS, table.concat(tAmbiguousNames, ", "));
 
 					VUHDO_Msg(tAmbiguousMsg, 1, 0.4, 0.4);
 				elseif tUnit then
