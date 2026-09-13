@@ -3323,9 +3323,11 @@ VUHDO_DEFAULT_AURA_GROUPS = {
 		["excludeFilter"] = nil,
 		["matchAnyBooleans"] = {
 			["isBossOrRoleAura"] = 1,
+			["isPriorityAura"] = 1,
 		},
 		["matchAnyFilters"] = {
 			["DISPELLABLE"] = 1,
+			["RAID"] = 1,
 			["IMPORTANT"] = 1,
 		},
 		["priority"] = 2,
