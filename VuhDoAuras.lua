@@ -3199,7 +3199,7 @@ do
 			["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 			["canColorBar"] = false,
 			["canColorText"] = false,
-			["unitScope"] = VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH,
+			["unitScope"] = VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY,
 		};
 
 	end
