@@ -73,6 +73,7 @@ local VUHDO_AURA_CONDITION_BOOLEAN_KEYS;
 local VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER;
 
 local VUHDO_getAuraGroup;
+local VUHDO_applyAuraGroupScopeFlags;
 local VUHDO_classifyBouquetRestrictedMode;
 local VUHDO_buildListEntryContainerGroupTemplate;
 local VUHDO_buildMixedBouquetListSlotTemplates;
@@ -224,6 +225,7 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER = _G["VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER"];
 
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
+	VUHDO_applyAuraGroupScopeFlags = _G["VUHDO_applyAuraGroupScopeFlags"];
 	VUHDO_classifyBouquetRestrictedMode = _G["VUHDO_classifyBouquetRestrictedMode"];
 	VUHDO_buildListEntryContainerGroupTemplate = _G["VUHDO_buildListEntryContainerGroupTemplate"];
 	VUHDO_buildMixedBouquetListSlotTemplates = _G["VUHDO_buildMixedBouquetListSlotTemplates"];
@@ -1619,6 +1621,8 @@ do
 						["buttonSetup"] = tSlotButtonSetup,
 					};
 
+					VUHDO_applyAuraGroupScopeFlags(tGroupTemplate, aGroup);
+
 					tinsert(tGroups, tGroupTemplate);
 				end
 			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_AURA_CONTAINER then
@@ -1651,6 +1655,8 @@ do
 						["layout"] = tGroupLayout,
 						["buttonSetup"] = tBouquetSlotTemplate["buttonSetup"],
 					};
+
+					VUHDO_applyAuraGroupScopeFlags(tGroupTemplate, aGroup);
 
 					tinsert(tGroups, tGroupTemplate);
 				end
@@ -1731,12 +1737,14 @@ do
 							tSlotTemplate["relPoint"] = tFixedSlotRelPoint;
 						end
 
+						VUHDO_applyAuraGroupScopeFlags(tSlotTemplate, aGroup);
+
 						VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
 
 						tinsert(tSlots, tSlotTemplate);
 					end
 				elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET and VUHDO_classifyBouquetRestrictedMode(tEntry["value"]) == VUHDO_BOUQUET_RESTRICTED_MIXED then
-					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup);
+					tMixedSlotTemplates = VUHDO_buildMixedBouquetListSlotTemplates(tEntry["value"], tEntryIndex, tSlotX, tSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup);
 
 					if anIsFixedLayout and tFixedSlotAnchor then
 						for tMixedSlotCnt = 1, #tMixedSlotTemplates do
@@ -1794,6 +1802,8 @@ do
 							tSlotTemplate["anchor"] = tFixedSlotAnchor;
 							tSlotTemplate["relPoint"] = tFixedSlotRelPoint;
 						end
+
+						VUHDO_applyAuraGroupScopeFlags(tSlotTemplate, aGroup);
 
 						VUHDO_applyListSlotLayoutFlags(tSlotTemplate, tEntryIndex);
 
@@ -2035,6 +2045,8 @@ do
 							},
 							["buttonSetup"] = tAnchorButtonSetup,
 						};
+
+						VUHDO_applyAuraGroupScopeFlags(tGroupTemplate, tGroup);
 
 						tinsert(tGroups, tGroupTemplate);
 					end

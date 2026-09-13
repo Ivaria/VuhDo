@@ -21,6 +21,7 @@ VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL = { };
 VUHDO_AURA_GROUPS_TYPE_SELECTED = 1;
 VUHDO_AURA_GROUPS_PRIORITY = 50;
 VUHDO_AURA_GROUPS_COLOR_TYPE = 1;
+VUHDO_AURA_GROUPS_SHOW_ON = 1;
 
 VUHDO_AURA_GROUPS_CUSTOM_COLOR = {
 	["R"] = 0.6,
@@ -209,6 +210,12 @@ VUHDO_AURA_GROUPS_COLOR_TYPE_OPTIONS = {
 VUHDO_AURA_GROUP_TYPE_OPTIONS = {
 	{ VUHDO_AURA_GROUP_TYPE_FILTER, VUHDO_I18N_AURA_GROUP_TYPE_FILTER },
 	{ VUHDO_AURA_GROUP_TYPE_LIST, VUHDO_I18N_AURA_GROUP_TYPE_LIST },
+};
+
+VUHDO_AURA_GROUPS_SHOW_ON_OPTIONS = {
+	{ VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY, VUHDO_I18N_AURA_SHOW_ON_FRIENDLY },
+	{ VUHDO_AURA_GROUP_UNIT_SCOPE_HOSTILE, VUHDO_I18N_HOSTILE },
+	{ VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH, VUHDO_I18N_AURA_SHOW_ON_BOTH },
 };
 
 local VUHDO_AURA_GROUP_LIST_ENTRY_ROW_HEIGHT = 22;
@@ -1250,6 +1257,8 @@ do
 	local tNameLabel;
 	local tTypeCombo;
 	local tTypeLabel;
+	local tShowOnCombo;
+	local tShowOnLabel;
 	local tAurasCombo;
 	local tPresetCombo;
 	local tAurasLabel;
@@ -1294,6 +1303,8 @@ do
 		tNameLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelNameLabel"];
 		tTypeLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelTypeLabel"];
 		tTypeCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelTypeCombo"];
+		tShowOnLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelShowOnLabel"];
+		tShowOnCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelShowOnCombo"];
 		tAurasLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelAurasLabel"];
 		tPresetLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelPresetLabel"];
 		tAurasCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelAurasCombo"];
@@ -1331,13 +1342,16 @@ do
 
 		if tNameEditBox and tGroup then
 			tNameEditBox:Show();
+
 			if tIsBuiltIn then
 				tNameEditBox:SetText(VUHDO_getAuraGroupDisplayName(sSelectedGroupId) or "");
+				tNameEditBox:SetCursorPosition(0);
 
 				tNameEditBox:Disable();
 				tNameEditBox:SetAlpha(0.5);
 			else
 				tNameEditBox:SetText(tGroup["displayName"] or "");
+				tNameEditBox:SetCursorPosition(0);
 
 				tNameEditBox:Enable();
 				tNameEditBox:SetAlpha(1);
@@ -1373,6 +1387,30 @@ do
 			else
 				tTypeLabel:Hide();
 				tTypeCombo:Hide();
+			end
+		end
+
+		if tShowOnLabel and tShowOnCombo then
+			if tGroup then
+				tShowOnLabel:Show();
+				tShowOnCombo:Show();
+
+				VUHDO_AURA_GROUPS_SHOW_ON = tGroup["unitScope"] or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+
+				VUHDO_lnfComboBoxInitFromModel(tShowOnCombo);
+
+				if tIsBuiltIn then
+					tShowOnLabel:SetAlpha(0.5);
+					tShowOnCombo:Disable();
+					tShowOnCombo:SetAlpha(0.5);
+				else
+					tShowOnLabel:SetAlpha(1);
+					tShowOnCombo:Enable();
+					tShowOnCombo:SetAlpha(1);
+				end
+			else
+				tShowOnLabel:Hide();
+				tShowOnCombo:Hide();
 			end
 		end
 
@@ -1878,6 +1916,7 @@ do
 			VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = false;
 			VUHDO_AURA_GROUPS_CAN_GLOW_BAR = false;
 			VUHDO_AURA_GROUPS_SOUND = nil;
+			VUHDO_AURA_GROUPS_SHOW_ON = VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
 
 			if tNameEditBox then
 				tNameEditBox:Show();
@@ -1990,6 +2029,19 @@ do
 				tEnabledCheck:SetAlpha(0.5);
 
 				VUHDO_lnfCheckButtonInitFromModel(tEnabledCheck);
+			end
+
+			if tShowOnCombo then
+				tShowOnCombo:Show();
+				tShowOnCombo:Disable();
+				tShowOnCombo:SetAlpha(0.5);
+
+				VUHDO_lnfComboBoxInitFromModel(tShowOnCombo);
+			end
+
+			if tShowOnLabel then
+				tShowOnLabel:Show();
+				tShowOnLabel:SetAlpha(0.5);
 			end
 		end
 
@@ -2594,6 +2646,41 @@ function VUHDO_auraGroupsColorTypeChanged(aComboBox, aValue, anArrayModel)
 	end
 
 	VUHDO_auraGroupsRefreshRightPanel();
+	VUHDO_timeRebuildAuraGroups(0.3);
+	VUHDO_timeRegisterBouquets(0.3);
+
+	return;
+
+end
+
+
+
+--
+local tShowOnGroup;
+local tShowOnScope;
+function VUHDO_auraGroupsShowOnChanged(aComboBox, aValue, anArrayModel)
+
+	if sRefreshDepth > 0 then
+		return;
+	end
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	tShowOnGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
+	tShowOnScope = aValue or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+
+	if (tShowOnGroup["unitScope"] or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH) == tShowOnScope then
+		return;
+	end
+
+	tShowOnGroup["unitScope"] = tShowOnScope;
+
+	VUHDO_invalidateAuraContainerTemplateCache();
+
+	VUHDO_auraGroupsRefreshRightPanel();
+
 	VUHDO_timeRebuildAuraGroups(0.3);
 	VUHDO_timeRegisterBouquets(0.3);
 

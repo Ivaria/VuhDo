@@ -18,6 +18,7 @@ local GetUnitAuras = C_UnitAuras and C_UnitAuras.GetUnitAuras;
 local GetAuraDataByAuraInstanceID = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID;
 local IsAuraFilteredOutByInstanceID = C_UnitAuras and C_UnitAuras.IsAuraFilteredOutByInstanceID;
 local UnitIsUnit = UnitIsUnit;
+local UnitCanAttack = UnitCanAttack;
 local issecretvalue = issecretvalue;
 
 local VUHDO_CONFIG;
@@ -96,6 +97,10 @@ VUHDO_AURA_GROUP_COLOR_OFF = 1;
 VUHDO_AURA_GROUP_COLOR_DISPEL = 2;
 VUHDO_AURA_GROUP_COLOR_CUSTOM = 3;
 VUHDO_AURA_GROUP_COLOR_ALL_DISPEL = 4;
+
+VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH = 1;
+VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY = 2;
+VUHDO_AURA_GROUP_UNIT_SCOPE_HOSTILE = 3;
 
 local VUHDO_ALL_DISPELLABLE_TOKEN = "VUHDO_ALL_DISPELLABLE";
 
@@ -607,6 +612,109 @@ do
 		end
 
 		return tGroup;
+
+	end
+
+
+
+	--
+	local tUnitScope;
+	local tIsHostile;
+	function VUHDO_getAuraGroupEffectiveUnitScope(aGroup)
+
+		if not aGroup then
+			return VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+		end
+
+		return aGroup["unitScope"] or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+
+	end
+
+
+
+	--
+	function VUHDO_isAuraGroupInScopeForUnit(aGroup, aUnit)
+
+		if not aGroup or not aUnit then
+			return false;
+		end
+
+		tUnitScope = VUHDO_getAuraGroupEffectiveUnitScope(aGroup);
+
+		if tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH then
+			return true;
+		end
+
+		tIsHostile = UnitCanAttack("player", aUnit);
+
+		if tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY then
+			return not tIsHostile;
+		end
+
+		return tIsHostile;
+
+	end
+
+
+
+	--
+	local tGroup;
+	function VUHDO_getAuraGroupForUnit(aGroupId, aUnit)
+
+		tGroup = VUHDO_getAuraGroup(aGroupId);
+
+		if not tGroup then
+			return nil;
+		end
+
+		if not VUHDO_isAuraGroupInScopeForUnit(tGroup, aUnit) then
+			return nil;
+		end
+
+		return tGroup;
+
+	end
+
+
+
+	--
+	function VUHDO_isAuraGroupScopeFriendly(aUnitScope)
+
+		tUnitScope = aUnitScope or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+
+		return tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH or tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY;
+
+	end
+
+
+
+	--
+	function VUHDO_isAuraGroupScopeHostile(aUnitScope)
+
+		tUnitScope = aUnitScope or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+
+		return tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH or tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_HOSTILE;
+
+	end
+
+
+
+	--
+	function VUHDO_applyAuraGroupScopeFlags(aEntry, aGroup)
+
+		if not aEntry or not aGroup then
+			return;
+		end
+
+		tUnitScope = VUHDO_getAuraGroupEffectiveUnitScope(aGroup);
+
+		if tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY then
+			aEntry["friendlyOnly"] = true;
+		elseif tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_HOSTILE then
+			aEntry["hostileOnly"] = true;
+		end
+
+		return;
 
 	end
 
@@ -2459,7 +2567,7 @@ do
 
 		for tAnchorIndex, tAnchorConfig in pairs(tPanelAnchors) do
 			if tAnchorConfig["enabled"] ~= false then
-				tGroup = VUHDO_getAuraGroup(tAnchorConfig["groupId"]);
+				tGroup = VUHDO_getAuraGroupForUnit(tAnchorConfig["groupId"], aUnit);
 
 				if tGroup then
 					if tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST then
@@ -2571,7 +2679,7 @@ function VUHDO_rebuildSlotAssignmentsForAnchor(aUnit, aPanelNum, anAnchorIndex, 
 		return;
 	end
 
-	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+	tGroup = VUHDO_getAuraGroupForUnit(anAnchorConfig["groupId"], aUnit);
 
 	if not tGroup then
 		return;
@@ -2695,6 +2803,20 @@ do
 			return;
 		end
 
+		if not VUHDO_isAuraGroupInScopeForUnit(tGroup, aUnit) then
+			if VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex] then
+				for tClearEntryIndex, tClearSlot in pairs(VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex]) do
+					if tClearSlot then
+						sSlotDataPool:release(tClearSlot);
+					end
+
+					VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tClearEntryIndex] = nil;
+				end
+			end
+
+			return;
+		end
+
 		tEntries = tGroup["entries"];
 
 		if not tEntries then
@@ -2810,9 +2932,15 @@ do
 			return;
 		end
 
-		tGroup = VUHDO_getAuraGroup(tAnchorConfig["groupId"]);
+		tGroup = VUHDO_getAuraGroupForUnit(tAnchorConfig["groupId"], aUnit);
 
 		if not tGroup then
+			tMaxSlots = tAnchorConfig["maxDisplay"] or 5;
+
+			for tSlotIndex = 1, tMaxSlots do
+				VUHDO_setAnchorSlotAuraId(aUnit, aPanelNum, anAnchorIndex, tSlotIndex, nil);
+			end
+
 			return;
 		end
 
@@ -3071,6 +3199,7 @@ do
 			["colorType"] = VUHDO_AURA_GROUP_COLOR_OFF,
 			["canColorBar"] = false,
 			["canColorText"] = false,
+			["unitScope"] = VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH,
 		};
 
 	end

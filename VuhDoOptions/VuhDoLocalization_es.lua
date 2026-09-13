@@ -955,6 +955,7 @@ VUHDO_I18N_TT.K892 = "Exclude Curse auras from this group.";
 VUHDO_I18N_TT.K893 = "Exclude Disease auras from this group.";
 VUHDO_I18N_TT.K894 = "Exclude Poison auras from this group.";
 VUHDO_I18N_TT.K895 = "Exclude Bleed auras from this group.";
+VUHDO_I18N_TT.K896 = "Limit this aura group to friendly units, hostile units, or both.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "Perfil\npredeterminado";
 VUHDO_I18N_DEFAULT_LAYOUT = "Disposici\195\179n\npredeterminada";
@@ -1784,3 +1785,6 @@ VUHDO_I18N_AURA_TOKEN_RAID_IN_COMBAT = "Raid (In Combat)";
 VUHDO_I18N_AURA_TOKEN_CANCELABLE = "Cancelable";
 VUHDO_I18N_AURA_TOKEN_NAMEPLATE_ONLY = "Nameplate Only";
 VUHDO_I18N_SKIN_PROMPT = "Choose a light or dark theme for VuhDo Options. You can change this later under Tools > Reset.";
+VUHDO_I18N_AURA_SHOW_ON = "Show On";
+VUHDO_I18N_AURA_SHOW_ON_FRIENDLY = "Friendly";
+VUHDO_I18N_AURA_SHOW_ON_BOTH = "Both";

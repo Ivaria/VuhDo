@@ -352,12 +352,12 @@
 
 					<Frame name="$parentNameLabel" inherits="VuhDoLabelFrameTemplate">
 						<Size>
-							<AbsDimension x="44" y="18" />
+							<AbsDimension x="34" y="18" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentEnabledCheckButton" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="0" y="-2" />
+									<AbsDimension x="-2" y="-2" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -371,7 +371,7 @@
 
 					<EditBox name="$parentNameEditBox" inherits="VuhDoEditBoxTemplate" autoFocus="false">
 						<Size>
-							<AbsDimension x="218" y="22" />
+							<AbsDimension x="154" y="22" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentNameLabel" relativePoint="TOPRIGHT">
@@ -404,7 +404,7 @@
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentNameEditBox" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="4" y="2" />
+									<AbsDimension x="6" y="2" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -418,12 +418,12 @@
 
 					<Button name="$parentTypeCombo" inherits="VuhDoComboBoxTemplate">
 						<Size>
-							<AbsDimension x="120" y="24" />
+							<AbsDimension x="72" y="24" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="$parentTypeLabel" relativePoint="TOPRIGHT">
 								<Offset>
-									<AbsDimension x="4" y="0" />
+									<AbsDimension x="0" y="0" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -435,6 +435,52 @@
 							</OnLoad>
 							<OnShow>
 								VUHDO_lnfPatchFont(self, "Text");
+								VUHDO_lnfComboBoxInitFromModel(self);
+							</OnShow>
+						</Scripts>
+					</Button>
+
+					<Frame name="$parentShowOnLabel" inherits="VuhDoLabelFrameTemplate">
+						<Size>
+							<AbsDimension x="44" y="18" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentTypeCombo" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="4" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer>
+								<FontString name="$parentLabel" text="VUHDO_I18N_AURA_SHOW_ON" justifyH="LEFT" inherits="VuDoDefaultFontTemplate">
+								</FontString>
+							</Layer>
+						</Layers>
+					</Frame>
+
+					<Button name="$parentShowOnCombo" inherits="VuhDoComboBoxTemplate">
+						<Size>
+							<AbsDimension x="82" y="24" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentShowOnLabel" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								VUHDO_setComboModel(self, "VUHDO_AURA_GROUPS_SHOW_ON", VUHDO_AURA_GROUPS_SHOW_ON_OPTIONS, VUHDO_I18N_AURA_SHOW_ON);
+
+								self:SetAttribute("custom_function", VUHDO_auraGroupsShowOnChanged);
+
+								VUHDO_lnfSetTooltip(self, VUHDO_I18N_TT.K896);
+							</OnLoad>
+							<OnShow>
+								VUHDO_lnfPatchFont(self, "Text");
+
 								VUHDO_lnfComboBoxInitFromModel(self);
 							</OnShow>
 						</Scripts>

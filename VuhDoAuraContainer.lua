@@ -3913,6 +3913,14 @@ do
 
 					tGroupShouldShow = not VUHDO_isAuraDisplaySuppressed(tTemplateRef, sGateState);
 
+					if tGroup["friendlyOnly"] and sGateState["canAttack"] then
+						tGroupShouldShow = false;
+					end
+
+					if tGroup["hostileOnly"] and not sGateState["canAttack"] then
+						tGroupShouldShow = false;
+					end
+
 					tShouldSuppress = not tGroupShouldShow;
 
 					if not tLastGroupSuppress or tLastGroupSuppress[tGroupKey] ~= tShouldSuppress then
@@ -3951,6 +3959,10 @@ do
 					tSlotShouldShow = not VUHDO_isAuraDisplaySuppressed(tTemplateRef, sGateState);
 
 					if tSlot["friendlyOnly"] and sGateState["canAttack"] then
+						tSlotShouldShow = false;
+					end
+
+					if tSlot["hostileOnly"] and not sGateState["canAttack"] then
 						tSlotShouldShow = false;
 					end
 

@@ -47,6 +47,8 @@ local VUHDO_getDispelTextCurveForUnit;
 local VUHDO_hasInferredAura;
 local VUHDO_createTablePool;
 local VUHDO_auraMatchesFilter;
+local VUHDO_getAuraGroupEffectiveUnitScope;
+local VUHDO_isAuraGroupInScopeForUnit;
 local VUHDO_isAuraIgnored;
 local VUHDO_isAuraDataRestricted;
 local VUHDO_isAuraModeContainers;
@@ -190,6 +192,7 @@ local function VUHDO_cleanupCanColorBarGroupDelegate(aGroup)
 	aGroup["allDispel"] = nil;
 	aGroup["isHelpful"] = nil;
 	aGroup["bouquetTrackOnly"] = nil;
+	aGroup["unitScope"] = nil;
 
 	return;
 
@@ -260,6 +263,8 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_hasInferredAura = _G["VUHDO_hasInferredAura"];
 	VUHDO_createTablePool = _G["VUHDO_createTablePool"];
 	VUHDO_auraMatchesFilter = _G["VUHDO_auraMatchesFilter"];
+	VUHDO_getAuraGroupEffectiveUnitScope = _G["VUHDO_getAuraGroupEffectiveUnitScope"];
+	VUHDO_isAuraGroupInScopeForUnit = _G["VUHDO_isAuraGroupInScopeForUnit"];
 	VUHDO_isAuraIgnored = _G["VUHDO_isAuraIgnored"];
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
@@ -408,6 +413,8 @@ do
 
 					tColorBarGroup["groupId"] = tGroupId;
 
+					tColorBarGroup["unitScope"] = VUHDO_getAuraGroupEffectiveUnitScope(tGroup);
+
 					VUHDO_setCanColorGroupBouquetTrackOnly(tColorBarGroup, tEffectiveColorType, tGroupId, tGroup);
 
 					tinsert(sCanColorBarGroups, tColorBarGroup);
@@ -450,6 +457,8 @@ do
 						tColorBarGroup["entries"] = tGroup["entries"];
 						tColorBarGroup["isHarmful"] = tGroup["isHarmful"];
 
+						tColorBarGroup["unitScope"] = VUHDO_getAuraGroupEffectiveUnitScope(tGroup);
+
 						VUHDO_setCanColorGroupBouquetTrackOnly(tColorBarGroup, tEffectiveColorType, tGroupId, tGroup);
 
 						tinsert(sCanColorBarGroups, tColorBarGroup);
@@ -468,6 +477,8 @@ do
 							tColorBarGroup["allDispel"] = true;
 							tColorBarGroup["isHelpful"] = not strfind(tGroup["filter"], "HARMFUL", 1, true);
 						end
+
+						tColorBarGroup["unitScope"] = VUHDO_getAuraGroupEffectiveUnitScope(tGroup);
 
 						VUHDO_setCanColorGroupBouquetTrackOnly(tColorBarGroup, tEffectiveColorType, tGroupId, tGroup);
 
@@ -521,6 +532,8 @@ do
 
 						tColorBarGroup["groupId"] = tGroupId;
 
+						tColorBarGroup["unitScope"] = VUHDO_getAuraGroupEffectiveUnitScope(tGroup);
+
 						VUHDO_setCanColorGroupBouquetTrackOnly(tColorBarGroup, tEffectiveColorType, tGroupId, tGroup);
 
 						tinsert(sCanColorBarGroups, tColorBarGroup);
@@ -564,6 +577,8 @@ do
 							tColorBarGroup["entries"] = tGroup["entries"];
 							tColorBarGroup["isHarmful"] = tGroup["isHarmful"];
 
+							tColorBarGroup["unitScope"] = VUHDO_getAuraGroupEffectiveUnitScope(tGroup);
+
 							VUHDO_setCanColorGroupBouquetTrackOnly(tColorBarGroup, tEffectiveColorType, tGroupId, tGroup);
 
 							tinsert(sCanColorBarGroups, tColorBarGroup);
@@ -584,6 +599,8 @@ do
 							end
 
 							tColorBarGroup["groupId"] = tGroupId;
+
+							tColorBarGroup["unitScope"] = VUHDO_getAuraGroupEffectiveUnitScope(tGroup);
 
 							VUHDO_setCanColorGroupBouquetTrackOnly(tColorBarGroup, tEffectiveColorType, tGroupId, tGroup);
 
@@ -980,50 +997,48 @@ do
 
 			if tListSlots then
 				if tCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_CUSTOM then
-					if not ((tCanColorGroup["isHarmful"] and not tIsHostile) or (not tCanColorGroup["isHarmful"] and tIsHostile)) then
-						for tEntryIndex, tSlotData in pairs(tListSlots) do
-							if tSlotData["isActive"] then
-								if not sUnitDispellableAuraId[aUnit] then
-									sUnitDispellableAuraId[aUnit] = -1;
-								end
-
-								tFoundDispelAuraId = nil;
-
-								if not tBarWinnerSet and tCanColorGroup["canColorBar"] then
-									tNewWinner = sAuraColorWinnerPool:get();
-
-									tNewWinner["colorType"] = tCanColorGroup["colorType"];
-									tNewWinner["customColor"] = tCanColorGroup["customColor"];
-									tNewWinner["dispelAuraId"] = nil;
-
-									sUnitAuraBarWinner[aUnit] = tNewWinner;
-
-									tBarWinnerSet = true;
-								end
-
-								if not tTextWinnerSet and tCanColorGroup["canColorText"] then
-									tNewWinner = sAuraColorWinnerPool:get();
-
-									tNewWinner["colorType"] = tCanColorGroup["colorType"];
-									tNewWinner["customColor"] = tCanColorGroup["customColor"];
-									tNewWinner["dispelAuraId"] = nil;
-
-									sUnitAuraTextWinner[aUnit] = tNewWinner;
-
-									tTextWinnerSet = true;
-								end
-
-								VUHDO_setGlowWinnerIfNeeded(aUnit, tCanColorGroup, nil);
-
-								tGroupActive = true;
-
-								break;
+					for tEntryIndex, tSlotData in pairs(tListSlots) do
+						if tSlotData["isActive"] then
+							if not sUnitDispellableAuraId[aUnit] then
+								sUnitDispellableAuraId[aUnit] = -1;
 							end
-						end
 
-						if tGroupActive then
+							tFoundDispelAuraId = nil;
+
+							if not tBarWinnerSet and tCanColorGroup["canColorBar"] then
+								tNewWinner = sAuraColorWinnerPool:get();
+
+								tNewWinner["colorType"] = tCanColorGroup["colorType"];
+								tNewWinner["customColor"] = tCanColorGroup["customColor"];
+								tNewWinner["dispelAuraId"] = nil;
+
+								sUnitAuraBarWinner[aUnit] = tNewWinner;
+
+								tBarWinnerSet = true;
+							end
+
+							if not tTextWinnerSet and tCanColorGroup["canColorText"] then
+								tNewWinner = sAuraColorWinnerPool:get();
+
+								tNewWinner["colorType"] = tCanColorGroup["colorType"];
+								tNewWinner["customColor"] = tCanColorGroup["customColor"];
+								tNewWinner["dispelAuraId"] = nil;
+
+								sUnitAuraTextWinner[aUnit] = tNewWinner;
+
+								tTextWinnerSet = true;
+							end
+
+							VUHDO_setGlowWinnerIfNeeded(aUnit, tCanColorGroup, nil);
+
+							tGroupActive = true;
+
 							break;
 						end
+					end
+
+					if tGroupActive then
+						break;
 					end
 				elseif tCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_DISPEL or tCanColorGroup["colorType"] == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
 					for tEntryIndex, tSlotData in pairs(tListSlots) do
@@ -1455,32 +1470,34 @@ do
 		for tCnt = 1, #sCanColorBarGroups do
 			tCanColorGroup = sCanColorBarGroups[tCnt];
 
-			if tCanColorGroup["bouquetTrackOnly"] then
-				VUHDO_tryBouquetTrackOnlyForDispellableAura(aUnit, tCanColorGroup);
-			elseif tCanColorGroup["isListGroup"] and tCanColorGroup["groupId"] then
-				if VUHDO_tryListGroupForDispellableAura(aUnit, tCanColorGroup) then
-					return;
-				end
-			elseif tCanColorGroup["isInferred"] and VUHDO_hasInferredAura(aUnit) and
-				VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tCanColorGroup["inferredType"]] then
-				if VUHDO_tryInferredForDispellableAura(aUnit, tCanColorGroup) then
-					return;
-				end
-			elseif tCanColorGroup["allDispel"] and tCanColorGroup["filter"] then
-				if (tCanColorGroup["isHelpful"] and UnitCanAttack("player", aUnit))
-					or (not tCanColorGroup["isHelpful"] and not UnitCanAttack("player", aUnit)) then
+			if VUHDO_isAuraGroupInScopeForUnit(tCanColorGroup, aUnit) then
+				if tCanColorGroup["bouquetTrackOnly"] then
+					VUHDO_tryBouquetTrackOnlyForDispellableAura(aUnit, tCanColorGroup);
+				elseif tCanColorGroup["isListGroup"] and tCanColorGroup["groupId"] then
+					if VUHDO_tryListGroupForDispellableAura(aUnit, tCanColorGroup) then
+						return;
+					end
+				elseif tCanColorGroup["isInferred"] and VUHDO_hasInferredAura(aUnit) and
+					VUHDO_INFERRED_AURAS[aUnit] and VUHDO_INFERRED_AURAS[aUnit][tCanColorGroup["inferredType"]] then
+					if VUHDO_tryInferredForDispellableAura(aUnit, tCanColorGroup) then
+						return;
+					end
+				elseif tCanColorGroup["allDispel"] and tCanColorGroup["filter"] then
+					if (tCanColorGroup["isHelpful"] and UnitCanAttack("player", aUnit))
+						or (not tCanColorGroup["isHelpful"] and not UnitCanAttack("player", aUnit)) then
+						if VUHDO_tryDispelColorForDispellableAura(aUnit, tCanColorGroup) then
+							return;
+						end
+					end
+				elseif tCanColorGroup["dispelCheckFilter"] and ((tCanColorGroup["isHelpful"] and VUHDO_PLAYER_HAS_PURGE and UnitCanAttack("player", aUnit)) or
+					(not tCanColorGroup["isHelpful"] and VUHDO_PLAYER_HAS_DISPEL and not UnitCanAttack("player", aUnit))) then
 					if VUHDO_tryDispelColorForDispellableAura(aUnit, tCanColorGroup) then
 						return;
 					end
-				end
-			elseif tCanColorGroup["dispelCheckFilter"] and ((tCanColorGroup["isHelpful"] and VUHDO_PLAYER_HAS_PURGE and UnitCanAttack("player", aUnit)) or
-				(not tCanColorGroup["isHelpful"] and VUHDO_PLAYER_HAS_DISPEL and not UnitCanAttack("player", aUnit))) then
-				if VUHDO_tryDispelColorForDispellableAura(aUnit, tCanColorGroup) then
-					return;
-				end
-			elseif not tCanColorGroup["isInferred"] and not tCanColorGroup["dispelCheckFilter"] and not tCanColorGroup["allDispel"] and tCanColorGroup["filter"] then
-				if VUHDO_trySimpleFilterForDispellableAura(aUnit, tCanColorGroup) then
-					return;
+				elseif not tCanColorGroup["isInferred"] and not tCanColorGroup["dispelCheckFilter"] and not tCanColorGroup["allDispel"] and tCanColorGroup["filter"] then
+					if VUHDO_trySimpleFilterForDispellableAura(aUnit, tCanColorGroup) then
+						return;
+					end
 				end
 			end
 		end

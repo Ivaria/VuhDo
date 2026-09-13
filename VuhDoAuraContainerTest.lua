@@ -1443,6 +1443,8 @@ do
 				"groupId", tGroupId,
 				"type", tGroup and (tGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER),
 				"colorType", tCanColorGroup["colorType"],
+				"unitScope", tCanColorGroup["unitScope"] or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH,
+				"scopeMatched", tGroup and VUHDO_isAuraGroupInScopeForUnit(tCanColorGroup, aUnit) and 1 or 0,
 				"canColorBar", tCanColorGroup["canColorBar"],
 				"canGlowBar", tCanColorGroup["canGlowBar"],
 				"groupResolves", tGroup ~= nil and 1 or 0,

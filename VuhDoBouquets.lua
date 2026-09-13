@@ -33,6 +33,8 @@ local VUHDO_resolveGroupCandidateFilters;
 local VUHDO_resolveAuraContainerSpellId;
 local VUHDO_addResolvedAuraContainerSpellIds;
 local VUHDO_getAuraGroup;
+local VUHDO_getAuraGroupForUnit;
+local VUHDO_applyAuraGroupScopeFlags;
 local VUHDO_isAuraGroupContainerExpressible;
 local VUHDO_invalidateAllOverlayPlans;
 local VUHDO_invalidateAuraContainerTemplateCache;
@@ -190,6 +192,8 @@ local function VUHDO_bouquetsInitLocalOverridesFunctions()
 	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
 	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
+	VUHDO_getAuraGroupForUnit = _G["VUHDO_getAuraGroupForUnit"];
+	VUHDO_applyAuraGroupScopeFlags = _G["VUHDO_applyAuraGroupScopeFlags"];
 	VUHDO_isAuraGroupContainerExpressible = _G["VUHDO_isAuraGroupContainerExpressible"];
 	VUHDO_invalidateAllOverlayPlans = _G["VUHDO_invalidateAllOverlayPlans"];
 	VUHDO_invalidateAuraContainerTemplateCache = _G["VUHDO_invalidateAuraContainerTemplateCache"];
@@ -3729,7 +3733,7 @@ do
 					VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"] and
 					VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"][tMapping["anchorKey"]];
 
-				if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
+				if tAnchorConfig and tAnchorConfig["enabled"] ~= false and VUHDO_getAuraGroupForUnit(tAnchorConfig["groupId"], aUnit) then
 					if VUHDO_isAuraModeContainers() then
 						VUHDO_updateStaticBouquetSlotsForUnit(aUnit, tMapping["panelNum"], tMapping["anchorKey"]);
 					elseif tIsRestricted then
@@ -4128,7 +4132,7 @@ do
 	local tMixedCandidateFilters;
 	local tMixedButtonSetup;
 	local tMixedFrameLevelOffset;
-	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup)
+	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup)
 
 		tMixedResult = { };
 
@@ -4268,6 +4272,14 @@ do
 					["width"] = aPixelWidth,
 					["height"] = aPixelHeight,
 				});
+			end
+		end
+
+		if aGroup then
+			for tMixedSlotCnt = 1, #tMixedResult do
+				if not tMixedResult[tMixedSlotCnt]["isStaticBouquetSlot"] then
+					VUHDO_applyAuraGroupScopeFlags(tMixedResult[tMixedSlotCnt], aGroup);
+				end
 			end
 		end
 
