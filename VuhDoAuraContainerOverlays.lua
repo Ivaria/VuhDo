@@ -6,6 +6,7 @@ local next = next;
 local strfind = string.find;
 local tostring = tostring;
 local twipe = table.wipe;
+local format = string.format;
 local min = math.min;
 
 local InCombatLockdown = InCombatLockdown;
@@ -48,6 +49,10 @@ local VUHDO_PixelUtil;
 local VUHDO_getUnitButtonsSafe;
 local VUHDO_getHealthBar;
 local VUHDO_getAuraGroup;
+local VUHDO_getAuraGroupEffectiveUnitScope;
+local VUHDO_isAuraGroupScopeFriendly;
+local VUHDO_isAuraGroupScopeHostile;
+local VUHDO_applyAuraGroupScopeFlags;
 local VUHDO_getAuraGroupResolvedFilters;
 local VUHDO_getCanColorBarGroups;
 local VUHDO_getAllDispelTypeNames;
@@ -114,11 +119,24 @@ local sOverlayBuild = {
 	["plannedContainerSpecs"] = { },
 	["plannedContainerOrder"] = { },
 	["plannedContainerSet"] = { },
+	["chainGroupKeySet"] = { },
+	["sublevelAllocByKey"] = { },
 };
 
 local sDispelNameHostile = {
 	["Enrage"] = true,
 };
+
+
+
+--
+function VUHDO_isDispelNameHostile(aDispelName)
+
+	return sDispelNameHostile[aDispelName] == true;
+
+end
+
+
 
 local sDebuffTypeDispelName = {
 	[VUHDO_DEBUFF_TYPE_MAGIC] = "Magic",
@@ -207,6 +225,10 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
+	VUHDO_getAuraGroupEffectiveUnitScope = _G["VUHDO_getAuraGroupEffectiveUnitScope"];
+	VUHDO_isAuraGroupScopeFriendly = _G["VUHDO_isAuraGroupScopeFriendly"];
+	VUHDO_isAuraGroupScopeHostile = _G["VUHDO_isAuraGroupScopeHostile"];
+	VUHDO_applyAuraGroupScopeFlags = _G["VUHDO_applyAuraGroupScopeFlags"];
 	VUHDO_getAuraGroupResolvedFilters = _G["VUHDO_getAuraGroupResolvedFilters"];
 	VUHDO_getCanColorBarGroups = _G["VUHDO_getCanColorBarGroups"];
 	VUHDO_getAllDispelTypeNames = _G["VUHDO_getAllDispelTypeNames"];
@@ -597,7 +619,7 @@ do
 	local tBaseOpacityItem;
 	local tBaseOpacityColor;
 	local tBaseOpacityProduct;
-	local function VUHDO_computeOverlayBaseOpacityProduct(aBouquet)
+	function VUHDO_computeOverlayBaseOpacityProduct(aBouquet)
 
 		tBaseOpacityProduct = nil;
 
@@ -653,7 +675,7 @@ do
 
 	--
 	local tBrightFactor;
-	local function VUHDO_getOverlayItemDispelBright(aItem)
+	function VUHDO_getOverlayItemDispelBright(aItem)
 
 		tBrightFactor = aItem and aItem["custom"] and aItem["custom"]["bright"];
 
@@ -668,7 +690,7 @@ do
 
 
 	--
-	local function VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct)
+	function VUHDO_getOverlayItemDispelOpacity(aItem, aBaseProduct)
 
 		return VUHDO_getOverlayEntryOpacity(aItem, aItem and aItem["color"] and aItem["color"]["O"], aBaseProduct);
 
@@ -680,7 +702,7 @@ do
 	local tDerivedColor;
 	local tBrightFactor;
 	local tEntryOpacity;
-	local function VUHDO_applyOverlayStaticColorBright(aStaticColor, aItem, aBaseProduct)
+	function VUHDO_applyOverlayStaticColorBright(aStaticColor, aItem, aBaseProduct)
 
 		if not aStaticColor then
 			return nil;
@@ -723,7 +745,7 @@ do
 
 
 	--
-	local function VUHDO_applyOverlayShapePrototypeFields(anOverlayEntry, anOverlayTarget)
+	function VUHDO_applyOverlayShapePrototypeFields(anOverlayEntry, anOverlayTarget)
 
 		if anOverlayTarget["shape"] == "bar" then
 			anOverlayEntry["shadowBar"] = true;
@@ -740,7 +762,7 @@ do
 
 
 	--
-	local function VUHDO_stampOverlayEntryShapeFields(anOverlayEntry, anOverlayTarget, aBarButtonSetup, aBorderButtonSetup)
+	function VUHDO_stampOverlayEntryShapeFields(anOverlayEntry, anOverlayTarget, aBarButtonSetup, aBorderButtonSetup)
 
 		if anOverlayTarget["shape"] == "bar" and anOverlayEntry["shadowBar"] and aBarButtonSetup then
 			for tKey, tValue in pairs(aBarButtonSetup) do
@@ -759,7 +781,7 @@ do
 
 
 	--
-	local function VUHDO_applyOverlayDotIconFields(anOverlayEntry, anItem, anIconColor, anOverlayTarget)
+	function VUHDO_applyOverlayDotIconFields(anOverlayEntry, anItem, anIconColor, anOverlayTarget)
 
 		if anOverlayTarget and anOverlayTarget["staticIcon"] then
 			anOverlayEntry["staticIcon"] = anOverlayTarget["staticIcon"];
@@ -789,12 +811,14 @@ do
 		return;
 
 	end
+end
 
 
 
+do
 	--
 	local tHostileDispelEntry;
-	function VUHDO_buildHostileDispelEntry(aDispelTypeNames, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, anSetEntryKey, anIsGlowFilterSpec)
+	function VUHDO_buildHostileDispelEntry(aDispelTypeNames, aFilterString, aCandidateFilters, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, anSetEntryKey, anIsGlowFilterSpec)
 
 		if not aDispelTypeNames or next(aDispelTypeNames) == nil then
 			return nil;
@@ -802,16 +826,16 @@ do
 
 		if anIsGlowFilterSpec then
 			return {
-				["filterString"] = "HELPFUL",
-				["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(nil, aDispelTypeNames),
+				["filterString"] = aFilterString or "HELPFUL",
+				["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, aDispelTypeNames),
 				["hostileOnly"] = true,
 				["entryKeySuffix"] = ":hostile",
 			};
 		end
 
 		tHostileDispelEntry = {
-			["filterString"] = "HELPFUL",
-			["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(nil, aDispelTypeNames),
+			["filterString"] = aFilterString or "HELPFUL",
+			["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, aDispelTypeNames),
 			["shape"] = aOverlayTarget["shape"],
 			["bouquetIdx"] = aBouquetIdx,
 			["groupKey"] = aGroupKey,
@@ -854,6 +878,8 @@ do
 	local tItemColor;
 	local tHostileEntry;
 	local tDispelTypeNames;
+	local tBranchEntryStart;
+	local tUnitScope;
 	local function VUHDO_buildAuraGroupOverlayEntries(aGroup, aGroupKey, aEffectiveColorType, aCustomColor, aItem, aOverlayTarget, aBouquetIdx, aShadowValueMode, aBaseProduct)
 
 		twipe(sOverlayBuild["groupOverlayEntries"]);
@@ -863,6 +889,8 @@ do
 		if not tResolved then
 			return sOverlayBuild["groupOverlayEntries"];
 		end
+
+		tUnitScope = VUHDO_getAuraGroupEffectiveUnitScope(aGroup);
 
 		tFilterString = tResolved["filterString"];
 
@@ -874,6 +902,8 @@ do
 		end
 
 		for tBranchIdx = 1, #tCandidateBranches do
+			tBranchEntryStart = #sOverlayBuild["groupOverlayEntries"] + 1;
+
 			tCandidateFilters = VUHDO_copyOverlayCandidateFilters(tCandidateBranches[tBranchIdx], nil);
 			tFilterString = (tBranchFilterStrings and tBranchFilterStrings[tBranchIdx]) or tResolved["filterString"];
 
@@ -890,6 +920,8 @@ do
 					};
 
 					VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, aOverlayTarget);
+
+					VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
 
 					sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_OFF then
@@ -913,7 +945,7 @@ do
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
 					tDispelTypeNames = VUHDO_getPlayerDispelBarColorTypeNames();
 
-					if next(tDispelTypeNames) ~= nil then
+					if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 						tOverlayEntry = {
 							["filterString"] = tFilterString,
 							["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -933,15 +965,17 @@ do
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
 
-					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+					if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+						tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
 
-					if tHostileEntry then
-						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						if tHostileEntry then
+							sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						end
 					end
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
 					tDispelTypeNames = VUHDO_getAllDispelBarColorTypeNames();
 
-					if next(tDispelTypeNames) ~= nil then
+					if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 						tOverlayEntry = {
 							["filterString"] = tFilterString,
 							["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -961,10 +995,12 @@ do
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
 
-					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+					if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+						tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
 
-					if tHostileEntry then
-						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						if tHostileEntry then
+							sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						end
 					end
 				end
 			elseif aOverlayTarget["shape"] == "border" then
@@ -979,6 +1015,8 @@ do
 						["staticColor"] = VUHDO_applyOverlayStaticColorBright(aCustomColor, aItem, aBaseProduct),
 						["border"] = true,
 					};
+
+					VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
 
 					sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_OFF then
@@ -1001,7 +1039,7 @@ do
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
 					tDispelTypeNames = VUHDO_getPlayerDispelBarColorTypeNames();
 
-					if next(tDispelTypeNames) ~= nil then
+					if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 						tOverlayEntry = {
 							["filterString"] = tFilterString,
 							["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -1019,15 +1057,17 @@ do
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
 
-					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+					if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+						tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
 
-					if tHostileEntry then
-						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						if tHostileEntry then
+							sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						end
 					end
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
 					tDispelTypeNames = VUHDO_getAllDispelBarColorTypeNames();
 
-					if next(tDispelTypeNames) ~= nil then
+					if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 						tOverlayEntry = {
 							["filterString"] = tFilterString,
 							["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -1045,10 +1085,12 @@ do
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
 
-					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+					if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+						tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
 
-					if tHostileEntry then
-						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						if tHostileEntry then
+							sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						end
 					end
 				end
 			elseif aOverlayTarget["shape"] == "dot" then
@@ -1065,6 +1107,8 @@ do
 						["shadowValueMode"] = aShadowValueMode,
 						["staticColor"] = VUHDO_applyOverlayStaticColorBright(aCustomColor, aItem, aBaseProduct),
 					};
+
+					VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
 				elseif tItemColor and tItemColor["useBackground"] then
 					tOverlayEntry = {
 						["filterString"] = tFilterString,
@@ -1078,7 +1122,7 @@ do
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
 					tDispelTypeNames = VUHDO_getPlayerDispelBarColorTypeNames();
 
-					if next(tDispelTypeNames) ~= nil then
+					if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 						tOverlayEntry = {
 							["filterString"] = tFilterString,
 							["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -1098,15 +1142,17 @@ do
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
 
-					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+					if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+						tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
 
-					if tHostileEntry then
-						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						if tHostileEntry then
+							sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						end
 					end
 				elseif aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
 					tDispelTypeNames = VUHDO_getAllDispelBarColorTypeNames();
 
-					if next(tDispelTypeNames) ~= nil then
+					if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 						tOverlayEntry = {
 							["filterString"] = tFilterString,
 							["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -1126,18 +1172,28 @@ do
 						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 					end
 
-					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
+					if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+						tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, aGroupKey, aShadowValueMode, aItem, aBaseProduct, false, false);
 
-					if tHostileEntry then
-						sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						if tHostileEntry then
+							sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tHostileEntry;
+						end
 					end
 				end
 
 				if tOverlayEntry and not tOverlayEntry["dispelIcon"] then
 					VUHDO_applyOverlayDotIconFields(tOverlayEntry, aItem, tOverlayEntry["staticColor"], aOverlayTarget);
 
+					if aEffectiveColorType == VUHDO_AURA_GROUP_COLOR_CUSTOM and aCustomColor then
+						VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, aGroup);
+					end
+
 					sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 				end
+			end
+
+			for tBranchStampIdx = tBranchEntryStart, #sOverlayBuild["groupOverlayEntries"] do
+				sOverlayBuild["groupOverlayEntries"][tBranchStampIdx]["branchIdx"] = tBranchIdx;
 			end
 		end
 
@@ -1160,7 +1216,7 @@ do
 	local tOverlayEntry;
 	local tHostileEntry;
 	local tDispelTypeNames;
-	local function VUHDO_buildCanColorBarGroupOverlayEntries(aCanColorGroup, aItem, aOverlayTarget, aBouquetIdx, aShadowValueMode, aBaseProduct)
+	function VUHDO_buildCanColorBarGroupOverlayEntries(aCanColorGroup, aItem, aOverlayTarget, aBouquetIdx, aShadowValueMode, aBaseProduct)
 
 		twipe(sOverlayBuild["canColorGroupEntries"]);
 
@@ -1174,6 +1230,8 @@ do
 		if not tGroup then
 			return sOverlayBuild["canColorGroupEntries"];
 		end
+
+		tUnitScope = aCanColorGroup["unitScope"] or VUHDO_getAuraGroupEffectiveUnitScope(tGroup);
 
 		tEffectiveColorType = aCanColorGroup["colorType"] or VUHDO_AURA_GROUP_COLOR_DISPEL;
 
@@ -1211,6 +1269,8 @@ do
 		end
 
 		for tBranchIdx = 1, #tCandidateBranches do
+			tBranchEntryStart = #sOverlayBuild["canColorGroupEntries"] + 1;
+
 			tCandidateFilters = VUHDO_copyOverlayCandidateFilters(tCandidateBranches[tBranchIdx], nil);
 			tFilterString = (tBranchFilterStrings and tBranchFilterStrings[tBranchIdx]) or tResolved["filterString"];
 
@@ -1227,11 +1287,13 @@ do
 
 				VUHDO_applyOverlayShapePrototypeFields(tOverlayEntry, aOverlayTarget);
 
+				VUHDO_applyAuraGroupScopeFlags(tOverlayEntry, tGroup);
+
 				sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tOverlayEntry;
 			elseif tEffectiveColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
 				tDispelTypeNames = VUHDO_getPlayerDispelBarColorTypeNames();
 
-				if next(tDispelTypeNames) ~= nil then
+				if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 					tOverlayEntry = {
 						["filterString"] = tFilterString,
 						["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -1260,15 +1322,17 @@ do
 					sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tOverlayEntry;
 				end
 
-				tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), aOverlayTarget, aBouquetIdx, tGroupId, aShadowValueMode, aItem, aBaseProduct, true, false);
+				if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, tGroupId, aShadowValueMode, aItem, aBaseProduct, true, false);
 
-				if tHostileEntry then
-					sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tHostileEntry;
+					if tHostileEntry then
+						sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tHostileEntry;
+					end
 				end
 			elseif tEffectiveColorType == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
 				tDispelTypeNames = VUHDO_getAllDispelBarColorTypeNames();
 
-				if next(tDispelTypeNames) ~= nil then
+				if VUHDO_isAuraGroupScopeFriendly(tUnitScope) and next(tDispelTypeNames) ~= nil then
 					tOverlayEntry = {
 						["filterString"] = tFilterString,
 						["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(tCandidateFilters, tDispelTypeNames),
@@ -1297,11 +1361,17 @@ do
 					sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tOverlayEntry;
 				end
 
-				tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), aOverlayTarget, aBouquetIdx, tGroupId, aShadowValueMode, aItem, aBaseProduct, true, false);
+				if VUHDO_isAuraGroupScopeHostile(tUnitScope) then
+					tHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelBarColorTypeNames(), tFilterString, tCandidateFilters, aOverlayTarget, aBouquetIdx, tGroupId, aShadowValueMode, aItem, aBaseProduct, true, false);
 
-				if tHostileEntry then
-					sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tHostileEntry;
+					if tHostileEntry then
+						sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tHostileEntry;
+					end
 				end
+			end
+
+			for tBranchStampIdx = tBranchEntryStart, #sOverlayBuild["canColorGroupEntries"] do
+				sOverlayBuild["canColorGroupEntries"][tBranchStampIdx]["branchIdx"] = tBranchIdx;
 			end
 		end
 
@@ -1316,7 +1386,7 @@ do
 	local tAuraGroup;
 	local tResolved;
 	local tEffectiveColorType;
-	local function VUHDO_buildAuraGroupActiveOverlayEntries(aItem, aOverlayTarget, aBouquetIdx, aShadowValueMode, aBaseProduct)
+	function VUHDO_buildAuraGroupActiveOverlayEntries(aItem, aOverlayTarget, aBouquetIdx, aShadowValueMode, aBaseProduct)
 
 		twipe(sOverlayBuild["auraGroupEntries"]);
 
@@ -1395,6 +1465,53 @@ do
 
 
 	--
+	local tHostilePurgeTypeNames;
+	function VUHDO_buildBarColorsHostilePurgeOverlayEntry()
+
+		tBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
+
+		if not tBarColors or not tBarColors["showDispelOverlay"] then
+			return nil;
+		end
+
+		tDispelIndicatorType = tBarColors["dispelIndicatorType"] or 1;
+
+		if tDispelIndicatorType <= 0 then
+			return nil;
+		end
+
+		if tDispelIndicatorType == 2 then
+			tHostilePurgeTypeNames = {
+				["Magic"] = true,
+				["Enrage"] = true,
+			};
+		else
+			tHostilePurgeTypeNames = VUHDO_getPlayerPurgeDispelTypeNames();
+		end
+
+		if next(tHostilePurgeTypeNames) == nil then
+			return nil;
+		end
+
+		tFilterString = "HELPFUL|DISPELLABLE";
+		tCandidateFilters = VUHDO_copyOverlayCandidateFilters(nil, tHostilePurgeTypeNames);
+
+		return {
+			["filterString"] = tFilterString,
+			["candidateFilters"] = tCandidateFilters,
+			["shape"] = "bar",
+			["entryKey"] = "barColorsHostilePurgeOverlay",
+			["frameLevelOffset"] = 8,
+			["hostileOnly"] = true,
+			["dispelOverlayChrome"] = true,
+			["templateName"] = VUHDO_AURA_BUTTON_DISPEL_OVERLAY_TEMPLATE,
+		};
+
+	end
+
+
+
+	--
 	local tOverlayTarget;
 	local tGetter;
 	function VUHDO_resolveOverlayTarget(aButton, anIndicatorKey)
@@ -1418,9 +1535,11 @@ do
 		return tGetter(aButton);
 
 	end
+end
 
 
 
+do
 	--
 	local tOverlayClaimFlags;
 	local function VUHDO_getOverlayFilterFlags(aFilterString)
@@ -1596,6 +1715,21 @@ do
 
 
 	--
+	local function VUHDO_finalizeOverlayBranchEntryKey(anEntry)
+
+		anEntry["sublevelKey"] = anEntry["entryKey"];
+
+		if (anEntry["branchIdx"] or 1) > 1 then
+			anEntry["entryKey"] = format("%s:b%d", anEntry["entryKey"], anEntry["branchIdx"]);
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tBouquet;
 	local tGroupEntries;
 	local tItem;
@@ -1672,6 +1806,8 @@ do
 							tOverlayEntry["entryKey"] = tOverlayEntry["entryKey"] .. ":friendly";
 						end
 
+						VUHDO_finalizeOverlayBranchEntryKey(tOverlayEntry);
+
 						VUHDO_appendOverlayEntryWithVariants(tOverlayEntries, tOverlayEntry, tShadowValueMode, tGateValidators);
 					end
 
@@ -1699,6 +1835,8 @@ do
 								tOverlayEntry["entryKey"] = tOverlayEntry["entryKey"] .. ":friendly";
 							end
 
+							VUHDO_finalizeOverlayBranchEntryKey(tOverlayEntry);
+
 							VUHDO_appendOverlayEntryWithVariants(tOverlayEntries, tOverlayEntry, tShadowValueMode, tGateValidators);
 						end
 					end
@@ -1710,7 +1848,7 @@ do
 
 						if tDispelName and VUHDO_getBackgroundDispelTypeNames()[tDispelName] then
 							tOverlayEntry = {
-								["filterString"] = sDispelNameHostile[tDispelName] and "HELPFUL" or "HARMFUL",
+								["filterString"] = VUHDO_isDispelNameHostile(tDispelName) and "HELPFUL" or "HARMFUL",
 								["candidateFilters"] = {
 									["includeDispelTypes"] = {
 										[tDispelName] = true,
@@ -1722,7 +1860,7 @@ do
 								["entryKey"] = tCnt .. ":dispel:" .. tDispelName,
 							};
 
-							if sDispelNameHostile[tDispelName] then
+							if VUHDO_isDispelNameHostile(tDispelName) then
 								tOverlayEntry["hostileOnly"] = true;
 							else
 								tOverlayEntry["friendlyOnly"] = true;
@@ -1838,6 +1976,8 @@ do
 	local tBarButtonSetup;
 	local tBorderButtonSetup;
 	local tSlotCount;
+	local tSublevelKey;
+	local tCachedSublevels;
 	function VUHDO_stampOverlayEntriesFromPrototypes(aPrototypes, aPanelNum, anIndicatorKey, aButton, aTargetFrame)
 
 		if not aPrototypes or not aTargetFrame then
@@ -1862,6 +2002,7 @@ do
 		end
 
 		twipe(sOverlayBuild["stampedEntries"]);
+		twipe(sOverlayBuild["sublevelAllocByKey"]);
 
 		for tCnt = 1, #aPrototypes do
 			tOverlayEntry = { };
@@ -1878,7 +2019,15 @@ do
 				tSlotCount = 1;
 			end
 
-			tOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aTargetFrame, tSlotCount, anIndicatorKey);
+			tSublevelKey = tOverlayEntry["sublevelKey"] or tOverlayEntry["entryKey"];
+			tCachedSublevels = sOverlayBuild["sublevelAllocByKey"][tSublevelKey];
+
+			if tCachedSublevels then
+				tOverlayEntry["sublevelSlots"] = tCachedSublevels;
+			else
+				tOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aTargetFrame, tSlotCount, anIndicatorKey);
+				sOverlayBuild["sublevelAllocByKey"][tSublevelKey] = tOverlayEntry["sublevelSlots"];
+			end
 
 			if tOverlayEntry["auraGroupBarGlow"] then
 				tOverlayEntry["unitButton"] = aButton;
@@ -2383,10 +2532,14 @@ do
 	local tContainerParent;
 	local tFrameLevelOffset;
 	local tOverlayHostFrame;
+	local tChainGroupKeyBase;
+	local tChainGroupKey;
 	function VUHDO_buildOverlayChainContainerTemplate(aButton, aTargetFrame, aFillEntries, anIndicatorKey)
 
 		tChainGroups = { };
 		tChainGroupMeta = { };
+
+		twipe(sOverlayBuild["chainGroupKeySet"]);
 
 		for tChainIdx = 1, #aFillEntries do
 			tChainFillEntry = aFillEntries[tChainIdx];
@@ -2395,8 +2548,17 @@ do
 			tChainButtonSetup = VUHDO_buildOverlayButtonSetup(aTargetFrame, tChainFillEntry);
 			tChainLayoutIndex = #tChainGroups + 1;
 
+			tChainGroupKeyBase = "chain_" .. tChainEntryKey;
+			tChainGroupKey = tChainGroupKeyBase;
+
+			if sOverlayBuild["chainGroupKeySet"][tChainGroupKey] then
+				tChainGroupKey = format("%s:d%d", tChainGroupKeyBase, tChainIdx);
+			end
+
+			sOverlayBuild["chainGroupKeySet"][tChainGroupKey] = true;
+
 			tChainGroupTemplate = {
-				["key"] = "chain_" .. tChainEntryKey,
+				["key"] = tChainGroupKey,
 				["filterString"] = tChainFillEntry["filterString"],
 				["candidateFilters"] = tChainFillEntry["candidateFilters"],
 				["templateName"] = tChainFillEntry["templateName"] or VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE,
@@ -2970,7 +3132,8 @@ do
 	local tBarGlowFilterString;
 	local tBarGlowHostileEntry;
 	local tDispelTypeNames;
-	local function VUHDO_buildAuraGroupBarGlowFilterEntries(aGroupId, aColorType, aFilterString, aCandidateFilters)
+	local tScopeGroup;
+	local function VUHDO_buildAuraGroupBarGlowFilterEntries(aGroupId, aColorType, aFilterString, aCandidateFilters, aUnitScope)
 
 		twipe(sOverlayBuild["barGlowFilterEntries"]);
 
@@ -2981,13 +3144,19 @@ do
 				["entryKeySuffix"] = "",
 			};
 
+			tScopeGroup = {
+				["unitScope"] = aUnitScope,
+			};
+
+			VUHDO_applyAuraGroupScopeFlags(tBarGlowFilterEntry, tScopeGroup);
+
 			sOverlayBuild["barGlowFilterEntries"][1] = tBarGlowFilterEntry;
 		elseif aColorType == VUHDO_AURA_GROUP_COLOR_DISPEL then
 			tBarGlowFilterString = aFilterString;
 
 			tDispelTypeNames = VUHDO_getPlayerDispelGlowTypeNames();
 
-			if next(tDispelTypeNames) ~= nil then
+			if VUHDO_isAuraGroupScopeFriendly(aUnitScope) and next(tDispelTypeNames) ~= nil then
 				tBarGlowFilterEntry = {
 					["filterString"] = tBarGlowFilterString,
 					["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, tDispelTypeNames),
@@ -2998,15 +3167,17 @@ do
 				sOverlayBuild["barGlowFilterEntries"][#sOverlayBuild["barGlowFilterEntries"] + 1] = tBarGlowFilterEntry;
 			end
 
-			tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeGlowTypeNames(), nil, nil, aGroupId, nil, nil, nil, false, true);
+			if VUHDO_isAuraGroupScopeHostile(aUnitScope) then
+				tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getPlayerPurgeGlowTypeNames(), aFilterString, aCandidateFilters, nil, nil, aGroupId, nil, nil, nil, false, true);
 
-			if tBarGlowHostileEntry then
-				sOverlayBuild["barGlowFilterEntries"][#sOverlayBuild["barGlowFilterEntries"] + 1] = tBarGlowHostileEntry;
+				if tBarGlowHostileEntry then
+					sOverlayBuild["barGlowFilterEntries"][#sOverlayBuild["barGlowFilterEntries"] + 1] = tBarGlowHostileEntry;
+				end
 			end
 		elseif aColorType == VUHDO_AURA_GROUP_COLOR_ALL_DISPEL then
 			tDispelTypeNames = VUHDO_getAllDispelGlowTypeNames();
 
-			if next(tDispelTypeNames) ~= nil then
+			if VUHDO_isAuraGroupScopeFriendly(aUnitScope) and next(tDispelTypeNames) ~= nil then
 				tBarGlowFilterEntry = {
 					["filterString"] = aFilterString,
 					["candidateFilters"] = VUHDO_copyOverlayCandidateFilters(aCandidateFilters, tDispelTypeNames),
@@ -3017,10 +3188,12 @@ do
 				sOverlayBuild["barGlowFilterEntries"][#sOverlayBuild["barGlowFilterEntries"] + 1] = tBarGlowFilterEntry;
 			end
 
-			tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelGlowTypeNames(), nil, nil, aGroupId, nil, nil, nil, false, true);
+			if VUHDO_isAuraGroupScopeHostile(aUnitScope) then
+				tBarGlowHostileEntry = VUHDO_buildHostileDispelEntry(VUHDO_getAllDispelGlowTypeNames(), aFilterString, aCandidateFilters, nil, nil, aGroupId, nil, nil, nil, false, true);
 
-			if tBarGlowHostileEntry then
-				sOverlayBuild["barGlowFilterEntries"][#sOverlayBuild["barGlowFilterEntries"] + 1] = tBarGlowHostileEntry;
+				if tBarGlowHostileEntry then
+					sOverlayBuild["barGlowFilterEntries"][#sOverlayBuild["barGlowFilterEntries"] + 1] = tBarGlowHostileEntry;
+				end
 			end
 		end
 
@@ -3098,7 +3271,7 @@ do
 						for tBarGlowBranchIdx = 1, #tBarGlowCandidateBranches do
 							tBarGlowCandidateFilters = VUHDO_copyOverlayCandidateFilters(tBarGlowCandidateBranches[tBarGlowBranchIdx], nil);
 
-							tBarGlowFilterSpecs = VUHDO_buildAuraGroupBarGlowFilterEntries(tBarGlowGroupId, tBarGlowColorType, (tBranchFilterStrings and tBranchFilterStrings[tBarGlowBranchIdx]) or tBarGlowResolved["filterString"], tBarGlowCandidateFilters);
+							tBarGlowFilterSpecs = VUHDO_buildAuraGroupBarGlowFilterEntries(tBarGlowGroupId, tBarGlowColorType, (tBranchFilterStrings and tBranchFilterStrings[tBarGlowBranchIdx]) or tBarGlowResolved["filterString"], tBarGlowCandidateFilters, tBarGlowGroup["unitScope"]);
 
 							for tBarGlowFilterIdx = 1, #tBarGlowFilterSpecs do
 								tBarGlowFilterSpec = tBarGlowFilterSpecs[tBarGlowFilterIdx];
@@ -3119,6 +3292,10 @@ do
 									["entryKey"] = "glow:" .. tBarGlowGroupId .. tBarGlowFilterSpec["entryKeySuffix"],
 									["frameLevelOffset"] = 8 + (#tBarGlowCanColorBarGroups - tGroupCnt),
 								};
+
+								if tBarGlowBranchIdx > 1 then
+									tBarGlowEntry["entryKey"] = format("%s:b%d", tBarGlowEntry["entryKey"], tBarGlowBranchIdx);
+								end
 
 								if tBarGlowEntry["glowColorType"] == VUHDO_AURA_GROUP_COLOR_CUSTOM then
 									tBarGlowColor = tBarGlowGroup["glowBarColor"];
@@ -3295,6 +3472,23 @@ do
 				tDispelOverlayEntry["alwaysEnabled"] = true;
 
 				VUHDO_planOverlaySlot(aButton, "DISPEL_OVERLAY", "barColorsDispelOverlay", tTargetFrame, tDispelOverlayEntry);
+
+				tPlannedCount = tPlannedCount + 1;
+			end
+		end
+
+		tDispelOverlayEntry = VUHDO_buildBarColorsHostilePurgeOverlayEntry();
+
+		if tDispelOverlayEntry then
+			tTargetFrame = VUHDO_getHealthBar(aButton, 3);
+
+			if tTargetFrame then
+				tDispelOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(tTargetFrame,
+					tDispelOverlayEntry["shadowBar"] and 2 or 1, "DISPEL_OVERLAY");
+
+				tDispelOverlayEntry["alwaysEnabled"] = true;
+
+				VUHDO_planOverlaySlot(aButton, "DISPEL_OVERLAY", "barColorsHostilePurgeOverlay", tTargetFrame, tDispelOverlayEntry);
 
 				tPlannedCount = tPlannedCount + 1;
 			end

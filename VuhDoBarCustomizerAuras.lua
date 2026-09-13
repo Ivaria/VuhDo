@@ -63,6 +63,7 @@ local VUHDO_backColor;
 local VUHDO_safeColorFromTable;
 local VUHDO_resolveAuraTriState;
 local VUHDO_getAuraGroup;
+local VUHDO_getAuraGroupForUnit;
 local VUHDO_getAnchorTriStateBool;
 local VUHDO_getAllAuraGroups;
 local VUHDO_setAnchorSlotAuraId;
@@ -504,6 +505,7 @@ function VUHDO_barCustomizerAurasInitLocalOverrides()
 	VUHDO_setAnchorSlotAuraId = _G["VUHDO_setAnchorSlotAuraId"];
 	VUHDO_resolveAuraTriState = _G["VUHDO_resolveAuraTriState"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
+	VUHDO_getAuraGroupForUnit = _G["VUHDO_getAuraGroupForUnit"];
 	VUHDO_isPanelPopulated = _G["VUHDO_isPanelPopulated"];
 	VUHDO_getAnchorTriStateBool = _G["VUHDO_getAnchorTriStateBool"];
 	VUHDO_getAllAuraGroups = _G["VUHDO_getAllAuraGroups"];
@@ -1844,8 +1846,13 @@ do
 
 
 	--
-	local tFrame;
-	local tFrameName;
+	local tIconFrame;
+	local tChild;
+	local tTexture;
+	local tAnchor;
+	local tRelPoint;
+	local tPosX;
+	local tPosY;
 	function VUHDO_displayPlayerIcon(aButton, aSlotIndex, aTexture, aTexCoords, aWidth, aHeight, aPositionIndex)
 
 		if not aButton or not aSlotIndex or not aTexture then
@@ -3378,9 +3385,15 @@ function VUHDO_displayAurasAtAnchorFromCache(aUnit, aPanelNum, anAnchorIndex, an
 		return;
 	end
 
-	tGroup = VUHDO_getAuraGroup(anAnchorConfig["groupId"]);
+	tGroup = VUHDO_getAuraGroupForUnit(anAnchorConfig["groupId"], aUnit);
 
-	if tGroup and (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
+	if not tGroup then
+		VUHDO_clearAurasForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig);
+
+		return;
+	end
+
+	if (tGroup["type"] or 1) == VUHDO_AURA_GROUP_TYPE_LIST then
 		tListSlots = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum] and VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex];
 		tFixedSlots = anAnchorConfig["fixedSlots"];
 

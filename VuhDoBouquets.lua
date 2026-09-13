@@ -33,12 +33,15 @@ local VUHDO_resolveGroupCandidateFilters;
 local VUHDO_resolveAuraContainerSpellId;
 local VUHDO_addResolvedAuraContainerSpellIds;
 local VUHDO_getAuraGroup;
+local VUHDO_getAuraGroupForUnit;
+local VUHDO_applyAuraGroupScopeFlags;
 local VUHDO_isAuraGroupContainerExpressible;
 local VUHDO_invalidateAllOverlayPlans;
 local VUHDO_invalidateAuraContainerTemplateCache;
 local VUHDO_renderNonAuraListSlots;
 local VUHDO_deferSyncOverlaysForUnit;
 local VUHDO_incrementAlphaChainConfigVersion;
+local VUHDO_isDispelNameHostile;
 
 local VUHDO_BOUQUETS = { };
 local VUHDO_RAID = { };
@@ -190,12 +193,15 @@ local function VUHDO_bouquetsInitLocalOverridesFunctions()
 	VUHDO_resolveAuraContainerSpellId = _G["VUHDO_resolveAuraContainerSpellId"];
 	VUHDO_addResolvedAuraContainerSpellIds = _G["VUHDO_addResolvedAuraContainerSpellIds"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
+	VUHDO_getAuraGroupForUnit = _G["VUHDO_getAuraGroupForUnit"];
+	VUHDO_applyAuraGroupScopeFlags = _G["VUHDO_applyAuraGroupScopeFlags"];
 	VUHDO_isAuraGroupContainerExpressible = _G["VUHDO_isAuraGroupContainerExpressible"];
 	VUHDO_invalidateAllOverlayPlans = _G["VUHDO_invalidateAllOverlayPlans"];
 	VUHDO_invalidateAuraContainerTemplateCache = _G["VUHDO_invalidateAuraContainerTemplateCache"];
 	VUHDO_renderNonAuraListSlots = _G["VUHDO_renderNonAuraListSlots"];
 	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
 	VUHDO_incrementAlphaChainConfigVersion = _G["VUHDO_incrementAlphaChainConfigVersion"];
+	VUHDO_isDispelNameHostile = _G["VUHDO_isDispelNameHostile"];
 
 	return;
 
@@ -2415,7 +2421,6 @@ do
 	local tInfos;
 	local tResultSlot;
 	local tName;
-	local tIsActive;
 	local tIcon;
 	local tTimer;
 	local tCounter;
@@ -2426,10 +2431,6 @@ do
 	local tSpellId;
 	local tExpiration;
 	local tNow;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretAuraLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2437,7 +2438,6 @@ do
 
 		if tResultSlot and not VUHDO_isAuraModeContainers() and not VUHDO_isAuraDataRestricted() then
 			tName = tInfos["name"];
-			tIsActive = false;
 			tSpellId = tonumber(tName);
 
 			tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aUnit] and
@@ -2449,7 +2449,6 @@ do
 						tCachedAura = VUHDO_UNIT_AURA_CACHE[aUnit] and VUHDO_UNIT_AURA_CACHE[aUnit][tAuraInstanceId];
 
 						if tCachedAura and VUHDO_auraSourceMatchesFilter(tCachedAura, tInfos) then
-							tIsActive = true;
 							txState["activeAuras"] = txState["activeAuras"] + 1;
 
 							tNow = GetTime();
@@ -2593,7 +2592,6 @@ do
 	local tSpecial;
 	local tSecretType;
 	local tResultSlot;
-	local tName;
 	local tIsActive;
 	local tIcon;
 	local tTimer;
@@ -2607,10 +2605,6 @@ do
 	local tClipR;
 	local tClipT;
 	local tClipB;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretNonSecretLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tResultSlot = aLayerTemplate["nonSecretResults"][aValidatorEntry["resultIdx"]];
@@ -2621,8 +2615,6 @@ do
 
 		if tSecretType == VUHDO_SECRET_TYPE_NONE or tSecretType == VUHDO_SECRET_TYPE_VALUES then
 			if tResultSlot then
-				tName = nil;
-
 				tIsActive, tIcon, tTimer, tCounter, tDuration, tColor, tTimer2, tClipL, tClipR, tClipT, tClipB = tSpecial["validator"](aInfo, tInfos, sSecretsEnabled and txState["secretContext"] or nil);
 
 				tResultSlot["isActive"] = tIsActive;
@@ -2818,8 +2810,6 @@ do
 			end
 		end
 
-
-
 		return;
 
 	end
@@ -2839,10 +2829,6 @@ do
 	local tTimer2;
 	local tSecretColor;
 	local tGradientClassId;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretCurveLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2918,8 +2904,6 @@ do
 			end
 		end
 
-
-
 		return;
 
 	end
@@ -2934,10 +2918,6 @@ do
 	local tResultSlot;
 	local tBooleanSecretBool;
 	local tBoolValidatorEntry;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretBooleanLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tBoolValidatorEntry = aLayerTemplate["booleanValidators"][aValidatorEntry["resultIdx"]];
@@ -2950,8 +2930,6 @@ do
 
 			tResultSlot["secretBool"] = tBooleanSecretBool;
 		end
-
-
 
 		return;
 
@@ -2974,10 +2952,7 @@ do
 	local tTextColorType;
 	local tNeedsCopy;
 	local tAuraInstanceId;
-
-
-
-	--
+	local tIsHarmful;
 	function VUHDO_evaluateBouquetSecretDispelLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -2987,14 +2962,16 @@ do
 		if tResultSlot then
 			tDispelValidatorEntry = aLayerTemplate["dispelValidators"][aValidatorEntry["resultIdx"]];
 
+			tIsHarmful = not aInfo["canAttack"];
+
 			if tDispelValidatorEntry and tDispelValidatorEntry["curves"] and tDispelValidatorEntry["special"]["getCurve"] then
-				txState["secretContext"]["dispelCurve"] = tDispelValidatorEntry["special"]["getCurve"](tDispelValidatorEntry["curves"], aUnit, true);
+				txState["secretContext"]["dispelCurve"] = tDispelValidatorEntry["special"]["getCurve"](tDispelValidatorEntry["curves"], aUnit, tIsHarmful);
 			else
 				txState["secretContext"]["dispelCurve"] = nil;
 			end
 
 			if tDispelValidatorEntry and tDispelValidatorEntry["textCurves"] and tDispelValidatorEntry["special"]["getTextCurve"] then
-				txState["secretContext"]["dispelTextCurve"] = tDispelValidatorEntry["special"]["getTextCurve"](tDispelValidatorEntry["textCurves"], aUnit, true);
+				txState["secretContext"]["dispelTextCurve"] = tDispelValidatorEntry["special"]["getTextCurve"](tDispelValidatorEntry["textCurves"], aUnit, tIsHarmful);
 			else
 				txState["secretContext"]["dispelTextCurve"] = nil;
 			end
@@ -3084,10 +3061,6 @@ do
 	local tIsActive;
 	local tIcon;
 	local tSpriteCell;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecretSpriteCellLayer(aUnit, aInfo, aBouquet, aLayerTemplate, aValidatorEntry, aCnt)
 
 		tInfos = aBouquet[aCnt];
@@ -3112,8 +3085,6 @@ do
 			txState["icon"] = tResultSlot["icon"];
 		end
 
-
-
 		return;
 
 	end
@@ -3128,10 +3099,6 @@ do
 	local tCnt;
 	local tResultSlot;
 	local tClassId;
-
-
-
-	--
 	function VUHDO_evaluateBouquetSecret(aUnit, aBouquetName, aInfo, aBouquet, aAnzInfos, aLayerTemplate)
 
 		txState["activeAuras"] = 0;
@@ -3285,10 +3252,6 @@ do
 	local tFactor;
 	local tMaxColor;
 	local tWorkingColor = { };
-
-
-
-	--
 	function VUHDO_evaluateBouquetNonSecret(aUnit, aInfo, aBouquet, aAnzInfos)
 
 		for tCnt = aAnzInfos, 1, -1  do
@@ -3634,7 +3597,6 @@ do
 		else
 			return false, nil, nil, nil, nil, nil, nil, tHasSecretResults or VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0, nil, nil, nil, nil, nil, tLayerTemplate, false;
 		end
-
 	end
 end
 
@@ -3845,7 +3807,7 @@ do
 					VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"] and
 					VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"][tMapping["anchorKey"]];
 
-				if tAnchorConfig and tAnchorConfig["enabled"] ~= false then
+				if tAnchorConfig and tAnchorConfig["enabled"] ~= false and VUHDO_getAuraGroupForUnit(tAnchorConfig["groupId"], aUnit) then
 					if VUHDO_isAuraModeContainers() then
 						VUHDO_updateStaticBouquetSlotsForUnit(aUnit, tMapping["panelNum"], tMapping["anchorKey"]);
 					elseif tIsRestricted then
@@ -3919,6 +3881,7 @@ function VUHDO_clearUnitBouquetActiveCache(aUnit)
 
 	if VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit] then
 		sUnitBouquetActivePool:release(VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit]);
+
 		VUHDO_UNIT_AURA_BOUQUET_ACTIVE[aUnit] = nil;
 	end
 
@@ -4105,6 +4068,10 @@ do
 	local tFilterString;
 	local tMineOthersMode;
 	local tEntryMineMode;
+	local tHasHostileDispelName;
+	local tHasFriendlyDispelName;
+	local tIsHarmful;
+	local tResult;
 	function VUHDO_buildListEntryContainerGroupTemplate(aBouquetName)
 
 		if not aBouquetName then
@@ -4204,16 +4171,33 @@ do
 			tCandidateFilters = {
 				["includeDispelTypes"] = tDispelTypes,
 			};
-			tFilterString = "HARMFUL";
+
+			tHasHostileDispelName = false;
+			tHasFriendlyDispelName = false;
+
+			for tDispelName in pairs(tDispelTypes) do
+				if VUHDO_isDispelNameHostile(tDispelName) then
+					tHasHostileDispelName = true;
+				else
+					tHasFriendlyDispelName = true;
+				end
+			end
+
+			if tHasHostileDispelName and not tHasFriendlyDispelName then
+				tFilterString = "HELPFUL|DISPELLABLE";
+				tIsHarmful = false;
+			else
+				tFilterString = "HARMFUL|DISPELLABLE";
+				tIsHarmful = true;
+			end
 		else
 			return nil;
 		end
 
-		return {
+		tResult = {
 			["key"] = "VuhDoB1Bouquet_" .. aBouquetName,
 			["filterString"] = tFilterString,
 			["candidateFilters"] = tCandidateFilters,
-			["isHarmful"] = tEntryCount == 0 and tDispelCount > 0,
 			["maxFrameCount"] = 1,
 			["templateName"] = "VuhDoAuraButtonIconTemplate",
 			["buttonSetup"] = {
@@ -4225,6 +4209,16 @@ do
 				["mouseMotion"] = false,
 			},
 		};
+
+		if tDispelCount > 0 and tEntryCount == 0 then
+			tResult["isHarmful"] = tIsHarmful;
+			tResult["friendlyOnly"] = tIsHarmful;
+			tResult["hostileOnly"] = tHasHostileDispelName and not tHasFriendlyDispelName;
+		else
+			tResult["isHarmful"] = false;
+		end
+
+		return tResult;
 
 	end
 
@@ -4243,7 +4237,8 @@ do
 	local tMixedCandidateFilters;
 	local tMixedButtonSetup;
 	local tMixedFrameLevelOffset;
-	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup)
+	local tIsHarmful;
+	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup)
 
 		tMixedResult = { };
 
@@ -4341,16 +4336,25 @@ do
 					tMixedButtonSetup["iconColor"] = tMixedItem["color"];
 				end
 
+				if VUHDO_isDispelNameHostile(tMixedDispelName) then
+					tMixedFilterString = "HELPFUL|DISPELLABLE";
+					tIsHarmful = false;
+				else
+					tMixedFilterString = "HARMFUL|DISPELLABLE";
+					tIsHarmful = true;
+				end
+
 				tinsert(tMixedResult, {
 					["key"] = tMixedPieceKey,
-					["filterString"] = "HARMFUL|DISPELLABLE",
+					["filterString"] = tMixedFilterString,
 					["candidateFilters"] = {
 						["includeDispelTypes"] = {
 							[tMixedDispelName] = true,
 						},
 					},
-					["isHarmful"] = true,
-					["friendlyOnly"] = true,
+					["isHarmful"] = tIsHarmful,
+					["friendlyOnly"] = tIsHarmful,
+					["hostileOnly"] = not tIsHarmful,
 					["mixedEntryIndex"] = aListEntryIndex,
 					["mixedItemIndex"] = tMixedItemIdx,
 					["templateName"] = aTemplateName,
@@ -4383,6 +4387,14 @@ do
 					["width"] = aPixelWidth,
 					["height"] = aPixelHeight,
 				});
+			end
+		end
+
+		if aGroup then
+			for tMixedSlotCnt = 1, #tMixedResult do
+				if not tMixedResult[tMixedSlotCnt]["isStaticBouquetSlot"] then
+					VUHDO_applyAuraGroupScopeFlags(tMixedResult[tMixedSlotCnt], aGroup);
+				end
 			end
 		end
 
@@ -5010,7 +5022,6 @@ end
 
 
 --
-local tRefreshBouquetName;
 local tRefreshIsRestricted;
 local tRefreshRestrictedMode;
 local tRefreshLastEval;

@@ -21,6 +21,7 @@ VUHDO_PANEL_AURA_GROUPS_COMBO_MODEL = { };
 VUHDO_AURA_GROUPS_TYPE_SELECTED = 1;
 VUHDO_AURA_GROUPS_PRIORITY = 50;
 VUHDO_AURA_GROUPS_COLOR_TYPE = 1;
+VUHDO_AURA_GROUPS_SHOW_ON = 1;
 
 VUHDO_AURA_GROUPS_CUSTOM_COLOR = {
 	["R"] = 0.6,
@@ -70,6 +71,7 @@ VUHDO_AURA_EXCLUDE_DISPEL_OPTIONS = {
 	{ "Disease", VUHDO_I18N_DISEASE, nil, nil, VUHDO_I18N_TT.K893 },
 	{ "Poison", VUHDO_I18N_POISON, nil, nil, VUHDO_I18N_TT.K894 },
 	{ "Bleed", VUHDO_I18N_BLEED, nil, nil, VUHDO_I18N_TT.K895 },
+	{ "Enrage", VUHDO_I18N_ENRAGE, nil, nil, VUHDO_I18N_TT.K897 },
 };
 
 VUHDO_AURA_GROUPS_ADD_SPELL_SELECTED = "";
@@ -144,9 +146,6 @@ VUHDO_AURA_FILTER_OPTIONS = {
 };
 
 local VUHDO_AURA_GROUP_TOOLTIPS = {
-	["OTHERS_HOTS"] = VUHDO_I18N_TT.K660,
-	["OTHERS_BUFFS"] = VUHDO_I18N_TT.K661,
-	["OTHERS_NAMEPLATE_DEBUFFS"] = VUHDO_I18N_TT.K662,
 	["PRESERVATION_EVOKER_HOTS"] = VUHDO_I18N_TT.K670,
 	["AUGMENTATION_EVOKER_BUFFS"] = VUHDO_I18N_TT.K671,
 	["RESTORATION_DRUID_HOTS"] = VUHDO_I18N_TT.K672,
@@ -164,10 +163,7 @@ local VUHDO_AURA_GROUP_TOOLTIPS = {
 	["ENHANCEMENT_SHAMAN_BUFFS"] = VUHDO_I18N_TT.K683,
 	["BREWMASTER_MONK_BUFFS"] = VUHDO_I18N_TT.K684,
 	["WARLOCK_METAMORPHOSIS"] = VUHDO_I18N_TT.K685,
-	["BOSS_DEBUFFS"] = VUHDO_I18N_TT.K856,
-	["PRIORITY_DEBUFFS"] = VUHDO_I18N_TT.K857,
 	["RELEVANT_DEBUFFS"] = VUHDO_I18N_TT.K862,
-	["TIMED_DEBUFFS"] = VUHDO_I18N_TT.K869,
 	["RELEVANT_BUFFS"] = VUHDO_I18N_TT.K858,
 };
 
@@ -211,6 +207,12 @@ VUHDO_AURA_GROUP_TYPE_OPTIONS = {
 	{ VUHDO_AURA_GROUP_TYPE_LIST, VUHDO_I18N_AURA_GROUP_TYPE_LIST },
 };
 
+VUHDO_AURA_GROUPS_SHOW_ON_OPTIONS = {
+	{ VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY, VUHDO_I18N_AURA_SHOW_ON_FRIENDLY },
+	{ VUHDO_AURA_GROUP_UNIT_SCOPE_HOSTILE, VUHDO_I18N_HOSTILE },
+	{ VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH, VUHDO_I18N_AURA_SHOW_ON_BOTH },
+};
+
 local VUHDO_AURA_GROUP_LIST_ENTRY_ROW_HEIGHT = 22;
 
 VUHDO_AURA_GROUPS_NEW_BOUQUET_SELECTED = "";
@@ -224,30 +226,6 @@ local sSpellEntrySettingsEntryIdx = nil;
 
 
 do
-	local sMatchAnyCandidateKeys = {
-		"isBossOrRoleAura",
-		"isBossAura",
-		"isRoleAura",
-		"isPriorityAura",
-		"isStealable",
-	};
-
-	local sMatchAllCandidateKeys = {
-		"isFromPlayerOrPlayerPet",
-		"canApplyAura",
-		"nameplateShowAll",
-		"nameplateShowPersonal",
-	};
-
-	local sMatchAnyFilterTokenOrder = {
-		"DISPELLABLE",
-		"RAID_PLAYER_DISPELLABLE",
-		"IMPORTANT",
-		"RAID",
-		"CROWD_CONTROL",
-		"CANCELABLE",
-	};
-
 	local sAuraConditionBooleanLabels = {
 		["isBossOrRoleAura"] = VUHDO_I18N_AURA_CONDITION_BOSS_OR_ROLE,
 		["isBossAura"] = VUHDO_I18N_AURA_CONDITION_BOSS_AURA,
@@ -310,6 +288,7 @@ do
 	local sPresetScratchMatchAll = { };
 	local sPresetScratchNeverShow = { };
 	local sPresetScratchAuras;
+	local sFilterParts = { };
 
 
 
@@ -319,18 +298,94 @@ do
 	local tDurationValue;
 	local tDurationLabel;
 	local tConditionTooltip;
+	local tCapability;
+	local function VUHDO_auraGroupsIsMatchAnyCondition(aKey)
+
+		tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[aKey];
+
+		if not tCapability or not tCapability["matchAny"] then
+			return false;
+		end
+
+		if tCapability["storage"] == "boolean" then
+			return sAuraConditionBooleanLabels[aKey] ~= nil;
+		end
+
+		return sAuraConditionTokenLabels[aKey] ~= nil;
+
+	end
+
+
+
+	--
+	local function VUHDO_auraGroupsBuildFilterString(aPolarity, aMatchAll, aNeverShow)
+
+		twipe(sFilterParts);
+
+		tinsert(sFilterParts, aPolarity);
+
+		for tCnt = 1, #VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS do
+			tTokenKey = VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS[tCnt];
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tTokenKey];
+
+			if tCapability and tCapability["matchAll"] and aMatchAll[tTokenKey] then
+				tinsert(sFilterParts, tTokenKey);
+			end
+		end
+
+		for tCnt = 1, #VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS do
+			tTokenKey = VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS[tCnt];
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tTokenKey];
+
+			if tCapability and tCapability["neverShow"] and aNeverShow[tTokenKey] then
+				tinsert(sFilterParts, "!" .. tTokenKey);
+			end
+		end
+
+		return tconcat(sFilterParts, "|");
+
+	end
+
+
+
+	--
+	local function VUHDO_getAuraConditionTokenLabel(aTokenKey)
+
+		if aTokenKey == "RAID_PLAYER_DISPELLABLE" then
+			if VUHDO_AURA_GROUPS_AURAS_SELECTED == "HELPFUL" then
+				return VUHDO_I18N_AURA_FILTER_HELPFUL_PURGEABLE;
+			end
+
+			return VUHDO_I18N_AURA_FILTER_HARMFUL_DISPELLABLE;
+		elseif aTokenKey == "DISPELLABLE" then
+			if VUHDO_AURA_GROUPS_AURAS_SELECTED == "HELPFUL" then
+				return VUHDO_I18N_AURA_FILTER_HELPFUL_ALL_PURGEABLE;
+			end
+
+			return VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE;
+		end
+
+		return sAuraConditionTokenLabels[aTokenKey];
+
+	end
+
+
+
+	--
 	function VUHDO_initAuraGroupConditionComboModels()
 
 		twipe(VUHDO_AURA_CONDITION_COMBO_MODEL);
 
-		for tBoolKey, tDurationLabel in pairs(sAuraConditionBooleanLabels) do
+		for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+			tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
+			tDurationLabel = sAuraConditionBooleanLabels[tBoolKey];
 			tConditionTooltip = sAuraConditionBooleanTooltips[tBoolKey];
 
 			tinsert(VUHDO_AURA_CONDITION_COMBO_MODEL, { tBoolKey, tDurationLabel, nil, nil, tConditionTooltip });
 		end
 
 		for _, tTokenKey in ipairs(VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS) do
-			tDurationLabel = sAuraConditionTokenLabels[tTokenKey];
+			tDurationLabel = VUHDO_getAuraConditionTokenLabel(tTokenKey);
 
 			if tDurationLabel then
 				tConditionTooltip = sAuraConditionTokenTooltips[tTokenKey];
@@ -523,6 +578,8 @@ do
 			return;
 		end
 
+		VUHDO_migrateAuraGroupConditions(aGroup);
+
 		VUHDO_AURA_GROUPS_AURAS_SELECTED = aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
 
 		if aGroup["maxDurationSeconds"] ~= nil then
@@ -534,10 +591,11 @@ do
 		tMatchAnyBooleans = aGroup["matchAnyBooleans"];
 
 		if tMatchAnyBooleans then
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
+				tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
 
-				if tMatchAnyBooleans[tBoolKey] == 1 then
+				if tCapability and tCapability["matchAny"] and tMatchAnyBooleans[tBoolKey] == 1 then
 					VUHDO_AURA_GROUPS_CONDITIONS["matchAny"][tBoolKey] = true;
 				end
 			end
@@ -546,10 +604,11 @@ do
 		tMatchAnyFilters = aGroup["matchAnyFilters"];
 
 		if tMatchAnyFilters then
-			for tCnt = 1, #sMatchAnyFilterTokenOrder do
-				tTokenKey = sMatchAnyFilterTokenOrder[tCnt];
+			for tCnt = 1, #VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER do
+				tTokenKey = VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER[tCnt];
+				tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tTokenKey];
 
-				if tMatchAnyFilters[tTokenKey] == 1 then
+				if tCapability and tCapability["matchAny"] and tMatchAnyFilters[tTokenKey] == 1 then
 					VUHDO_AURA_GROUPS_CONDITIONS["matchAny"][tTokenKey] = true;
 				end
 			end
@@ -558,31 +617,16 @@ do
 		tCandidateBooleans = aGroup["candidateBooleans"];
 
 		if tCandidateBooleans then
-			if not tMatchAnyBooleans then
-				for tCnt = 1, #sMatchAnyCandidateKeys do
-					tBoolKey = sMatchAnyCandidateKeys[tCnt];
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
+				tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
 
-					if tCandidateBooleans[tBoolKey] == 1 then
-						VUHDO_AURA_GROUPS_CONDITIONS["matchAny"][tBoolKey] = true;
+				if tCapability then
+					if tCandidateBooleans[tBoolKey] == 1 and tCapability["matchAll"] then
+						VUHDO_AURA_GROUPS_CONDITIONS["matchAll"][tBoolKey] = true;
+					elseif tCandidateBooleans[tBoolKey] == 3 and tCapability["neverShow"] then
+						VUHDO_AURA_GROUPS_CONDITIONS["neverShow"][tBoolKey] = true;
 					end
-				end
-			end
-
-			for tCnt = 1, #sMatchAllCandidateKeys do
-				tBoolKey = sMatchAllCandidateKeys[tCnt];
-
-				if tCandidateBooleans[tBoolKey] == 1 then
-					VUHDO_AURA_GROUPS_CONDITIONS["matchAll"][tBoolKey] = true;
-				elseif tCandidateBooleans[tBoolKey] == 3 then
-					VUHDO_AURA_GROUPS_CONDITIONS["neverShow"][tBoolKey] = true;
-				end
-			end
-
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
-
-				if tCandidateBooleans[tBoolKey] == 3 then
-					VUHDO_AURA_GROUPS_CONDITIONS["neverShow"][tBoolKey] = true;
 				end
 			end
 		end
@@ -641,7 +685,6 @@ do
 
 	--
 	local tExcludeDispelTypes;
-	local tFilterParts;
 	function VUHDO_auraGroupsWriteConditions(aGroup)
 
 		if not aGroup or (aGroup["type"] or VUHDO_AURA_GROUP_TYPE_FILTER) ~= VUHDO_AURA_GROUP_TYPE_FILTER then
@@ -657,13 +700,8 @@ do
 		tMatchAnyFilters = aGroup["matchAnyFilters"];
 
 		if tCandidateBooleans then
-			for tCnt = 1, #sMatchAllCandidateKeys do
-				tBoolKey = sMatchAllCandidateKeys[tCnt];
-				tCandidateBooleans[tBoolKey] = nil;
-			end
-
-			for tCnt = 1, #sMatchAnyCandidateKeys do
-				tBoolKey = sMatchAnyCandidateKeys[tCnt];
+			for tCnt = 1, #VUHDO_AURA_CONDITION_BOOLEAN_KEYS do
+				tBoolKey = VUHDO_AURA_CONDITION_BOOLEAN_KEYS[tCnt];
 				tCandidateBooleans[tBoolKey] = nil;
 			end
 		else
@@ -685,21 +723,27 @@ do
 		twipe(tMatchAnyFilters);
 
 		for tBoolKey, _ in pairs(tMatchAll) do
-			if sAuraConditionBooleanLabels[tBoolKey] then
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
+
+			if tCapability and tCapability["storage"] == "boolean" and tCapability["matchAll"] then
 				tCandidateBooleans[tBoolKey] = 1;
 			end
 		end
 
 		for tBoolKey, _ in pairs(tNeverShow) do
-			if sAuraConditionBooleanLabels[tBoolKey] then
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
+
+			if tCapability and tCapability["storage"] == "boolean" and tCapability["neverShow"] then
 				tCandidateBooleans[tBoolKey] = 3;
 			end
 		end
 
 		for tBoolKey, _ in pairs(tMatchAny) do
-			if sAuraConditionBooleanLabels[tBoolKey] then
+			tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[tBoolKey];
+
+			if tCapability and tCapability["storage"] == "boolean" and tCapability["matchAny"] then
 				tMatchAnyBooleans[tBoolKey] = 1;
-			elseif VUHDO_AURA_MATCH_ANY_FILTER_TOKENS[tBoolKey] then
+			elseif tCapability and tCapability["storage"] == "filterToken" and tCapability["matchAny"] then
 				tMatchAnyFilters[tBoolKey] = 1;
 			end
 		end
@@ -716,21 +760,8 @@ do
 			aGroup["matchAnyFilters"] = nil;
 		end
 
-		tFilterParts = { VUHDO_AURA_GROUPS_AURAS_SELECTED };
-
-		for tTokenKey, _ in pairs(tMatchAll) do
-			if sAuraConditionTokenLabels[tTokenKey] then
-				tinsert(tFilterParts, tTokenKey);
-			end
-		end
-
-		for tTokenKey, _ in pairs(tNeverShow) do
-			if sAuraConditionTokenLabels[tTokenKey] and not sNonNegatableFilterTokens[tTokenKey] then
-				tinsert(tFilterParts, "!" .. tTokenKey);
-			end
-		end
-
-		aGroup["filter"] = tconcat(tFilterParts, "|");
+		aGroup["filter"] = VUHDO_auraGroupsBuildFilterString(VUHDO_AURA_GROUPS_AURAS_SELECTED, tMatchAll, tNeverShow);
+		aGroup["conditionsVersion"] = VUHDO_AURA_GROUP_CONDITIONS_VERSION;
 		aGroup["isHarmful"] = VUHDO_AURA_GROUPS_AURAS_SELECTED == "HARMFUL";
 
 		aGroup["excludeFilter"] = tNeverShow["PLAYER"] and "PLAYER" or nil;
@@ -785,7 +816,7 @@ do
 		tMatchAnyCount = 0;
 
 		for tBoolKey, _ in pairs(VUHDO_AURA_GROUPS_CONDITIONS["matchAny"]) do
-			if sAuraConditionBooleanLabels[tBoolKey] or VUHDO_AURA_MATCH_ANY_FILTER_TOKENS[tBoolKey] then
+			if VUHDO_auraGroupsIsMatchAnyCondition(tBoolKey) then
 				tMatchAnyCount = tMatchAnyCount + 1;
 			end
 		end
@@ -811,6 +842,8 @@ do
 		tMatchAll = VUHDO_AURA_GROUPS_CONDITIONS["matchAll"];
 		tNeverShow = VUHDO_AURA_GROUPS_CONDITIONS["neverShow"];
 
+		tCapability = VUHDO_AURA_CONDITION_CAPABILITIES[aValue];
+
 		if tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAny" and tMatchAny[aValue] then
 			return false;
 		elseif tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAll" and tMatchAll[aValue] then
@@ -820,6 +853,10 @@ do
 		end
 
 		if tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAny" then
+			if not tCapability or not tCapability["matchAny"] then
+				return true;
+			end
+
 			if tMatchAll[aValue] or tNeverShow[aValue] then
 				return true;
 			end
@@ -839,7 +876,7 @@ do
 			tMatchAnyCount = 0;
 
 			for tBoolKey, _ in pairs(tMatchAny) do
-				if sAuraConditionBooleanLabels[tBoolKey] or VUHDO_AURA_MATCH_ANY_FILTER_TOKENS[tBoolKey] then
+				if VUHDO_auraGroupsIsMatchAnyCondition(tBoolKey) then
 					tMatchAnyCount = tMatchAnyCount + 1;
 				end
 			end
@@ -848,6 +885,10 @@ do
 				return true;
 			end
 		elseif tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.matchAll" then
+			if not tCapability or not tCapability["matchAll"] then
+				return true;
+			end
+
 			if tMatchAny[aValue] or tNeverShow[aValue] then
 				return true;
 			end
@@ -856,6 +897,10 @@ do
 				return true;
 			end
 		elseif tChangedModel == "VUHDO_AURA_GROUPS_CONDITIONS.neverShow" then
+			if not tCapability or not tCapability["neverShow"] then
+				return true;
+			end
+
 			if tMatchAny[aValue] or tMatchAll[aValue] then
 				return true;
 			end
@@ -1230,6 +1275,8 @@ do
 	local tNameLabel;
 	local tTypeCombo;
 	local tTypeLabel;
+	local tShowOnCombo;
+	local tShowOnLabel;
 	local tAurasCombo;
 	local tPresetCombo;
 	local tAurasLabel;
@@ -1274,6 +1321,8 @@ do
 		tNameLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelNameLabel"];
 		tTypeLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelTypeLabel"];
 		tTypeCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelTypeCombo"];
+		tShowOnLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelShowOnLabel"];
+		tShowOnCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelShowOnCombo"];
 		tAurasLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelAurasLabel"];
 		tPresetLabel = _G["VuhDoNewOptionsAuraGroupsStorePanelPresetLabel"];
 		tAurasCombo = _G["VuhDoNewOptionsAuraGroupsStorePanelAurasCombo"];
@@ -1311,13 +1360,16 @@ do
 
 		if tNameEditBox and tGroup then
 			tNameEditBox:Show();
+
 			if tIsBuiltIn then
 				tNameEditBox:SetText(VUHDO_getAuraGroupDisplayName(sSelectedGroupId) or "");
+				tNameEditBox:SetCursorPosition(0);
 
 				tNameEditBox:Disable();
 				tNameEditBox:SetAlpha(0.5);
 			else
 				tNameEditBox:SetText(tGroup["displayName"] or "");
+				tNameEditBox:SetCursorPosition(0);
 
 				tNameEditBox:Enable();
 				tNameEditBox:SetAlpha(1);
@@ -1353,6 +1405,30 @@ do
 			else
 				tTypeLabel:Hide();
 				tTypeCombo:Hide();
+			end
+		end
+
+		if tShowOnLabel and tShowOnCombo then
+			if tGroup then
+				tShowOnLabel:Show();
+				tShowOnCombo:Show();
+
+				VUHDO_AURA_GROUPS_SHOW_ON = tGroup["unitScope"] or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+
+				VUHDO_lnfComboBoxInitFromModel(tShowOnCombo);
+
+				if tIsBuiltIn then
+					tShowOnLabel:SetAlpha(0.5);
+					tShowOnCombo:Disable();
+					tShowOnCombo:SetAlpha(0.5);
+				else
+					tShowOnLabel:SetAlpha(1);
+					tShowOnCombo:Enable();
+					tShowOnCombo:SetAlpha(1);
+				end
+			else
+				tShowOnLabel:Hide();
+				tShowOnCombo:Hide();
 			end
 		end
 
@@ -1858,6 +1934,7 @@ do
 			VUHDO_AURA_GROUPS_CAN_COLOR_TEXT = false;
 			VUHDO_AURA_GROUPS_CAN_GLOW_BAR = false;
 			VUHDO_AURA_GROUPS_SOUND = nil;
+			VUHDO_AURA_GROUPS_SHOW_ON = VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
 
 			if tNameEditBox then
 				tNameEditBox:Show();
@@ -1971,6 +2048,19 @@ do
 
 				VUHDO_lnfCheckButtonInitFromModel(tEnabledCheck);
 			end
+
+			if tShowOnCombo then
+				tShowOnCombo:Show();
+				tShowOnCombo:Disable();
+				tShowOnCombo:SetAlpha(0.5);
+
+				VUHDO_lnfComboBoxInitFromModel(tShowOnCombo);
+			end
+
+			if tShowOnLabel then
+				tShowOnLabel:Show();
+				tShowOnLabel:SetAlpha(0.5);
+			end
 		end
 
 		return;
@@ -2009,6 +2099,7 @@ function VUHDO_auraGroupsOnNewGroup()
 		["glowBarStyle"] = nil,
 		["glowBarColor"] = nil,
 		["enabled"] = true,
+		["unitScope"] = VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY,
 		["displayName"] = VUHDO_ensureUniqueAuraGroupDisplayName(VUHDO_I18N_NEW .. " " .. VUHDO_I18N_GROUP),
 		["isHarmful"] = false,
 		["sound"] = nil,
@@ -2196,6 +2287,8 @@ function VUHDO_auraGroupsAurasChanged(aComboBox, aValue, anArrayModel)
 
 	VUHDO_auraGroupsClearPresetSelection();
 
+	VUHDO_initAuraGroupConditionComboModels();
+
 	VUHDO_timeRebuildAuraGroups(0.3);
 
 	return;
@@ -2343,9 +2436,26 @@ end
 
 
 --
+local tRootPane;
+local tCombo;
+local tEditBox;
+local function VUHDO_getAuraGroupsIgnoreListWidgets()
+
+	tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrame"];
+
+	tRootPane = tFrame and _G[tFrame:GetName() .. "RootPane"];
+	tCombo = tRootPane and _G[tRootPane:GetName() .. "IgnoreCombo"];
+	tEditBox = tCombo and _G[tCombo:GetName() .. "EditBox"];
+
+	return tRootPane, tCombo, tEditBox;
+
+end
+
+
+
+--
 local tGroup;
 local tIgnoreList;
-local tSpellNameById;
 local tDisplayName;
 local tFrame;
 local function VUHDO_initAuraGroupsIgnorePanel()
@@ -2371,31 +2481,19 @@ local function VUHDO_initAuraGroupsIgnorePanel()
 	VUHDO_AURA_GROUPS_IGNORE_SELECTED = "";
 
 	for tName, _ in pairs(tIgnoreList) do
-		tSpellNameById = VUHDO_resolveSpellId(tName);
-
-		if (tSpellNameById ~= tName) then
-			tDisplayName = "[" .. tName .. "] " .. tSpellNameById;
-		else
-			tDisplayName = tName;
-		end
+		tDisplayName = VUHDO_formatAuraSpellDisplayName(tName);
 
 		tinsert(VUHDO_AURA_GROUPS_IGNORE_COMBO_MODEL, { tName, tDisplayName });
 	end
 
-	tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrame"];
+	_, tCombo, tEditBox = VUHDO_getAuraGroupsIgnoreListWidgets();
 
-	if tFrame then
-		tFrame = _G[tFrame:GetName() .. "IgnoreComboEditBox"];
+	if tEditBox then
+		tEditBox:SetText("");
+	end
 
-		if tFrame then
-			tFrame:SetText("");
-		end
-
-		tFrame = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreCombo"];
-
-		if tFrame then
-			VUHDO_lnfComboBoxInitFromModel(tFrame);
-		end
+	if tCombo then
+		VUHDO_lnfComboBoxInitFromModel(tCombo);
 	end
 
 	tFrame = _G["VuhDoNewOptionsAuraGroupsStorePanelGroupCombo"];
@@ -2427,7 +2525,6 @@ local tText;
 local tKey;
 local tGroup;
 local tDisplayName;
-local tEditBox;
 function VUHDO_auraGroupsIgnoreAdd()
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -2440,7 +2537,7 @@ function VUHDO_auraGroupsIgnoreAdd()
 		return;
 	end
 
-	tEditBox = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreComboEditBox"];
+	_, _, tEditBox = VUHDO_getAuraGroupsIgnoreListWidgets();
 
 	if not tEditBox then
 		return;
@@ -2475,6 +2572,8 @@ function VUHDO_auraGroupsIgnoreAdd()
 
 	tEditBox:SetText("");
 
+	VUHDO_invalidateAuraGroupFilterCache();
+
 	VUHDO_auraGroupsRefreshIgnorePanel();
 
 	return;
@@ -2489,7 +2588,6 @@ local tSpellId;
 local tKeyToRemove;
 local tGroup;
 local tDisplayName;
-local tComboEditBox;
 function VUHDO_auraGroupsIgnoreDelete()
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -2502,13 +2600,13 @@ function VUHDO_auraGroupsIgnoreDelete()
 		return;
 	end
 
-	tComboEditBox = _G["VuhDoNewOptionsAuraGroupsIgnoreListSettingsFrameIgnoreComboEditBox"];
+	_, _, tEditBox = VUHDO_getAuraGroupsIgnoreListWidgets();
 
-	if not tComboEditBox then
+	if not tEditBox then
 		return;
 	end
 
-	tText = tComboEditBox:GetText();
+	tText = tEditBox:GetText();
 
 	if not tText or tText == "" then
 		return;
@@ -2547,6 +2645,8 @@ function VUHDO_auraGroupsIgnoreDelete()
 		VUHDO_Msg(string.format(VUHDO_I18N_AURA_DOES_NOT_EXIST_IN_IGNORE_LIST, tDisplayName));
 	end
 
+	VUHDO_invalidateAuraGroupFilterCache();
+
 	VUHDO_auraGroupsRefreshIgnorePanel();
 
 	return;
@@ -2567,6 +2667,41 @@ function VUHDO_auraGroupsColorTypeChanged(aComboBox, aValue, anArrayModel)
 	end
 
 	VUHDO_auraGroupsRefreshRightPanel();
+	VUHDO_timeRebuildAuraGroups(0.3);
+	VUHDO_timeRegisterBouquets(0.3);
+
+	return;
+
+end
+
+
+
+--
+local tShowOnGroup;
+local tShowOnScope;
+function VUHDO_auraGroupsShowOnChanged(aComboBox, aValue, anArrayModel)
+
+	if sRefreshDepth > 0 then
+		return;
+	end
+
+	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
+		return;
+	end
+
+	tShowOnGroup = VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId];
+	tShowOnScope = aValue or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH;
+
+	if (tShowOnGroup["unitScope"] or VUHDO_AURA_GROUP_UNIT_SCOPE_BOTH) == tShowOnScope then
+		return;
+	end
+
+	tShowOnGroup["unitScope"] = tShowOnScope;
+
+	VUHDO_invalidateAuraContainerTemplateCache();
+
+	VUHDO_auraGroupsRefreshRightPanel();
+
 	VUHDO_timeRebuildAuraGroups(0.3);
 	VUHDO_timeRegisterBouquets(0.3);
 

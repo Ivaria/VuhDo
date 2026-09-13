@@ -32,12 +32,13 @@ VUHDO_INIT_PURGE_ABILITIES = {
 	["PALADIN"] = { },
 	["PRIEST"] = {
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { 528 }, -- VUHDO_SPELL_ID.DISPEL_MAGIC
+		-- [VUHDO_DEBUFF_TYPE_MAGIC] = { 528, 32375 }, -- VUHDO_SPELL_ID.DISPEL_MAGIC, VUHDO_SPELL_ID.MASS_DISPEL
 	},
 	["SHAMAN"] = {
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { 370, 378773 }, -- VUHDO_SPELL_ID.PURGE, VUHDO_SPELL_ID.GREATER_PURGE
 	},
 	["WARLOCK"] = {
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { "*" }, -- VUHDO_SPELL_ID.DEVOUR_MAGIC 19505
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 19505 }, -- VUHDO_SPELL_ID.DEVOUR_MAGIC (Felhunter pet)
 	},
 	["DEATHKNIGHT"] = { },
 	["MONK"] = {
@@ -76,6 +77,7 @@ VUHDO_INIT_DISPEL_ABILITIES = {
 		-- Priest talent 'Improved Purify' (390632) is now needed to dispel 'Disease'
 		[VUHDO_DEBUFF_TYPE_DISEASE] = { 213634, 390632 }, --  VUHDO_SPELL_ID.PURIFY_DISEASE, VUHDO_SPELL_ID.IMPROVED_PURIFY
 		[VUHDO_DEBUFF_TYPE_MAGIC] = { 527 }, -- VUHDO_SPELL_ID.PURIFY
+		-- [VUHDO_DEBUFF_TYPE_MAGIC] = { 527, 32375 }, -- VUHDO_SPELL_ID.PURIFY, VUHDO_SPELL_ID.MASS_DISPEL
 	},
 	["SHAMAN"] = {
 		-- Shaman has two dispel spells with the same name ("Purify Spirit") so need to reference by ID
@@ -84,7 +86,7 @@ VUHDO_INIT_DISPEL_ABILITIES = {
 		[VUHDO_DEBUFF_TYPE_POISON] = { 383013 }, -- VUHDO_SPELL_ID.POISON_CLEANSING_TOTEM
 	},
 	["WARLOCK"] = {
-		[VUHDO_DEBUFF_TYPE_MAGIC] = { "*" },
+		[VUHDO_DEBUFF_TYPE_MAGIC] = { 89808 }, -- VUHDO_SPELL_ID.SINGE_MAGIC (Imp pet)
 	},
 	["DEATHKNIGHT"] = { },
 	["MONK"] = {
@@ -116,6 +118,7 @@ VUHDO_SPEC_TO_DEBUFF_ABIL = {
 	[388874] = GetSpellName(115450), -- Monk 'Improved Detox' must be mapped to 'Detox'
 	[383016] = GetSpellName(77130), -- Shaman 'Improved Purify Spirit' must be mapped to 'Purify Spirit'
 	[378773] = GetSpellName(370), -- Shaman 'Greater Purge' must be mapped to 'Purge'
+	[450432] = GetSpellName(115078), -- Monk 'Pressure Points' must be mapped to 'Paralysis'
 };
 
 

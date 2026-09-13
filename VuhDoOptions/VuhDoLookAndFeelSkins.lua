@@ -222,29 +222,16 @@ local sOriginalBackdropFiles = { };
 local sEmpty = { };
 
 local sIsCjkLocale = GetLocale() == "zhCN" or GetLocale() == "zhTW" or GetLocale() == "koKR";
-local sCjkFontPath;
+local sCjkFont = {
+	["size"] = 12,
+};
 
 local sCjkButtonFontNames = {
-	{
-		["name"] = "VuDoButtonFont",
-		["height"] = 8,
-	},
-	{
-		["name"] = "VuDoButtonFontLight",
-		["height"] = 8,
-	},
-	{
-		["name"] = "VuDoButtonFontDark",
-		["height"] = 8,
-	},
-	{
-		["name"] = "VuDoButtonFontBig",
-		["height"] = 12,
-	},
-	{
-		["name"] = "VuDoButtonFontBigLight",
-		["height"] = 12,
-	},
+	"VuDoButtonFont",
+	"VuDoButtonFontLight",
+	"VuDoButtonFontDark",
+	"VuDoButtonFontBig",
+	"VuDoButtonFontBigLight",
 };
 
 local sNativeTextures = { };
@@ -981,13 +968,17 @@ local function VUHDO_lnfSkinStyleFontFace(aRegion)
 
 	tEntry = VUHDO_lnfSkinSnapshotFontString(aRegion);
 
-	if not tEntry or type(tEntry["fontSize"]) ~= "number" or tEntry["fontSize"] <= 0 then
+	if not tEntry then
 		return;
 	end
 
 	if sIsCjkLocale then
-		aRegion:SetFont(sCjkFontPath, tEntry["fontSize"], tEntry["fontFlags"] or "");
+		aRegion:SetFont(sCjkFont["path"], sCjkFont["size"], tEntry["fontFlags"] or "");
 
+		return;
+	end
+
+	if type(tEntry["fontSize"]) ~= "number" or tEntry["fontSize"] <= 0 then
 		return;
 	end
 
@@ -4250,14 +4241,14 @@ function VUHDO_lnfSkinInit()
 	end
 
 	if sIsCjkLocale then
-		sCjkFontPath = VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME);
+		sCjkFont["path"] = VUHDO_getSafeFontPath(VUHDO_OPTIONS_FONT_NAME);
 
 		for tCnt = 1, #sCjkButtonFontNames do
-			tName = sCjkButtonFontNames[tCnt]["name"];
+			tName = sCjkButtonFontNames[tCnt];
 
 			_, _, tFontFlags = _G[tName]:GetFont();
 
-			_G[tName]:SetFont(sCjkFontPath, sCjkButtonFontNames[tCnt]["height"], tFontFlags or "");
+			_G[tName]:SetFont(sCjkFont["path"], sCjkFont["size"], tFontFlags or "");
 		end
 	end
 
