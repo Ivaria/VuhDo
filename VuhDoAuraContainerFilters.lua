@@ -460,7 +460,6 @@ do
 	local tBranchBase;
 	local tBranchIsNegated;
 	local tBranchEmit;
-	local tBranchHasCategory;
 	function VUHDO_buildAuraGroupBranchFilterString(aBaseFilterString, aMatchAnyShows, aBranchIndex)
 
 		if not aBaseFilterString or not aMatchAnyShows or not aBranchIndex then
@@ -551,7 +550,6 @@ do
 	local tDroppedBranchTokens;
 	local tExpressible;
 	local tSpellIds;
-	local tFilter;
 	local tDispelTypes;
 	local tDispelSnapshot;
 	function VUHDO_isAuraGroupContainerExpressible(aGroup)
@@ -675,8 +673,6 @@ do
 
 
 	--
-	local tAllDispelSnapshot;
-	local tDispelName;
 	function VUHDO_intersectCandidateIncludeDispelTypes(aCandidate, aSnapshot)
 
 		if not aSnapshot then
@@ -806,15 +802,7 @@ do
 		if aGroup["allDispel"] then
 			aCandidate = aCandidate or { };
 
-			tAllDispelSnapshot = {
-				["Magic"] = true,
-				["Curse"] = true,
-				["Disease"] = true,
-				["Poison"] = true,
-				["Bleed"] = true,
-			};
-
-			VUHDO_intersectCandidateIncludeDispelTypes(aCandidate, tAllDispelSnapshot);
+			VUHDO_intersectCandidateIncludeDispelTypes(aCandidate, VUHDO_getAllDispelTypeNames());
 		end
 
 		if aGroup["dispellableOnly"] == "harmful" then

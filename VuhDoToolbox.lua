@@ -1084,11 +1084,14 @@ function VUHDO_isSpellKnown(aSpellName)
 	if type(aSpellName) == "number" then
 		if IsSpellInSpellBook then
 			return IsSpellInSpellBook(aSpellName, SpellBookSpellBank.Player, true)
-				or (IsSpellKnownNew and IsSpellKnownNew(aSpellName, SpellBookSpellBank.Player));
+				or (IsSpellKnownNew and IsSpellKnownNew(aSpellName, SpellBookSpellBank.Player))
+				or (SpellBookSpellBank.Pet and (IsSpellInSpellBook(aSpellName, SpellBookSpellBank.Pet, true) or (IsSpellKnownNew and IsSpellKnownNew(aSpellName, SpellBookSpellBank.Pet))))
+				or VUHDO_isTalentKnown(aSpellName);
 		else
 			return IsSpellKnown(aSpellName)
 				or IsSpellKnownOrOverridesKnown(aSpellName)
-				or IsPlayerSpell(aSpellName);
+				or IsPlayerSpell(aSpellName)
+				or VUHDO_isTalentKnown(aSpellName);
 		end
 	elseif type(aSpellName) ~= "number" then
 		aSpellName = VUHDO_NAME_TO_SPELL[aSpellName] or aSpellName;

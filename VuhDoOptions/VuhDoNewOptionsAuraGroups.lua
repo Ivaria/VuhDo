@@ -71,6 +71,7 @@ VUHDO_AURA_EXCLUDE_DISPEL_OPTIONS = {
 	{ "Disease", VUHDO_I18N_DISEASE, nil, nil, VUHDO_I18N_TT.K893 },
 	{ "Poison", VUHDO_I18N_POISON, nil, nil, VUHDO_I18N_TT.K894 },
 	{ "Bleed", VUHDO_I18N_BLEED, nil, nil, VUHDO_I18N_TT.K895 },
+	{ "Enrage", VUHDO_I18N_ENRAGE, nil, nil, VUHDO_I18N_TT.K897 },
 };
 
 VUHDO_AURA_GROUPS_ADD_SPELL_SELECTED = "";
@@ -348,6 +349,29 @@ do
 
 
 	--
+	local function VUHDO_getAuraConditionTokenLabel(aTokenKey)
+
+		if aTokenKey == "RAID_PLAYER_DISPELLABLE" then
+			if VUHDO_AURA_GROUPS_AURAS_SELECTED == "HELPFUL" then
+				return VUHDO_I18N_AURA_FILTER_HELPFUL_PURGEABLE;
+			end
+
+			return VUHDO_I18N_AURA_FILTER_HARMFUL_DISPELLABLE;
+		elseif aTokenKey == "DISPELLABLE" then
+			if VUHDO_AURA_GROUPS_AURAS_SELECTED == "HELPFUL" then
+				return VUHDO_I18N_AURA_FILTER_HELPFUL_ALL_PURGEABLE;
+			end
+
+			return VUHDO_I18N_AURA_FILTER_HARMFUL_ALL_DISPELLABLE;
+		end
+
+		return sAuraConditionTokenLabels[aTokenKey];
+
+	end
+
+
+
+	--
 	function VUHDO_initAuraGroupConditionComboModels()
 
 		twipe(VUHDO_AURA_CONDITION_COMBO_MODEL);
@@ -361,7 +385,7 @@ do
 		end
 
 		for _, tTokenKey in ipairs(VUHDO_AURA_CONDITION_FILTER_TOKEN_KEYS) do
-			tDurationLabel = sAuraConditionTokenLabels[tTokenKey];
+			tDurationLabel = VUHDO_getAuraConditionTokenLabel(tTokenKey);
 
 			if tDurationLabel then
 				tConditionTooltip = sAuraConditionTokenTooltips[tTokenKey];
@@ -2262,6 +2286,8 @@ function VUHDO_auraGroupsAurasChanged(aComboBox, aValue, anArrayModel)
 	VUHDO_auraGroupsWriteConditions(tGroup);
 
 	VUHDO_auraGroupsClearPresetSelection();
+
+	VUHDO_initAuraGroupConditionComboModels();
 
 	VUHDO_timeRebuildAuraGroups(0.3);
 

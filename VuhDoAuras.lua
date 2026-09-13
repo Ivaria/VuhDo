@@ -710,8 +710,13 @@ do
 
 		if tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_FRIENDLY then
 			aEntry["friendlyOnly"] = true;
+			aEntry["hostileOnly"] = nil;
 		elseif tUnitScope == VUHDO_AURA_GROUP_UNIT_SCOPE_HOSTILE then
 			aEntry["hostileOnly"] = true;
+			aEntry["friendlyOnly"] = nil;
+		else
+			aEntry["friendlyOnly"] = nil;
+			aEntry["hostileOnly"] = nil;
 		end
 
 		return;

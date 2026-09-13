@@ -185,7 +185,7 @@ local sAuraSymbolOptions = {
 local sDispelOverlayIconOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.Icon,
 	["showWhenHarmful"] = true,
-	["showWhenHelpful"] = false,
+	["showWhenHelpful"] = true,
 };
 
 local sAuraOpaqueBorderOptions = {
