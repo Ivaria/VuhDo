@@ -6,6 +6,7 @@ local next = next;
 local strfind = string.find;
 local tostring = tostring;
 local twipe = table.wipe;
+local format = string.format;
 local min = math.min;
 
 local InCombatLockdown = InCombatLockdown;
@@ -114,6 +115,8 @@ local sOverlayBuild = {
 	["plannedContainerSpecs"] = { },
 	["plannedContainerOrder"] = { },
 	["plannedContainerSet"] = { },
+	["chainGroupKeySet"] = { },
+	["sublevelAllocByKey"] = { },
 };
 
 local sDispelNameHostile = {
@@ -854,6 +857,7 @@ do
 	local tItemColor;
 	local tHostileEntry;
 	local tDispelTypeNames;
+	local tBranchEntryStart;
 	local function VUHDO_buildAuraGroupOverlayEntries(aGroup, aGroupKey, aEffectiveColorType, aCustomColor, aItem, aOverlayTarget, aBouquetIdx, aShadowValueMode, aBaseProduct)
 
 		twipe(sOverlayBuild["groupOverlayEntries"]);
@@ -874,6 +878,8 @@ do
 		end
 
 		for tBranchIdx = 1, #tCandidateBranches do
+			tBranchEntryStart = #sOverlayBuild["groupOverlayEntries"] + 1;
+
 			tCandidateFilters = VUHDO_copyOverlayCandidateFilters(tCandidateBranches[tBranchIdx], nil);
 			tFilterString = (tBranchFilterStrings and tBranchFilterStrings[tBranchIdx]) or tResolved["filterString"];
 
@@ -1139,6 +1145,10 @@ do
 					sOverlayBuild["groupOverlayEntries"][#sOverlayBuild["groupOverlayEntries"] + 1] = tOverlayEntry;
 				end
 			end
+
+			for tBranchStampIdx = tBranchEntryStart, #sOverlayBuild["groupOverlayEntries"] do
+				sOverlayBuild["groupOverlayEntries"][tBranchStampIdx]["branchIdx"] = tBranchIdx;
+			end
 		end
 
 		return sOverlayBuild["groupOverlayEntries"];
@@ -1211,6 +1221,8 @@ do
 		end
 
 		for tBranchIdx = 1, #tCandidateBranches do
+			tBranchEntryStart = #sOverlayBuild["canColorGroupEntries"] + 1;
+
 			tCandidateFilters = VUHDO_copyOverlayCandidateFilters(tCandidateBranches[tBranchIdx], nil);
 			tFilterString = (tBranchFilterStrings and tBranchFilterStrings[tBranchIdx]) or tResolved["filterString"];
 
@@ -1302,6 +1314,10 @@ do
 				if tHostileEntry then
 					sOverlayBuild["canColorGroupEntries"][#sOverlayBuild["canColorGroupEntries"] + 1] = tHostileEntry;
 				end
+			end
+
+			for tBranchStampIdx = tBranchEntryStart, #sOverlayBuild["canColorGroupEntries"] do
+				sOverlayBuild["canColorGroupEntries"][tBranchStampIdx]["branchIdx"] = tBranchIdx;
 			end
 		end
 
@@ -1596,6 +1612,21 @@ do
 
 
 	--
+	local function VUHDO_finalizeOverlayBranchEntryKey(anEntry)
+
+		anEntry["sublevelKey"] = anEntry["entryKey"];
+
+		if (anEntry["branchIdx"] or 1) > 1 then
+			anEntry["entryKey"] = format("%s:b%d", anEntry["entryKey"], anEntry["branchIdx"]);
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tBouquet;
 	local tGroupEntries;
 	local tItem;
@@ -1672,6 +1703,8 @@ do
 							tOverlayEntry["entryKey"] = tOverlayEntry["entryKey"] .. ":friendly";
 						end
 
+						VUHDO_finalizeOverlayBranchEntryKey(tOverlayEntry);
+
 						VUHDO_appendOverlayEntryWithVariants(tOverlayEntries, tOverlayEntry, tShadowValueMode, tGateValidators);
 					end
 
@@ -1698,6 +1731,8 @@ do
 							elseif tOverlayEntry["friendlyOnly"] then
 								tOverlayEntry["entryKey"] = tOverlayEntry["entryKey"] .. ":friendly";
 							end
+
+							VUHDO_finalizeOverlayBranchEntryKey(tOverlayEntry);
 
 							VUHDO_appendOverlayEntryWithVariants(tOverlayEntries, tOverlayEntry, tShadowValueMode, tGateValidators);
 						end
@@ -1838,6 +1873,8 @@ do
 	local tBarButtonSetup;
 	local tBorderButtonSetup;
 	local tSlotCount;
+	local tSublevelKey;
+	local tCachedSublevels;
 	function VUHDO_stampOverlayEntriesFromPrototypes(aPrototypes, aPanelNum, anIndicatorKey, aButton, aTargetFrame)
 
 		if not aPrototypes or not aTargetFrame then
@@ -1862,6 +1899,7 @@ do
 		end
 
 		twipe(sOverlayBuild["stampedEntries"]);
+		twipe(sOverlayBuild["sublevelAllocByKey"]);
 
 		for tCnt = 1, #aPrototypes do
 			tOverlayEntry = { };
@@ -1878,7 +1916,15 @@ do
 				tSlotCount = 1;
 			end
 
-			tOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aTargetFrame, tSlotCount, anIndicatorKey);
+			tSublevelKey = tOverlayEntry["sublevelKey"] or tOverlayEntry["entryKey"];
+			tCachedSublevels = sOverlayBuild["sublevelAllocByKey"][tSublevelKey];
+
+			if tCachedSublevels then
+				tOverlayEntry["sublevelSlots"] = tCachedSublevels;
+			else
+				tOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aTargetFrame, tSlotCount, anIndicatorKey);
+				sOverlayBuild["sublevelAllocByKey"][tSublevelKey] = tOverlayEntry["sublevelSlots"];
+			end
 
 			if tOverlayEntry["auraGroupBarGlow"] then
 				tOverlayEntry["unitButton"] = aButton;
@@ -2383,10 +2429,14 @@ do
 	local tContainerParent;
 	local tFrameLevelOffset;
 	local tOverlayHostFrame;
+	local tChainGroupKeyBase;
+	local tChainGroupKey;
 	function VUHDO_buildOverlayChainContainerTemplate(aButton, aTargetFrame, aFillEntries, anIndicatorKey)
 
 		tChainGroups = { };
 		tChainGroupMeta = { };
+
+		twipe(sOverlayBuild["chainGroupKeySet"]);
 
 		for tChainIdx = 1, #aFillEntries do
 			tChainFillEntry = aFillEntries[tChainIdx];
@@ -2395,8 +2445,17 @@ do
 			tChainButtonSetup = VUHDO_buildOverlayButtonSetup(aTargetFrame, tChainFillEntry);
 			tChainLayoutIndex = #tChainGroups + 1;
 
+			tChainGroupKeyBase = "chain_" .. tChainEntryKey;
+			tChainGroupKey = tChainGroupKeyBase;
+
+			if sOverlayBuild["chainGroupKeySet"][tChainGroupKey] then
+				tChainGroupKey = format("%s:d%d", tChainGroupKeyBase, tChainIdx);
+			end
+
+			sOverlayBuild["chainGroupKeySet"][tChainGroupKey] = true;
+
 			tChainGroupTemplate = {
-				["key"] = "chain_" .. tChainEntryKey,
+				["key"] = tChainGroupKey,
 				["filterString"] = tChainFillEntry["filterString"],
 				["candidateFilters"] = tChainFillEntry["candidateFilters"],
 				["templateName"] = tChainFillEntry["templateName"] or VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE,
@@ -3119,6 +3178,10 @@ do
 									["entryKey"] = "glow:" .. tBarGlowGroupId .. tBarGlowFilterSpec["entryKeySuffix"],
 									["frameLevelOffset"] = 8 + (#tBarGlowCanColorBarGroups - tGroupCnt),
 								};
+
+								if tBarGlowBranchIdx > 1 then
+									tBarGlowEntry["entryKey"] = format("%s:b%d", tBarGlowEntry["entryKey"], tBarGlowBranchIdx);
+								end
 
 								if tBarGlowEntry["glowColorType"] == VUHDO_AURA_GROUP_COLOR_CUSTOM then
 									tBarGlowColor = tBarGlowGroup["glowBarColor"];
