@@ -3840,7 +3840,7 @@ VUHDO_DEFAULT_AURA_ANCHORS = {
 		},
 	},
 	["2"] = {
-		["groupId"] = "DISPELLABLE",
+		["groupId"] = "RELEVANT_DEBUFFS",
 		["enabled"] = true,
 		["radioValue"] = 17,
 		["offsetX"] = 0,
