@@ -1529,8 +1529,6 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 		return;
 	end
 
-	tButtonName = aButton:GetName();
-
 	tGateIdx = 0;
 
 	for tIdx = 1, #aLayerTemplate["nonSecretResults"] do
@@ -1548,6 +1546,8 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 	end
 
 	if VUHDO_isAuraModeContainers() or VUHDO_isAuraDataRestricted() then
+		tButtonName = aButton:GetName();
+
 		if tButtonName and (VUHDO_OVERLAY_CONTAINERS[tButtonName] or VUHDO_OVERLAY_SLOT_HOSTS[tButtonName]) then
 			tIndicatorEntry = VUHDO_OVERLAY_CONTAINERS[tButtonName] and VUHDO_OVERLAY_CONTAINERS[tButtonName][anIndicatorKey];
 
