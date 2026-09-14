@@ -1021,7 +1021,7 @@ do
 	local tNewGroup;
 	function VUHDO_cloneAuraGroup(aSourceGroupId, aNewDisplayName)
 
-		tSourceGroup = VUHDO_getAuraGroup(aSourceGroupId);
+		tSourceGroup = VUHDO_getAuraGroupRaw(aSourceGroupId);
 
 		if not tSourceGroup then
 			return nil;
@@ -1032,6 +1032,10 @@ do
 
 		tNewGroup["displayName"] = aNewDisplayName;
 		tNewGroup["priority"] = VUHDO_getNextAuraGroupPriority();
+
+		if VUHDO_isBuiltInAuraGroup(aSourceGroupId) and VUHDO_CONFIG["AURA_GROUP_DISABLED"] and VUHDO_CONFIG["AURA_GROUP_DISABLED"][aSourceGroupId] then
+			tNewGroup["enabled"] = false;
+		end
 
 		VUHDO_AURA_GROUPS[tNewId] = tNewGroup;
 
