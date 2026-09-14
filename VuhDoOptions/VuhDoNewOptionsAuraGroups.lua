@@ -580,7 +580,11 @@ do
 
 		VUHDO_migrateAuraGroupConditions(aGroup);
 
-		VUHDO_AURA_GROUPS_AURAS_SELECTED = aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
+		if aGroup["isHarmful"] ~= nil then
+			VUHDO_AURA_GROUPS_AURAS_SELECTED = aGroup["isHarmful"] and "HARMFUL" or "HELPFUL";
+		else
+			VUHDO_AURA_GROUPS_AURAS_SELECTED = VUHDO_filterContainsToken(aGroup["filter"] or "", "HARMFUL") and "HARMFUL" or "HELPFUL";
+		end
 
 		if aGroup["maxDurationSeconds"] ~= nil then
 			VUHDO_AURA_GROUPS_DURATION_SELECTED = aGroup["maxDurationSeconds"];
@@ -1587,11 +1591,12 @@ do
 
 			tIsConditionsDisabled = tIsBuiltIn or tGroup["isInferred"];
 
+			VUHDO_auraGroupsSyncConditionModels(tGroup);
+
 			VUHDO_initAuraGroupConditionComboModels();
 
 			if tConditionsPanel then
 				tConditionsPanel:Show();
-				VUHDO_auraGroupsSyncConditionModels(tGroup);
 			end
 
 			if tAurasCombo then
@@ -2124,7 +2129,7 @@ local tNewId;
 local tSourceGroup;
 function VUHDO_auraGroupsOnCloneGroup(aSourceId)
 
-	tSourceGroup = VUHDO_getAuraGroup(aSourceId);
+	tSourceGroup = VUHDO_getAuraGroupRaw(aSourceId);
 
 	if not tSourceGroup then
 		return;
@@ -2285,9 +2290,7 @@ function VUHDO_auraGroupsAurasChanged(aComboBox, aValue, anArrayModel)
 
 	VUHDO_auraGroupsWriteConditions(tGroup);
 
-	VUHDO_auraGroupsClearPresetSelection();
-
-	VUHDO_initAuraGroupConditionComboModels();
+	VUHDO_auraGroupsRefreshRightPanel();
 
 	VUHDO_timeRebuildAuraGroups(0.3);
 
