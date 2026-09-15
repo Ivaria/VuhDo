@@ -1919,27 +1919,6 @@ do
 				VUHDO_printDeferredRedrawStatus();
 			end
 
-		elseif tCommandWord == "debug" then
-			tSubCommand = strlower(tParsedTexts[2] or "");
-
-			if tSubCommand == "charm" then
-				tArgument = strlower(tParsedTexts[3] or "");
-
-				if tArgument == "help" or tArgument == "?" then
-					VUHDO_debugCharmHelp();
-				else
-					tUnit = tParsedTexts[3];
-
-					if not tUnit or tUnit == "" then
-						tUnit = "target";
-					end
-
-					VUHDO_dumpCharmDiagnostics(tUnit);
-				end
-			else
-				VUHDO_Msg("Usage: /vd debug charm [unit|help]");
-			end
-
 		elseif strfind(tCommandWord, "prof") then
 			tSubCommand = strlower(tParsedTexts[2] or "");
 
