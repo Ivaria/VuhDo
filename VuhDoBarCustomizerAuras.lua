@@ -3094,6 +3094,23 @@ end
 
 
 --
+function VUHDO_rebuildAuraAnchorsForAllButtons()
+
+	if InCombatLockdown() then
+		return;
+	end
+
+	for tButton, tPanelNum in pairs(VUHDO_BUTTON_CACHE) do
+		VUHDO_initAuraAnchorsForButton(tButton, tPanelNum);
+	end
+
+	return;
+
+end
+
+
+
+--
 local tButtonName;
 local tButtonFrames;
 local tPanelAnchors;

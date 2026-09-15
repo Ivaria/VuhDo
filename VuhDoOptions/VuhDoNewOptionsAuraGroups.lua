@@ -2708,6 +2708,8 @@ function VUHDO_auraGroupsShowOnChanged(aComboBox, aValue, anArrayModel)
 	VUHDO_timeRebuildAuraGroups(0.3);
 	VUHDO_timeRegisterBouquets(0.3);
 
+	VUHDO_rebuildAuraAnchorsForAllButtons();
+
 	return;
 
 end
