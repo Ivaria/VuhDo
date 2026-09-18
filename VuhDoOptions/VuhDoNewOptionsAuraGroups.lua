@@ -394,6 +394,8 @@ do
 			end
 		end
 
+		tsort(VUHDO_AURA_CONDITION_COMBO_MODEL, function(anA, anotherA) return anA[2] < anotherA[2]; end);
+
 		twipe(VUHDO_AURA_DURATION_OPTIONS);
 
 		for tCnt = 1, #VUHDO_AURA_DURATION_COMBO_VALUES do
@@ -417,6 +419,16 @@ do
 		for _, tEntry in ipairs(VUHDO_AURA_FILTER_OPTIONS) do
 			tinsert(VUHDO_AURA_PRESET_OPTIONS, { tEntry[1], tEntry[2], nil, nil, tEntry[5] });
 		end
+
+		tsort(VUHDO_AURA_PRESET_OPTIONS, function(anA, anotherA)
+			if anA[1] == "" then
+				return true;
+			elseif anotherA[1] == "" then
+				return false;
+			end
+
+			return anA[2] < anotherA[2];
+		end);
 
 		return;
 
