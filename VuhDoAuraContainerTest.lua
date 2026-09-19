@@ -625,6 +625,11 @@ do
 					"fillAlpha", tFrameRunState["fillAlpha"],
 					"fillLayer", tFrameRunState["fillLayer"],
 					"maskPts", tFrameRunState["maskPts"]);
+
+				if tAuraFrame and tCanAccess and tAuraFrame["ShadowBar"] then
+					VUHDO_auraDiagEmitOverlayShadowBar("chainFrameShadow", nil, nil,
+						nil, format("g%d:i%d", aGroupIndex, tGroupFrameIndex), tAuraFrame["ShadowBar"], nil);
+				end
 			end
 		end
 
@@ -891,10 +896,86 @@ end
 
 do
 	--
+	local tShadowBarWidth;
+	local tShadowBarHeight;
+	local tShadowBarValue;
+	local tShadowBarMin;
+	local tShadowBarMax;
+	local tShadowTexture;
+	local tShadowTexLayer;
+	local tShadowTexSublevel;
+	local tShadowTexR;
+	local tShadowTexG;
+	local tShadowTexB;
+	local tShadowTexA;
+	local tShadowBackground;
+	local tSublevelSlot;
+	local tStaticColor;
+	function VUHDO_auraDiagEmitOverlayShadowBar(aPrefix, aButtonName, aIndicatorKey, aEntryKey, aSlotKey, aShadowBar, aButtonSetup)
+
+		if not aShadowBar then
+			return;
+		end
+
+		tShadowBarWidth, tShadowBarHeight = aShadowBar:GetSize();
+		tShadowBarValue = aShadowBar:GetValue();
+		tShadowBarMin, tShadowBarMax = aShadowBar:GetMinMaxValues();
+		tShadowTexture = aShadowBar:GetStatusBarTexture();
+		tShadowBackground = aShadowBar["ShadowBackground"];
+
+		if tShadowTexture then
+			tShadowTexLayer, tShadowTexSublevel = tShadowTexture:GetDrawLayer();
+			tShadowTexR, tShadowTexG, tShadowTexB, tShadowTexA = tShadowTexture:GetVertexColor();
+		end
+
+		tSublevelSlot = aButtonSetup and aButtonSetup["sublevelSlots"] and aButtonSetup["sublevelSlots"][2];
+		tStaticColor = aButtonSetup and aButtonSetup["staticColor"];
+
+		VUHDO_auraDiagLine(aPrefix,
+			"button", aButtonName,
+			"indicator", aIndicatorKey,
+			"entry", aEntryKey,
+			"slotKey", aSlotKey,
+			"isDuration", aShadowBar["isDuration"] and 1 or 0,
+			"shown", aShadowBar:IsShown(),
+			"frameLevel", aShadowBar:GetFrameLevel(),
+			"width", tShadowBarWidth,
+			"height", tShadowBarHeight,
+			"numPoints", aShadowBar:GetNumPoints(),
+			"value", tShadowBarValue,
+			"minValue", tShadowBarMin,
+			"maxValue", tShadowBarMax,
+			"texLayer", tShadowTexture and format("%s/%s", tostring(tShadowTexLayer), tostring(tShadowTexSublevel)),
+			"texR", tShadowTexR,
+			"texG", tShadowTexG,
+			"texB", tShadowTexB,
+			"texA", tShadowTexA,
+			"texShown", tShadowTexture and tShadowTexture:IsShown(),
+			"shadowBgShown", tShadowBackground and tShadowBackground:IsShown(),
+			"shadowValueMode", aButtonSetup and aButtonSetup["shadowValueMode"],
+			"staticColorR", tStaticColor and tStaticColor["R"],
+			"staticColorG", tStaticColor and tStaticColor["G"],
+			"staticColorB", tStaticColor and tStaticColor["B"],
+			"staticColorO", tStaticColor and tStaticColor["O"],
+			"barTexture", aButtonSetup and aButtonSetup["barTexture"],
+			"barInverted", aButtonSetup and aButtonSetup["barInverted"],
+			"subLayer", tSublevelSlot and tSublevelSlot["layer"],
+			"subSublevel", tSublevelSlot and tSublevelSlot["sublevel"]);
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
 	local tOverlayContainers;
 	local tSlotHostData;
 	local tSlotHostContainer;
 	local tSlotFrame;
+	local tSlotFrameReadable;
 	local tFillTexture;
 	local tFillLayer;
 	local tFillSublevel;
@@ -930,6 +1011,9 @@ do
 	local tTargetBarAlpha;
 	local tWarnParts;
 	local tWarnField;
+	local tSlotButtonSetup;
+	local tSlotStaticColor;
+	local tSlotSublevelSlot;
 	function VUHDO_dumpAuraOverlayDiagnostics(aButtonName)
 
 		tSlotHostData = VUHDO_OVERLAY_SLOT_HOSTS and VUHDO_OVERLAY_SLOT_HOSTS[aButtonName];
@@ -948,6 +1032,7 @@ do
 			for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"] or sEmpty) do
 				if VUHDO_auraDiagMatchesIndicator(tSlotRecord["indicatorKey"]) then
 					tSlotFrame = tSlotRecord["slotFrame"];
+					tSlotFrameReadable = tSlotFrame and not tSlotFrame:IsForbidden();
 					tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tSlotRecord, {
 						["isDisconnected"] = sAuraDiagDisconnected,
 						["canApplyHelpfulIdentity"] = sAuraDiagCanApplyHelpfulIdentity,
@@ -958,17 +1043,21 @@ do
 					tFillLayer = nil;
 					tFillSublevel = nil;
 
-					if tSlotFrame and tSlotFrame["FillTexture"] then
+					if tSlotFrameReadable and tSlotFrame["FillTexture"] then
 						tFillTexture = tSlotFrame["FillTexture"];
 						tFillLayer, tFillSublevel = tFillTexture:GetDrawLayer();
 					end
+
+					tSlotButtonSetup = tSlotRecord["buttonSetup"];
+					tSlotStaticColor = tSlotButtonSetup and tSlotButtonSetup["staticColor"];
+					tSlotSublevelSlot = tSlotButtonSetup and tSlotButtonSetup["sublevelSlots"] and tSlotButtonSetup["sublevelSlots"][2];
 
 					VUHDO_auraDiagLine("overlaySlot",
 						"button", aButtonName,
 						"indicator", tSlotRecord["indicatorKey"],
 						"entry", tSlotRecord["entryKey"],
 						"slotKey", tSlotKey,
-						"shown", tSlotFrame and tSlotFrame:IsShown(),
+						"shown", tSlotFrameReadable and tSlotFrame:IsShown(),
 						"filter", VUHDO_escapeAuraDiagFilterString(tSlotRecord["filterString"]),
 						"appliedFilter", VUHDO_escapeAuraDiagFilterString(tSlotRecord["appliedFilterString"]),
 						"candidates", VUHDO_auraDiagFormatCandidateSummary(tSlotRecord["candidateFilters"], nil),
@@ -980,8 +1069,23 @@ do
 						"appliedSuppress", tSlotRecord["appliedSuppress"] and 1 or 0,
 						"lastSyncedEnabled", tSlotHostData["lastSyncedSlotEnabled"] and tSlotHostData["lastSyncedSlotEnabled"][tSlotKey],
 						"fillLayer", tFillLayer and format("%s/%s", tostring(tFillLayer), tostring(tFillSublevel)),
-						"frameLevel", tSlotFrame and tSlotFrame:GetFrameLevel(),
-						"auraGroupBarGlow", tSlotRecord["auraGroupBarGlow"] and 1 or 0);
+						"frameLevel", tSlotFrameReadable and tSlotFrame:GetFrameLevel(),
+						"forbidden", tSlotFrame and not tSlotFrameReadable and 1 or nil,
+						"auraGroupBarGlow", tSlotRecord["auraGroupBarGlow"] and 1 or 0,
+						"shadowValueMode", tSlotButtonSetup and tSlotButtonSetup["shadowValueMode"],
+						"staticColorR", tSlotStaticColor and tSlotStaticColor["R"],
+						"staticColorG", tSlotStaticColor and tSlotStaticColor["G"],
+						"staticColorB", tSlotStaticColor and tSlotStaticColor["B"],
+						"staticColorO", tSlotStaticColor and tSlotStaticColor["O"],
+						"barTexture", tSlotButtonSetup and tSlotButtonSetup["barTexture"],
+						"barInverted", tSlotButtonSetup and tSlotButtonSetup["barInverted"],
+						"subLayer", tSlotSublevelSlot and tSlotSublevelSlot["layer"],
+						"subSublevel", tSlotSublevelSlot and tSlotSublevelSlot["sublevel"]);
+
+					if tSlotFrameReadable and tSlotFrame["ShadowBar"] then
+						VUHDO_auraDiagEmitOverlayShadowBar("overlaySlotShadow", aButtonName, tSlotRecord["indicatorKey"],
+							tSlotRecord["entryKey"], tSlotKey, tSlotFrame["ShadowBar"], tSlotButtonSetup);
+					end
 
 					if tSlotRecord["indicatorKey"] == "DISPEL_OVERLAY" then
 						tBarColors = VUHDO_PANEL_SETUP and VUHDO_PANEL_SETUP["BAR_COLORS"];
@@ -1324,7 +1428,6 @@ do
 	local tIsAuraDataRestricted;
 	local tIsBarColorsDispelOverlayConfigured;
 	local tUnitInfo;
-	local tIsAssistRestricted;
 	local tIsAuraFilterRestricted;
 	local tIsDisconnected;
 	local tPhaseReason;

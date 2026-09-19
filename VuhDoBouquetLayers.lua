@@ -55,6 +55,7 @@ local VUHDO_isAuraModeContainers;
 local VUHDO_copyStatusBarFillTexture;
 local VUHDO_getBouquetLayerTemplate;
 local VUHDO_invalidatePanelButtonInits;
+local VUHDO_deferSyncOverlaysForUnit;
 
 local VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS or { };
 local VUHDO_OVERLAY_SLOT_HOSTS = VUHDO_OVERLAY_SLOT_HOSTS or { };
@@ -168,6 +169,7 @@ function VUHDO_bouquetLayersInitLocalOverrides()
 	VUHDO_copyStatusBarFillTexture = _G["VUHDO_copyStatusBarFillTexture"];
 	VUHDO_getBouquetLayerTemplate = _G["VUHDO_getBouquetLayerTemplate"];
 	VUHDO_invalidatePanelButtonInits = _G["VUHDO_invalidatePanelButtonInits"];
+	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
 
 	sAlphaChainStepEntryPool = VUHDO_createTablePool("AlphaChainStepEntry", 100);
 	sAlphaChainPool = VUHDO_createTablePool("AlphaChain", 50, VUHDO_createAlphaChainDelegate, VUHDO_cleanupAlphaChainDelegate);
@@ -1499,12 +1501,16 @@ local tResultSlot;
 local tValidatorEntry;
 local tButtonName;
 local tIndicatorEntry;
-local tContainer;
-local tGroupEntry;
 local tBouquetIdx;
 local tOverlay;
 local tSlotHostData;
-local tSlotFrame;
+local tIsGated;
+local tGateChanged;
+local tGateUnit;
+local tGatedGroups;
+local tChainGroupMeta;
+local tChainGroupMetaEntry;
+local tGroupKey;
 function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, aLayerTemplate, aTargetBar)
 
 	if not aButton or not anIndicatorKey or not aLayerTemplate then
@@ -1512,6 +1518,7 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 	end
 
 	tGateIdx = 0;
+	tGateChanged = false;
 
 	for tIdx = 1, #aLayerTemplate["nonSecretResults"] do
 		tResultSlot = aLayerTemplate["nonSecretResults"][tIdx];
@@ -1535,15 +1542,28 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 
 			if tIndicatorEntry then
 				for _, tContainerData in pairs(tIndicatorEntry) do
-					tContainer = tContainerData and tContainerData["container"];
-					tGroupEntry = tContainerData and tContainerData["containerTemplate"] and tContainerData["containerTemplate"]["groups"] and tContainerData["containerTemplate"]["groups"][1];
-					tBouquetIdx = tGroupEntry and tGroupEntry["bouquetIdx"];
+					tChainGroupMeta = tContainerData and tContainerData["chainGroupMeta"];
 
-					if tContainer and tBouquetIdx then
-						if tGateIdx > 0 and tBouquetIdx > tGateIdx then
-							tContainer:Hide();
-						else
-							tContainer:Show();
+					if tChainGroupMeta then
+						if not tContainerData["bouquetGatedGroups"] then
+							tContainerData["bouquetGatedGroups"] = { };
+						end
+
+						tGatedGroups = tContainerData["bouquetGatedGroups"];
+
+						for tChainGroupIdx = 1, #tChainGroupMeta do
+							tChainGroupMetaEntry = tChainGroupMeta[tChainGroupIdx];
+							tGroupKey = tChainGroupMetaEntry and tChainGroupMetaEntry["groupKey"];
+							tBouquetIdx = tChainGroupMetaEntry and tChainGroupMetaEntry["bouquetIdx"];
+
+							if tGroupKey then
+								tIsGated = tGateIdx > 0 and tBouquetIdx and tBouquetIdx > tGateIdx or false;
+
+								if tGatedGroups[tGroupKey] ~= tIsGated then
+									tGatedGroups[tGroupKey] = tIsGated;
+									tGateChanged = true;
+								end
+							end
 						end
 					end
 				end
@@ -1554,18 +1574,23 @@ function VUHDO_applyOverlayBouquetGating(aButton, anIndicatorKey, aBouquetName, 
 			if tSlotHostData and tSlotHostData["slotRecords"] then
 				for tSlotKey, tSlotRecord in pairs(tSlotHostData["slotRecords"]) do
 					if tSlotRecord["indicatorKey"] == anIndicatorKey then
-						tSlotFrame = tSlotRecord["slotFrame"];
 						tBouquetIdx = tSlotRecord["bouquetIdx"];
+						tIsGated = tGateIdx > 0 and tBouquetIdx and tBouquetIdx > tGateIdx or false;
 
-						if tSlotFrame then
-							if tGateIdx > 0 and tBouquetIdx and tBouquetIdx > tGateIdx then
-								tSlotFrame:Hide();
-							else
-								tSlotFrame:Show();
-							end
+						if tSlotRecord["bouquetGated"] ~= tIsGated then
+							tSlotRecord["bouquetGated"] = tIsGated;
+							tGateChanged = true;
 						end
 					end
 				end
+			end
+		end
+
+		if tGateChanged then
+			tGateUnit = aButton["raidid"] or aButton:GetAttribute("unit");
+
+			if tGateUnit then
+				VUHDO_deferSyncOverlaysForUnit(tGateUnit);
 			end
 		end
 	end

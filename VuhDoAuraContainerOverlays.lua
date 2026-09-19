@@ -2285,6 +2285,8 @@ do
 		aSlotRecord["indicatorKey"] = aSlotSpec["indicatorKey"];
 		aSlotRecord["entryKey"] = aSlotSpec["entryKey"];
 		aSlotRecord["bouquetIdx"] = aSlotSpec["bouquetIdx"];
+		aSlotRecord["buttonSetup"] = aSlotSpec["buttonSetup"];
+		aSlotRecord["durationSetupPending"] = ((aSlotSpec["buttonSetup"] or sEmpty)["shadowValueMode"] == "duration") or nil;
 
 		return;
 
@@ -3744,6 +3746,10 @@ do
 					else
 						twipe(tSlotHostData["lastSyncedSlotEnabled"]);
 					end
+
+					for _, tSlotRecord in pairs(tSlotHostData["slotRecords"] or sEmpty) do
+						tSlotRecord["bouquetGated"] = nil;
+					end
 				end
 			end
 
@@ -3753,6 +3759,10 @@ do
 					tContainerData["lastSyncedGuid"] = nil;
 					tContainerData["lastSyncedEnabled"] = nil;
 					tContainerData["lastSyncedGroupEnabled"] = nil;
+
+					if tContainerData["bouquetGatedGroups"] then
+						twipe(tContainerData["bouquetGatedGroups"]);
+					end
 				end
 			end
 		end
@@ -3904,6 +3914,10 @@ do
 								tSlotEnabled = false;
 							end
 
+							if tSlotEnabled and tSlotRecord["bouquetGated"] then
+								tSlotEnabled = false;
+							end
+
 							if tSlotEnabled and tSlotRecord["valueGates"] then
 								tGateActive = VUHDO_isAnyOverlayValueGateActive(tSlotRecord["valueGates"], tGateInfo);
 
@@ -3941,6 +3955,12 @@ do
 
 							if tSlotEnabled then
 								tHostNeedsUnit = true;
+
+								if tSlotRecord["durationSetupPending"] and tSlotRecord["slotFrame"] then
+									VUHDO_reapplyOverlayDurationSlotSetup(tSlotRecord["slotFrame"], tSlotRecord["buttonSetup"]);
+
+									tSlotRecord["durationSetupPending"] = nil;
+								end
 							end
 
 							if tSlotRecord["auraGroupBarGlow"] then
@@ -4034,6 +4054,10 @@ do
 									tShouldSuppress = VUHDO_isAuraDisplaySuppressed(tChainGroupMetaEntry);
 
 									if tGroupEnabled and tShouldSuppress then
+										tGroupEnabled = false;
+									end
+
+									if tGroupEnabled and (tContainerData["bouquetGatedGroups"] or sEmpty)[tChainGroupMetaEntry["groupKey"]] then
 										tGroupEnabled = false;
 									end
 
