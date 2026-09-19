@@ -33,6 +33,7 @@ local VUHDO_BOUQUET_CUSTOM_TYPE_AURA_GROUP;
 local VUHDO_BOUQUET_VALUE_TYPE_NONE;
 local VUHDO_BOUQUET_VALUE_TYPE_AURA;
 local VUHDO_BOUQUET_VALUE_TYPE_STATUS;
+local VUHDO_BOUQUET_STATUS_TYPE_FULL;
 local VUHDO_AURA_GROUP_COLOR_OFF;
 local VUHDO_AURA_GROUP_COLOR_DISPEL;
 local VUHDO_AURA_GROUP_COLOR_ALL_DISPEL;
@@ -198,6 +199,7 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_BOUQUET_VALUE_TYPE_NONE = _G["VUHDO_BOUQUET_VALUE_TYPE_NONE"];
 	VUHDO_BOUQUET_VALUE_TYPE_AURA = _G["VUHDO_BOUQUET_VALUE_TYPE_AURA"];
 	VUHDO_BOUQUET_VALUE_TYPE_STATUS = _G["VUHDO_BOUQUET_VALUE_TYPE_STATUS"];
+	VUHDO_BOUQUET_STATUS_TYPE_FULL = _G["VUHDO_BOUQUET_STATUS_TYPE_FULL"];
 	VUHDO_AURA_GROUP_COLOR_OFF = _G["VUHDO_AURA_GROUP_COLOR_OFF"];
 	VUHDO_AURA_GROUP_COLOR_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_DISPEL"];
 	VUHDO_AURA_GROUP_COLOR_ALL_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_ALL_DISPEL"];
@@ -493,6 +495,10 @@ do
 					if tValueSpecial and tValueSpecial["valueType"] == VUHDO_BOUQUET_VALUE_TYPE_STATUS then
 						if tValueSpecial["isSecretInactive"] then
 						elseif tValueSpecial["isActiveOnly"] then
+							if tValueSpecial["statusType"] and VUHDO_BOUQUET_STATUS_TYPE_FULL ~= tValueSpecial["statusType"] then
+								return "mirror";
+							end
+
 							tHasHigherStatusItem = true;
 							tHasCoverContributor = true;
 						elseif tValueSpecial["gateValidator"] then
