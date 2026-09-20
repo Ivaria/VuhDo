@@ -1,6 +1,41 @@
 local _G = _G;
 local _;
 
+<<<<<<< Updated upstream
+=======
+local ipairs = ipairs;
+local pairs = pairs;
+local strfind = strfind;
+local twipe = table.wipe;
+local tinsert = table.insert;
+local floor = math.floor;
+local ceil = math.ceil;
+local min = math.min;
+local max = math.max;
+local format = format;
+
+local InCombatLockdown = InCombatLockdown;
+local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor;
+
+local VUHDO_getFont;
+local VUHDO_getHealthBar;
+local VUHDO_updateAuraAnchorHost;
+local VUHDO_getPixelPerfectBorderEdgeSize;
+local VUHDO_getPixelPerfectBorderInsets;
+local VUHDO_getDynamicModelArray;
+local VUHDO_getGroupMembersSorted;
+local VUHDO_getGroupMembers;
+local VUHDO_redrawPanel;
+local VUHDO_redrawAllPanels;
+local VUHDO_refreshAllUnitAuras;
+local VUHDO_redisplayAllUnitAuras;
+local VUHDO_calculateDerivedOrientation;
+local VUHDO_updateToggledUnitEvents;
+local VUHDO_buildAllIndicatorAlphaChains;
+local VUHDO_buildBooleanOverlaysForButton;
+local VUHDO_buildTargetIndicatorAlphaChains;
+local VUHDO_resetButtonVisuals;
+>>>>>>> Stashed changes
 
 local VUHDO_STD_BACKDROP = nil;
 local VUHDO_DESIGN_BACKDROP = nil;
@@ -1875,12 +1910,85 @@ end
 
 
 
+<<<<<<< Updated upstream
 --
 local tCnt;
 local tHealButton;
 local tGroupPanel;
 local tDebuffFrame;
 function VUHDO_deferInitAllHealButtonsCompleteDelegate(aPanelNum)
+=======
+		tIsFullRedrawCycle = (aCycleId ~= nil);
+		tCurrentCycleId = aCycleId or "UNKNOWN";
+
+		tIsPanelActive = false;
+
+		if tIsFullRedrawCycle then
+			if sRedrawPanelSemaphores[aPanelNum] and sRedrawPanelSemaphores[aPanelNum]["count"] > 0 then
+				tIsPanelActive = true;
+			end
+		else
+			if sRedrawPanelSemaphores[aPanelNum] and sRedrawPanelSemaphores[aPanelNum]["count"] > 0 then
+				tIsPanelActive = true;
+			elseif sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+				tIsPanelActive = true;
+			end
+		end
+
+		if tIsPanelActive then
+			if not sWaitingIndividualRedraws[aPanelNum] then
+				sWaitingIndividualRedraws[aPanelNum] = { };
+			end
+
+			if not sQueuedIndividualRequests[aPanelNum] then
+				sQueuedIndividualRequests[aPanelNum] = { };
+			end
+
+			if sQueuedIndividualRequests[aPanelNum][anIsFixAllFrameLevels] then
+				return;
+			end
+
+			tWaitingRequest = {
+				["isFixAllFrameLevels"] = anIsFixAllFrameLevels,
+				["cycleId"] = aCycleId,
+				["timestamp"] = GetTime()
+			};
+
+			sQueuedIndividualRequests[aPanelNum][anIsFixAllFrameLevels] = true;
+			tinsert(sWaitingIndividualRedraws[aPanelNum], tWaitingRequest);
+
+			return;
+		end
+
+		if not tIsFullRedrawCycle then
+			tCycleId = VUHDO_generateCycleId();
+			tCurrentCycleId = tCycleId;
+
+			if not sRedrawPanelSemaphores[aPanelNum] then
+				VUHDO_calculateSemaphoreTimeouts();
+
+				sRedrawPanelSemaphores[aPanelNum] = VUHDO_createSemaphore("RedrawPanel_" .. aPanelNum .. "_" .. tCycleId, 0, 1, sPanelRedrawTimeout);
+
+				if sRedrawPanelSemaphores[aPanelNum] then
+					sPanelCompletionTracker = { };
+				end
+			end
+		end
+
+		if VUHDO_isPanelPopulated(aPanelNum) then
+			if tIsFullRedrawCycle and sRedrawAllPanelsSemaphore then
+				sRedrawAllPanelsSemaphore:increment();
+			elseif not tIsFullRedrawCycle and sRedrawPanelSemaphores[aPanelNum] then
+				sRedrawPanelSemaphores[aPanelNum]:increment();
+			end
+
+			VUHDO_invalidatePanelButtonInits(aPanelNum);
+
+			VUHDO_deferTask(VUHDO_DEFER_REDRAW_PANEL, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum, anIsFixAllFrameLevels, tCurrentCycleId);
+		else
+			VUHDO_PixelUtil.Hide(VUHDO_getActionPanelOrStub(aPanelNum));
+		end
+>>>>>>> Stashed changes
 
 	if sButtonInitSemaphores[aPanelNum] and not sButtonInitSemaphores[aPanelNum]:waitFor(VUHDO_DEFER_INIT_ALL_HEAL_BUTTONS_COMPLETE, VUHDO_DEFERRED_TASK_PRIORITY_HIGH, aPanelNum) then
 		return;
@@ -2122,8 +2230,135 @@ function VUHDO_isDeferredRedrawActive()
 		return true;
 	end
 
+<<<<<<< Updated upstream
 	for tPanelNum = 1, 10 do
 		if sRedrawPanelSemaphores[tPanelNum] and sRedrawPanelSemaphores[tPanelNum]["count"] > 0 then
+=======
+
+
+	--
+	function VUHDO_lnfReloadUI()
+
+		if InCombatLockdown() then
+			return;
+		end
+
+		VUHDO_IS_RELOADING = true;
+
+		VUHDO_invalidatePanelButtonInits();
+
+		VUHDO_clearBackdropCache();
+		VUHDO_clearCustomFlagCache();
+		VUHDO_initAllBurstCaches();
+		VUHDO_reloadRaidMembers();
+		VUHDO_updatePanelVisibility();
+
+		VUHDO_buildGenericHealthBarBouquet();
+		VUHDO_buildGenericTargetHealthBouquet();
+		VUHDO_bouqetsChanged();
+
+		_G["VUHDO_redrawAllPanels"](false);
+
+		VUHDO_initAllBurstCaches();
+		VUHDO_redisplayAllUnitAuras();
+
+		VUHDO_IS_RELOADING = false;
+
+		return;
+
+	end
+
+
+
+	--
+	local tTrackerCount;
+	local tSemaphore;
+	function VUHDO_printDeferredRedrawState()
+
+		VUHDO_Msg("|cffFFD100--- Deferred Redraw State ---|r");
+
+		VUHDO_Msg(format("|cffFFA500** Task System:|r |cffB0E0E6Pending:|r %s",
+			VUHDO_isAnyTaskPending() and "|cff00ff00yes|r" or "|cffff0000no|r"));
+
+		VUHDO_Msg(format("|cffFFA500** Redraw Gate:|r |cffB0E0E6Active:|r %s",
+			VUHDO_isDeferredRedrawActive() and "|cff00ff00yes|r" or "|cffff0000no|r"));
+
+		VUHDO_Msg("|cffFFA500** Semaphores:|r");
+
+		if sRedrawAllPanelsSemaphore then
+			tSemaphore = sRedrawAllPanelsSemaphore;
+
+			VUHDO_Msg(format("  |cffB0E0E6RedrawAll:|r (|cffB0E0E6Cur:|r%d |cffB0E0E6Wait:|r%d): %s",
+				tSemaphore["count"],
+				#tSemaphore["waitingTasks"],
+				tSemaphore["name"]));
+		else
+			VUHDO_Msg("  |cffB0E0E6RedrawAll:|r none");
+		end
+
+		for tPanelNum = 1, 10 do
+			if sRedrawPanelSemaphores[tPanelNum] then
+				tSemaphore = sRedrawPanelSemaphores[tPanelNum];
+
+				VUHDO_Msg(format("  |cffB0E0E6RedrawPanel %d:|r (|cffB0E0E6Cur:|r%d |cffB0E0E6Wait:|r%d): %s",
+					tPanelNum,
+					tSemaphore["count"],
+					#tSemaphore["waitingTasks"],
+					tSemaphore["name"]));
+			end
+
+			if sButtonInitSemaphores[tPanelNum] then
+				tSemaphore = sButtonInitSemaphores[tPanelNum];
+
+				VUHDO_Msg(format("  |cffB0E0E6ButtonInit %d:|r (|cffB0E0E6Cur:|r%d |cffB0E0E6Wait:|r%d): %s",
+					tPanelNum,
+					tSemaphore["count"],
+					#tSemaphore["waitingTasks"],
+					tSemaphore["name"]));
+			end
+
+			if sButtonPositionSemaphores[tPanelNum] then
+				tSemaphore = sButtonPositionSemaphores[tPanelNum];
+
+				VUHDO_Msg(format("  |cffB0E0E6ButtonPosition %d:|r (|cffB0E0E6Cur:|r%d |cffB0E0E6Wait:|r%d): %s",
+					tPanelNum,
+					tSemaphore["count"],
+					#tSemaphore["waitingTasks"],
+					tSemaphore["name"]));
+			end
+		end
+
+		VUHDO_Msg(format("|cffFFA500** Waiting All-Panels Redraws:|r %d", #sWaitingAllPanelsRedraws));
+
+		tTrackerCount = 0;
+
+		if sPanelCompletionTracker then
+			for tTrackerKey, _ in pairs(sPanelCompletionTracker) do
+				tTrackerCount = tTrackerCount + 1;
+			end
+		end
+
+		VUHDO_Msg(format("|cffFFA500** Panel Completion Tracker:|r %d entries", tTrackerCount));
+
+		if sPanelCompletionTracker then
+			for tTrackerKey, _ in pairs(sPanelCompletionTracker) do
+				VUHDO_Msg(format("  |cffB0E0E6Key:|r %s", tTrackerKey));
+			end
+		end
+
+		VUHDO_Msg("|cffFFD100--- End of State ---|r");
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_isDeferredRedrawActive()
+
+		if sRedrawAllPanelsSemaphore and sRedrawAllPanelsSemaphore["count"] > 0 then
+>>>>>>> Stashed changes
 			return true;
 		end
 

@@ -1471,6 +1471,72 @@ end
 
 
 --
+<<<<<<< Updated upstream
+=======
+local tTokens;
+local tName;
+local tUnit;
+local tKey;
+local tAmbiguousNames;
+local tAmbiguousMsg;
+local function VUHDO_slashCmdPrivateTanks(aArgument)
+
+	if aArgument then
+		tTokens = VUHDO_splitString(aArgument, ",");
+
+		if "clear" == tTokens[1] then
+			twipe(VUHDO_PLAYER_TARGETS);
+
+			VUHDO_quickRaidReload();
+
+			return;
+		end
+
+		for _, tToken in ipairs(tTokens) do
+			tName = strtrim(tToken);
+
+			if not InCombatLockdown() then
+				tUnit, tAmbiguousNames = VUHDO_getUnitByPrivateTankName(tName);
+
+				if tAmbiguousNames then
+					tAmbiguousMsg = format(VUHDO_I18N_PT_NAME_AMBIGUOUS, table.concat(tAmbiguousNames, ", "));
+
+					VUHDO_Msg(tAmbiguousMsg, 1, 0.4, 0.4);
+				elseif tUnit then
+					tKey = VUHDO_getPrivateTankKey(tUnit);
+
+					if tKey then
+						VUHDO_PLAYER_TARGETS[tKey] = true;
+					end
+				end
+			end
+		end
+
+		VUHDO_quickRaidReload();
+
+		return;
+	end
+
+	tUnit = VUHDO_getPrivateTankUnitFromTarget();
+	tKey = tUnit and VUHDO_getPrivateTankKey(tUnit);
+
+	if not InCombatLockdown() and tKey then
+		if VUHDO_PLAYER_TARGETS[tKey] then
+			VUHDO_PLAYER_TARGETS[tKey] = nil;
+		else
+			VUHDO_PLAYER_TARGETS[tKey] = true;
+		end
+
+		VUHDO_quickRaidReload();
+	end
+
+	return;
+
+end
+
+
+
+>>>>>>> Stashed changes
 do
 	--
 	local tParsedTexts;
@@ -1698,6 +1764,8 @@ do
 				VUHDO_setDeferredRedrawEnabled(true);
 			elseif tSubCommand == "off" then
 				VUHDO_setDeferredRedrawEnabled(false);
+			elseif tSubCommand == "state" then
+				VUHDO_printDeferredRedrawState();
 			else
 				VUHDO_printDeferredRedrawStatus();
 			end

@@ -198,6 +198,21 @@ local VUHDO_DEFERRED_TASK_POOL_MAX_SIZE = 1500;
 local VUHDO_TASK_PRIORITY_QUEUE = { };
 local VUHDO_TASK_QUEUE_MAP = { };
 
+<<<<<<< Updated upstream
+=======
+local VUHDO_processPendingAuraContainerBuilds;
+local VUHDO_processPendingNativeAuraSounds;
+local VUHDO_validateAllSemaphoreStates;
+local VUHDO_recoverOrphanedSemaphores;
+local VUHDO_getSemaphores;
+
+local sOrphanedPrevNothingPending = false;
+local sOrphanedPrevEnqueueOrder = 0;
+local sOrphanedSemaphoreNames = { };
+
+local VUHDO_argToString = VUHDO_argToString;
+
+>>>>>>> Stashed changes
 
 
 do
@@ -1325,6 +1340,14 @@ do
 	local tPredictionError;
 	local tPredictionAccuracy;
 	local tAccuracy;
+<<<<<<< Updated upstream
+=======
+	local tIsInCombatLockdown;
+	local tHeldTaskKey;
+	local tBelowHighProcessed;
+	local tHeldForRequeue;
+	local tStarvationTask;
+>>>>>>> Stashed changes
 	function VUHDO_executeDeferredTaskChunk()
 
 		tTaskState = VUHDO_DEFERRED_TASK_STATE;
@@ -1442,6 +1465,52 @@ do
 
 
 	--
+	local tNothingPending;
+	local tCurrentEnqueueOrder;
+	local tInconsistentSemaphores;
+	local tRecoveredCount;
+	local function VUHDO_checkOrphanedRedrawSemaphores()
+
+		tNothingPending = #VUHDO_TASK_PRIORITY_QUEUE == 0 and #sCombatHeldTasks == 0;
+		tCurrentEnqueueOrder = sNextTaskEnqueueOrder;
+
+		if tNothingPending and sOrphanedPrevNothingPending and sOrphanedPrevEnqueueOrder == tCurrentEnqueueOrder then
+			tInconsistentSemaphores = VUHDO_validateAllSemaphoreStates();
+
+			if #tInconsistentSemaphores > 0 then
+				twipe(sOrphanedSemaphoreNames);
+
+				for tSemaphoreName, tSemaphore in pairs(VUHDO_getSemaphores()) do
+					if tSemaphore and tSemaphore["count"] > 0 and #tSemaphore["waitingTasks"] == 0 then
+						tinsert(sOrphanedSemaphoreNames, tSemaphoreName);
+					end
+				end
+
+				tRecoveredCount = VUHDO_recoverOrphanedSemaphores();
+
+				if tRecoveredCount > 0 then
+					for tCnt = 1, #sOrphanedSemaphoreNames do
+						VUHDO_Msg("Recovered orphaned semaphore: " .. sOrphanedSemaphoreNames[tCnt]);
+					end
+				end
+			end
+		end
+
+		if tNothingPending then
+			sOrphanedPrevNothingPending = true;
+			sOrphanedPrevEnqueueOrder = tCurrentEnqueueOrder;
+		else
+			sOrphanedPrevNothingPending = false;
+			sOrphanedPrevEnqueueOrder = tCurrentEnqueueOrder;
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tTaskState;
 	local tTaskConfig;
 	local tNumTasksProcessed;
@@ -1499,6 +1568,23 @@ do
 			tTaskState["lastAdjustTime"] = GetTime();
 		end
 
+<<<<<<< Updated upstream
+=======
+		tDrainSuccess, tDrainError = xpcall(VUHDO_processPendingAuraContainerBuilds, VUHDO_deferredTaskErrorHandler);
+
+		if not tDrainSuccess then
+			VUHDO_Msg(format("Aura container build drain failure:\nError: %s", tostring(tDrainError)));
+		end
+
+		tDrainSuccess, tDrainError = xpcall(VUHDO_processPendingNativeAuraSounds, VUHDO_deferredTaskErrorHandler);
+
+		if not tDrainSuccess then
+			VUHDO_Msg(format("Native aura sound drain failure:\nError: %s", tostring(tDrainError)));
+		end
+
+		VUHDO_checkOrphanedRedrawSemaphores();
+
+>>>>>>> Stashed changes
 		return;
 
 	end
@@ -2084,11 +2170,33 @@ function VUHDO_initTaskSystem()
 		sNextTaskEnqueueOrder = 0;
 
 		VUHDO_DEFERRED_TASK_STATE["lastAdjustTime"] = GetTime();
+<<<<<<< Updated upstream
 		VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] = VUHDO_DEFERRED_TASK_CONFIG["MAX_TASKS_PER_FRAME"];
+=======
+		VUHDO_DEFERRED_TASK_STATE["maxTasksPerFrame"] = VUHDO_DEFERRED_TASK_CONFIG["INITIAL_TASKS_PER_FRAME"];
+
+		VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
+		VUHDO_processPendingNativeAuraSounds = _G["VUHDO_processPendingNativeAuraSounds"];
+		VUHDO_validateAllSemaphoreStates = _G["VUHDO_validateAllSemaphoreStates"];
+		VUHDO_recoverOrphanedSemaphores = _G["VUHDO_recoverOrphanedSemaphores"];
+		VUHDO_getSemaphores = _G["VUHDO_getSemaphores"];
+
+		sOrphanedPrevNothingPending = false;
+		sOrphanedPrevEnqueueOrder = 0;
+>>>>>>> Stashed changes
 
 		VUHDO_DEFERRED_TASK_STATE["isInit"] = true;
 	end
 
 	return;
+
+end
+
+
+
+--
+function VUHDO_isAnyTaskPending()
+
+	return #VUHDO_TASK_PRIORITY_QUEUE > 0 or #sCombatHeldTasks > 0;
 
 end
