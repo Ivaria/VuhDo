@@ -52,6 +52,7 @@ local VUHDO_isAuraGroupInScopeForUnit;
 local VUHDO_isAuraIgnored;
 local VUHDO_isAuraDataRestricted;
 local VUHDO_isAuraModeContainers;
+local VUHDO_isLegacyMissingBuffBarColor;
 local VUHDO_syncAllOverlayUnits;
 local VUHDO_buildAuraGroupNativeFilterString;
 local VUHDO_auraSourceMatchesFilter;
@@ -268,6 +269,7 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_isAuraIgnored = _G["VUHDO_isAuraIgnored"];
 	VUHDO_isAuraDataRestricted = _G["VUHDO_isAuraDataRestricted"];
 	VUHDO_isAuraModeContainers = _G["VUHDO_isAuraModeContainers"];
+	VUHDO_isLegacyMissingBuffBarColor = _G["VUHDO_isLegacyMissingBuffBarColor"];
 	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
 	VUHDO_buildAuraGroupNativeFilterString = _G["VUHDO_buildAuraGroupNativeFilterString"];
 	VUHDO_auraSourceMatchesFilter = _G["VUHDO_auraSourceMatchesFilter"];
@@ -1386,6 +1388,10 @@ do
 	local tMissingBuffCategory;
 	local tMissingColor;
 	local function VUHDO_applyMissingBuffColorsForDispellableAura(aUnit)
+
+		if not VUHDO_isLegacyMissingBuffBarColor() then
+			return;
+		end
 
 		if (not tBarWinnerSet or not tTextWinnerSet) and VUHDO_RAID and VUHDO_RAID[aUnit] and VUHDO_RAID[aUnit]["missbuff"] then
 			tBuffConfig = VUHDO_BUFF_SETTINGS["CONFIG"];

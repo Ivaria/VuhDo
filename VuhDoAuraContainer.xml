@@ -171,4 +171,22 @@
 
 	</ScopedModifier>
 
+	<Frame name="VuhDoMissingBuffBarTemplate" inherits="DisableUntrustedLayoutScriptsTemplate" virtual="true" hidden="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="BarTexture" file="Interface\Buttons\WHITE8X8" setAllPoints="true" texelSnappingBias="0.0" snapToPixelGrid="false" />
+				<MaskTexture parentKey="EmptyMask" texelSnappingBias="0.0" snapToPixelGrid="false">
+					<MaskedTextures>
+						<MaskedTexture childKey="BarTexture" />
+					</MaskedTextures>
+				</MaskTexture>
+				<MaskTexture parentKey="FillMask" texelSnappingBias="0.0" snapToPixelGrid="false">
+					<MaskedTextures>
+						<MaskedTexture childKey="BarTexture" />
+					</MaskedTextures>
+				</MaskTexture>
+			</Layer>
+		</Layers>
+	</Frame>
+
 </Ui>

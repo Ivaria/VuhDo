@@ -32,6 +32,9 @@ local VUHDO_OVERLAY_CONTAINERS = VUHDO_OVERLAY_CONTAINERS;
 VUHDO_OVERLAY_SLOT_HOSTS = VUHDO_OVERLAY_SLOT_HOSTS or { };
 local VUHDO_OVERLAY_SLOT_HOSTS = VUHDO_OVERLAY_SLOT_HOSTS;
 
+VUHDO_MISSING_BUFF_CONTAINERS = VUHDO_MISSING_BUFF_CONTAINERS or { };
+local VUHDO_MISSING_BUFF_CONTAINERS = VUHDO_MISSING_BUFF_CONTAINERS;
+
 local VUHDO_AURA_CONTAINER_TEMPLATE = "VuhDoAuraContainerTemplate";
 local VUHDO_FILL_CHAIN_CONTAINER_TEMPLATE = "VuhDoFillChainAuraContainerTemplate";
 VUHDO_AURA_BUTTON_ICON_TEMPLATE = "VuhDoAuraButtonIconTemplate";
@@ -164,6 +167,7 @@ local VUHDO_unitPhaseReason;
 local VUHDO_isSpecialUnit;
 local VUHDO_stopOverlayThreatMarkFlashForSlotRecord;
 local VUHDO_deferVolatilePassForButton;
+local VUHDO_fixFrameLevels;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -246,6 +250,7 @@ local sAuraTimerColorCurvesByThreshold = { };
 local sChainBaselineColors = { };
 local sChainBaselineFrames = { };
 local sChainBackgroundFillOwners = { };
+local sMissingBuffBarColors = { };
 local sSignatureParts = { };
 
 local sBorderTexture;
@@ -420,6 +425,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_updateStaticBouquetSlotsForButton = _G["VUHDO_updateStaticBouquetSlotsForButton"];
 	VUHDO_hideStaticBouquetSlotsForButton = _G["VUHDO_hideStaticBouquetSlotsForButton"];
 	VUHDO_deferVolatilePassForButton = _G["VUHDO_deferVolatilePassForButton"];
+	VUHDO_fixFrameLevels = _G["VUHDO_fixFrameLevels"];
 
 	sAuraOpaqueBorderOptions["backingCurveFn"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"];
 	sAuraOpaqueBorderOptions["fillCurveFn"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"];
@@ -2002,7 +2008,7 @@ do
 
 				tChainBaselineMask:ClearAllPoints();
 
-				-- FIXME: aura containers seem to keep a one pixel minimum height
+				-- AnchorUtil.ApplyFlowLayout clamps an empty container to a one pixel minimum size
 				tChainBaselineTopInset = VUHDO_PixelUtil.RoundToPixel(1, 1);
 
 				VUHDO_PixelUtil.SetPoint(tChainBaselineMask, "TOPLEFT", aContainer, "BOTTOMLEFT", 0, tChainBaselineTopInset);
@@ -2054,6 +2060,7 @@ do
 	function VUHDO_buildManagedAuraContainer(aContainerTemplate)
 
 		tParent = aContainerTemplate["parent"];
+
 		tContainer = CreateFrame("AuraContainer", nil, tParent, aContainerTemplate["chainHasBaseline"] and VUHDO_FILL_CHAIN_CONTAINER_TEMPLATE or VUHDO_AURA_CONTAINER_TEMPLATE);
 
 		tContainerLayout = aContainerTemplate["containerLayout"];
@@ -2152,6 +2159,13 @@ do
 
 		if aContainerTemplate["isFillChain"] then
 			VUHDO_setupOverlayFillChain(tContainer, aContainerTemplate, tContainerData);
+		elseif aContainerTemplate["isMissingBuff"] then
+			if not VUHDO_setupOverlayMissingBuff(tContainer, aContainerTemplate, tContainerData) then
+				tContainer:Hide();
+				tContainer:SetParent(nil);
+
+				return nil;
+			end
 		end
 
 		return tContainerData;
@@ -2166,7 +2180,114 @@ do
 		return VUHDO_addAuraContainerSlot(aContainer, aSlot, anAnchorPoint, aSlotKeys, aSlotFrames, aSlotRefs);
 
 	end
+end
 
+
+
+do
+	--
+	local tFrameName;
+	local tFrame;
+	function VUHDO_getOrCreateMissingBuffBarFrame(aTargetBar, aSlotIndex)
+
+		if not aTargetBar or not aSlotIndex then
+			return nil;
+		end
+
+		tFrameName = format("%sMbBar%d", aTargetBar:GetName(), aSlotIndex);
+		tFrame = _G[tFrameName];
+
+		if not tFrame then
+			if InCombatLockdown() then
+				return nil;
+			end
+
+			tFrame = CreateFrame("Frame", tFrameName, aTargetBar, "VuhDoMissingBuffBarTemplate");
+			tFrame["addLevel"] = 0;
+
+			VUHDO_fixFrameLevels(false, aTargetBar, aTargetBar:GetFrameLevel(), aTargetBar:GetChildren());
+		end
+
+		return tFrame;
+
+	end
+end
+
+
+
+do
+	--
+	local tTargetBar;
+	local tCategName;
+	local tSlotIndex;
+	local tFrame;
+	local tEmptyMask;
+	local tBarTexture;
+	local tFillMask;
+	local tButtonName;
+	function VUHDO_setupOverlayMissingBuff(aContainer, aContainerTemplate, aContainerData)
+
+		if not aContainer or not aContainerTemplate or not aContainerTemplate["isMissingBuff"] then
+			return false;
+		end
+
+		tTargetBar = aContainerTemplate["overlayTargetBar"];
+		tCategName = aContainerTemplate["missingBuffCategName"];
+		tSlotIndex = aContainerTemplate["missingBuffSlotIndex"];
+
+		if not tTargetBar or not tCategName or not tSlotIndex then
+			return false;
+		end
+
+		tFrame = VUHDO_getOrCreateMissingBuffBarFrame(tTargetBar, tSlotIndex);
+
+		if not tFrame then
+			return false;
+		end
+
+		tBarTexture = tFrame["BarTexture"];
+		tEmptyMask = tFrame["EmptyMask"];
+		tFillMask = tFrame["FillMask"];
+
+		if tBarTexture and tEmptyMask and tFillMask then
+
+			tEmptyMask:SetTexture(nil);
+			tEmptyMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST");
+
+			VUHDO_PixelUtil.ApplySettings(tEmptyMask);
+
+			tFillMask:SetTexture(nil);
+			tFillMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST");
+
+			VUHDO_PixelUtil.ApplySettings(tFillMask);
+
+			tFrame:ClearAllPoints();
+			tFrame:SetAllPoints(tTargetBar);
+
+			tFrame:Show();
+			tBarTexture:Show();
+
+			tBarTexture:SetDrawLayer("ARTWORK", aContainerTemplate["missingBuffSublevel"] or 0);
+
+			aContainerData["missingBuffBarFrame"] = tFrame;
+			aContainerData["missingBuffBarTexture"] = tBarTexture;
+			aContainerData["missingBuffCategName"] = tCategName;
+			aContainerData["missingBuffSlotIndex"] = tSlotIndex;
+
+			VUHDO_refreshMissingBuffBarFill(aContainerData, true);
+
+			tButtonName = tTargetBar:GetParent() and tTargetBar:GetParent():GetName();
+
+			if tButtonName then
+				VUHDO_applyStoredMissingBuffBarColor(tButtonName, tCategName, aContainerData);
+			end
+
+			return true;
+		end
+
+		return false;
+
+	end
 end
 
 
@@ -2382,6 +2503,9 @@ do
 		tinsert(aSignatureParts, aContainerTemplate["isOverlay"] and "1" or "0");
 		tinsert(aSignatureParts, aContainerTemplate["isFillChain"] and "1" or "0");
 		tinsert(aSignatureParts, aContainerTemplate["chainHasBaseline"] and "1" or "0");
+		tinsert(aSignatureParts, aContainerTemplate["isMissingBuff"] and "1" or "0");
+		tinsert(aSignatureParts, aContainerTemplate["missingBuffCategName"] or "");
+		tinsert(aSignatureParts, format("%d", aContainerTemplate["missingBuffSlotIndex"] or 0));
 
 		if aContainerTemplate["anchor"] then
 			tinsert(aSignatureParts, aContainerTemplate["anchor"]["mode"] or "");
@@ -2859,6 +2983,7 @@ do
 
 
 
+
 	--
 	local tContainerData;
 	local tOverlayTargetBar;
@@ -2916,6 +3041,7 @@ do
 		end
 
 		VUHDO_restoreOverlayFillChainBackground(aContainerData);
+		VUHDO_restoreMissingBuffBar(aContainerData);
 
 		VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] = (VUHDO_AURA_CONTAINER_METRICS["releases"]["container"] or 0) + 1;
 
@@ -2936,9 +3062,49 @@ do
 		return;
 
 	end
-
 end
 
+
+
+
+do
+	--
+	local tFrame;
+	local tEmptyMask;
+	local tFillMask;
+	function VUHDO_restoreMissingBuffBar(aContainerData)
+
+		if not aContainerData then
+			return;
+		end
+
+		tFrame = aContainerData["missingBuffBarFrame"];
+
+		if tFrame then
+			tEmptyMask = tFrame["EmptyMask"];
+			tFillMask = tFrame["FillMask"];
+
+			if tEmptyMask then
+				tEmptyMask:ClearAllPoints();
+			end
+
+			if tFillMask then
+				tFillMask:ClearAllPoints();
+			end
+
+			tFrame:ClearAllPoints();
+			tFrame:Hide();
+		end
+
+		aContainerData["missingBuffBarFrame"] = nil;
+		aContainerData["missingBuffBarTexture"] = nil;
+		aContainerData["missingBuffCategName"] = nil;
+		aContainerData["missingBuffSlotIndex"] = nil;
+
+		return;
+
+	end
+end
 
 
 do
@@ -3127,7 +3293,6 @@ do
 		return;
 
 	end
-
 end
 
 
@@ -3407,6 +3572,221 @@ function VUHDO_applyStoredChainBaselineColor(aButtonName, aContainerData)
 
 	return;
 
+end
+
+
+
+do
+	--
+	local tSourceTexture;
+	local tSourceFile;
+	local tSourceAtlas;
+	function VUHDO_copyMissingBuffBarTexture(aDestTexture, aSourceBar)
+
+		if "StatusBar" ~= aSourceBar:GetObjectType() then
+			return;
+		end
+
+		tSourceTexture = aSourceBar:GetStatusBarTexture();
+
+		if not tSourceTexture then
+			return;
+		end
+
+		tSourceAtlas = tSourceTexture:GetAtlas();
+
+		if tSourceAtlas then
+			aDestTexture:SetAtlas(tSourceAtlas);
+		else
+			tSourceFile = tSourceTexture:GetTexture();
+
+			if not tSourceFile then
+				return;
+			end
+
+			aDestTexture:SetTexture(tSourceFile, "CLAMP", "CLAMP", "NEAREST");
+		end
+
+		aDestTexture:SetTexCoord(0, 1, 0, 1);
+
+		VUHDO_PixelUtil.ApplySettings(aDestTexture);
+
+		return true;
+
+	end
+end
+
+
+
+do
+	--
+	local tBarTexture;
+	local tFrame;
+	local tTargetBar;
+	local tContainer;
+	local tFillMask;
+	local tEmptyMask;
+	local tTargetTexture;
+	local tTextureKey;
+	local tSourceAtlas;
+	local tSourceFile;
+	local tCopySucceeded;
+	local tBarTopInset;
+	local tMaskHeight;
+	function VUHDO_refreshMissingBuffBarFill(aContainerData, anForceTextureCopy)
+
+		if not aContainerData then
+			return;
+		end
+
+		tBarTexture = aContainerData["missingBuffBarTexture"];
+		tFrame = aContainerData["missingBuffBarFrame"];
+		tTargetBar = aContainerData["overlayTargetBar"];
+		tContainer = aContainerData["container"];
+		tFillMask = tFrame and tFrame["FillMask"];
+		tEmptyMask = tFrame and tFrame["EmptyMask"];
+
+		tTextureKey = nil;
+		tTargetTexture = tTargetBar and tTargetBar:GetStatusBarTexture();
+
+		if tTargetTexture then
+			tSourceAtlas = tTargetTexture:GetAtlas();
+
+			if tSourceAtlas then
+				tTextureKey = "a:" .. tSourceAtlas;
+			else
+				tSourceFile = tTargetTexture:GetTexture();
+				tTextureKey = "f:" .. tostring(tSourceFile);
+			end
+		end
+
+		if anForceTextureCopy or tTextureKey ~= aContainerData["missingBuffLastTextureKey"] then
+			tCopySucceeded = false;
+
+			if tBarTexture and tTargetBar then
+				tCopySucceeded = VUHDO_copyMissingBuffBarTexture(tBarTexture, tTargetBar);
+			end
+
+			if tCopySucceeded then
+				aContainerData["missingBuffLastTextureKey"] = tTextureKey;
+			else
+				aContainerData["missingBuffLastTextureKey"] = nil;
+			end
+		end
+
+		if tFillMask and tTargetBar then
+			tTargetTexture = tTargetBar:GetStatusBarTexture();
+
+			tFillMask:ClearAllPoints();
+
+			if tTargetTexture then
+				tFillMask:SetAllPoints(tTargetTexture);
+			end
+		end
+
+		if tEmptyMask and tContainer and tTargetBar then
+			tBarTopInset = VUHDO_PixelUtil.RoundToPixel(1, 1);
+			tMaskHeight = tTargetBar:GetHeight() + tBarTopInset + 1;
+
+			tEmptyMask:ClearAllPoints();
+
+			VUHDO_PixelUtil.SetPoint(tEmptyMask, "TOPLEFT", tContainer, "BOTTOMLEFT", 0, tBarTopInset);
+			VUHDO_PixelUtil.SetPoint(tEmptyMask, "TOPRIGHT", tContainer, "BOTTOMRIGHT", 0, tBarTopInset);
+			VUHDO_PixelUtil.SetHeight(tEmptyMask, tMaskHeight);
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tColorKey;
+	function VUHDO_setMissingBuffBarColor(aButtonName, aCategName, aColor)
+
+		if not aButtonName or not aCategName or not aColor then
+			return;
+		end
+
+		tColorKey = aButtonName .. ":" .. aCategName;
+
+		if not sMissingBuffBarColors[tColorKey] then
+			sMissingBuffBarColors[tColorKey] = { };
+		end
+
+		sMissingBuffBarColors[tColorKey]["R"] = aColor["R"] or 0;
+		sMissingBuffBarColors[tColorKey]["G"] = aColor["G"] or 0;
+		sMissingBuffBarColors[tColorKey]["B"] = aColor["B"] or 0;
+		sMissingBuffBarColors[tColorKey]["O"] = aColor["O"];
+		sMissingBuffBarColors[tColorKey]["useBackground"] = aColor["useBackground"];
+
+		if sMissingBuffBarColors[tColorKey]["O"] == nil then
+			sMissingBuffBarColors[tColorKey]["O"] = 1;
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tColorKey;
+	local tStoredColor;
+	local tBarTexture;
+	local tBarOpacity;
+	function VUHDO_applyStoredMissingBuffBarColor(aButtonName, aCategName, aContainerData)
+
+		if not aButtonName or not aCategName or not aContainerData then
+			return;
+		end
+
+		tColorKey = aButtonName .. ":" .. aCategName;
+		tStoredColor = sMissingBuffBarColors[tColorKey];
+		tBarTexture = aContainerData["missingBuffBarTexture"];
+
+		if not tBarTexture or tBarTexture:IsForbidden() then
+			return;
+		end
+
+		if tStoredColor and tStoredColor["useBackground"] ~= false then
+			tBarOpacity = tStoredColor["O"];
+
+			if tBarOpacity == nil then
+				tBarOpacity = 1;
+			end
+
+			tBarTexture:SetVertexColor(tStoredColor["R"] or 0, tStoredColor["G"] or 0, tStoredColor["B"] or 0, tBarOpacity);
+		else
+			tBarTexture:SetVertexColor(0, 0, 0, 0);
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tFrame;
+	function VUHDO_setMissingBuffBarShown(aContainerData, anIsShown)
+
+		tFrame = aContainerData and aContainerData["missingBuffBarFrame"];
+
+		if tFrame then
+			tFrame:SetShown(anIsShown and true or false);
+		end
+
+		return;
+
+	end
 end
 
 
@@ -4232,12 +4612,12 @@ end
 function VUHDO_refreshAuraContainer(aContainer)
 
 	if not aContainer or not aContainer:IsShown() then
-		return;
+		return false;
 	end
 
 	aContainer:UpdateAllAuras();
 
-	return;
+	return true;
 
 end
 

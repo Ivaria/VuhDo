@@ -737,7 +737,14 @@ do
 					end
 
 				elseif strfind(aModel, "_BUFF_", 1, true) then
-					VUHDO_reloadBuffPanel();
+					if strfind(aModel, "missingColor.show", 1, true) then
+						VUHDO_invalidateMissingBuffContainerPlans();
+						VUHDO_updateBuffPanel();
+					elseif strfind(aModel, "missingColor", 1, true) then
+						VUHDO_applyMissingBuffContainerColors();
+					else
+						VUHDO_reloadBuffPanel();
+					end
 
 				elseif strfind(aModel, "BLIZZ_UI", 1, true) then
 					VUHDO_initBlizzFrames();

@@ -3,7 +3,6 @@ local _;
 local GetTime = GetTime;
 local UnitName = UnitName;
 local UnitGUID = UnitGUID;
-local UnitIsUnit = UnitIsUnit;
 local UnitIsEnemy = UnitIsEnemy;
 local GetSpellCooldown = GetSpellCooldown or VUHDO_getSpellCooldown;
 local HasFullControl = HasFullControl;
@@ -129,6 +128,7 @@ local VUHDO_resetAuraContainersForUnit;
 local VUHDO_resetOverlaysForUnit;
 local VUHDO_clearOverlaysForUnit;
 local VUHDO_syncAllOverlayUnits;
+local VUHDO_refreshAllMissingBuffContainers;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -581,10 +581,7 @@ local VuhDoDirectionFrame;
 
 
 --
-local function VUHDO_eventHandlerInitLocalOverrides()
-
-	VUHDO_RAID = _G["VUHDO_RAID"];
-	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+local function VUHDO_eventHandlerInitFunctionOverrides()
 
 	VUHDO_updateHealth = _G["VUHDO_updateHealth"];
 	VUHDO_updateAllRaidBars = _G["VUHDO_updateAllRaidBars"];
@@ -636,6 +633,21 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_resetOverlaysForUnit = _G["VUHDO_resetOverlaysForUnit"];
 	VUHDO_clearOverlaysForUnit = _G["VUHDO_clearOverlaysForUnit"];
 	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
+	VUHDO_refreshAllMissingBuffContainers = _G["VUHDO_refreshAllMissingBuffContainers"];
+
+	return;
+
+end
+
+
+
+--
+local function VUHDO_eventHandlerInitLocalOverrides()
+
+	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+
+	VUHDO_eventHandlerInitFunctionOverrides();
 
 	VUHDO_initTaskSystem();
 
@@ -745,6 +757,7 @@ VUHDO_TIMERS = {
 	["UPDATE_AOE"] = 3,
 	["BUFF_WATCH"] = 1,
 	["REFRESH_AURA_CONTAINERS"] = 0,
+	["REFRESH_MISSING_BUFF_CONTAINERS"] = -1,
 };
 local VUHDO_TIMERS = VUHDO_TIMERS;
 
@@ -841,6 +854,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_customDebuffIconsInitLocalOverrides();
 	VUHDO_healCommAdapterInitLocalOverrides();
 	VUHDO_buffWatchInitLocalOverrides();
+	VUHDO_buffWatchContainersInitLocalOverrides();
 	VUHDO_clusterBuilderInitLocalOverrides();
 	VUHDO_aoeAdvisorInitLocalOverrides();
 	VUHDO_bouquetValidatorsSpellTraceInitLocalOverrides();
@@ -1409,6 +1423,8 @@ do
 
 			if VUHDO_VARIABLES_LOADED then
 				VUHDO_syncAuraContainersForAllRaidUnits();
+
+				VUHDO_timeRefreshMissingBuffContainers(0.3);
 
 				C_Timer.After(2, VUHDO_timeRefreshAuraContainers);
 				C_Timer.After(6, VUHDO_timeRefreshAuraContainers);
@@ -2317,6 +2333,17 @@ end
 
 
 --
+function VUHDO_timeRefreshMissingBuffContainers(aNumSecs)
+
+	VUHDO_TIMERS["REFRESH_MISSING_BUFF_CONTAINERS"] = aNumSecs or 0.3;
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_timeRedrawPanel(aPanelNum, aNumSecs)
 
 	VUHDO_RELOAD_PANEL_NUM = aPanelNum;
@@ -2671,6 +2698,14 @@ do
 			VUHDO_syncAuraContainersForAllRaidUnits();
 
 			VUHDO_syncAllOverlayUnits(false);
+		end
+
+		if VUHDO_checkTimer("REFRESH_MISSING_BUFF_CONTAINERS") then
+			if VUHDO_refreshAllMissingBuffContainers() then
+				VUHDO_TIMERS["REFRESH_MISSING_BUFF_CONTAINERS"] = 0.1;
+			else
+				VUHDO_TIMERS["REFRESH_MISSING_BUFF_CONTAINERS"] = 0.5;
+			end
 		end
 
 		-- Refresh Tooltip

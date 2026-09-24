@@ -44,6 +44,7 @@ local VUHDO_CUSTOM_ICONS;
 local VUHDO_AURA_GROUP_TYPE_FILTER;
 local VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY;
 local VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY;
+local VUHDO_MISSING_BUFF_CONTAINERS;
 
 local VUHDO_PixelUtil;
 
@@ -90,6 +91,9 @@ local VUHDO_getTemplateIdentityGate;
 local VUHDO_isCompoundFilterStringTemplate;
 local VUHDO_rewriteAuraContainerGateState;
 local VUHDO_isAuraDisplaySuppressed;
+local VUHDO_reconcileMissingBuffContainersForButton;
+local VUHDO_syncMissingBuffContainersForButton;
+local VUHDO_clearMissingBuffBuildKey;
 
 local sEmpty = { };
 local sInvalidateRemappedButtonNameToUnit = { };
@@ -210,6 +214,7 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_AURA_GROUP_TYPE_FILTER = _G["VUHDO_AURA_GROUP_TYPE_FILTER"];
 	VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY = _G["VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY"];
 	VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY = _G["VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY"];
+	VUHDO_MISSING_BUFF_CONTAINERS = _G["VUHDO_MISSING_BUFF_CONTAINERS"];
 
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 
@@ -267,6 +272,9 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 	VUHDO_isCompoundFilterStringTemplate = _G["VUHDO_isCompoundFilterStringTemplate"];
 	VUHDO_rewriteAuraContainerGateState = _G["VUHDO_rewriteAuraContainerGateState"];
 	VUHDO_isAuraDisplaySuppressed = _G["VUHDO_isAuraDisplaySuppressed"];
+	VUHDO_reconcileMissingBuffContainersForButton = _G["VUHDO_reconcileMissingBuffContainersForButton"];
+	VUHDO_syncMissingBuffContainersForButton = _G["VUHDO_syncMissingBuffContainersForButton"];
+	VUHDO_clearMissingBuffBuildKey = _G["VUHDO_clearMissingBuffBuildKey"];
 
 	return;
 
@@ -2620,6 +2628,7 @@ do
 
 
 
+
 	--
 	local tPendingKey;
 	function VUHDO_enqueueOverlayContainerBuild(aButton, anIndicatorKey, anEntryKey, aContainerTemplate, anOverlayEntry, aChainGroupMeta)
@@ -2651,7 +2660,74 @@ do
 		return;
 
 	end
+
+
+
+	--
+	local tElementHeight;
+	local tButtonSetup;
+	local tGroupTemplate;
+	local tContainerParent;
+	local tOverlayHostFrame;
+	local tFrameLevelOffset;
+	function VUHDO_buildMissingBuffContainerTemplate(aButton, aTargetFrame, aCategName, aSpellIdMap, aBarWidth, aBarHeight, aFrameLevelOffset, aMissingBuffSublevel, aSlotIndex)
+
+		tElementHeight = aBarHeight + VUHDO_PixelUtil.RoundToPixel(1, 1) + 1;
+
+		tButtonSetup = {
+			["width"] = aBarWidth,
+			["height"] = tElementHeight,
+			["targetBar"] = aTargetFrame,
+			["shadowValueMode"] = "cover",
+			["templateName"] = VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE,
+			["disableMouse"] = true,
+		};
+
+		tGroupTemplate = {
+			["key"] = "missingBuff_" .. aCategName,
+			["filterString"] = "HELPFUL",
+			["candidateFilters"] = {
+				["includeSpellIDs"] = aSpellIdMap,
+			},
+			["templateName"] = VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE,
+			["buttonSetup"] = tButtonSetup,
+			["maxFrameCount"] = 1,
+			["layout"] = {
+				["elementWidth"] = aBarWidth,
+				["elementHeight"] = tElementHeight,
+				["elementSpacing"] = 0,
+				["lineSpacing"] = 0,
+				["forceNewLine"] = true,
+				["layoutIndex"] = 1,
+			},
+		};
+
+		tContainerParent, tOverlayHostFrame, tFrameLevelOffset = VUHDO_resolveOverlayContainerAnchorFields(aButton, aTargetFrame, aFrameLevelOffset or 1);
+
+		return {
+			["parent"] = tContainerParent,
+			["anchor"] = {
+				["mode"] = "topEdge",
+				["target"] = tOverlayHostFrame or aTargetFrame,
+				["levelBase"] = aButton,
+				["frameLevelOffset"] = tFrameLevelOffset,
+			},
+			["isOverlay"] = true,
+			["isMissingBuff"] = true,
+			["overlayTargetBar"] = aTargetFrame,
+			["overlayHostFrame"] = tOverlayHostFrame,
+			["missingBuffCategName"] = aCategName,
+			["missingBuffSublevel"] = aMissingBuffSublevel or 0,
+			["missingBuffSlotIndex"] = aSlotIndex,
+			["groups"] = {
+				tGroupTemplate,
+			},
+			["alwaysEnabled"] = true,
+		};
+
+	end
 end
+
 
 
 
@@ -3018,6 +3094,16 @@ do
 			VUHDO_OVERLAY_CONTAINERS[tButtonName] = nil;
 		end
 
+		if tButtonName and VUHDO_MISSING_BUFF_CONTAINERS[tButtonName] then
+			for _, tContainerData in pairs(VUHDO_MISSING_BUFF_CONTAINERS[tButtonName]) do
+				VUHDO_retireAuraContainer(aButton, tContainerData);
+			end
+
+			VUHDO_MISSING_BUFF_CONTAINERS[tButtonName] = nil;
+
+			VUHDO_clearMissingBuffBuildKey(tButtonName);
+		end
+
 		if tButtonName then
 			sOverlayConfigKeys[tButtonName] = nil;
 		end
@@ -3069,6 +3155,15 @@ do
 			end
 		end
 
+		for tReleaseAllMissingButtonName, tMissingBuffEntry in pairs(VUHDO_MISSING_BUFF_CONTAINERS) do
+			for _, tContainerData in pairs(tMissingBuffEntry) do
+				VUHDO_retireAuraContainer(nil, tContainerData);
+			end
+
+			VUHDO_clearMissingBuffBuildKey(tReleaseAllMissingButtonName);
+		end
+
+		twipe(VUHDO_MISSING_BUFF_CONTAINERS);
 		twipe(VUHDO_OVERLAY_CONTAINERS);
 		twipe(sOverlayContainerPlans);
 		twipe(sOverlayConfigKeys);
@@ -3865,6 +3960,12 @@ do
 				if tPanelNum and (tIsAuraModeContainers or tIsAuraDataRestricted or sHasAnyOverlays or tIsBarColorsDispelOverlayConfigured) then
 					VUHDO_buildOverlaysForButton(tButton, tButtonName, tPanelNum, aUnit);
 				end
+
+				if tPanelNum and tIsAuraModeContainers then
+					VUHDO_reconcileMissingBuffContainersForButton(tButton, tButtonName, tPanelNum);
+				end
+
+				VUHDO_syncMissingBuffContainersForButton(tButton, aUnit);
 
 				tUnitGlowApplied = false;
 

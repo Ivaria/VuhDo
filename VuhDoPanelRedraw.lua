@@ -1590,8 +1590,8 @@ do
 			tPredOvershieldClipFrame:SetAllPoints(tHealthTexture);
 		end
 
-		VUHDO_PixelUtil.SetFrameLevel(tPredOvershieldClipFrame, tPredHealthBar:GetFrameLevel() + 1);
-		VUHDO_PixelUtil.SetFrameLevel(tPredOvershieldBar, tPredHealthBar:GetFrameLevel() + 1);
+		VUHDO_PixelUtil.SetFrameLevel(tPredOvershieldClipFrame, tPredHealthBar:GetFrameLevel() + 2);
+		VUHDO_PixelUtil.SetFrameLevel(tPredOvershieldBar, tPredHealthBar:GetFrameLevel() + 2);
 
 		if tPredIsInverted then
 			tPredHealthLevel = tPredHealthBar:GetFrameLevel();
@@ -2895,6 +2895,8 @@ do
 			sPanelCompletionTracker[tTrackerKey] = nil;
 		end
 
+		VUHDO_timeRefreshMissingBuffContainers(0.01);
+
 		return;
 
 	end
@@ -3119,6 +3121,8 @@ do
 
 		VUHDO_IS_RELOADING = false;
 
+		VUHDO_timeRefreshMissingBuffContainers(0.05);
+
 		VUHDO_reloadBuffPanel();
 
 		return;
@@ -3155,6 +3159,8 @@ do
 
 		VUHDO_IS_RELOADING = false;
 
+		VUHDO_timeRefreshMissingBuffContainers(0.05);
+
 		return;
 
 	end
@@ -3180,6 +3186,27 @@ do
 			if sButtonPositionSemaphores[tPanelNum] and sButtonPositionSemaphores[tPanelNum]["count"] > 0 then
 				return true;
 			end
+		end
+
+		return false;
+
+	end
+
+
+
+	--
+	function VUHDO_isDeferredRedrawActiveForPanel(aPanelNum)
+
+		if sRedrawPanelSemaphores[aPanelNum] and sRedrawPanelSemaphores[aPanelNum]["count"] > 0 then
+			return true;
+		end
+
+		if sButtonInitSemaphores[aPanelNum] and sButtonInitSemaphores[aPanelNum]["count"] > 0 then
+			return true;
+		end
+
+		if sButtonPositionSemaphores[aPanelNum] and sButtonPositionSemaphores[aPanelNum]["count"] > 0 then
+			return true;
 		end
 
 		return false;
@@ -3401,6 +3428,8 @@ do
 
 			VUHDO_deferRedrawAllPanels(tNextRequest["isFixAllFrameLevels"]);
 		end
+
+		VUHDO_timeRefreshMissingBuffContainers(0.01);
 
 		return;
 
