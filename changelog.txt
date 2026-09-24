@@ -15,6 +15,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed missing aura bar color in Buff Watch  
   
   
 Improvements:  
