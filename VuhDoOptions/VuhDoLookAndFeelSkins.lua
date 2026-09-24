@@ -3575,6 +3575,18 @@ function VUHDO_lnfSkinApplyToComponent(aComponent, aLabelName)
 		VUHDO_lnfSkinRefreshTabButton(aComponent);
 	end
 
+	if tObjectType == "Frame" and aComponent:GetAttribute("model") then
+		tName = aComponent:GetName();
+
+		if tName and _G[tName .. "Texture"] and _G[tName .. "TitleString"] then
+			if _G[tName .. "Border"] then
+				VUHDO_lnfColorSwatchInitFromModel(aComponent);
+			else
+				VUHDO_lnfTextureSwatchInitFromModel(aComponent);
+			end
+		end
+	end
+
 	return;
 
 end
