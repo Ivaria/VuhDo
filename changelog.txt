@@ -16,6 +16,7 @@ Known issues:
   
 Bugfixes:  
 -- Fixed missing aura bar color in Buff Watch  
+-- Fixed hostile spell binding with a corresponding friendly macro  
   
   
 Improvements:  

@@ -261,13 +261,43 @@ local function VUHDO_generateTargetMacroText(aTarget, aFriendlyAction, aHostileA
 	if not aFriendlyAction or not aHostileAction then	return ""; end
 
 	tMacroId = GetMacroIndexByName(aHostileAction);
-	if tMacroId == 0 then
-		tMacroId = GetMacroIndexByName(aFriendlyAction);
+
+	if tMacroId ~= 0 then
+		_, _, tMacroText = GetMacroInfo(tMacroId);
+
+		return tMacroText;
 	end
 
-	if (tMacroId ~= 0) then
+	tMacroId = GetMacroIndexByName(aFriendlyAction);
+
+	if tMacroId ~= 0 then
 		_, _, tMacroText = GetMacroInfo(tMacroId);
-		return tMacroText;
+
+		tLowerHostile = strlower(aHostileAction);
+
+		if "target" == tLowerHostile then
+			tEnemyText = "/tar [harm,@vuhdo]";
+		elseif "focus" == tLowerHostile then
+			tEnemyText = "/focus [harm,@vuhdo]";
+		elseif "assist" == tLowerHostile then
+			tEnemyText = "/assist [harm,@vuhdo]";
+		elseif #aHostileAction > 0 and GetSpellName(aHostileAction) then
+			tEnemyText = "/use [harm,@vuhdo] " .. aHostileAction;
+		else
+			tEnemyText = "";
+		end
+
+		if tEnemyText == "" then
+			return tMacroText;
+		end
+
+		if VUHDO_SPELL_CONFIG["IS_CANCEL_CURRENT"] then
+			tStopText = "/stopcasting\n";
+		else
+			tStopText = "";
+		end
+
+		return format("%s%s%s\n/stopmacro [harm,@vuhdo]\n%s", sStopTargetText, tStopText, tEnemyText, tMacroText);
 	end
 
 	if VUHDO_SPELL_CONFIG["IS_CANCEL_CURRENT"] then
