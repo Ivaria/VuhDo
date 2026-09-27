@@ -23,6 +23,7 @@ local VUHDO_AURA_GROUP_COLOR_OFF;
 local VUHDO_AURA_GROUP_COLOR_DISPEL;
 local VUHDO_AURA_GROUP_COLOR_ALL_DISPEL;
 local VUHDO_AURA_GROUP_COLOR_CUSTOM;
+local VUHDO_UPDATE_DEBUFF;
 local VUHDO_UNIT_AURA_LIST_SLOTS;
 local VUHDO_AURA_GROUP_TYPE_LIST;
 local VUHDO_UNIT_AURA_CACHE;
@@ -60,6 +61,12 @@ local VUHDO_invalidateOverlayBuildKeys;
 local VUHDO_invalidateNativeAuraSoundScanCache;
 local VUHDO_clearNativeAuraSounds;
 local VUHDO_initNativeAuraSounds;
+local VUHDO_invalidateAuraGroupFilterCache;
+local VUHDO_invalidateAuraGroupFilterCacheForGroup;
+local VUHDO_rebuildAuraAnchorsForGroups;
+local VUHDO_processPendingAuraContainerBuilds;
+local VUHDO_timeRebuildAuraGroups;
+local VUHDO_updateBouquetsForEvent;
 
 local sUnitDispellableAuraId = { };
 local sUnitAuraCanColorBar = { };
@@ -82,6 +89,9 @@ local sAuraGlowWinnerPool;
 local sFilterResultCache = { };
 local sListGroupAnchorIndex = { };
 local sDispellableAuraScanDone = { };
+
+local sDirtyAuraGroupIds = { };
+local sIsAuraGroupSoundsDirty = false;
 
 local sEmpty = { };
 
@@ -232,32 +242,7 @@ end
 
 
 --
-function VUHDO_auraColorsInitLocalOverrides()
-
-	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
-	VUHDO_RAID = _G["VUHDO_RAID"];
-	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
-	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
-	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
-	VUHDO_AURA_GROUP_COLOR_OFF = _G["VUHDO_AURA_GROUP_COLOR_OFF"];
-	VUHDO_AURA_GROUP_COLOR_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_DISPEL"];
-	VUHDO_AURA_GROUP_COLOR_ALL_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_ALL_DISPEL"];
-	VUHDO_AURA_GROUP_COLOR_CUSTOM = _G["VUHDO_AURA_GROUP_COLOR_CUSTOM"];
-	VUHDO_UNIT_AURA_LIST_SLOTS = _G["VUHDO_UNIT_AURA_LIST_SLOTS"];
-	VUHDO_AURA_GROUP_TYPE_LIST = _G["VUHDO_AURA_GROUP_TYPE_LIST"];
-	VUHDO_UNIT_AURA_CACHE = _G["VUHDO_UNIT_AURA_CACHE"];
-	VUHDO_AURA_LIST_ENTRY_SPELL = _G["VUHDO_AURA_LIST_ENTRY_SPELL"];
-	VUHDO_AURA_LIST_ENTRY_BOUQUET = _G["VUHDO_AURA_LIST_ENTRY_BOUQUET"];
-	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
-	VUHDO_UNIT_AURA_BY_SPELL = _G["VUHDO_UNIT_AURA_BY_SPELL"];
-	VUHDO_UNIT_AURA_BOUQUET_ACTIVE = _G["VUHDO_UNIT_AURA_BOUQUET_ACTIVE"];
-	VUHDO_DEBUFF_TYPES = _G["VUHDO_DEBUFF_TYPES"];
-	VUHDO_PLAYER_PURGE_ABILITIES = _G["VUHDO_PLAYER_PURGE_ABILITIES"];
-	VUHDO_PLAYER_DISPEL_ABILITIES = _G["VUHDO_PLAYER_DISPEL_ABILITIES"];
-	VUHDO_INFERRED_AURA_SYNTHETIC_IDS = _G["VUHDO_INFERRED_AURA_SYNTHETIC_IDS"];
-	VUHDO_INFERRED_AURAS = _G["VUHDO_INFERRED_AURAS"];
-	VUHDO_BUFF_SETTINGS = _G["VUHDO_BUFF_SETTINGS"];
-	VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS = _G["VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS"];
+local function VUHDO_auraColorsInitLocalOverridesFunctions()
 
 	VUHDO_getDispelCurveForUnit = _G["VUHDO_getDispelCurveForUnit"];
 	VUHDO_getDispelTextCurveForUnit = _G["VUHDO_getDispelTextCurveForUnit"];
@@ -277,6 +262,49 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_invalidateNativeAuraSoundScanCache = _G["VUHDO_invalidateNativeAuraSoundScanCache"];
 	VUHDO_clearNativeAuraSounds = _G["VUHDO_clearNativeAuraSounds"];
 	VUHDO_initNativeAuraSounds = _G["VUHDO_initNativeAuraSounds"];
+	VUHDO_invalidateAuraGroupFilterCache = _G["VUHDO_invalidateAuraGroupFilterCache"];
+	VUHDO_invalidateAuraGroupFilterCacheForGroup = _G["VUHDO_invalidateAuraGroupFilterCacheForGroup"];
+	VUHDO_rebuildAuraAnchorsForGroups = _G["VUHDO_rebuildAuraAnchorsForGroups"];
+	VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
+	VUHDO_timeRebuildAuraGroups = _G["VUHDO_timeRebuildAuraGroups"];
+	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_auraColorsInitLocalOverrides()
+
+	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
+	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_PANEL_SETUP = _G["VUHDO_PANEL_SETUP"];
+	VUHDO_PANEL_MODELS = _G["VUHDO_PANEL_MODELS"];
+	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
+	VUHDO_AURA_GROUP_COLOR_OFF = _G["VUHDO_AURA_GROUP_COLOR_OFF"];
+	VUHDO_AURA_GROUP_COLOR_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_DISPEL"];
+	VUHDO_AURA_GROUP_COLOR_ALL_DISPEL = _G["VUHDO_AURA_GROUP_COLOR_ALL_DISPEL"];
+	VUHDO_AURA_GROUP_COLOR_CUSTOM = _G["VUHDO_AURA_GROUP_COLOR_CUSTOM"];
+	VUHDO_UPDATE_DEBUFF = _G["VUHDO_UPDATE_DEBUFF"];
+	VUHDO_UNIT_AURA_LIST_SLOTS = _G["VUHDO_UNIT_AURA_LIST_SLOTS"];
+	VUHDO_AURA_GROUP_TYPE_LIST = _G["VUHDO_AURA_GROUP_TYPE_LIST"];
+	VUHDO_UNIT_AURA_CACHE = _G["VUHDO_UNIT_AURA_CACHE"];
+	VUHDO_AURA_LIST_ENTRY_SPELL = _G["VUHDO_AURA_LIST_ENTRY_SPELL"];
+	VUHDO_AURA_LIST_ENTRY_BOUQUET = _G["VUHDO_AURA_LIST_ENTRY_BOUQUET"];
+	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
+	VUHDO_UNIT_AURA_BY_SPELL = _G["VUHDO_UNIT_AURA_BY_SPELL"];
+	VUHDO_UNIT_AURA_BOUQUET_ACTIVE = _G["VUHDO_UNIT_AURA_BOUQUET_ACTIVE"];
+	VUHDO_DEBUFF_TYPES = _G["VUHDO_DEBUFF_TYPES"];
+	VUHDO_PLAYER_PURGE_ABILITIES = _G["VUHDO_PLAYER_PURGE_ABILITIES"];
+	VUHDO_PLAYER_DISPEL_ABILITIES = _G["VUHDO_PLAYER_DISPEL_ABILITIES"];
+	VUHDO_INFERRED_AURA_SYNTHETIC_IDS = _G["VUHDO_INFERRED_AURA_SYNTHETIC_IDS"];
+	VUHDO_INFERRED_AURAS = _G["VUHDO_INFERRED_AURAS"];
+	VUHDO_BUFF_SETTINGS = _G["VUHDO_BUFF_SETTINGS"];
+	VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS = _G["VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS"];
+
+	VUHDO_auraColorsInitLocalOverridesFunctions();
 
 	sAuraColorWinnerPool = VUHDO_createTablePool("AuraColorWinner", 100, VUHDO_createAuraColorWinnerDelegate, VUHDO_cleanupAuraColorWinnerDelegate);
 	sCanColorBarGroupPool = VUHDO_createTablePool("CanColorBarGroup", 50, VUHDO_createCanColorBarGroupDelegate, VUHDO_cleanupCanColorBarGroupDelegate);
@@ -345,24 +373,31 @@ do
 
 
 
-	function VUHDO_rebuildCanColorBarGroupsCache()
+	function VUHDO_rebuildAuraGroupCaches(anIsFilterCacheDirty, anIsAnchorIndexDirty, anIsSoundsDirty)
 
-		VUHDO_invalidateAuraGroupFilterCache();
+		if anIsFilterCacheDirty then
+			VUHDO_invalidateAuraGroupFilterCache();
+		end
 
-		VUHDO_rebuildListGroupAnchorIndex();
+		if anIsAnchorIndexDirty then
+			VUHDO_rebuildListGroupAnchorIndex();
+		end
 
 		VUHDO_rebuildActiveAuraCaches();
 
 		VUHDO_rebuildAuraModeEventFlags();
-		VUHDO_rebuildSoundEnabledAuraGroups();
 
-		VUHDO_invalidateNativeAuraSoundScanCache();
+		if anIsSoundsDirty then
+			VUHDO_rebuildSoundEnabledAuraGroups();
 
-		if VUHDO_isAuraModeContainers() then
-			VUHDO_clearNativeAuraSounds();
-			VUHDO_initNativeAuraSounds();
-		else
-			VUHDO_clearNativeAuraSounds();
+			VUHDO_invalidateNativeAuraSoundScanCache();
+
+			if VUHDO_isAuraModeContainers() then
+				VUHDO_clearNativeAuraSounds();
+				VUHDO_initNativeAuraSounds();
+			else
+				VUHDO_clearNativeAuraSounds();
+			end
 		end
 
 		VUHDO_collectBouquetAuraGroupIds();
@@ -628,8 +663,19 @@ do
 		VUHDO_invalidateOverlayBuildKeys();
 
 		if VUHDO_isAuraDataRestricted() or VUHDO_isAuraModeContainers() then
-			VUHDO_syncAllOverlayUnits(true);
+			VUHDO_syncAllOverlayUnits(false);
 		end
+
+		return;
+
+	end
+
+
+
+	--
+	function VUHDO_rebuildCanColorBarGroupsCache()
+
+		VUHDO_rebuildAuraGroupCaches(true, true, true);
 
 		return;
 
@@ -643,6 +689,56 @@ do
 		return sCanColorBarGroups;
 
 	end
+end
+
+
+
+--
+function VUHDO_markAuraGroupChanged(aGroupId, anIsAnchorsDirty, anIsSoundsDirty)
+
+	if anIsAnchorsDirty and aGroupId then
+		sDirtyAuraGroupIds[aGroupId] = true;
+	end
+
+	if anIsSoundsDirty then
+		sIsAuraGroupSoundsDirty = true;
+	end
+
+	VUHDO_timeRebuildAuraGroups(0.3);
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_applyAuraGroupChanges()
+
+	for tGroupId, _ in pairs(sDirtyAuraGroupIds) do
+		VUHDO_invalidateAuraGroupFilterCacheForGroup(tGroupId);
+	end
+
+	VUHDO_rebuildAuraGroupCaches(false, false, sIsAuraGroupSoundsDirty);
+
+	if next(sDirtyAuraGroupIds) then
+		VUHDO_rebuildAuraAnchorsForGroups(sDirtyAuraGroupIds);
+	end
+
+	twipe(sDirtyAuraGroupIds);
+
+	sIsAuraGroupSoundsDirty = false;
+
+	VUHDO_processPendingAuraContainerBuilds();
+
+	if not VUHDO_isAuraDataRestricted() then
+		for tUnit, _ in pairs(VUHDO_RAID) do
+			VUHDO_updateBouquetsForEvent(tUnit, VUHDO_UPDATE_DEBUFF);
+		end
+	end
+
+	return;
+
 end
 
 

@@ -728,10 +728,18 @@ do
 					or strfind(aModel, "INTERNAL_MODEL_", 1, true)
 					or strfind(aModel, "VUHDO_BOUQUETS", 1, true) then
 
+					if strfind(aModel, "VUHDO_BOUQUETS", 1, true) then
+						VUHDO_timeRefreshOverlays(0.3);
+					end
+
 				elseif tPanelNum then
 					if (strfind(aModel, "TOOLTIP", 1, true) ~= nil) then
 						VUHDO_demoTooltip(tPanelNum);
 					else
+						if strfind(aModel, "VUHDO_INDICATOR_CONFIG", 1, true) and strfind(aModel, ".CUSTOM.", 1, true) then
+							VUHDO_timeRefreshOverlays(0.3);
+						end
+
 						VUHDO_initDynamicPanelModels();
 						VUHDO_timeRedrawPanel(tPanelNum, 0.3);
 					end
@@ -748,6 +756,8 @@ do
 
 				elseif strfind(aModel, "BLIZZ_UI", 1, true) then
 					VUHDO_initBlizzFrames();
+
+				elseif strfind(aModel, "AURA_GROUPS", 1, true) or strfind(aModel, "VUHDO_SPELL_ENTRY_", 1, true) then
 
 				else
 					if strfind(aModel, "VUHDO_CONFIG.", 1, true) then

@@ -8,6 +8,9 @@ local tostring = tostring;
 local twipe = table.wipe;
 local format = string.format;
 local min = math.min;
+local max = math.max;
+
+local sBorderCoordStart = 0.0625;
 
 local InCombatLockdown = InCombatLockdown;
 local issecretvalue = issecretvalue;
@@ -81,8 +84,16 @@ local VUHDO_refreshAuraContainer;
 local VUHDO_clearOverlaySlotHostUnit;
 local VUHDO_clearAuraContainerBinding;
 local VUHDO_getAuraContainerBuildSignature;
+local VUHDO_getAuraContainerFilterSignature;
+local VUHDO_getAuraButtonSetupBuildSignature;
+local VUHDO_getAuraButtonSetupVolatileSignature;
 local VUHDO_getOverlayHostFrame;
 local VUHDO_deferAcquireOverlayContainer;
+local VUHDO_deferVolatilePassForButton;
+local VUHDO_applyAuraContainerFilterPass;
+local VUHDO_reconcileAuraContainerVolatilePass;
+local VUHDO_reapplyAuraSlotVolatileSetup;
+local VUHDO_updateOverlaySuppressedSlotMetrics;
 local VUHDO_deferSyncOverlaysForUnit;
 local VUHDO_applyStoredChainBaselineColor;
 local VUHDO_showOverlayFillChainBackgroundForData;
@@ -262,8 +273,16 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 	VUHDO_clearOverlaySlotHostUnit = _G["VUHDO_clearOverlaySlotHostUnit"];
 	VUHDO_clearAuraContainerBinding = _G["VUHDO_clearAuraContainerBinding"];
 	VUHDO_getAuraContainerBuildSignature = _G["VUHDO_getAuraContainerBuildSignature"];
+	VUHDO_getAuraContainerFilterSignature = _G["VUHDO_getAuraContainerFilterSignature"];
+	VUHDO_getAuraButtonSetupBuildSignature = _G["VUHDO_getAuraButtonSetupBuildSignature"];
+	VUHDO_getAuraButtonSetupVolatileSignature = _G["VUHDO_getAuraButtonSetupVolatileSignature"];
 	VUHDO_getOverlayHostFrame = _G["VUHDO_getOverlayHostFrame"];
 	VUHDO_deferAcquireOverlayContainer = _G["VUHDO_deferAcquireOverlayContainer"];
+	VUHDO_deferVolatilePassForButton = _G["VUHDO_deferVolatilePassForButton"];
+	VUHDO_applyAuraContainerFilterPass = _G["VUHDO_applyAuraContainerFilterPass"];
+	VUHDO_reconcileAuraContainerVolatilePass = _G["VUHDO_reconcileAuraContainerVolatilePass"];
+	VUHDO_reapplyAuraSlotVolatileSetup = _G["VUHDO_reapplyAuraSlotVolatileSetup"];
+	VUHDO_updateOverlaySuppressedSlotMetrics = _G["VUHDO_updateOverlaySuppressedSlotMetrics"];
 	VUHDO_deferSyncOverlaysForUnit = _G["VUHDO_deferSyncOverlaysForUnit"];
 	VUHDO_applyStoredChainBaselineColor = _G["VUHDO_applyStoredChainBaselineColor"];
 	VUHDO_showOverlayFillChainBackgroundForData = _G["VUHDO_showOverlayFillChainBackgroundForData"];
@@ -2092,7 +2111,12 @@ do
 	local tTargetWidth;
 	local tTargetHeight;
 	local tSquareSize;
-	local function VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry)
+	local tBorderEdgeSize;
+	local tBorderScale;
+	local tBorderRepeatX;
+	local tBorderRepeatY;
+	local tButtonSetup;
+	function VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry)
 
 		tLevelFrame = VUHDO_resolveOverlayLevelFrame(aTargetFrame);
 
@@ -2106,7 +2130,7 @@ do
 			tTargetHeight = tSquareSize;
 		end
 
-		return {
+		tButtonSetup = {
 			["staticColor"] = anOverlayEntry["staticColor"],
 			["iconColor"] = anOverlayEntry["iconColor"],
 			["dispelBorder"] = anOverlayEntry["dispelBorder"],
@@ -2141,6 +2165,19 @@ do
 			["height"] = tTargetHeight,
 		};
 
+		if anOverlayEntry["border"] then
+			tBorderEdgeSize = VUHDO_PixelUtil.RoundToPixel(anOverlayEntry["borderWidth"] or 1, 1);
+			tBorderScale = aTargetFrame:GetEffectiveScale();
+			tBorderRepeatX = max(0, (tTargetWidth / tBorderEdgeSize) * tBorderScale - 2 - sBorderCoordStart);
+			tBorderRepeatY = max(0, (tTargetHeight / tBorderEdgeSize) * tBorderScale - 2 - sBorderCoordStart);
+
+			tButtonSetup["borderEdgeSize"] = tBorderEdgeSize;
+			tButtonSetup["borderRepeatX"] = tBorderRepeatX;
+			tButtonSetup["borderRepeatY"] = tBorderRepeatY;
+		end
+
+		return tButtonSetup;
+
 	end
 
 
@@ -2150,11 +2187,12 @@ do
 	local tResolveOverlayHostFrame;
 	local tResolveFrameLevelOffset;
 	local tResolveLevelFrame;
-	local function VUHDO_resolveOverlayContainerAnchorFields(aButton, aTargetFrame, aFrameLevelOffsetAddend)
+	function VUHDO_resolveOverlayContainerAnchorFields(aButton, aTargetFrame, aFrameLevelOffsetAddend)
 
 		tResolveLevelFrame = VUHDO_resolveOverlayLevelFrame(aTargetFrame);
 
 		tResolveOverlayHostFrame = VUHDO_getOverlayHostFrame(aTargetFrame);
+
 		tResolveContainerParent = (tResolveOverlayHostFrame and tResolveOverlayHostFrame:GetName() and tResolveOverlayHostFrame) or (((aTargetFrame and aTargetFrame:GetName()) and aTargetFrame) or aButton);
 		tResolveFrameLevelOffset = (tResolveLevelFrame["addLevel"] or 0) + (aFrameLevelOffsetAddend or 1);
 
@@ -2214,6 +2252,10 @@ do
 	local tSlotFrameLevelOffset;
 	local tOverlayHostFrame;
 	local tContainerParent;
+	local tPlanSlotKey;
+	local tSlotBuildSignature;
+	local tSlotFamilyKey;
+	local tSlotVolatileSignature;
 	local function VUHDO_buildOverlaySlotSpec(aButton, aTargetFrame, anOverlayEntry, anIndicatorKey, anEntryKey)
 
 		tSlotButtonSetup = VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry);
@@ -2224,8 +2266,19 @@ do
 
 		VUHDO_applyOverlayGateFlags(anOverlayEntry);
 
+		tPlanSlotKey = anIndicatorKey .. ":" .. anEntryKey;
+
+		tSlotBuildSignature = VUHDO_getAuraButtonSetupBuildSignature(tSlotButtonSetup);
+
+		tSlotFamilyKey = format("%s:%s#%s", anIndicatorKey, anEntryKey, tSlotBuildSignature);
+
+		tSlotVolatileSignature = VUHDO_getAuraButtonSetupVolatileSignature(tSlotButtonSetup);
+
 		return {
-			["key"] = anIndicatorKey .. ":" .. anEntryKey,
+			["key"] = tPlanSlotKey,
+			["planSlotKey"] = tPlanSlotKey,
+			["slotFamilyKey"] = tSlotFamilyKey,
+			["volatileSignature"] = tSlotVolatileSignature,
 			["filterString"] = anOverlayEntry["filterString"],
 			["candidateFilters"] = anOverlayEntry["candidateFilters"],
 			["templateName"] = anOverlayEntry["templateName"] or VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE,
@@ -2273,7 +2326,7 @@ do
 
 
 	--
-	local function VUHDO_copyOverlaySlotRecordFromSpec(aSlotRecord, aSlotSpec)
+	function VUHDO_copyOverlaySlotRecordFromSpec(aSlotRecord, aSlotSpec)
 
 		aSlotRecord["filterString"] = aSlotSpec["filterString"];
 		aSlotRecord["candidateFilters"] = aSlotSpec["candidateFilters"];
@@ -2294,75 +2347,141 @@ do
 		aSlotRecord["entryKey"] = aSlotSpec["entryKey"];
 		aSlotRecord["bouquetIdx"] = aSlotSpec["bouquetIdx"];
 		aSlotRecord["buttonSetup"] = aSlotSpec["buttonSetup"];
+		aSlotRecord["planSlotKey"] = aSlotSpec["planSlotKey"] or aSlotSpec["key"];
+		aSlotRecord["slotFamilyKey"] = aSlotSpec["slotFamilyKey"];
 		aSlotRecord["durationSetupPending"] = ((aSlotSpec["buttonSetup"] or sEmpty)["shadowValueMode"] == "duration") or nil;
 
 		return;
 
 	end
+end
 
 
 
+do
 	--
 	local tFilterChanged;
 	local tCandidateChanged;
-	local tContainer;
-	local tSlotKey;
-	local tSlotTable;
-	local tAuraFrame;
-	local tExistingRecord;
-	local tSlotRecord;
 	local tDesiredFilterString;
-	local function VUHDO_addOverlaySlotFromSpec(aHostData, aSlotSpec)
+	function VUHDO_syncOverlaySlotRecordFilters(aHostData, aSlotEngineKey, aSlotRecord, aSlotSpec)
 
-		tContainer = aHostData["container"];
-		tSlotKey = aSlotSpec["key"];
-		tExistingRecord = aHostData["slotRecords"][tSlotKey];
+		tFilterChanged = aSlotRecord["appliedFilterString"] ~= (aSlotSpec["filterString"] or "HELPFUL");
+		tCandidateChanged = aSlotRecord["candidateFilters"] ~= aSlotSpec["candidateFilters"];
 
-		if tExistingRecord then
-			tFilterChanged = tExistingRecord["appliedFilterString"] ~= (aSlotSpec["filterString"] or "HELPFUL");
-			tCandidateChanged = tExistingRecord["candidateFilters"] ~= aSlotSpec["candidateFilters"];
+		if aSlotRecord["appliedSuppress"] then
+			if aSlotRecord["appliedFilterString"] ~= "" then
+				aHostData["container"]:SetAuraSlotFilterString(aSlotEngineKey, "");
 
-			VUHDO_copyOverlaySlotRecordFromSpec(tExistingRecord, aSlotSpec);
-
-			if tExistingRecord["appliedSuppress"] then
-				if tExistingRecord["appliedFilterString"] ~= "" then
-					tContainer:SetAuraSlotFilterString(tSlotKey, "");
-
-					tExistingRecord["appliedFilterString"] = "";
-				end
-
-				if aHostData["lastSyncedSlotEnabled"] then
-					aHostData["lastSyncedSlotEnabled"][tSlotKey] = nil;
-				end
-			else
-				tDesiredFilterString = aSlotSpec["filterString"] or "HELPFUL";
-
-				if tFilterChanged then
-					tContainer:SetAuraSlotFilterString(tSlotKey, tDesiredFilterString);
-
-					tExistingRecord["appliedFilterString"] = tDesiredFilterString;
-				end
-
-				if tCandidateChanged then
-					tContainer:SetAuraSlotCandidateFilters(tSlotKey, aSlotSpec["candidateFilters"]);
-				end
-
-				if tFilterChanged or tCandidateChanged then
-					if aHostData["lastSyncedSlotEnabled"] then
-						aHostData["lastSyncedSlotEnabled"][tSlotKey] = nil;
-					end
-				end
+				aSlotRecord["appliedFilterString"] = "";
 			end
 
-			return true;
+			if aHostData["lastSyncedSlotEnabled"] then
+				aHostData["lastSyncedSlotEnabled"][aSlotEngineKey] = nil;
+			end
+
+			return;
 		end
+
+		tDesiredFilterString = aSlotSpec["filterString"] or "HELPFUL";
+
+		if tFilterChanged then
+			aHostData["container"]:SetAuraSlotFilterString(aSlotEngineKey, tDesiredFilterString);
+
+			aSlotRecord["appliedFilterString"] = tDesiredFilterString;
+		end
+
+		if tCandidateChanged then
+			aHostData["container"]:SetAuraSlotCandidateFilters(aSlotEngineKey, aSlotSpec["candidateFilters"]);
+		end
+
+		if tFilterChanged or tCandidateChanged then
+			if aHostData["lastSyncedSlotEnabled"] then
+				aHostData["lastSyncedSlotEnabled"][aSlotEngineKey] = nil;
+			end
+		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tEngineKeys;
+	function VUHDO_registerOverlaySlotFamilyEngineKey(aHostData, aSlotFamilyKey, aSlotEngineKey)
+
+		if not aHostData["slotRecordsByFamily"] then
+			aHostData["slotRecordsByFamily"] = { };
+		end
+
+		tEngineKeys = aHostData["slotRecordsByFamily"][aSlotFamilyKey];
+
+		if not tEngineKeys then
+			tEngineKeys = { };
+
+			aHostData["slotRecordsByFamily"][aSlotFamilyKey] = tEngineKeys;
+		end
+
+		for tFamilyCnt = 1, #tEngineKeys do
+			if tEngineKeys[tFamilyCnt] == aSlotEngineKey then
+				return;
+			end
+		end
+
+		tEngineKeys[#tEngineKeys + 1] = aSlotEngineKey;
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tEngineKeys;
+	local tNextIndex;
+	function VUHDO_getNextOverlaySlotEngineKey(aHostData, aSlotFamilyKey)
+
+		if not aHostData["slotRecordsByFamily"] then
+			aHostData["slotRecordsByFamily"] = { };
+		end
+
+		tEngineKeys = aHostData["slotRecordsByFamily"][aSlotFamilyKey];
+
+		if not tEngineKeys then
+			tEngineKeys = { };
+
+			aHostData["slotRecordsByFamily"][aSlotFamilyKey] = tEngineKeys;
+		end
+
+		tNextIndex = #tEngineKeys + 1;
+
+		return format("%s#%d", aSlotFamilyKey, tNextIndex);
+
+	end
+end
+
+
+
+do
+	--
+	local tContainer;
+	local tSlotTable;
+	local tAuraFrame;
+	local tSlotRecord;
+	function VUHDO_addOverlaySlotEngineFromSpec(aHostData, aSlotSpec, aSlotEngineKey)
+
+		tContainer = aHostData["container"];
 
 		if InCombatLockdown() then
 			return false;
 		end
 
 		tSlotTable = {
-			["key"] = tSlotKey,
+			["key"] = aSlotEngineKey,
 			["filterString"] = aSlotSpec["filterString"],
 			["candidateFilters"] = aSlotSpec["candidateFilters"],
 			["templateName"] = aSlotSpec["templateName"],
@@ -2381,21 +2500,136 @@ do
 		tAuraFrame = VUHDO_addOverlaySlotToHost(tContainer, tSlotTable, "TOPLEFT", aHostData["slotOrder"], aHostData["slotFrames"], nil);
 
 		tSlotRecord = { };
+
 		VUHDO_copyOverlaySlotRecordFromSpec(tSlotRecord, aSlotSpec);
+
+		tSlotRecord["slotEngineKey"] = aSlotEngineKey;
 		tSlotRecord["slotFrame"] = tAuraFrame;
 		tSlotRecord["appliedFilterString"] = aSlotSpec["filterString"] or "HELPFUL";
 		tSlotRecord["appliedSuppress"] = false;
+		tSlotRecord["appliedVolatileSignature"] = aSlotSpec["volatileSignature"];
 
-		aHostData["slotRecords"][tSlotKey] = tSlotRecord;
+		aHostData["slotRecords"][aSlotEngineKey] = tSlotRecord;
+
+		VUHDO_registerOverlaySlotFamilyEngineKey(aHostData, aSlotSpec["slotFamilyKey"], aSlotEngineKey);
 
 		VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] = (VUHDO_AURA_CONTAINER_METRICS["builds"]["overlaySlot"] or 0) + 1;
 
 		return true;
 
 	end
+end
 
 
 
+do
+	--
+	local tContainer;
+	local tEngineKey;
+	local tRecord;
+	local tSlotFrame;
+	local tEngineKeys;
+	local tFilterString;
+	function VUHDO_reconcileOverlaySlotFromSpec(aHostData, aSlotSpec)
+
+		if not aHostData or not aSlotSpec then
+			return nil;
+		end
+
+		tContainer = aHostData["container"];
+
+		if not tContainer then
+			return nil;
+		end
+
+		for tSlotEngineKey, tSlotRecord in pairs(aHostData["slotRecords"] or sEmpty) do
+			if not tSlotRecord["appliedSuppress"]
+				and (tSlotRecord["planSlotKey"] == aSlotSpec["planSlotKey"] or tSlotEngineKey == aSlotSpec["planSlotKey"]) then
+				if tSlotRecord["appliedVolatileSignature"] == aSlotSpec["volatileSignature"] then
+					VUHDO_copyOverlaySlotRecordFromSpec(tSlotRecord, aSlotSpec);
+
+					tSlotRecord["planSlotKey"] = aSlotSpec["planSlotKey"];
+					tSlotRecord["slotEngineKey"] = tSlotEngineKey;
+					tSlotRecord["slotFamilyKey"] = aSlotSpec["slotFamilyKey"];
+
+					VUHDO_syncOverlaySlotRecordFilters(aHostData, tSlotEngineKey, tSlotRecord, aSlotSpec);
+
+					VUHDO_registerOverlaySlotFamilyEngineKey(aHostData, aSlotSpec["slotFamilyKey"], tSlotEngineKey);
+
+					return tSlotEngineKey;
+				end
+
+				tSlotFrame = tSlotRecord["slotFrame"];
+
+				if tSlotFrame and tSlotFrame:CanBeAccessedInContext() then
+					VUHDO_copyOverlaySlotRecordFromSpec(tSlotRecord, aSlotSpec);
+
+					tSlotRecord["planSlotKey"] = aSlotSpec["planSlotKey"];
+					tSlotRecord["slotEngineKey"] = tSlotEngineKey;
+					tSlotRecord["slotFamilyKey"] = aSlotSpec["slotFamilyKey"];
+
+					VUHDO_reapplyAuraSlotVolatileSetup(tContainer, aSlotSpec["buttonSetup"], tSlotFrame);
+
+					tSlotRecord["appliedVolatileSignature"] = aSlotSpec["volatileSignature"];
+
+					VUHDO_syncOverlaySlotRecordFilters(aHostData, tSlotEngineKey, tSlotRecord, aSlotSpec);
+
+					VUHDO_registerOverlaySlotFamilyEngineKey(aHostData, aSlotSpec["slotFamilyKey"], tSlotEngineKey);
+
+					return tSlotEngineKey;
+				end
+			end
+		end
+
+		tEngineKeys = aHostData["slotRecordsByFamily"] and aHostData["slotRecordsByFamily"][aSlotSpec["slotFamilyKey"]];
+
+		if tEngineKeys then
+			for tFamilyCnt = 1, #tEngineKeys do
+				tEngineKey = tEngineKeys[tFamilyCnt];
+				tRecord = aHostData["slotRecords"][tEngineKey];
+
+				if tRecord and tRecord["appliedSuppress"]
+					and tRecord["appliedVolatileSignature"] == aSlotSpec["volatileSignature"] then
+
+					tFilterString = aSlotSpec["filterString"] or "HELPFUL";
+
+					tContainer:SetAuraSlotFilterString(tEngineKey, tFilterString);
+
+					tRecord["appliedFilterString"] = tFilterString;
+					tRecord["appliedSuppress"] = false;
+
+					if aHostData["suppressedSlotCount"] and aHostData["suppressedSlotCount"] > 0 then
+						aHostData["suppressedSlotCount"] = aHostData["suppressedSlotCount"] - 1;
+					end
+
+					if aHostData["lastSyncedSlotEnabled"] then
+						aHostData["lastSyncedSlotEnabled"][tEngineKey] = nil;
+					end
+
+					VUHDO_copyOverlaySlotRecordFromSpec(tRecord, aSlotSpec);
+					VUHDO_syncOverlaySlotRecordFilters(aHostData, tEngineKey, tRecord, aSlotSpec);
+
+					VUHDO_updateOverlaySuppressedSlotMetrics();
+
+					return tEngineKey;
+				end
+			end
+		end
+
+		tEngineKey = VUHDO_getNextOverlaySlotEngineKey(aHostData, aSlotSpec["slotFamilyKey"]);
+
+		if not VUHDO_addOverlaySlotEngineFromSpec(aHostData, aSlotSpec, tEngineKey) then
+			return nil;
+		end
+
+		return tEngineKey;
+
+	end
+end
+
+
+
+do
 	--
 	local tHostData;
 	local tPlannedKey;
@@ -2406,6 +2640,7 @@ do
 	local tSuppressedAny;
 	local tContainer;
 	local tWasHostShown;
+	local tEngineKey;
 	function VUHDO_reconcileOverlaySlotsForButton(aButton, aButtonName)
 
 		tPlannedOrder = sOverlayBuild["plannedSlotOrder"];
@@ -2430,6 +2665,7 @@ do
 
 			for tOrderCnt = 1, #tPlannedOrder do
 				tPlannedKey = tPlannedOrder[tOrderCnt];
+
 				sPendingOverlaySlotPlans[aButton]["plannedOrder"][#sPendingOverlaySlotPlans[aButton]["plannedOrder"] + 1] = tPlannedKey;
 				sPendingOverlaySlotPlans[aButton]["plannedSpecs"][tPlannedKey] = tPlannedSpecs[tPlannedKey];
 			end
@@ -2443,14 +2679,21 @@ do
 
 		twipe(tHostData["plannedSlots"]);
 
-		for tOrderCnt = 1, #tPlannedOrder do
-			tHostData["plannedSlots"][tPlannedOrder[tOrderCnt]] = true;
-		end
-
 		twipe(sOverlayBuild["plannedSlotSet"]);
 
+		tDeferredAdd = false;
+
 		for tOrderCnt = 1, #tPlannedOrder do
-			sOverlayBuild["plannedSlotSet"][tPlannedOrder[tOrderCnt]] = true;
+			tPlannedKey = tPlannedOrder[tOrderCnt];
+
+			tEngineKey = VUHDO_reconcileOverlaySlotFromSpec(tHostData, tPlannedSpecs[tPlannedKey]);
+
+			if tEngineKey then
+				sOverlayBuild["plannedSlotSet"][tEngineKey] = true;
+				tHostData["plannedSlots"][tEngineKey] = true;
+			else
+				tDeferredAdd = true;
+			end
 		end
 
 		tSuppressedAny = false;
@@ -2465,16 +2708,6 @@ do
 			end
 		end
 
-		tDeferredAdd = false;
-
-		for tOrderCnt = 1, #tPlannedOrder do
-			tPlannedKey = tPlannedOrder[tOrderCnt];
-
-			if not VUHDO_addOverlaySlotFromSpec(tHostData, tPlannedSpecs[tPlannedKey]) then
-				tDeferredAdd = true;
-			end
-		end
-
 		if tDeferredAdd then
 			sPendingOverlaySlotPlans[aButton] = {
 				["generation"] = sOverlayConfigGeneration,
@@ -2484,6 +2717,7 @@ do
 
 			for tOrderCnt = 1, #tPlannedOrder do
 				tPlannedKey = tPlannedOrder[tOrderCnt];
+
 				sPendingOverlaySlotPlans[aButton]["plannedOrder"][#sPendingOverlaySlotPlans[aButton]["plannedOrder"] + 1] = tPlannedKey;
 				sPendingOverlaySlotPlans[aButton]["plannedSpecs"][tPlannedKey] = tPlannedSpecs[tPlannedKey];
 			end
@@ -2523,6 +2757,7 @@ do
 
 				for tOrderCnt = 1, #(tPendingPlan["plannedOrder"] or sEmpty) do
 					tPlannedKey = tPendingPlan["plannedOrder"][tOrderCnt];
+
 					sOverlayBuild["plannedSlotSpecs"][tPlannedKey] = tPendingPlan["plannedSpecs"][tPlannedKey];
 					sOverlayBuild["plannedSlotOrder"][#sOverlayBuild["plannedSlotOrder"] + 1] = tPlannedKey;
 				end
@@ -2798,6 +3033,11 @@ do
 	local tReconcileEntryKey;
 	local tReconcileExistingOverlays;
 	local tReconcileExistingContainer;
+	local tContainerTemplate;
+	local tFilterContainer;
+	local tFilterSignature;
+	local tVolatileAction;
+	local tFreshContainer;
 	function VUHDO_reconcileOverlayContainersForButton(aButton, aButtonName)
 
 		tReconcilePlannedOrder = sOverlayBuild["plannedContainerOrder"];
@@ -2872,7 +3112,40 @@ do
 					and tReconcileExistingOverlays[tReconcileIndicatorKey][tReconcileEntryKey];
 
 				if tReconcileExistingContainer then
+					tContainerTemplate = tReconcilePlannedSpec["containerTemplate"];
+
+					tReconcileExistingContainer["containerTemplate"] = tContainerTemplate;
+
 					VUHDO_stampOverlayContainerMetadata(aButtonName, tReconcileExistingContainer, tReconcilePlannedSpec["chainGroupMeta"], tReconcileIndicatorKey);
+
+					tFilterContainer = tReconcileExistingContainer["container"];
+					tFilterSignature = VUHDO_getAuraContainerFilterSignature(tContainerTemplate);
+
+					if tFilterContainer and tReconcileExistingContainer["filterSignature"] ~= tFilterSignature then
+						VUHDO_applyAuraContainerFilterPass(tFilterContainer, tReconcileExistingContainer, tContainerTemplate);
+
+						tReconcileExistingContainer["filterSignature"] = tFilterSignature;
+					end
+
+					tVolatileAction = VUHDO_reconcileAuraContainerVolatilePass(tFilterContainer, tReconcileExistingContainer, tContainerTemplate);
+
+					if VUHDO_AURA_VOLATILE_PASS_REBUILD == tVolatileAction then
+						VUHDO_retireAuraContainer(aButton, tReconcileExistingContainer);
+
+						tFreshContainer = VUHDO_acquireAuraContainer(aButton, tContainerTemplate);
+
+						if tFreshContainer then
+							if not tReconcileExistingOverlays[tReconcileIndicatorKey] then
+								tReconcileExistingOverlays[tReconcileIndicatorKey] = { };
+							end
+
+							tReconcileExistingOverlays[tReconcileIndicatorKey][tReconcileEntryKey] = tFreshContainer;
+
+							VUHDO_stampOverlayContainerMetadata(aButtonName, tFreshContainer, tReconcilePlannedSpec["chainGroupMeta"], tReconcileIndicatorKey);
+						end
+					elseif VUHDO_AURA_VOLATILE_PASS_DEFER == tVolatileAction then
+						VUHDO_deferVolatilePassForButton(aButton);
+					end
 				else
 					VUHDO_enqueueOverlayContainerBuild(aButton, tReconcileIndicatorKey, tReconcileEntryKey,
 						tReconcilePlannedSpec["containerTemplate"], nil, tReconcilePlannedSpec["chainGroupMeta"]);

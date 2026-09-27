@@ -737,6 +737,7 @@ VUHDO_TIMERS = {
 	["RELOAD_UI"] = 0,
 	["REGISTER_BOUQUETS"] = 0,
 	["REBUILD_AURA_GROUPS"] = 0,
+	["REFRESH_OVERLAYS"] = 0,
 	["RELOAD_PANEL"] = 0,
 	["CUSTOMIZE"] = 0,
 	["CHECK_PROFILES"] = 6.2,
@@ -2322,6 +2323,17 @@ end
 
 
 --
+function VUHDO_timeRefreshOverlays(aNumSecs)
+
+	VUHDO_TIMERS["REFRESH_OVERLAYS"] = aNumSecs;
+
+	return;
+
+end
+
+
+
+--
 function VUHDO_timeRefreshAuraContainers(aNumSecs)
 
 	VUHDO_TIMERS["REFRESH_AURA_CONTAINERS"] = aNumSecs or 0.5;
@@ -2616,7 +2628,20 @@ do
 		end
 
 		if VUHDO_checkTimer("REBUILD_AURA_GROUPS") then
-			VUHDO_rebuildCanColorBarGroupsCache();
+			if InCombatLockdown() then
+				VUHDO_TIMERS["REBUILD_AURA_GROUPS"] = 0.3;
+			else
+				VUHDO_applyAuraGroupChanges();
+			end
+		end
+
+		if VUHDO_checkTimer("REFRESH_OVERLAYS") then
+			if InCombatLockdown() then
+				VUHDO_TIMERS["REFRESH_OVERLAYS"] = 0.3;
+			else
+				VUHDO_invalidateAllOverlayPlans();
+				VUHDO_syncAllOverlayUnits(false);
+			end
 		end
 
 		return;
