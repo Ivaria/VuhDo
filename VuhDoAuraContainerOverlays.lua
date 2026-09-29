@@ -53,6 +53,8 @@ local VUHDO_PixelUtil;
 
 local VUHDO_getUnitButtonsSafe;
 local VUHDO_getHealthBar;
+local VUHDO_getSideBarWidthLeft;
+local VUHDO_getSideBarWidthRight;
 local VUHDO_getAuraGroup;
 local VUHDO_getAuraGroupEffectiveUnitScope;
 local VUHDO_isAuraGroupScopeFriendly;
@@ -242,6 +244,8 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 
 	VUHDO_getUnitButtonsSafe = _G["VUHDO_getUnitButtonsSafe"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
+	VUHDO_getSideBarWidthLeft = _G["VUHDO_getSideBarWidthLeft"];
+	VUHDO_getSideBarWidthRight = _G["VUHDO_getSideBarWidthRight"];
 	VUHDO_getAuraGroup = _G["VUHDO_getAuraGroup"];
 	VUHDO_getAuraGroupEffectiveUnitScope = _G["VUHDO_getAuraGroupEffectiveUnitScope"];
 	VUHDO_isAuraGroupScopeFriendly = _G["VUHDO_isAuraGroupScopeFriendly"];
@@ -2115,13 +2119,49 @@ do
 	local tBorderScale;
 	local tBorderRepeatX;
 	local tBorderRepeatY;
+	local tPanelNum;
+	local tScaling;
 	local tButtonSetup;
-	function VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry)
+	function VUHDO_buildOverlayButtonSetup(aButton, aTargetFrame, anOverlayEntry)
 
 		tLevelFrame = VUHDO_resolveOverlayLevelFrame(aTargetFrame);
 
-		tTargetWidth = aTargetFrame:GetWidth();
-		tTargetHeight = anOverlayEntry["height"] or aTargetFrame:GetHeight();
+		if aButton then
+			tPanelNum = VUHDO_BUTTON_CACHE[aButton];
+			tScaling = tPanelNum and VUHDO_PANEL_SETUP[tPanelNum] and VUHDO_PANEL_SETUP[tPanelNum]["SCALING"];
+
+			if aTargetFrame == VUHDO_getHealthBar(aButton, 1) then
+				if tScaling then
+					tTargetWidth = tScaling["barWidth"];
+					tTargetHeight = anOverlayEntry["height"] or tScaling["barHeight"];
+				else
+					tTargetWidth = aTargetFrame:GetWidth();
+					tTargetHeight = anOverlayEntry["height"] or aTargetFrame:GetHeight();
+				end
+			elseif aTargetFrame == VUHDO_getHealthBar(aButton, 17) then
+				if tScaling then
+					tTargetWidth = VUHDO_getSideBarWidthLeft(tPanelNum);
+					tTargetHeight = anOverlayEntry["height"] or tScaling["barHeight"];
+				else
+					tTargetWidth = aTargetFrame:GetWidth();
+					tTargetHeight = anOverlayEntry["height"] or aTargetFrame:GetHeight();
+				end
+			elseif aTargetFrame == VUHDO_getHealthBar(aButton, 18) then
+				if tScaling then
+					tTargetWidth = VUHDO_getSideBarWidthRight(tPanelNum);
+					tTargetHeight = anOverlayEntry["height"] or tScaling["barHeight"];
+				else
+					tTargetWidth = aTargetFrame:GetWidth();
+					tTargetHeight = anOverlayEntry["height"] or aTargetFrame:GetHeight();
+				end
+			else
+				tTargetWidth = aTargetFrame:GetWidth();
+				tTargetHeight = anOverlayEntry["height"] or aTargetFrame:GetHeight();
+			end
+		else
+			tTargetWidth = aTargetFrame:GetWidth();
+			tTargetHeight = anOverlayEntry["height"] or aTargetFrame:GetHeight();
+		end
 
 		if (anOverlayEntry["templateName"] or VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE) == VUHDO_AURA_BUTTON_ICON_TEMPLATE then
 			tSquareSize = min(tTargetWidth, tTargetHeight);
@@ -2210,7 +2250,7 @@ do
 	local tOverlayHostFrame;
 	function VUHDO_buildOverlayContainerTemplate(aButton, aTargetFrame, anOverlayEntry, anOverlayKey)
 
-		tButtonSetup = VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry);
+		tButtonSetup = VUHDO_buildOverlayButtonSetup(aButton, aTargetFrame, anOverlayEntry);
 
 		tGroupTemplate = {
 			["key"] = anOverlayKey or "overlay",
@@ -2258,7 +2298,7 @@ do
 	local tSlotVolatileSignature;
 	local function VUHDO_buildOverlaySlotSpec(aButton, aTargetFrame, anOverlayEntry, anIndicatorKey, anEntryKey)
 
-		tSlotButtonSetup = VUHDO_buildOverlayButtonSetup(aTargetFrame, anOverlayEntry);
+		tSlotButtonSetup = VUHDO_buildOverlayButtonSetup(aButton, aTargetFrame, anOverlayEntry);
 
 		tContainerParent, tOverlayHostFrame, tSlotFrameLevelOffset = VUHDO_resolveOverlayContainerAnchorFields(aButton, aTargetFrame, anOverlayEntry["frameLevelOffset"] or 1);
 
@@ -2796,7 +2836,7 @@ do
 			tChainFillEntry = aFillEntries[tChainIdx];
 			tChainEntryKey = tChainFillEntry["entryKey"] or tChainFillEntry["bouquetIdx"] or tChainIdx;
 
-			tChainButtonSetup = VUHDO_buildOverlayButtonSetup(aTargetFrame, tChainFillEntry);
+			tChainButtonSetup = VUHDO_buildOverlayButtonSetup(aButton, aTargetFrame, tChainFillEntry);
 			tChainLayoutIndex = #tChainGroups + 1;
 
 			tChainGroupKeyBase = "chain_" .. tChainEntryKey;

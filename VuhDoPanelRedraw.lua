@@ -16,6 +16,8 @@ local RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnc
 local VUHDO_getFont;
 local VUHDO_getHealthBar;
 local VUHDO_updateAuraAnchorHost;
+local VUHDO_positionHealthBar;
+local VUHDO_positionSideBars;
 local VUHDO_getPixelPerfectBorderEdgeSize;
 local VUHDO_getPixelPerfectBorderInsets;
 local VUHDO_getDynamicModelArray;
@@ -135,6 +137,8 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_getFont = _G["VUHDO_getFont"];
 	VUHDO_getHealthBar = _G["VUHDO_getHealthBar"];
 	VUHDO_updateAuraAnchorHost = _G["VUHDO_updateAuraAnchorHost"];
+	VUHDO_positionHealthBar = _G["VUHDO_positionHealthBar"];
+	VUHDO_positionSideBars = _G["VUHDO_positionSideBars"];
 	VUHDO_getPixelPerfectBorderEdgeSize = _G["VUHDO_getPixelPerfectBorderEdgeSize"];
 	VUHDO_getPixelPerfectBorderInsets = _G["VUHDO_getPixelPerfectBorderInsets"];
 	VUHDO_getDynamicModelArray = _G["VUHDO_getDynamicModelArray"];
@@ -626,8 +630,6 @@ do
 	--
 	function VUHDO_initHealthBar(aButton, aPanelNum)
 
-		VUHDO_PixelUtil.SetSize(sHealthBar, sPanelConfig[aPanelNum]["barWidth"], sPanelConfig[aPanelNum]["barHeight"]);
-
 		return;
 
 	end
@@ -782,7 +784,6 @@ do
 	local tIsManaBouquet;
 	local tIsManaLayoutActive;
 	local tManaLayoutHeight;
-	local tHealthLayoutHeight;
 	function VUHDO_initManaBar(aButton, aManaBar, aWidth, anIsForceBar, aPanelNum)
 
 		tIsManaBouquet = sIsManaBouquet[aPanelNum];
@@ -807,8 +808,12 @@ do
 		VUHDO_updateAuraAnchorHost(aButton);
 
 		if tIsManaBouquet then
-			VUHDO_PixelUtil.Show(aManaBar);
-			VUHDO_PixelUtil.SetHeight(aManaBar, tManaHeight);
+			if not tInfo or tIsManaLayoutActive then
+				VUHDO_PixelUtil.Show(aManaBar);
+				VUHDO_PixelUtil.SetHeight(aManaBar, tManaHeight);
+			else
+				VUHDO_PixelUtil.Hide(aManaBar);
+			end
 
 			if not tInfo then
 				aManaBar:SetMinMaxValues(0, 1, Enum.StatusBarInterpolation.Immediate);
@@ -818,15 +823,6 @@ do
 			if anIsForceBar then
 				if VUHDO_getHealthBar(aButton, 1):GetHeight() == 0 then
 					VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 1), sPanelConfig[aPanelNum]["barHeight"]);
-				end
-			else
-				tHealthLayoutHeight = aButton["regularHeight"] - tManaLayoutHeight;
-
-				VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 1), tHealthLayoutHeight);
-
-				if not VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"]["HEALTH_BAR"]["vertical"] then
-					VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 6), tHealthLayoutHeight);
-					VUHDO_PixelUtil.SetHeight(VUHDO_getHealthBar(aButton, 19), tHealthLayoutHeight);
 				end
 			end
 		else
@@ -2040,8 +2036,6 @@ do
 			VUHDO_PixelUtil.ClearAllPoints(tBar);
 			VUHDO_PixelUtil.Hide(tBar);
 		else
-			VUHDO_PixelUtil.SetPoint(tBar, "RIGHT", aHealthBar:GetName(), "LEFT", 0, 0);
-			VUHDO_PixelUtil.SetSize(tBar, sPanelConfig[aPanelNum]["sideBarLeftWidth"], sPanelConfig[aPanelNum]["barHeight"]);
 			VUHDO_setLlcStatusBarTexture(tBar, sPanelConfig[aPanelNum]["indicatorConfig"]["CUSTOM"]["SIDE_LEFT"]["TEXTURE"]);
 
 			VUHDO_PixelUtil.Show(tBar);
@@ -2065,8 +2059,6 @@ do
 			VUHDO_PixelUtil.ClearAllPoints(tBar);
 			VUHDO_PixelUtil.Hide(tBar);
 		else
-			VUHDO_PixelUtil.SetPoint(tBar, "LEFT", aHealthBar:GetName(), "RIGHT", 0, 0);
-			VUHDO_PixelUtil.SetSize(tBar, sPanelConfig[aPanelNum]["sideBarRightWidth"], sPanelConfig[aPanelNum]["barHeight"]);
 			VUHDO_setLlcStatusBarTexture(tBar, sPanelConfig[aPanelNum]["indicatorConfig"]["CUSTOM"]["SIDE_RIGHT"]["TEXTURE"]);
 
 			VUHDO_PixelUtil.Show(tBar);
@@ -2214,6 +2206,9 @@ do
 		VUHDO_initHighlightBar(aButton, aPanelNum);
 		VUHDO_initSideBarLeft(aButton, sHealthBar, aPanelNum);
 		VUHDO_initSideBarRight(aButton, sHealthBar, aPanelNum);
+
+		VUHDO_positionHealthBar(aButton, aPanelNum);
+		VUHDO_positionSideBars(aButton, aPanelNum);
 
 		VUHDO_initAggroBar(aButton, sHealthBar, aPanelNum);
 
