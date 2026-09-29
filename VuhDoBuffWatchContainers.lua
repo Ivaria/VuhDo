@@ -1,6 +1,7 @@
 local _;
 
 local pairs = pairs;
+local ipairs = ipairs;
 local next = next;
 local tinsert = table.insert;
 local tsort = table.sort;
@@ -47,6 +48,8 @@ local sMissingBuffLastGeneration = { };
 local sMissingBuffLastBarWidth = { };
 local sMissingBuffLastBarHeight = { };
 local sMissingBuffPlannedCategs = { };
+local sMissingBuffKnownKeys = { };
+local sMissingBuffCurrentKeys = { };
 
 
 
@@ -530,6 +533,71 @@ do
 				end
 			end
 		end
+
+		return;
+
+	end
+end
+
+
+
+do
+	--
+	local tCategName;
+	local tKeyCount;
+	local tIsChanged;
+	function VUHDO_invalidateMissingBuffContainerPlansIfNeeded()
+
+		twipe(sMissingBuffPlannedCategs);
+
+		for tCategName, _ in pairs(VUHDO_BUFF_ORDER) do
+			if VUHDO_isMissingBuffCategoryEnabled(tCategName) then
+				tinsert(sMissingBuffPlannedCategs, tCategName);
+			end
+		end
+
+		tsort(sMissingBuffPlannedCategs, VUHDO_compareMissingBuffPlanOrder);
+
+		twipe(sMissingBuffCurrentKeys);
+
+		for tCnt = 1, #sMissingBuffPlannedCategs do
+			tCategName = sMissingBuffPlannedCategs[tCnt];
+
+			tinsert(sMissingBuffCurrentKeys, tCategName);
+
+			for _, tCategSpells in ipairs(VUHDO_getPlayerClassBuffs()[tCategName] or sEmpty) do
+				if VUHDO_BUFFS[tCategSpells[1]] then
+					tinsert(sMissingBuffCurrentKeys, tCategSpells[1]);
+				end
+			end
+		end
+
+		tKeyCount = #sMissingBuffCurrentKeys;
+		tIsChanged = tKeyCount ~= #sMissingBuffKnownKeys;
+
+		if not tIsChanged then
+			for tCnt = 1, tKeyCount do
+				if sMissingBuffCurrentKeys[tCnt] ~= sMissingBuffKnownKeys[tCnt] then
+					tIsChanged = true;
+
+					break;
+				end
+			end
+		end
+
+		if not tIsChanged then
+			return;
+		end
+
+		twipe(sMissingBuffKnownKeys);
+
+		for tCnt = 1, tKeyCount do
+			sMissingBuffKnownKeys[tCnt] = sMissingBuffCurrentKeys[tCnt];
+		end
+
+		sMissingBuffPlanGeneration = sMissingBuffPlanGeneration + 1;
+
+		VUHDO_timeRefreshMissingBuffContainers(0.1);
 
 		return;
 

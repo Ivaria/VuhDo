@@ -129,6 +129,7 @@ local VUHDO_resetOverlaysForUnit;
 local VUHDO_clearOverlaysForUnit;
 local VUHDO_syncAllOverlayUnits;
 local VUHDO_refreshAllMissingBuffContainers;
+local VUHDO_invalidateMissingBuffContainerPlansIfNeeded;
 
 local VUHDO_UIFrameFlash_OnUpdate = function() end;
 
@@ -634,6 +635,7 @@ local function VUHDO_eventHandlerInitFunctionOverrides()
 	VUHDO_clearOverlaysForUnit = _G["VUHDO_clearOverlaysForUnit"];
 	VUHDO_syncAllOverlayUnits = _G["VUHDO_syncAllOverlayUnits"];
 	VUHDO_refreshAllMissingBuffContainers = _G["VUHDO_refreshAllMissingBuffContainers"];
+	VUHDO_invalidateMissingBuffContainerPlansIfNeeded = _G["VUHDO_invalidateMissingBuffContainerPlansIfNeeded"];
 
 	return;
 
@@ -795,6 +797,8 @@ function VUHDO_initBuffs()
 
 	VUHDO_initBuffsFromSpellBook();
 	VUHDO_reloadBuffPanel();
+
+	VUHDO_invalidateMissingBuffContainerPlansIfNeeded();
 
 	return;
 
