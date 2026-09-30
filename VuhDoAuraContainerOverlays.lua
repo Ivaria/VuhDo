@@ -2769,13 +2769,15 @@ do
 
 		tContainer = tHostData["container"];
 
-		tWasHostShown = tContainer:IsShown();
+		if not tHostData["lastHostGated"] then
+			tWasHostShown = tContainer:IsShown();
 
-		tContainer:SetEnabled(true);
-		tContainer:SetShown(true);
+			tContainer:SetEnabled(true);
+			tContainer:SetShown(true);
 
-		if tSuppressedAny or not tWasHostShown then
-			VUHDO_refreshAuraContainer(tContainer);
+			if tSuppressedAny or not tWasHostShown then
+				VUHDO_refreshAuraContainer(tContainer);
+			end
 		end
 
 		return;
@@ -4001,11 +4003,11 @@ function VUHDO_gateOverlaySlotHost(aHostData, aButton)
 		return;
 	end
 
-	if aHostData["lastHostGated"] then
+	tGateContainer = aHostData["container"];
+
+	if aHostData["lastHostGated"] and not tGateContainer:IsEnabled() and not tGateContainer:IsShown() then
 		return;
 	end
-
-	tGateContainer = aHostData["container"];
 
 	for tGateSlotKey, tGateSlotRecord in pairs(aHostData["slotRecords"] or sEmpty) do
 		VUHDO_stopOverlayThreatMarkFlashForSlotRecord(tGateSlotRecord);
