@@ -350,7 +350,8 @@ do
 	local tRemaining;
 	local tSlotIndex;
 	local tSlot;
-	function VUHDO_allocateOverlaySublevels(aTargetFrame, aSlotCount, anIndicatorKey)
+	local tWarnKey;
+	function VUHDO_allocateOverlaySublevels(aTargetFrame, aSlotCount, anIndicatorKey, aPanelNum)
 
 		tSlots = { };
 
@@ -365,10 +366,11 @@ do
 			tRemaining = sOverlaySublevelTotal - tAllocator + 1;
 
 			if tRemaining < tSlotsNeeded then
-				if anIndicatorKey and not sOverlaySublevelWarned[anIndicatorKey] then
-					sOverlaySublevelWarned[anIndicatorKey] = true;
+				if anIndicatorKey and aPanelNum and not sOverlaySublevelWarned[anIndicatorKey .. ":" .. aPanelNum] then
+					tWarnKey = anIndicatorKey .. ":" .. aPanelNum;
+					sOverlaySublevelWarned[tWarnKey] = true;
 
-					VUHDO_xMsg("Overlay sublevel budget exhausted for indicator:", anIndicatorKey);
+					VUHDO_Msg(format("WARNING: Overlay sublevel budget exhausted for indicator %s on panel %d (%d requested, %d of %d remaining).", anIndicatorKey, aPanelNum, aSlotCount, tRemaining, sOverlaySublevelTotal));
 				end
 
 				tSlotsNeeded = tRemaining;
@@ -2062,7 +2064,7 @@ do
 			if tCachedSublevels then
 				tOverlayEntry["sublevelSlots"] = tCachedSublevels;
 			else
-				tOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aTargetFrame, tSlotCount, anIndicatorKey);
+				tOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aTargetFrame, tSlotCount, anIndicatorKey, aPanelNum);
 				sOverlayBuild["sublevelAllocByKey"][tSublevelKey] = tOverlayEntry["sublevelSlots"];
 			end
 
@@ -3724,7 +3726,7 @@ do
 									tBarGlowEntry["glowColor"] = tBarGlowColor;
 								end
 
-								tBarGlowEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aButton, 1, "AURA_GROUP_BAR_GLOW");
+								tBarGlowEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(aButton, 1, "AURA_GROUP_BAR_GLOW", aPanelNum);
 
 								VUHDO_planOverlaySlot(aButton, "AURA_GROUP_BAR_GLOW", tBarGlowEntry["entryKey"], aButton, tBarGlowEntry);
 
@@ -3882,8 +3884,7 @@ do
 			tTargetFrame = VUHDO_getHealthBar(aButton, 3);
 
 			if tTargetFrame then
-				tDispelOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(tTargetFrame,
-					tDispelOverlayEntry["shadowBar"] and 2 or 1, "DISPEL_OVERLAY");
+				tDispelOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(tTargetFrame, tDispelOverlayEntry["shadowBar"] and 2 or 1, "DISPEL_OVERLAY", aPanelNum);
 
 				tDispelOverlayEntry["alwaysEnabled"] = true;
 
@@ -3899,8 +3900,7 @@ do
 			tTargetFrame = VUHDO_getHealthBar(aButton, 3);
 
 			if tTargetFrame then
-				tDispelOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(tTargetFrame,
-					tDispelOverlayEntry["shadowBar"] and 2 or 1, "DISPEL_OVERLAY");
+				tDispelOverlayEntry["sublevelSlots"] = VUHDO_allocateOverlaySublevels(tTargetFrame, tDispelOverlayEntry["shadowBar"] and 2 or 1, "DISPEL_OVERLAY", aPanelNum);
 
 				tDispelOverlayEntry["alwaysEnabled"] = true;
 
