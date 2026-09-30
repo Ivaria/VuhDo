@@ -55,6 +55,7 @@ local VUHDO_BOUQUET_RESTRICTED_MIXED;
 local VUHDO_SPELL_DURATION_MODE_THRESHOLD;
 local VUHDO_SPELL_NAME_TO_ID;
 local VUHDO_DEFAULT_AURA_GROUPS;
+local VUHDO_BUFF_WATCH_AURA_SPELL_IDS;
 local VUHDO_CONFIG;
 local VUHDO_AURA_RADIOVALUE_POSITIONS;
 local VUHDO_AURA_FIXED_STRAIGHT_POSITIONS;
@@ -208,6 +209,7 @@ function VUHDO_auraContainerFiltersInitLocalOverrides()
 	VUHDO_SPELL_DURATION_MODE_THRESHOLD = _G["VUHDO_SPELL_DURATION_MODE_THRESHOLD"];
 	VUHDO_SPELL_NAME_TO_ID = _G["VUHDO_SPELL_NAME_TO_ID"];
 	VUHDO_DEFAULT_AURA_GROUPS = _G["VUHDO_DEFAULT_AURA_GROUPS"];
+	VUHDO_BUFF_WATCH_AURA_SPELL_IDS = _G["VUHDO_BUFF_WATCH_AURA_SPELL_IDS"];
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_AURA_RADIOVALUE_POSITIONS = _G["VUHDO_AURA_RADIOVALUE_POSITIONS"];
 	VUHDO_AURA_FIXED_STRAIGHT_POSITIONS = _G["VUHDO_AURA_FIXED_STRAIGHT_POSITIONS"];
@@ -289,6 +291,25 @@ function VUHDO_rebuildDefaultAuraNameSpellIds()
 						end
 					end
 				end
+			end
+		end
+	end
+
+	for tCastSpellId, tAuraSpellIds in pairs(VUHDO_BUFF_WATCH_AURA_SPELL_IDS or sEmpty) do
+		tSpellName = GetSpellName(tCastSpellId);
+
+		if tSpellName then
+			tNameIds = VUHDO_AURA_NAME_TO_SPELL_IDS[tSpellName];
+
+			if not tNameIds then
+				tNameIds = { };
+				VUHDO_AURA_NAME_TO_SPELL_IDS[tSpellName] = tNameIds;
+			end
+
+			for _, tAuraSpellId in ipairs(tAuraSpellIds) do
+				tNameIds[tAuraSpellId] = true;
+
+				VUHDO_AURA_NAME_PREFERRED_SPELL_ID[tSpellName] = VUHDO_AURA_NAME_PREFERRED_SPELL_ID[tSpellName] or tAuraSpellId;
 			end
 		end
 	end
