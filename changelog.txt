@@ -22,6 +22,8 @@ Bugfixes:
   
   
 Improvements:  
+-- Added Rogue 'Amplifying Poison' to Buff Watch  
+-- Added Evoker 'Source of Magic' to Buff Watch  
   
   
 --------------------------------------------------------------  
