@@ -48,6 +48,10 @@ local VUHDO_AURA_GROUP_TYPE_FILTER;
 local VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY;
 local VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY;
 local VUHDO_MISSING_BUFF_CONTAINERS;
+local VUHDO_STATUSBAR_LEFT_TO_RIGHT;
+local VUHDO_STATUSBAR_RIGHT_TO_LEFT;
+local VUHDO_STATUSBAR_BOTTOM_TO_TOP;
+local VUHDO_STATUSBAR_TOP_TO_BOTTOM;
 
 local VUHDO_PixelUtil;
 
@@ -228,6 +232,10 @@ function VUHDO_auraContainerOverlaysInitLocalOverrides()
 	VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY = _G["VUHDO_CUSTOM_GLOW_AURA_GROUP_KEY"];
 	VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY = _G["VUHDO_AURA_GROUP_GLOW_ACTIVE_KEY"];
 	VUHDO_MISSING_BUFF_CONTAINERS = _G["VUHDO_MISSING_BUFF_CONTAINERS"];
+	VUHDO_STATUSBAR_LEFT_TO_RIGHT = _G["VUHDO_STATUSBAR_LEFT_TO_RIGHT"];
+	VUHDO_STATUSBAR_RIGHT_TO_LEFT = _G["VUHDO_STATUSBAR_RIGHT_TO_LEFT"];
+	VUHDO_STATUSBAR_BOTTOM_TO_TOP = _G["VUHDO_STATUSBAR_BOTTOM_TO_TOP"];
+	VUHDO_STATUSBAR_TOP_TO_BOTTOM = _G["VUHDO_STATUSBAR_TOP_TO_BOTTOM"];
 
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 
@@ -408,12 +416,14 @@ do
 	local tOcclusionO;
 	local tThreatHeight;
 	local tBarButtonSetup;
+	local tFillMaskInset;
 	function VUHDO_getOverlayBarButtonSetup(aPanelNum, anIndicatorKey, aTargetFrame, aButton)
 
 		tCustomSetup = VUHDO_INDICATOR_CONFIG[aPanelNum] and VUHDO_INDICATOR_CONFIG[aPanelNum]["CUSTOM"][anIndicatorKey];
-		tBarTexture = (tCustomSetup and tCustomSetup["TEXTURE"])
-			or ((VUHDO_PANEL_SETUP[aPanelNum] or sEmpty)["PANEL_COLOR"] or sEmpty)["barTexture"];
+		tBarTexture = (tCustomSetup and tCustomSetup["TEXTURE"]) or ((VUHDO_PANEL_SETUP[aPanelNum] or sEmpty)["PANEL_COLOR"] or sEmpty)["barTexture"];
 		tOrientation = VUHDO_getStatusbarOrientationNumber(anIndicatorKey, aPanelNum);
+
+		tFillMaskInset = VUHDO_PixelUtil.RoundToPixel(1, 1);
 
 		tBgBar = VUHDO_getHealthBar(aButton, 3);
 		tOcclusionR, tOcclusionG, tOcclusionB, tOcclusionO = 0, 0, 0, 1;
@@ -426,6 +436,10 @@ do
 			["barTexture"] = tBarTexture,
 			["barOrientation"] = tOrientation,
 			["barInverted"] = tCustomSetup and tCustomSetup["invertGrowth"],
+			["fillMaskTopLeftX"] = (VUHDO_STATUSBAR_LEFT_TO_RIGHT == tOrientation) and -tFillMaskInset or 0,
+			["fillMaskTopLeftY"] = (VUHDO_STATUSBAR_TOP_TO_BOTTOM == tOrientation) and tFillMaskInset or 0,
+			["fillMaskBottomRightX"] = (VUHDO_STATUSBAR_RIGHT_TO_LEFT == tOrientation) and tFillMaskInset or 0,
+			["fillMaskBottomRightY"] = (VUHDO_STATUSBAR_BOTTOM_TO_TOP == tOrientation) and -tFillMaskInset or 0,
 			["occlusionColor"] = {
 				["R"] = tOcclusionR,
 				["G"] = tOcclusionG,
@@ -2185,6 +2199,10 @@ do
 			["barTexture"] = anOverlayEntry["barTexture"],
 			["barOrientation"] = anOverlayEntry["barOrientation"],
 			["barInverted"] = anOverlayEntry["barInverted"],
+			["fillMaskTopLeftX"] = anOverlayEntry["fillMaskTopLeftX"],
+			["fillMaskTopLeftY"] = anOverlayEntry["fillMaskTopLeftY"],
+			["fillMaskBottomRightX"] = anOverlayEntry["fillMaskBottomRightX"],
+			["fillMaskBottomRightY"] = anOverlayEntry["fillMaskBottomRightY"],
 			["occlusionColor"] = anOverlayEntry["occlusionColor"],
 			["sublevelSlots"] = anOverlayEntry["sublevelSlots"],
 			["border"] = anOverlayEntry["border"],

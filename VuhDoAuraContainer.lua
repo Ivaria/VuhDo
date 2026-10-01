@@ -663,6 +663,27 @@ end
 
 
 
+--
+local tFillMaskTexture;
+local function VUHDO_anchorAuraButtonFillMask(aFillMask, aButtonSetup)
+
+	aFillMask:ClearAllPoints();
+
+	if "cover" == aButtonSetup["shadowValueMode"] then
+		aFillMask:SetAllPoints(aButtonSetup["targetBar"]);
+	else
+		tFillMaskTexture = aButtonSetup["targetBar"]:GetStatusBarTexture();
+
+		VUHDO_PixelUtil.SetPoint(aFillMask, "TOPLEFT", tFillMaskTexture, "TOPLEFT", aButtonSetup["fillMaskTopLeftX"] or 0, aButtonSetup["fillMaskTopLeftY"] or 0);
+		VUHDO_PixelUtil.SetPoint(aFillMask, "BOTTOMRIGHT", tFillMaskTexture, "BOTTOMRIGHT", aButtonSetup["fillMaskBottomRightX"] or 0, aButtonSetup["fillMaskBottomRightY"] or 0);
+	end
+
+	return;
+
+end
+
+
+
 do
 	--
 	local tOverlayBarTextureFile;
@@ -754,13 +775,7 @@ do
 					tVolatileFillMask = aAuraButton["VuhDoFillMask"];
 
 					if tVolatileFillMask then
-						tVolatileFillMask:ClearAllPoints();
-
-						if aButtonSetup["shadowValueMode"] == "cover" then
-							tVolatileFillMask:SetAllPoints(aButtonSetup["targetBar"]);
-						else
-							tVolatileFillMask:SetAllPoints(aButtonSetup["targetBar"]:GetStatusBarTexture());
-						end
+						VUHDO_anchorAuraButtonFillMask(tVolatileFillMask, aButtonSetup);
 					end
 				end
 
@@ -1399,11 +1414,7 @@ do
 						VUHDO_PixelUtil.ApplySettings(tFillMask);
 					end
 
-					if aButtonSetup["shadowValueMode"] == "cover" then
-						tFillMask:SetAllPoints(aButtonSetup["targetBar"]);
-					else
-						tFillMask:SetAllPoints(aButtonSetup["targetBar"]:GetStatusBarTexture());
-					end
+					VUHDO_anchorAuraButtonFillMask(tFillMask, aButtonSetup);
 
 					if aButtonSetup["dispelFill"] then
 						tFillBackground = aAuraButton["VuhDoFillBackground"];
