@@ -76,7 +76,7 @@ if [[ ${BASH_VERSINFO[0]} -lt 4 ]] || [[ ${BASH_VERSINFO[0]} -eq 4 && ${BASH_VER
 fi
 
 # Game versions for uploading
-declare -A game_flavor=( ["retail"]="retail" ["classic"]="classic" ["bcc"]="bcc" ["mainline"]="retail" ["tbc"]="bcc" ["vanilla"]="classic" ["wrath"]="wrath" ["wotlkc"]="wrath" ["cata"]="cata" ["mists"]="mists" ["titan"]="titan" ["tbcc"]="bcc" ["catac"]="cata" ["mopc"]="mists" )
+declare -A game_flavor=( ["retail"]="retail" ["classic"]="classic" ["bcc"]="bcc" ["mainline"]="retail" ["tbc"]="bcc" ["vanilla"]="classic" ["wrath"]="wrath" ["wotlkc"]="wrath" ["cata"]="cata" ["mists"]="mists" ["titan"]="titan" ["forever"]="forever" ["camelot"]="forever" ["tbcc"]="bcc" ["catac"]="cata" ["mopc"]="mists" )
 
 declare -A game_type_version=()           # type -> version (: delim)
 declare -A game_type_interface=()         # type -> toc (: delim)
@@ -145,7 +145,8 @@ filename_filter() {
 		 [[ "$game_type" != "wrath" || "${si_project_version,,}" != *"-wrath"* ]] &&\
 		 [[ "$game_type" != "cata" || "${si_project_version,,}" != *"-cata"* ]] &&\
 		 [[ "$game_type" != "mists" || "${si_project_version,,}" != *"-mists"* ]] &&\
-		 [[ "$game_type" != "titan" || "${si_project_version,,}" != *"-titan"* ]]
+		 [[ "$game_type" != "titan" || "${si_project_version,,}" != *"-titan"* ]] &&\
+		 [[ "$game_type" != "forever" || "${si_project_version,,}" != *"-forever"* ]]
 	then
 		# only append the game type if the tag doesn't include it
 		classic="-$game_type"
@@ -168,7 +169,7 @@ filename_filter() {
 		-e "s/{beta}/${beta}/g" \
 		-e "s/{nolib}/${nolib:+-nolib}/g" \
 		-e "s/{classic}/${classic}/g" \
-		-e "s/\([^A-Za-z0-9._-]\)/${invalid}/g" \
+		-e "s/\([^A-Za-z0-9._!-]\)/${invalid}/g" \
 		<<< "$1"
 }
 
@@ -194,6 +195,7 @@ toc_to_type() {
 	local -n game_type="$2" || return 1
 	case $toc_version in
 		11???) game_type="classic" ;;
+		16???) game_type="forever" ;;
 		20???) game_type="bcc" ;;
 		30???) game_type="wrath" ;;
 		40???) game_type="cata" ;;
@@ -209,6 +211,7 @@ toc_to_file_type() {
 	local -n game_type="$2" || return 1
 	case $toc_version in
 		11???) game_type="classic" ;;
+		16???) game_type="forever" ;;
 		20???) game_type="bcc" ;;
 		30???) game_type="wrath" ;;
 		40???) game_type="cata" ;;
@@ -288,8 +291,9 @@ while getopts ":celLzusSop:dw:a:r:t:g:m:n:" opt; do
 		g) # Set the game type or version
 			OPTARG="${OPTARG,,}"
 			case "$OPTARG" in
-				retail|classic|bcc|wrath|cata|mists|titan) game_type="$OPTARG" ;; # game_version from toc
+				retail|classic|bcc|wrath|cata|mists|titan|forever) game_type="$OPTARG" ;; # game_version from toc
 				mainline) game_type="retail" ;;
+				camelot) game_type="forever" ;;
 				*)
 					# Set game version (x.y.z)
 					# Build game type set from the last value if a list
@@ -301,7 +305,11 @@ while getopts ":celLzusSop:dw:a:r:t:g:m:n:" opt; do
 							exit 1
 						fi
 						if [[ ${BASH_REMATCH[1]} == "1" ]]; then
-							game_type="classic"
+							if [[ ${BASH_REMATCH[2]} == 6[0-9] ]]; then
+								game_type="forever"
+							else
+								game_type="classic"
+							fi
 						elif [[ ${BASH_REMATCH[1]} == "2" ]]; then
 							game_type="bcc"
 						elif [[ ${BASH_REMATCH[1]} == "3" ]]; then
@@ -484,7 +492,9 @@ elif [ -f ".env" ]; then
 	. ".env"
 fi
 [ -z "$cf_token" ] && cf_token=$CF_API_KEY
+[ -z "$cf_token" ] && cf_token=$CF_API_TOKEN
 [ -z "$github_token" ] && github_token=$GITHUB_OAUTH
+[ -z "$github_token" ] && github_token=$GITHUB_API_TOKEN
 [ -z "$wowi_token" ] && wowi_token=$WOWI_API_TOKEN
 [ -z "$wago_token" ] && wago_token=$WAGO_API_TOKEN
 
@@ -1162,7 +1172,7 @@ set_info_toc_interface() {
 	local toc_name=${toc_path##*/}
 
 	local toc_suffix toc_file_game_type
-	if [[ $toc_name =~ "$package_name"[-_](Mainline|Classic|Vanilla|BCC|TBC|Wrath|WOTLKC|Cata|Mists)\.toc$ ]]; then
+	if [[ $toc_name =~ "$package_name"[-_](Mainline|Classic|Vanilla|BCC|TBC|Wrath|WOTLKC|Cata|Mists|Camelot)\.toc$ ]]; then
 		toc_suffix="${BASH_REMATCH[1],,}"
 		toc_file_game_type="${game_flavor[$toc_suffix]}"
 	fi
@@ -1270,6 +1280,7 @@ set_info_toc_interface() {
 				cata) game_type_toc_prefix="40" ;;
 				mists) game_type_toc_prefix="50" ;;
 				titan) game_type_toc_prefix="380" ;;
+				forever) game_type_toc_prefix="16[0-9]" ;;
 				*) game_type_toc_prefix=
 			esac
 			if [[ -n $game_type_toc_prefix ]]; then
@@ -1288,6 +1299,11 @@ set_info_toc_interface() {
 				si_game_root_interface="$toc_version"
 				si_game_type_interface_all[$toc_game_type]="$toc_version"
 			fi
+		fi
+
+		# Only game type TOC files will be created, so a fallback interface version isn't needed
+		if [[ -z $toc_version && -n $split && -z $game_type && ${#si_game_type_interface[@]} -gt 0 ]]; then
+			return 0
 		fi
 
 		# End of the line
@@ -1376,14 +1392,14 @@ if [[ -z "$package" ]]; then
 		exit 1
 	fi
 	package=${package%.toc}
-	if [[ $package =~ ^(.*)([-_](Mainline|Classic|Vanilla|BCC|TBC|Wrath|WOTLKC|Cata|Mists))$ ]]; then
+	if [[ $package =~ ^(.*)([-_](Mainline|Classic|Vanilla|BCC|TBC|Wrath|WOTLKC|Cata|Mists|Camelot))$ ]]; then
 		echo "Ambiguous addon name. No fallback TOC file or addon name includes an expansion suffix (${BASH_REMATCH[2]}). Set 'package-as' in .pkgmeta" >&2
 		exit 1
 	fi
 fi
 
 # Parse the project root TOC files for info first
-for toc_path in "$topdir/$package"{,-Mainline,_Mainline,-Classic,_Classic,-Vanilla,_Vanilla,-BCC,_BCC,-TBC,_TBC,-Wrath,_Wrath,-WOTLKC,_WOTLKC,-Cata,_Cata,-Mists,_Mists}.toc; do
+for toc_path in "$topdir/$package"{,-Mainline,_Mainline,-Classic,_Classic,-Vanilla,_Vanilla,-BCC,_BCC,-TBC,_TBC,-Wrath,_Wrath,-WOTLKC,_WOTLKC,-Cata,_Cata,-Mists,_Mists,-Camelot,_Camelot}.toc; do
 	if [[ -f "$toc_path" ]]; then
 		set_toc_project_info "$toc_path"
 		toc_paths+=("$toc_path")
@@ -1393,7 +1409,7 @@ done
 # Try parsing the project addon in move-folders for info next
 for path in "${!toc_root_paths[@]}"; do
 	if [[ ${toc_root_paths[$path]} == "$package" && $path != "$topdir" ]]; then
-		for toc_path in "$path/$package"{,-Mainline,_Mainline,-Classic,_Classic,-Vanilla,_Vanilla,-BCC,_BCC,-TBC,_TBC,-Wrath,_Wrath,-WOTLKC,_WOTLKC,-Cata,_Cata,-Mists,_Mists}.toc; do
+		for toc_path in "$path/$package"{,-Mainline,_Mainline,-Classic,_Classic,-Vanilla,_Vanilla,-BCC,_BCC,-TBC,_TBC,-Wrath,_Wrath,-WOTLKC,_WOTLKC,-Cata,_Cata,-Mists,_Mists,-Camelot,_Camelot}.toc; do
 			if [[ -f "$toc_path" ]]; then
 				set_toc_project_info "$toc_path"
 			fi
@@ -1403,7 +1419,7 @@ done
 
 # Parse project TOC files
 for path in "${!toc_root_paths[@]}"; do
-	for toc_path in "$path/${toc_root_paths[$path]}"{,-Mainline,_Mainline,-Classic,_Classic,-Vanilla,_Vanilla,-BCC,_BCC,-TBC,_TBC,-Wrath,_Wrath,-WOTLKC,_WOTLKC,-Cata,_Cata,-Mists,_Mists}.toc; do
+	for toc_path in "$path/${toc_root_paths[$path]}"{,-Mainline,_Mainline,-Classic,_Classic,-Vanilla,_Vanilla,-BCC,_BCC,-TBC,_TBC,-Wrath,_Wrath,-WOTLKC,_WOTLKC,-Cata,_Cata,-Mists,_Mists,-Camelot,_Camelot}.toc; do
 		if [[ -f "$toc_path" ]]; then
 			set_toc_project_info "$toc_path"
 			set_info_toc_interface "$toc_path" "${toc_root_paths[$path]}"
@@ -1535,7 +1551,7 @@ set_localization_url() {
 }
 
 # Filter to handle @localization@ repository keyword replacement.
-# https://authors.curseforge.com/knowledge-base/projects/531-localization-substitutions/
+# https://support.curseforge.com/support/solutions/articles/9000197354-localization-substitutions
 declare -A unlocalized_values=( ["english"]="ShowPrimary" ["comment"]="ShowPrimaryAsComment" ["blank"]="ShowBlankAsComment" ["ignore"]="Ignore" )
 localization_filter() {
 	_ul_eof=
@@ -1568,7 +1584,7 @@ localization_filter() {
 					echo "    Warning! No locale set, using enUS." >&3
 				fi
 				# Generate a URL parameter string from the localization parameters.
-				# https://authors.curseforge.com/knowledge-base/projects/529-api
+				# https://support.curseforge.com/support/solutions/articles/9000197321-curseforge-upload-api#Localization
 				_ul_url_params=""
 				# shellcheck disable=SC2086
 				set -- ${_ul_params}
@@ -1661,7 +1677,7 @@ localization_filter() {
 						echo -n "$_ul_prefix"
 
 						# Fetch the localization data, but don't output anything if there is an error.
-						curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    \033[01;31mError! "$0"\033[0m\n           "url; print o >"/dev/fd/3"; exit 1 } /<!DOCTYPE/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^<html>/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^'"$_ul_tablename"' = '"$_ul_tablename"' or \{\}/ { next } { print }' || exit 1
+						curl -sL -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    \033[01;31mError! "$0"\033[0m\n           "url; print o >"/dev/fd/3"; exit 1 } /<!(DOCTYPE|doctype)/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^<(HTML|html)>/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^'"$_ul_tablename"' = '"$_ul_tablename"' or \{\}/ { next } { print }' || exit 1
 
 						# Insert a trailing blank line to match CF packager.
 						if [ -z "$_ul_eof" ]; then
@@ -1669,7 +1685,7 @@ localization_filter() {
 						fi
 					else
 						# Parse out a single phrase. This is kind of expensive, but caching would be way too much effort to optimize for what is basically an edge case.
-						_ul_value=$( curl -s -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    \033[01;31mError! "$0"\033[0m\n           "url; print o >"/dev/fd/3"; exit 1 } /<!DOCTYPE/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^<html>/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } { print }' | sed -n '/L\["'"$_ul_singlekey"'"\]/p' | sed 's/^.* = "\(.*\)"/\1/' )
+						_ul_value=$( curl -sL -H "x-api-token: $cf_token" "${_ul_url}" | awk -v url="$_ul_url" '/^{"error/ { o="    \033[01;31mError! "$0"\033[0m\n           "url; print o >"/dev/fd/3"; exit 1 } /<!(DOCTYPE|doctype)/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } /^<(HTML|html)>/ { print "    \033[01;31mError! Invalid output\033[0m\n           "url >"/dev/fd/3"; exit 1 } { print }' | sed -n '/L\["'"$_ul_singlekey"'"\]/p' | sed 's/^.* = "\(.*\)"/\1/' )
 						if [ -n "$_ul_value" ] && [ "$_ul_value" != "$_ul_singlekey" ]; then
 							# The result is different from the base value so print out the line.
 							echo "${_ul_prefix}${_ul_value}${_ul_line##*)@}"
@@ -1884,6 +1900,7 @@ copy_directory_tree() {
 								[[ $_cdt_file_gametype != "cata" ]] && _cdt_filters+="|lua_filter version-cata"
 								[[ $_cdt_file_gametype != "mists" ]] && _cdt_filters+="|lua_filter version-mists"
 								[[ $_cdt_file_gametype != "titan" ]] && _cdt_filters+="|lua_filter version-titan"
+								[[ $_cdt_file_gametype != "forever" ]] && _cdt_filters+="|lua_filter version-forever"
 							fi
 							[[ -n $_cdt_localization ]] && grep -q "@localization" "$_cdt_source_file" && _cdt_filters+="|localization_filter"
 							;;
@@ -1900,6 +1917,7 @@ copy_directory_tree() {
 								[[ $_cdt_file_gametype != "cata" ]] && _cdt_filters+="|xml_filter version-cata"
 								[[ $_cdt_file_gametype != "mists" ]] && _cdt_filters+="|xml_filter version-mists"
 								[[ $_cdt_file_gametype != "titan" ]] && _cdt_filters+="|xml_filter version-titan"
+								[[ $_cdt_file_gametype != "forever" ]] && _cdt_filters+="|xml_filter version-forever"
 							fi
 							;;
 						*.toc)
@@ -1927,6 +1945,7 @@ copy_directory_tree() {
 									_cdt_filters+="|toc_filter version-cata $([[ "$_cdt_file_gametype" != "cata" ]] && echo "true")"
 									_cdt_filters+="|toc_filter version-mists $([[ "$_cdt_file_gametype" != "mists" ]] && echo "true")"
 									_cdt_filters+="|toc_filter version-titan $([[ "$_cdt_file_gametype" != "titan" ]] && echo "true")"
+									_cdt_filters+="|toc_filter version-forever $([[ "$_cdt_file_gametype" != "forever" ]] && echo "true")"
 								fi
 								# Rewrite the interface line if necessary
 								_cdt_filters+="|toc_interface_filter '${si_game_type_interface_all[${_cdt_file_gametype:- }]}' '${toc_root_interface["$_cdt_source_file"]}'"
@@ -1945,10 +1964,10 @@ copy_directory_tree() {
 					echo "  Copying: $file${_cdt_external_slug:+ (embedded: "$_cdt_external_slug")}"
 
 					# Make sure we're not causing any surprises
-					if [[ -z $_cdt_file_gametype && ( $file == *".lua" || $file == *".xml" || ( -z $_cdt_external && $file == *".toc" ) ) ]] && grep -q '@\(non-\)\?version-\(retail\|classic\|vanilla\|bcc\|wrath\|cata\|mists\|titan\)@' "$_cdt_source_file"; then
+					if [[ -z $_cdt_file_gametype && ( $file == *".lua" || $file == *".xml" || ( -z $_cdt_external && $file == *".toc" ) ) ]] && grep -q '@\(non-\)\?version-\(retail\|classic\|vanilla\|bcc\|wrath\|cata\|mists\|titan\|forever\)@' "$_cdt_source_file"; then
 						echo "    Error! Build type version keywords are not allowed in a multi-version build." >&2
 						echo "           These should be replaced with lua conditional statements:" >&2
-						grep -n '@\(non-\)\?version-\(retail\|classic\|vanilla\|bcc\|wrath\|cata\|mists\|titan\)@' "$_cdt_source_file" | sed 's/^/             /' >&2
+						grep -n '@\(non-\)\?version-\(retail\|classic\|vanilla\|bcc\|wrath\|cata\|mists\|titan\|forever\)@' "$_cdt_source_file" | sed 's/^/             /' >&2
 						echo "           See https://wowpedia.fandom.com/wiki/WOW_PROJECT_ID" >&2
 						exit 1
 					fi
@@ -1970,6 +1989,7 @@ copy_directory_tree() {
 								wrath) new_file+="_Wrath.toc" ;;
 								cata) new_file+="_Cata.toc" ;;
 								mists) new_file+="_Mists.toc" ;;
+								forever) new_file+="_Camelot.toc" ;;
 								# titan) new_file+="_Wrath.toc" ;;
 							esac
 
@@ -1989,6 +2009,7 @@ copy_directory_tree() {
 							_cdt_filters+="|toc_filter version-cata $([[ "$type" != "cata" ]] && echo "true")"
 							_cdt_filters+="|toc_filter version-mists $([[ "$type" != "mists" ]] && echo "true")"
 							_cdt_filters+="|toc_filter version-titan $([[ "$type" != "titan" ]] && echo "true")"
+							_cdt_filters+="|toc_filter version-forever $([[ "$type" != "forever" ]] && echo "true")"
 							_cdt_filters+="|toc_interface_filter '$toc_version' '$root_toc_version'"
 							_cdt_filters+="|line_ending_filter"
 
@@ -2812,6 +2833,7 @@ upload_curseforge() {
 				cata) game_id=77522 ;;
 				mists) game_id=79434 ;;
 				titan) game_id=81212 ;;
+				forever) game_id=88568 ;;
 				*) game_id=517
 			esac
 			IFS=':' read -ra V <<< "${game_type_version[$type]}"
@@ -2929,9 +2951,11 @@ upload_wowinterface() {
 				classic) wowi_type="Classic" ;;
 				bcc) wowi_type="TBC-Classic" ;;
 				wrath) wowi_type="WOTLK-Classic" ;;
-				cata) wowi_type="Cata-Classic" ;;
-				mists) wowi_type="MOP-Classic" ;; # XXX nyi
-				titan) wowi_type="Titan-Classic" ;; # XXX nyi
+				cata|mists) wowi_type="Cata-Classic" ;;
+				titan|forever)
+					echo "WARNING: No WoWInterface game type match for \"$type\", \"$type\" is not supported, ignoring" >&2
+					continue
+					;;
 				*) wowi_type="Retail"
 			esac
 			IFS=':' read -ra V <<< "${game_type_version[$type]}"
@@ -2942,14 +2966,15 @@ upload_wowinterface() {
 					# use the next highest version (try to avoid testing versions)
 					version=$( echo "$_wowi_versions" | jq -r --arg v "$invalid_version" --arg t "$wowi_type" 'map(select(.game == $t and .id < $v)) | max_by(.id) | .id // empty' )
 					if [[ -z $version ]]; then
-						if [[ $wowi_type == "MOP-Classic" ]]; then # XXX compat: not supported yet or I guessed the wrong name
+						if [[ $type == "mists" ]]; then # XXX wowi dead, yo
 							wowi_type="Cata-Classic"
+							echo "WARNING: No WoWInterface game type match for \"$type\", using \"$wowi_type\"" >&2
 						fi
 						# just grab the highest version
 						version=$( echo "$_wowi_versions" | jq -r --arg t "$wowi_type" 'map(select(.game == $t)) | max_by(.id) | .id // empty' )
 					fi
 					if [[ -z $version ]]; then
-						echo "WARNING: No WoWInterface game version match for \"$invalid_version\", \"$wowi_type\" is not supported" >&2
+						echo "WARNING: No WoWInterface game version match for \"$invalid_version\", \"$wowi_type\" is not supported, ignoring" >&2
 					else
 						echo "WARNING: No WoWInterface game version match for \"$invalid_version\", using \"$version\"" >&2
 					fi
