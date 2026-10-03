@@ -788,8 +788,13 @@ end
 
 
 --
+local tPlayerInfo;
 function VUHDO_isInSameZone(aUnit)
-	return (VUHDO_RAID[aUnit] or sEmpty)["zone"] == (VUHDO_RAID["player"] or sEmpty)["zone"];
+
+	tPlayerInfo = VUHDO_getPlayerRaidInfo();
+
+	return (VUHDO_RAID[aUnit] or sEmpty)["zone"] == (tPlayerInfo or sEmpty)["zone"];
+
 end
 local VUHDO_isInSameZone = VUHDO_isInSameZone;
 
@@ -913,10 +918,15 @@ end
 
 
 --
+local tPlayerUnit;
 local tDistance;
 function VUHDO_getDistanceText(aUnit)
-	tDistance = VUHDO_getDistanceBetween("player", aUnit);
-	return tDistance ~= nil and tDistance or "player" == aUnit and sZeroRange or VUHDO_I18N_UNKNOWN;
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
+	tDistance = VUHDO_getDistanceBetween(tPlayerUnit, aUnit);
+
+	return tDistance ~= nil and tDistance or tPlayerUnit == aUnit and sZeroRange or VUHDO_I18N_UNKNOWN;
+
 end
 
 
@@ -1097,10 +1107,22 @@ local VUHDO_setMapToCurrentZone = VUHDO_setMapToCurrentZone;
 
 --
 local tInfo;
-function VUHDO_replaceMacroTemplates(aText, aUnit)
+function VUHDO_replaceMacroTemplates(aText, aUnit, aUseMouseover)
+
+	if not aText then
+		return;
+	end
+
+	if aUseMouseover then
+		aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", "mouseover");
+		aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", "mouseoverpet");
+		aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", "mouseovertarget");
+	end
 
 	if aUnit then
-		aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", aUnit);
+		if not aUseMouseover then
+			aText = gsub(aText, "[Vv][Uu][Hh][Dd][Oo]", aUnit);
+		end
 
 		tInfo = VUHDO_RAID[aUnit];
 
@@ -1109,12 +1131,14 @@ function VUHDO_replaceMacroTemplates(aText, aUnit)
 				aText = gsub(aText, "[Vv][Dd][Nn][Aa][Mm][Ee]", tInfo["name"]);
 			end
 
-			if tInfo["petUnit"] then
-				aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", tInfo["petUnit"]);
-			end
+			if not aUseMouseover then
+				if tInfo["petUnit"] then
+					aText = gsub(aText, "[Vv][Dd][Pp][Ee][Tt]", tInfo["petUnit"]);
+				end
 
-			if tInfo["targetUnit"] then
-				aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", tInfo["targetUnit"]);
+				if tInfo["targetUnit"] then
+					aText = gsub(aText, "[Vv][Dd][Tt][Aa][Rr][Gg][Ee][Tt]", tInfo["targetUnit"]);
+				end
 			end
 		end
 	end

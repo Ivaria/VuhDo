@@ -27,7 +27,7 @@ function VUHDO_bouquetsInitLocalOverrides()
 	VUHDO_CONFIG = _G["VUHDO_CONFIG"];
 	VUHDO_CUSTOM_ICONS = _G["VUHDO_CUSTOM_ICONS"];
 	VUHDO_BOUQUET_BUFFS_SPECIAL = _G["VUHDO_BOUQUET_BUFFS_SPECIAL"];
-	sPlayerArray["player"] = VUHDO_RAID["player"];
+	sPlayerArray["player"] = VUHDO_getPlayerRaidInfo();
 end
 
 ----------------------------------------------------------

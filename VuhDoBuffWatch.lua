@@ -648,6 +648,8 @@ end
 
 
 --
+local tPlayerUnit;
+local tPlayerInfo;
 local tDestGroup;
 local tTargetType;
 local tEnchantDuration;
@@ -657,6 +659,9 @@ local tNameGroup = { };
 local tIsActive;
 local tStart, tDuration, tRest, tName, tTexture;
 local function VUHDO_getMissingBuffsForCode(aTargetCode, aBuffInfo, aCategSpec)
+
+	tPlayerUnit = VUHDO_getPlayerUnit();
+	tPlayerInfo = VUHDO_getPlayerRaidInfo();
 
 	if "N" == strsub(aTargetCode, 1, 1) then
 		tNameGroup[1] = VUHDO_RAID_NAMES[strsub(aTargetCode, 2)];
@@ -673,37 +678,37 @@ local function VUHDO_getMissingBuffsForCode(aTargetCode, aBuffInfo, aCategSpec)
 			end
 
 		elseif VUHDO_BUFF_TARGET_OWN_GROUP == tTargetType then
-			tDestGroup = VUHDO_GROUPS[(VUHDO_RAID["player"] or {})["group"] or 1];
+			tDestGroup = VUHDO_GROUPS[(tPlayerInfo or {})["group"] or 1];
 
 		elseif VUHDO_BUFF_TARGET_STANCE == tTargetType then
 			for tCnt = 1, NUM_STANCE_SLOTS do
 				_, tName, tIsActive = GetShapeshiftFormInfo(tCnt);
 				if tIsActive and tName == aBuffInfo[1] then
-					return sEmpty, sEmpty, "player", 0, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+					return sEmpty, sEmpty, tPlayerUnit, 0, tPlayerUnit, VUHDO_PLAYER_GROUP, sEmpty, 0;
 				end
 			end
 
-			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			VUHDO_setUnitMissBuff(tPlayerUnit, aCategSpec, aBuffInfo, aCategSpec);
+			return VUHDO_PLAYER_GROUP, sEmpty, tPlayerUnit, 0, tPlayerUnit, sEmpty, sEmpty, 0;
 
 		elseif VUHDO_BUFF_TARGET_ENCHANT == tTargetType then
 			tHasEnchant, tEnchantDuration = GetWeaponEnchantInfo();
 			if tHasEnchant and (not sGermanOrEnglish or strfind(aBuffInfo[1], VUHDO_getWeaponEnchantName(16), 1, true)) then
-				return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+				return sEmpty, sEmpty, tPlayerUnit, tEnchantDuration * 0.001, tPlayerUnit, VUHDO_PLAYER_GROUP, sEmpty, 0;
 			end
 
-			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			VUHDO_setUnitMissBuff(tPlayerUnit, aCategSpec, aBuffInfo, aCategSpec);
+			return VUHDO_PLAYER_GROUP, sEmpty, tPlayerUnit, 0, tPlayerUnit, sEmpty, sEmpty, 0;
 
 		elseif VUHDO_BUFF_TARGET_ENCHANT_OFF == tTargetType then
 			_, _, _, _, tHasEnchant, tEnchantDuration = GetWeaponEnchantInfo();
 
 			if tHasEnchant and (not sGermanOrEnglish or strfind(aBuffInfo[1], VUHDO_getWeaponEnchantName(17), 1, true)) then
-				return sEmpty, sEmpty, "player", tEnchantDuration * 0.001, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+				return sEmpty, sEmpty, tPlayerUnit, tEnchantDuration * 0.001, tPlayerUnit, VUHDO_PLAYER_GROUP, sEmpty, 0;
 			end
 
-			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			VUHDO_setUnitMissBuff(tPlayerUnit, aCategSpec, aBuffInfo, aCategSpec);
+			return VUHDO_PLAYER_GROUP, sEmpty, tPlayerUnit, 0, tPlayerUnit, sEmpty, sEmpty, 0;
 
 		elseif VUHDO_BUFF_TARGET_TOTEM == tTargetType then
 			for tTotemNum = 1, 4 do
@@ -715,12 +720,12 @@ local function VUHDO_getMissingBuffsForCode(aTargetCode, aBuffInfo, aCategSpec)
 					tRest = tDuration - (GetTime() - tStart);
 					if tRest < 0 then tRest = 0; end
 
-					return sEmpty, sEmpty, "player", tRest, "player", VUHDO_PLAYER_GROUP, sEmpty, 0;
+					return sEmpty, sEmpty, tPlayerUnit, tRest, tPlayerUnit, VUHDO_PLAYER_GROUP, sEmpty, 0;
 				end
 			end
 
-			VUHDO_setUnitMissBuff("player", aCategSpec, aBuffInfo, aCategSpec);
-			return VUHDO_PLAYER_GROUP, sEmpty, "player", 0, "player", sEmpty, sEmpty, 0;
+			VUHDO_setUnitMissBuff(tPlayerUnit, aCategSpec, aBuffInfo, aCategSpec);
+			return VUHDO_PLAYER_GROUP, sEmpty, tPlayerUnit, 0, tPlayerUnit, sEmpty, sEmpty, 0;
 		else
 			-- If self we only care if buff isn't on player
 			tDestGroup = VUHDO_PLAYER_GROUP;

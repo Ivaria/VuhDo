@@ -727,6 +727,7 @@ function VUHDO_initAllBurstCaches()
 	VUHDO_keySetupInitLocalOverrides();
 	VUHDO_combatLogInitLocalOverrides();
 	VUHDO_eventHandlerInitLocalOverrides();
+	VUHDO_secureShadowHeaderInitLocalOverrides();
 	VUHDO_customHealthInitLocalOverrides();
 	VUHDO_customManaInitLocalOverrides();
 	VUHDO_customTargetInitLocalOverrides();
@@ -927,6 +928,11 @@ local function VUHDO_init()
 	VUHDO_initDebuffs(); -- Too soon obviously => ReloadUI
 	VUHDO_clearUndefinedModelEntries();
 	VUHDO_registerAllBouquets(true);
+
+	if not InCombatLockdown() then
+		VUHDO_initSecureShadowHeader();
+	end
+
 	VUHDO_reloadUI(false);
 	VUHDO_getAutoProfile();
 	VUHDO_initCliqueSupport();
@@ -970,6 +976,8 @@ do
 	local tEmptyRaid = { };
 	local tSpecNumber;
 	local tBestProfileName;
+	local tButton;
+	local tUnit;
 	function VUHDO_OnEvent(anInstance, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
@@ -1115,6 +1123,11 @@ do
 				VUHDO_OPTIONS_SHOW_AFTER_BATTLE = false;
 			end
 
+			if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
+				VUHDO_refreshUI();
+				VUHDO_syncPanelButtonRaidIds();
+			end
+
 			VUHDO_setIsOutOfCombat(true);
 
 		elseif "PLAYER_REGEN_DISABLED" == anEvent then
@@ -1127,6 +1140,10 @@ do
 			end
 
 			VUHDO_processCombatUnsafeTasksBeforeLockdown();
+
+			if VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
+				VUHDO_computeAndPushSecureMappings();
+			end
 
 			VUHDO_setIsOutOfCombat(false);
 
@@ -1767,6 +1784,33 @@ do
 				VUHDO_animHelp();
 			end
 
+		elseif strfind(tCommandWord, "shad") then
+			if not VUHDO_CONFIG or not VUHDO_CONFIG["COMBAT_ROSTER"] then
+				VUHDO_Msg("Combat roster configuration not available.", 1, 0.4, 0.4);
+
+				return;
+			end
+
+			if InCombatLockdown() then
+				VUHDO_Msg("Command not available during combat.", 1, 0.4, 0.4);
+
+				return;
+			end
+
+			tSubCommand = strlower(tParsedTexts[2] or "");
+
+			if tSubCommand == "debug" then
+				VUHDO_setSecureDebugEnabled(not VUHDO_CONFIG["COMBAT_ROSTER"]["debug"]);
+			elseif tSubCommand == "toggle" then
+				VUHDO_setCombatRosterEnabled(not VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"]);
+
+				VUHDO_saveCurrentProfile();
+
+				ReloadUI();
+			else
+				VUHDO_debugSecureEnvironment();
+			end
+
 		elseif tCommandWord == "ab" or tCommandWord == "about" then
 			VUHDO_printAbout();
 
@@ -1878,9 +1922,15 @@ function VUHDO_updateGlobalToggles()
 
 	VUHDO_TIMERS["REFRESH_INSPECT"] = VUHDO_CONFIG["IS_SCAN_TALENTS"] and 1 or -1
 
+	local tWasPetsEnabled = VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS] or false;
+
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS]
 		= VUHDO_isModelConfigured(VUHDO_ID_PETS)
 		or VUHDO_isModelConfigured(VUHDO_ID_SELF_PET); -- Event nicht deregistrieren => Problem mit manchen Vehikeln
+
+	if tWasPetsEnabled ~= VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS] and not InCombatLockdown() and VUHDO_isSecureShadowHeaderReady() then
+		VUHDO_initSecureShadowHeader();
+	end
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PLAYER_TARGET]
 		= (VUHDO_isModelConfigured(VUHDO_ID_PRIVATE_TANKS) and not VUHDO_CONFIG["OMIT_TARGET"])
@@ -2053,7 +2103,9 @@ local function VUHDO_doReloadRoster(anIsQuick)
 				VUHDO_updateAllRaidBars();
 				VUHDO_initAllEventBouquets();
 
-				VUHDO_updatePanelVisibility();
+				if not VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"] then
+					VUHDO_updatePanelVisibility();
+				end
 
 				VUHDO_IS_RELOADING = false;
 			else

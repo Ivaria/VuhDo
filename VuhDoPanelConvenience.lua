@@ -2,6 +2,7 @@ local _G = _G;
 local pairs = pairs;
 local format = format;
 local CreateFrame = CreateFrame;
+local tremove = table.remove;
 local _;
 
 -- Fast caches
@@ -110,7 +111,8 @@ local tDebuffOnEnterSnippet = [[
 		end
 
 		sHealButton = tFrame;
-		tBody = tFrame:GetAttribute("vuhdo_onenter");
+
+		tBody = tFrame:GetAttribute("vuhdo_onenter_hook");
 
 		if tBody then
 			owner:RunFor(tFrame, tBody);
@@ -133,7 +135,8 @@ local tDebuffOnLeaveSnippet = [[
 	if tFrame then
 		tFrame:ClearBindings();
 		sHealButton = nil;
-		tBody = tFrame:GetAttribute("vuhdo_onleave");
+
+		tBody = tFrame:GetAttribute("vuhdo_onleave_hook");
 
 		if tBody then
 			owner:RunFor(tFrame, tBody);
@@ -150,6 +153,8 @@ local tDebuffOnLeaveSnippet = [[
 		end
 	end
 ]]
+local tPanelNum;
+local tButtonNum;
 function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 
 	if not VUHDO_BAR_ICON_BUTTONS[aButton][anIconNumber] then
@@ -175,7 +180,7 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 		VUHDO_BAR_ICON_COUNTERS[aButton][anIconNumber] = _G[tFrameName .. "BC"];
 		VUHDO_BAR_ICON_NAMES[aButton][anIconNumber] = _G[tFrameName .. "BN"];
 
-		if not tBarIconFrame:GetAttribute("vd_tt_hook") then
+		if not tBarIconFrame:GetAttribute("vuhdo_tooltip_hook") then
 			tBarIconFrame:SetScript("OnEnter", function(self)
 				VUHDO_showDebuffTooltip(self);
 				VuhDoActionOnEnter(self:GetParent():GetParent():GetParent():GetParent());
@@ -186,7 +191,7 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 				VuhDoActionOnLeave(self:GetParent():GetParent():GetParent():GetParent());
 			end);
 
-			VUHDO_safeSetAttribute(tBarIconFrame, "vd_tt_hook", true);
+			VUHDO_safeSetAttribute(tBarIconFrame, "vuhdo_tooltip_hook", true);
 		end
 
 		if not tBarIconFrame:GetAttribute("vuhdo_secureheader_wrap") then
@@ -198,6 +203,25 @@ function VUHDO_getOrCreateCuDeButton(aButton, anIconNumber)
 
 				VUHDO_safeSetAttribute(tBarIconFrame, "vuhdo_secureheader_wrap", true);
 			end
+		end
+
+		if not InCombatLockdown() and VUHDO_isSecureShadowHeaderReady() then
+			tPanelNum = aButton["panelNum"];
+			tButtonNum = aButton["buttonNum"];
+
+			if tPanelNum and tButtonNum then
+				VUHDO_registerSecureDebuffFrame(tPanelNum, tButtonNum, anIconNumber, tBarIconFrame);
+			end
+		end
+
+		if not tBarIconFrame:GetAttribute("vuhdo_raidid_sync_hook") then
+			tBarIconFrame:HookScript("OnAttributeChanged", function(self, name, value)
+				if name == "unit" then
+					self.raidid = value;
+				end
+			end);
+
+			VUHDO_safeSetAttribute(tBarIconFrame, "vuhdo_raidid_sync_hook", true);
 		end
 
 		tBarIconFrame:EnableMouse(false);
@@ -474,7 +498,7 @@ function VUHDO_getOrCreateBuffSwatch(aName, aParent)
 		VUHDO_safeSetAttribute(tButton, "_onshow", "self:ClearBindings();");
 		VUHDO_safeSetAttribute(tButton, "_onhide", "self:ClearBindings();");
 		VUHDO_safeSetAttribute(tButton,
-			"_onmousedown", 
+			"_onmousedown",
 			"if not self:IsUnderMouse(false) then self:ClearBindings(); end"
 		);
 	else
@@ -762,6 +786,9 @@ local function VUHDO_fastCacheInitButton(aPanelNum, aButtonNum)
 	local tTargetButton = _G[tButtonName .. "Tg"];
 	local tTotButton = _G[tButtonName .. "Tot"];
 
+	tButton["panelNum"] = aPanelNum;
+	tButton["buttonNum"] = aButtonNum;
+
 	VUHDO_BARS_PER_BUTTON[tButton] = { };
 	VUHDO_BARS_PER_BUTTON[tTargetButton] = { };
 	VUHDO_BARS_PER_BUTTON[tTotButton] = { };
@@ -859,11 +886,65 @@ function VUHDO_getOrCreateHealButton(aButtonNum, aPanelNum)
 		VUHDO_initHealButton(tNewButton, aPanelNum);
 		VUHDO_positionHealButton(tNewButton, aPanelNum);
 
+		if not InCombatLockdown() and VUHDO_isSecureShadowHeaderReady() then
+			VUHDO_registerSecureRealButton(aPanelNum, aButtonNum, tNewButton);
+		end
+
 		if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
 			tFunc = (VUHDO_CONFIG["HIDE_EMPTY_BUTTONS"] and not VUHDO_IS_PANEL_CONFIG and not VUHDO_isConfigDemoUsers())
 				and RegisterUnitWatch or UnregisterUnitWatch;
 
 			tFunc(tNewButton);
+		end
+
+		if not tNewButton:GetAttribute("vuhdo_raidid_sync_hook") then
+			tNewButton:HookScript("OnAttributeChanged", function(self, name, value)
+				if name == "unit" then
+					local tOldRaidId = self.raidid;
+
+					if tOldRaidId ~= value then
+						if tOldRaidId then
+							if VUHDO_UNIT_BUTTONS[tOldRaidId] then
+								for tCnt = #VUHDO_UNIT_BUTTONS[tOldRaidId], 1, -1 do
+									if VUHDO_UNIT_BUTTONS[tOldRaidId][tCnt] == self then
+										tremove(VUHDO_UNIT_BUTTONS[tOldRaidId], tCnt);
+
+										break;
+									end
+								end
+							end
+
+							if VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId] then
+								local tButtonName = self:GetName();
+								local tPanelNum = tonumber(tButtonName:match("Vd(%d+)"));
+
+								if tPanelNum and VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum] then
+									for tCnt = #VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum], 1, -1 do
+										if VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum][tCnt] == self then
+											tremove(VUHDO_UNIT_BUTTONS_PANEL[tOldRaidId][tPanelNum], tCnt);
+
+											break;
+										end
+									end
+								end
+							end
+						end
+
+						self.raidid = value;
+
+						if value then
+							local tButtonName = self:GetName();
+							local tPanelNum = tonumber(tButtonName:match("Vd(%d+)"));
+
+							if tPanelNum then
+								VUHDO_addUnitButton(self, tPanelNum);
+							end
+						end
+					end
+				end
+			end);
+
+			tNewButton:SetAttribute("vuhdo_raidid_sync_hook", true);
 		end
 	end
 
@@ -875,7 +956,9 @@ end
 
 --
 function VUHDO_getPanelButtons(aPanelNum)
+
 	return VUHDO_BUTTONS_PER_PANEL[aPanelNum];
+
 end
 
 

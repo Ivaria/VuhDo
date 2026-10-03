@@ -78,7 +78,7 @@ local VUHDO_REZ_SPELLS_NAMES = {
 local tUnit, tInfo;
 local tMacroId, tMacroText;
 local tActionLow;
-local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex)
+local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex, aUseMouseover)
 
 	tUnit = aButton["raidid"];
 
@@ -91,22 +91,22 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 	if tActionLow then
 		if "assist" == tActionLow then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildAssistMacroText(tUnit));
+			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildAssistMacroText(tUnit, aUseMouseover));
 		elseif "focus" == tActionLow then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildFocusMacroText(tUnit));
+			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildFocusMacroText(tUnit, aUseMouseover));
 		elseif "target" == tActionLow then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildTargetMacroText(tUnit));
+			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildTargetMacroText(tUnit, aUseMouseover));
 		elseif "extraactionbutton" == tActionLow then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildExtraActionButtonMacroText(tUnit));
+			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildExtraActionButtonMacroText(tUnit, aUseMouseover));
 		elseif "mouselook" == tActionLow then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMouseLookMacroText());
 		elseif "ping" == tActionLow then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildPingMacroText(tUnit));
+			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildPingMacroText(tUnit, aUseMouseover));
 		elseif "menu" == tActionLow or "tell" == tActionLow then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, nil);
 		elseif "dropdown" == tActionLow then
@@ -124,7 +124,7 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 					tMenu = "PET";
 				elseif UnitIsPlayer(tUnit) then
 					tInfo = VUHDO_RAID[tUnit];
-				
+
 					tName = tInfo["name"];
 
 					if UnitInRaid(tUnit) then
@@ -167,19 +167,19 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 				-- Dead players do not trigger "help/noharm" conditionals
 				if VUHDO_REZ_SPELLS_NAMES[anAction] then
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildRezMacroText(anAction, tUnit));
+					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildRezMacroText(anAction, tUnit, aUseMouseover));
 
 					return;
 				-- Cleansing charmed players is an offensive thing to do
 				elseif VUHDO_BUFF_REMOVAL_SPELLS[anAction] then
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildPurgeMacroText(anAction, tUnit));
+					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildPurgeMacroText(anAction, tUnit, aUseMouseover));
 
 					return;
 				else
 					-- build a spell macro
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
-					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit));
+					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, VUHDO_buildMacroText(anAction, false, tUnit, aUseMouseover));
 				end
 			else
 				tMacroId = GetMacroIndexByName(anAction);
@@ -187,7 +187,7 @@ local function _VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, a
 				if tMacroId ~= 0 then -- Macro?
 					_, _, tMacroText = GetMacroInfo(tMacroId);
 
-					tMacroText = VUHDO_replaceMacroTemplates(tMacroText, tUnit);
+					tMacroText = VUHDO_replaceMacroTemplates(tMacroText, tUnit, aUseMouseover);
 
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "type" .. aButtonId, "macro");
 					VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, tMacroText);
@@ -211,7 +211,7 @@ local tUnit;
 local tHostSpell;
 local tSpellInfo;
 local tActionLow;
-local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex)
+local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex, aUseMouseover)
 
 	tUnit = aButton["raidid"];
 	tActionLow = strlower(anAction);
@@ -228,7 +228,7 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 
 		if (tHostSpell or "") ~= "" or (tActionLow or "") ~= "" then
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId,
-				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell));
+				VUHDO_buildTargetButtonMacroText(tUnit, tActionLow, tHostSpell, aUseMouseover));
 		else
 			VUHDO_safeSetAttribute(aButton, aModiKey .. "macrotext" .. aButtonId, nil);
 		end
@@ -241,7 +241,7 @@ local function VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aB
 
 		return;
 	else
-		_VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex);
+		_VUHDO_setupHealButtonAttributes(aModiKey, aButtonId, anAction, aButton, anIsTgButton, anIndex, aUseMouseover);
 	end
 
 end
@@ -300,6 +300,7 @@ local tOnLeaveSnippet = [[
 local tClearBindsSnippet = [[
 	self:ClearBindings();
 ]]
+local tUseMouseover;
 local tDebuffFrame;
 function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceTarget, anIsTgButton, anIsIcButton)
 
@@ -317,9 +318,24 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 				end
 			end
 		end
+
+	elseif not anIsIcButton then
+		VUHDO_safeSetAttribute(aButton, "unit", nil);
+		aButton["raidid"] = nil;
+
+		if not anIsTgButton then
+			for tCnt = 40, VUHDO_CONFIG["CUSTOM_DEBUFF"]["max_num"] + 39 do
+				tDebuffFrame = VUHDO_getBarIconFrame(aButton, tCnt);
+
+				if tDebuffFrame then
+					VUHDO_safeSetAttribute(tDebuffFrame, "unit", nil);
+					tDebuffFrame["raidid"] = nil;
+				end
+			end
+		end
 	end
 
-	if not aButton:GetAttribute("vd_tt_hook") then
+	if not aButton:GetAttribute("vuhdo_tooltip_hook") then
 		if anIsIcButton then
 			aButton:HookScript("OnEnter", function(self) VUHDO_showDebuffTooltip(self); VuhDoActionOnEnter(self:GetParent():GetParent():GetParent():GetParent()) end);
 			aButton:HookScript("OnLeave", function(self) VUHDO_hideDebuffTooltip(); VuhDoActionOnLeave(self:GetParent():GetParent():GetParent():GetParent()) end);
@@ -328,7 +344,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			aButton:HookScript("OnLeave",	function(self) VuhDoActionOnLeave(self); end);
 		end
 
-		VUHDO_safeSetAttribute(aButton, "vd_tt_hook", true);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_tooltip_hook", true);
 	end
 
 	if sIsCliqueCompat then
@@ -336,6 +352,8 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 
 		return;
 	end
+
+	tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
 
 	tPreAction = anIsDisable and "" or aForceTarget and "target" or nil;
 
@@ -345,7 +363,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 
 			VUHDO_setupHealButtonAttributes(tWithMinus, tCnt,
 				tPreAction or tBinding ~= nil and tBinding[3] or "",
-				aButton, anIsTgButton);
+				aButton, anIsTgButton, nil, tUseMouseover);
 		end
 	end
 
@@ -357,16 +375,16 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		if #tSpellDescr[3] > 0 or #tHostSpell > 0 then
 			tIsWheel = true;
 
-			VUHDO_setupHealButtonAttributes("", tSpellDescr[2], tSpellDescr[3], aButton, anIsTgButton, tIndex);
+			VUHDO_setupHealButtonAttributes("", tSpellDescr[2], tSpellDescr[3], aButton, anIsTgButton, tIndex, tUseMouseover);
 		end
 	end
 
 	for tIndex, tEntries in pairs(VUHDO_SPELLS_KEYBOARD["INTERNAL"]) do
 		if VUHDO_isActionValid(tEntries[1], false) then
-			_VUHDO_setupHealButtonAttributes("",  "-ik" .. tIndex, tEntries[1], aButton, anIsTgButton, tIndex);
+			_VUHDO_setupHealButtonAttributes("",  "-ik" .. tIndex, tEntries[1], aButton, anIsTgButton, tIndex, tUseMouseover);
 		else
 			VUHDO_safeSetAttribute(aButton, "type-ik" .. tIndex, "macro");
-			VUHDO_safeSetAttribute(aButton, "macrotext-ik" .. tIndex, VUHDO_replaceMacroTemplates(tEntries[3] or "", aUnit));
+			VUHDO_safeSetAttribute(aButton, "macrotext-ik" .. tIndex, VUHDO_replaceMacroTemplates(tEntries[3] or "", aUnit, tUseMouseover));
 		end
 	end
 
@@ -384,8 +402,8 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 		VUHDO_safeSetAttribute(aButton, "_onshow", tClearBindsSnippet);
 		VUHDO_safeSetAttribute(aButton, "_onhide", tClearBindsSnippet);
 
-		VUHDO_safeSetAttribute(aButton, "vuhdo_onenter", tWheelDefString);
-		VUHDO_safeSetAttribute(aButton, "vuhdo_onleave", tClearBindsSnippet);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_onenter_hook", tWheelDefString);
+		VUHDO_safeSetAttribute(aButton, "vuhdo_onleave_hook", tClearBindsSnippet);
 
 		tHeaderFrame = _G["VuhDoHealButtonSecureHeaderFrame"];
 
@@ -398,6 +416,8 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			end
 		end
 	end
+
+	return;
 
 end
 local VUHDO_setupAllHealButtonAttributes = VUHDO_setupAllHealButtonAttributes;
@@ -423,15 +443,23 @@ local tProhibitSmartCastOn = {
 };
 -- Setup for smart cast
 local tKey;
+local tUseMouseover;
 local function VUHDO_setupAllButtonsTo(aButton, aSpellName)
+
+	tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
+
 	for tNoMinus, tWithMinus in pairs(VUHDO_MODIFIER_KEYS) do
 		for tCnt = 1, VUHDO_NUM_MOUSE_BUTTONS do
 			tKey = tNoMinus .. tCnt;
+
 			if not VUHDO_SPELL_ASSIGNMENTS[tKey] or not tProhibitSmartCastOn[VUHDO_SPELL_ASSIGNMENTS[tKey][3]] then
-				VUHDO_setupHealButtonAttributes(tWithMinus, tCnt, aSpellName, aButton, false);
+				VUHDO_setupHealButtonAttributes(tWithMinus, tCnt, aSpellName, aButton, false, nil, tUseMouseover);
 			end
 		end
 	end
+
+	return;
+
 end
 
 
@@ -466,8 +494,11 @@ local tAbilities;
 local tAbility;
 local tUnit;
 local tInfo;
+local tMainRes;
 local tBuff;
+local tUseMouseover;
 function VUHDO_setupSmartCast(aButton)
+
 	if InCombatLockdown() or UnitIsDeadOrGhost("player")
 		or (VUHDO_PLAYER_CLASS == "PRIEST" and GetShapeshiftForm() == 4) then -- Priest Spirit of Redemption?
 		return false;
@@ -476,24 +507,32 @@ function VUHDO_setupSmartCast(aButton)
 	tUnit = aButton["raidid"];
 	tInfo = VUHDO_RAID[tUnit];
 
-	if not tInfo then return false; end
+	if not tInfo then
+		return false;
+	end
 
 	-- Resurrect?
 	if VUHDO_CONFIG["SMARTCAST_RESURRECT"] and tInfo["dead"] then
-		local tMainRes = VUHDO_getResurrectionSpells();
+		tMainRes = VUHDO_getResurrectionSpells();
+
 		if tMainRes then
 			VUHDO_setupAllButtonsTo(aButton, tMainRes);
+
 			return true;
 		end
 	end
 
-	if not tInfo["baseRange"] then return false; end
+	if not tInfo["baseRange"] then
+		return false;
+	end
 
 	-- Trade?
 	tCursorItemType = GetCursorInfo();
+
 	if "item" == tCursorItemType or "money" == tCursorItemType then
 		DropItemOnUnit(tUnit);
 		VUHDO_disableActions(aButton);
+
 		return true;
 	end
 
@@ -521,12 +560,15 @@ function VUHDO_setupSmartCast(aButton)
 			return false;
 		else
 			VUHDO_setupAllButtonsTo(aButton, tBuff[1]);
-			VUHDO_setupHealButtonAttributes("", "2", tBuff[1], aButton, false);
+
+			tUseMouseover = VUHDO_CONFIG["COMBAT_ROSTER"] and VUHDO_CONFIG["COMBAT_ROSTER"]["enabled"];
+
+			VUHDO_setupHealButtonAttributes("", "2", tBuff[1], aButton, false, nil, tUseMouseover);
 
 			return true;
 		end
 	end
 
 	return false;
-end
 
+end

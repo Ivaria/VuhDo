@@ -73,36 +73,43 @@ local VUHDO_isConfigPanelShowing = VUHDO_isConfigPanelShowing;
 --
 local tUnit;
 local function VUHDO_hasPanelVisibleButtons(aPanelNum)
+
 	if not sShowPanels or not VUHDO_IS_SHOWN_BY_GROUP then
 		return false;
-
 	elseif not sIsHideEmptyAndClickThrough or VUHDO_isConfigPanelShowing() or VUHDO_isConfigDemoUsers() then
 		return true;
-
 	else
 		for _, tButton in pairs(VUHDO_getPanelButtons(aPanelNum)) do
 			tUnit = tButton:GetAttribute("unit");
-			
-			if not tUnit then
-				return false;
-			elseif UnitExists(tUnit) then
+
+			if tUnit and UnitExists(tUnit) then
 				return true;
 			end
 		end
 
 		return false;
 	end
+
 end
 
 
 
 --
+local tHasVisibleButtons;
+local tPanel;
 function VUHDO_updatePanelVisibility()
+
 	for tCnt = 1, 10 do -- VUHDO_MAX_PANELS
 		if #(VUHDO_PANEL_MODELS[tCnt] or sEmpty) > 0 then
-			VUHDO_getActionPanelOrStub(tCnt):SetAlpha(VUHDO_hasPanelVisibleButtons(tCnt) and 1 or 0);
+			tHasVisibleButtons = VUHDO_hasPanelVisibleButtons(tCnt);
+			tPanel = VUHDO_getActionPanelOrStub(tCnt);
+
+			tPanel:SetAlpha(tHasVisibleButtons and 1 or 0);
 		end
 	end
+
+	return;
+
 end
 
 
