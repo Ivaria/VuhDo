@@ -1,5 +1,5 @@
-## Interface: 120100
-## AllowLoadGameType: standard
+## Interface: 16001
+## AllowLoadGameType: camelot
 
 ## Title: VuhDo ['vu:du:]
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
@@ -34,9 +34,9 @@ Libs\Libs.xml
 VuhDoLocalization.xml
 VuhDoConstSpells.lua
 VuhDoFlavorConst.lua
-Flavors\Retail\VuhDoSpells.xml
+Flavors\Forever\VuhDoSpells.xml
 VuhDoCore.xml
-Flavors\Retail\VuhDoData.xml
+Flavors\Forever\VuhDoData.xml
 VuhDo.xml
 
 VuhDoPanel.xml

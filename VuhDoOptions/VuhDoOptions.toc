@@ -1,4 +1,4 @@
-## Interface: 120100, 160105
+## Interface: 120100, 16001
 ## AllowLoadGameType: standard, camelot
 
 ## Title: VuhDo ['vu:du:] - Options
