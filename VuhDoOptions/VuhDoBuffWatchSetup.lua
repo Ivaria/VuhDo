@@ -348,7 +348,7 @@ local function VUHDO_buffSetupResolvePanelTemplate(aCategoryName, someCategoryBu
 
 	if (VUHDO_BUFF_TARGET_UNIQUE == tTargetType) then
 		tPanelTemplate = "VuhDoBuffSetupUniqueSingleTargetPanelTemplate";
-	elseif (VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType) then
+	elseif (VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType or VUHDO_BUFF_TARGET_GROUP == tTargetType) then
 		if (#someCategoryBuffs > 1) then
 			tPanelTemplate = "VuhDoBuffSetupDedicatedPanelTemplate";
 		else
@@ -484,7 +484,7 @@ local function VUHDO_setupGenericBuffPanel(aBuffVariant, aGenericPanel, someCate
 	local tBuffTarget = aBuffVariant[2];
 	local tSettings = VUHDO_BUFF_SETTINGS[aCategoryName];
 
-	if (VUHDO_BUFF_TARGET_RAID == tBuffTarget or VUHDO_BUFF_TARGET_SINGLE == tBuffTarget) then
+	if (VUHDO_BUFF_TARGET_RAID == tBuffTarget or VUHDO_BUFF_TARGET_SINGLE == tBuffTarget or VUHDO_BUFF_TARGET_GROUP == tBuffTarget) then
 		if (#someCategoryBuffs > 1) then
 			local tCategBuffNames = VUHDO_getAllBuffNamesAvail(someCategoryBuffs);
 			local tCombo = _G[aGenericPanel:GetName() .. "DedicatedComboBox"];

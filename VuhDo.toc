@@ -1,8 +1,9 @@
-## Interface: 120100
+## Interface: 120100, 160105
+## AllowLoadGameType: standard, camelot
 
 ## Title: VuhDo ['vu:du:]
 ## Author: Iza@Gilneas, humfras, Ivaria@Hyjal
-## Version: 3.218
+## Version: 3.219
 ## Notes: Raid Frames providing click-heal functionality, buff and debuff control, main tank management and much more
 ## IconTexture: Interface\AddOns\VuhDo\Images\TemporaryPortrait-Female-BloodElf-VuhDo
 
@@ -30,8 +31,15 @@
 
 Libs\Libs.xml
 
+VuhDoLocalization.xml
+VuhDoConstSpells.lua
+Flavors\Retail\VuhDoSpells.xml [AllowLoadGameType standard]
+Flavors\Forever\VuhDoSpells.xml [AllowLoadGameType camelot]
+VuhDoCore.xml
+Flavors\Retail\VuhDoData.xml [AllowLoadGameType standard]
+Flavors\Forever\VuhDoData.xml [AllowLoadGameType camelot]
 VuhDo.xml
 
 VuhDoPanel.xml
 VuhDoBuffWatch.xml
-
+

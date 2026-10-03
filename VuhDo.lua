@@ -507,6 +507,7 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["powertype"] = tonumber(tPowerType);
 			tInfo["power"] = UnitPower(aUnit);
 			tInfo["powermax"] = UnitPowerMax(aUnit);
+			tInfo["hasMana"] = UnitPowerMax(aUnit, Enum.PowerType.Mana) > 0;
 
 			if sSecretsEnabled then
 				tInfo["hasSecretPower"] = issecretvalue(tInfo["power"]) or issecretvalue(tInfo["powermax"]);
