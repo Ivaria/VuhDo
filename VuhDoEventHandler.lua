@@ -1033,6 +1033,7 @@ local function VUHDO_init()
 	VUHDO_loadVariables(); -- 2. umgekehrt undefiniertes Verhalten (VUHDO_CONFIG ist nil etc.)
 	VUHDO_initAuraModeSelection();
 	VUHDO_initAllBurstCaches();
+	VUHDO_verifyFlavorRulesLoaded();
 	VUHDO_resolveAllAuraGroupFilters();
 	VUHDO_initDefaultProfiles();
 
@@ -1572,7 +1573,7 @@ do
 				end
 
 				if "player" == anArg1 then
-					tSpecNumber = tostring(GetSpecialization()) or "1";
+					tSpecNumber = tostring(VUHDO_getActiveSpecSlot()) or "1";
 					tBestProfileName = VUHDO_getBestProfileAfterSpecChange();
 
 					-- event sometimes fires multiple times so we must de-dupe
@@ -2162,7 +2163,7 @@ function VUHDO_updateGlobalToggles()
 		VUHDO_TIMERS["REFRESH_TARGETS"] = -1;
 	end
 
-	VUHDO_TIMERS["REFRESH_INSPECT"] = VUHDO_CONFIG["IS_SCAN_TALENTS"] and 1 or -1
+	VUHDO_TIMERS["REFRESH_INSPECT"] = (VUHDO_CONFIG["IS_SCAN_TALENTS"] and VUHDO_FLAVOR_SPEC_SPECIALIZATIONS == VUHDO_getFlavorSpecModel()) and 1 or -1
 
 	VUHDO_INTERNAL_TOGGLES[VUHDO_UPDATE_PETS]
 		= VUHDO_isModelConfigured(VUHDO_ID_PETS)

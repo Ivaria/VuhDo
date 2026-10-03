@@ -1239,6 +1239,8 @@ globals = {
 	"C_Social.TwitterPostAchievement",
 	"C_Social.TwitterPostMessage",
 	"C_Social.TwitterPostScreenshot",
+	"C_SpecializationInfo.GetActiveSpecGroup",
+	"C_SpecializationInfo.GetSpecialization",
 	"C_SpecializationInfo.GetPvpTalentSlotInfo",
 	"C_StorePublic.IsDisabledByParentalControls",
 	"C_StorePublic.IsEnabled",

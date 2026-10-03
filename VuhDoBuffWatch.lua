@@ -302,6 +302,10 @@ do
 			return false;
 		end
 
+		if tFirstVariant["manaOnly"] and not tInfo["hasMana"] then
+			return false;
+		end
+
 		tIsNotInBattleground = not VUHDO_isInBattleground();
 
 		if "player" ~= aUnit and (not VUHDO_isInSameZone(aUnit) or not (tInfo["visible"] or tIsNotInBattleground)) then
@@ -327,7 +331,7 @@ do
 				return VUHDO_RAID_NAMES[(tSettings or sEmpty)["name"] or VUHDO_PLAYER_NAME] == aUnit;
 			end
 
-		elseif VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType then
+		elseif VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType or VUHDO_BUFF_TARGET_GROUP == tTargetType then
 			tRaidList = VUHDO_BUFF_RAID_FILTERED[aCategName] or VUHDO_BUFF_RAID;
 			tIsInRaidList = false;
 
@@ -728,6 +732,70 @@ local tSpellInRange;
 local tIsLowByTime;
 local tIsLow;
 local tIsSecretBuff;
+local tUnitsByGroup = { };
+local tGroupTarget;
+local tUnitGroup;
+local tGroupInfo;
+local tGroupInRange;
+local tGroupSpellInRange;
+--
+local function VUHDO_getGroupBuffTarget(aBuffInfo, aMissGroup, aLowGroup)
+
+	tGroupTarget = nil;
+	twipe(tUnitsByGroup);
+
+	for _, tUnit in pairs(aMissGroup) do
+		tUnitGroup = (VUHDO_RAID[tUnit] or sEmpty)["group"];
+
+		if tUnitGroup and tUnitGroup >= 1 and tUnitGroup <= 8 then
+			if not tUnitsByGroup[tUnitGroup] then
+				tUnitsByGroup[tUnitGroup] = { };
+			end
+
+			tUnitsByGroup[tUnitGroup][#tUnitsByGroup[tUnitGroup] + 1] = tUnit;
+		end
+	end
+
+	for _, tUnit in pairs(aLowGroup) do
+		tUnitGroup = (VUHDO_RAID[tUnit] or sEmpty)["group"];
+
+		if tUnitGroup and tUnitGroup >= 1 and tUnitGroup <= 8 then
+			if not tUnitsByGroup[tUnitGroup] then
+				tUnitsByGroup[tUnitGroup] = { };
+			end
+
+			tUnitsByGroup[tUnitGroup][#tUnitsByGroup[tUnitGroup] + 1] = tUnit;
+		end
+	end
+
+	for tGroupNum = 1, 8 do
+		if tUnitsByGroup[tGroupNum] then
+			for _, tUnit in pairs(tUnitsByGroup[tGroupNum]) do
+				tGroupInfo = VUHDO_RAID[tUnit];
+
+				if tGroupInfo and tGroupInfo["connected"] and not tGroupInfo["dead"] then
+					tGroupSpellInRange = VUHDO_isSpellInRange(aBuffInfo[1], tUnit, "HELPFUL");
+
+					tGroupInRange = (tGroupSpellInRange == true) or tGroupInfo["hasSecretRange"]
+						or (sSecretsEnabled and issecretvalue(tGroupInfo["baseRange"])) or tGroupInfo["baseRange"];
+
+					if tGroupInRange then
+						tGroupTarget = tUnit;
+
+						return tGroupTarget;
+					end
+				end
+			end
+		end
+	end
+
+	return tGroupTarget;
+
+end
+
+
+
+--
 local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppressMissBuff, aTargetMode)
 
 	tCategName = aCategSpec;
@@ -765,6 +833,10 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 		elseif VUHDO_isInSameZone(tUnit) and (tInfo["visible"] or tIsNotInBattleground) then
 			tIsWatchUnit = true;
 		else
+			tIsWatchUnit = false;
+		end
+
+		if aBuffInfo["manaOnly"] and tInfo and not tInfo["hasMana"] then
 			tIsWatchUnit = false;
 		end
 
@@ -877,6 +949,10 @@ local function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppres
 		end
 	end
 
+	if VUHDO_BUFF_TARGET_GROUP == aBuffInfo[2] then
+		tGoodTarget = VUHDO_getGroupBuffTarget(aBuffInfo, tMissGroup, tLowGroup) or tGoodTarget;
+	end
+
 	return tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tSecretCount or tMaxCount;
 
 end
@@ -964,7 +1040,7 @@ function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpe
 	else
 		tTargetType = aBuffInfo[2];
 
-		if VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType then
+		if VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType or VUHDO_BUFF_TARGET_GROUP == tTargetType then
 			tCategName = aCategSpec;
 			if VUHDO_BUFF_RAID_FILTERED[tCategName] then
 				tDestGroup = VUHDO_BUFF_RAID_FILTERED[tCategName];
@@ -1100,7 +1176,7 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 			end
 		end
 
-	elseif VUHDO_BUFF_TARGET_RAID == tDdTargetType or VUHDO_BUFF_TARGET_SINGLE == tDdTargetType then
+	elseif VUHDO_BUFF_TARGET_RAID == tDdTargetType or VUHDO_BUFF_TARGET_SINGLE == tDdTargetType or VUHDO_BUFF_TARGET_GROUP == tDdTargetType then
 		tDdDropInfo = UIDropDownMenu_CreateInfo();
 		tDdDropInfo["text"] = VUHDO_I18N_TRACK_BUFFS_FOR;
 		tDdDropInfo["isTitle"] = true;

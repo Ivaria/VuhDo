@@ -16,7 +16,8 @@ VUHDO_NEXT_INSPECT_TIME_OUT = nil;
 
 --------------------------------------------------------------
 local NotifyInspect = NotifyInspect;
-local GetSpecializationInfo = GetSpecializationInfo;
+local GetSpecialization = C_SpecializationInfo.GetSpecialization;
+local GetSpecializationInfo = C_SpecializationInfo.GetSpecializationInfo;
 local GetInspectSpecialization = GetInspectSpecialization;
 local GetSpecializationRoleByID = GetSpecializationRoleByID;
 local ClearInspectPlayer = ClearInspectPlayer;
@@ -109,6 +110,10 @@ local tInfo;
 local tName;
 function VUHDO_needsRoleInspect(aUnit)
 
+	if VUHDO_FLAVOR_SPEC_SPECIALIZATIONS ~= VUHDO_getFlavorSpecModel() then
+		return false;
+	end
+
 	tInfo = VUHDO_RAID[aUnit];
 
 	if not tInfo then
@@ -183,6 +188,10 @@ end
 --
 function VUHDO_tryInspectNext()
 
+	if VUHDO_FLAVOR_SPEC_SPECIALIZATIONS ~= VUHDO_getFlavorSpecModel() then
+		return;
+	end
+
 	for tUnit, _ in pairs(VUHDO_RAID) do
 		if VUHDO_shouldBeInspected(tUnit) then
 			VUHDO_NEXT_INSPECT_TIME_OUT = GetTime() + VUHDO_INSPECT_TIMEOUT;
@@ -229,6 +238,10 @@ end
 --
 function VUHDO_requestTargetFocusInspect(aUnit)
 
+	if VUHDO_FLAVOR_SPEC_SPECIALIZATIONS ~= VUHDO_getFlavorSpecModel() then
+		return;
+	end
+
 	if "target" ~= aUnit and "focus" ~= aUnit then
 		return;
 	end
@@ -259,6 +272,10 @@ local tClassId;
 local tRole;
 local tTreeId;
 function VUHDO_inspectRole(aUnit)
+
+	if VUHDO_FLAVOR_SPEC_SPECIALIZATIONS ~= VUHDO_getFlavorSpecModel() then
+		return VUHDO_ID_UNDEFINED;
+	end
 
 	tInfo = VUHDO_RAID[aUnit];
 
@@ -345,6 +362,12 @@ local tActiveTree;
 local tInfo;
 local tTreeId;
 function VUHDO_inspectLockRole()
+
+	if VUHDO_FLAVOR_SPEC_SPECIALIZATIONS ~= VUHDO_getFlavorSpecModel() then
+		VUHDO_NEXT_INSPECT_UNIT = nil;
+
+		return;
+	end
 
 	tInfo = VUHDO_RAID[VUHDO_NEXT_INSPECT_UNIT];
 
@@ -471,6 +494,45 @@ end
 
 
 --
+local tForeverBuffTexture;
+local tForeverClassId;
+local function VUHDO_determineHeuristicRole(aUnit, anInfo)
+
+	tForeverClassId = anInfo["classId"];
+
+	if VUHDO_ID_HUNTERS == tForeverClassId then
+		VUHDO_FIX_ROLES[anInfo["name"]] = VUHDO_ID_RANGED_DAMAGE;
+
+		return VUHDO_ID_RANGED_DAMAGE;
+	elseif VUHDO_ID_PRIESTS == tForeverClassId then
+		_, tForeverBuffTexture = VUHDO_unitBuffAllowSecret(aUnit, VUHDO_SPELL_ID.SHADOWFORM);
+
+		if tForeverBuffTexture then
+			return VUHDO_ID_RANGED_DAMAGE;
+		end
+
+		return VUHDO_ID_RANGED_HEAL;
+	elseif VUHDO_ID_DRUIDS == tForeverClassId then
+		_, tForeverBuffTexture = VUHDO_unitBuffAllowSecret(aUnit, VUHDO_SPELL_ID.MOONKIN_FORM);
+
+		if tForeverBuffTexture then
+			return VUHDO_ID_RANGED_DAMAGE;
+		end
+	elseif VUHDO_ID_SHAMANS == tForeverClassId then
+		_, tForeverBuffTexture = VUHDO_unitBuffAllowSecret(aUnit, VUHDO_SPELL_ID.BUFF_ELEMENTAL_FOCUS);
+
+		if tForeverBuffTexture then
+			return VUHDO_ID_RANGED_DAMAGE;
+		end
+	end
+
+	return nil;
+
+end
+
+
+
+--
 local tInfo;
 local tPowerType;
 local tFixRole;
@@ -585,6 +647,14 @@ function VUHDO_determineRole(aUnit)
 	-- Estimated role fixed?
 	if VUHDO_FIX_ROLES[tName] then
 		return VUHDO_FIX_ROLES[tName];
+	end
+
+	if VUHDO_FLAVOR_SPEC_TALENT_GROUPS == VUHDO_getFlavorSpecModel() then
+		tRole = VUHDO_determineHeuristicRole(aUnit, tInfo);
+
+		if tRole then
+			return tRole;
+		end
 	end
 
 	if sSecretsEnabled and tInfo["hasSecretPower"] then
@@ -763,6 +833,10 @@ local tInfo;
 local tRole;
 local tOldRole;
 function VUHDO_updateRoleBySpecialization(aSpecId, aRole, aPosition, aSender, aTalentString)
+
+	if VUHDO_FLAVOR_SPEC_SPECIALIZATIONS ~= VUHDO_getFlavorSpecModel() then
+		return;
+	end
 
 	if not aRole or not aPosition or not aSender then
 		return;

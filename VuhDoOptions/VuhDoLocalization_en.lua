@@ -1440,6 +1440,8 @@ VUHDO_I18N_FURY = "Fury";
 VUHDO_I18N_PAIN = "Pain";
 VUHDO_I18N_SPEC_3 = "Spec 3";
 VUHDO_I18N_SPEC_4 = "Spec 4";
+VUHDO_I18N_SPEC_PRIMARY = "Primary";
+VUHDO_I18N_SPEC_SECONDARY = "Secondary";
 
 VUHDO_I18N_ANNOUNCE_MASS_RES = "'Mass' Resurrection\nAnnouncement";
 
