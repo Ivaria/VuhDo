@@ -427,6 +427,7 @@ local tName, tRealm;
 local tIsDcChange;
 local tOwner;
 local tUnitCharmed;
+local tManaMax;
 function VUHDO_setHealth(aUnit, aMode)
 
 	tInfo = VUHDO_RAID[aUnit];
@@ -512,7 +513,14 @@ function VUHDO_setHealth(aUnit, aMode)
 			tInfo["powertype"] = tonumber(tPowerType);
 			tInfo["power"] = UnitPower(aUnit);
 			tInfo["powermax"] = UnitPowerMax(aUnit);
-			tInfo["hasMana"] = UnitPowerMax(aUnit, Enum.PowerType.Mana) > 0;
+
+			tManaMax = UnitPowerMax(aUnit, VUHDO_UNIT_POWER_MANA);
+
+			if sSecretsEnabled and issecretvalue(tManaMax) then
+				tInfo["hasMana"] = VUHDO_UNIT_POWER_MANA == tInfo["powertype"];
+			else
+				tInfo["hasMana"] = tManaMax > 0;
+			end
 
 			if sSecretsEnabled then
 				tInfo["hasSecretPower"] = issecretvalue(tInfo["power"]) or issecretvalue(tInfo["powermax"]);
