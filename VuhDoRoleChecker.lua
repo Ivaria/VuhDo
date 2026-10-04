@@ -32,19 +32,24 @@ local issecretvalue = issecretvalue;
 local VUHDO_isUnitInModel;
 local VUHDO_checkInteractDistance;
 local pairs = pairs;
-local Ambiguate = Ambiguate;
 local _;
 
 local VUHDO_MANUAL_ROLES;
 local VUHDO_RAID_NAMES;
+local VUHDO_RAID_FULL_NAMES;
 local VUHDO_RAID;
+local VUHDO_getUnitIdentityKey;
+local VUHDO_resolveUnitByName;
 
 local sSecretsEnabled = VUHDO_SECRETS_ENABLED;
 
 function VUHDO_roleCheckerInitLocalOverrides()
 	VUHDO_MANUAL_ROLES = _G["VUHDO_MANUAL_ROLES"];
 	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
+	VUHDO_RAID_FULL_NAMES = _G["VUHDO_RAID_FULL_NAMES"];
 	VUHDO_RAID = _G["VUHDO_RAID"];
+	VUHDO_getUnitIdentityKey = _G["VUHDO_getUnitIdentityKey"];
+	VUHDO_resolveUnitByName = _G["VUHDO_resolveUnitByName"];
 	VUHDO_isUnitInModel = _G["VUHDO_isUnitInModel"];
 	VUHDO_checkInteractDistance = _G["VUHDO_checkInteractDistance"];
 end
@@ -63,7 +68,7 @@ function VUHDO_resetTalentScan(aUnit)
 	local tInfo = VUHDO_RAID[aUnit];
 
 	if tInfo then
-		tName = tInfo["name"];
+		tName = VUHDO_getUnitIdentityKey(tInfo);
 
 		if tName then
 			VUHDO_INSPECTED_ROLES[tName] = nil;
@@ -80,7 +85,7 @@ end
 --
 function VUHDO_trimInspected()
 	for tName, _ in pairs(VUHDO_INSPECTED_ROLES) do
-		if not VUHDO_RAID_NAMES[tName] then
+		if not VUHDO_RAID_FULL_NAMES[tName] then
 			VUHDO_INSPECTED_ROLES[tName] = nil;
 			VUHDO_FIX_ROLES[tName] = nil;
 		end
@@ -92,7 +97,13 @@ end
 -- If timeout after talent tree server request
 function VUHDO_setRoleUndefined(aUnit)
 	local tInfo = VUHDO_RAID[aUnit];
-	if tInfo then	VUHDO_INSPECTED_ROLES[tInfo["name"]] = nil;	end
+	if tInfo then
+		tName = VUHDO_getUnitIdentityKey(tInfo);
+
+		if tName then
+			VUHDO_INSPECTED_ROLES[tName] = nil;
+		end
+	end
 end
 
 
@@ -120,9 +131,9 @@ function VUHDO_needsRoleInspect(aUnit)
 		return false;
 	end
 
-	tName = tInfo["name"];
+	tName = VUHDO_getUnitIdentityKey(tInfo);
 
-	if not tName or tInfo["isPet"] or tInfo["hasSecretName"] then
+	if not tName or tInfo["isPet"] or tInfo["hasSecretIdentity"] then
 		return false;
 	end
 
@@ -166,13 +177,13 @@ local function VUHDO_shouldBeInspected(aUnit)
 		return false;
 	end
 
-	if tInfo["hasSecretName"] then
+	if tInfo["hasSecretIdentity"] then
 		return false;
 	end
 
 	-- Already inspected or manually overridden?
 	-- or assigned tank or heal via dungeon finder? (in case of DPS inspect anyway)
-	tName = tInfo["name"];
+	tName = VUHDO_getUnitIdentityKey(tInfo);
 	if VUHDO_INSPECTED_ROLES[tName] or VUHDO_MANUAL_ROLES[tName] or VUHDO_ROLE_BY_SPEC[tName]
 		or VUHDO_DF_TOOL_ROLES[tName] == 60 or VUHDO_DF_TOOL_ROLES[tName] == 63 then -- VUHDO_ID_MELEE_TANK -- VUHDO_ID_RANGED_HEAL
 		return false;
@@ -381,7 +392,12 @@ function VUHDO_inspectLockRole()
 		tActiveTree = GetSpecialization();
 
 		if not tActiveTree then
-			VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_ID_UNDEFINED;
+			tName = VUHDO_getUnitIdentityKey(tInfo);
+
+			if tName then
+				VUHDO_INSPECTED_ROLES[tName] = VUHDO_ID_UNDEFINED;
+			end
+
 			VUHDO_NEXT_INSPECT_UNIT = nil;
 
 			return;
@@ -396,7 +412,11 @@ function VUHDO_inspectLockRole()
 		ClearInspectPlayer();
 
 		VUHDO_NEXT_INSPECT_UNIT = nil;
-		VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_ID_UNDEFINED;
+		tName = VUHDO_getUnitIdentityKey(tInfo);
+
+		if tName then
+			VUHDO_INSPECTED_ROLES[tName] = VUHDO_ID_UNDEFINED;
+		end
 
 		return;
 	end
@@ -405,14 +425,22 @@ function VUHDO_inspectLockRole()
 		ClearInspectPlayer();
 
 		VUHDO_NEXT_INSPECT_UNIT = nil;
-		VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_ID_UNDEFINED;
+		tName = VUHDO_getUnitIdentityKey(tInfo);
+
+		if tName then
+			VUHDO_INSPECTED_ROLES[tName] = VUHDO_ID_UNDEFINED;
+		end
 
 		return;
 	end
 
 	--VUHDO_xMsg(VUHDO_NEXT_INSPECT_UNIT, tTreeId);
 
-	VUHDO_INSPECTED_ROLES[tInfo["name"]] = VUHDO_inspectRole(VUHDO_NEXT_INSPECT_UNIT);
+	tName = VUHDO_getUnitIdentityKey(tInfo);
+
+	if tName then
+		VUHDO_INSPECTED_ROLES[tName] = VUHDO_inspectRole(VUHDO_NEXT_INSPECT_UNIT);
+	end
 
 	ClearInspectPlayer();
 
@@ -429,7 +457,12 @@ end
 local tDfRole, tOldRole, tReturnRole, tName;
 local function VUHDO_determineDfToolRole(anInfo)
 
-	tName = anInfo["name"];
+	tName = VUHDO_getUnitIdentityKey(anInfo);
+
+	if not tName then
+		return nil;
+	end
+
 	tOldRole = VUHDO_DF_TOOL_ROLES[tName];
 	tDfRole = UnitGroupRolesAssigned(anInfo["unit"]);
 
@@ -496,12 +529,17 @@ end
 --
 local tForeverBuffTexture;
 local tForeverClassId;
+local tForeverIdentityKey;
 local function VUHDO_determineHeuristicRole(aUnit, anInfo)
 
 	tForeverClassId = anInfo["classId"];
 
 	if VUHDO_ID_HUNTERS == tForeverClassId then
-		VUHDO_FIX_ROLES[anInfo["name"]] = VUHDO_ID_RANGED_DAMAGE;
+		tForeverIdentityKey = VUHDO_getUnitIdentityKey(anInfo);
+
+		if tForeverIdentityKey then
+			VUHDO_FIX_ROLES[tForeverIdentityKey] = VUHDO_ID_RANGED_DAMAGE;
+		end
 
 		return VUHDO_ID_RANGED_DAMAGE;
 	elseif VUHDO_ID_PRIESTS == tForeverClassId then
@@ -549,13 +587,7 @@ function VUHDO_determineRole(aUnit)
 		return nil;
 	end
 
-	tName = tInfo["name"];
-
-	if not tName then
-		return nil;
-	end
-
-	if tInfo["hasSecretName"] then
+	if tInfo["hasSecretIdentity"] then
 		tDfRole = UnitGroupRolesAssigned(tInfo["unit"]);
 
 		if sSecretsEnabled and issecretvalue(tDfRole) then
@@ -603,6 +635,12 @@ function VUHDO_determineRole(aUnit)
 			end
 		end
 
+		return nil;
+	end
+
+	tName = VUHDO_getUnitIdentityKey(tInfo);
+
+	if not tName then
 		return nil;
 	end
 
@@ -842,20 +880,22 @@ function VUHDO_updateRoleBySpecialization(aSpecId, aRole, aPosition, aSender, aT
 		return;
 	end
 
-	tName = Ambiguate(aSender, "short");
+	tUnit = VUHDO_resolveUnitByName(aSender);
 
-	if not tName then
+	if not tUnit then
 		return;
 	end
 
-	tUnit = VUHDO_RAID_NAMES[tName];
+	tInfo = VUHDO_RAID[tUnit];
 
-	if tUnit then
-		tInfo = VUHDO_RAID[tUnit];
+	if tInfo and VUHDO_determineDfToolRole(tInfo) then
+		return;
+	end
 
-		if tInfo and VUHDO_determineDfToolRole(tInfo) then
-			return;
-		end
+	tName = VUHDO_getUnitIdentityKey(tInfo);
+
+	if not tName then
+		return;
 	end
 
 	if aRole == "TANK" then

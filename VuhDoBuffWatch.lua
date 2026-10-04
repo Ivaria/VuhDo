@@ -57,6 +57,9 @@ BACKDROP_VUHDO_BUFF_WATCH_MAIN_FRAME_16_16_5555 = {
 
 local VUHDO_RAID;
 local VUHDO_RAID_NAMES;
+local VUHDO_RAID_FULL_NAMES;
+local VUHDO_getUnitIdentityKey;
+local VUHDO_resolveUnitByName;
 local VUHDO_BOSS_UNITS;
 local VUHDO_GROUPS;
 
@@ -133,6 +136,9 @@ function VUHDO_buffWatchInitLocalOverrides()
 
 	VUHDO_RAID = _G["VUHDO_RAID"];
 	VUHDO_RAID_NAMES = _G["VUHDO_RAID_NAMES"];
+	VUHDO_RAID_FULL_NAMES = _G["VUHDO_RAID_FULL_NAMES"];
+	VUHDO_getUnitIdentityKey = _G["VUHDO_getUnitIdentityKey"];
+	VUHDO_resolveUnitByName = _G["VUHDO_resolveUnitByName"];
 	VUHDO_BOSS_UNITS = _G["VUHDO_BOSS_UNITS"];
 	VUHDO_GROUPS = _G["VUHDO_GROUPS"];
 
@@ -328,7 +334,7 @@ do
 			elseif VUHDO_BUFF_TARGET_MODE_FOCUS == tTargetMode then
 				return "focus" == aUnit;
 			else
-				return VUHDO_RAID_NAMES[(tSettings or sEmpty)["name"] or VUHDO_PLAYER_NAME] == aUnit;
+				return VUHDO_RAID_FULL_NAMES[(tSettings or sEmpty)["name"] or VUHDO_PLAYER_FULL_NAME or VUHDO_PLAYER_NAME] == aUnit;
 			end
 
 		elseif VUHDO_BUFF_TARGET_RAID == tTargetType or VUHDO_BUFF_TARGET_SINGLE == tTargetType or VUHDO_BUFF_TARGET_GROUP == tTargetType then
@@ -1027,7 +1033,7 @@ local tHadSecretSlot;
 function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
 
 	if VUHDO_BUFF_TARGET_MODE_NAME == aTargetMode then
-		tNameGroup[1] = VUHDO_RAID_NAMES[aTarget];
+		tNameGroup[1] = VUHDO_RAID_FULL_NAMES[aTarget] or VUHDO_resolveUnitByName(aTarget);
 		tDestGroup = tNameGroup;
 	elseif VUHDO_BUFF_TARGET_MODE_ROLE == aTargetMode then
 		tDestGroup = (VUHDO_GROUPS or sEmpty)[aTarget] or sEmpty;
@@ -1149,6 +1155,7 @@ local tDdMissGroup;
 local tDdLowGroup;
 local tDdOkayGroup;
 local tDdBuffedUnit;
+local tKey;
 function VUHDO_buffSelectDropdown_Initialize(_, _)
 
 	if VUHDO_CLICKED_BUFF == nil or VUHDO_CLICKED_TARGET_MODE == nil or InCombatLockdown() then
@@ -1206,18 +1213,20 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 			tDdSelName = nil;
 			tDdNextSel = false;
 
-			if VUHDO_RAID_NAMES[tDdSettings["name"]] then
-				for tName, _ in pairs(VUHDO_RAID_NAMES) do
-					if tName ~= "player" then
+			if VUHDO_RAID_FULL_NAMES[tDdSettings["name"]] or VUHDO_resolveUnitByName(tDdSettings["name"]) then
+				for tUnitId, tRaidInfo in pairs(VUHDO_RAID) do
+					tKey = VUHDO_getUnitIdentityKey(tRaidInfo);
+
+					if tKey and not tRaidInfo["isPet"] and tUnitId ~= "player" then
 						if tDdSelName == nil or tDdNextSel then
-							tDdSelName = tName;
+							tDdSelName = tKey;
 
 							if tDdNextSel then
 								break;
 							end
 						end
 
-						if tName == tDdSettings["name"] then
+						if tKey == tDdSettings["name"] then
 							tDdNextSel = true;
 						end
 					end
@@ -1226,7 +1235,7 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 				tDdSettings["name"] = tDdSelName;
 				VUHDO_reloadBuffPanel();
 			else
-				tDdSettings["name"] = VUHDO_PLAYER_NAME;
+				tDdSettings["name"] = VUHDO_PLAYER_FULL_NAME or VUHDO_PLAYER_NAME;
 			end
 
 		elseif VUHDO_BUFF_TARGET_MODE_ROLE == VUHDO_CLICKED_TARGET_MODE then
@@ -1251,7 +1260,7 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 			for tIdx = 1, #tDdPickList do
 				tDdUnitId = tDdPickList[tIdx];
 
-				if (VUHDO_RAID[tDdUnitId] or sEmpty)["name"] == tDdSettings["name"] then
+				if VUHDO_getUnitIdentityKey(VUHDO_RAID[tDdUnitId]) == tDdSettings["name"] then
 					tDdNameInPickList = true;
 
 					break;
@@ -1279,10 +1288,10 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 				end
 
 				if tDdBuffedUnit and VUHDO_RAID[tDdBuffedUnit] then
-					tDdEffectiveName = VUHDO_RAID[tDdBuffedUnit]["name"];
+					tDdEffectiveName = VUHDO_getUnitIdentityKey(VUHDO_RAID[tDdBuffedUnit]);
 				elseif #tDdPickList > 0 then
 					tDdUnitId = tDdPickList[1];
-					tDdEffectiveName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
+					tDdEffectiveName = VUHDO_getUnitIdentityKey(VUHDO_RAID[tDdUnitId]);
 				end
 			end
 
@@ -1293,7 +1302,7 @@ function VUHDO_buffSelectDropdown_Initialize(_, _)
 				tDdUnitId = tDdPickList[tIdx];
 
 				if tDdFoundCur then
-					tDdNextName = (VUHDO_RAID[tDdUnitId] or sEmpty)["name"];
+					tDdNextName = VUHDO_getUnitIdentityKey(VUHDO_RAID[tDdUnitId]);
 					break;
 				end
 
@@ -1555,7 +1564,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 	if VUHDO_BUFF_TARGET_MODE_NAME == tTargetMode then
 		tStaleName = tTarget;
 
-		if not VUHDO_RAID_NAMES[tStaleName] then
+		if not VUHDO_RAID_FULL_NAMES[tStaleName] and not VUHDO_resolveUnitByName(tStaleName) then
 			VUHDO_setBuffSwatchColor(aSwatch, sConfig["SWATCH_COLOR_BUFF_OUT"], VUHDO_BS_COLOR_MISSING);
 			VUHDO_setBuffSwatchInfo(tSwatchName, VUHDO_I18N_BW_MISS);
 			VUHDO_setBuffSwatchCount(tSwatchName, "");
@@ -1600,7 +1609,7 @@ function VUHDO_updateBuffSwatch(aSwatch)
 	if VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] then
 		tRoleId = tTarget;
 		tBuffSettings = VUHDO_BUFF_SETTINGS[tCategSpec];
-		tPinnedUnit = VUHDO_RAID_NAMES[(tBuffSettings or sEmpty)["name"]];
+		tPinnedUnit = VUHDO_RAID_FULL_NAMES[(tBuffSettings or sEmpty)["name"]] or VUHDO_resolveUnitByName((tBuffSettings or sEmpty)["name"]);
 		tBuffedRoleUnit = nil;
 
 		for _, tRoleUnit in ipairs(tOkayGroup) do
@@ -1899,7 +1908,7 @@ function VUHDO_execSmartBuffPre(self)
 		return;
 	end
 
-	local tName = VUHDO_RAID_NAMES[tMaxLowTarget] or VUHDO_RAID[tMaxLowTarget]["name"];
+	local tName = (VUHDO_RAID[tMaxLowTarget] or sEmpty)["name"];
 
 	UIErrorsFrame:AddMessage(VUHDO_I18N_SMARTBUFF_OKAY_1 .. tMaxLowSpell .. VUHDO_I18N_SMARTBUFF_OKAY_2 .. tName, 0.1, 1, 0.1, 1);
 

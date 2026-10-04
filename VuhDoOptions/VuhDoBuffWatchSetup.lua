@@ -497,7 +497,7 @@ local function VUHDO_setupGenericBuffPanel(aBuffVariant, aGenericPanel, someCate
 		end
 	elseif (VUHDO_BUFF_TARGET_UNIQUE == tBuffTarget) then
 		if (tSettings["name"] == nil) then
-			tSettings["name"] = VUHDO_PLAYER_NAME;
+			tSettings["name"] = VUHDO_PLAYER_FULL_NAME or VUHDO_PLAYER_NAME;
 		end
 
 		local tEditBox = _G[aGenericPanel:GetName() .. "PlayerNameEditBox"];

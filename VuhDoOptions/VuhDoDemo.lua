@@ -612,7 +612,7 @@ function VUHDO_reloadRaidDemoUsers()
 	twipe(VUHDO_MAINTANK_NAMES);
 
 	for tCnt = 1, VUHDO_TEST_USERS_LEFT[VUHDO_ID_MAINTANKS] do
-		VUHDO_MAINTANK_NAMES[tCnt] = VUHDO_RAID["raid" .. tCnt]["name"];
+		VUHDO_MAINTANK_NAMES[tCnt] = VUHDO_getUnitIdentityKey(VUHDO_RAID["raid" .. tCnt]);
 	end
 
 	twipe(VUHDO_PLAYER_TARGETS);

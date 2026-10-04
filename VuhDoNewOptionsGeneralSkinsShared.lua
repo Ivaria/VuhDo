@@ -2389,7 +2389,7 @@ local function VUHDO_createNewProfile(aName)
 		["LOCKED"] = tProfile ~= nil and tProfile["LOCKED"],
 		["HARDLOCKED"] = false,
 		["ORIGINATOR_CLASS"] = VUHDO_PLAYER_CLASS,
-		["ORIGINATOR_TOON"] = VUHDO_PLAYER_NAME,
+		["ORIGINATOR_TOON"] = VUHDO_PLAYER_FULL_NAME or VUHDO_PLAYER_NAME,
 		["CONFIG"] = VUHDO_CONFIG,
 		["PANEL_SETUP"] = VUHDO_PANEL_SETUP,
 		["POWER_TYPE_COLORS"] = VUHDO_POWER_TYPE_COLORS,
@@ -2515,7 +2515,9 @@ function VUHDO_saveProfile(aName)
 	if tExistingProfile then
 		VUHDO_TARGET_PROFILE_NAME = aName;
 
-		if tExistingProfile["ORIGINATOR_TOON"] ~= VUHDO_PLAYER_NAME and not VUHDO_CONFIG["IS_ALWAYS_OVERWRITE_PROFILE"] then
+		if tExistingProfile["ORIGINATOR_TOON"] ~= (VUHDO_PLAYER_FULL_NAME or VUHDO_PLAYER_NAME)
+			and tExistingProfile["ORIGINATOR_TOON"] ~= VUHDO_PLAYER_NAME
+			and not VUHDO_CONFIG["IS_ALWAYS_OVERWRITE_PROFILE"] then
 
 			VuhDoThreeSelectFrameText:SetText(
 				VUHDO_I18N_PROFILE_OVERWRITE_1 .. " \"" .. aName .. "\" "
@@ -2569,7 +2571,7 @@ local function VUHDO_isProfileRuleAllowed(tRule, aClass, aToon)
 	elseif VUHDO_PROFILE_MODEL_MATCH_CLASS == tRule then
 		return VUHDO_PLAYER_CLASS == aClass;
 	elseif VUHDO_PROFILE_MODEL_MATCH_TOON == tRule then
-		return VUHDO_PLAYER_NAME == aToon;
+		return (VUHDO_PLAYER_FULL_NAME or VUHDO_PLAYER_NAME) == aToon or VUHDO_PLAYER_NAME == aToon;
 	elseif VUHDO_PROFILE_MODEL_MATCH_NEVER == tRule then
 		return false;
 	else

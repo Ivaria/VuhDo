@@ -83,6 +83,7 @@ local sAddonRestrictionEnableCvars = {
 
 local VUHDO_parseAddonMessage;
 local VUHDO_spellcastSent;
+local VUHDO_resolveUnitByName;
 local VUHDO_updateAllOutRaidTargetButtons;
 local VUHDO_updateAllRaidTargetIndices;
 local VUHDO_updateDirectionFrame;
@@ -589,6 +590,7 @@ local function VUHDO_eventHandlerInitFunctionOverrides()
 	VUHDO_updateAllOutRaidTargetButtons = _G["VUHDO_updateAllOutRaidTargetButtons"];
 	VUHDO_parseAddonMessage = _G["VUHDO_parseAddonMessage"];
 	VUHDO_spellcastSent = _G["VUHDO_spellcastSent"];
+	VUHDO_resolveUnitByName = _G["VUHDO_resolveUnitByName"];
 	VUHDO_parseCombatLogEvent = _G["VUHDO_parseCombatLogEvent"];
 	VUHDO_updateAllHoTs = _G["VUHDO_updateAllHoTs"];
 	VUHDO_updateAllCyclicBouquets = _G["VUHDO_updateAllCyclicBouquets"];
@@ -1205,6 +1207,8 @@ do
 	local tEmptyRaid = { };
 	local tSpecNumber;
 	local tBestProfileName;
+	local tUnit;
+	local tSecond;
 	function VUHDO_OnEvent(anInstance, anEvent, anArg1, anArg2, anArg3, anArg4, anArg5, anArg6, anArg7, anArg8, anArg9, anArg10, anArg11, anArg12, anArg13, anArg14, anArg15, anArg16, anArg17, anArg18, anArg19)
 
 		if VUHDO_HANDLER_PROFILING_ENABLED and anEvent then
@@ -1530,8 +1534,22 @@ do
 			VUHDO_inspectLockRole();
 
 		elseif "ROLE_CHANGED_INFORM" == anEvent then
-			if VUHDO_RAID_NAMES[anArg1] then
-				VUHDO_resetTalentScan(VUHDO_RAID_NAMES[anArg1]);
+			if VUHDO_VARIABLES_LOADED then
+				tUnit = VUHDO_resolveUnitByName(anArg1);
+
+				if tUnit then
+					VUHDO_resetTalentScan(tUnit);
+				end
+			end
+
+		elseif "UNIT_NAME_UPDATE" == anEvent then
+			if VUHDO_VARIABLES_LOADED and anArg1 then
+				if "player" == anArg1 then
+					VUHDO_PLAYER_NAME, tSecond = UnitName("player");
+					VUHDO_PLAYER_FULL_NAME = VUHDO_buildUnitFullName(VUHDO_PLAYER_NAME, tSecond);
+				end
+
+				VUHDO_updateHealth(anArg1, 1);
 			end
 
 		elseif "MODIFIER_STATE_CHANGED" == anEvent then
@@ -1651,7 +1669,6 @@ end
 --
 local tTokens;
 local tName;
-local tUnit;
 local tKey;
 local tAmbiguousNames;
 local tAmbiguousMsg;
@@ -2214,7 +2231,8 @@ end
 function VUHDO_loadVariables()
 
 	_, VUHDO_PLAYER_CLASS = UnitClass("player");
-	VUHDO_PLAYER_NAME = UnitName("player");
+	VUHDO_PLAYER_NAME, tSecond = UnitName("player");
+	VUHDO_PLAYER_FULL_NAME = VUHDO_buildUnitFullName(VUHDO_PLAYER_NAME, tSecond);
 
 	VUHDO_loadDefaultConfig();
 	VUHDO_setDeferredRedrawEnabled(VUHDO_CONFIG["USE_DEFERRED_REDRAW"], true);
@@ -3170,6 +3188,7 @@ local VUHDO_ALL_EVENT_NAMES = {
 	"PLAYER_LOGOUT",
 	"RUNE_POWER_UPDATE",
 	"UNIT_SPELLCAST_SENT",
+	"UNIT_NAME_UPDATE",
 	"PARTY_MEMBER_ENABLE", "PARTY_MEMBER_DISABLE",
 	"UPDATE_BINDINGS",
 	"PLAYER_TARGET_CHANGED", "PLAYER_FOCUS_CHANGED",

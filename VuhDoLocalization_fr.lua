@@ -680,4 +680,4 @@ VUHDO_I18N_AURA_GROUP_RELEVANT_BUFFS = "Relevant Buffs";
 VUHDO_I18N_AURA_GROUP_RELEVANT_DEBUFFS = "Relevant Debuffs";
 VUHDO_I18N_AURA_GROUP_TIMED_DEBUFFS = "Timed Debuffs";
 
-VUHDO_I18N_PT_NAME_AMBIGUOUS = "Private tank name ambiguous: %s. Use a realm-qualified full name.";
+VUHDO_I18N_PT_NAME_AMBIGUOUS = "Private tank name ambiguous: %s. Use the full name (Name-Realm or First-Surname).";

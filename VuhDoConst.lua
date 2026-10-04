@@ -739,6 +739,11 @@ local tAuraModeTemplateInfo = C_XMLUtil.GetTemplateInfo("CustomAuraContainerTemp
 VUHDO_AURA_MODE_CAPABILITY = tAuraModeTemplateInfo ~= nil;
 VUHDO_AURA_MODE_CONTAINERS = false;
 
+local tCharacterNameSeparatorConsts = Constants and Constants.CharacterNameSeparatorConsts;
+
+VUHDO_SURNAME_SEPARATOR = tCharacterNameSeparatorConsts and tCharacterNameSeparatorConsts["CHARACTERNAME_SURNAME_SEPARATOR"];
+VUHDO_SURNAME_CAPABILITY = VUHDO_SURNAME_SEPARATOR ~= nil;
+
 VUHDO_AURA_ANCHOR_PLAYER_ICONS = 999;
 
 VUHDO_AURA_GROUP_TYPE_FILTER = 1;
