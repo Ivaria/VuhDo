@@ -1,4 +1,4 @@
-Get [VuhDo release v3.199](https://www.curseforge.com/wow/addons/vuhdo/download/7770489) now with support for Midnight Season 1 patch 12.0.1!
+Get [VuhDo release v3.217](https://www.curseforge.com/wow/addons/vuhdo) now with support for Midnight patch 12.1.0!
 
 To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
