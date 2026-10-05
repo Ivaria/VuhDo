@@ -13,7 +13,7 @@ To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.
 Download user created VuhDo profiles, key layouts and custom bouquets over on [wago.io](https://wago.io)!
 
 Keep those feature requests and bug reports coming!
-Please [file VuhDo GitHub issues](https://github.com/Ivaria/VuhDo/issues/new/choose) to report any bugs or to make feature requests.
+Please [file VuhDo GitHub issues](https://github.com/vuhdo-io/VuhDo/issues/new/choose) to report any bugs or to make feature requests.
 
 Further reading:
 
