@@ -1,0 +1,108 @@
+name: Bug report
+description: Report a problem with VuhDo
+labels:
+  - bug
+body:
+  - type: checkboxes
+    id: isolated
+    attributes:
+      label: Confirm the issue lies within VuhDo
+      description: Please first disable all add-ons other than VuhDo and VuhDo Options and see if your issue persists.
+      options:
+        - label: The issue still happens with only VuhDo and VuhDo Options enabled.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: VuhDo version
+      description: 'Run this command in-game: `/dump C_AddOns.GetAddOnMetadata("VuhDo", "Version")`'
+      placeholder: e.g. v3.218
+    validations:
+      required: true
+
+  - type: dropdown
+    id: flavor
+    attributes:
+      label: Game flavor
+      options:
+        - Retail (Midnight)
+        - Classic Era
+        - Burning Crusade Classic
+        - Cataclysm Classic
+        - Mists of Pandaria Classic
+        - WoW Forever
+    validations:
+      required: true
+
+  - type: dropdown
+    id: region
+    attributes:
+      label: World of Warcraft region
+      options:
+        - Americas/Oceanic
+        - EU
+        - CN
+        - KR
+        - TW
+    validations:
+      required: true
+
+  - type: input
+    id: locale
+    attributes:
+      label: World of Warcraft client language
+      description: 'Run this command in-game: `/dump GetLocale()`'
+      placeholder: e.g. enUS
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary of the issue
+      description: Describe your issue here.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: Tell me what you feel should be happening.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Tell me what is happening instead, contrary to the expectations you documented above.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Tell me how to reproduce your issue. Please provide step-by-step instructions.
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: errors
+    attributes:
+      label: Related error messages
+      description: |
+        Please first install the following two add-ons to assist in capturing any error messages in-game:
+
+        * [BugGrabber](https://www.curseforge.com/wow/addons/bug-grabber)
+        * [BugSack](https://www.curseforge.com/wow/addons/bugsack)
+
+        Next, disable all add-ons except for BugSack, BugGrabber, VuhDo and VuhDo Options.
+        Capture any VuhDo related error messages and paste them here verbatim.
+      render: text
