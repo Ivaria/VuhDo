@@ -2610,9 +2610,10 @@ do
 				VUHDO_registerAllBouquets(false);
 				VUHDO_initAllEventBouquets();
 				VUHDO_redrawPanel(VUHDO_RELOAD_PANEL_NUM);
-				VUHDO_updateAllPanelBars(VUHDO_RELOAD_PANEL_NUM);
 
 				if not VUHDO_CONFIG["USE_DEFERRED_REDRAW"] then
+					VUHDO_updateAllPanelBars(VUHDO_RELOAD_PANEL_NUM);
+
 					VUHDO_redisplayAllUnitAuras();
 				end
 

@@ -27,6 +27,7 @@ local VUHDO_redrawPanel;
 local VUHDO_redrawAllPanels;
 local VUHDO_refreshAllUnitAuras;
 local VUHDO_redisplayAllUnitAuras;
+local VUHDO_updateAllPanelBars;
 local VUHDO_calculateDerivedOrientation;
 local VUHDO_updateToggledUnitEvents;
 local VUHDO_buildAllIndicatorAlphaChains;
@@ -146,6 +147,7 @@ function VUHDO_panelRedrawInitLocalOverrides()
 	VUHDO_getGroupMembers = _G["VUHDO_getGroupMembers"];
 	VUHDO_refreshAllUnitAuras = _G["VUHDO_refreshAllUnitAuras"];
 	VUHDO_redisplayAllUnitAuras = _G["VUHDO_redisplayAllUnitAuras"];
+	VUHDO_updateAllPanelBars = _G["VUHDO_updateAllPanelBars"];
 	VUHDO_calculateDerivedOrientation = _G["VUHDO_calculateDerivedOrientation"];
 	VUHDO_updateToggledUnitEvents = _G["VUHDO_updateToggledUnitEvents"];
 	VUHDO_buildAllIndicatorAlphaChains = _G["VUHDO_buildAllIndicatorAlphaChains"];
@@ -969,12 +971,16 @@ do
 			VUHDO_PixelUtil.Show(tNameText);
 			tNameText:SetAlpha(1);
 
+			tNameText["vuhdoLifeTextAlpha"] = nil;
+
 			VUHDO_PixelUtil.SetWidth(tNameTextSolo, aWidth);
 			VUHDO_PixelUtil.SetHeight(tNameTextSolo, sPanelConfig[aPanelNum]["mainFontHeight"]);
 			VUHDO_PixelUtil.ClearAllPoints(tNameTextSolo);
 			VUHDO_PixelUtil.SetPoint(tNameTextSolo, "CENTER", tTextPanel:GetName(), "CENTER", 0, 0);
 			VUHDO_PixelUtil.Show(tNameTextSolo);
 			tNameTextSolo:SetAlpha(0);
+
+			tNameTextSolo["vuhdoLifeTextAlpha"] = nil;
 		else
 			VUHDO_PixelUtil.ClearAllPoints(tLifeText);
 			VUHDO_PixelUtil.SetWidth(tLifeText, aWidth);
@@ -2842,6 +2848,8 @@ do
 		else
 			VUHDO_PixelUtil.Hide(tPanel);
 		end
+
+		VUHDO_updateAllPanelBars(aPanelNum);
 
 		VUHDO_redisplayAllUnitAuras();
 
