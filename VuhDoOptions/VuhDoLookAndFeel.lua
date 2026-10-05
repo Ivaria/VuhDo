@@ -712,6 +712,10 @@ do
 			end
 
 			if "table" == type(tLastField) then
+				if tLastField[tLastIndex] == aValue then
+					return;
+				end
+
 				tLastField[tLastIndex] = aValue;
 			else
 				_G[tTableIndices[1]] = aValue;
