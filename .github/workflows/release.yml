@@ -1,0 +1,55 @@
+name: Package and release
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      args:
+        description: 'Extra release.sh arguments (e.g. -d to skip uploads)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  luacheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: sudo apt-get update -q && sudo apt-get install -yq lua-check
+      - run: luacheck . -q && echo "Lua check passed!" || echo "Lua check failed!"
+
+  package:
+    needs: luacheck
+    if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      WOWI_API_TOKEN: ${{ secrets.WOWI_API_TOKEN }}
+      WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_ARGS: ${{ inputs.args }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - run: sudo apt-get update -q && sudo apt-get install -yq subversion pandoc
+      - working-directory: .release
+        run: |
+          chmod +x ./release.sh
+          ./release.sh $RELEASE_ARGS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: VuhDo-${{ github.ref_name }}
+          path: |
+            .release/VuhDo/
+            .release/VuhDoOptions/
+            .release/*.zip
