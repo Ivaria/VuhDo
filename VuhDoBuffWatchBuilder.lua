@@ -139,7 +139,7 @@ local function VUHDO_addBuffPanel(aCategorySpec)
 	tSwatch = nil;
 
 	if VUHDO_BUFF_TARGET_UNIQUE == tTargetType then
-		if not tSettings["name"] then tSettings["name"] = VUHDO_PLAYER_NAME; end
+		if not tSettings["name"] then tSettings["name"] = VUHDO_PLAYER_FULL_NAME or VUHDO_PLAYER_NAME; end
 
 		tTargetModeStr = tSettings["targetMode"];
 

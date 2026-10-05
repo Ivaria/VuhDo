@@ -206,7 +206,9 @@ function VUHDO_initBouquetComboModel()
 
 	table.wipe(VUHDO_BOUQET_DETAILS_COMBO_MODEL);
 	for tName, tInfo in pairs(VUHDO_BOUQUET_BUFFS_SPECIAL) do
-		tinsert(VUHDO_BOUQET_DETAILS_COMBO_MODEL, { tName, tInfo["displayName"] });
+		if VUHDO_isFlavorRequirementMet(VUHDO_BOUQUET_SPECIAL_REQUIREMENTS[tName]) then
+			tinsert(VUHDO_BOUQET_DETAILS_COMBO_MODEL, { tName, tInfo["displayName"] });
+		end
 	end
 
 	table.sort(VUHDO_BOUQET_DETAILS_COMBO_MODEL,
