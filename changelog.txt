@@ -40,9 +40,16 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed missing aura bar color in Buff Watch  
+-- Fixed hostile spell binding with a corresponding friendly macro  
+-- Fixed Inner and Outer Border indicator textures  
+-- Fixed Side Left and Side Right indicator positions  
   
   
 Improvements:  
+-- Added Rogue 'Amplifying Poison' to Buff Watch  
+-- Added Evoker 'Source of Magic' to Buff Watch  
+-- Added group header text rotation when panel is horizontal  
   
   
 --------------------------------------------------------------  
