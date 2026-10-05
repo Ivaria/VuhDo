@@ -49,6 +49,8 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: VuhDo-${{ github.ref_name }}
+          include-hidden-files: true
+          if-no-files-found: error
           path: |
             .release/VuhDo/
             .release/VuhDoOptions/
