@@ -310,4 +310,11 @@ VUHDO_BUFF_WATCH_AURA_SPELL_IDS = {
 
 
 
-VUHDO_AURA_SPELL_VARIANTS = { };
+VUHDO_AURA_SPELL_VARIANTS = {
+	[774] = { 774, 1058, 1430, 2090, 2091, 3627, 8910, 9839, 9840, 9841 }, -- Rejuvenation
+	[8936] = { 8936, 8938, 8939, 8940, 8941, 9750, 9856, 9857, 9858 }, -- Regrowth
+	[139] = { 139, 6074, 6075, 6076, 6077, 6078, 10927, 10928, 10929, 25315 }, -- Renew
+	[17] = { 17, 592, 600, 3747, 6065, 6066, 10898, 10899, 10900, 10901 }, -- Power Word: Shield
+	[1022] = { 1022, 5599, 10278 }, -- Blessing of Protection
+	[6940] = { 6940, 20729 }, -- Blessing of Sacrifice
+};
