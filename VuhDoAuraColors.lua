@@ -68,6 +68,7 @@ local VUHDO_rebuildAuraAnchorsForGroups;
 local VUHDO_processPendingAuraContainerBuilds;
 local VUHDO_timeRebuildAuraGroups;
 local VUHDO_updateBouquetsForEvent;
+local VUHDO_rebuildDefaultAuraNameSpellIds;
 
 local sUnitDispellableAuraId = { };
 local sUnitAuraCanColorBar = { };
@@ -269,6 +270,7 @@ local function VUHDO_auraColorsInitLocalOverridesFunctions()
 	VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
 	VUHDO_timeRebuildAuraGroups = _G["VUHDO_timeRebuildAuraGroups"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
+	VUHDO_rebuildDefaultAuraNameSpellIds = _G["VUHDO_rebuildDefaultAuraNameSpellIds"];
 
 	return;
 
@@ -716,6 +718,8 @@ end
 
 --
 function VUHDO_applyAuraGroupChanges()
+
+	VUHDO_rebuildDefaultAuraNameSpellIds();
 
 	for tGroupId, _ in pairs(sDirtyAuraGroupIds) do
 		VUHDO_invalidateAuraGroupFilterCacheForGroup(tGroupId);

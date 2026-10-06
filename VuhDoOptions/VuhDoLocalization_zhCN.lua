@@ -951,6 +951,7 @@ VUHDO_I18N_TT.K894 = "Exclude Poison auras from this group.";
 VUHDO_I18N_TT.K895 = "Exclude Bleed auras from this group.";
 VUHDO_I18N_TT.K896 = "Limit this aura group to friendly units, hostile units, or both.";
 VUHDO_I18N_TT.K897 = "Exclude Enrage auras from this group.";
+VUHDO_I18N_TT.K898 = "Match every aura with this spell's name (e.g. all ranks) instead of only this exact spell ID.";
 
 VUHDO_I18N_DEFAULT_PROFILE = "预设存档";
 VUHDO_I18N_DEFAULT_LAYOUT = "预设按键配置";
@@ -1779,3 +1780,4 @@ VUHDO_I18N_SKIN_PROMPT = "Choose a light or dark theme for VuhDo Options. You ca
 VUHDO_I18N_AURA_SHOW_ON = "Show On";
 VUHDO_I18N_AURA_SHOW_ON_FRIENDLY = "Friendly";
 VUHDO_I18N_AURA_SHOW_ON_BOTH = "Both";
+VUHDO_I18N_MATCH_BY_NAME = "Match by name";
