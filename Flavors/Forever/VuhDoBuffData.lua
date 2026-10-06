@@ -307,3 +307,7 @@ VUHDO_BUFF_WATCH_AURA_SPELL_IDS = {
 	[13165] = { 13165, 14318, 14319, 14320, 14321, 14322 }, -- Aspect of the Hawk
 	[20043] = { 20043, 20190 }, -- Aspect of the Wild
 };
+
+
+
+VUHDO_AURA_SPELL_VARIANTS = { };

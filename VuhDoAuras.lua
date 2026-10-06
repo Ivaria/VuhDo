@@ -41,6 +41,7 @@ local VUHDO_UNIT_AURA_SOURCE_BOTH;
 
 local VUHDO_AURA_CONDITION_BOOLEAN_KEYS;
 local VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER;
+local VUHDO_AURA_NAME_MATCH_SPELL_NAMES;
 
 local VUHDO_generateUUID;
 local VUHDO_determineAura;
@@ -60,6 +61,7 @@ local VUHDO_classifyBouquetRestrictedMode;
 local VUHDO_getBouquetLayerTemplate;
 local VUHDO_getUnitButtonsPanel;
 local VUHDO_updateHealthBarsFor;
+local VUHDO_getAuraListEntryMatchValue;
 
 VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE or { };
 local VUHDO_UNIT_AURA_CACHE = VUHDO_UNIT_AURA_CACHE;
@@ -273,6 +275,7 @@ do
 
 		VUHDO_AURA_CONDITION_BOOLEAN_KEYS = _G["VUHDO_AURA_CONDITION_BOOLEAN_KEYS"];
 		VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER = _G["VUHDO_AURA_MATCH_ANY_FILTER_TOKEN_ORDER"];
+		VUHDO_AURA_NAME_MATCH_SPELL_NAMES = _G["VUHDO_AURA_NAME_MATCH_SPELL_NAMES"];
 
 		VUHDO_generateUUID = _G["VUHDO_generateUUID"];
 		VUHDO_determineAura = _G["VUHDO_determineAura"];
@@ -292,6 +295,7 @@ do
 		VUHDO_getBouquetLayerTemplate = _G["VUHDO_getBouquetLayerTemplate"];
 		VUHDO_getUnitButtonsPanel = _G["VUHDO_getUnitButtonsPanel"];
 		VUHDO_updateHealthBarsFor = _G["VUHDO_updateHealthBarsFor"];
+		VUHDO_getAuraListEntryMatchValue = _G["VUHDO_getAuraListEntryMatchValue"];
 
 		VUHDO_updateAuraDisplaysForUnit = _G["VUHDO_deferUpdateAuraDisplaysForUnit"];
 		VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
@@ -931,7 +935,7 @@ do
 				elseif tGroup["type"] == VUHDO_AURA_GROUP_TYPE_LIST and tGroup["entries"] then
 					for _, tEntry in pairs(tGroup["entries"]) do
 						if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
-							tValue = tEntry["value"];
+							tValue = VUHDO_getAuraListEntryMatchValue(tEntry);
 
 							if tValue then
 								VUHDO_ACTIVE_AURA_SPELLS[tValue] = true;
@@ -2856,6 +2860,10 @@ do
 				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex] = nil;
 			elseif tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
 				tLookupKey = tEntry["value"];
+
+				if tEntry["isNameMatch"] and type(tLookupKey) == "number" then
+					tLookupKey = VUHDO_AURA_NAME_MATCH_SPELL_NAMES[tLookupKey] or tLookupKey;
+				end
 
 				tOldSlot = VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tEntryIndex];
 

@@ -39,6 +39,7 @@ local VUHDO_INFERRED_AURA_SYNTHETIC_IDS;
 local VUHDO_INFERRED_AURAS;
 local VUHDO_BUFF_SETTINGS;
 local VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS;
+local VUHDO_AURA_NAME_MATCH_SPELL_NAMES;
 
 VUHDO_AURA_GROUP_ACTIVE_NO_COLOR = { };
 local VUHDO_AURA_GROUP_ACTIVE_NO_COLOR = VUHDO_AURA_GROUP_ACTIVE_NO_COLOR;
@@ -303,6 +304,7 @@ function VUHDO_auraColorsInitLocalOverrides()
 	VUHDO_INFERRED_AURAS = _G["VUHDO_INFERRED_AURAS"];
 	VUHDO_BUFF_SETTINGS = _G["VUHDO_BUFF_SETTINGS"];
 	VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS = _G["VUHDO_BOUQUET_TRACKED_AURA_GROUP_IDS"];
+	VUHDO_AURA_NAME_MATCH_SPELL_NAMES = _G["VUHDO_AURA_NAME_MATCH_SPELL_NAMES"];
 
 	VUHDO_auraColorsInitLocalOverridesFunctions();
 
@@ -760,6 +762,10 @@ do
 			if tEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_SPELL then
 				if tEntry["mine"] or tEntry["others"] then
 					tEntryValue = tEntry["value"];
+
+					if tEntry["isNameMatch"] and type(tEntryValue) == "number" then
+						tEntryValue = VUHDO_AURA_NAME_MATCH_SPELL_NAMES[tEntryValue] or tEntryValue;
+					end
 
 					if tEntryValue and VUHDO_UNIT_AURA_BY_SPELL[aUnit] then
 						tAuraInstances = VUHDO_UNIT_AURA_BY_SPELL[aUnit][tEntryValue];
