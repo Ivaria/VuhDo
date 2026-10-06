@@ -1549,7 +1549,9 @@ do
 			tSlotButtonSetup = { };
 
 			for tKey, tValue in pairs(aAnchorButtonSetup) do
-				tSlotButtonSetup[tKey] = tValue;
+				if "volatileSignature" ~= tKey and "buildSignature" ~= tKey then
+					tSlotButtonSetup[tKey] = tValue;
+				end
 			end
 
 			tSlotButtonSetup["durationMode"] = tSlotEntryDurationMode;
