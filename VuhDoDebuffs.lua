@@ -35,9 +35,9 @@ VUHDO_addSpellNameKeys(VUHDO_DEBUFF_BLACKLIST,
 	57724, -- Sated (Bloodlust)
 	71328, -- Dungeon Cooldown
 	57723, -- Exhaustion (Heroism)
-	80354 -- Temporal Displacement (Time Warp)
+	80354, -- Temporal Displacement (Time Warp)
+	264689 -- Fatigued (Primal Fury)
 );
-VUHDO_DEBUFF_BLACKLIST[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true; -- Fatigued (Primal Fury)
 
 local VUHDO_CONFIG;
 local VUHDO_RAID;
