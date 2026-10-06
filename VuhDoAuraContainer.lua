@@ -259,6 +259,7 @@ local sChainBaselineFrames = { };
 local sChainBackgroundFillOwners = { };
 local sMissingBuffBarColors = { };
 local sSignatureParts = { };
+local sVolatileSignatureParts = { };
 
 local sBorderTexture;
 local sBorderColorR;
@@ -3026,15 +3027,15 @@ do
 			return aContainerTemplate["volatileSignature"];
 		end
 
-		twipe(sSignatureParts);
+		twipe(sVolatileSignatureParts);
 
 		for _, tSlot in ipairs(aContainerTemplate["slots"] or sEmpty) do
 			if tSlot and not tSlot["isStaticBouquetSlot"] then
 				tButtonSetup = tSlot["buttonSetup"];
 
 				if tButtonSetup then
-					tinsert(sSignatureParts, "s");
-					tinsert(sSignatureParts, VUHDO_getAuraButtonSetupVolatileSignature(tButtonSetup) or "");
+					tinsert(sVolatileSignatureParts, "s");
+					tinsert(sVolatileSignatureParts, VUHDO_getAuraButtonSetupVolatileSignature(tButtonSetup) or "");
 				end
 			end
 		end
@@ -3043,12 +3044,12 @@ do
 			tButtonSetup = tGroup["buttonSetup"];
 
 			if tButtonSetup then
-				tinsert(sSignatureParts, "g");
-				tinsert(sSignatureParts, VUHDO_getAuraButtonSetupVolatileSignature(tButtonSetup) or "");
+				tinsert(sVolatileSignatureParts, "g");
+				tinsert(sVolatileSignatureParts, VUHDO_getAuraButtonSetupVolatileSignature(tButtonSetup) or "");
 			end
 		end
 
-		aContainerTemplate["volatileSignature"] = tconcat(sSignatureParts, "|");
+		aContainerTemplate["volatileSignature"] = tconcat(sVolatileSignatureParts, "|");
 
 		return aContainerTemplate["volatileSignature"];
 

@@ -2,6 +2,7 @@ local _;
 
 local min = math.min;
 local max = math.max;
+local issecretvalue = issecretvalue;
 
 local GetAtlasInfo = C_Texture.GetAtlasInfo;
 
@@ -341,6 +342,11 @@ local function VUHDO_anchorInPlaceGlowTexture(aTexture, aGlowFrame, aGlowVisual,
 	else
 		tGlowWidth = aGlowFrame:GetWidth() or 20;
 		tGlowHeight = aGlowFrame:GetHeight() or tGlowWidth;
+
+		if issecretvalue(tGlowWidth) or issecretvalue(tGlowHeight) then
+			tGlowWidth = 20;
+			tGlowHeight = 20;
+		end
 	end
 
 	tScale = aScale or aGlowVisual["scale"] or sDefaultFlipbookScale;
@@ -667,7 +673,7 @@ local tFrameGlowR;
 local tFrameGlowG;
 local tFrameGlowB;
 local tFrameGlowO;
-function VUHDO_startFrameGlow(aFrame, aStyle, aColorArray, aGlowKey, aFrameLevel, aFieldPrefix)
+function VUHDO_startFrameGlow(aFrame, aStyle, aColorArray, aGlowKey, aFrameLevel, aFieldPrefix, aWidth, aHeight)
 
 	if not aFrame then
 		return;
@@ -757,7 +763,7 @@ function VUHDO_startFrameGlow(aFrame, aStyle, aColorArray, aGlowKey, aFrameLevel
 
 	tFrameGlowTexture = tFrameGlowHost:CreateTexture(nil, "OVERLAY", nil, 1);
 
-	VUHDO_anchorInPlaceGlowTexture(tFrameGlowTexture, tFrameGlowHost, tFrameGlowVisual);
+	VUHDO_anchorInPlaceGlowTexture(tFrameGlowTexture, tFrameGlowHost, tFrameGlowVisual, aWidth, aHeight);
 	VUHDO_applyGlowVisualToTexture(tFrameGlowTexture, tFrameGlowVisual, tFrameGlowR, tFrameGlowG, tFrameGlowB, tFrameGlowO);
 
 	tFrameGlowBodyAnim = VUHDO_playInPlaceFlipbookGlow(tFrameGlowTexture, tFrameGlowVisual);
@@ -828,7 +834,7 @@ function VUHDO_startAuraButtonGlow(aAuraButton, aButtonSetup)
 
 	tGlowStyleName = aButtonSetup["glowStyle"] or VUHDO_DEFAULT_AURA_GLOW_STYLE;
 
-	VUHDO_startFrameGlow(aAuraButton, tGlowStyleName, sUnitGlowColorArray, nil, nil, "vuhdo");
+	VUHDO_startFrameGlow(aAuraButton, tGlowStyleName, sUnitGlowColorArray, nil, nil, "vuhdo", aButtonSetup["width"], aButtonSetup["height"]);
 
 	return;
 
