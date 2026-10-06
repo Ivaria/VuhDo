@@ -336,6 +336,24 @@ VUHDO_BUFF_WATCH_AURA_SPELL_IDS = {
 };
 
 
+VUHDO_AURA_SPELL_VARIANTS = {
+	[1459] = { 1459, 432778 }, -- Arcane Intellect
+	[974] = { 974, 383648 }, -- Earth Shield
+	[1126] = { 1126, 432661 }, -- Mark of the Wild
+	[355941] = { 355941, 376788 }, -- Dream Breath
+	[366155] = { 366155, 367364 }, -- Reversion
+	[381732] = { 381732, 381741, 381746, 381748, 381749, 381750, 381751, 381752, 381753, 381754, 381756, 381757, 381758, 432652, 432655, 432658, 432674, 442744 }, -- Blessing of the Bronze
+	[382021] = { 382021, 382022, 382024 }, -- Earthliving Weapon
+	[395152] = { 395152, 395296 }, -- Ebon Might
+	[433550] = { 433550, 433568 }, -- Rite of Sanctification
+	[433583] = { 433583, 433584 }, -- Rite of Adjuration
+	[457481] = { 457481, 457496 }, -- Tidecaller's Guard
+	[462742] = { 462742, 462757 }, -- Thunderstrike Ward
+	[474750] = { 474750, 474754 }, -- Symbiotic Relationship
+	[1217607] = { 1217607, 1225789 }, -- Void Metamorphosis
+};
+
+
 VUHDO_CAST_ICON_DIFF = {
 	["OTHER"] = "Interface\\Icons\\achievement_bg_tophealer_soa",
 };
