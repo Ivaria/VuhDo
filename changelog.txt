@@ -25,6 +25,7 @@ Improvements:
 -- Added Rogue 'Amplifying Poison' to Buff Watch  
 -- Added Evoker 'Source of Magic' to Buff Watch  
 -- Added group header text rotation when panel is horizontal  
+-- Added match by name option for spell entries in aura groups  
   
   
 --------------------------------------------------------------  

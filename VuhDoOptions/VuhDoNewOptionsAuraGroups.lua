@@ -79,6 +79,7 @@ VUHDO_AURA_GROUPS_ADD_SPELL_COMBO_MODEL = { };
 
 VUHDO_SPELL_ENTRY_MINE = true;
 VUHDO_SPELL_ENTRY_OTHERS = false;
+VUHDO_SPELL_ENTRY_IS_NAME_MATCH = false;
 VUHDO_SPELL_ENTRY_DURATION_MODE = VUHDO_SPELL_DURATION_MODE_THRESHOLD;
 VUHDO_SPELL_ENTRY_TIMER_THRESHOLD = 10;
 VUHDO_SPELL_ENTRY_GLOW_STYLE = "none";
@@ -222,6 +223,7 @@ local sRefreshDepth = 0;
 local sAuraGroupEntryItems = { };
 local sSpellEntrySettingsGroupId = nil;
 local sSpellEntrySettingsEntryIdx = nil;
+local sSpellEntryIsNumeric = false;
 
 
 
@@ -3131,6 +3133,7 @@ local tSpellComboEditBox;
 local tText;
 local tValue;
 local tSpellIdFromMatch;
+local tIsNameMatch;
 function VUHDO_auraGroupsListAddSpell()
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -3169,6 +3172,12 @@ function VUHDO_auraGroupsListAddSpell()
 		tValue = tonumber(tText) or tText;
 	end
 
+	tIsNameMatch = nil;
+
+	if tSpellIdFromMatch and type(tValue) == "number" then
+		tIsNameMatch = true;
+	end
+
 	if not tGroup["entries"] then
 		tGroup["entries"] = { };
 	end
@@ -3176,6 +3185,7 @@ function VUHDO_auraGroupsListAddSpell()
 	tinsert(tGroup["entries"], {
 		["entryType"] = VUHDO_AURA_LIST_ENTRY_SPELL,
 		["value"] = tValue,
+		["isNameMatch"] = tIsNameMatch,
 		["mine"] = true,
 		["others"] = false,
 		["durationMode"] = VUHDO_SPELL_DURATION_MODE_THRESHOLD,
@@ -3425,6 +3435,10 @@ function VUHDO_spellEntrySettingsInitFromEntry(anEntry)
 
 	VUHDO_SPELL_ENTRY_MINE = tEntry["mine"] ~= false;
 	VUHDO_SPELL_ENTRY_OTHERS = tEntry["others"] == true;
+
+	VUHDO_SPELL_ENTRY_IS_NAME_MATCH = tEntry["isNameMatch"] == true;
+	sSpellEntryIsNumeric = type(tEntry["value"]) == "number";
+
 	VUHDO_SPELL_ENTRY_DURATION_MODE = tEntry["durationMode"] or VUHDO_SPELL_DURATION_MODE_THRESHOLD;
 	VUHDO_SPELL_ENTRY_TIMER_THRESHOLD = tEntry["timerThreshold"] or 10;
 	VUHDO_SPELL_ENTRY_GLOW_STYLE = tEntry["glowIconStyle"] or (tEntry["glowIcon"] == true and VUHDO_DEFAULT_AURA_GLOW_STYLE or "none");
@@ -3477,6 +3491,7 @@ function VUHDO_spellEntrySettingsSaveToEntry()
 
 	tEntry["mine"] = VUHDO_SPELL_ENTRY_MINE;
 	tEntry["others"] = VUHDO_SPELL_ENTRY_OTHERS;
+	tEntry["isNameMatch"] = (VUHDO_SPELL_ENTRY_IS_NAME_MATCH and type(tEntry["value"]) == "number") or nil;
 	tEntry["durationMode"] = VUHDO_SPELL_ENTRY_DURATION_MODE;
 	tEntry["timerThreshold"] = VUHDO_SPELL_ENTRY_TIMER_THRESHOLD;
 	tEntry["glowIcon"] = "none" ~= VUHDO_SPELL_ENTRY_GLOW_STYLE;
@@ -3617,6 +3632,13 @@ local function VUHDO_initSpellEntrySettingsFromModel(aFrame)
 
 	if tControl then
 		VUHDO_lnfCheckButtonInitFromModel(tControl);
+	end
+
+	tControl = _G[tRootPane:GetName() .. "NameMatchCheckButton"];
+
+	if tControl then
+		VUHDO_lnfCheckButtonInitFromModel(tControl);
+		tControl:SetShown(sSpellEntryIsNumeric);
 	end
 
 	tControl = _G[tRootPane:GetName() .. "FullDurationCheckButton"];
