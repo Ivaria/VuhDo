@@ -35,7 +35,7 @@ VUHDO_DEBUFF_BLACKLIST = {
 	[GetSpellName(71328)] = true, -- Dungeon Cooldown
 	[GetSpellName(57723)] = true, -- Exhaustion (Heroism)
 	[GetSpellName(80354)] = true, -- Temporal Displacement (Time Warp)
-	[VUHDO_SPELL_ID.DEBUFF_FATIGUED] = true -- Fatigued (Primal Fury)
+	[GetSpellName(264689)] = true, -- Fatigued (Primal Fury)
 };
 
 local VUHDO_CONFIG;
