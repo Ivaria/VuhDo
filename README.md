@@ -1,10 +1,10 @@
-[![latest retail](https://img.shields.io/badge/latest%20retail-v3.218-red?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/files)
-[![latest cataclysm](https://img.shields.io/badge/latest%20cataclysm-v3.218--catac-orange?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/files)
+[![latest retail](https://img.shields.io/badge/latest%20retail-v3.218-red?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9086122)
+[![latest cataclysm](https://img.shields.io/badge/latest%20cataclysm-v3.218--catac-orange?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9086128)
 [![latest wrath](https://img.shields.io/badge/latest%20wrath-v3.164--wotlkc-blue?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/5305726)
-[![latest burning crusade](https://img.shields.io/badge/latest%20burning%20crusade-v3.218--tbcc-green?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/files)
-[![latest classic](https://img.shields.io/badge/latest%20classic-v3.218--vanilla-lightgrey?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/files)
+[![latest burning crusade](https://img.shields.io/badge/latest%20burning%20crusade-v3.218--tbcc-green?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9086125)
+[![latest classic](https://img.shields.io/badge/latest%20classic-v3.218--vanilla-lightgrey?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9086124)
 [![discord](https://img.shields.io/discord/632687773526130691?color=7289da&logo=discord&label=discord&style=flat-square)](https://discord.gg/57en44E)
-[![latest mists](https://img.shields.io/badge/latest%20mists-v3.218--mopc-brightgreen?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/files)
+[![latest mists](https://img.shields.io/badge/latest%20mists-v3.218--mopc-brightgreen?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9086126)
 
 Get [VuhDo release v3.218](https://www.curseforge.com/wow/addons/vuhdo) now with support for Midnight patch 12.1.0!
 
