@@ -6,7 +6,7 @@
 [![discord](https://img.shields.io/discord/632687773526130691?color=7289da&logo=discord&label=discord&style=flat-square)](https://discord.gg/57en44E)
 [![latest mists](https://img.shields.io/badge/latest%20mists-v3.218--mopc-brightgreen?style=flat-square)](https://www.curseforge.com/wow/addons/vuhdo/download/9086126)
 
-Get [VuhDo release v3.218](https://www.curseforge.com/wow/addons/vuhdo) now with support for Midnight patch 12.1.0!
+Get [VuhDo release v3.218](https://www.curseforge.com/wow/addons/vuhdo/download/9086122) now with support for Midnight patch 12.1.0!
 
 To get started read the updated [guide over at Icy-Veins](https://www.icy-veins.com/forums/topic/11805-vuhdo-a-comprehensive-guide/).
 
