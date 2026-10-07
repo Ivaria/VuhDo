@@ -3,7 +3,6 @@ VUHDO_AURA_IGNORE_LIST_DEFAULTS = {
 	[2479] = true, -- Honorless Target
 	[11196] = true, -- Recently Bandaged
 	[15007] = true, -- Resurrection Sickness
-	[6788] = true, -- Weakened Soul
 };
 
 
