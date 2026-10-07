@@ -285,7 +285,7 @@ function VUHDO_manaBarBouquetCallback(aUnit, anIsActive, anIcon, aCurrValue, aCo
 	end
 
 	-- Targets und targets-of-target, die im Raid sind
-	tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[VUHDO_RAID[aUnit]["name"]];
+	tAllButtons = VUHDO_IN_RAID_TARGET_BUTTONS[VUHDO_getUnitIdentityKey(VUHDO_RAID[aUnit])];
 
 	if not tAllButtons then
 		return;

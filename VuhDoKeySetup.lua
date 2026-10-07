@@ -736,7 +736,7 @@ function VUHDO_setupAllHealButtonAttributes(aButton, aUnit, anIsDisable, aForceT
 			end
 
 			if tRequiresName and tInfo and tInfo["name"] and not tInfo["hasSecretName"] then
-				VUHDO_safeSetAttribute(aButton, "vuhdo-name", tInfo["name"]);
+				VUHDO_safeSetAttribute(aButton, "vuhdo-name", VUHDO_getUnitExternalName(aUnit) or tInfo["name"]);
 			end
 
 			if tRequiresTarget and tInfo and tInfo["targetUnit"] then

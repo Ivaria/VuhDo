@@ -9,6 +9,8 @@ usage() {
 
 	OPTIONS:
 	  -h, --help     Show this help message
+	  -o FILE        Write the Lua tables to FILE instead of VuhDoSecretSpellLists.lua.<timestamp>
+	                 (Forever: -o Flavors/Forever/VuhDoSecretSpells.lua)
 
 	ARGUMENTS:
 	  VERSION        Specific version to fetch (e.g., 11, 11.0.7, 12.0.0)
@@ -28,6 +30,7 @@ usage() {
 	                   wrath, wotlkc          - Alias for classic progression
 	                   cata, catac            - Alias for classic progression
 	                   mists, mopc            - Alias for classic progression
+	                   forever, camelot       - WoW Forever (16xxx interface, see FOREVER_WAGO_BRANCH)
 
 	                 Direct branch names:
 	                   wow, wow_beta, wow_classic, wow_classic_beta,
@@ -42,8 +45,18 @@ usage() {
 	  createSecretSpellLists.sh wow_beta     # Using direct branch name
 	  createSecretSpellLists.sh 11           # Version search: latest 11.x from any branch
 	  createSecretSpellLists.sh 11.0.7       # Version search: specific 11.0.7.x
+	  createSecretSpellLists.sh -o Flavors/Forever/VuhDoSecretSpells.lua forever
+	                                         # WoW Forever (latest build of FOREVER_WAGO_BRANCH)
+
+	ENVIRONMENT:
+	  FOREVER_WAGO_BRANCH   Wago Tools product used for the forever/camelot alias.
+	                        Default: wow_cn_beta (the product that carries the 1.6x Forever builds).
 	EOF
 }
+
+# Wago Tools has no dedicated Forever product yet; the 1.6x (16xxx interface) builds are listed under wow_cn_beta.
+FOREVER_WAGO_BRANCH="${FOREVER_WAGO_BRANCH:-wow_cn_beta}"
+OUTPUT_FILE=""
 
 resolve_branch_alias() {
 
@@ -74,6 +87,9 @@ resolve_branch_alias() {
 		vanilla-ptr|era-ptr)
 			echo "wow_classic_era_ptr"
 			;;
+		forever|camelot)
+			echo "$FOREVER_WAGO_BRANCH"
+			;;
 		*)
 			echo "$1"
 			;;
@@ -81,9 +97,10 @@ resolve_branch_alias() {
 
 }
 
-while getopts ":h-:" opt; do
+while getopts ":ho:-:" opt; do
 	case $opt in
 		h) usage; exit 0 ;;
+		o) OUTPUT_FILE="$OPTARG" ;;
 		-)
 			case $OPTARG in
 				help) usage; exit 0 ;;
@@ -200,10 +217,10 @@ for key in CAST_ALWAYS_SECRET CAST_NEVER_SECRET AURA_ALWAYS_SECRET AURA_NEVER_SE
 	fi
 done
 
-OUTFILE="VuhDoSecretSpellLists.lua.$DATE"
+OUTFILE="${OUTPUT_FILE:-VuhDoSecretSpellLists.lua.$DATE}"
 
 {
-	echo "-- $OUTFILE (Build: $BUILD_PARAM, Branch: $BUILD_BRANCH)"
+	echo "-- $(basename "$OUTFILE") (Build: $BUILD_PARAM, Branch: $BUILD_BRANCH)"
 	echo "VUHDO_SPELL_CAST_ALWAYS_SECRET = {"
 
 	if [ -s "wow_secret_CAST_ALWAYS_SECRET_sorted_$DATE.txt" ]; then
