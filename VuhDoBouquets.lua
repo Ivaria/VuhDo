@@ -2179,6 +2179,22 @@ do
 
 		return tHasChanged;
 	end
+
+
+
+	--
+	local tInvalidateState;
+	function VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName)
+
+		tInvalidateState = VUHDO_LAST_EVALUATED_BOUQUETS[aBouquetName][aUnit];
+
+		if tInvalidateState then
+			tInvalidateState[1] = nil;
+		end
+
+		return;
+
+	end
 end
 
 
@@ -3528,6 +3544,7 @@ do
 	local tLayerTemplate;
 	local tHasSecretResults;
 	local tEvalColorHash;
+	local tHasChanged;
 	function VUHDO_evaluateBouquet(aUnit, aBouquetName, anInfo)
 
 		tUnit = (VUHDO_RAID[aUnit] or tEmptyInfo)["isVehicle"] and VUHDO_RAID[aUnit]["petUnit"] or aUnit;
@@ -3590,12 +3607,27 @@ do
 				tEvalColorHash = tEvalColorHash + VUHDO_getColorHash(txState["maxColor"]) * 100000;
 			end
 
-			return true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], txState["color"], txState["name"],
-				tHasSecretResults or VUHDO_hasBouquetChanged(aUnit, aBouquetName, true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], tEvalColorHash, txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"]),
+			if tHasSecretResults then
+				VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName);
+
+				tHasChanged = true;
+			else
+				tHasChanged = VUHDO_hasBouquetChanged(aUnit, aBouquetName, true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], tEvalColorHash, txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"]);
+			end
+
+			return true, txState["icon"], txState["timer"], txState["counter"], txState["duration"], txState["color"], txState["name"], tHasChanged,
 				tAnzInfos - txState["level"], txState["timer2"], txState["clipL"], txState["clipR"], txState["clipT"], txState["clipB"], txState["isMaxColorInit"] and txState["maxColor"] or nil,
 				tLayerTemplate, txState["isAliveTime"];
 		else
-			return false, nil, nil, nil, nil, nil, nil, tHasSecretResults or VUHDO_hasBouquetChanged(aUnit, aBouquetName, false), 0, 0, nil, nil, nil, nil, nil, tLayerTemplate, false;
+			if tHasSecretResults then
+				VUHDO_invalidateBouquetChangeState(aUnit, aBouquetName);
+
+				tHasChanged = true;
+			else
+				tHasChanged = VUHDO_hasBouquetChanged(aUnit, aBouquetName, false);
+			end
+
+			return false, nil, nil, nil, nil, nil, nil, tHasChanged, 0, 0, nil, nil, nil, nil, nil, tLayerTemplate, false;
 		end
 	end
 end

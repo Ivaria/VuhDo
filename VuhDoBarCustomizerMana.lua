@@ -151,6 +151,44 @@ end
 
 
 
+--
+function VUHDO_updateAllPowerTypes()
+
+	if VUHDO_isConfigDemoUsers() then
+		return;
+	end
+
+	for tUnit, tUnitInfo in pairs(VUHDO_RAID) do
+		if not tUnitInfo["isVehicle"] and tUnitInfo["powertype"] ~= UnitPowerType(tUnit) then
+			VUHDO_updateManaBars(tUnit, 3);
+		end
+	end
+
+	return;
+
+end
+
+
+
+--
+function VUHDO_deferUpdateAllPowerTypes(aPriority)
+
+	if VUHDO_isConfigDemoUsers() then
+		return;
+	end
+
+	for tUnit, tUnitInfo in pairs(VUHDO_RAID) do
+		if not tUnitInfo["isVehicle"] and tUnitInfo["powertype"] ~= UnitPowerType(tUnit) then
+			VUHDO_deferTask(VUHDO_DEFER_UPDATE_MANA_BARS, aPriority or VUHDO_DEFERRED_TASK_PRIORITY_HIGH, tUnit, 3);
+		end
+	end
+
+	return;
+
+end
+
+
+
 do
 	--
 	local tManaBar;

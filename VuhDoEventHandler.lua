@@ -93,6 +93,8 @@ local VUHDO_setHealth;
 local VUHDO_initAllEventBouquets;
 local VUHDO_redisplayAllUnitAuras;
 local VUHDO_updateBouquetsForEvent;
+local VUHDO_updateManaBars;
+local VUHDO_updateAllPowerTypes;
 local VUHDO_updateAllHoTs;
 local VUHDO_updateAllCyclicBouquets;
 local VUHDO_updateAllDebuffIcons;
@@ -614,6 +616,7 @@ local function VUHDO_eventHandlerInitFunctionOverrides()
 	VUHDO_setHealth = _G["VUHDO_setHealth"];
 	VUHDO_initAllEventBouquets = _G["VUHDO_initAllEventBouquets"];
 	VUHDO_updateAllAggro = _G["VUHDO_updateAllAggro"];
+	VUHDO_updateAllPowerTypes = _G["VUHDO_updateAllPowerTypes"];
 	VUHDO_updateAllRange = _G["VUHDO_updateAllRange"];
 	VUHDO_updateUnitRange = _G["VUHDO_updateUnitRange"];
 	VUHDO_updateAllVisibilityCharmRange = _G["VUHDO_updateAllVisibilityCharmRange"];
@@ -659,11 +662,13 @@ local function VUHDO_eventHandlerInitLocalOverrides()
 	VUHDO_flushPendingOverlayRebuild = _G["VUHDO_deferFlushPendingOverlayRebuild"];
 	VUHDO_updateHealth = _G["VUHDO_deferUpdateHealth"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
+	VUHDO_updateManaBars = _G["VUHDO_deferUpdateManaBars"];
 	VUHDO_updateHealthBarsFor = _G["VUHDO_deferUpdateHealthBarsFor"];
 	VUHDO_updateAllHoTs = _G["VUHDO_deferUpdateAllHoTs"];
 	VUHDO_updateAllCyclicBouquets = _G["VUHDO_deferUpdateAllCyclicBouquets"];
 	VUHDO_updateAllDebuffIcons = _G["VUHDO_deferUpdateAllDebuffIcons"];
 	VUHDO_updateAllAggro = _G["VUHDO_deferUpdateAllAggro"];
+	VUHDO_updateAllPowerTypes = _G["VUHDO_deferUpdateAllPowerTypes"];
 	VUHDO_updateAllRange = _G["VUHDO_deferUpdateAllRange"];
 	VUHDO_updateAllVisibilityCharmRange = _G["VUHDO_deferUpdateAllVisibilityCharmRange"];
 	VUHDO_updateAllClusters = _G["VUHDO_deferUpdateAllClusters"];
@@ -1258,6 +1263,9 @@ do
 
 				VUHDO_updateBouquetsForEvent("target", 13); -- VUHDO_UPDATE_MANA
 				VUHDO_updateBouquetsForEvent("focus",  13); -- VUHDO_UPDATE_MANA
+
+				VUHDO_updateManaBars("player", 3);
+				VUHDO_updateAllPowerTypes();
 
 				if VUHDO_RELOAD_AFTER_BATTLE and not InCombatLockdown() then
 					VUHDO_RELOAD_AFTER_BATTLE = false;
