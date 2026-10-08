@@ -15,6 +15,7 @@ Known issues:
   
   
 Bugfixes:  
+-- Fixed item mouse bindings after login  
   
   
 Improvements:  

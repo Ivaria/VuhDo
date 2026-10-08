@@ -421,7 +421,7 @@ function VUHDO_getSecureActionForBinding(anAction, anUsesPet)
 			elseif IsUsableItem(anAction) then
 				return "item", anAction;
 			else
-				return "spell", anAction;
+				return "spell", anAction, true;
 			end
 		end
 	end
