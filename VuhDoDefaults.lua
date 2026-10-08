@@ -3788,6 +3788,49 @@ end
 
 
 --
+local tOldCategKey;
+local tNewCategKey;
+local tAllBuffs;
+local tPlayerClass;
+function VUHDO_migrateShieldsBuffSettings()
+
+	_, tPlayerClass = UnitClass("player");
+	tAllBuffs = VUHDO_CLASS_BUFFS[tPlayerClass];
+
+	if not tAllBuffs or not tAllBuffs[VUHDO_I18N_BUFFC_SHIELDS] then
+		return;
+	end
+
+	tOldCategKey = VUHDO_SPELL_ID.BUFF_LIGHTNING_SHIELD;
+	tNewCategKey = VUHDO_I18N_BUFFC_SHIELDS;
+
+	if tOldCategKey == tNewCategKey then
+		return;
+	end
+
+	if VUHDO_BUFF_SETTINGS[tOldCategKey] then
+		if not VUHDO_BUFF_SETTINGS[tNewCategKey] then
+			VUHDO_BUFF_SETTINGS[tNewCategKey] = VUHDO_deepCopyTable(VUHDO_BUFF_SETTINGS[tOldCategKey]);
+		end
+
+		VUHDO_BUFF_SETTINGS[tOldCategKey] = nil;
+	end
+
+	if VUHDO_BUFF_ORDER and VUHDO_BUFF_ORDER[tOldCategKey] then
+		if not VUHDO_BUFF_ORDER[tNewCategKey] then
+			VUHDO_BUFF_ORDER[tNewCategKey] = VUHDO_BUFF_ORDER[tOldCategKey];
+		end
+
+		VUHDO_BUFF_ORDER[tOldCategKey] = nil;
+	end
+
+	return;
+
+end
+
+
+
+--
 local function VUHDO_fixBuffOrder()
 	local _, tPlayerClass = UnitClass("player");
 	local tAllBuffs = VUHDO_CLASS_BUFFS[tPlayerClass];
@@ -3827,6 +3870,8 @@ function VUHDO_initBuffSettings()
 
 	VUHDO_BUFF_SETTINGS["CONFIG"] = VUHDO_ensureSanity("VUHDO_BUFF_SETTINGS.CONFIG", VUHDO_BUFF_SETTINGS["CONFIG"], VUHDO_DEFAULT_BUFF_CONFIG);
 	VUHDO_DEFAULT_BUFF_CONFIG = VUHDO_compressAndPackTable(VUHDO_DEFAULT_BUFF_CONFIG);
+
+	VUHDO_migrateShieldsBuffSettings();
 
 	local _, tPlayerClass = UnitClass("player");
 	for tCategSpec, _ in pairs(VUHDO_CLASS_BUFFS[tPlayerClass]) do
