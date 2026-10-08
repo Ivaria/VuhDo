@@ -17,6 +17,7 @@ Known issues:
 Bugfixes:  
 -- Fixed item mouse bindings after login  
 -- Fixed Buff Watch missing buff bar color target selection  
+-- Fixed header text alignment when panel is horizontal  
   
   
 Improvements:  
