@@ -996,7 +996,12 @@ do
 	local tIsLowByTime;
 	local tIsLow;
 	local tIsSecretBuff;
-	function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppressMissBuff, aTargetMode)
+	local tIsSelfMissing;
+	local tIsSelfLow;
+	local tIsSelfInRange;
+	local tSelfRest;
+	local tHasOtherMissOrLow;
+	function VUHDO_getMissingBuffs(aBuffInfo, someUnits, aCategSpec, anSuppressMissBuff, aTargetMode, aSelfTargetUnit)
 
 		tCategName = aCategSpec;
 
@@ -1008,6 +1013,12 @@ do
 		tGoodTarget = nil;
 		tLowestRest = nil;
 		tLowestUnit = nil;
+
+		tIsSelfMissing = false;
+		tIsSelfLow = false;
+		tIsSelfInRange = false;
+		tSelfRest = nil;
+		tHasOtherMissOrLow = false;
 
 		tNow = GetTime();
 
@@ -1099,6 +1110,14 @@ do
 						if tIsLow then
 							tLowGroup[#tLowGroup + 1] = tUnit;
 
+							if aSelfTargetUnit ~= tUnit then
+								tHasOtherMissOrLow = true;
+							else
+								tIsSelfLow = true;
+								tIsSelfInRange = tInRange;
+								tSelfRest = tRest;
+							end
+
 							if not tInRange and tIsAvailable then
 								tOorGroup[#tOorGroup + 1] = tUnit;
 							end
@@ -1106,11 +1125,13 @@ do
 							tOkayGroup[#tOkayGroup + 1] = tUnit;
 						end
 
-						if tLowestRest == nil or tRest < tLowestRest then
-							tLowestRest = tRest;
+						if aSelfTargetUnit ~= tUnit then
+							if tLowestRest == nil or tRest < tLowestRest then
+								tLowestRest = tRest;
 
-							if tInRange then
-								tLowestUnit = tUnit;
+								if tInRange then
+									tLowestUnit = tUnit;
+								end
 							end
 						end
 					end
@@ -1123,6 +1144,14 @@ do
 						else
 							tMissGroup[#tMissGroup + 1] = tUnit;
 
+							if aSelfTargetUnit ~= tUnit then
+								tHasOtherMissOrLow = true;
+							else
+								tIsSelfMissing = true;
+								tIsSelfInRange = tInRange;
+								tSelfRest = 0;
+							end
+
 							if not tInRange and tIsAvailable then
 								tOorGroup[#tOorGroup + 1] = tUnit;
 							end
@@ -1131,19 +1160,21 @@ do
 								VUHDO_setUnitMissBuff(tUnit, aCategSpec, aBuffInfo, tCategName);
 							end
 
-							if tInRange and (tLowestRest == nil or tLowestRest > 0) then
+							if aSelfTargetUnit ~= tUnit and tInRange and (tLowestRest == nil or tLowestRest > 0) then
 								tLowestUnit = tUnit;
 								tLowestRest = 0;
 							end
 						end
 					end
 
-					if 10 == aBuffInfo[2] then
-						tGoodTarget = "player"; -- VUHDO_BUFF_TARGET_RAID
-					elseif 9 == aBuffInfo[2] then
-						tGoodTarget = "target"; -- VUHDO_BUFF_TARGET_HOSTILE
-					elseif 3 == aBuffInfo[2] or tInRange then
-						tGoodTarget = tUnit; -- VUHDO_BUFF_TARGET_UNIQUE
+					if aSelfTargetUnit ~= tUnit then
+						if 10 == aBuffInfo[2] then
+							tGoodTarget = "player"; -- VUHDO_BUFF_TARGET_RAID
+						elseif 9 == aBuffInfo[2] then
+							tGoodTarget = "target"; -- VUHDO_BUFF_TARGET_HOSTILE
+						elseif 3 == aBuffInfo[2] or tInRange then
+							tGoodTarget = tUnit; -- VUHDO_BUFF_TARGET_UNIQUE
+						end
 					end
 				end
 			end
@@ -1151,6 +1182,15 @@ do
 
 		if VUHDO_BUFF_TARGET_GROUP == aBuffInfo[2] then
 			tGoodTarget = VUHDO_getGroupBuffTarget(aBuffInfo, tMissGroup, tLowGroup) or tGoodTarget;
+		end
+
+		if aSelfTargetUnit and not tHasOtherMissOrLow and (tIsSelfMissing or tIsSelfLow) then
+			tGoodTarget = aSelfTargetUnit;
+
+			if tIsSelfInRange then
+				tLowestUnit = aSelfTargetUnit;
+				tLowestRest = tSelfRest;
+			end
 		end
 
 		return tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tSecretCount or tMaxCount;
@@ -1239,7 +1279,10 @@ do
 	local tTexture;
 	local tHadSecretSlot;
 	local tHasPlayer;
+	local tSelfTargetUnit;
 	function VUHDO_getMissingBuffsForCode(aTargetMode, aTarget, aBuffInfo, aCategSpec, anSuppressMissBuff)
+
+		tSelfTargetUnit = nil;
 
 		if VUHDO_BUFF_TARGET_MODE_NAME == aTargetMode then
 			tNameGroup[1] = VUHDO_RAID_FULL_NAMES[aTarget] or VUHDO_resolveUnitByName(aTarget);
@@ -1355,12 +1398,13 @@ do
 
 			if not tHasPlayer then
 				sDestGroupScratch[#sDestGroupScratch + 1] = "player";
+				tSelfTargetUnit = "player";
 			end
 
 			tDestGroup = sDestGroupScratch;
 		end
 
-		return VUHDO_getMissingBuffs(aBuffInfo, tDestGroup or sEmpty, aCategSpec, anSuppressMissBuff, aTargetMode);
+		return VUHDO_getMissingBuffs(aBuffInfo, tDestGroup or sEmpty, aCategSpec, anSuppressMissBuff, aTargetMode, tSelfTargetUnit);
 
 	end
 end
@@ -1789,6 +1833,7 @@ do
 	local tRoleTotal;
 	local tInfo;
 	local tBuffedRoleUnit;
+	local tIsSelfTargetFallback;
 	function VUHDO_updateBuffSwatch(aSwatch)
 
 		tSwatchName = aSwatch:GetName();
@@ -1866,6 +1911,8 @@ do
 		tMissGroup, tLowGroup, tGoodTarget, tLowestRest, tLowestUnit, tOkayGroup, tOorGroup, tMaxCount
 			= VUHDO_getMissingBuffsForCode(tTargetMode, tTarget, tVariant, tCategSpec, false);
 
+		tIsSelfTargetFallback = VUHDO_isBuffCategorySelfTarget(tCategSpec) and "player" == tGoodTarget;
+
 		if VUHDO_BUFF_TARGET_MODE_ROLE == tTargetMode and VUHDO_BUFF_TARGET_UNIQUE == tVariant[2] then
 			tRoleId = tTarget;
 			tBuffSettings = VUHDO_BUFF_SETTINGS[tCategSpec];
@@ -1890,29 +1937,31 @@ do
 				end
 			end
 
-			if tPinnedUnit and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
-				for _, tRoleUnit in pairs(tMissGroup) do
-					if tRoleUnit == tPinnedUnit then
+			if not tIsSelfTargetFallback then
+				if tPinnedUnit and VUHDO_isUnitInRoleGroup(tPinnedUnit, tRoleId) then
+					for _, tRoleUnit in pairs(tMissGroup) do
+						if tRoleUnit == tPinnedUnit then
+							tGoodTarget = tPinnedUnit;
+
+							break;
+						end
+					end
+
+					for _, tRoleUnit in pairs(tLowGroup) do
+						if tRoleUnit == tPinnedUnit then
+							tLowestUnit = tPinnedUnit;
+
+							break;
+						end
+					end
+
+					if not tGoodTarget and not tLowestUnit then
 						tGoodTarget = tPinnedUnit;
-
-						break;
 					end
+				elseif tBuffedRoleUnit then
+					tGoodTarget = tBuffedRoleUnit;
+					tLowestUnit = tBuffedRoleUnit;
 				end
-
-				for _, tRoleUnit in pairs(tLowGroup) do
-					if tRoleUnit == tPinnedUnit then
-						tLowestUnit = tPinnedUnit;
-
-						break;
-					end
-				end
-
-				if not tGoodTarget and not tLowestUnit then
-					tGoodTarget = tPinnedUnit;
-				end
-			elseif tBuffedRoleUnit then
-				tGoodTarget = tBuffedRoleUnit;
-				tLowestUnit = tBuffedRoleUnit;
 			end
 
 			tGroupLabel = _G[tSwatchName .. "GroupLabelLabel"];
