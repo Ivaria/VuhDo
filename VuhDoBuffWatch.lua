@@ -1665,7 +1665,7 @@ do
 	local tIsOnGCD;
 	local tDuration;
 	local tRemainingNumeric;
-	local function VUHDO_buffWatchGetSpellCooldown(aSpellName)
+	function VUHDO_buffWatchGetSpellCooldown(aSpellName)
 
 		tSpellId = sCooldownAliases[aSpellName] or (VUHDO_BUFFS[aSpellName] and VUHDO_BUFFS[aSpellName]["id"]);
 
