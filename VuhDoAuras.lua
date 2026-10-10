@@ -2801,6 +2801,7 @@ do
 	local tCachedAura;
 	local tSlotData;
 	local tOldSlot;
+	local tEntryCount;
 	function VUHDO_updateListSlotsForAnchor(aUnit, aPanelNum, anAnchorIndex, anAnchorConfig)
 
 		if not aUnit or not aPanelNum or not anAnchorIndex or not anAnchorConfig then
@@ -2905,6 +2906,18 @@ do
 						end
 					end
 				end
+			end
+		end
+
+		tEntryCount = #tEntries;
+
+		for tClearIndex, tClearSlot in pairs(VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex]) do
+			if tClearIndex > tEntryCount then
+				if tClearSlot then
+					sSlotDataPool:release(tClearSlot);
+				end
+
+				VUHDO_UNIT_AURA_LIST_SLOTS[aUnit][aPanelNum][anAnchorIndex][tClearIndex] = nil;
 			end
 		end
 

@@ -144,6 +144,7 @@ local VUHDO_AURA_IDENTITY_GATE_HELPFUL;
 local VUHDO_AURA_IDENTITY_GATE_HARMFUL;
 local VUHDO_BUTTON_CACHE;
 local VUHDO_MAX_PANELS;
+local VUHDO_AURA_LIST_BOUQUETS;
 
 local VUHDO_PixelUtil;
 local VUHDO_LibSharedMedia;
@@ -173,6 +174,7 @@ local VUHDO_deferVolatilePassForButton;
 local VUHDO_fixFrameLevels;
 local VUHDO_deferInitAuraContainersForButton;
 local VUHDO_rebuildAuraAnchorsForAllButtons;
+local VUHDO_refreshAllUnitAuras;
 
 local sAuraBorderOptions = {
 	["style"] = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
@@ -451,6 +453,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_AURA_IDENTITY_GATE_HARMFUL = _G["VUHDO_AURA_IDENTITY_GATE_HARMFUL"];
 	VUHDO_BUTTON_CACHE = _G["VUHDO_BUTTON_CACHE"];
 	VUHDO_MAX_PANELS = _G["VUHDO_MAX_PANELS"];
+	VUHDO_AURA_LIST_BOUQUETS = _G["VUHDO_AURA_LIST_BOUQUETS"];
 
 	VUHDO_PixelUtil = _G["VUHDO_PixelUtil"];
 	VUHDO_LibSharedMedia = _G["VUHDO_LibSharedMedia"];
@@ -483,6 +486,7 @@ function VUHDO_auraContainerInitLocalOverrides()
 	VUHDO_fixFrameLevels = _G["VUHDO_fixFrameLevels"];
 	VUHDO_deferInitAuraContainersForButton = _G["VUHDO_deferInitAuraContainersForButton"];
 	VUHDO_rebuildAuraAnchorsForAllButtons = _G["VUHDO_rebuildAuraAnchorsForAllButtons"];
+	VUHDO_refreshAllUnitAuras = _G["VUHDO_refreshAllUnitAuras"];
 
 	sAuraOpaqueBorderOptions["backingCurveFn"] = _G["VUHDO_getDispelTypeBackgroundBackingCurve"];
 	sAuraOpaqueBorderOptions["fillCurveFn"] = _G["VUHDO_getDispelTypeBackgroundFillCurve"];
@@ -705,6 +709,54 @@ do
 
 
 	--
+	local tIconColor;
+	local tBarColor;
+	local tMainTexture;
+	local tStaticColor;
+	local function VUHDO_reapplyAuraButtonEntryColors(aButtonSetup, aAuraButton)
+
+		if aAuraButton["IconTexture"] and not aButtonSetup["dispelIcon"] then
+			if aButtonSetup["iconColor"] then
+				tIconColor = aButtonSetup["iconColor"];
+
+				aAuraButton["IconColorOverlay"]:SetColorTexture(tIconColor["R"] or 1, tIconColor["G"] or 1, tIconColor["B"] or 1, 1);
+				aAuraButton["IconColorOverlay"]:Show();
+			else
+				aAuraButton["IconColorOverlay"]:Hide();
+			end
+		end
+
+		if aButtonSetup["durationBar"] and aAuraButton["DurationBar"] and aButtonSetup["barColor"] and "class" ~= aButtonSetup["barColorMode"] then
+			tBarColor = aButtonSetup["barColor"];
+
+			aAuraButton["DurationBar"]:GetStatusBarTexture():SetVertexColor(tBarColor["R"] or 0.2, tBarColor["G"] or 0.6, tBarColor["B"] or 0.2, tBarColor["O"] or 1);
+		end
+
+		tMainTexture = aAuraButton["IconTexture"] or aAuraButton["FillTexture"];
+
+		if aButtonSetup["staticColor"] and tMainTexture and not aButtonSetup["shadowBar"] and not aButtonSetup["border"] then
+			tStaticColor = aButtonSetup["staticColor"];
+
+			if aButtonSetup["staticIcon"] then
+				tMainTexture:SetVertexColor(tStaticColor["R"] or 1, tStaticColor["G"] or 1, tStaticColor["B"] or 1, tStaticColor["O"] or 1);
+			else
+				tMainTexture:SetColorTexture(tStaticColor["R"] or 1, tStaticColor["G"] or 1, tStaticColor["B"] or 1, tStaticColor["O"] or 1);
+			end
+
+			tMainTexture:Show();
+		elseif tMainTexture and not aButtonSetup["shadowBar"] and not aButtonSetup["border"] and not aButtonSetup["hideIcon"] then
+			if aButtonSetup["staticIcon"] then
+				tMainTexture:SetVertexColor(1, 1, 1, 1);
+			end
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	local tVolatileShadowBar;
 	local tVolatileShadowBackground;
 	local tVolatileShadowTexture;
@@ -723,6 +775,8 @@ do
 		if aButtonSetup["border"] or aButtonSetup["dispelBorder"] then
 			VUHDO_reapplyAuraButtonBorderEdges(aAuraButton, aButtonSetup);
 		end
+
+		VUHDO_reapplyAuraButtonEntryColors(aButtonSetup, aAuraButton);
 
 		if not aAuraButton["ShadowBar"] then
 			return;
@@ -2707,6 +2761,16 @@ do
 			tinsert(aSignatureParts, "0");
 		end
 
+		tinsert(aSignatureParts, aButtonSetup["durationText"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["applicationCount"] and "1" or "0");
+		tinsert(aSignatureParts, aButtonSetup["durationCooldown"] and "1" or "0");
+		tinsert(aSignatureParts, tostring(aButtonSetup["durationMode"] or ""));
+		tinsert(aSignatureParts, format("%.3f", aButtonSetup["timerThreshold"] or 0));
+		tinsert(aSignatureParts, tostring(aButtonSetup["staticIcon"] or ""));
+		tinsert(aSignatureParts, aButtonSetup["staticColor"] and "1" or "0");
+		tinsert(aSignatureParts, format("%.3f", aButtonSetup["dispelBright"] or 0));
+		tinsert(aSignatureParts, format("%.3f", aButtonSetup["dispelOpacity"] or 0));
+
 		return;
 
 	end
@@ -2952,16 +3016,37 @@ do
 		tinsert(aSignatureParts, aButtonSetup["barInverted"] and "1" or "0");
 		tinsert(aSignatureParts, aButtonSetup["shadowValueMode"] or "");
 		tinsert(aSignatureParts, format("%.3f", aButtonSetup["dispelOpacity"] or 0));
+
 		VUHDO_appendAuraButtonSetupColorSignature(aSignatureParts, aButtonSetup["staticColor"]);
+
 		tinsert(aSignatureParts, format("%d", aButtonSetup["borderWidth"] or 0));
 		tinsert(aSignatureParts, aButtonSetup["borderFile"] or "");
 		tinsert(aSignatureParts, format("%.3f", aButtonSetup["borderRepeatX"] or 1));
 		tinsert(aSignatureParts, format("%.3f", aButtonSetup["borderRepeatY"] or 1));
 		tinsert(aSignatureParts, aButtonSetup["glowStyle"] or "");
 		tinsert(aSignatureParts, aButtonSetup["glowColorType"] or "");
+
 		VUHDO_appendAuraButtonSetupColorSignature(aSignatureParts, aButtonSetup["glowColor"]);
+		VUHDO_appendAuraButtonSetupColorSignature(aSignatureParts, aButtonSetup["iconColor"]);
+		VUHDO_appendAuraButtonSetupColorSignature(aSignatureParts, aButtonSetup["barColor"]);
+
+		tinsert(aSignatureParts, format("%d", aButtonSetup["frameLevelOffset"] or 0));
 
 		return;
+
+	end
+
+
+
+	--
+	local sCandidateFilterSignatureParts = { };
+	function VUHDO_getCandidateFiltersSignature(aCandidateFilters)
+
+		twipe(sCandidateFilterSignatureParts);
+
+		VUHDO_appendSignatureCandidateFilters(sCandidateFilterSignatureParts, aCandidateFilters);
+
+		return tconcat(sCandidateFilterSignatureParts, "|");
 
 	end
 
@@ -4539,8 +4624,41 @@ end
 
 do
 	--
+	local sBouquetListGroupIds = { };
 	local tPanelAnchors;
 	local tTemplatePanelCache;
+	local tMapping;
+	local tAnchorConfig;
+	function VUHDO_rebuildAuraAnchorsForBouquetListGroups()
+
+		if not VUHDO_isAuraModeContainers() then
+			return;
+		end
+
+		twipe(sBouquetListGroupIds);
+
+		for _, tBouquetMappings in pairs(VUHDO_AURA_LIST_BOUQUETS or sEmpty) do
+			for tMappingCnt = 1, #tBouquetMappings do
+				tMapping = tBouquetMappings[tMappingCnt];
+				tAnchorConfig = VUHDO_PANEL_SETUP[tMapping["panelNum"]] and VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"] and VUHDO_PANEL_SETUP[tMapping["panelNum"]]["AURA_ANCHORS"][tMapping["anchorKey"]];
+
+				if tAnchorConfig and tAnchorConfig["groupId"] then
+					sBouquetListGroupIds[tAnchorConfig["groupId"]] = true;
+				end
+			end
+		end
+
+		if next(sBouquetListGroupIds) then
+			VUHDO_rebuildAuraAnchorsForGroups(sBouquetListGroupIds);
+		end
+
+		return;
+
+	end
+
+
+
+	--
 	function VUHDO_rebuildAuraAnchorsForGroups(aGroupIds)
 
 		if not aGroupIds then
@@ -4576,6 +4694,8 @@ do
 		else
 			VUHDO_invalidateAuraContainerTemplateCache();
 			VUHDO_rebuildAuraAnchorsForAllButtons();
+
+			VUHDO_refreshAllUnitAuras();
 		end
 
 		return;

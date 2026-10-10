@@ -734,6 +734,7 @@ do
 
 					if strfind(aModel, "VUHDO_BOUQUETS", 1, true) then
 						VUHDO_timeRefreshOverlays(0.3);
+						VUHDO_timeRegisterBouquets(0.3);
 					end
 
 				elseif tPanelNum then

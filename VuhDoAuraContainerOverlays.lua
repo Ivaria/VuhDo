@@ -93,6 +93,7 @@ local VUHDO_getAuraContainerBuildSignature;
 local VUHDO_getAuraContainerFilterSignature;
 local VUHDO_getAuraButtonSetupBuildSignature;
 local VUHDO_getAuraButtonSetupVolatileSignature;
+local VUHDO_getCandidateFiltersSignature;
 local VUHDO_getOverlayHostFrame;
 local VUHDO_deferAcquireOverlayContainer;
 local VUHDO_deferVolatilePassForButton;
@@ -288,6 +289,7 @@ function VUHDO_auraContainerOverlaysInitFunctionOverrides()
 	VUHDO_getAuraContainerFilterSignature = _G["VUHDO_getAuraContainerFilterSignature"];
 	VUHDO_getAuraButtonSetupBuildSignature = _G["VUHDO_getAuraButtonSetupBuildSignature"];
 	VUHDO_getAuraButtonSetupVolatileSignature = _G["VUHDO_getAuraButtonSetupVolatileSignature"];
+	VUHDO_getCandidateFiltersSignature = _G["VUHDO_getCandidateFiltersSignature"];
 	VUHDO_getOverlayHostFrame = _G["VUHDO_getOverlayHostFrame"];
 	VUHDO_deferAcquireOverlayContainer = _G["VUHDO_deferAcquireOverlayContainer"];
 	VUHDO_deferVolatilePassForButton = _G["VUHDO_deferVolatilePassForButton"];
@@ -2316,6 +2318,8 @@ do
 	local tSlotBuildSignature;
 	local tSlotFamilyKey;
 	local tSlotVolatileSignature;
+	local tSlotCandidateSignature;
+	local tSlotTemplateName;
 	local function VUHDO_buildOverlaySlotSpec(aButton, aTargetFrame, anOverlayEntry, anIndicatorKey, anEntryKey)
 
 		tSlotButtonSetup = VUHDO_buildOverlayButtonSetup(aButton, aTargetFrame, anOverlayEntry);
@@ -2330,15 +2334,20 @@ do
 
 		tSlotBuildSignature = VUHDO_getAuraButtonSetupBuildSignature(tSlotButtonSetup);
 
-		tSlotFamilyKey = format("%s:%s#%s", anIndicatorKey, anEntryKey, tSlotBuildSignature);
+		tSlotTemplateName = anOverlayEntry["templateName"] or VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE;
+
+		tSlotFamilyKey = format("%s:%s:%s#%s", anIndicatorKey, anEntryKey, tSlotTemplateName, tSlotBuildSignature);
 
 		tSlotVolatileSignature = VUHDO_getAuraButtonSetupVolatileSignature(tSlotButtonSetup);
+
+		tSlotCandidateSignature = VUHDO_getCandidateFiltersSignature(anOverlayEntry["candidateFilters"]);
 
 		return {
 			["key"] = tPlanSlotKey,
 			["planSlotKey"] = tPlanSlotKey,
 			["slotFamilyKey"] = tSlotFamilyKey,
 			["volatileSignature"] = tSlotVolatileSignature,
+			["candidateSignature"] = tSlotCandidateSignature,
 			["filterString"] = anOverlayEntry["filterString"],
 			["candidateFilters"] = anOverlayEntry["candidateFilters"],
 			["templateName"] = anOverlayEntry["templateName"] or VUHDO_AURA_BUTTON_OVERLAY_TEMPLATE,
@@ -2426,7 +2435,7 @@ do
 	function VUHDO_syncOverlaySlotRecordFilters(aHostData, aSlotEngineKey, aSlotRecord, aSlotSpec)
 
 		tFilterChanged = aSlotRecord["appliedFilterString"] ~= (aSlotSpec["filterString"] or "HELPFUL");
-		tCandidateChanged = aSlotRecord["candidateFilters"] ~= aSlotSpec["candidateFilters"];
+		tCandidateChanged = aSlotRecord["appliedCandidateSignature"] ~= aSlotSpec["candidateSignature"];
 
 		if aSlotRecord["appliedSuppress"] then
 			if aSlotRecord["appliedFilterString"] ~= "" then
@@ -2452,6 +2461,8 @@ do
 
 		if tCandidateChanged then
 			aHostData["container"]:SetAuraSlotCandidateFilters(aSlotEngineKey, aSlotSpec["candidateFilters"]);
+
+			aSlotRecord["appliedCandidateSignature"] = aSlotSpec["candidateSignature"];
 		end
 
 		if tFilterChanged or tCandidateChanged then
@@ -2568,6 +2579,7 @@ do
 		tSlotRecord["appliedFilterString"] = aSlotSpec["filterString"] or "HELPFUL";
 		tSlotRecord["appliedSuppress"] = false;
 		tSlotRecord["appliedVolatileSignature"] = aSlotSpec["volatileSignature"];
+		tSlotRecord["appliedCandidateSignature"] = aSlotSpec["candidateSignature"];
 
 		aHostData["slotRecords"][aSlotEngineKey] = tSlotRecord;
 
@@ -2604,6 +2616,7 @@ do
 
 		for tSlotEngineKey, tSlotRecord in pairs(aHostData["slotRecords"] or sEmpty) do
 			if not tSlotRecord["appliedSuppress"]
+				and tSlotRecord["slotFamilyKey"] == aSlotSpec["slotFamilyKey"]
 				and (tSlotRecord["planSlotKey"] == aSlotSpec["planSlotKey"] or tSlotEngineKey == aSlotSpec["planSlotKey"]) then
 				if tSlotRecord["appliedVolatileSignature"] == aSlotSpec["volatileSignature"] then
 					VUHDO_copyOverlaySlotRecordFromSpec(tSlotRecord, aSlotSpec);
@@ -4371,6 +4384,7 @@ do
 										tContainer:SetAuraSlotCandidateFilters(tSlotKey, tSlotRecord["candidateFilters"]);
 
 										tSlotRecord["appliedFilterString"] = tSlotRecord["filterString"] or "HELPFUL";
+										tSlotRecord["appliedCandidateSignature"] = VUHDO_getCandidateFiltersSignature(tSlotRecord["candidateFilters"]);
 										tSlotRecord["appliedSuppress"] = false;
 									else
 										tContainer:SetAuraSlotFilterString(tSlotKey, "");

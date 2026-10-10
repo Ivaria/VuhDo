@@ -145,6 +145,15 @@ local sDispelNameColorKeyMap = {
 	["Enrage"] = "DEBUFF9",
 };
 
+local sDispelSpecialToDispelName = {
+	["DEBUFF_MAGIC"] = "Magic",
+	["DEBUFF_CURSE"] = "Curse",
+	["DEBUFF_DISEASE"] = "Disease",
+	["DEBUFF_POISON"] = "Poison",
+	["DEBUFF_BLEED"] = "Bleed",
+	["DEBUFF_ENRAGE"] = "Enrage",
+};
+
 local sBackgroundDispelTypeNames = { };
 local sGlowDispelTypeNames = { };
 
@@ -171,6 +180,16 @@ local sTransparentColor;
 local sWhiteColor;
 
 local sIsDispelColorType = { };
+
+local sAuraConsumingSpecialNames = {
+	["OTHER"] = true,
+	["SWIFTMEND"] = true,
+	["CHI_HARMONY_ICON_MINE"] = true,
+	["CHI_HARMONY_ICON_OTHERS"] = true,
+	["CHI_HARMONY_ICON_BOTH"] = true,
+};
+
+local sRestrictedModeClassCache = { };
 
 
 
@@ -3924,26 +3943,6 @@ end
 
 
 do
-	-- Specials with secretType NONE that nonetheless read aura/HoT-derived state and therefore degrade in restricted mode.
-	local sAuraConsumingSpecialNames = {
-		["OTHER"] = true,
-		["SWIFTMEND"] = true,
-		["CHI_HARMONY_ICON_MINE"] = true,
-		["CHI_HARMONY_ICON_OTHERS"] = true,
-		["CHI_HARMONY_ICON_BOTH"] = true,
-	};
-
-	local sDispelSpecialToDispelName = {
-		["DEBUFF_MAGIC"] = "Magic",
-		["DEBUFF_CURSE"] = "Curse",
-		["DEBUFF_DISEASE"] = "Disease",
-		["DEBUFF_POISON"] = "Poison",
-		["DEBUFF_BLEED"] = "Bleed",
-		["DEBUFF_ENRAGE"] = "Enrage",
-	};
-
-	local sRestrictedModeClassCache = { };
-
 	--
 	local tBouquet;
 	local tItem;
@@ -4085,6 +4084,38 @@ do
 
 	end
 
+end
+
+
+
+do
+	--
+	local tBouquet;
+	local tItem;
+	local tName;
+	local tSpecial;
+	local tSpellId;
+	local tListBouquetIconColor;
+	local tSourceColor;
+	local function VUHDO_buildListBouquetIconColorFromItem(aItem)
+
+		if not aItem or not aItem["color"] or not aItem["color"]["R"] or not aItem["color"]["useBackground"] then
+			return nil;
+		end
+
+		tSourceColor = aItem["color"];
+
+		tListBouquetIconColor = {
+			["R"] = tSourceColor["R"],
+			["G"] = tSourceColor["G"],
+			["B"] = tSourceColor["B"],
+			["O"] = tSourceColor["useOpacity"] and (tSourceColor["O"] or 1) or 1,
+		};
+
+		return tListBouquetIconColor;
+
+	end
+
 
 
 	--
@@ -4094,7 +4125,6 @@ do
 	local tDispelCount;
 	local tStaticIcon;
 	local tStaticColor;
-	local tSourceColor;
 	local tSyntheticGroup;
 	local tCandidateFilters;
 	local tFilterString;
@@ -4167,15 +4197,8 @@ do
 			end
 
 			if tSpellId or sDispelSpecialToDispelName[tName] then
-				if tStaticColor == nil and tItem["color"] and tItem["color"]["R"] then
-					tSourceColor = tItem["color"];
-
-					tStaticColor = {
-						["R"] = tSourceColor["R"],
-						["G"] = tSourceColor["G"],
-						["B"] = tSourceColor["B"],
-						["O"] = tSourceColor["O"] or 1,
-					};
+				if tStaticColor == nil then
+					tStaticColor = VUHDO_buildListBouquetIconColorFromItem(tItem);
 				end
 
 				if tStaticIcon == nil and tItem["icon"] and tItem["icon"] ~= 1 and VUHDO_CUSTOM_ICONS[tItem["icon"]] then
@@ -4269,7 +4292,6 @@ do
 	local tMixedCandidateFilters;
 	local tMixedButtonSetup;
 	local tMixedFrameLevelOffset;
-	local tIsHarmful;
 	function VUHDO_buildMixedBouquetListSlotTemplates(aBouquetName, aListEntryIndex, aSlotX, aSlotY, aPixelWidth, aPixelHeight, aTemplateName, aAnchorButtonSetup, aGroup)
 
 		tMixedResult = { };
@@ -4332,9 +4354,7 @@ do
 
 				tMixedButtonSetup["frameLevelOffset"] = tMixedFrameLevelOffset;
 
-				if tMixedItem["color"] and tMixedItem["color"]["R"] then
-					tMixedButtonSetup["iconColor"] = tMixedItem["color"];
-				end
+				tMixedButtonSetup["iconColor"] = VUHDO_buildListBouquetIconColorFromItem(tMixedItem);
 
 				if tMixedItem["icon"] and tMixedItem["icon"] ~= 1 and VUHDO_CUSTOM_ICONS[tMixedItem["icon"]] then
 					tMixedButtonSetup["staticIcon"] = VUHDO_CUSTOM_ICONS[tMixedItem["icon"]][2];
@@ -4364,9 +4384,7 @@ do
 
 				tMixedButtonSetup["frameLevelOffset"] = tMixedFrameLevelOffset;
 
-				if tMixedItem["color"] and tMixedItem["color"]["R"] then
-					tMixedButtonSetup["iconColor"] = tMixedItem["color"];
-				end
+				tMixedButtonSetup["iconColor"] = VUHDO_buildListBouquetIconColorFromItem(tMixedItem);
 
 				if VUHDO_isDispelNameHostile(tMixedDispelName) then
 					tMixedFilterString = "HELPFUL|DISPELLABLE";
@@ -4433,10 +4451,15 @@ do
 		return tMixedResult;
 
 	end
+end
 
 
 
+do
 	--
+	local tBouquet;
+	local tItem;
+	local tSpecial;
 	local tIsActive;
 	local tIcon;
 	local tTimer;
@@ -4486,7 +4509,6 @@ do
 		return false;
 
 	end
-
 end
 
 
@@ -4775,6 +4797,10 @@ do
 
 		for tUnit, _ in pairs(VUHDO_RAID or { }) do
 			VUHDO_deferSyncOverlaysForUnit(tUnit);
+		end
+
+		if not aDoCompress then
+			VUHDO_rebuildAuraAnchorsForBouquetListGroups();
 		end
 
 		return;

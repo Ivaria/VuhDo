@@ -2827,6 +2827,8 @@ function VUHDO_auraGroupsGlowBarStyleChanged(aParent, aValue)
 
 	VUHDO_markAuraGroupChanged(sSelectedGroupId, false, false);
 
+	VUHDO_timeRegisterBouquets(0.3);
+
 	VUHDO_auraGroupsRefreshRightPanel();
 
 	return;
@@ -2843,6 +2845,8 @@ function VUHDO_auraGroupsGlowColorChanged(aColorSwatch)
 	end
 
 	VUHDO_markAuraGroupChanged(sSelectedGroupId, false, false);
+
+	VUHDO_timeRegisterBouquets(0.3);
 
 	return;
 
@@ -3248,6 +3252,8 @@ function VUHDO_auraGroupsListAddBouquet()
 	VUHDO_auraGroupsRefreshListEntries();
 
 	VUHDO_markAuraGroupChanged(sSelectedGroupId, true, true);
+
+	VUHDO_timeRegisterBouquets(0.3);
 
 	return;
 
@@ -4025,6 +4031,7 @@ end
 
 --
 local tEntries;
+local tRemovedEntry;
 function VUHDO_auraGroupsListRemoveEntry(anIndex)
 
 	if not sSelectedGroupId or not VUHDO_CONFIG["AURA_GROUPS"] or not VUHDO_CONFIG["AURA_GROUPS"][sSelectedGroupId] then
@@ -4037,11 +4044,17 @@ function VUHDO_auraGroupsListRemoveEntry(anIndex)
 		return;
 	end
 
+	tRemovedEntry = tEntries[anIndex];
+
 	tremove(tEntries, anIndex);
 
 	VUHDO_auraGroupsRefreshListEntries();
 
 	VUHDO_markAuraGroupChanged(sSelectedGroupId, true, true);
+
+	if tRemovedEntry and tRemovedEntry["entryType"] == VUHDO_AURA_LIST_ENTRY_BOUQUET then
+		VUHDO_timeRegisterBouquets(0.3);
+	end
 
 	return;
 
@@ -4077,6 +4090,8 @@ function VUHDO_auraGroupsListMoveEntry(anIndex, aDirection)
 	VUHDO_auraGroupsRefreshListEntries();
 
 	VUHDO_markAuraGroupChanged(sSelectedGroupId, true, true);
+
+	VUHDO_timeRegisterBouquets(0.3);
 
 	return;
 

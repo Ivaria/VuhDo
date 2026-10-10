@@ -69,6 +69,7 @@ local VUHDO_processPendingAuraContainerBuilds;
 local VUHDO_timeRebuildAuraGroups;
 local VUHDO_updateBouquetsForEvent;
 local VUHDO_rebuildDefaultAuraNameSpellIds;
+local VUHDO_invalidateBouquetRestrictedModeCache;
 
 local sUnitDispellableAuraId = { };
 local sUnitAuraCanColorBar = { };
@@ -270,6 +271,7 @@ local function VUHDO_auraColorsInitLocalOverridesFunctions()
 	VUHDO_processPendingAuraContainerBuilds = _G["VUHDO_processPendingAuraContainerBuilds"];
 	VUHDO_timeRebuildAuraGroups = _G["VUHDO_timeRebuildAuraGroups"];
 	VUHDO_updateBouquetsForEvent = _G["VUHDO_deferUpdateBouquetsForEvent"];
+	VUHDO_invalidateBouquetRestrictedModeCache = _G["VUHDO_invalidateBouquetRestrictedModeCache"];
 	VUHDO_rebuildDefaultAuraNameSpellIds = _G["VUHDO_rebuildDefaultAuraNameSpellIds"];
 
 	return;
@@ -659,8 +661,8 @@ do
 		VUHDO_clearDispellableAuraCache(nil);
 
 		if VUHDO_RAID then
-			for tUnit, _ in pairs(VUHDO_RAID) do
-				VUHDO_updateDispellableAuraForUnit(tUnit);
+			for tUnit, tInfo in pairs(VUHDO_RAID) do
+				tInfo["debuff"], tInfo["debuffName"] = VUHDO_determineAura(tUnit);
 			end
 		end
 
@@ -726,6 +728,8 @@ function VUHDO_applyAuraGroupChanges()
 	end
 
 	VUHDO_rebuildAuraGroupCaches(false, false, sIsAuraGroupSoundsDirty);
+
+	VUHDO_invalidateBouquetRestrictedModeCache();
 
 	if next(sDirtyAuraGroupIds) then
 		VUHDO_rebuildAuraAnchorsForGroups(sDirtyAuraGroupIds);

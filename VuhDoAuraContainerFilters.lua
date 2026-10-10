@@ -1510,6 +1510,10 @@ do
 	local tColorCopy;
 	function VUHDO_buildListEntrySlotButtonSetup(aGroup, anEntry, aAnchorButtonSetup, anIsBar, anExcludeSpellIds)
 
+		if anEntry["mine"] == false and anEntry["others"] ~= true then
+			return nil, nil;
+		end
+
 		tIncludeSpellIds = { };
 
 		VUHDO_addResolvedAuraContainerSpellIds(tIncludeSpellIds, VUHDO_getAuraListEntryMatchValue(anEntry));
